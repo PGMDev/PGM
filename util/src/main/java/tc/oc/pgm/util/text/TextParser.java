@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.text;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 import static tc.oc.pgm.util.text.TextException.outOfRange;
 import static tc.oc.pgm.util.text.TextException.unknown;
@@ -56,7 +56,7 @@ public final class TextParser {
    * @throws TextException If the text is not a boolean.
    */
   public static boolean parseBoolean(String text) throws TextException {
-    checkNotNull(text, "cannot parse boolean from null");
+    assertNotNull(text, "cannot parse boolean from null");
 
     if (YES.matcher(text).matches()) return true;
     if (NO.matcher(text).matches()) return false;
@@ -75,7 +75,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid or out of range.
    */
   public static int parseInteger(String text, Range<Integer> range) throws TextException {
-    checkNotNull(text, "cannot parse integer from null");
+    assertNotNull(text, "cannot parse integer from null");
 
     final int number;
     if (INF.matcher(text).matches()) {
@@ -118,7 +118,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid or out of range.
    */
   public static float parseFloat(String text, Range<Float> range) throws TextException {
-    checkNotNull(text, "cannot parse float from null");
+    assertNotNull(text, "cannot parse float from null");
 
     final float number;
     if (INF.matcher(text).matches()) {
@@ -161,7 +161,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid or out of range.
    */
   public static Duration parseDuration(String text, Range<Duration> range) throws TextException {
-    checkNotNull(text, "cannot parse duration from null");
+    assertNotNull(text, "cannot parse duration from null");
 
     Duration duration;
     if (INF.matcher(text).matches()) {
@@ -223,7 +223,7 @@ public final class TextParser {
    */
   public static Vector parseVector3d(String text, Range<Float> rangeXZ, Range<Float> rangeY)
       throws TextException {
-    checkNotNull(text, "cannot parse vector from null");
+    assertNotNull(text, "cannot parse vector from null");
 
     final boolean twod = rangeY == null; // If 2D, then y = 0
     final Class<?> type = twod ? Chunk.class : Vector.class;
@@ -284,7 +284,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid or out of range.
    */
   public static Version parseVersion(String text, Range<Version> range) throws TextException {
-    checkNotNull(text, "cannot parse version from null");
+    assertNotNull(text, "cannot parse version from null");
 
     final String[] components = DOT.split(text, 3);
     final int size = components.length;
@@ -331,7 +331,7 @@ public final class TextParser {
    */
   public static <E extends Enum<E>> E parseEnum(
       String text, Class<E> type, Range<E> range, boolean fuzzyMatch) throws TextException {
-    checkNotNull(text, "cannot parse enum " + type.getSimpleName().toLowerCase() + "  from null");
+    assertNotNull(text, "cannot parse enum " + type.getSimpleName().toLowerCase() + "  from null");
 
     double maxScore = 0;
     E value = null;
@@ -378,7 +378,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid.
    */
   public static UUID parseUuid(String text) throws TextException {
-    checkNotNull(text, "cannot parse uuid from null");
+    assertNotNull(text, "cannot parse uuid from null");
 
     try {
       return UUID.fromString(text);
@@ -395,7 +395,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid.
    */
   public static LocalDate parseDate(String text) throws TextException {
-    checkNotNull(text, "cannot parse date from null");
+    assertNotNull(text, "cannot parse date from null");
 
     try {
       return LocalDate.parse(text, DateTimeFormatter.ISO_LOCAL_DATE);
@@ -416,7 +416,7 @@ public final class TextParser {
    * @throws TextException If there is json present and it is invalid.
    */
   public static Component parseComponent(String text) throws TextException {
-    checkNotNull(text, "cannot parse component from null");
+    assertNotNull(text, "cannot parse component from null");
 
     if (text.startsWith("{\"") && text.endsWith("\"}")) {
       try {
@@ -447,13 +447,13 @@ public final class TextParser {
    * @throws TextException If there is json present and it is invalid.
    */
   public static Component parseComponentSection(String text) {
-    checkNotNull(text, "cannot parse component from null");
+    assertNotNull(text, "cannot parse component from null");
 
     if (text.startsWith("{\"") && text.endsWith("\"}")) {
       try {
         return GsonComponentSerializer.gson().deserialize(text);
-      } catch (JsonSyntaxException e) {
-        throw invalidFormat(text, Component.class, e);
+      } catch (Throwable t) {
+        throw invalidFormat(text, Component.class, t);
       }
     }
 
@@ -481,7 +481,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid.
    */
   public static Level parseLogLevel(String text) throws TextException {
-    checkNotNull(text, "cannot parse log level from null");
+    assertNotNull(text, "cannot parse log level from null");
 
     try {
       return Level.parse(text.toUpperCase());
@@ -498,7 +498,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid.
    */
   public static URI parseUri(String text) throws TextException {
-    checkNotNull(text, "cannot parse uri from null");
+    assertNotNull(text, "cannot parse uri from null");
 
     if (text.trim().isEmpty()) {
       throw invalidFormat(text, URI.class);
@@ -519,7 +519,7 @@ public final class TextParser {
    * @throws TextException If the text is invalid or the connection cannot be made.
    */
   public static Connection parseSqlConnection(String text) throws TextException {
-    checkNotNull(text, "cannot parse sql connection from null");
+    assertNotNull(text, "cannot parse sql connection from null");
 
     final URI uri;
     try {

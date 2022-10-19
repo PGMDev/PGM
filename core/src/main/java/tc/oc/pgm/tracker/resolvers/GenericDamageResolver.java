@@ -1,8 +1,8 @@
 package tc.oc.pgm.tracker.resolvers;
 
-import javax.annotation.Nullable;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.tracker.DamageResolver;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;

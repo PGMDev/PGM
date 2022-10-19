@@ -1,6 +1,6 @@
 package tc.oc.pgm.map.source;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Stream;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
@@ -22,7 +22,7 @@ public abstract class PathMapSourceFactory implements MapSourceFactory {
 
   protected PathMapSourceFactory(String path) {
     this.sources = new ConcurrentSkipListMap<>();
-    this.path = checkNotNull(path);
+    this.path = assertNotNull(path);
   }
 
   protected abstract MapSource loadSource(String dir);

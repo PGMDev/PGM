@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.attribute;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,13 +44,13 @@ public class AttributeInstanceImpl implements AttributeInstance {
 
   @Override
   public void addModifier(AttributeModifier modifier) {
-    Preconditions.checkArgument(modifier != null, "modifier");
+    assertTrue(modifier != null, "modifier");
     handle.b(convert(modifier));
   }
 
   @Override
   public void removeModifier(AttributeModifier modifier) {
-    Preconditions.checkArgument(modifier != null, "modifier");
+    assertTrue(modifier != null, "modifier");
     handle.c(convert(modifier));
   }
 

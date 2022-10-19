@@ -1,9 +1,9 @@
 package tc.oc.pgm.events;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
-import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
@@ -24,7 +24,7 @@ public class PlayerPartyChangeEvent extends MatchPlayerEvent {
   public PlayerPartyChangeEvent(
       MatchPlayer player, @Nullable Party oldParty, @Nullable Party newParty) {
     super(player);
-    checkArgument(oldParty != newParty);
+    assertTrue(oldParty != newParty);
     this.oldParty = oldParty;
     this.newParty = newParty;
   }

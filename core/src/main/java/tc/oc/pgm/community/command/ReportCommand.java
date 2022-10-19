@@ -9,8 +9,6 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
@@ -143,7 +141,7 @@ public class ReportCommand {
       CommandSender sender,
       Match match,
       @Default("1") int page,
-      @Fallback(Type.NULL) @Switch('t') String target)
+      @Switch('t') String target)
       throws CommandException {
     if (RECENT_REPORTS.asMap().isEmpty()) {
       audience.sendMessage(translatable("moderation.reports.none", NamedTextColor.RED));

@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.module;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
 /** A dependency graph for {@link Module}s and their {@link ModuleFactory}s. */
@@ -75,7 +75,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
 
   protected F getFactory(Class<? extends M> key, @Nullable Class<? extends M> requiredBy)
       throws ModuleLoadException {
-    if (checkNotNull(key) == requiredBy) {
+    if (assertNotNull(key) == requiredBy) {
       throw new ModuleLoadException(key, "Required itself (is there a circular dependency?)");
     }
 

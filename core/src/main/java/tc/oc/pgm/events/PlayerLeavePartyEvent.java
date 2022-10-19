@@ -1,6 +1,6 @@
 package tc.oc.pgm.events;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Party;
@@ -14,7 +14,7 @@ public class PlayerLeavePartyEvent extends MatchPlayerEvent {
 
   public PlayerLeavePartyEvent(MatchPlayer player, Party oldParty) {
     super(player);
-    this.oldParty = checkNotNull(oldParty);
+    this.oldParty = assertNotNull(oldParty);
   }
 
   public Party getParty() {

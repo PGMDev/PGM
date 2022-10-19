@@ -1,6 +1,7 @@
 package tc.oc.pgm.score;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -10,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -38,9 +39,9 @@ public class ScoreModule implements MapModule {
       new MapTag("tdm", "deathmatch", "Deathmatch", true, false);
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox", false, true);
 
-  public ScoreModule(@Nonnull ScoreConfig config, @Nonnull Set<ScoreBoxFactory> scoreBoxFactories) {
-    Preconditions.checkNotNull(config, "score config");
-    Preconditions.checkNotNull(scoreBoxFactories, "score box factories");
+  public ScoreModule(@NotNull ScoreConfig config, @NotNull Set<ScoreBoxFactory> scoreBoxFactories) {
+    assertNotNull(config, "score config");
+    assertNotNull(scoreBoxFactories, "score box factories");
 
     this.config = config;
     this.scoreBoxFactories = scoreBoxFactories;
@@ -64,10 +65,10 @@ public class ScoreModule implements MapModule {
     return new ScoreMatchModule(match, this.config, scoreBoxes.build());
   }
 
-  private final @Nonnull ScoreConfig config;
-  private final @Nonnull Set<ScoreBoxFactory> scoreBoxFactories;
+  private final @NotNull ScoreConfig config;
+  private final @NotNull Set<ScoreBoxFactory> scoreBoxFactories;
 
-  @Nonnull
+  @NotNull
   public ScoreConfig getConfig() {
     return config;
   }

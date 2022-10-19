@@ -2,6 +2,9 @@ package tc.oc.pgm.flag.state;
 
 import static net.kyori.adventure.text.Component.translatable;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.filters.query.GoalQuery;
@@ -78,14 +81,14 @@ public class Captured extends BaseState implements Returning {
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return Flag.RESPAWNING_SYMBOL;
   }
 
   @Override
-  public org.bukkit.ChatColor getStatusColor(Party viewer) {
+  public TextColor getStatusColor(Party viewer) {
     if (this.flag.getDefinition().hasMultipleCarriers()) {
-      return org.bukkit.ChatColor.WHITE;
+      return NamedTextColor.WHITE;
     } else {
       return super.getStatusColor(viewer);
     }

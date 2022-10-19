@@ -106,8 +106,8 @@ public class DestroyableModule implements MapModule {
           regionParser.validate(region, BlockBoundedValidation.INSTANCE, new Node(destroyableEl));
         } else {
           region =
-              regionParser.parseRequiredRegionProperty(
-                  destroyableEl, BlockBoundedValidation.INSTANCE, "region");
+              regionParser.parseRequiredProperty(
+                  destroyableEl, "region", BlockBoundedValidation.INSTANCE);
         }
 
         String id = destroyableEl.getAttributeValue("id");

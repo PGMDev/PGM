@@ -1,9 +1,9 @@
 package tc.oc.pgm.tracker.info;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.MeleeInfo;
@@ -17,7 +17,7 @@ public class PlayerInfo implements OwnerInfo, MeleeInfo, PhysicalInfo {
   private final ItemInfo weapon;
 
   public PlayerInfo(ParticipantState player, @Nullable ItemInfo weapon) {
-    this.player = checkNotNull(player);
+    this.player = assertNotNull(player);
     this.weapon = weapon;
   }
 

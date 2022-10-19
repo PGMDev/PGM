@@ -1,19 +1,21 @@
 package tc.oc.pgm.ffa;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.*;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -21,6 +23,7 @@ import tc.oc.pgm.filters.query.PartyQuery;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 /**
  * Wraps a single {@link MatchPlayer} in a free-for-all match.
@@ -46,6 +49,8 @@ public class Tribute implements Competitor {
   private final String username;
   private final ChatColor chatColor;
   private final Color color;
+  private final DyeColor dyeColor;
+  private final TextColor textColor;
   private final PartyQuery query;
 
   protected @Nullable MatchPlayer player;
@@ -58,6 +63,8 @@ public class Tribute implements Competitor {
     this.username = player.getBukkit().getName();
     this.chatColor = color == null ? ChatColor.YELLOW : color;
     this.color = BukkitUtils.colorOf(this.chatColor);
+    this.dyeColor = BukkitUtils.chatColorToDyeColor(this.chatColor);
+    this.textColor = TextFormatter.convert(color);
     this.query = new PartyQuery(null, this);
   }
 
@@ -89,6 +96,16 @@ public class Tribute implements Competitor {
   @Override
   public Color getFullColor() {
     return this.color;
+  }
+
+  @Override
+  public DyeColor getDyeColor() {
+    return dyeColor;
+  }
+
+  @Override
+  public TextColor getTextColor() {
+    return this.textColor;
   }
 
   @Override
@@ -139,7 +156,7 @@ public class Tribute implements Competitor {
 
   @Override
   public void addPlayer(final MatchPlayer player) {
-    checkPlayer(checkNotNull(player).getId());
+    checkPlayer(assertNotNull(player).getId());
     this.player = player;
     this.players = Collections.unmodifiableList(Collections.singletonList(player));
   }

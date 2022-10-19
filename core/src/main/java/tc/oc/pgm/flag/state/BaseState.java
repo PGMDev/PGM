@@ -1,17 +1,21 @@
 package tc.oc.pgm.flag.state;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Party;
@@ -164,28 +168,29 @@ public abstract class BaseState implements Runnable, State {
     }
   }
 
-  public ChatColor getStatusColor(Party viewer) {
-    return this.flag.getBukkitColor();
+  public TextColor getStatusColor(Party viewer) {
+    return this.flag.getTextColor();
   }
 
-  public ChatColor getLabelColor(Party viewer) {
+  public TextColor getLabelColor(Party viewer) {
     if (this.flag.hasMultipleControllers()) {
       Team controller = this.getController();
-      return controller != null ? controller.getColor() : ChatColor.WHITE;
-    } else {
-      return ChatColor.WHITE;
+      if (controller != null) {
+        return controller.getTextColor();
+      }
     }
+    return NamedTextColor.WHITE;
   }
 
-  public String getStatusText(Party viewer) {
+  public Component getStatusText(Party viewer) {
     if (this.isCountingDown()) {
-      return String.valueOf(this.getRemainingSeconds());
+      return text(this.getRemainingSeconds());
     } else {
       return this.getStatusSymbol(viewer);
     }
   }
 
-  public abstract String getStatusSymbol(Party viewer);
+  public abstract Component getStatusSymbol(Party viewer);
 
   public void onEvent(GoalEvent event) {}
 

@@ -1,13 +1,11 @@
 package tc.oc.pgm.map.contrib;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import com.google.common.base.Objects;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.player.Username;
@@ -20,7 +18,7 @@ public class PlayerContributor implements Contributor {
   private final @Nullable String contribution;
 
   public PlayerContributor(UUID id, @Nullable String contribution) {
-    this.id = checkNotNull(id);
+    this.id = assertNotNull(id);
     this.username = PGM.get().getDatastore().getUsername(id);
     this.contribution = contribution;
   }
@@ -53,23 +51,19 @@ public class PlayerContributor implements Contributor {
   public boolean equals(Object obj) {
     if (!(obj instanceof PlayerContributor)) return false;
     final PlayerContributor o = (PlayerContributor) obj;
-    return new EqualsBuilder()
-        .append(getId(), o.getId())
-        .append(getContribution(), o.getContribution())
-        .build();
+    return this.id.equals(o.getId()) && Objects.equal(this.contribution, o.getContribution());
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getId()).append(getContribution()).build();
+    int hash = 7;
+    hash = 31 * hash + this.id.hashCode();
+    hash = 31 * hash + (this.contribution == null ? 0 : this.contribution.hashCode());
+    return hash;
   }
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("id", getId())
-        .append("name", username.getNameLegacy())
-        .append("desc", getContribution())
-        .build();
+    return "PlayerContributor{id=" + this.id + ", name=" + this.username.getNameLegacy() + "}";
   }
 }

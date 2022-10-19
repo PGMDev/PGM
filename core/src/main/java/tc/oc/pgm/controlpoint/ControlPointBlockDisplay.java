@@ -1,11 +1,10 @@
 package tc.oc.pgm.controlpoint;
 
-import com.google.common.collect.Lists;
-import java.util.List;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -13,11 +12,13 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.events.CapturingTimeChangeEvent;
 import tc.oc.pgm.controlpoint.events.ControllerChangeEvent;
+import tc.oc.pgm.filters.operator.AllFilter;
+import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.block.BlockVectors;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
 public class ControlPointBlockDisplay implements Listener {
@@ -55,21 +56,17 @@ public class ControlPointBlockDisplay implements Listener {
       this.controllerDisplayRegion = null;
       this.controllerDisplayImage = null;
     } else {
-      FiniteBlockRegion unfilteredControllerDisplayRegion =
+      Filter controllerDisplayFilter =
+          this.progressDisplayRegion == null
+              ? visualMaterials
+              : AllFilter.of(visualMaterials, new InverseFilter(progressDisplayRegion));
+
+      this.controllerDisplayRegion =
           FiniteBlockRegion.fromWorld(
               controllerDisplayRegion,
               match.getWorld(),
-              visualMaterials,
+              controllerDisplayFilter,
               match.getMap().getProto());
-
-      // Ensure the controller and progress display regions do not overlap. The progress display has
-      // priority.
-      List<Block> filteredControllerBlocks =
-          Lists.newArrayList(unfilteredControllerDisplayRegion.getBlocks());
-      if (this.progressDisplayRegion != null) {
-        filteredControllerBlocks.removeAll(this.progressDisplayRegion.getBlocks());
-      }
-      this.controllerDisplayRegion = new FiniteBlockRegion(filteredControllerBlocks);
       this.controllerDisplayImage =
           new BlockImage(match.getWorld(), this.controllerDisplayRegion.getBounds());
       this.controllerDisplayImage.save();
@@ -83,13 +80,13 @@ public class ControlPointBlockDisplay implements Listener {
   public void setController(Competitor controllingTeam) {
     if (this.controllingTeam != controllingTeam && this.controllerDisplayRegion != null) {
       if (controllingTeam == null) {
-        for (Block block : this.controllerDisplayRegion.getBlocks()) {
+        for (BlockVector block : this.controllerDisplayRegion.getBlockVectors()) {
           this.controllerDisplayImage.restore(block);
         }
       } else {
-        byte blockData = BukkitUtils.chatColorToDyeColor(controllingTeam.getColor()).getWoolData();
-        for (Block block : this.controllerDisplayRegion.getBlocks()) {
-          block.setData(blockData);
+        byte blockData = controllingTeam.getDyeColor().getWoolData();
+        for (BlockVector pos : this.controllerDisplayRegion.getBlockVectors()) {
+          BlockVectors.blockAt(match.getWorld(), pos).setData(blockData);
         }
       }
       this.controllingTeam = controllingTeam;
@@ -97,14 +94,15 @@ public class ControlPointBlockDisplay implements Listener {
   }
 
   @SuppressWarnings("deprecation")
-  private void setBlock(Block block, Competitor team) {
+  private void setBlock(BlockVector pos, Competitor team) {
+    final Block block = BlockVectors.blockAt(match.getWorld(), pos);
     if (this.controlPoint
         .getDefinition()
         .getVisualMaterials()
         .query(new BlockQuery(block))
         .isAllowed()) {
       if (team != null) {
-        block.setData(BukkitUtils.chatColorToDyeColor(team.getColor()).getWoolData());
+        block.setData(team.getDyeColor().getWoolData());
       } else {
         this.progressDisplayImage.restore(block);
       }
@@ -121,11 +119,11 @@ public class ControlPointBlockDisplay implements Listener {
       SectorRegion sectorRegion =
           new SectorRegion(center.getX(), center.getZ(), 0, (1 - capturingProgress) * 2 * Math.PI);
 
-      for (Block block : this.progressDisplayRegion.getBlocks()) {
-        if (sectorRegion.contains(block.getLocation().toVector())) {
-          this.setBlock(block, controllingTeam);
+      for (BlockVector pos : this.progressDisplayRegion.getBlockVectors()) {
+        if (sectorRegion.contains(pos)) {
+          this.setBlock(pos, controllingTeam);
         } else {
-          this.setBlock(block, capturingTeam);
+          this.setBlock(pos, capturingTeam);
         }
       }
     }

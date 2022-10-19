@@ -4,10 +4,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
 
 @Deprecated
-public class FilterNode implements Filter {
+public class FilterNode implements FilterDefinition {
   protected final List<Filter> parents;
   protected final List<Filter> allowedMatchers;
   protected final List<Filter> deniedMatchers;

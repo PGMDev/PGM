@@ -6,12 +6,12 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -255,7 +255,7 @@ public class FlagParser {
         factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
     double pointsPerCapture = XMLUtils.parseNumber(el.getAttribute("points"), Double.class, 0D);
     double pointsPerSecond = XMLUtils.parseNumber(el.getAttribute("points-rate"), Double.class, 0D);
-    Filter pickupFilter = filterParser.parseFilterProperty(el, "pickup-filter", null);
+    Filter pickupFilter = filterParser.parseFilterProperty(el, "pickup-filter");
     if (pickupFilter == null)
       pickupFilter = filterParser.parseFilterProperty(el, "filter", StaticFilter.ALLOW);
     Filter captureFilter =

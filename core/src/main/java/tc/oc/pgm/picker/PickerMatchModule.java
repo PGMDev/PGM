@@ -1,10 +1,10 @@
 package tc.oc.pgm.picker;
 
-import static com.google.common.base.Preconditions.checkState;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -15,7 +15,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -33,6 +32,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -113,9 +113,9 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Set<MatchPlayer> picking = new HashSet<>();
-  private boolean hasTeams;
-  private boolean hasClasses;
-  private boolean isBlitz;
+  private final boolean hasTeams;
+  private final boolean hasClasses;
+  private final boolean isBlitz;
 
   private PickerMatchModule(Match match) {
     this.match = match;
@@ -174,17 +174,12 @@ public class PickerMatchModule implements MatchModule, Listener {
     return teams;
   }
 
-  /** Get if the player participated in blitz match and was eliminated * */
-  private boolean hasParticipated(MatchPlayer player) {
-    return isBlitz && match.getModule(BlitzMatchModule.class).isPlayerEliminated(player.getId());
-  }
-
   /** Does the player have any use for the picker? */
   private boolean canUse(MatchPlayer player) {
     if (player == null) return false;
 
     // Player is eliminated from Blitz
-    if (isBlitz && match.isRunning() && hasParticipated(player)) return false;
+    if (isBlitz && !match.needModule(BlitzMatchModule.class).canJoin(player)) return false;
 
     // Player is not observing or dead
     if (!(player.isObserving() || player.isDead())) return false;
@@ -211,7 +206,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private String getWindowTitle(MatchPlayer player) {
-    checkState(hasTeams || hasClasses); // Window should not open if there is nothing to pick
+    assertTrue(hasTeams || hasClasses); // Window should not open if there is nothing to pick
 
     String key;
     if (hasTeams && hasClasses) {

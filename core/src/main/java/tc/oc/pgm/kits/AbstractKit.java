@@ -19,6 +19,9 @@ public abstract class AbstractKit implements KitDefinition {
   }
 
   @Override
+  public void applyLeftover(MatchPlayer player, List<ItemStack> leftover) {}
+
+  @Override
   public void remove(MatchPlayer player) {
     throw new UnsupportedOperationException(this + " is not removable");
   }

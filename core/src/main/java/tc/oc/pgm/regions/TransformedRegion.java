@@ -1,11 +1,12 @@
 package tc.oc.pgm.regions;
 
 import java.util.Random;
-import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public abstract class TransformedRegion extends AbstractRegion {
+public abstract class TransformedRegion implements RegionDefinition {
 
   protected final Region region;
   protected @Nullable Bounds bounds;

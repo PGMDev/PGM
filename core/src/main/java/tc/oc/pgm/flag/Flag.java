@@ -2,15 +2,16 @@ package tc.oc.pgm.flag;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -30,6 +31,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.util.BlockVector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -69,10 +71,10 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
-  public static final String RESPAWNING_SYMBOL = "\u2690"; // ⚐
-  public static final String RETURNED_SYMBOL = "\u2691"; // ⚑
-  public static final String DROPPED_SYMBOL = "\u2691"; // ⚑
-  public static final String CARRIED_SYMBOL = "\u2794"; // ➔
+  public static final Component RESPAWNING_SYMBOL = text("\u2690"); // ⚐
+  public static final Component RETURNED_SYMBOL = text("\u2691"); // ⚑
+  public static final Component DROPPED_SYMBOL = text("\u2691"); // ⚑
+  public static final Component CARRIED_SYMBOL = text("\u2794"); // ➔
 
   public static final Sound PICKUP_SOUND_OWN =
       sound(key("mob.wither.idle"), Sound.Source.MASTER, 0.7f, 1.2f);
@@ -200,6 +202,10 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public ChatColor getBukkitColor() {
     return BukkitUtils.dyeColorToChatColor(this.getDyeColor());
+  }
+
+  public TextColor getTextColor() {
+    return TextFormatter.convert(this.getBukkitColor());
   }
 
   @Override
@@ -443,17 +449,17 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     return this.state.getStatusText(viewer);
   }
 
   @Override
-  public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
     return this.state.getStatusColor(viewer);
   }
 
   @Override
-  public ChatColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
     return this.state.getLabelColor(viewer);
   }
 

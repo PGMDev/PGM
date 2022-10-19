@@ -1,7 +1,7 @@
 package tc.oc.pgm.filters.query;
 
-import javax.annotation.Nullable;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.Nullable;
 
 public class Query implements tc.oc.pgm.api.filter.query.Query {
 

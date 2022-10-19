@@ -20,13 +20,12 @@ import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.operator.SingleFilterFunction;
 
 public class MonostableFilter extends SingleFilterFunction
-    implements TypedFilter<MatchQuery>, ReactorFactory<MonostableFilter.Reactor> {
+    implements TypedFilter<MatchQuery>, ReactorFactory<MonostableFilter.Reactor<?>> {
 
   private final Duration duration;
-  final Class<? extends Filterable<?>> scope;
 
   public static Filter afterMatchStart(Duration duration) {
-    return AllFilter.of(after(MatchPhaseFilter.RUNNING, duration), MatchPhaseFilter.RUNNING);
+    return after(MatchPhaseFilter.RUNNING, duration);
   }
 
   /**
@@ -36,13 +35,12 @@ public class MonostableFilter extends SingleFilterFunction
    * @param duration the duration to delay this filters rise
    */
   public static Filter after(Filter filter, Duration duration) {
-    return new InverseFilter(new MonostableFilter(filter, duration));
+    return AllFilter.of(filter, new InverseFilter(new MonostableFilter(filter, duration)));
   }
 
   public MonostableFilter(Filter filter, Duration duration) {
     super(filter);
     this.duration = duration;
-    this.scope = Filterables.scope(filter);
   }
 
   @Override
@@ -52,30 +50,35 @@ public class MonostableFilter extends SingleFilterFunction
 
   @Override
   public boolean matches(MatchQuery query) {
-    boolean response = this.filter.response(query);
-    final Filterable<?> filterable = query.extractFilterable().getFilterableAncestor(this.scope);
-    if (filterable == null)
-      throw new IllegalArgumentException(
-          "The scope of this filter does not match the query it received");
-
-    return query.reactor(this).matches(filterable, response);
+    return query.reactor(this).matches(query);
   }
 
   @Override
-  public MonostableFilter.Reactor createReactor(Match match, FilterMatchModule fmm) {
-    return new Reactor(match, fmm);
+  public Reactor<?> createReactor(Match match, FilterMatchModule fmm) {
+    return new Reactor<>(match, fmm, Filterables.scope(filter));
   }
 
-  protected final class Reactor extends ReactorFactory.Reactor implements Tickable {
+  protected final class Reactor<F extends Filterable<?>> extends ReactorFactory.Reactor
+      implements Tickable {
+
+    private final Class<F> scope;
 
     // Filterables that currently pass the inner filter, mapped to the instants that they expire.
     // They are not actually removed until the inner filter goes false.
     final Map<Filterable<?>, Instant> endTimes = new HashMap<>();
 
-    public Reactor(Match match, FilterMatchModule fmm) {
+    public Reactor(Match match, FilterMatchModule fmm, Class<F> scope) {
       super(match, fmm);
+      this.scope = scope;
       match.addTickable(this, MatchScope.LOADED);
       fmm.onChange(scope, filter, this::matches);
+    }
+
+    boolean matches(MatchQuery query) {
+      final Filterable<?> filterable = query.filterable(this.scope);
+      if (filterable == null) return false;
+
+      return matches(filterable, filter.response(query));
     }
 
     boolean matches(Filterable<?> filterable, boolean response) {

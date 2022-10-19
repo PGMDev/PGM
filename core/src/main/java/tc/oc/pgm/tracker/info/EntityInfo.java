@@ -1,12 +1,12 @@
 package tc.oc.pgm.tracker.info;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.text.MinecraftComponent;
@@ -19,7 +19,7 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
   public EntityInfo(
       EntityType entityType, @Nullable String customName, @Nullable ParticipantState owner) {
     super(owner);
-    this.entityType = checkNotNull(entityType);
+    this.entityType = assertNotNull(entityType);
     this.customName = customName;
   }
 

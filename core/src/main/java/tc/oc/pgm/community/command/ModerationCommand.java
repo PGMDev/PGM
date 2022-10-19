@@ -13,9 +13,8 @@ import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
-import app.ashcon.intake.bukkit.parametric.Type;
-import app.ashcon.intake.bukkit.parametric.annotation.Fallback;
 import app.ashcon.intake.parametric.annotation.Default;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.Lists;
@@ -27,17 +26,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -484,7 +482,7 @@ public class ModerationCommand implements Listener {
       Audience viewer,
       CommandSender sender,
       MatchManager manager,
-      @Fallback(Type.NULL) Player targetPl,
+      @Maybe Player targetPl,
       @Default("1") int page)
       throws CommandException {
     if (targetPl != null) {
@@ -755,7 +753,7 @@ public class ModerationCommand implements Listener {
    * Formatting of Kick Screens (KICK/BAN/TEMPBAN)
    */
   public static String formatPunishmentScreen(
-      PunishmentType type, Component punisher, String reason, @Nullable Duration expires) {
+      PunishmentType type, Component punisher, String reason, @Maybe Duration expires) {
     List<Component> lines = Lists.newArrayList();
 
     Component header =
@@ -933,8 +931,7 @@ public class ModerationCommand implements Listener {
    * Bukkit method of banning players
    * NOTE: Will use this if not handled by other plugins
    */
-  private void banPlayer(
-      String target, String reason, Component source, @Nullable Instant expires) {
+  private void banPlayer(String target, String reason, Component source, @Maybe Instant expires) {
     Bukkit.getBanList(BanList.Type.NAME)
         .addBan(
             target,

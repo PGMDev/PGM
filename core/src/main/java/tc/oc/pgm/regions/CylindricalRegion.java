@@ -1,18 +1,19 @@
 package tc.oc.pgm.regions;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.Random;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class CylindricalRegion extends AbstractRegion {
+public class CylindricalRegion implements RegionDefinition {
   private final Vector base;
   private final double radius;
   private final double radiusSq;
   private final double height;
 
   public CylindricalRegion(Vector base, double radius, double height) {
-    checkArgument(radius >= 0);
+    assertTrue(radius >= 0);
 
     this.base = base;
     this.radius = radius;

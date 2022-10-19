@@ -28,4 +28,8 @@ public interface MatchQuery extends Query {
   default <T extends ReactorFactory.Reactor> T reactor(ReactorFactory<T> factory) {
     return getMatch().needModule(FilterMatchModule.class).getReactor(factory);
   }
+
+  default <F extends Filterable<?>> F filterable(Class<F> type) {
+    return extractFilterable().getFilterableAncestor(type);
+  }
 }

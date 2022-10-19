@@ -1,8 +1,9 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class SectorRegion extends AbstractRegion {
+public class SectorRegion implements RegionDefinition {
   protected final double x, z;
   protected final double startAngle;
   protected final double endAngle;

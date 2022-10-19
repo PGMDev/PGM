@@ -3,14 +3,16 @@ package tc.oc.pgm.regions;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
@@ -19,11 +21,6 @@ import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.util.xml.Node;
 
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
-
-  public XMLRegionReference(
-      FeatureDefinitionContext context, Node node, Class<RegionDefinition> type) {
-    super(context, node, type);
-  }
 
   public XMLRegionReference(
       FeatureDefinitionContext context,
@@ -136,5 +133,15 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   @Override
   public Class<? extends LocationQuery> queryType() {
     return LocationQuery.class;
+  }
+
+  @Override
+  public Stream<BlockVector> getBlockPositions() {
+    return get().getBlockPositions();
+  }
+
+  @Override
+  public Iterable<Block> getBlocks(World world) {
+    return get().getBlocks(world);
   }
 }

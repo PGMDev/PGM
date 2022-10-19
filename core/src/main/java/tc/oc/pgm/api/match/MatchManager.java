@@ -2,11 +2,11 @@ package tc.oc.pgm.api.match;
 
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
-import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayerResolver;
 

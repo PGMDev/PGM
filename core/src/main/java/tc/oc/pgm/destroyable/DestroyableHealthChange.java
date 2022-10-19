@@ -1,16 +1,17 @@
 package tc.oc.pgm.destroyable;
 
-import com.google.common.base.Preconditions;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 
 /** Provides additional information about why a {@link Destroyable} was damaged. */
 public class DestroyableHealthChange {
-  private final @Nonnull BlockState oldState;
-  private final @Nonnull BlockState newState;
+  private final @NotNull BlockState oldState;
+  private final @NotNull BlockState newState;
   private final @Nullable ParticipantState playerCause;
   private final int healthChange;
 
@@ -21,11 +22,11 @@ public class DestroyableHealthChange {
    * @param playerCause Player most responsible for the damage
    */
   public DestroyableHealthChange(
-      @Nonnull BlockState oldState,
-      @Nonnull BlockState newState,
+      @NotNull BlockState oldState,
+      @NotNull BlockState newState,
       @Nullable ParticipantState playerCause,
       int healthChange) {
-    Preconditions.checkNotNull(oldState, "old block state");
+    assertNotNull(oldState, "old block state");
 
     this.oldState = oldState;
     this.newState = newState;
@@ -38,7 +39,7 @@ public class DestroyableHealthChange {
    *
    * @return Damaged block
    */
-  public @Nonnull Block getBlock() {
+  public @NotNull Block getBlock() {
     return this.oldState.getBlock();
   }
 
@@ -47,7 +48,7 @@ public class DestroyableHealthChange {
    *
    * @return Old block state
    */
-  public @Nonnull BlockState getOldState() {
+  public @NotNull BlockState getOldState() {
     return this.oldState;
   }
 
@@ -56,7 +57,7 @@ public class DestroyableHealthChange {
    *
    * @return Old block state
    */
-  public @Nonnull BlockState getNewState() {
+  public @NotNull BlockState getNewState() {
     return this.newState;
   }
 

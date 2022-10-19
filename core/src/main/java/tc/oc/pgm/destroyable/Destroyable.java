@@ -3,8 +3,10 @@ package tc.oc.pgm.destroyable;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.format.Style.style;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -17,11 +19,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,6 +30,8 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Firework;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -117,7 +119,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
             match.getWorld(),
             this.materialPatterns,
             match.getMap().getProto());
-    if (this.blockRegion.getBlocks().isEmpty()) {
+    if (this.blockRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());
     }
 
@@ -133,7 +135,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   // Remove @Nullable
   @Override
-  public @Nonnull Team getOwner() {
+  public @NotNull Team getOwner() {
     Team owner = super.getOwner();
     if (owner == null) {
       throw new IllegalStateException("destroyable " + getId() + " has no owner");
@@ -199,9 +201,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       this.buildMaterialHealthMap();
     } else {
       this.blockMaterialHealth = null;
-      this.maxHealth = this.blockRegion.getBlocks().size();
+      this.maxHealth = this.blockRegion.getBlockVolume();
       this.health = 0;
-      for (Block block : this.blockRegion.getBlocks()) {
+      for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
         if (this.hasMaterial(block.getState().getData())) {
           this.health++;
         }
@@ -214,7 +216,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       return false;
     }
 
-    for (Block block : this.blockRegion.getBlocks()) {
+    for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
       for (MaterialData material : this.materials) {
         BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
         if (drops != null && drops.replacement != null && this.hasMaterial(drops.replacement)) {
@@ -234,7 +236,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     this.health = 0;
     Set<MaterialData> visited = new HashSet<>();
     try {
-      for (Block block : blockRegion.getBlocks()) {
+      for (Block block : blockRegion.getBlocks(match.getWorld())) {
         Map<MaterialData, Integer> materialHealthMap = new HashMap<>();
         int blockMaxHealth = 0;
 
@@ -518,16 +520,16 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.getShowProgress() || (viewer.isObserving() && this.getBreaksRequired() > 1)) {
-      String text = this.renderCompletion();
-      if (PGM.get().getConfiguration().showProximity()) {
-        String precise = this.renderPreciseCompletion();
-        if (precise != null) {
-          text += " " + ChatColor.GRAY + precise;
-        }
+      if (!PGM.get().getConfiguration().showProximity()) {
+        return text(this.renderCompletion());
       }
-      return text;
+      return text()
+          .content(this.renderCompletion())
+          .append(space())
+          .append(text(this.renderPreciseCompletion(), style(NamedTextColor.GRAY)))
+          .build();
     } else {
       return super.renderSidebarStatusText(competitor, viewer);
     }
@@ -562,11 +564,11 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.isDestroyed() && this.canComplete(team);
   }
 
-  public @Nonnull List<DestroyableHealthChange> getEvents() {
+  public @NotNull List<DestroyableHealthChange> getEvents() {
     return ImmutableList.copyOf(this.events);
   }
 
-  public @Nonnull ImmutableList<DestroyableContribution> getContributions() {
+  public @NotNull ImmutableList<DestroyableContribution> getContributions() {
     if (this.contributions != null) {
       return this.contributions;
     }
@@ -612,7 +614,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     // of the destroyable: individual block health can only decrease, while the total health
     // percentage can only increase.
 
-    for (Block block : this.getBlockRegion().getBlocks()) {
+    for (Block block : this.getBlockRegion().getBlocks(match.getWorld())) {
       BlockState oldState = block.getState();
       int oldHealth = this.getBlockHealth(oldState);
 

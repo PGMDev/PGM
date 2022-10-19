@@ -1,6 +1,7 @@
 package tc.oc.pgm.score;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import com.google.common.collect.ImmutableMap;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -20,8 +21,8 @@ public class ScoreBoxFactory {
       Filter filter,
       ImmutableMap<SingleMaterialMatcher, Double> redeemables,
       boolean silent) {
-    Preconditions.checkNotNull(region, "region");
-    Preconditions.checkNotNull(filter, "filter");
+    assertNotNull(region, "region");
+    assertNotNull(filter, "filter");
 
     this.region = region;
     this.score = score;

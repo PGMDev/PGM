@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.Nullable;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.minecraft.server.v1_8_R3.*;
 import net.minecraft.server.v1_8_R3.Item;
@@ -42,6 +41,7 @@ import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -1369,5 +1369,14 @@ public interface NMSHacks {
         item, new PacketPlayOutCollect(item.getEntityId(), player.getEntityId()));
 
     item.remove();
+  }
+
+  static void freezeEntity(Entity entity) {
+    net.minecraft.server.v1_8_R3.Entity nmsEntity = ((CraftEntity) entity).getHandle();
+    NBTTagCompound tag = new NBTTagCompound();
+    nmsEntity.c(tag); // save to tag
+    tag.setBoolean("NoAI", true);
+    tag.setBoolean("NoGravity", true);
+    nmsEntity.f(tag); // load from tag
   }
 }

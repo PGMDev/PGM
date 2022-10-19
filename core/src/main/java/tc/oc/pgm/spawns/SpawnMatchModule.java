@@ -1,5 +1,7 @@
 package tc.oc.pgm.spawns;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -8,8 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -19,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.jetbrains.annotations.Nullable;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
@@ -45,8 +49,11 @@ import tc.oc.pgm.spawns.states.State;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
+@SuppressWarnings("UnstableApiUsage")
 @ListenerScope(MatchScope.LOADED)
 public class SpawnMatchModule implements MatchModule, Listener, Tickable {
+
+  private static final long PREDICTED_EXTRA_TICKS = 10 * 20;
 
   private final Match match;
   private final SpawnModule module;
@@ -55,6 +62,8 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   private final Map<Competitor, Spawn> unique = new HashMap<>();
   private final Set<Spawn> failed = new HashSet<>();
   private final ObserverToolFactory observerToolFactory;
+  private final Cache<UUID, Long> deathTicks =
+      CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
 
   public SpawnMatchModule(Match match, SpawnModule module) {
     this.match = match;
@@ -169,12 +178,20 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     }
   }
 
+  public long getDeathTick(MatchPlayer player) {
+    Long deathTick = deathTicks.getIfPresent(player.getId());
+    return deathTick != null ? deathTick : 0;
+  }
+
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPartyChange(final PlayerPartyChangeEvent event) {
     if (event.getOldParty() == null) {
       // Join match
       if (event.getNewParty().isParticipating()) {
-        transition(event.getPlayer(), null, new Joining(this, event.getPlayer()));
+        transition(
+            event.getPlayer(),
+            null,
+            new Joining(this, event.getPlayer(), getDeathTick(event.getPlayer())));
       } else {
         transition(event.getPlayer(), null, new Observing(this, event.getPlayer(), true, true));
       }
@@ -304,6 +321,17 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
         unique.remove(competitor);
       }
     }
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onPlayerDeath(MatchPlayerDeathEvent event) {
+    long tick = event.getMatch().getTick().tick;
+
+    if (event.isPredicted()) {
+      tick = tick + PREDICTED_EXTRA_TICKS;
+    }
+
+    deathTicks.put(event.getPlayer().getId(), tick);
   }
 
   @Override

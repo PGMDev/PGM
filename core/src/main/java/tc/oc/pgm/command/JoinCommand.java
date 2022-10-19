@@ -1,8 +1,9 @@
 package tc.oc.pgm.command;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
-import javax.annotation.Nullable;
+import app.ashcon.intake.parametric.annotation.Text;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -19,7 +20,7 @@ public final class JoinCommand {
       flags = "f",
       perms = Permissions.JOIN)
   public void join(
-      Match match, MatchPlayer player, @Switch('f') boolean force, @Nullable Party team) {
+      Match match, MatchPlayer player, @Switch('f') boolean force, @Text @Maybe Party team) {
     if (team != null && !(team instanceof Competitor)) {
       leave(player, match);
       return;

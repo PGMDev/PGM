@@ -2,7 +2,7 @@ package tc.oc.pgm.countdowns;
 
 import java.time.Duration;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 
 public class SingleCountdownContext extends CountdownContext {

@@ -1,6 +1,6 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -46,13 +46,12 @@ public class MatchManagerImpl implements MatchManager, Listener {
   private final long destroyDelaySecs;
 
   public MatchManagerImpl(Logger logger) {
-    this.logger = ClassLogger.get(checkNotNull(logger), getClass());
+    this.logger = ClassLogger.get(assertNotNull(logger), getClass());
     this.matchById = Collections.synchronizedMap(new LinkedHashMap<>());
     this.matchByWorld = new HashMap<>();
 
     final Config config = PGM.get().getConfiguration();
-    this.unloadNonMatches =
-        config.getExperiments().getOrDefault("unload-non-match-worlds", "false").equals("true");
+    this.unloadNonMatches = config.getExperimentAsBool("unload-non-match-worlds", false);
 
     long delaySecs = (config.getStartTime().getSeconds() + 1) / 2;
     try {
@@ -70,8 +69,8 @@ public class MatchManagerImpl implements MatchManager, Listener {
   public void onMatchLoad(MatchLoadEvent event) {
     final Match match = event.getMatch();
 
-    matchById.put(checkNotNull(match).getId(), match);
-    matchByWorld.put(checkNotNull(match.getWorld()).getName(), match);
+    matchById.put(assertNotNull(match).getId(), match);
+    matchByWorld.put(assertNotNull(match.getWorld()).getName(), match);
 
     logger.info("Loaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
 
@@ -86,8 +85,8 @@ public class MatchManagerImpl implements MatchManager, Listener {
   public void onMatchUnload(MatchUnloadEvent event) {
     final Match match = event.getMatch();
 
-    matchById.remove(checkNotNull(match).getId());
-    matchByWorld.remove(checkNotNull(match.getWorld()).getName());
+    matchById.remove(assertNotNull(match).getId());
+    matchByWorld.remove(assertNotNull(match.getWorld()).getName());
 
     PGM.get()
         .getAsyncExecutor()

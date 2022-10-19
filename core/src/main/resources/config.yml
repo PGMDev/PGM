@@ -200,4 +200,6 @@ database-uri: ""
 database-max-connections: 5
 
 # Experimental features that are not yet stable.
-experiments: {}
+experiments:
+  # Enable payload preview. This is not fully finished and xml syntax is likely to change at a later time.
+  payload: false

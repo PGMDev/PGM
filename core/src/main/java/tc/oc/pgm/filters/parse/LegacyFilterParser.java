@@ -4,7 +4,9 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.block.BlockFilter;
@@ -88,12 +90,18 @@ public class LegacyFilterParser extends FilterParser {
   }
 
   @Override
-  public Filter parseReference(Node node, String value) throws InvalidXMLException {
-    Filter filter = this.filterContext.get(value);
+  public Filter parseReference(Node node, String id) throws InvalidXMLException {
+    Filter filter = this.filterContext.get(id);
     if (filter == null) {
-      throw new InvalidXMLException("No filter named '" + value + "'", node);
+      throw new InvalidXMLException("No filter named '" + id + "'", node);
     }
     return filter;
+  }
+
+  @Override
+  public void validate(Filter filter, FeatureValidation<FilterDefinition> validation, Node node)
+      throws InvalidXMLException {
+    validation.validate((FilterDefinition) filter, node);
   }
 
   @MethodParser("filter")

@@ -1,18 +1,20 @@
 package tc.oc.pgm.spawns.states;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Location;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
+import tc.oc.pgm.spawns.RespawnOptions;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -21,11 +23,15 @@ import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 /** Player is waiting to spawn as a participant */
 public abstract class Spawning extends Participating {
 
+  protected final RespawnOptions options;
   protected boolean spawnRequested;
+  protected final long deathTick;
 
-  public Spawning(SpawnMatchModule smm, MatchPlayer player) {
+  public Spawning(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
     super(smm, player);
+    this.options = smm.getRespawnOptions(player);
     this.spawnRequested = options.auto;
+    this.deathTick = deathTick;
   }
 
   @Override
@@ -66,6 +72,10 @@ public abstract class Spawning extends Participating {
     event.setCancelled(true);
   }
 
+  protected long age() {
+    return player.getMatch().getTick().tick - deathTick;
+  }
+
   @Override
   public void tick() {
     if (!trySpawn()) {
@@ -89,15 +99,17 @@ public abstract class Spawning extends Participating {
     return true;
   }
 
+  protected long ticksUntilRespawn() {
+    return Math.max(0, options.delayTicks - age());
+  }
+
   public @Nullable Spawn chooseSpawn() {
-    if (spawnRequested) {
+    if (ticksUntilRespawn() <= 0 && spawnRequested) {
       return smm.chooseSpawn(player);
     } else {
       return null;
     }
   }
-
-  public void sendMessage() {}
 
   public void updateTitle() {
     Title.Times times = Title.Times.of(Duration.ZERO, fromTicks(3), fromTicks(3));
@@ -111,15 +123,30 @@ public abstract class Spawning extends Participating {
   protected abstract Component getTitle(boolean spectator);
 
   protected Component getSubtitle(boolean spectator) {
-    if (!spawnRequested) {
+    long ticks = ticksUntilRespawn();
+    if (ticks > 0) {
+      return translatable(
+          spawnRequested
+              ? "death.respawn.confirmed.time"
+              : "death.respawn.unconfirmed.time" + (spectator ? ".spectator" : ""),
+          NamedTextColor.GREEN,
+          text(String.format("%.1f", (ticks / (float) 20)), NamedTextColor.AQUA));
+    } else if (!spawnRequested) {
       return translatable(
           "death.respawn.unconfirmed" + (spectator ? ".spectator" : ""), NamedTextColor.GREEN);
     } else if (options.message != null) {
-      return options.message;
+      return options.message.colorIfAbsent(NamedTextColor.GREEN);
     } else {
       return translatable(
           "death.respawn.confirmed.waiting" + (spectator ? ".spectator" : ""),
           NamedTextColor.GREEN);
+    }
+  }
+
+  public void sendMessage() {
+    long ticks = options.delayTicks - age();
+    if (ticks % (ticks > 0 ? 20 : 100) == 0) {
+      player.sendMessage(getSubtitle(false));
     }
   }
 }

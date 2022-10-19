@@ -1,10 +1,10 @@
 package tc.oc.pgm.score;
 
-import static com.google.common.base.Preconditions.checkState;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import java.time.Instant;
@@ -81,7 +81,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   public int getScoreLimit() {
-    checkState(hasScoreLimit());
+    assertTrue(hasScoreLimit());
 
     if (hasMercyRule()) {
       return this.mercyRule.getScoreLimit();
@@ -269,7 +269,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   private void playerScore(ScoreBox box, MatchPlayer player, double points) {
-    checkState(player.isParticipating());
+    assertTrue(player.isParticipating());
 
     if (points == 0) return;
 

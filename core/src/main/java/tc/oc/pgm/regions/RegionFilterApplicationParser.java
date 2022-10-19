@@ -86,13 +86,8 @@ public class RegionFilterApplicationParser {
 
   public void parseMaxBuildHeight(Element el) throws InvalidXMLException {
     final Region region =
-        new CuboidRegion(
-            new Vector(
-                Double.NEGATIVE_INFINITY,
-                XMLUtils.parseNumber(el, Integer.class),
-                Double.NEGATIVE_INFINITY),
-            new Vector(
-                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY));
+        new HalfspaceRegion(
+            new Vector(0, XMLUtils.parseNumber(el, Integer.class), 0), new Vector(0, 1, 0));
     final Component message = translatable("match.maxBuildHeight");
 
     for (RFAScope scope : Lists.newArrayList(RFAScope.BLOCK_PLACE)) {

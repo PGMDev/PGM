@@ -1,9 +1,9 @@
 package tc.oc.pgm.tracker.info;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.Location;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.FallInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
@@ -14,8 +14,8 @@ public class GenericFallInfo implements FallInfo {
   private final Location origin;
 
   public GenericFallInfo(To to, Location origin) {
-    this.to = checkNotNull(to);
-    this.origin = checkNotNull(origin);
+    this.to = assertNotNull(to);
+    this.origin = assertNotNull(origin);
   }
 
   public GenericFallInfo(To to, Location location, double distance) {

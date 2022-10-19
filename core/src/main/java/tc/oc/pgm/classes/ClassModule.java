@@ -1,6 +1,6 @@
 package tc.oc.pgm.classes;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -40,9 +40,9 @@ public class ClassModule implements MapModule {
   final PlayerClass defaultClass;
 
   public ClassModule(String family, Map<String, PlayerClass> classes, PlayerClass defaultClass) {
-    this.family = checkNotNull(family, "family");
-    this.classes = ImmutableMap.copyOf(checkNotNull(classes, "classes"));
-    this.defaultClass = checkNotNull(defaultClass, "default class");
+    this.family = assertNotNull(family, "family");
+    this.classes = ImmutableMap.copyOf(assertNotNull(classes, "classes"));
+    this.defaultClass = assertNotNull(defaultClass, "default class");
   }
 
   @Override

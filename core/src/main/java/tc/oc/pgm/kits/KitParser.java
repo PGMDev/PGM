@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -35,6 +34,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
@@ -43,6 +43,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
+import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
@@ -51,6 +52,7 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -145,6 +147,7 @@ public abstract class KitParser {
     kits.add(this.parseTeamSwitchKit(el));
     kits.add(this.parseMaxHealthKit(el));
     kits.add(this.parseActionKit(el));
+    kits.add(this.parseOverflowWarning(el));
     kits.addAll(this.parseRemoveKits(el));
 
     kits.removeAll(Collections.singleton((Kit) null)); // Remove any nulls returned above
@@ -217,10 +220,7 @@ public abstract class KitParser {
     ItemStack stack = parseItem(el, true);
     boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
 
-    boolean teamColor =
-        stack.getItemMeta() instanceof LeatherArmorMeta
-            && XMLUtils.parseBoolean(el.getAttribute("team-color"), false);
-    return new ArmorKit.ArmorItem(stack, locked, teamColor);
+    return new ArmorKit.ArmorItem(stack, locked);
   }
 
   public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
@@ -279,8 +279,9 @@ public abstract class KitParser {
     boolean repairTools = XMLUtils.parseBoolean(Node.fromAttr(el, "repair-tools"), true);
     boolean deductTools = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-tools"), true);
     boolean deductItems = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-items"), true);
+    boolean dropOverflow = XMLUtils.parseBoolean(Node.fromAttr(el, "drop-overflow"), false);
 
-    return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems);
+    return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems, dropOverflow);
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
@@ -396,12 +397,36 @@ public abstract class KitParser {
     return itemStack;
   }
 
-  public ItemStack parseRequiredItem(Element parent) throws InvalidXMLException {
-    ItemStack stack = parseItem(parent.getChild("item"), false);
-    if (stack == null) {
-      throw new InvalidXMLException("Item expected", parent);
+  public ItemMatcher parseItemMatcher(Element parent) throws InvalidXMLException {
+    return parseItemMatcher(parent, "item");
+  }
+
+  public ItemMatcher parseItemMatcher(Element parent, String childName) throws InvalidXMLException {
+    ItemStack stack = parseItem(parent.getChild(childName), false);
+    if (stack == null)
+      throw new InvalidXMLException("Child " + childName + " element expected", parent);
+
+    Range<Integer> amount =
+        XMLUtils.parseNumericRange(Node.fromAttr(parent, "amount"), Integer.class, null);
+    if (amount == null) amount = Range.atLeast(stack.getAmount());
+    else if (stack.getAmount() != 1)
+      throw new InvalidXMLException("Cannot combine amount range with an item amount", parent);
+
+    boolean ignoreDurability =
+        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-durability"), true);
+    boolean ignoreMetadata = XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-metadata"), false);
+    boolean ignoreName =
+        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-name"), ignoreMetadata);
+    boolean ignoreEnchantments =
+        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-enchantments"), ignoreMetadata);
+
+    if (ignoreMetadata && (!ignoreName || !ignoreEnchantments)) {
+      throw new InvalidXMLException(
+          "Cannot ignore metadata but respect name or enchantments", parent);
     }
-    return stack;
+
+    return new ItemMatcher(
+        stack, amount, ignoreDurability, ignoreMetadata, ignoreName, ignoreEnchantments);
   }
 
   public ItemStack parseItem(Element el, boolean allowAir) throws InvalidXMLException {
@@ -544,6 +569,9 @@ public abstract class KitParser {
   }
 
   public void parseCustomNBT(Element el, ItemStack itemStack) throws InvalidXMLException {
+    if (XMLUtils.parseBoolean(el.getAttribute("team-color"), false))
+      ItemModifier.TEAM_COLOR.set(itemStack, true);
+
     if (XMLUtils.parseBoolean(el.getAttribute("grenade"), false)) {
       Grenade.ITEM_TAG.set(
           itemStack,
@@ -746,5 +774,12 @@ public abstract class KitParser {
     }
 
     return new ActionKit(builder.build());
+  }
+
+  public OverflowWarningKit parseOverflowWarning(Element parent) throws InvalidXMLException {
+    Node node = Node.fromChildOrAttr(parent, "overflow-warning");
+    if (node == null) return null;
+
+    return new OverflowWarningKit(XMLUtils.parseFormattedText(node));
   }
 }

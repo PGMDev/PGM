@@ -11,6 +11,7 @@ import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
 import java.time.Duration;
 import java.util.List;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.WordUtils;
@@ -21,6 +22,7 @@ import tc.oc.pgm.modes.ModeChangeCountdown;
 import tc.oc.pgm.modes.ModesPaginatedResult;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.text.TextFormatter;
 
 // TODO: make the output nicer
 public final class ModeCommand {
@@ -173,7 +175,19 @@ public final class ModeCommand {
     if (modes == null) {
       throwNoResults();
     } else {
-      new ModesPaginatedResult(modes).display(audience, modes.getSortedCountdowns(true), page);
+      List<ModeChangeCountdown> modeList = modes.getSortedCountdowns(true);
+      int resultsPerPage = 8;
+      int pages = (modeList.size() + resultsPerPage - 1) / resultsPerPage;
+      Component header =
+          TextFormatter.paginate(
+              translatable("command.monumentModes"),
+              page,
+              pages,
+              NamedTextColor.DARK_AQUA,
+              NamedTextColor.AQUA,
+              true);
+
+      new ModesPaginatedResult(header, resultsPerPage, modes).display(audience, modeList, page);
     }
   }
 

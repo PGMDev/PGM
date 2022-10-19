@@ -1,7 +1,7 @@
 package tc.oc.pgm.api.player;
 
 import java.util.UUID;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.named.Named;
 
 /** Represents the mapping of a {@link UUID} to a username. */

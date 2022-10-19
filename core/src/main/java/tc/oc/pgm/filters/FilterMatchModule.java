@@ -1,5 +1,7 @@
 package tc.oc.pgm.filters;
 
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -12,7 +14,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -188,14 +189,13 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       throw new IllegalStateException("Cannot register filter listener after match has started");
     }
 
-    // Ideally this should never happen. All features that try to register a dynamic filter should
-    // have ensured that the filter can respond dynamically to the scope, at XML parse time.
-    // However, that does not occur, nothing is validating dynamic filters' scopes at all.
-    // The proper fix is to have a validation, using FeatureValidation and all features
-    // that will use a filter dynamically to validate the scope.
-    if (!filter.respondsTo(scope)) {
+    /**
+     * This should never happen. If any feature is going to register a dynamic filter, it should
+     * validate at parse time using a {@link tc.oc.pgm.filters.parse.DynamicFilterValidation}
+     */
+    if (!filter.isDynamic() || !filter.respondsTo(scope)) {
       throw new IllegalStateException(
-          "Filter " + filter + " does not respond to " + scope.getSimpleName() + " scope");
+          "Filter " + filter + " doesn't respond to " + scope.getSimpleName() + " scope.");
     }
 
     final ListenerSet listenerSet =
@@ -227,16 +227,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * @param filter The filter to listen to
-   * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is running at register time
-   */
-  @Override
-  public void onChange(Filter filter, FilterListener<? super Filterable<?>> listener) {
-    onChange((Class) Filterable.class, filter, listener);
-  }
-
-  /**
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
@@ -258,16 +248,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   /**
-   * @param filter The filter to listen to
-   * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is running at register time
-   */
-  @Override
-  public void onRise(Filter filter, Consumer<? super Filterable<?>> listener) {
-    onRise((Class) Filterable.class, filter, listener);
-  }
-
-  /**
    * @param scope The scope of the filter listener
    * @param filter The filter to listen to
    * @param listener The listener that handles the response
@@ -286,16 +266,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
                 + " filter="
                 + filter);
     register(scope, filter, false, (filterable, response) -> listener.accept(filterable));
-  }
-
-  /**
-   * @param filter The filter to listen to
-   * @param listener The listener that handles the response
-   * @throws IllegalStateException if the match is running at register time
-   */
-  @Override
-  public void onFall(Filter filter, Consumer<? super Filterable<?>> listener) {
-    onFall((Class) Filterable.class, filter, listener);
   }
 
   /** Returns the last response a given filter gave to a given filterable */
@@ -567,7 +537,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    */
   @SuppressWarnings("unchecked")
   public <T extends ReactorFactory.Reactor> @NotNull T getReactor(ReactorFactory<T> factory) {
-    return (T) Objects.requireNonNull(this.activeReactors.get(factory), "reactor");
+    return (T) assertNotNull(this.activeReactors.get(factory), "reactor");
   }
 
   private static class DummyListener implements Listener {}

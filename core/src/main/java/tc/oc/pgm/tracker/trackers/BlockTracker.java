@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.trackers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -19,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPistonEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -66,7 +66,7 @@ public class BlockTracker implements Listener {
 
   public void trackBlockState(
       Block block, @Nullable Material material, @Nullable TrackerInfo info) {
-    checkNotNull(block);
+    assertNotNull(block);
     if (info != null) {
       blocks.put(block, info);
       if (material != null) {
@@ -81,12 +81,12 @@ public class BlockTracker implements Listener {
   }
 
   public void trackBlockState(BlockState state, @Nullable TrackerInfo info) {
-    checkNotNull(state);
+    assertNotNull(state);
     trackBlockState(state.getBlock(), state.getType(), info);
   }
 
   public void clearBlock(Block block) {
-    checkNotNull(block);
+    assertNotNull(block);
     blocks.remove(block);
     materials.remove(block);
     logger.fine("Clear block=" + block);

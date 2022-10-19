@@ -22,7 +22,7 @@ public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
       Action<? super I> child) {
     super(outer);
     if ((single == null) == (multi == null))
-      throw new IllegalArgumentException("One and only one of single or multi must be nonnull");
+      throw new IllegalArgumentException("One and only one of single or multi must be NotNull");
     this.single = single;
     this.multi = multi;
     this.child = child;

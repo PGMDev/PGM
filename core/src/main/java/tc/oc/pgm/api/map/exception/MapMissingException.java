@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.map.exception;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapSource;
 
 /** Thrown when a {@link MapSource} has gone missing. */

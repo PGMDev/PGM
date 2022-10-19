@@ -1,13 +1,13 @@
 package tc.oc.pgm.timelimit;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import java.time.Duration;
 import java.util.Collection;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -30,7 +30,7 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
       @Nullable VictoryCondition result,
       boolean show) {
     super(id);
-    this.duration = checkNotNull(duration);
+    this.duration = assertNotNull(duration);
     this.overtime = overtime;
     this.maxOvertime = maxOvertime;
     this.endOvertime = minOvertime;

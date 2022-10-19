@@ -1,6 +1,6 @@
 package tc.oc.pgm.map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,7 +62,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
 
   public MapFactoryImpl(Logger logger, MapSource source, MapIncludeProcessor includes) {
     super(Modules.MAP); // Do not copy to avoid N copies of the factories
-    this.logger = ClassLogger.get(checkNotNull(logger), getClass(), checkNotNull(source).getId());
+    this.logger = ClassLogger.get(assertNotNull(logger), getClass(), assertNotNull(source).getId());
     this.source = source;
     this.includes = includes;
   }
@@ -120,8 +120,10 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       throw e;
     } catch (IOException e) {
       throw new MapException(source, info, "Unable to read map document", e);
-    } catch (ModuleLoadException | InvalidXMLException e) {
+    } catch (InvalidXMLException e) {
       throw new MapException(source, info, e.getMessage(), e);
+    } catch (ModuleLoadException e) {
+      throw new MapException(source, info, e.getFullMessage(), e);
     } catch (JDOMParseException e) {
       final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
       throw new MapException(source, info, cause.getMessage(), cause);

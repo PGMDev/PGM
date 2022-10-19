@@ -1,9 +1,10 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
 /** Wherever you go, here you are */
-public class EverywhereRegion extends AbstractRegion {
+public class EverywhereRegion implements RegionDefinition {
   public static final EverywhereRegion INSTANCE = new EverywhereRegion();
 
   private EverywhereRegion() {}

@@ -1,6 +1,6 @@
 package tc.oc.pgm.map.source;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Sets;
 import java.io.File;
@@ -14,7 +14,6 @@ import java.nio.file.Path;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
@@ -50,7 +49,7 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
     private final Set<MapInclude> storedIncludes;
 
     private SystemMapSource(String dir) {
-      this.dir = checkNotNull(dir);
+      this.dir = assertNotNull(dir);
       this.modified = new AtomicLong(-1);
       this.storedIncludes = Sets.newHashSet();
     }
@@ -139,10 +138,7 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
 
     @Override
     public String toString() {
-      return new ToStringBuilder(this)
-          .append("dir", dir)
-          .append("modified", modified.get())
-          .build();
+      return "SystemMapSourceFactory{dir=" + this.dir + ", modified=" + this.modified.get() + "}";
     }
 
     @Override

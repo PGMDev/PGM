@@ -26,4 +26,4 @@ Documents
 Governance
 ----------
 
-The lead maintainer of this project is [Electroid](https://github.com/Electroid), a former administrator and software developer at `oc.tc`. As the project grows, we'll scale the governance model to meet those needs. If you're interested in donating to the project or running PGM commercially, contact him for more information.
+The lead maintainer of this project is [Electroid](https://github.com/Electroid), a former administrator and software developer at [`oc.tc`](https://oc.tc/). As the project grows, we'll scale the governance model to meet those needs.

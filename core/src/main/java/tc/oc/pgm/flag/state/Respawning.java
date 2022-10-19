@@ -4,12 +4,12 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
@@ -112,12 +112,12 @@ public class Respawning extends Spawned implements Returning {
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return Flag.RESPAWNING_SYMBOL;
   }
 
   @Override
-  public ChatColor getStatusColor(Party viewer) {
-    return ChatColor.GRAY;
+  public TextColor getStatusColor(Party viewer) {
+    return NamedTextColor.GRAY;
   }
 }

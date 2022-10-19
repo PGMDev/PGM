@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.operator;
 
-import java.util.List;
+import java.util.Collection;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 
@@ -32,7 +32,7 @@ public class OneFilter extends MultiFilterFunction {
     return MultiFilterFunction.of(OneFilter::new, filters);
   }
 
-  public static Filter of(List<Filter> filters) {
+  public static Filter of(Collection<Filter> filters) {
     return MultiFilterFunction.of(OneFilter::new, filters);
   }
 }

@@ -2,24 +2,23 @@ package tc.oc.pgm.regions;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.feature.FeatureValidation;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
+import tc.oc.pgm.util.XMLParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public abstract class RegionParser {
+public abstract class RegionParser implements XMLParser<Region, RegionDefinition> {
 
   protected final Map<String, Method> methodParsers;
   protected final MapFactory factory;
@@ -29,13 +28,22 @@ public abstract class RegionParser {
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
 
+  @Override
+  public String type() {
+    return "region";
+  }
+
   /**
    * Parse a single region element and return it. Also, store the region in whatever type of context
    * is in use.
    */
   public abstract Region parse(Element el) throws InvalidXMLException;
 
-  public abstract Region parseReference(Attribute attr) throws InvalidXMLException;
+  public abstract Region parseReference(Node node, String id) throws InvalidXMLException;
+
+  public Region parseReference(Attribute attribute) throws InvalidXMLException {
+    return parseReference(new Node(attribute));
+  }
 
   public List<Element> getRegionChildren(Element parent) {
     List<Element> elements = new ArrayList<Element>();
@@ -47,13 +55,9 @@ public abstract class RegionParser {
     return elements;
   }
 
-  public Region parseChild(Element parent) throws InvalidXMLException {
-    if (parent.getChildren().isEmpty()) {
-      throw new InvalidXMLException("Expected a child region", parent);
-    } else if (parent.getChildren().size() > 1) {
-      throw new InvalidXMLException("Expected only one child region, not multiple", parent);
-    }
-    return this.parse(parent.getChildren().get(0));
+  @Override
+  public Region parsePropertyElement(Element property) throws InvalidXMLException {
+    return parseChildren(property);
   }
 
   /**
@@ -70,7 +74,7 @@ public abstract class RegionParser {
     return Union.of(regions.toArray(new Region[0]));
   }
 
-  public Region[] parseSubRegionsArray(Element parent) throws InvalidXMLException {
+  protected Region[] parseSubRegionsArray(Element parent) throws InvalidXMLException {
     return this.parseSubRegions(parent).toArray(new Region[0]);
   }
 
@@ -82,93 +86,12 @@ public abstract class RegionParser {
     return regions;
   }
 
-  public @Nullable Region parseRegionProperty(Element rootElement, String... names)
-      throws InvalidXMLException {
-    return parseRegionProperty(rootElement, null, null, names);
+  public @Nullable Region parseRegionProperty(Element el, String name) throws InvalidXMLException {
+    return parseProperty(el, name);
   }
 
-  public @Nullable Region parseRegionProperty(Element rootElement, Region def, String... names)
-      throws InvalidXMLException {
-    return parseRegionProperty(rootElement, null, def, names);
-  }
-
-  public @Nullable Region parseRegionProperty(
-      Element rootElement,
-      @Nullable FeatureValidation<RegionDefinition> validation,
-      String... names)
-      throws InvalidXMLException {
-    return parseRegionProperty(rootElement, validation, null, names);
-  }
-
-  public @Nullable Region parseRegionProperty(
-      Element rootElement,
-      @Nullable FeatureValidation<RegionDefinition> validation,
-      Region def,
-      String... names)
-      throws InvalidXMLException {
-    Attribute propertyAttribute = null;
-    Element propertyElement = null;
-
-    for (String name : names) {
-      if (rootElement.getAttribute(name) != null && rootElement.getChild(name) != null) {
-        throw new InvalidXMLException(
-            "Multiple defined region properties for " + name, rootElement);
-      }
-
-      if ((rootElement.getAttribute(name) != null || rootElement.getChild(name) != null)
-          && (propertyAttribute != null || propertyElement != null)) {
-        throw new InvalidXMLException(
-            "Multiple defined region properties for " + Arrays.toString(names), rootElement);
-      }
-
-      if (rootElement.getAttribute(name) != null) {
-        propertyAttribute = rootElement.getAttribute(name);
-      } else if (rootElement.getChild(name) != null) {
-        propertyElement = rootElement.getChild(name);
-      }
-    }
-
-    Region region = def;
-    Node node = null;
-
-    if (propertyAttribute != null) {
-      region = this.parseReference(propertyAttribute);
-      node = new Node(propertyAttribute);
-    } else if (propertyElement != null) {
-      region = this.parseChildren(propertyElement);
-      node = new Node(propertyElement);
-    }
-
-    if (region != null && validation != null) {
-      validate(region, validation, node);
-    }
-
-    return region;
-  }
-
-  public Region parseRequiredRegionProperty(Element rootElement, String... names)
-      throws InvalidXMLException {
-    return parseRequiredRegionProperty(rootElement, null, names);
-  }
-
-  public Region parseRequiredRegionProperty(
-      Element rootElement,
-      @Nullable FeatureValidation<RegionDefinition> validation,
-      String... names)
-      throws InvalidXMLException {
-    Region region = parseRegionProperty(rootElement, validation, names);
-
-    if (region == null) {
-      throw new InvalidXMLException(
-          "No region defined for " + Arrays.toString(names) + " names(s).", rootElement);
-    } else {
-      return region;
-    }
-  }
-
-  public void validate(Region region, FeatureValidation<RegionDefinition> validation, Node node)
-      throws InvalidXMLException {
-    validation.validate((RegionDefinition) region, node);
+  public Region parseRequiredRegionProperty(Element el, String name) throws InvalidXMLException {
+    return parseRequiredProperty(el, name);
   }
 
   protected Method getMethodParser(String regionName) {

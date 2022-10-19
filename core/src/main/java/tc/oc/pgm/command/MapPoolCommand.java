@@ -7,6 +7,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import app.ashcon.intake.Command;
 import app.ashcon.intake.CommandException;
 import app.ashcon.intake.parametric.annotation.Default;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
 import app.ashcon.intake.parametric.annotation.Text;
 import java.text.DecimalFormat;
@@ -15,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -214,7 +214,7 @@ public final class MapPoolCommand {
       CommandSender source,
       Match match,
       MapOrder mapOrder,
-      @Nullable String poolName,
+      @Maybe String poolName,
       @Switch('r') boolean reset,
       @Switch('t') Duration timeLimit,
       @Switch('m') Integer matchLimit)

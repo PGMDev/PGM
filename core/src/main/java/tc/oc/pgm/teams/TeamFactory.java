@@ -1,8 +1,9 @@
 package tc.oc.pgm.teams;
 
-import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
@@ -13,7 +14,7 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
   protected final String defaultName;
   protected final boolean defaultNamePlural;
   protected final ChatColor defaultColor;
-  @Nullable protected final ChatColor overheadColor;
+  protected final @Nullable DyeColor dyeColor;
   protected final int minPlayers;
   protected final int maxPlayers;
   protected final int maxOverfill;
@@ -26,7 +27,7 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
    * @param defaultName Default name for the team.
    * @param defaultNamePlural Is the default name a plural word?
    * @param defaultColor Default color for the team.
-   * @param overheadColor Color to be displayed above the team members' avatars.
+   * @param dyeColor Dye color to be used for blocks on kits or control points
    * @param maxPlayers Maximum amount of players that may be on this team.
    * @param nameTagVisibility Who can see the name tags of players on this team
    */
@@ -35,7 +36,7 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
       String defaultName,
       boolean defaultNamePlural,
       ChatColor defaultColor,
-      @Nullable ChatColor overheadColor,
+      @Nullable DyeColor dyeColor,
       int minPlayers,
       int maxPlayers,
       int maxOverfill,
@@ -44,7 +45,7 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
     this.defaultName = defaultName;
     this.defaultNamePlural = defaultNamePlural;
     this.defaultColor = defaultColor;
-    this.overheadColor = overheadColor;
+    this.dyeColor = dyeColor;
     this.minPlayers = minPlayers;
     this.maxPlayers = maxPlayers;
     this.maxOverfill = maxOverfill;
@@ -94,12 +95,12 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
   }
 
   /**
-   * Gets the color to be displayed alongside the player's name above the player.
+   * Gets the dye color to use for blocks on kits or control points
    *
-   * @return Overhead color.
+   * @return Dye color for the team
    */
-  public ChatColor getOverheadColor() {
-    return this.overheadColor != null ? this.overheadColor : this.defaultColor;
+  public @Nullable DyeColor getDyeColor() {
+    return this.dyeColor;
   }
 
   public int getMinPlayers() {

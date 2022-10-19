@@ -1,8 +1,11 @@
 package tc.oc.pgm.util.inventory;
 
+import com.google.common.collect.Lists;
 import java.util.Arrays;
+import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -10,6 +13,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Dye;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.text.TextTranslations;
 
 /** A nice way to build {@link ItemStack}s. */
 public class ItemBuilder {
@@ -60,13 +65,29 @@ public class ItemBuilder {
     return this;
   }
 
+  @Deprecated
   public ItemBuilder name(String name) {
     meta().setDisplayName(name);
     return this;
   }
 
+  public ItemBuilder name(@Nullable CommandSender viewer, Component component) {
+    meta().setDisplayName(TextTranslations.translateLegacy(component, viewer));
+    return this;
+  }
+
+  @Deprecated
   public ItemBuilder lore(String... lore) {
     meta().setLore(Arrays.asList(lore));
+    return this;
+  }
+
+  public ItemBuilder lore(@Nullable CommandSender viewer, Component... lore) {
+    meta()
+        .setLore(
+            Lists.transform(
+                Arrays.asList(lore),
+                (component) -> TextTranslations.translateLegacy(component, viewer)));
     return this;
   }
 

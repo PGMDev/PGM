@@ -2,8 +2,9 @@ package tc.oc.pgm.regions;
 
 import java.util.Random;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class PointRegion extends AbstractRegion {
+public class PointRegion implements RegionDefinition {
 
   private final Vector position;
 

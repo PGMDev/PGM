@@ -1,9 +1,9 @@
 package tc.oc.pgm.listeners;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
 import java.util.Random;
@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
@@ -134,6 +134,9 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   public void addPlayerOnJoin(final PlayerJoinEvent event) {
+    // Player already left. Because quit already happened, we must ignore the join.
+    if (!event.getPlayer().isOnline()) return;
+
     Match match = this.mm.getMatch(event.getPlayer().getWorld());
     if (match == null) {
       event
@@ -188,7 +191,7 @@ public class PGMListener implements Listener {
 
   public static void announceJoinOrLeave(
       MatchPlayer player, boolean join, boolean staffOnly, boolean force) {
-    checkNotNull(player);
+    assertNotNull(player);
     Collection<MatchPlayer> viewers =
         player.getMatch().getPlayers().stream()
             .filter(p -> !staffOnly || p.getBukkit().hasPermission(Permissions.STAFF))

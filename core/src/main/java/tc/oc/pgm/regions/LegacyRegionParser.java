@@ -1,11 +1,13 @@
 package tc.oc.pgm.regions;
 
-import org.jdom2.Attribute;
 import org.jdom2.Element;
+import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 /** For proto < 1.4 */
@@ -17,6 +19,7 @@ public class LegacyRegionParser extends RegionParser {
     super(factory);
   }
 
+  @Override
   public Region parse(Element el) throws InvalidXMLException {
     Region region = this.parseDynamic(el);
 
@@ -34,14 +37,20 @@ public class LegacyRegionParser extends RegionParser {
     return region;
   }
 
-  public Region parseReference(Attribute attr) throws InvalidXMLException {
-    String name = attr.getValue();
-    Region region = this.regionContext.get(name);
+  @Override
+  public Region parseReference(Node node, String id) throws InvalidXMLException {
+    Region region = this.regionContext.get(id);
     if (region == null) {
-      throw new InvalidXMLException("Unknown region '" + name + "'", attr);
+      throw new InvalidXMLException("Unknown region '" + id + "'", node);
     } else {
       return region;
     }
+  }
+
+  @Override
+  public void validate(Region region, FeatureValidation<RegionDefinition> validation, Node node)
+      throws InvalidXMLException {
+    validation.validate((RegionDefinition) region, node);
   }
 
   @MethodParser("region")

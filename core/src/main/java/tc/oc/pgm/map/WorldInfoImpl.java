@@ -1,11 +1,11 @@
 package tc.oc.pgm.map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Random;
-import javax.annotation.Nullable;
 import org.bukkit.World;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -29,7 +29,7 @@ public class WorldInfoImpl implements WorldInfo {
 
   public WorldInfoImpl(Element element) throws InvalidXMLException {
     this(
-        parseSeed(checkNotNull(element).getAttributeValue("seed")),
+        parseSeed(assertNotNull(element).getAttributeValue("seed")),
         XMLUtils.parseBoolean(element.getAttribute("vanilla"), false),
         XMLUtils.parseEnum(
                 Node.fromLastChildOrAttr(element, "environment"),

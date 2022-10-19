@@ -10,12 +10,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.permissions.Permission;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 
 /** A configuration for server owners to modify {@link PGM}. */
@@ -420,4 +420,9 @@ public interface Config {
    * @return A map of experimental settings.
    */
   Map<String, Object> getExperiments();
+
+  default boolean getExperimentAsBool(String key, boolean def) {
+    Object exp = getExperiments().getOrDefault(key, def);
+    return exp instanceof Boolean ? (Boolean) exp : exp.toString().equals("true");
+  }
 }

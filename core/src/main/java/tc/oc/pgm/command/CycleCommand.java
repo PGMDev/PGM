@@ -4,9 +4,10 @@ import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
 import app.ashcon.intake.parametric.annotation.Default;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Switch;
+import app.ashcon.intake.parametric.annotation.Text;
 import java.time.Duration;
-import javax.annotation.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -23,8 +24,8 @@ public final class CycleCommand {
   public void cycle(
       Match match,
       MapOrder mapOrder,
-      @Nullable Duration duration,
-      @Default("next") MapInfo map,
+      @Maybe Duration duration,
+      @Text @Default("next") MapInfo map,
       @Switch('f') boolean force) {
     if (match.isRunning() && !force) {
       throw exception("admin.matchRunning.cycle");
@@ -44,7 +45,7 @@ public final class CycleCommand {
       flags = "f",
       perms = Permissions.START)
   public void recycle(
-      Match match, MapOrder mapOrder, @Nullable Duration duration, @Switch('f') boolean force) {
+      Match match, MapOrder mapOrder, @Maybe Duration duration, @Switch('f') boolean force) {
     cycle(match, mapOrder, duration, match.getMap(), force);
   }
 }

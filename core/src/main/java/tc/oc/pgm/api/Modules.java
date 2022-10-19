@@ -1,10 +1,10 @@
 package tc.oc.pgm.api;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.map.MapModule;
@@ -103,6 +103,8 @@ import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.shield.ShieldMatchModule;
+import tc.oc.pgm.shops.ShopMatchModule;
+import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.spawner.SpawnerMatchModule;
 import tc.oc.pgm.spawner.SpawnerModule;
@@ -118,6 +120,8 @@ import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tntrender.TNTRenderMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.variables.VariablesMatchModule;
+import tc.oc.pgm.variables.VariablesModule;
 import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderMatchModule;
@@ -133,16 +137,16 @@ public interface Modules {
       new ConcurrentHashMap<>();
 
   static <M extends MatchModule> void register(Class<M> match, MatchModuleFactory<M> factory) {
-    if (MATCH.containsKey(checkNotNull(match)))
+    if (MATCH.containsKey(assertNotNull(match)))
       throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
-    MATCH.put(match, checkNotNull(factory));
+    MATCH.put(match, assertNotNull(factory));
   }
 
   static <M extends MatchModule, N extends MapModule<M>> void register(
       Class<N> map, @Nullable Class<M> match, MapModuleFactory<N> factory) {
-    if (MAP.containsKey(checkNotNull(map)) || MAP_TO_MATCH.containsKey(map))
+    if (MAP.containsKey(assertNotNull(map)) || MAP_TO_MATCH.containsKey(map))
       throw new IllegalArgumentException(map.getSimpleName() + " was registered twice");
-    MAP.put(map, checkNotNull(factory));
+    MAP.put(map, assertNotNull(factory));
     if (match != null) MAP_TO_MATCH.put(map, match);
   }
 
@@ -185,6 +189,7 @@ public interface Modules {
     register(PickerMatchModule.class, new PickerMatchModule.Factory());
 
     // MapModules that create a MatchModule
+    register(VariablesModule.class, VariablesMatchModule.class, new VariablesModule.Factory());
     register(TeamModule.class, TeamMatchModule.class, new TeamModule.Factory());
     register(FreeForAllModule.class, FreeForAllMatchModule.class, new FreeForAllModule.Factory());
     register(RegionModule.class, RegionMatchModule.class, new RegionModule.Factory());
@@ -253,6 +258,7 @@ public interface Modules {
     register(
         WorldBorderModule.class, WorldBorderMatchModule.class, new WorldBorderModule.Factory());
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
+    register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());

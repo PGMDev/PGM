@@ -1,6 +1,6 @@
 package tc.oc.pgm.match;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
@@ -48,7 +48,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
   protected MatchFactoryImpl(String mapId) {
     this.stages = new Stack<>();
-    this.stages.push(new InitMapStage(checkNotNull(mapId)));
+    this.stages.push(new InitMapStage(assertNotNull(mapId)));
     this.timedOut = new AtomicBoolean(false);
     this.future = Executors.newSingleThreadExecutor().submit(this);
   }
@@ -195,7 +195,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     private final String mapId;
 
     private InitMapStage(String mapId) {
-      this.mapId = checkNotNull(mapId);
+      this.mapId = assertNotNull(mapId);
     }
 
     @Override
@@ -210,7 +210,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     private File dir;
 
     private DownloadMapStage(MapContext map) {
-      this.map = checkNotNull(map);
+      this.map = assertNotNull(map);
     }
 
     private File getDirectory() {
@@ -254,8 +254,8 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     private final String worldName;
 
     private InitWorldStage(MapContext map, String worldName) {
-      this.map = checkNotNull(map);
-      this.worldName = checkNotNull(worldName);
+      this.map = assertNotNull(map);
+      this.worldName = assertNotNull(worldName);
     }
 
     private Stage advanceSync() throws IllegalStateException {
@@ -308,7 +308,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private InitMatchStage(World world, MapContext map) {
       this.match =
-          new MatchImpl(Long.toString(counter.get() - 1), checkNotNull(map), checkNotNull(world));
+          new MatchImpl(Long.toString(counter.get() - 1), assertNotNull(map), assertNotNull(world));
     }
 
     private MoveMatchStage advanceSync() {
@@ -345,7 +345,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     private final Duration delay;
 
     private MoveMatchStage(Match match) {
-      this.match = checkNotNull(match);
+      this.match = assertNotNull(match);
 
       // Right before moving players, make sure they don't show up in tab list due to missing a team
       for (Player viewer : Bukkit.getOnlinePlayers()) {

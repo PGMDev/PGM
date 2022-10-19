@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.ChatColor;
 import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -20,6 +20,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -74,7 +75,8 @@ public class ObjectiveModesModule implements MapModule {
         MaterialData material =
             XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
         Duration after = TextParser.parseDuration(modeEl.getAttributeValue("after"));
-        Filter filter = factory.getFilters().parseFilterProperty(modeEl, "filter", null);
+        Filter filter =
+            factory.getFilters().parseProperty(modeEl, "filter", DynamicFilterValidation.MATCH);
         String name = modeEl.getAttributeValue("name");
         if (name != null) {
           name = ChatColor.translateAlternateColorCodes('`', name);

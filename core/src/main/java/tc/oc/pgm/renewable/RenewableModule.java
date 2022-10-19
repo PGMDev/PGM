@@ -53,7 +53,7 @@ public class RenewableModule implements MapModule {
           XMLUtils.flattenElements(doc.getRootElement(), "renewables", "renewable")) {
         RenewableDefinition renewableDefinition = new RenewableDefinition();
         renewableDefinition.region =
-            regionParser.parseRegionProperty(elRenewable, EverywhereRegion.INSTANCE, "region");
+            regionParser.parseProperty(elRenewable, "region", EverywhereRegion.INSTANCE);
 
         renewableDefinition.renewableBlocks =
             parseFilter(filterParser, elRenewable, "renew", StaticFilter.ALLOW);

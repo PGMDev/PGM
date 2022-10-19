@@ -1,6 +1,8 @@
 package tc.oc.pgm.fireworks;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
+
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +18,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.event.EventHandler;
@@ -207,6 +210,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
   public void spawnFireworkDisplay(
       Location center, Color color, int count, double radius, int power) {
+    if (Double.isInfinite(radius)) return;
     FireworkEffect effect =
         FireworkEffect.builder()
             .with(Type.BURST)
@@ -219,27 +223,24 @@ public class FireworkMatchModule implements MatchModule, Listener {
       double angle = 2 * Math.PI / count * i;
       double dx = radius * Math.cos(angle);
       double dz = radius * Math.sin(angle);
-      Location baseLocation = center.clone().add(dx, 0, dz);
+      Location loc = getOpenSpaceAbove(center.clone().add(dx, 0, dz));
 
-      Block block = baseLocation.getBlock();
-      if (block == null || !block.getType().isOccluding()) {
-        spawnFirework(getOpenSpaceAbove(baseLocation), effect, power);
-      }
+      if (loc != null) spawnFirework(loc, effect, power);
     }
   }
 
   public void spawnFireworkDisplay(
       World world, Region region, Color color, int count, double radiusMultiplier, int power) {
     final Bounds bound = region.getBounds();
-    final double radius = bound.getMax().subtract(bound.getMin()).multiply(0.5).length();
-    final Location center = bound.getMin().getMidpoint(bound.getMax()).toLocation(world);
+    final double radius = bound.getSize().setY(0).multiply(0.5).length();
+    final Location center = bound.getCenterPoint().toLocation(world);
     this.spawnFireworkDisplay(center, color, count, radiusMultiplier * radius, power);
   }
 
   public static Firework spawnFirework(Location location, FireworkEffect effect, int power) {
-    Preconditions.checkNotNull(location, "location");
-    Preconditions.checkNotNull(effect, "firework effect");
-    Preconditions.checkArgument(power >= 0, "power must be positive");
+    assertNotNull(location, "location");
+    assertNotNull(effect, "firework effect");
+    assertTrue(power >= 0, "power must be positive");
 
     FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK);
     meta.setPower(power);
@@ -252,16 +253,22 @@ public class FireworkMatchModule implements MatchModule, Listener {
   }
 
   public static Location getOpenSpaceAbove(Location location) {
-    Preconditions.checkNotNull(location, "location");
+    assertNotNull(location, "location");
 
-    Location result = location.clone();
-    while (true) {
-      Block block = result.getBlock();
-      if (block == null || block.getType() == Material.AIR) break;
+    Block block = location.getBlock();
 
-      result.setY(result.getY() + 1);
-    }
+    int maxSearch = 25;
+    while (block != null && block.getType().isOccluding() && maxSearch-- > 0)
+      block = block.getRelative(BlockFace.UP);
+    if (maxSearch < 0 || block == null) return null;
 
-    return result;
+    maxSearch = 25;
+    while (block != null && block.getType() != Material.AIR && maxSearch-- > 0)
+      block = block.getRelative(BlockFace.UP);
+    if (maxSearch < 0 || block == null) return null;
+
+    // Returning original location ensure x & z are not affected.
+    location.setY(block.getY() + 0.5d);
+    return location;
   }
 }

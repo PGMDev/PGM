@@ -1,12 +1,12 @@
 package tc.oc.pgm.points;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.util.Vector;
 
 public class DirectedYawProvider implements AngleProvider {
   public DirectedYawProvider(Vector target) {
-    this.target = checkNotNull(target, "target");
+    this.target = assertNotNull(target, "target");
   }
 
   @Override

@@ -1,15 +1,13 @@
 package tc.oc.pgm.map.contrib;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import com.google.common.base.Objects;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -19,7 +17,7 @@ public class PseudonymContributor implements Contributor {
   private final @Nullable String contribution;
 
   public PseudonymContributor(String name, @Nullable String contribution) {
-    this.name = checkNotNull(name);
+    this.name = assertNotNull(name);
     this.contribution = contribution;
   }
 
@@ -47,22 +45,19 @@ public class PseudonymContributor implements Contributor {
   public boolean equals(Object obj) {
     if (!(obj instanceof PseudonymContributor)) return false;
     final PseudonymContributor o = (PseudonymContributor) obj;
-    return new EqualsBuilder()
-        .append(getName(), o.getName())
-        .append(getContribution(), o.getContribution())
-        .build();
+    return this.name.equals(o.name) && Objects.equal(this.contribution, o.contribution);
   }
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(getName()).append(getContribution()).build();
+    int hash = 7;
+    hash = 31 * hash + (int) this.name.hashCode();
+    hash = 31 * hash + (contribution == null ? 0 : contribution.hashCode());
+    return hash;
   }
 
   @Override
   public String toString() {
-    return new ToStringBuilder(this)
-        .append("name", getName())
-        .append("desc", getContribution())
-        .build();
+    return "PseudonymContributor{name=" + this.name + "}";
   }
 }

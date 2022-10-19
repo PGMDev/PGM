@@ -6,10 +6,11 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
@@ -18,6 +19,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
@@ -53,7 +55,7 @@ public class KitModule implements MapModule {
 
     @Override
     public Collection<Class<? extends MapModule>> getWeakDependencies() {
-      return ImmutableList.of(TeamModule.class);
+      return ImmutableList.of(ActionModule.class, TeamModule.class);
     }
 
     @Override
@@ -77,7 +79,8 @@ public class KitModule implements MapModule {
     private KitRule parseRule(MapFactory factory, Element el) throws InvalidXMLException {
       KitRule.Action action = TextParser.parseEnum(el.getName(), KitRule.Action.class);
       Kit kit = factory.getKits().parseKitProperty(el, "kit");
-      Filter filter = factory.getFilters().parseFilterProperty(el, "filter");
+      Filter filter =
+          factory.getFilters().parseProperty(el, "filter", DynamicFilterValidation.PLAYER);
 
       return new KitRule(action, kit, filter);
     }

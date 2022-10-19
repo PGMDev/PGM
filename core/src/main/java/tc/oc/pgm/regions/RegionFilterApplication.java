@@ -1,8 +1,8 @@
 package tc.oc.pgm.regions;
 
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;

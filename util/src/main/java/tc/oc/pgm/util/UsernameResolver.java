@@ -1,6 +1,6 @@
 package tc.oc.pgm.util;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
@@ -22,9 +22,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 import java.util.logging.Level;
-import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /**
@@ -69,7 +69,7 @@ public final class UsernameResolver {
    * @param callback A callback to run after the username is resolved.
    */
   public static void resolve(UUID id, @Nullable Consumer<String> callback) {
-    final Consumer<String> existing = QUEUE.get(checkNotNull(id));
+    final Consumer<String> existing = QUEUE.get(assertNotNull(id));
     if (callback == null) callback = i -> {};
 
     // If a callback already exists, chain the new one after the existing one
@@ -123,7 +123,7 @@ public final class UsernameResolver {
   private static String resolveSync(UUID id) throws IOException {
     final HttpURLConnection url =
         (HttpURLConnection)
-            new URL("https://api.ashcon.app/mojang/v2/user/" + checkNotNull(id).toString())
+            new URL("https://api.ashcon.app/mojang/v2/user/" + assertNotNull(id).toString())
                 .openConnection();
     url.setRequestMethod("GET");
     url.setRequestProperty("User-Agent", userAgent);

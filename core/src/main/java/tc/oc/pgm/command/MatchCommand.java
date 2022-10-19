@@ -1,5 +1,6 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
@@ -14,14 +15,14 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.party.Competitor;
@@ -182,24 +183,23 @@ public final class MatchCommand {
     TextComponent.Builder sb = text().append(space());
 
     sb.append(
-        text(
-            goal.renderSidebarStatusText(competitor, viewingParty),
-            TextFormatter.convert(goal.renderSidebarStatusColor(competitor, viewingParty))));
+        goal.renderSidebarStatusText(competitor, viewingParty)
+            .color(goal.renderSidebarStatusColor(competitor, viewingParty)));
 
     sb.append(space());
     if (goal instanceof ProximityGoal) {
       ProximityGoal<?> proxGoal = (ProximityGoal<?>) goal;
-      String proximityText = proxGoal.renderProximity(competitor, viewingParty);
-      if (proximityText != null && !proximityText.isEmpty()) {
-        ChatColor proximityColor = proxGoal.renderProximityColor(competitor, viewingParty);
-        sb.append(text(proximityText, TextFormatter.convert(proximityColor)));
+      Component proximity = proxGoal.renderProximity(competitor, viewingParty);
+      if (proximity != empty()) {
+        TextColor proximityColor = proxGoal.renderProximityColor(competitor, viewingParty);
+        sb.append(proximity.color(proximityColor));
         sb.append(space());
       }
     }
 
     sb.append(
         goal.renderSidebarLabelText(competitor, viewingParty)
-            .color(TextFormatter.convert(goal.renderSidebarLabelColor(competitor, viewingParty))));
+            .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
 
     return sb.build();
   }

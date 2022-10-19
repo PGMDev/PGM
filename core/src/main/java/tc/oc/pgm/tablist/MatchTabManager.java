@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,6 +12,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.map.Contributor;
@@ -33,6 +33,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.concurrent.RateLimiter;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.PlayerTabEntry;
 import tc.oc.pgm.util.tablist.TabEntry;
@@ -57,7 +58,8 @@ public class MatchTabManager extends TabManager implements Listener {
 
   private Future<?> pingUpdateTask;
   private Future<?> renderTask;
-  private long lastUpdate = 0, renderTime = 0, loadingUntil = 0;
+  private final RateLimiter rateLimit =
+      new RateLimiter(MIN_DELAY, MAX_DELAY, TIME_RATIO, TPS_RATIO);
 
   public MatchTabManager(Plugin plugin) {
     this(
@@ -144,22 +146,14 @@ public class MatchTabManager extends TabManager implements Listener {
     if (this.renderTask == null) {
       Runnable render =
           () -> {
-            long start = System.currentTimeMillis();
+            rateLimit.beforeTask();
             MatchTabManager.this.renderTask = null;
             MatchTabManager.this.render();
-            lastUpdate = System.currentTimeMillis();
-            renderTime = lastUpdate - start;
+            rateLimit.afterTask();
           };
 
-      long now = System.currentTimeMillis();
-
-      long nextUpdate =
-          (lastUpdate - now)
-              + (renderTime * TIME_RATIO)
-              + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * TPS_RATIO)
-              + (loadingUntil > now ? MAX_DELAY : 0);
-      nextUpdate = Math.min(Math.max(MIN_DELAY, nextUpdate), MAX_DELAY);
-      this.renderTask = PGM.get().getExecutor().schedule(render, nextUpdate, TimeUnit.MILLISECONDS);
+      this.renderTask =
+          PGM.get().getExecutor().schedule(render, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
     }
   }
 
@@ -238,12 +232,12 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMatchLoad(MatchLoadEvent event) {
-    loadingUntil = System.currentTimeMillis() + MATCH_LOAD_TIMEOUT;
+    rateLimit.setTimeout(System.currentTimeMillis() + MATCH_LOAD_TIMEOUT);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMatchUnload(MatchUnloadEvent event) {
-    loadingUntil = 0;
+    rateLimit.setTimeout(0);
     TeamMatchModule tmm = event.getMatch().getModule(TeamMatchModule.class);
     if (tmm != null) {
       for (Team team : tmm.getTeams()) {

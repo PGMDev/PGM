@@ -2,7 +2,7 @@ package tc.oc.pgm.filters;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.filter.query.Query;

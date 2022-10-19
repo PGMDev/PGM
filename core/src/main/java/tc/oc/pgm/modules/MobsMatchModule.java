@@ -1,9 +1,9 @@
 package tc.oc.pgm.modules;
 
-import javax.annotation.Nullable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filter.QueryResponse;
 import tc.oc.pgm.api.match.Match;

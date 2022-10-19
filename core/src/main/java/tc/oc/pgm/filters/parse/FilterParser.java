@@ -8,22 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import tc.oc.pgm.api.feature.FeatureDefinition;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.PlayerRelation;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.classes.ClassModule;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.matcher.CauseFilter;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.matcher.block.BlocksFilter;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.matcher.block.StructuralLoadFilter;
 import tc.oc.pgm.filters.matcher.block.VoidFilter;
@@ -37,11 +41,13 @@ import tc.oc.pgm.filters.matcher.match.MatchPhaseFilter;
 import tc.oc.pgm.filters.matcher.match.MonostableFilter;
 import tc.oc.pgm.filters.matcher.match.PlayerCountFilter;
 import tc.oc.pgm.filters.matcher.match.RandomFilter;
+import tc.oc.pgm.filters.matcher.match.VariableFilter;
 import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
 import tc.oc.pgm.filters.matcher.party.ScoreFilter;
 import tc.oc.pgm.filters.matcher.party.TeamFilter;
+import tc.oc.pgm.filters.matcher.party.TeamVariableFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingItemFilter;
@@ -54,6 +60,7 @@ import tc.oc.pgm.filters.matcher.player.LivesFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerClassFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
+import tc.oc.pgm.filters.matcher.player.PlayerStateFilter;
 import tc.oc.pgm.filters.matcher.player.WearingItemFilter;
 import tc.oc.pgm.filters.modifier.LocationQueryModifier;
 import tc.oc.pgm.filters.modifier.PlayerBlockQueryModifier;
@@ -71,28 +78,35 @@ import tc.oc.pgm.flag.state.Dropped;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
+import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.XMLParser;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.VariableDefinition;
 
-public abstract class FilterParser {
+public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
   protected final Map<String, Method> methodParsers;
   protected final MapFactory factory;
-  protected final TeamModule teamModule;
+  protected final FeatureDefinitionContext features;
 
   public FilterParser(MapFactory factory) {
     this.factory = factory;
-    this.teamModule = factory.getModule(TeamModule.class);
+    this.features = factory.getFeatures();
 
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+  }
+
+  @Override
+  public String type() {
+    return "filter";
   }
 
   /**
@@ -109,36 +123,25 @@ public abstract class FilterParser {
    */
   public abstract Filter parse(Element el) throws InvalidXMLException;
 
+  @Override
+  public Filter parsePropertyElement(Element property) throws InvalidXMLException {
+    return parseChild(property);
+  }
+
   /**
    * Return the filter referenced by the given name/id, and assume it appears in the given {@link
    * Node} for error reporting purposes.
    */
-  public abstract Filter parseReference(Node node, String value) throws InvalidXMLException;
-
-  public Filter parseReference(Node node) throws InvalidXMLException {
-    return parseReference(node, node.getValue());
-  }
+  public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
 
   public boolean isFilter(Element el) {
     return methodParsers.containsKey(el.getName()) || factory.getRegions().isRegion(el);
   }
 
-  public List<Element> getFilterChildren(Element parent) {
-    List<Element> elements = new ArrayList<Element>();
+  public void parseFilterChildren(Element parent) throws InvalidXMLException {
     for (Element el : parent.getChildren()) {
-      if (this.isFilter(el)) {
-        elements.add(el);
-      }
+      if (isFilter(el)) this.parse(el);
     }
-    return elements;
-  }
-
-  public List<Filter> parseFilterChildren(Element parent) throws InvalidXMLException {
-    List<Filter> filters = new ArrayList<>();
-    for (Element el : getFilterChildren(parent)) {
-      filters.add(this.parse(el));
-    }
-    return filters;
   }
 
   protected Method getParserFor(Element el) {
@@ -160,16 +163,7 @@ public abstract class FilterParser {
     }
   }
 
-  public Filter parseChild(Element parent) throws InvalidXMLException {
-    if (parent.getChildren().isEmpty()) {
-      throw new InvalidXMLException("Expected a child filter", parent);
-    } else if (parent.getChildren().size() > 1) {
-      throw new InvalidXMLException("Expected only one child filter, not multiple", parent);
-    }
-    return this.parse(parent.getChildren().get(0));
-  }
-
-  public List<Filter> parseChildren(Element parent) throws InvalidXMLException {
+  protected List<Filter> parseChildren(Element parent) throws InvalidXMLException {
     List<Filter> filters = Lists.newArrayList();
     for (Element el : parent.getChildren()) {
       filters.add(this.parse(el));
@@ -179,29 +173,16 @@ public abstract class FilterParser {
 
   /** These "property" methods are the ones to use for parsing filters as part of other modules. */
   public @Nullable Filter parseFilterProperty(Element el, String name) throws InvalidXMLException {
-    return this.parseFilterProperty(el, name, null);
+    return this.parseProperty(el, name, null, null);
   }
 
   public Filter parseRequiredFilterProperty(Element el, String name) throws InvalidXMLException {
-    Filter filter = this.parseFilterProperty(el, name);
-    if (filter == null) throw new InvalidXMLException("Missing required filter '" + name + "'", el);
-    return filter;
+    return parseRequiredProperty(el, name);
   }
 
   public Filter parseFilterProperty(Element el, String name, @Nullable Filter def)
       throws InvalidXMLException {
-    Attribute attr = el.getAttribute(name);
-    Element child = XMLUtils.getUniqueChild(el, name);
-    if (attr != null) {
-      if (child != null) {
-        throw new InvalidXMLException(
-            "Filter reference conflicts with inline filter '" + name + "'", el);
-      }
-      return this.parseReference(new Node(attr));
-    } else if (child != null) {
-      return this.parseChild(child);
-    }
-    return def;
+    return parseProperty(el, name, def);
   }
 
   /**
@@ -403,21 +384,21 @@ public abstract class FilterParser {
     return GroundedFilter.INSTANCE;
   }
 
-  private <T extends FeatureDefinition> XMLFeatureReference<T> reference(Node node, Class<T> cls) {
-    return this.factory.getFeatures().createReference(node, cls);
+  @MethodParser("alive")
+  public PlayerStateFilter parseAlive(Element el) throws InvalidXMLException {
+    return PlayerStateFilter.ALIVE;
   }
 
-  private <T extends FeatureDefinition> Optional<XMLFeatureReference<T>> optionalReference(
-      Node node, Class<T> cls) {
-    return node == null
-        ? Optional.empty()
-        : Optional.of(this.factory.getFeatures().createReference(node, cls));
+  @MethodParser("dead")
+  public PlayerStateFilter parseDead(Element el) throws InvalidXMLException {
+    return PlayerStateFilter.DEAD;
   }
 
   private Filter parseExplicitTeam(Element el, CompetitorFilter filter) throws InvalidXMLException {
     final boolean any = XMLUtils.parseBoolean(el.getAttribute("any"), false);
     final Optional<XMLFeatureReference<TeamFactory>> team =
-        optionalReference(Node.fromAttr(el, "team"), TeamFactory.class);
+        Optional.ofNullable(Node.fromAttr(el, "team"))
+            .map(n -> features.createReference(n, TeamFactory.class));
 
     if (any && team.isPresent())
       throw new InvalidXMLException("Cannot combine attributes 'team' and 'any'", el);
@@ -426,7 +407,7 @@ public abstract class FilterParser {
   }
 
   private GoalFilter goalFilter(Element el) throws InvalidXMLException {
-    return new GoalFilter(reference(new Node(el), GoalDefinition.class));
+    return new GoalFilter(features.createReference(new Node(el), GoalDefinition.class));
   }
 
   @MethodParser("objective")
@@ -441,20 +422,15 @@ public abstract class FilterParser {
 
   @MethodParser("captured")
   public Filter parseCaptured(Element el) throws InvalidXMLException {
-    final GoalFilter goal = goalFilter(el);
-    Optional<XMLFeatureReference<TeamFactory>> team =
-        optionalReference(Node.fromAttr(el, "team"), TeamFactory.class);
-    return team.isPresent() ? new TeamFilterAdapter(team, goal) : goal;
+    return parseExplicitTeam(el, goalFilter(el));
   }
 
   protected FlagStateFilter parseFlagState(Element el, Class<? extends State> state)
       throws InvalidXMLException {
     Node postAttr = Node.fromAttr(el, "post");
     return new FlagStateFilter(
-        this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class),
-        postAttr == null
-            ? null
-            : this.factory.getFeatures().createReference(postAttr, PostDefinition.class),
+        features.createReference(new Node(el), FlagDefinition.class),
+        postAttr == null ? null : features.createReference(postAttr, PostDefinition.class),
         state);
   }
 
@@ -480,8 +456,7 @@ public abstract class FilterParser {
 
   @MethodParser("carrying-flag")
   public CarryingFlagFilter parseCarryingFlag(Element el) throws InvalidXMLException {
-    return new CarryingFlagFilter(
-        this.factory.getFeatures().createReference(new Node(el), FlagDefinition.class));
+    return new CarryingFlagFilter(features.createReference(new Node(el), FlagDefinition.class));
   }
 
   @MethodParser("cause")
@@ -497,17 +472,17 @@ public abstract class FilterParser {
 
   @MethodParser("carrying")
   public CarryingItemFilter parseHasItem(Element el) throws InvalidXMLException {
-    return new CarryingItemFilter(factory.getKits().parseRequiredItem(el));
+    return new CarryingItemFilter(factory.getKits().parseItemMatcher(el));
   }
 
   @MethodParser("holding")
   public HoldingItemFilter parseHolding(Element el) throws InvalidXMLException {
-    return new HoldingItemFilter(factory.getKits().parseRequiredItem(el));
+    return new HoldingItemFilter(factory.getKits().parseItemMatcher(el));
   }
 
   @MethodParser("wearing")
   public WearingItemFilter parseWearingItem(Element el) throws InvalidXMLException {
-    return new WearingItemFilter(factory.getKits().parseRequiredItem(el));
+    return new WearingItemFilter(factory.getKits().parseItemMatcher(el));
   }
 
   @MethodParser("effect")
@@ -542,12 +517,20 @@ public abstract class FilterParser {
 
   @MethodParser("countdown")
   public Filter parseCountdownFilter(Element el) throws InvalidXMLException {
-    final Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"), null);
-    if (!duration.isNegative() && !duration.isZero()) {
-      return new MonostableFilter(parseChild(el), duration);
-    } else {
-      return StaticFilter.DENY;
-    }
+    Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"));
+    if (duration.isNegative() || duration.isZero()) return StaticFilter.DENY;
+
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), DynamicFilterValidation.ANY);
+    return new MonostableFilter(child, duration);
+  }
+
+  @MethodParser("after")
+  public Filter parseAfterFilter(Element el) throws InvalidXMLException {
+    Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"));
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), DynamicFilterValidation.ANY);
+
+    if (duration.isNegative() || duration.isZero()) return child;
+    return MonostableFilter.after(child, duration);
   }
 
   @MethodParser("rank")
@@ -644,14 +627,33 @@ public abstract class FilterParser {
   @MethodParser("players")
   public PlayerCountFilter parsePlayerCountFilter(Element el) throws InvalidXMLException {
     Filter child =
-        el.getChildren().isEmpty()
-            ? parseFilterProperty(el, "filter", StaticFilter.ALLOW)
-            : parseChild(el);
+        parseProperty(
+            Node.fromAttrOrSelf(el, "filter"), StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
 
     return new PlayerCountFilter(
         child,
         XMLUtils.parseNumericRange(el, Integer.class, Range.atLeast(1)),
         XMLUtils.parseBoolean(el.getAttribute("participants"), true),
         XMLUtils.parseBoolean(el.getAttribute("observers"), false));
+  }
+
+  @MethodParser("variable")
+  public Filter parseVariableFilter(Element el) throws InvalidXMLException {
+    VariableDefinition<?> varDef =
+        features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
+    Range<Double> range = XMLUtils.parseNumericRange(new Node(el), Double.class);
+
+    if (varDef.getScope() == Party.class)
+      return parseExplicitTeam(el, new TeamVariableFilter(varDef, range));
+    else return new VariableFilter(varDef, range);
+  }
+
+  @MethodParser("blocks")
+  public Filter parseBlocksFilter(Element el) throws InvalidXMLException {
+    Region region =
+        factory.getRegions().parseRequiredProperty(el, "region", BlockBoundedValidation.INSTANCE);
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), MaterialFilter.NOT_AIR);
+
+    return new BlocksFilter(region, child);
   }
 }

@@ -2,8 +2,9 @@ package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class Complement extends AbstractRegion {
+public class Complement implements RegionDefinition {
   private final Region original;
   private final Region subtracted;
 

@@ -1,22 +1,24 @@
 package tc.oc.pgm.core;
 
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.format.Style.style;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -65,7 +67,7 @@ public class Core extends TouchableGoal<CoreFactory>
             match.getWorld(),
             match.getMap().getProto(),
             new SingleMaterialMatcher(this.material));
-    if (this.casingRegion.getBlocks().isEmpty()) {
+    if (this.casingRegion.getBlockVolume() == 0) {
       match
           .getLogger()
           .warning("No casing world (" + this.material + ") found in core " + this.getName());
@@ -78,7 +80,7 @@ public class Core extends TouchableGoal<CoreFactory>
             match.getMap().getProto(),
             new SingleMaterialMatcher(Material.LAVA, (byte) 0),
             new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
-    if (this.lavaRegion.getBlocks().isEmpty()) {
+    if (this.lavaRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }
 
@@ -94,7 +96,7 @@ public class Core extends TouchableGoal<CoreFactory>
 
   // Remove @Nullable
   @Override
-  public @Nonnull Team getOwner() {
+  public @NotNull Team getOwner() {
     Team owner = super.getOwner();
     if (owner == null) {
       throw new IllegalStateException("core " + getId() + " has no owner");
@@ -214,16 +216,16 @@ public class Core extends TouchableGoal<CoreFactory>
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.getShowProgress() || viewer.isObserving()) {
-      String text = this.renderCompletion();
-      if (PGM.get().getConfiguration().showProximity()) {
-        String precise = this.renderPreciseCompletion();
-        if (precise != null) {
-          text += " " + ChatColor.GRAY + precise;
-        }
+      if (!PGM.get().getConfiguration().showProximity()) {
+        return text(this.renderCompletion());
       }
-      return text;
+      return text()
+          .content(this.renderCompletion())
+          .append(space())
+          .append(text(this.renderPreciseCompletion(), style(NamedTextColor.GRAY)))
+          .build();
     } else {
       return super.renderSidebarStatusText(competitor, viewer);
     }
@@ -232,7 +234,7 @@ public class Core extends TouchableGoal<CoreFactory>
   @Override
   @SuppressWarnings("deprecation")
   public void replaceBlocks(MaterialData newMaterial) {
-    for (Block block : this.getCasingRegion().getBlocks()) {
+    for (Block block : this.getCasingRegion().getBlocks(match.getWorld())) {
       if (this.isObjectiveMaterial(block)) {
         block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
       }

@@ -1,11 +1,12 @@
 package tc.oc.pgm.wool;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collections;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -13,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -27,13 +29,14 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
     implements Goal<MonumentWoolFactory> {
 
-  public static final String SYMBOL_WOOL_INCOMPLETE = "\u2b1c"; // ⬜
-  public static final String SYMBOL_WOOL_TOUCHED = "\u2592"; // ▒
-  public static final String SYMBOL_WOOL_COMPLETE = "\u2b1b"; // ⬛
+  public static final Component SYMBOL_WOOL_INCOMPLETE = text("\u2b1c"); // ⬜
+  public static final Component SYMBOL_WOOL_TOUCHED = text("\u2592"); // ▒
+  public static final Component SYMBOL_WOOL_COMPLETE = text("\u2b1b"); // ⬛
 
   protected boolean placed = false;
   private final Location woolLocation;
@@ -165,16 +168,16 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   }
 
   @Override
-  public ChatColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
+  public TextColor renderSidebarStatusColor(@Nullable Competitor competitor, Party viewer) {
     if (getDyeColor() == DyeColor.BLUE) {
-      return ChatColor.DARK_BLUE; // DARK_BLUE looks ok on sidebar, but not in chat
+      return NamedTextColor.DARK_BLUE; // DARK_BLUE looks ok on sidebar, but not in chat
     } else {
-      return BukkitUtils.dyeColorToChatColor(this.getDyeColor());
+      return TextFormatter.convert(BukkitUtils.dyeColorToChatColor(this.getDyeColor()));
     }
   }
 
   @Override
-  public String renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
+  public Component renderSidebarStatusText(@Nullable Competitor competitor, Party viewer) {
     if (this.isCompleted()) {
       return SYMBOL_WOOL_COMPLETE;
     } else if (shouldShowTouched(competitor, viewer)) {

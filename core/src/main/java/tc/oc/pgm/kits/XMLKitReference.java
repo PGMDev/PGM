@@ -1,8 +1,8 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
-import javax.annotation.Nullable;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
@@ -22,6 +22,11 @@ public class XMLKitReference extends XMLFeatureReference<KitDefinition> implemen
   @Override
   public void apply(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
     get().apply(player, force, displacedItems);
+  }
+
+  @Override
+  public void applyLeftover(MatchPlayer player, List<ItemStack> leftover) {
+    get().applyLeftover(player, leftover);
   }
 
   @Override

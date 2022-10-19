@@ -1,6 +1,7 @@
 package tc.oc.pgm.teams.events;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.event.PartyEvent;
 import tc.oc.pgm.teams.Team;
@@ -11,8 +12,7 @@ public class TeamResizeEvent extends PartyEvent {
 
   public TeamResizeEvent(Team team) {
     super(team);
-    Preconditions.checkNotNull(team, "team");
-    this.team = team;
+    this.team = assertNotNull(team, "team");
   }
 
   public Team getTeam() {

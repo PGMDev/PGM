@@ -6,8 +6,8 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Text;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -25,7 +25,7 @@ public final class ClassCommand {
   @Command(
       aliases = {"class", "selectclass", "c", "cl"},
       desc = "Select your class")
-  public void classSelect(Match match, MatchPlayer player, @Nullable @Text String query) {
+  public void classSelect(Match match, MatchPlayer player, @Maybe @Text String query) {
     final ClassMatchModule classes = getClasses(match);
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 

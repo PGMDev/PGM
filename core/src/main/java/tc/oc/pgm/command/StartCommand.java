@@ -4,8 +4,8 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import java.time.Duration;
-import javax.annotation.Nullable;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.start.StartCountdown;
@@ -19,7 +19,7 @@ public final class StartCommand {
       aliases = {"start", "begin"},
       desc = "Start the match",
       perms = Permissions.START)
-  public void start(Audience audience, Match match, @Nullable Duration duration) {
+  public void start(Audience audience, Match match, @Maybe Duration duration) {
     if (match.isRunning()) {
       throw exception("admin.start.matchRunning");
     } else if (match.isFinished()) {

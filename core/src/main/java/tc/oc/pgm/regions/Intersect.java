@@ -2,8 +2,9 @@ package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionDefinition;
 
-public class Intersect extends AbstractRegion {
+public class Intersect implements RegionDefinition {
   private final Region[] regions;
 
   public Intersect(Region... regions) {

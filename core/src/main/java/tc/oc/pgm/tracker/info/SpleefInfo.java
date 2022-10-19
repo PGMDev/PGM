@@ -1,8 +1,8 @@
 package tc.oc.pgm.tracker.info;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.api.tracker.info.CauseInfo;
@@ -14,8 +14,8 @@ public class SpleefInfo implements DamageInfo, CauseInfo {
   private final Tick time;
 
   public SpleefInfo(DamageInfo breaker, Tick time) {
-    this.breaker = checkNotNull(breaker);
-    this.time = checkNotNull(time);
+    this.breaker = assertNotNull(breaker);
+    this.time = assertNotNull(time);
   }
 
   @Override

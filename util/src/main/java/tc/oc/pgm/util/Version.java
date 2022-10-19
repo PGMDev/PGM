@@ -1,6 +1,6 @@
 package tc.oc.pgm.util;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 /**
  * A semantic version.
@@ -23,9 +23,9 @@ public final class Version implements Comparable<Version> {
    * @throws IllegalArgumentException If any of the numbers are negative.
    */
   public Version(int major, int minor, int patch) {
-    checkArgument(major >= 0, "version major cannot be negative");
-    checkArgument(minor >= 0, "version minor cannot be negative");
-    checkArgument(patch >= 0, "version patch cannot be negative");
+    assertTrue(major >= 0, "version major cannot be negative");
+    assertTrue(minor >= 0, "version minor cannot be negative");
+    assertTrue(patch >= 0, "version patch cannot be negative");
 
     this.major = major;
     this.minor = minor;

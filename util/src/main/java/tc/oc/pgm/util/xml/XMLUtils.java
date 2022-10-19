@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -21,6 +21,9 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.attribute.AttributeModifier;
@@ -384,6 +387,12 @@ public final class XMLUtils {
   private static final Pattern RANGE_RE =
       Pattern.compile("\\s*(\\(|\\[)\\s*([^,]+)\\s*,\\s*([^\\)\\]]+)\\s*(\\)|\\])\\s*");
 
+  public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
+      @Nullable Node node, Class<T> type, @Nullable Range<T> fallback) throws InvalidXMLException {
+    if (node == null) return fallback;
+    return parseNumericRange(node, type);
+  }
+
   /**
    * Parse a range in the standard mathematical format e.g.
    *
@@ -394,7 +403,7 @@ public final class XMLUtils {
    * <p>Also supports singleton ranges derived from providing a number with no delimiter
    */
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      Node node, Class<T> type) throws InvalidXMLException {
+      @NotNull Node node, Class<T> type) throws InvalidXMLException {
     Matcher matcher = RANGE_RE.matcher(node.getValue());
     if (!matcher.matches()) {
       T value = parseNumber(node, node.getValue(), type, true);
@@ -512,7 +521,8 @@ public final class XMLUtils {
     }
   }
 
-  public static @Nullable Duration parseDuration(Node node) throws InvalidXMLException {
+  @Contract("null -> null; !null -> !null")
+  public static Duration parseDuration(Node node) throws InvalidXMLException {
     return parseDuration(node, null);
   }
 
@@ -1110,5 +1120,14 @@ public final class XMLUtils {
     } catch (TextException e) {
       throw new InvalidXMLException(node, e);
     }
+  }
+
+  public static Title.Times parseTitleTimes(Element el, Title.Times def)
+      throws InvalidXMLException {
+    Duration fadeIn = XMLUtils.parseDuration(Node.fromAttr(el, "fade-in"), def.fadeIn());
+    Duration stay = XMLUtils.parseDuration(Node.fromAttr(el, "stay"), def.stay());
+    Duration fadeOut = XMLUtils.parseDuration(Node.fromAttr(el, "fade-out"), def.fadeOut());
+
+    return Title.Times.times(fadeIn, stay, fadeOut);
   }
 }

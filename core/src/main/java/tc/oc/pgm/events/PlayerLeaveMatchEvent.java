@@ -1,6 +1,6 @@
 package tc.oc.pgm.events;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -10,6 +10,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
  */
 public class PlayerLeaveMatchEvent extends PlayerLeavePartyEvent {
   public PlayerLeaveMatchEvent(MatchPlayer player, Party party) {
-    super(player, checkNotNull(party));
+    super(player, assertNotNull(party));
   }
 }

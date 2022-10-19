@@ -1,6 +1,6 @@
 package tc.oc.pgm.points;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class PointProviderAttributes {
   private final @Nullable AngleProvider yawProvider;

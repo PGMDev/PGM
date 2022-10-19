@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters.matcher.player;
 
-import com.google.common.base.Preconditions;
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -10,7 +11,7 @@ public class PlayerClassFilter extends TypedFilter.Impl<PlayerQuery> {
   protected final PlayerClass playerClass;
 
   public PlayerClassFilter(PlayerClass playerClass) {
-    this.playerClass = Preconditions.checkNotNull(playerClass, "player class");
+    this.playerClass = assertNotNull(playerClass, "player class");
   }
 
   @Override

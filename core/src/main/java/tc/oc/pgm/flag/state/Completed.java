@@ -1,7 +1,8 @@
 package tc.oc.pgm.flag.state;
 
 import java.util.Collections;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -28,12 +29,12 @@ public class Completed extends Returned {
   }
 
   @Override
-  public ChatColor getStatusColor(Party viewer) {
+  public TextColor getStatusColor(Party viewer) {
     return SimpleGoal.COLOR_COMPLETE;
   }
 
   @Override
-  public String getStatusSymbol(Party viewer) {
+  public Component getStatusSymbol(Party viewer) {
     return SimpleGoal.SYMBOL_COMPLETE;
   }
 }

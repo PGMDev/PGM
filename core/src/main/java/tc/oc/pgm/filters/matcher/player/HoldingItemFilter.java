@@ -9,10 +9,11 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 
 public class HoldingItemFilter extends ParticipantItemFilter {
-  public HoldingItemFilter(ItemStack base) {
-    super(base);
+  public HoldingItemFilter(ItemMatcher matcher) {
+    super(matcher);
   }
 
   @Override
