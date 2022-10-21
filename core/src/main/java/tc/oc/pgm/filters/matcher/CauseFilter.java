@@ -71,7 +71,9 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
   @Override
   public boolean matches(MatchQuery query) {
     Event event = query.getEvent();
-    if (event instanceof GeneralizedEvent) {
+    // Prevent PlayerTrampleBlockEvent from casting, which will turn into PlayerCoarseMoveEvent
+    // which doesn't work for trample
+    if (event instanceof GeneralizedEvent && !(event instanceof PlayerTrampleBlockEvent)) {
       event = ((GeneralizedEvent) event).getCause();
     }
 
