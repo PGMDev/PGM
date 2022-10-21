@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.util.LiquidMetal;
 
 public final class PartyParser extends StringLikeParser<CommandSender, Party> {
 
@@ -39,6 +40,7 @@ public final class PartyParser extends StringLikeParser<CommandSender, Party> {
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
     return Stream.concat(Stream.of("obs"), TeamParser.getTeams(context.getSender()))
+        .filter(str -> LiquidMetal.match(str, input))
         .collect(Collectors.toList());
   }
 }

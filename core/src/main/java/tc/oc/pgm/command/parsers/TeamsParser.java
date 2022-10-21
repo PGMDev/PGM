@@ -20,6 +20,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.LiquidMetal;
 
 public final class TeamsParser extends StringLikeParser<CommandSender, Collection<Team>> {
 
@@ -46,6 +47,7 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
     return Stream.concat(Stream.of("*"), TeamParser.getTeams(context.getSender()))
+        .filter(str -> LiquidMetal.match(str, input))
         .collect(Collectors.toList());
   }
 }

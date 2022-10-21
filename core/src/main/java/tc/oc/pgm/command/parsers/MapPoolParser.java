@@ -17,7 +17,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
-import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.LiquidMetal;
 
 public final class MapPoolParser implements ArgumentParser<CommandSender, MapPool> {
 
@@ -42,12 +42,10 @@ public final class MapPoolParser implements ArgumentParser<CommandSender, MapPoo
     MapOrder mapOrder = PGM.get().getMapOrder();
     if (!(mapOrder instanceof MapPoolManager)) return Collections.emptyList();
 
-    String normalized = StringUtils.normalize(input);
-
     return ((MapPoolManager) mapOrder)
         .getMapPools().stream()
             .map(MapPool::getName)
-            .filter(n -> StringUtils.normalize(n).startsWith(normalized))
+            .filter(name -> LiquidMetal.match(name, input))
             .collect(Collectors.toList());
   }
 }

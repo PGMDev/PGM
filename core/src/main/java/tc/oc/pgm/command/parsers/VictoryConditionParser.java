@@ -25,6 +25,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
+import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.text.TextException;
 
 public final class VictoryConditionParser
@@ -73,6 +74,7 @@ public final class VictoryConditionParser
             tmm.getParticipatingTeams().stream()
                 .map(Team::getNameLegacy)
                 .map(name -> name.replace(" ", "")))
+        .filter(str -> LiquidMetal.match(str, input))
         .collect(Collectors.toList());
   }
 }
