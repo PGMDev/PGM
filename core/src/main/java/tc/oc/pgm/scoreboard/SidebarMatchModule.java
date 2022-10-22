@@ -313,11 +313,10 @@ public class SidebarMatchModule implements MatchModule, Listener {
     }
 
     // Display "Blitz: Rage" rather than "Blitz and Rage"
-    if (map.getTags().contains(new MapTag("blitz", "Blitz", true, true))
-        && map.getTags().contains(new MapTag("rage", "Rage", true, true))) {
+    if (games.size() == 2 && Stream.of("blitz", "rage").allMatch(
+            id-> map.getTags().stream().anyMatch(mt -> mt.getId().equals(id))) {
+      games.clear();
       games.add(translatable("gamemode.br.name").color(NamedTextColor.AQUA));
-      games.remove(translatable("gamemode.blitz.name").color(NamedTextColor.AQUA));
-      games.remove(translatable("gamemode.rage.name").color(NamedTextColor.AQUA));
     }
 
     return TextFormatter.list(games, NamedTextColor.AQUA);
