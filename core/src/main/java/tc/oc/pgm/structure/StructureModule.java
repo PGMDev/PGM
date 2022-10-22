@@ -32,9 +32,9 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class StructureModule implements MapModule<StructureMatchModule> {
 
-  private final List<DynamicDefinition> dynamics;
+  private final List<DynamicStructureDefinition> dynamics;
 
-  public StructureModule(List<DynamicDefinition> dynamics) {
+  public StructureModule(List<DynamicStructureDefinition> dynamics) {
     this.dynamics = dynamics;
   }
 
@@ -56,14 +56,14 @@ public class StructureModule implements MapModule<StructureMatchModule> {
     @Override
     public StructureModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      if (factory.getProto().isOlderThan(MapProtos.FILTER_FEATURES)) return null; // TODO
+      if (factory.getProto().isOlderThan(MapProtos.FILTER_FEATURES)) return null;
 
       final Map<String, StructureDefinition> structures = new HashMap<>();
       for (Element elStruct :
           XMLUtils.flattenElements(doc.getRootElement(), "structures", "structure")) {
         final StructureDefinition definition =
             new StructureDefinition(
-                elStruct.getAttribute("id").getValue(), // TODO Default?
+                XMLUtils.getRequiredAttribute(elStruct, "id").getValue(),
                 XMLUtils.parseVector(elStruct.getAttribute("origin"), (Vector) null),
                 factory
                     .getRegions()
@@ -75,7 +75,7 @@ public class StructureModule implements MapModule<StructureMatchModule> {
         factory.getFeatures().addFeature(elStruct, definition);
       }
 
-      final List<DynamicDefinition> dynamics = new LinkedList<>();
+      final List<DynamicStructureDefinition> dynamics = new LinkedList<>();
       for (Element elDynamic :
           XMLUtils.flattenElements(doc.getRootElement(), "structures", "dynamic")) {
         final @Nullable Attribute idAttr = elDynamic.getAttribute("id");
@@ -103,8 +103,8 @@ public class StructureModule implements MapModule<StructureMatchModule> {
         final Filter filter =
             filterParser.parseFilterProperty(elDynamic, "filter", StaticFilter.ALLOW);
 
-        final DynamicDefinition definition =
-            new DynamicDefinition(id, structure, trigger, filter, position, offset);
+        final DynamicStructureDefinition definition =
+            new DynamicStructureDefinition(id, structure, trigger, filter, position, offset);
         dynamics.add(definition);
         factory.getFeatures().addFeature(elDynamic, definition);
       }

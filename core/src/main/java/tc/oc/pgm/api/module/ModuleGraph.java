@@ -89,9 +89,8 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
         throw new ModuleLoadException(
             key, "Required but not registered in " + getClass().getSimpleName());
       }
-      factory =
-          dependencyOnlyFactories.get(
-              key); // Only check this if a module is required as a dependency for some other module
+      // Only check this if a module is required as a dependency for some other module
+      factory = dependencyOnlyFactories.get(key);
       if (factory == null)
         throw new ModuleLoadException(
             key,

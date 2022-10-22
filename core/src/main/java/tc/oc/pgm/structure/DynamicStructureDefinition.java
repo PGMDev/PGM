@@ -9,7 +9,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 @FeatureInfo(name = "dynamic")
-public class DynamicDefinition extends SelfIdentifyingFeatureDefinition {
+public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition {
 
   private final StructureDefinition structure;
   private final Filter trigger;
@@ -17,7 +17,7 @@ public class DynamicDefinition extends SelfIdentifyingFeatureDefinition {
   private final @Nullable Vector position;
   private final @Nullable Vector offset;
 
-  DynamicDefinition(
+  DynamicStructureDefinition(
       String id,
       StructureDefinition structure,
       Filter trigger,

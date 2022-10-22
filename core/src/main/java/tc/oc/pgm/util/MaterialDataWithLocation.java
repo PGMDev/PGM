@@ -1,18 +1,17 @@
 package tc.oc.pgm.util;
 
 import org.bukkit.material.MaterialData;
+import org.bukkit.util.BlockVector;
 
 /** Simple util class to store {@link MaterialData} for a specific location. */
 public class MaterialDataWithLocation {
-  public final MaterialData data;
-  public final int x;
-  public final int y;
-  public final int z;
+  public MaterialData data;
+  public BlockVector vector;
 
-  public MaterialDataWithLocation(MaterialData data, int x, int y, int z) {
+  public MaterialDataWithLocation() {}
+
+  public void set(MaterialData data, BlockVector vector) {
     this.data = data;
-    this.x = x;
-    this.y = y;
-    this.z = z;
+    this.vector = vector;
   }
 }

@@ -61,8 +61,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   private FeatureDefinitionContext features;
 
   public MapFactoryImpl(Logger logger, MapSource source, MapIncludeProcessor includes) {
-    super(
-        Modules.MAP, Modules.MAP_DEPENDENCY_ONLY); // Do not copy to avoid N copies of the factories
+    super(Modules.MAP, Modules.MAP_DEPENDENCY_ONLY); // Don't copy, avoid N factory copies
     this.logger = ClassLogger.get(assertNotNull(logger), getClass(), assertNotNull(source).getId());
     this.source = source;
     this.includes = includes;

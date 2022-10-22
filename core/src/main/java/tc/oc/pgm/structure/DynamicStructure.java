@@ -3,24 +3,24 @@ package tc.oc.pgm.structure;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.util.BudgetWorldEdit;
+import tc.oc.pgm.snapshot.BudgetWorldEdit;
 
-public class Dynamic implements Feature<DynamicDefinition> {
+public class DynamicStructure implements Feature<DynamicStructureDefinition> {
 
   private final Match match;
-  final StructureDefinition structureDefinition;
-  final Vector offset;
-  private final DynamicDefinition dynamicDefinition;
+  private final StructureDefinition structureDefinition;
+  private final Vector offset;
+  private final DynamicStructureDefinition dynamicStructureDefinition;
 
   // Since the passive filter can skip placing the structure,
   // we need to keep track of whether its placed or not if we
   // want to avoid unnecessary clears.
-  boolean placed;
+  private boolean placed;
 
-  Dynamic(DynamicDefinition dynamicDefinition, Match match) {
+  DynamicStructure(DynamicStructureDefinition dynamicStructureDefinition, Match match) {
     this.match = match;
-    this.dynamicDefinition = dynamicDefinition;
-    this.structureDefinition = this.dynamicDefinition.getStructureDefinition();
+    this.dynamicStructureDefinition = dynamicStructureDefinition;
+    this.structureDefinition = this.dynamicStructureDefinition.getStructureDefinition();
     this.offset = this.findOffset();
 
     BudgetWorldEdit.saveBlocks(
@@ -33,8 +33,8 @@ public class Dynamic implements Feature<DynamicDefinition> {
   }
 
   private Vector findOffset() {
-    Vector position = this.dynamicDefinition.getPosition();
-    Vector offset = this.dynamicDefinition.getOffset();
+    Vector position = this.dynamicStructureDefinition.getPosition();
+    Vector offset = this.dynamicStructureDefinition.getOffset();
     if (position != null) {
       return position.subtract(this.structureDefinition.getOrigin());
     } else return offset != null ? offset : new Vector();
@@ -42,12 +42,12 @@ public class Dynamic implements Feature<DynamicDefinition> {
 
   @Override
   public String getId() {
-    return this.dynamicDefinition.getId();
+    return this.dynamicStructureDefinition.getId();
   }
 
   @Override
-  public DynamicDefinition getDefinition() {
-    return this.dynamicDefinition;
+  public DynamicStructureDefinition getDefinition() {
+    return this.dynamicStructureDefinition;
   }
 
   /** Place the structure in the world */

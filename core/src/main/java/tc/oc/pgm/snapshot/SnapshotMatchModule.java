@@ -1,8 +1,7 @@
 package tc.oc.pgm.snapshot;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Predicate;
 import org.bukkit.Chunk;
@@ -79,30 +78,9 @@ public class SnapshotMatchModule implements MatchModule, Listener {
    * @param region the region to get block states from
    * @param materialFilter filters which blocks that will be included in the returned list
    */
-  public List<MaterialDataWithLocation> getOriginalMaterialData(
+  public Iterator<MaterialDataWithLocation> getOriginalMaterialData(
       Region region, Predicate<Material> materialFilter) {
-    List<MaterialDataWithLocation> materialData = new LinkedList<>();
-    ChunkVector chunkVector = null;
-    ChunkSnapshot snapshot = null;
-    for (BlockVector blockVector : region.getBlockVectors()) {
-      int x = blockVector.getBlockX();
-      int y = blockVector.getBlockY();
-      int z = blockVector.getBlockZ();
-      // If this block is in the same chunk as the previous one, keep using the same snapshot
-      // without
-      // fetching a new one
-      if (chunkVector == null
-          || z >> 4 != chunkVector.getChunkZ()
-          || x >> 4 != chunkVector.getChunkX()) {
-        chunkVector = ChunkVector.ofBlock(blockVector);
-        snapshot = chunkSnapshots.get(chunkVector);
-      }
-      BlockVector chunkPos = chunkVector.worldToChunk(x, y, z);
-      MaterialData data = snapshot.getMaterialData(chunkPos);
-      if (!materialFilter.test(data.getItemType())) continue;
-      materialData.add(new MaterialDataWithLocation(data, x, y, z));
-    }
-    return materialData;
+    return new MaterialDataWithLocationIterator(region.getBlockVectorIterator(), materialFilter);
   }
 
   public MaterialData getOriginalMaterial(Vector pos) {
@@ -167,6 +145,46 @@ public class SnapshotMatchModule implements MatchModule, Listener {
       ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
 
       chunkSnapshots.put(chunkVector, chunkSnapshot);
+    }
+  }
+
+  private class MaterialDataWithLocationIterator implements Iterator<MaterialDataWithLocation> {
+
+    private final Iterator<BlockVector> vectors;
+    private final Predicate<Material> materialFilter;
+
+    private final MaterialDataWithLocation data = new MaterialDataWithLocation();
+    private ChunkVector chunkVector = null;
+    private ChunkSnapshot snapshot = null;
+
+    private MaterialDataWithLocationIterator(
+        Iterator<BlockVector> vectors, Predicate<Material> materialFilter) {
+      this.vectors = vectors;
+      this.materialFilter = materialFilter;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return this.vectors.hasNext();
+    }
+
+    @Override
+    public MaterialDataWithLocation next() {
+      final BlockVector blockVector = this.vectors.next();
+      // If this block is in the same chunk as the previous one, keep using the same snapshot
+      // without fetching a new one
+      if (chunkVector == null
+          || blockVector.getBlockZ() >> 4 != chunkVector.getChunkZ()
+          || blockVector.getBlockX() >> 4 != chunkVector.getChunkX()) {
+        chunkVector = ChunkVector.ofBlock(blockVector);
+        snapshot = chunkSnapshots.get(chunkVector);
+      }
+      BlockVector chunkPos = chunkVector.worldToChunk(blockVector);
+      MaterialData data = snapshot.getMaterialData(chunkPos);
+      if (!materialFilter.test(data.getItemType())) return this.next();
+
+      this.data.set(data, blockVector);
+      return this.data;
     }
   }
 }
