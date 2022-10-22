@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.bukkit.Location;
@@ -21,6 +22,7 @@ import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.filters.matcher.TypedFilter;
 import tc.oc.pgm.regions.Bounds;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /** Represents an arbitrary region in a Bukkit world. */
@@ -147,5 +149,22 @@ public interface Region extends TypedFilter<LocationQuery> {
   default Iterable<Block> getBlocks(World world) {
     return () ->
         Iterators.transform(getBlockVectorIterator(), pos -> BlockVectors.blockAt(world, pos));
+  }
+
+  default Stream<ChunkVector> getChunkPositions() {
+    final Bounds bounds = getBounds();
+    if (!bounds.isBlockFinite()) {
+      throw new UnsupportedOperationException(
+          "Cannot enumerate chunks in unbounded region type " + getClass().getSimpleName());
+    }
+
+    final ChunkVector min = ChunkVector.ofBlock(bounds.getMin()),
+        max = ChunkVector.ofBlock(bounds.getBlockMaxInside());
+    return IntStream.rangeClosed(min.getChunkX(), max.getChunkX())
+        .mapToObj(
+            x ->
+                IntStream.rangeClosed(min.getChunkZ(), max.getChunkX())
+                    .mapToObj(z -> ChunkVector.of(x, z)))
+        .flatMap(f -> f);
   }
 }

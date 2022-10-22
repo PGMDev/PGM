@@ -1,15 +1,15 @@
 package tc.oc.pgm.structure;
 
 import com.google.common.collect.ImmutableList;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +21,12 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.filters.FilterParser;
-import tc.oc.pgm.filters.StaticFilter;
-import tc.oc.pgm.filters.dynamic.FilterMatchModule;
-import tc.oc.pgm.regions.CuboidValidation;
+import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.parse.DynamicFilterValidation;
+import tc.oc.pgm.filters.parse.FilterParser;
+import tc.oc.pgm.regions.BlockBoundedValidation;
+import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -32,16 +34,19 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class StructureModule implements MapModule<StructureMatchModule> {
 
+  private final Map<String, StructureDefinition> structures;
   private final List<DynamicStructureDefinition> dynamics;
 
-  public StructureModule(List<DynamicStructureDefinition> dynamics) {
+  public StructureModule(
+      Map<String, StructureDefinition> structures, List<DynamicStructureDefinition> dynamics) {
+    this.structures = structures;
     this.dynamics = dynamics;
   }
 
   @Nullable
   @Override
   public StructureMatchModule createMatchModule(Match match) throws ModuleLoadException {
-    return new StructureMatchModule(match, this.dynamics);
+    return new StructureMatchModule(match, this.structures, this.dynamics);
   }
 
   @Nullable
@@ -58,58 +63,49 @@ public class StructureModule implements MapModule<StructureMatchModule> {
         throws InvalidXMLException {
       if (factory.getProto().isOlderThan(MapProtos.FILTER_FEATURES)) return null;
 
+      FilterParser filters = factory.getFilters();
+      RegionParser regions = factory.getRegions();
+
       final Map<String, StructureDefinition> structures = new HashMap<>();
-      for (Element elStruct :
-          XMLUtils.flattenElements(doc.getRootElement(), "structures", "structure")) {
+      for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "structures", "structure")) {
         final StructureDefinition definition =
             new StructureDefinition(
-                XMLUtils.getRequiredAttribute(elStruct, "id").getValue(),
-                XMLUtils.parseVector(elStruct.getAttribute("origin"), (Vector) null),
-                factory
-                    .getRegions()
-                    .parseRegionProperty(elStruct, CuboidValidation.INSTANCE, "region"),
-                XMLUtils.parseBoolean(elStruct.getAttribute("air"), false),
-                XMLUtils.parseBoolean(elStruct.getAttribute("clear"), true));
+                XMLUtils.getRequiredAttribute(el, "id").getValue(),
+                XMLUtils.parseVector(el.getAttribute("origin"), (Vector) null),
+                regions.parseProperty(el, "region", BlockBoundedValidation.INSTANCE),
+                XMLUtils.parseBoolean(el.getAttribute("air"), false),
+                XMLUtils.parseBoolean(el.getAttribute("clear"), true));
 
         structures.put(definition.getId(), definition);
-        factory.getFeatures().addFeature(elStruct, definition);
+        factory.getFeatures().addFeature(el, definition);
       }
 
-      final List<DynamicStructureDefinition> dynamics = new LinkedList<>();
-      for (Element elDynamic :
-          XMLUtils.flattenElements(doc.getRootElement(), "structures", "dynamic")) {
-        final @Nullable Attribute idAttr = elDynamic.getAttribute("id");
-        final String id = idAttr != null ? idAttr.getValue() : UUID.randomUUID().toString();
+      final List<DynamicStructureDefinition> dynamics = new ArrayList<>();
+      for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "structures", "dynamic")) {
+        String id = el.getAttributeValue("id");
+        if (id == null) id = UUID.randomUUID().toString();
 
-        final @Nullable Attribute loc = elDynamic.getAttribute("location");
-        final Vector position =
-            loc != null ? XMLUtils.parseVector(Node.fromNullable(elDynamic), loc.getValue()) : null;
+        BlockVector position = XMLUtils.parseBlockVector(Node.fromAttr(el, "location"));
+        BlockVector offset = XMLUtils.parseBlockVector(Node.fromAttr(el, "offset"));
 
-        final @Nullable Attribute off = elDynamic.getAttribute("offset");
-        final Vector offset =
-            off != null ? XMLUtils.parseVector(Node.fromNullable(elDynamic), off.getValue()) : null;
-
-        if (position != null && offset != null) {
+        if (position != null && offset != null)
           throw new InvalidXMLException(
-              "attributes 'location' and 'offset' cannot be used together", elDynamic);
-        }
+              "attributes 'location' and 'offset' cannot be used together", el);
 
         final StructureDefinition structure =
-            structures.get(elDynamic.getAttribute("structure").getValue());
+            structures.get(el.getAttribute("structure").getValue());
 
-        final FilterParser filterParser = factory.getFilters();
-        final Filter trigger =
-            filterParser.parseFilterProperty(elDynamic, "trigger", StaticFilter.ALLOW);
-        final Filter filter =
-            filterParser.parseFilterProperty(elDynamic, "filter", StaticFilter.ALLOW);
+        Filter trigger =
+            filters.parseProperty(el, "trigger", StaticFilter.ALLOW, DynamicFilterValidation.MATCH);
+        Filter filter = filters.parseProperty(el, "filter", StaticFilter.ALLOW);
 
-        final DynamicStructureDefinition definition =
+        DynamicStructureDefinition definition =
             new DynamicStructureDefinition(id, structure, trigger, filter, position, offset);
         dynamics.add(definition);
-        factory.getFeatures().addFeature(elDynamic, definition);
+        factory.getFeatures().addFeature(el, definition);
       }
 
-      return new StructureModule(dynamics);
+      return new StructureModule(structures, dynamics);
     }
   }
 }

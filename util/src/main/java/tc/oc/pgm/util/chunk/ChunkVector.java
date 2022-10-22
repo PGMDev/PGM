@@ -2,6 +2,7 @@ package tc.oc.pgm.util.chunk;
 
 import java.util.Objects;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
@@ -18,6 +19,10 @@ public class ChunkVector {
 
   public static ChunkVector of(Chunk chunk) {
     return new ChunkVector(chunk.getX(), chunk.getZ());
+  }
+
+  public static ChunkVector of(int x, int z) {
+    return new ChunkVector(x, z);
   }
 
   public static ChunkVector ofBlock(int x, int y, int z) {
@@ -70,6 +75,10 @@ public class ChunkVector {
 
   public BlockVector worldToChunk(Vector pos) {
     return worldToChunk(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+  }
+
+  public Chunk getChunk(World world) {
+    return world.getChunkAt(x, z);
   }
 
   @Override

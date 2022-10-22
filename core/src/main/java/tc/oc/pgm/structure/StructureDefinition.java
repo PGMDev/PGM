@@ -1,9 +1,9 @@
 package tc.oc.pgm.structure;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import javax.annotation.Nullable;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
@@ -20,7 +20,7 @@ public class StructureDefinition extends SelfIdentifyingFeatureDefinition {
       String id, @Nullable Vector origin, Region region, boolean includeAir, boolean clearSource) {
     super(id);
     this.origin = origin;
-    this.region = checkNotNull(region);
+    this.region = assertNotNull(region);
     this.includeAir = includeAir;
     this.clearSource = clearSource;
   }

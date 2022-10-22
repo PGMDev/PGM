@@ -1,8 +1,9 @@
 package tc.oc.pgm.structure;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import org.bukkit.util.Vector;
+import org.bukkit.util.BlockVector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
@@ -14,22 +15,22 @@ public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition
   private final StructureDefinition structure;
   private final Filter trigger;
   private final Filter passive;
-  private final @Nullable Vector position;
-  private final @Nullable Vector offset;
+  private final @Nullable BlockVector position;
+  private final @NotNull BlockVector offset;
 
   DynamicStructureDefinition(
       String id,
       StructureDefinition structure,
       Filter trigger,
       Filter passive,
-      @Nullable Vector position,
-      @Nullable Vector offset) {
+      @Nullable BlockVector position,
+      @Nullable BlockVector offset) {
     super(id);
-    this.structure = checkNotNull(structure);
-    this.trigger = checkNotNull(trigger);
-    this.passive = checkNotNull(passive);
+    this.structure = assertNotNull(structure);
+    this.trigger = assertNotNull(trigger);
+    this.passive = assertNotNull(passive);
     this.position = position;
-    this.offset = offset;
+    this.offset = offset == null ? new BlockVector() : offset;
   }
 
   /**
@@ -62,22 +63,13 @@ public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition
   }
 
   /**
-   * The position to place/clear the structure to/from. Can not be used if the offset attribute is
-   * used.
-   *
-   * @return The position to place/clear this structure to/from
-   */
-  public @Nullable Vector getPosition() {
-    return position;
-  }
-
-  /**
    * The offset to use when placing/clearing the structure. Can not be used if the position
    * attribute is used.
    *
    * @return The offset to use when placing/clearing the structure
    */
-  public @Nullable Vector getOffset() {
+  public BlockVector getOffset() {
+    if (position != null) return position.subtract(this.structure.getOrigin()).toBlockVector();
     return offset;
   }
 }

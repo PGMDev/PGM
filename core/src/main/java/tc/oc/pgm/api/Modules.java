@@ -162,9 +162,9 @@ public interface Modules {
 
   static <M extends MatchModule> void registerDependencyOnly(
       Class<M> match, MatchModuleFactory<M> factory) {
-    if (MATCH_DEPENDENCY_ONLY.containsKey(checkNotNull(match)))
+    if (MATCH_DEPENDENCY_ONLY.containsKey(assertNotNull(match)))
       throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
-    MATCH_DEPENDENCY_ONLY.put(match, checkNotNull(factory));
+    MATCH_DEPENDENCY_ONLY.put(match, assertNotNull(factory));
   }
 
   static void registerAll() {

@@ -3,11 +3,8 @@ package tc.oc.pgm.snapshot;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Predicate;
-import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.PGM;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -24,7 +21,7 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.MaterialDataWithLocation;
+import tc.oc.pgm.util.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -49,9 +46,11 @@ public class SnapshotMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<ChunkVector, ChunkSnapshot> chunkSnapshots = new HashMap<>();
+  private final BudgetWorldEdit worldEdit;
 
   private SnapshotMatchModule(Match match) {
     this.match = match;
+    this.worldEdit = new BudgetWorldEdit(match, this);
   }
 
   public MaterialData getOriginalMaterial(int x, int y, int z) {
@@ -76,11 +75,9 @@ public class SnapshotMatchModule implements MatchModule, Listener {
    * Get the original material data for a {@code region}.
    *
    * @param region the region to get block states from
-   * @param materialFilter filters which blocks that will be included in the returned list
    */
-  public Iterator<MaterialDataWithLocation> getOriginalMaterialData(
-      Region region, Predicate<Material> materialFilter) {
-    return new MaterialDataWithLocationIterator(region.getBlockVectorIterator(), materialFilter);
+  public Iterable<BlockData> getOriginalMaterialData(Region region) {
+    return () -> new MaterialDataWithLocationIterator(region.getBlockVectorIterator());
   }
 
   public MaterialData getOriginalMaterial(Vector pos) {
@@ -114,53 +111,52 @@ public class SnapshotMatchModule implements MatchModule, Listener {
   // event
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onBlockChange(BlockTransformEvent event) {
-    Match match = PGM.get().getMatchManager().getMatch(event.getWorld());
-
-    // Dont carry over old chunks into a new match
-    if (match == null || match.isFinished()) return;
-
-    Chunk chunk = event.getOldState().getChunk();
-    ChunkVector chunkVector = ChunkVector.of(chunk);
-    if (!chunkSnapshots.containsKey(chunkVector)) {
-      match.getLogger().fine("Copying chunk at " + chunkVector);
-      ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
-
-      // ChunkSnapshot is very likely to have the post-event state already,
-      // so we have to correct it
-      NMSHacks.updateChunkSnapshot(chunkSnapshot, event.getOldState());
-      chunkSnapshots.put(chunkVector, chunkSnapshot);
-    }
+    if (event.getWorld() != match.getWorld()) return;
+    saveSnapshot(ChunkVector.ofBlock(event.getBlock()), event.getOldState());
   }
 
   /**
    * Manually save the initial state of a block to the snapshot.
    *
-   * @param block the block to save
+   * @param cv the chunk vector to save
+   * @param state optional block state to write on the snapshot
    */
-  public void saveSnapshot(Block block) {
-    Chunk chunk = block.getState().getChunk();
-    ChunkVector chunkVector = ChunkVector.of(chunk);
-    if (!chunkSnapshots.containsKey(chunkVector)) {
-      this.match.getLogger().fine("Copying chunk at " + chunkVector);
-      ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot();
+  public void saveSnapshot(ChunkVector cv, @Nullable BlockState state) {
+    if (!chunkSnapshots.containsKey(cv)) {
+      this.match.getLogger().fine("Copying chunk at " + cv);
 
-      chunkSnapshots.put(chunkVector, chunkSnapshot);
+      ChunkSnapshot snapshot = cv.getChunk(match.getWorld()).getChunkSnapshot();
+
+      // ChunkSnapshot is very likely to have the post-event state already,
+      // so we have to correct it
+      if (state != null) NMSHacks.updateChunkSnapshot(snapshot, state);
+
+      chunkSnapshots.put(cv, snapshot);
     }
   }
 
-  private class MaterialDataWithLocationIterator implements Iterator<MaterialDataWithLocation> {
+  public void saveRegion(Region region) {
+    region.getChunkPositions().forEach(cv -> this.saveSnapshot(cv, null));
+  }
+
+  public void pasteBlocks(Region region, BlockVector offset, boolean includeAir) {
+    worldEdit.pasteBlocks(region, offset, includeAir);
+  }
+
+  public void removeBlocks(Region region, BlockVector offset, boolean includeAir) {
+    worldEdit.removeBlocks(region, offset, includeAir);
+  }
+
+  private class MaterialDataWithLocationIterator implements Iterator<BlockData> {
 
     private final Iterator<BlockVector> vectors;
-    private final Predicate<Material> materialFilter;
 
-    private final MaterialDataWithLocation data = new MaterialDataWithLocation();
+    private final BlockData data = new BlockData();
     private ChunkVector chunkVector = null;
     private ChunkSnapshot snapshot = null;
 
-    private MaterialDataWithLocationIterator(
-        Iterator<BlockVector> vectors, Predicate<Material> materialFilter) {
+    private MaterialDataWithLocationIterator(Iterator<BlockVector> vectors) {
       this.vectors = vectors;
-      this.materialFilter = materialFilter;
     }
 
     @Override
@@ -169,7 +165,7 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     }
 
     @Override
-    public MaterialDataWithLocation next() {
+    public BlockData next() {
       final BlockVector blockVector = this.vectors.next();
       // If this block is in the same chunk as the previous one, keep using the same snapshot
       // without fetching a new one
@@ -179,9 +175,8 @@ public class SnapshotMatchModule implements MatchModule, Listener {
         chunkVector = ChunkVector.ofBlock(blockVector);
         snapshot = chunkSnapshots.get(chunkVector);
       }
-      BlockVector chunkPos = chunkVector.worldToChunk(blockVector);
-      MaterialData data = snapshot.getMaterialData(chunkPos);
-      if (!materialFilter.test(data.getItemType())) return this.next();
+      BlockVector blockOffset = chunkVector.worldToChunk(blockVector);
+      MaterialData data = snapshot.getMaterialData(blockOffset);
 
       this.data.set(data, blockVector);
       return this.data;
