@@ -80,7 +80,7 @@ public class KitModule implements MapModule {
       KitRule.Action action = TextParser.parseEnum(el.getName(), KitRule.Action.class);
       Kit kit = factory.getKits().parseKitProperty(el, "kit");
       Filter filter =
-          factory.getFilters().parseProperty(el, "filter", DynamicFilterValidation.PLAYER);
+          factory.getFilters().parseRequiredProperty(el, "filter", DynamicFilterValidation.PLAYER);
 
       return new KitRule(action, kit, filter);
     }

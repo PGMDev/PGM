@@ -35,6 +35,8 @@ import tc.oc.pgm.death.DeathMessageMatchModule;
 import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.destroyable.DestroyableModule;
 import tc.oc.pgm.doublejump.DoubleJumpMatchModule;
+import tc.oc.pgm.enderchest.EnderChestMatchModule;
+import tc.oc.pgm.enderchest.EnderChestModule;
 import tc.oc.pgm.fallingblocks.FallingBlocksMatchModule;
 import tc.oc.pgm.fallingblocks.FallingBlocksModule;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
@@ -259,6 +261,7 @@ public interface Modules {
         WorldBorderModule.class, WorldBorderMatchModule.class, new WorldBorderModule.Factory());
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
     register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
+    register(EnderChestModule.class, EnderChestMatchModule.class, new EnderChestModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());

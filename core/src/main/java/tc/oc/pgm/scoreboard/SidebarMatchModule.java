@@ -488,22 +488,17 @@ public class SidebarMatchModule implements MatchModule, Listener {
           boolean horizontalCompact =
               MAX_LENGTH < (3 * sortedWools.size()) + (3 * (sortedWools.size() - 1)) + 1;
           TextComponent.Builder woolText = text();
-          if (!horizontalCompact) {
-            // If there is extra room, add another space to the left of the wools to make them
-            // appear more centered.
-            woolText.append(space());
-          }
-
           for (Goal<?> goal : sortedWools) {
             if (goal instanceof MonumentWool && goal.hasShowOption(ShowOption.SHOW_SIDEBAR)) {
               MonumentWool wool = (MonumentWool) goal;
-              woolText.append(space());
+              TextComponent spacer = space();
               if (!firstWool && !horizontalCompact) {
-                woolText.append(space()).append(space());
+                spacer = spacer.append(space()).append(space());
               }
               firstWool = false;
               woolText.append(
-                  wool.renderSidebarStatusText(competitor, party)
+                  spacer
+                      .append(wool.renderSidebarStatusText(competitor, party))
                       .color(wool.renderSidebarStatusColor(competitor, party)));
             }
           }
