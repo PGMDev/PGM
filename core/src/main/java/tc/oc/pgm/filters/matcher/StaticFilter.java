@@ -16,6 +16,11 @@ public class StaticFilter implements FilterDefinition {
   }
 
   @Override
+  public boolean isDynamic() {
+    return true;
+  }
+
+  @Override
   public QueryResponse query(Query query) {
     return response;
   }
