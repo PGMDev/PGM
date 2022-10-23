@@ -43,7 +43,7 @@ public class DynamicStructure implements Feature<DynamicStructureDefinition> {
     if (placed) return;
     placed = true;
 
-    smm.pasteBlocks(structure.getRegion(), offset, structure.includeAir());
+    smm.placeBlocks(structure.getRegion(), offset, structure.includeAir());
   }
 
   /** Remove the structure from the world */

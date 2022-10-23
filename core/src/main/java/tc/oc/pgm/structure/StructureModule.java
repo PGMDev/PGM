@@ -96,7 +96,7 @@ public class StructureModule implements MapModule<StructureMatchModule> {
             structures.get(el.getAttribute("structure").getValue());
 
         Filter trigger =
-            filters.parseProperty(el, "trigger", StaticFilter.ALLOW, DynamicFilterValidation.MATCH);
+            filters.parseRequiredProperty(el, "trigger", DynamicFilterValidation.MATCH);
         Filter filter = filters.parseProperty(el, "filter", StaticFilter.ALLOW);
 
         DynamicStructureDefinition definition =

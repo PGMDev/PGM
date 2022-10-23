@@ -71,15 +71,6 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     }
   }
 
-  /**
-   * Get the original material data for a {@code region}.
-   *
-   * @param region the region to get block states from
-   */
-  public Iterable<BlockData> getOriginalMaterialData(Region region) {
-    return () -> new MaterialDataWithLocationIterator(region.getBlockVectorIterator());
-  }
-
   public MaterialData getOriginalMaterial(Vector pos) {
     return getOriginalMaterial(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
   }
@@ -105,6 +96,15 @@ public class SnapshotMatchModule implements MatchModule, Listener {
 
   public BlockState getOriginalBlock(Vector pos) {
     return getOriginalBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+  }
+
+  /**
+   * Get the original material data for a {@code region}.
+   *
+   * @param region the region to get block states from
+   */
+  public Iterable<BlockData> getOriginalMaterials(Region region) {
+    return () -> new MaterialDataWithLocationIterator(region);
   }
 
   // Listen on lowest priority so that the original block is available to other handlers of this
@@ -139,24 +139,33 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     region.getChunkPositions().forEach(cv -> this.saveSnapshot(cv, null));
   }
 
-  public void pasteBlocks(Region region, BlockVector offset, boolean includeAir) {
-    worldEdit.pasteBlocks(region, offset, includeAir);
+  public void placeBlocks(Region region, BlockVector offset, boolean includeAir) {
+    worldEdit.placeBlocks(region, offset, includeAir);
   }
 
   public void removeBlocks(Region region, BlockVector offset, boolean includeAir) {
     worldEdit.removeBlocks(region, offset, includeAir);
   }
 
-  private class MaterialDataWithLocationIterator implements Iterator<BlockData> {
+  /**
+   * Works in a similar fashion to {@link tc.oc.pgm.util.block.CuboidBlockIterator}. Implements both
+   * {@link BlockData} and {@link Iterator}, changes its own state while iterating, and returns
+   * itself from {@link #next()}. In this way, it avoids creating any objects while iterating. It
+   * additionally provides no methods to mutate the state.
+   */
+  private class MaterialDataWithLocationIterator implements Iterator<BlockData>, BlockData {
 
     private final Iterator<BlockVector> vectors;
 
-    private final BlockData data = new BlockData();
     private ChunkVector chunkVector = null;
     private ChunkSnapshot snapshot = null;
 
-    private MaterialDataWithLocationIterator(Iterator<BlockVector> vectors) {
-      this.vectors = vectors;
+    private BlockVector blockVector;
+    private int materialId;
+    private int data;
+
+    private MaterialDataWithLocationIterator(Region region) {
+      this.vectors = region.getBlockVectorIterator();
     }
 
     @Override
@@ -166,20 +175,42 @@ public class SnapshotMatchModule implements MatchModule, Listener {
 
     @Override
     public BlockData next() {
-      final BlockVector blockVector = this.vectors.next();
+      blockVector = this.vectors.next();
+
       // If this block is in the same chunk as the previous one, keep using the same snapshot
       // without fetching a new one
-      if (chunkVector == null
+      if (snapshot == null
           || blockVector.getBlockZ() >> 4 != chunkVector.getChunkZ()
           || blockVector.getBlockX() >> 4 != chunkVector.getChunkX()) {
         chunkVector = ChunkVector.ofBlock(blockVector);
         snapshot = chunkSnapshots.get(chunkVector);
       }
-      BlockVector blockOffset = chunkVector.worldToChunk(blockVector);
-      MaterialData data = snapshot.getMaterialData(blockOffset);
 
-      this.data.set(data, blockVector);
-      return this.data;
+      // Equivalent to chunkVector.worldToChunk(blockVector), but avoids allocations
+      int offsetX = blockVector.getBlockX() - chunkVector.getBlockMinX();
+      int offsetY = blockVector.getBlockY();
+      int offsetZ = blockVector.getBlockZ() - chunkVector.getBlockMinZ();
+
+      // Calling getMaterialData would cause an allocation, so instead use raw types
+      materialId = snapshot.getBlockTypeId(offsetX, offsetY, offsetZ);
+      data = snapshot.getBlockData(offsetX, offsetY, offsetZ);
+
+      return this;
+    }
+
+    @Override
+    public int getTypeId() {
+      return materialId;
+    }
+
+    @Override
+    public int getData() {
+      return data;
+    }
+
+    @Override
+    public BlockVector getBlockVector() {
+      return blockVector;
     }
   }
 }

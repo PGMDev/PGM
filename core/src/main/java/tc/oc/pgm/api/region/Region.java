@@ -160,11 +160,11 @@ public interface Region extends TypedFilter<LocationQuery> {
 
     final ChunkVector min = ChunkVector.ofBlock(bounds.getMin()),
         max = ChunkVector.ofBlock(bounds.getBlockMaxInside());
-    return IntStream.rangeClosed(min.getChunkX(), max.getChunkX())
-        .mapToObj(
-            x ->
-                IntStream.rangeClosed(min.getChunkZ(), max.getChunkX())
-                    .mapToObj(z -> ChunkVector.of(x, z)))
+
+    int minX = min.getChunkX(), maxX = max.getChunkX();
+    int minZ = min.getChunkZ(), maxZ = max.getChunkZ();
+    return IntStream.rangeClosed(minX, maxX)
+        .mapToObj(x -> IntStream.rangeClosed(minZ, maxZ).mapToObj(z -> ChunkVector.of(x, z)))
         .flatMap(f -> f);
   }
 }

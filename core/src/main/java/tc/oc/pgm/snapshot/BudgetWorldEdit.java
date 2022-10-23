@@ -15,12 +15,33 @@ import tc.oc.pgm.util.BlockData;
  */
 class BudgetWorldEdit {
 
+  // Ugly optimization, match material via primitive id
+  private static final int AIR_ID = Material.AIR.getId();
+
   private final Match match;
   private final SnapshotMatchModule smm;
 
   BudgetWorldEdit(Match match, SnapshotMatchModule snapshotMatchModule) {
     this.match = match;
     this.smm = snapshotMatchModule;
+  }
+
+  /**
+   * Places blocks in the region from the {@link SnapshotMatchModule} memory.
+   *
+   * @param region region where the blocks were when they got saved
+   * @param offset the offset to add when placing blocks
+   * @param includeAir whether to place air if it's found in the memory
+   */
+  public void placeBlocks(Region region, BlockVector offset, boolean includeAir) {
+    final World world = match.getWorld();
+    for (BlockData blockData : smm.getOriginalMaterials(region)) {
+      if (!includeAir && blockData.getTypeId() == AIR_ID) continue;
+
+      BlockState state = blockData.getBlock(world, offset).getState();
+      state.setMaterialData(blockData.getMaterialData());
+      state.update(true, true);
+    }
   }
 
   /**
@@ -32,29 +53,13 @@ class BudgetWorldEdit {
    */
   public void removeBlocks(Region region, BlockVector offset, boolean includeAir) {
     final World world = match.getWorld();
-    for (BlockData blockData : smm.getOriginalMaterialData(region)) {
-      if (!includeAir && blockData.data.getItemType() == Material.AIR) continue;
+
+    for (BlockData blockData : smm.getOriginalMaterials(region)) {
+      if (!includeAir && blockData.getTypeId() == AIR_ID) continue;
 
       Block block = blockData.getBlock(world, offset);
+      // Ignore if already air
       if (!block.getType().equals(Material.AIR)) block.setType(Material.AIR);
-    }
-  }
-
-  /**
-   * Places blocks from the {@link SnapshotMatchModule} memory.
-   *
-   * @param region region where the blocks were when they got saved
-   * @param offset the offset to add when placing blocks
-   * @param includeAir whether to place air if it's found in the memory
-   */
-  public void pasteBlocks(Region region, BlockVector offset, boolean includeAir) {
-    final World world = match.getWorld();
-    for (BlockData blockData : smm.getOriginalMaterialData(region)) {
-      if (!includeAir && blockData.data.getItemType() == Material.AIR) continue;
-
-      BlockState state = blockData.getBlock(world, offset).getState();
-      state.setMaterialData(blockData.data);
-      state.update(true, true);
     }
   }
 }
