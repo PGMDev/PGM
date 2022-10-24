@@ -104,7 +104,7 @@ public class SnapshotMatchModule implements MatchModule, Listener {
    * @param region the region to get block states from
    */
   public Iterable<BlockData> getOriginalMaterials(Region region) {
-    return () -> new MaterialDataWithLocationIterator(region);
+    return () -> new BlockDataIterator(region);
   }
 
   // Listen on lowest priority so that the original block is available to other handlers of this
@@ -153,7 +153,7 @@ public class SnapshotMatchModule implements MatchModule, Listener {
    * itself from {@link #next()}. In this way, it avoids creating any objects while iterating. It
    * additionally provides no methods to mutate the state.
    */
-  private class MaterialDataWithLocationIterator implements Iterator<BlockData>, BlockData {
+  private class BlockDataIterator implements Iterator<BlockData>, BlockData {
 
     private final Iterator<BlockVector> vectors;
 
@@ -164,7 +164,7 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     private int materialId;
     private int data;
 
-    private MaterialDataWithLocationIterator(Region region) {
+    private BlockDataIterator(Region region) {
       this.vectors = region.getBlockVectorIterator();
     }
 

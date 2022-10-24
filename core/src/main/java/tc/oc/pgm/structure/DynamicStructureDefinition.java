@@ -52,11 +52,9 @@ public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition
   }
 
   /**
-   * The filter used to filter weather a structure gets placed/cleared when the dynamic filter
-   * rises/falls //TODO check this behaviour
+   * The filter used to filter weather a structure gets placed when the dynamic filter rises
    *
-   * @return The filter used to filter weather a structure gets placed/cleared when the dynamic
-   *     filter rises/falls //TODO check this behaviour
+   * @return The filter used to filter weather a structure gets placed when the dynamic filter rises
    */
   public Filter getPassive() {
     return passive;
