@@ -9,6 +9,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import app.ashcon.intake.Command;
+import app.ashcon.intake.parametric.annotation.Maybe;
 import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -116,7 +117,7 @@ public class ChatDispatcher implements Listener {
       aliases = {"g", "all"},
       desc = "Send a message to everyone",
       usage = "[message]")
-  public void sendGlobal(Match match, MatchPlayer sender, @Nullable @Text String message) {
+  public void sendGlobal(Match match, MatchPlayer sender, @Maybe @Text String message) {
     if (sender != null && sender.isVanished()) {
       sendAdmin(match, sender, message);
       return;
@@ -138,7 +139,7 @@ public class ChatDispatcher implements Listener {
       aliases = {"t"},
       desc = "Send a message to your team",
       usage = "[message]")
-  public void sendTeam(Match match, MatchPlayer sender, @Nullable @Text String message) {
+  public void sendTeam(Match match, MatchPlayer sender, @Maybe @Text String message) {
     if (sender != null && sender.isVanished()) {
       sendAdmin(match, sender, message);
       return;
@@ -172,7 +173,7 @@ public class ChatDispatcher implements Listener {
       desc = "Send a message to operators",
       usage = "[message]",
       perms = Permissions.ADMINCHAT)
-  public void sendAdmin(Match match, MatchPlayer sender, @Nullable @Text String message) {
+  public void sendAdmin(Match match, MatchPlayer sender, @Maybe @Text String message) {
     // If a player managed to send a default message without permissions, reset their chat channel
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
