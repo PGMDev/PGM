@@ -2,7 +2,7 @@ package tc.oc.pgm.command.parsers;
 
 import static cloud.commandframework.arguments.parser.ArgumentParseResult.failure;
 import static cloud.commandframework.arguments.parser.ArgumentParseResult.success;
-import static tc.oc.pgm.util.text.TextException.exception;
+import static tc.oc.pgm.util.text.TextException.playerOnly;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ParserParameters;
@@ -29,11 +29,11 @@ public final class PartyParser extends StringLikeParser<CommandSender, Party> {
   public ArgumentParseResult<Party> parse(
       @NotNull CommandContext<CommandSender> context, @NotNull String text) {
     final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
-    if (match == null) return failure(exception("command.onlyPlayers"));
+    if (match == null) return failure(playerOnly());
 
     if (text.equalsIgnoreCase("obs")) return success(match.getDefaultParty());
 
-    return TeamParser.getTeam(match, text).mapParsedValue(team -> (Party) team);
+    return TeamParser.getTeam(match, text).mapParsedValue(team -> team);
   }
 
   @Override

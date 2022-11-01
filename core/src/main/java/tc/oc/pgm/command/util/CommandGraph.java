@@ -53,6 +53,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.command.AdminCommand;
 import tc.oc.pgm.command.CancelCommand;
 import tc.oc.pgm.command.ClassCommand;
@@ -85,6 +86,7 @@ import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
 import tc.oc.pgm.command.parsers.PartyParser;
+import tc.oc.pgm.command.parsers.PlayerClassParser;
 import tc.oc.pgm.command.parsers.SettingKeyParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
@@ -266,6 +268,7 @@ public class CommandGraph {
     registerParser(Party.class, PartyParser::new);
     registerParser(Team.class, TeamParser::new);
     registerParser(TypeFactory.parameterizedClass(Collection.class, Team.class), TeamsParser::new);
+    registerParser(PlayerClass.class, PlayerClassParser::new);
     registerParser(
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());

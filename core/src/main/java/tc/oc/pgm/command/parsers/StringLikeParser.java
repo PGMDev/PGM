@@ -8,6 +8,7 @@ import cloud.commandframework.context.CommandContext;
 import io.leangen.geantyref.TypeToken;
 import java.util.Queue;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.util.StringUtils;
 
 public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T> {
 
@@ -26,7 +27,9 @@ public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T> {
   @Override
   public @NotNull ArgumentParseResult<T> parse(
       @NotNull CommandContext<S> context, @NotNull Queue<String> args) {
-    return stringParser.parse(context, args).flatMapParsedValue(text -> parse(context, text));
+    return stringParser
+        .parse(context, args)
+        .flatMapParsedValue(text -> parse(context, StringUtils.suggestionToText(text)));
   }
 
   public abstract ArgumentParseResult<T> parse(

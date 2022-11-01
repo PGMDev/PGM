@@ -3,7 +3,7 @@ package tc.oc.pgm.command.parsers;
 import static cloud.commandframework.arguments.parser.ArgumentParseResult.failure;
 import static cloud.commandframework.arguments.parser.ArgumentParseResult.success;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
-import static tc.oc.pgm.util.text.TextException.exception;
+import static tc.oc.pgm.util.text.TextException.playerOnly;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ArgumentParser;
@@ -41,7 +41,7 @@ public final class VictoryConditionParser
     }
 
     final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
-    if (match == null) return failure(exception("command.onlyPlayers"));
+    if (match == null) return failure(playerOnly());
 
     // Default to current tl victory condition
     if (input.equals(CURRENT)) {

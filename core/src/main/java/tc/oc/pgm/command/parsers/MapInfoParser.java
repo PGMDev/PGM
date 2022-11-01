@@ -40,7 +40,7 @@ public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo
       final Match match = matchManager.getMatch(context.getSender());
       if (match != null) map = match.getMap();
     } else {
-      map = library.getMap(StringUtils.suggestionToText(text));
+      map = library.getMap(text);
     }
 
     return map != null

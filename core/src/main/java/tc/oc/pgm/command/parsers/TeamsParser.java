@@ -3,6 +3,7 @@ package tc.oc.pgm.command.parsers;
 import static cloud.commandframework.arguments.parser.ArgumentParseResult.failure;
 import static cloud.commandframework.arguments.parser.ArgumentParseResult.success;
 import static tc.oc.pgm.util.text.TextException.exception;
+import static tc.oc.pgm.util.text.TextException.playerOnly;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ParserParameters;
@@ -32,7 +33,7 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
   public ArgumentParseResult<Collection<Team>> parse(
       @NotNull CommandContext<CommandSender> context, @NotNull String text) {
     final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
-    if (match == null) return failure(exception("command.onlyPlayers"));
+    if (match == null) return failure(playerOnly());
 
     if (text.equalsIgnoreCase("*")) {
       final TeamMatchModule teams = match.getModule(TeamMatchModule.class);

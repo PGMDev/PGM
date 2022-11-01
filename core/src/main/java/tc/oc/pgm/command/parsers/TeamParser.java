@@ -4,6 +4,7 @@ import static cloud.commandframework.arguments.parser.ArgumentParseResult.failur
 import static cloud.commandframework.arguments.parser.ArgumentParseResult.success;
 import static tc.oc.pgm.util.text.TextException.exception;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
+import static tc.oc.pgm.util.text.TextException.playerOnly;
 
 import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ParserParameters;
@@ -31,7 +32,7 @@ public final class TeamParser extends StringLikeParser<CommandSender, Team> {
   public ArgumentParseResult<Team> parse(
       @NotNull CommandContext<CommandSender> context, @NotNull String text) {
     final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
-    if (match == null) return failure(exception("command.onlyPlayers"));
+    if (match == null) return failure(playerOnly());
 
     return getTeam(match, text);
   }
