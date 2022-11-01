@@ -53,6 +53,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.command.AdminCommand;
 import tc.oc.pgm.command.CancelCommand;
@@ -88,6 +89,7 @@ import tc.oc.pgm.command.parsers.MatchPlayerParser;
 import tc.oc.pgm.command.parsers.PartyParser;
 import tc.oc.pgm.command.parsers.PlayerClassParser;
 import tc.oc.pgm.command.parsers.SettingKeyParser;
+import tc.oc.pgm.command.parsers.SettingValueParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
 import tc.oc.pgm.command.parsers.VictoryConditionParser;
@@ -273,7 +275,7 @@ public class CommandGraph {
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());
     registerParser(SettingKey.class, new SettingKeyParser());
-    // registerParser(SettingValue.class, new EnumProvider<>(SettingValue.class));
+    registerParser(SettingValue.class, new SettingValueParser());
   }
 
   private <T> void registerParser(Class<T> type, ArgumentParser<CommandSender, T> parser) {

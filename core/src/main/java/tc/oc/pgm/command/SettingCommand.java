@@ -7,7 +7,6 @@ import static tc.oc.pgm.util.text.TextException.exception;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.specifier.Greedy;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -64,16 +63,14 @@ public final class SettingCommand {
   public void toggle(
       MatchPlayer player,
       @Argument("setting") SettingKey key,
-      @Argument("value") @Greedy String query) {
+      @Argument("value") SettingValue value) {
     final Settings setting = player.getSettings();
     final SettingValue old = setting.getValue(key);
 
-    final SettingValue value;
-    if (query == null) {
+    if (value == null) {
       setting.toggleValue(key);
       value = setting.getValue(key);
-    } else {
-      value = SettingValue.search(key, query);
+    } else if (old != value) {
       setting.setValue(key, value);
     }
 

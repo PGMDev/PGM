@@ -24,7 +24,7 @@ public final class MatchPlayerParser implements ArgumentParser<CommandSender, Ma
     final String input = inputQueue.peek();
 
     if (input == null) {
-      return failure(new NoInputProvidedException(DurationParser.class, context));
+      return failure(new NoInputProvidedException(MatchPlayerParser.class, context));
     }
 
     CommandSender sender = context.getSender();
