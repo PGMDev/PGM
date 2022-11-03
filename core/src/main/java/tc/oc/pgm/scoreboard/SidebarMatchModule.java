@@ -1,5 +1,9 @@
 package tc.oc.pgm.scoreboard;
 
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import fr.mrmicky.fastboard.FastBoard;
@@ -239,6 +243,119 @@ public class SidebarMatchModule implements MatchModule, Listener {
     renderSidebarDebounce();
     // After match end, timeout rate-limit indefinitely
     rateLimit.timeOut(Integer.MAX_VALUE);
+  }
+
+  private Component renderTitle(final Config config, final MapInfo map) {
+    final Component header = config.getMatchHeader();
+    if (header != null) {
+      return header.colorIfAbsent(NamedTextColor.AQUA);
+    }
+
+    final Component gamemode = map.getGamemode();
+    if (gamemode != null) {
+      return gamemode.colorIfAbsent(NamedTextColor.AQUA);
+    }
+
+    final Collection<Gamemode> gamemodes = map.getGamemodes();
+    if (!gamemodes.isEmpty()) {
+      boolean name = gamemodes.size() <= 1;
+      List<Component> gmComponents =
+          gamemodes.stream()
+              .map(gm -> text(name ? gm.getFullName() : gm.getAcronym()))
+              .collect(Collectors.toList());
+      return TextFormatter.list(gmComponents, NamedTextColor.AQUA);
+    }
+
+    final List<Component> games = new LinkedList<>();
+
+    // First, find a primary game mode
+    for (final MapTag tag : map.getTags()) {
+      if (!tag.isGamemode() || tag.isAuxiliary()) continue;
+
+      if (games.isEmpty()) {
+        games.add(tag.getName().color(NamedTextColor.AQUA));
+        continue;
+      }
+
+      // When there are multiple, primary game modes
+      games.set(0, text(Gamemode.OBJECTIVES.getFullName(), NamedTextColor.AQUA));
+      break;
+    }
+
+    // Second, append auxiliary game modes
+    for (final MapTag tag : map.getTags()) {
+      if (!tag.isGamemode() || !tag.isAuxiliary()) continue;
+
+      // There can only be 2 game modes
+      if (games.size() < 2) {
+        games.add(tag.getName().color(NamedTextColor.AQUA));
+      } else {
+        break;
+      }
+    }
+
+    // Display "Blitz: Rage" rather than "Blitz and Rage"
+    if (games.size() == 2
+        && Stream.of("blitz", "rage")
+            .allMatch(id -> map.getTags().stream().anyMatch(mt -> mt.getId().equals(id)))) {
+      games.clear();
+      games.add(translatable("gamemode.br.name").color(NamedTextColor.AQUA));
+    }
+
+    return TextFormatter.list(games, NamedTextColor.AQUA);
+  }
+
+  private Component renderGoal(Goal<?> goal, @Nullable Competitor competitor, Party viewingParty) {
+    final BlinkTask blinkTask = this.blinkingGoals.get(goal);
+    final TextComponent.Builder line = text();
+
+    line.append(space());
+    line.append(
+        goal.renderSidebarStatusText(competitor, viewingParty)
+            .color(
+                blinkTask != null && blinkTask.isDark()
+                    ? NamedTextColor.BLACK
+                    : goal.renderSidebarStatusColor(competitor, viewingParty)));
+
+    if (goal instanceof ProximityGoal) {
+      final ProximityGoal<?> proximity = (ProximityGoal<?>) goal;
+      if (proximity.shouldShowProximity(competitor, viewingParty)) {
+        line.append(space());
+        line.append(proximity.renderProximity(competitor, viewingParty));
+      }
+    }
+
+    line.append(space());
+    line.append(
+        goal.renderSidebarLabelText(competitor, viewingParty)
+            .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
+
+    return line.build();
+  }
+
+  private Component renderScore(Competitor competitor) {
+    ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
+    Component score = text((int) smm.getScore(competitor), NamedTextColor.WHITE);
+    if (!smm.hasScoreLimit()) {
+      return score;
+    }
+    return text()
+        .append(score)
+        .append(text("/", NamedTextColor.DARK_GRAY))
+        .append(text(smm.getScoreLimit(), NamedTextColor.GRAY))
+        .build();
+  }
+
+  private Component renderBlitz(Competitor competitor) {
+    BlitzMatchModule bmm = match.needModule(BlitzMatchModule.class);
+    if (competitor instanceof Team) {
+      return text(bmm.getRemainingPlayers(competitor), NamedTextColor.WHITE);
+    } else if (competitor instanceof Tribute && bmm.getConfig().getNumLives() > 1) {
+      final UUID id = competitor.getPlayers().iterator().next().getId();
+      return text(bmm.getNumOfLives(id), NamedTextColor.WHITE);
+    } else {
+      return empty();
+    }
   }
 
   private void renderSidebarDebounce() {

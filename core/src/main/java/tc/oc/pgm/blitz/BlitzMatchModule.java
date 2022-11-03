@@ -22,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -116,7 +117,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
     if (canJoin(event.getPlayer(), event.getRequest())) return;
 
     event.cancel(
-        translatable("blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));
+        translatable("blitz.joinDenied", text(Gamemode.BLITZ.getFullName(), NamedTextColor.AQUA)));
   }
 
   @EventHandler
