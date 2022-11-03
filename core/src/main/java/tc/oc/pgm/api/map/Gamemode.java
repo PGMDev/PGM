@@ -1,6 +1,5 @@
 package tc.oc.pgm.api.map;
 
-import org.jetbrains.annotations.NotNull;
 
 public enum Gamemode {
   ATTACK_DEFEND("ad", "Attack/Defend", "A/D"),
@@ -49,7 +48,6 @@ public enum Gamemode {
     return id;
   }
 
-  @NotNull
   public String getFullName() {
     return name;
   }
