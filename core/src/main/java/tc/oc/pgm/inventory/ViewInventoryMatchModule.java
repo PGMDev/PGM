@@ -50,6 +50,7 @@ import tc.oc.pgm.events.PlayerBlockTransformEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -298,8 +299,10 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     // Ensure that the title of the inventory is <= 32 characters long to appease Minecraft's
     // restrictions on inventory titles
     String title =
-        TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer)
-            .substring(0, 32);
+        StringUtils.substring(
+            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer),
+            0,
+            32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 
