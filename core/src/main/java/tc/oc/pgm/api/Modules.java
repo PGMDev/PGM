@@ -114,6 +114,8 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.stats.StatsMatchModule;
+import tc.oc.pgm.structure.StructureMatchModule;
+import tc.oc.pgm.structure.StructureModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
@@ -133,8 +135,14 @@ public interface Modules {
 
   Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> MAP =
       new ConcurrentHashMap<>();
+
+  Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> MAP_DEPENDENCY_ONLY =
+      new ConcurrentHashMap<>(); // No modules fit this yet, exists for consistency.
   Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> MATCH =
       new ConcurrentHashMap<>();
+
+  Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
+      MATCH_DEPENDENCY_ONLY = new ConcurrentHashMap<>();
   Map<Class<? extends MapModule>, Class<? extends MatchModule>> MAP_TO_MATCH =
       new ConcurrentHashMap<>();
 
@@ -150,6 +158,13 @@ public interface Modules {
       throw new IllegalArgumentException(map.getSimpleName() + " was registered twice");
     MAP.put(map, assertNotNull(factory));
     if (match != null) MAP_TO_MATCH.put(map, match);
+  }
+
+  static <M extends MatchModule> void registerDependencyOnly(
+      Class<M> match, MatchModuleFactory<M> factory) {
+    if (MATCH_DEPENDENCY_ONLY.containsKey(assertNotNull(match)))
+      throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
+    MATCH_DEPENDENCY_ONLY.put(match, assertNotNull(factory));
   }
 
   static void registerAll() {
@@ -186,7 +201,6 @@ public interface Modules {
     register(ScoreboardMatchModule.class, new ScoreboardMatchModule.Factory());
     register(JoinMatchModule.class, new JoinMatchModule.Factory());
     register(StartMatchModule.class, new StartMatchModule.Factory());
-    register(SnapshotMatchModule.class, new SnapshotMatchModule.Factory());
     register(SidebarMatchModule.class, new SidebarMatchModule.Factory());
     register(PickerMatchModule.class, new PickerMatchModule.Factory());
 
@@ -262,8 +276,12 @@ public interface Modules {
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
     register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
     register(EnderChestModule.class, EnderChestMatchModule.class, new EnderChestModule.Factory());
+    register(StructureModule.class, StructureMatchModule.class, new StructureModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());
+
+    // MatchModules only used if required as a dependency by other modules
+    registerDependencyOnly(SnapshotMatchModule.class, new SnapshotMatchModule.Factory());
   }
 }

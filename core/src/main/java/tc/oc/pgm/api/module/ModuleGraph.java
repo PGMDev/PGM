@@ -17,11 +17,15 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
 
   private final AtomicBoolean loaded;
   private final Map<Class<? extends M>, F> factories;
+  // A set of factories only used when they are requested as a dependency of some other factory
+  private final Map<Class<? extends M>, F> dependencyOnlyFactories;
   private Map<Class<? extends M>, M> modules;
 
-  public ModuleGraph(Map factories) {
+  public ModuleGraph(
+      Map<Class<? extends M>, F> factories, Map<Class<? extends M>, F> dependencyOnlyFactories) {
     this.loaded = new AtomicBoolean(true); // unloadAll will change to false
     this.factories = factories; // No copies since every graph would be duplicated
+    this.dependencyOnlyFactories = dependencyOnlyFactories;
     unloadAll();
   }
 
@@ -79,18 +83,21 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
       throw new ModuleLoadException(key, "Required itself (is there a circular dependency?)");
     }
 
-    final F factory = factories.get(key);
+    F factory = factories.get(key);
     if (factory == null) {
       if (requiredBy == null) {
         throw new ModuleLoadException(
             key, "Required but not registered in " + getClass().getSimpleName());
       }
-      throw new ModuleLoadException(
-          key,
-          "Required by "
-              + requiredBy.getSimpleName()
-              + " but not registered in "
-              + getClass().getSimpleName());
+      // Only check this if a module is required as a dependency for some other module
+      factory = dependencyOnlyFactories.get(key);
+      if (factory == null)
+        throw new ModuleLoadException(
+            key,
+            "Required by "
+                + requiredBy.getSimpleName()
+                + " but not registered in "
+                + getClass().getSimpleName());
     }
 
     return factory;
@@ -117,7 +124,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
           throw new ModuleLoadException(
               key,
               hardDependency.getSimpleName() + " is a hard dependency that failed to load",
-              errors.lastElement());
+              errors.empty() ? null : errors.lastElement());
         }
       }
     }
