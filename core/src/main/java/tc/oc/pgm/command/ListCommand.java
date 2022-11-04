@@ -4,7 +4,8 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import app.ashcon.intake.Command;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -21,12 +22,10 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
-// TODO: clean up format and use new components
 public final class ListCommand {
 
-  @Command(
-      aliases = {"list", "who", "online", "ls"},
-      desc = "View a list of online players")
+  @CommandMethod("list|who|online|ls")
+  @CommandDescription("View a list of online players")
   public void list(CommandSender sender, Audience viewer, Match match) {
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
     if (tmm != null) {

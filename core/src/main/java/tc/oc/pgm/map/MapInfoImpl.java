@@ -22,6 +22,7 @@ import tc.oc.pgm.api.map.Phase;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
@@ -36,6 +37,7 @@ public class MapInfoImpl implements MapInfo {
   private final Version version;
   private final Phase phase;
   private final String name;
+  private final String normalizedName;
   private final String description;
   private final LocalDate created;
   private final Collection<Contributor> authors;
@@ -69,7 +71,8 @@ public class MapInfoImpl implements MapInfo {
       Phase phase,
       @Nullable boolean friendlyFire) {
     this.name = assertNotNull(name);
-    this.id = assertNotNull(MapInfo.normalizeName(id == null ? name : id));
+    this.normalizedName = StringUtils.normalize(name);
+    this.id = assertNotNull(StringUtils.slugify(id == null ? name : id));
     this.proto = assertNotNull(proto);
     this.version = assertNotNull(version);
     this.description = assertNotNull(description);
@@ -154,6 +157,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String getNormalizedName() {
+    return normalizedName;
   }
 
   @Override

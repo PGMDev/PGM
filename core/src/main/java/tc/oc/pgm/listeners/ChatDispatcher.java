@@ -8,9 +8,11 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Text;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.specifier.Greedy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
@@ -19,7 +21,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
@@ -45,7 +46,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.Players;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
@@ -113,11 +114,10 @@ public class ChatDispatcher implements Listener {
     return muted.keySet();
   }
 
-  @Command(
-      aliases = {"g", "all"},
-      desc = "Send a message to everyone",
-      usage = "[message]")
-  public void sendGlobal(Match match, MatchPlayer sender, @Maybe @Text String message) {
+  @CommandMethod("g|all [message]")
+  @CommandDescription("Send a message to everyone")
+  public void sendGlobal(
+      Match match, MatchPlayer sender, @Argument("message") @Greedy String message) {
     if (sender != null && sender.isVanished()) {
       sendAdmin(match, sender, message);
       return;
@@ -135,11 +135,10 @@ public class ChatDispatcher implements Listener {
     }
   }
 
-  @Command(
-      aliases = {"t"},
-      desc = "Send a message to your team",
-      usage = "[message]")
-  public void sendTeam(Match match, MatchPlayer sender, @Maybe @Text String message) {
+  @CommandMethod("t [message]")
+  @CommandDescription("Send a message to your team")
+  public void sendTeam(
+      Match match, MatchPlayer sender, @Argument("message") @Greedy String message) {
     if (sender != null && sender.isVanished()) {
       sendAdmin(match, sender, message);
       return;
@@ -168,12 +167,11 @@ public class ChatDispatcher implements Listener {
     }
   }
 
-  @Command(
-      aliases = {"a"},
-      desc = "Send a message to operators",
-      usage = "[message]",
-      perms = Permissions.ADMINCHAT)
-  public void sendAdmin(Match match, MatchPlayer sender, @Maybe @Text String message) {
+  @CommandMethod("a [message]")
+  @CommandDescription("Send a message to operators")
+  @CommandPermission(Permissions.ADMINCHAT)
+  public void sendAdmin(
+      Match match, MatchPlayer sender, @Argument("message") @Greedy String message) {
     // If a player managed to send a default message without permissions, reset their chat channel
     if (sender != null && !sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
@@ -200,11 +198,13 @@ public class ChatDispatcher implements Listener {
     }
   }
 
-  @Command(
-      aliases = {"msg", "tell", "pm", "dm"},
-      desc = "Send a direct message to a player",
-      usage = "[player] [message]")
-  public void sendDirect(Match match, MatchPlayer sender, Player receiver, @Text String message) {
+  @CommandMethod("msg|tell|pm|dm <player> <message>")
+  @CommandDescription("Send a direct message to a player")
+  public void sendDirect(
+      Match match,
+      MatchPlayer sender,
+      @Argument("player") Player receiver,
+      @Argument("message") @Greedy String message) {
     if (sender == null) return;
 
     if (vanish.isVanished(sender.getId())) {
@@ -289,15 +289,14 @@ public class ChatDispatcher implements Listener {
     return TextTranslations.translateLegacy(action, viewer) + " " + PREFIX_FORMAT;
   }
 
-  @Command(
-      aliases = {"reply", "r"},
-      desc = "Reply to a direct message",
-      usage = "[message]")
-  public void sendReply(Match match, Audience audience, MatchPlayer sender, @Text String message) {
+  @CommandMethod("reply|r <message>")
+  @CommandDescription("Reply to a direct message")
+  public void sendReply(
+      Match match, MatchPlayer sender, @Argument("message") @Greedy String message) {
     if (sender == null) return;
     final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
     if (receiver == null) {
-      audience.sendWarning(translatable("command.message.noReply", text("/msg")));
+      sender.sendWarning(translatable("command.message.noReply", text("/msg")));
       return;
     }
 
@@ -321,8 +320,7 @@ public class ChatDispatcher implements Listener {
         sendGlobal(player.getMatch(), player, message.substring(1));
       } else if (message.startsWith(DM_SYMBOL) && message.contains(" ")) {
         final String target = message.substring(1, message.indexOf(" "));
-        final MatchPlayer receiver =
-            getApproximatePlayer(player.getMatch(), target, player.getBukkit());
+        final MatchPlayer receiver = Players.getMatchPlayer(event.getPlayer(), target);
         if (receiver == null) {
           player.sendWarning(translatable("chat.message.unknownTarget", text(target)));
         } else {
@@ -432,14 +430,6 @@ public class ChatDispatcher implements Listener {
                                 UsernameFormatUtils.CONSOLE_NAME,
                                 TextTranslations.getLocale(player.getBukkit())),
                             message))));
-  }
-
-  private MatchPlayer getApproximatePlayer(Match match, String query, CommandSender sender) {
-    return StringUtils.bestFuzzyMatch(
-        query,
-        match.getPlayers().stream()
-            .collect(Collectors.toMap(player -> player.getBukkit().getName(), Function.identity())),
-        0.75);
   }
 
   private void sendMutedMessage(MatchPlayer player) {

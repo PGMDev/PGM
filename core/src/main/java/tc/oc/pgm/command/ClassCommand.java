@@ -5,48 +5,36 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Text;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.specifier.FlagYielding;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.ChatColor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.pgm.util.LegacyFormatUtils;
-import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.text.TextFormatter;
 
 public final class ClassCommand {
 
-  @Command(
-      aliases = {"class", "selectclass", "c", "cl"},
-      desc = "Select your class")
-  public void classSelect(Match match, MatchPlayer player, @Maybe @Text String query) {
+  @CommandMethod("class|selectclass|c|cl [class]")
+  @CommandDescription("Select your class")
+  public void classSelect(
+      Match match, MatchPlayer player, @Argument("class") @FlagYielding PlayerClass newClass) {
     final ClassMatchModule classes = getClasses(match);
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
-    if (query == null) {
+    if (newClass == null) {
       player.sendMessage(
           translatable("match.class.current", NamedTextColor.GREEN)
               .append(space())
               .append(text(currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
       player.sendMessage(translatable("match.class.view", NamedTextColor.GOLD));
     } else {
-      final PlayerClass newClass = StringUtils.bestFuzzyMatch(query, classes.getClasses(), 0.9);
-
-      if (newClass == null) {
-        throw exception("match.class.notFound");
-      }
-
-      try {
-        classes.setPlayerClass(player.getId(), newClass);
-      } catch (IllegalStateException e) {
-        throw exception("match.class.sticky");
-      }
+      classes.setPlayerClass(player.getId(), newClass);
 
       player.sendMessage(
           translatable(
@@ -59,20 +47,18 @@ public final class ClassCommand {
     }
   }
 
-  @Command(
-      aliases = {"classlist", "classes", "listclasses", "cls"},
-      desc = "List all available classes")
+  @CommandMethod("classlist|classes|listclasses|cls")
+  @CommandDescription("List all available classes")
   public void classList(Match match, MatchPlayer player) {
     final ClassMatchModule classes = getClasses(match);
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
     player.sendMessage(
-        text(
-            LegacyFormatUtils.dashedChatMessage(
-                ChatColor.GOLD
-                    + TextTranslations.translate("match.class.title", player.getBukkit()),
-                "-",
-                ChatColor.RED.toString())));
+        TextFormatter.horizontalLineHeading(
+            player.getBukkit(),
+            translatable("match.class.title").color(NamedTextColor.GOLD),
+            NamedTextColor.RED));
+
     int i = 1;
     for (PlayerClass cls : classes.getClasses()) {
       TextComponent.Builder result = text().append(text(i++ + ". "));
@@ -100,9 +86,7 @@ public final class ClassCommand {
 
   private ClassMatchModule getClasses(Match match) {
     final ClassMatchModule classes = match.getModule(ClassMatchModule.class);
-    if (classes == null) {
-      throw exception("match.class.notEnabled");
-    }
+    if (classes == null) throw exception("match.class.notEnabled");
     return classes;
   }
 }

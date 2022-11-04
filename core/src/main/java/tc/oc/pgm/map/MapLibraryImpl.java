@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapContext;
@@ -29,6 +28,8 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
+import tc.oc.pgm.util.LiquidMetal;
+import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameResolver;
 
@@ -63,19 +64,32 @@ public class MapLibraryImpl implements MapLibrary {
 
   @Override
   public MapInfo getMap(String idOrName) {
-    idOrName = MapInfo.normalizeName(idOrName);
 
-    MapEntry map = maps.get(idOrName);
+    // Exact match
+    MapEntry map = maps.get(StringUtils.slugify(idOrName));
     if (map == null) {
-      map = StringUtils.bestFuzzyMatch(idOrName, maps, 0.75);
+      // Fuzzy match
+      map =
+          StringUtils.bestFuzzyMatch(
+              StringUtils.normalize(idOrName), maps.values(), m -> m.info.getNormalizedName());
     }
 
     return map == null ? null : map.info;
   }
 
   @Override
+  public Stream<MapInfo> getMaps(@Nullable String query) {
+    Stream<MapInfo> maps = this.maps.values().stream().map(e -> e.info);
+    if (query != null) {
+      String normalized = StringUtils.normalize(query);
+      maps = maps.filter(mi -> LiquidMetal.match(mi.getNormalizedName(), normalized));
+    }
+    return maps;
+  }
+
+  @Override
   public Iterator<MapInfo> getMaps() {
-    return maps.values().stream().map(entry -> entry.info).iterator();
+    return getMaps(null).iterator();
   }
 
   @Override
@@ -159,10 +173,9 @@ public class MapLibraryImpl implements MapLibrary {
 
     return CompletableFuture.runAsync(
             () ->
-                StreamSupport.stream(
-                        Spliterators.spliteratorUnknownSize(
-                            Iterators.concat(sources.iterator()), 0),
-                        true)
+                StreamUtils.of(Iterators.concat(sources.iterator()))
+                    .parallel()
+                    .unordered()
                     .forEach(source -> loadMapSafe(source, null)))
         .thenRunAsync(() -> logMapSuccess(fail, ok))
         .thenRunAsync(UsernameResolver::resolveAll);

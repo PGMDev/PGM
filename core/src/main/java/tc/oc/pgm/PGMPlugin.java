@@ -42,15 +42,12 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.VanishManager;
-import tc.oc.pgm.command.graph.CommandExecutor;
-import tc.oc.pgm.command.graph.CommandGraph;
-import tc.oc.pgm.community.command.CommunityCommandGraph;
+import tc.oc.pgm.command.util.CommandGraph;
 import tc.oc.pgm.community.features.VanishManagerImpl;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
-import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.listeners.FormattingListener;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
@@ -338,13 +335,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   }
 
   private void registerCommands() {
-    final CommandGraph graph =
-        config.isCommunityMode() ? new CommunityCommandGraph() : new CommandGraph();
-
-    graph.register(vanishManager);
-    graph.register(ChatDispatcher.get());
-
-    new CommandExecutor(this, graph).register();
+    try {
+      new CommandGraph(this);
+    } catch (Exception e) {
+      getLogger().log(Level.SEVERE, "Exception registering commands", e);
+    }
   }
 
   private void registerEvents(Object listener) {

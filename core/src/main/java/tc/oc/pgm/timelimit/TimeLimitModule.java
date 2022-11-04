@@ -102,7 +102,7 @@ public class TimeLimitModule implements MapModule<TimeLimitMatchModule> {
         throws InvalidXMLException {
       if (attr == null) return null;
       try {
-        return VictoryConditions.parse(factory, attr.getValue());
+        return VictoryConditions.parseNullable(factory, attr.getValue());
       } catch (TextException e) {
         throw new InvalidXMLException(e.getLocalizedMessage(), attr);
       }

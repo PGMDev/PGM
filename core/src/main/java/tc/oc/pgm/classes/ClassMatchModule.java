@@ -2,6 +2,7 @@ package tc.oc.pgm.classes;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -158,7 +159,7 @@ public class ClassMatchModule implements MatchModule, Listener {
    * @param userId player to set the class
    * @param cls class to set
    * @return old class or default if none selected
-   * @throws IllegalStateException if the player may not change classes
+   * @throws tc.oc.pgm.util.text.TextException if the player may not change classes
    */
   public PlayerClass setPlayerClass(UUID userId, PlayerClass cls) {
     assertNotNull(userId, "player id");
@@ -166,7 +167,7 @@ public class ClassMatchModule implements MatchModule, Listener {
     assertTrue(this.classes.containsValue(cls), "class is not valid for this match");
 
     if (!this.getCanChangeClass(userId)) {
-      throw new IllegalStateException("cannot change sticky class");
+      throw exception("match.class.sticky");
     }
 
     PlayerClass oldClass = this.selectedClasses.put(userId, cls);

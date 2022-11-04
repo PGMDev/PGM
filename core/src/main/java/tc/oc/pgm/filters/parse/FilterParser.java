@@ -269,7 +269,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
       throw new InvalidXMLException("No classes defined", el);
     } else {
       PlayerClass playerClass =
-          StringUtils.bestFuzzyMatch(el.getTextNormalize(), classes.getPlayerClasses(), 0.9);
+          StringUtils.bestFuzzyMatch(el.getTextNormalize(), classes.getPlayerClasses());
 
       if (playerClass == null) {
         throw new InvalidXMLException("Could not find player-class: " + el.getTextNormalize(), el);

@@ -109,7 +109,7 @@ public enum SettingKey {
   /**
    * Get a list of the possible {@link SettingValue}s.
    *
-   * @return A array of {@link SettingValue}s, sorted by defined order.
+   * @return An array of {@link SettingValue}s, sorted by defined order.
    */
   public SettingValue[] getPossibleValues() {
     return values;

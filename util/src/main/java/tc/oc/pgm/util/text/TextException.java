@@ -9,13 +9,16 @@ import static tc.oc.pgm.util.text.TextTranslations.translate;
 import com.google.common.collect.Range;
 import java.util.Locale;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.util.ComponentMessageThrowable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** An exception with a localized error message. */
-public class TextException extends RuntimeException implements ComponentMessageThrowable {
+public class TextException extends RuntimeException
+    implements ComponentMessageThrowable, ComponentLike {
 
   private final Component message;
 
@@ -34,7 +37,12 @@ public class TextException extends RuntimeException implements ComponentMessageT
   }
 
   @Override
-  public Component componentMessage() {
+  public @NotNull Component componentMessage() {
+    return this.message;
+  }
+
+  @Override
+  public @NotNull Component asComponent() {
     return this.message;
   }
 
@@ -52,8 +60,16 @@ public class TextException extends RuntimeException implements ComponentMessageT
     return exception("misc.noPermission");
   }
 
+  public static TextException playerOnly() {
+    return exception("command.onlyPlayers");
+  }
+
   public static TextException unknown(@Nullable Throwable cause) {
     return new TextException(cause, null, "error.unknown");
+  }
+
+  public static TextException usage(String usage) {
+    return exception("command.incorrectUsage", text(usage));
   }
 
   public static TextException invalidFormat(String text, Class<?> type) {
@@ -71,6 +87,10 @@ public class TextException extends RuntimeException implements ComponentMessageT
 
   public static TextException outOfRange(String text, Range<?> range) {
     return new TextException(null, null, "error.outOfRange", text(text), format(range));
+  }
+
+  public static TextException outOfRange(Number num, Range<?> range) {
+    return outOfRange(num.toString(), range);
   }
 
   private static Component format(Range<?> range) {

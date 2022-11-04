@@ -3,7 +3,8 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.PGM;
@@ -18,9 +19,8 @@ import tc.oc.pgm.util.text.TextFormatter;
 
 public final class StatsCommand {
 
-  @Command(
-      aliases = {"stats"},
-      desc = "Show your stats for the match")
+  @CommandMethod("stats")
+  @CommandDescription("Show your stats for the match")
   public void stats(Audience audience, CommandSender sender, MatchPlayer player, Match match) {
     if (match.isFinished()
         && PGM.get().getConfiguration().showVerboseStats()

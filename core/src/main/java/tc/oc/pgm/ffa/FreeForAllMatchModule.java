@@ -128,13 +128,13 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   }
 
   public void setMinPlayers(@Nullable Integer minPlayers) {
-    this.minPlayers = minPlayers;
+    this.minPlayers = minPlayers == null ? options.minPlayers : minPlayers;
     updateReadiness();
   }
 
   public void setMaxPlayers(@Nullable Integer maxPlayers, @Nullable Integer maxOverfill) {
-    this.maxPlayers = maxPlayers;
-    this.maxOverfill = maxOverfill;
+    this.maxPlayers = maxPlayers == null ? options.maxPlayers : maxPlayers;
+    this.maxOverfill = maxOverfill == null ? options.maxOverfill : maxOverfill;
     match.setMaxPlayers(getMaxPlayers());
   }
 

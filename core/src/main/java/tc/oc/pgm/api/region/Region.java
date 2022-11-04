@@ -5,11 +5,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -21,6 +18,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.filters.matcher.TypedFilter;
 import tc.oc.pgm.regions.Bounds;
+import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
@@ -142,8 +140,7 @@ public interface Region extends TypedFilter<LocationQuery> {
   }
 
   default Stream<BlockVector> getBlockPositions() {
-    return StreamSupport.stream(
-        Spliterators.spliterator(getBlockVectorIterator(), 0, Spliterator.ORDERED), false);
+    return StreamUtils.of(getBlockVectorIterator());
   }
 
   default Iterable<Block> getBlocks(World world) {

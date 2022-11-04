@@ -37,6 +37,20 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>cloud.commandframework</groupId>
+                            <artifactId>cloud-annotations</artifactId>
+                            <version>1.7.1</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.4.0</version>
                 <configuration>
@@ -47,7 +61,8 @@
                             <include>tc.oc.pgm:*:*</include>
                             <include>org.jdom:jdom2:*</include>
                             <include>net.kyori:*:*</include>
-                            <include>app.ashcon.intake:intake-*:*</include>
+                            <include>cloud.commandframework:cloud-*:*</include>
+                            <include>me.lucko:commodore:*</include>
                             <include>fr.mrmicky:*:*</include>
                             <include>org.eclipse.jgit:org.eclipse.jgit:*</include>
                             <include>org.slf4j:slf4j-api:*</include>
@@ -65,8 +80,12 @@
                     </filters>
                     <relocations combine.children="append">
                         <relocation>
-                            <pattern>app.ashcon.intake</pattern>
-                            <shadedPattern>tc.oc.pgm.lib.app.ashcon.intake</shadedPattern>
+                            <pattern>cloud.commandframework</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.cloud.commandframework</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>me.lucko</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.me.lucko</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>fr.mrmicky</pattern>

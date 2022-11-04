@@ -28,7 +28,8 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.util.LiquidMetal;
+import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -88,11 +89,14 @@ public final class TextParser {
       }
     }
 
-    if (range != null && !range.contains(number)) {
-      throw outOfRange(text, range);
-    }
+    if (range != null) assertInRange(number, range);
 
     return number;
+  }
+
+  public static <T extends Comparable<T>> void assertInRange(
+      @NotNull T val, @NotNull Range<T> range) {
+    if (!range.contains(val)) throw outOfRange(val.toString(), range);
   }
 
   /**
@@ -333,20 +337,11 @@ public final class TextParser {
       String text, Class<E> type, Range<E> range, boolean fuzzyMatch) throws TextException {
     assertNotNull(text, "cannot parse enum " + type.getSimpleName().toLowerCase() + "  from null");
 
-    double maxScore = 0;
-    E value = null;
+    String name = text.replace(' ', '_');
+    E value = StringUtils.bestFuzzyMatch(name, type);
 
-    for (E each : type.getEnumConstants()) {
-      final double score = LiquidMetal.score(each.name(), text.replace(' ', '_'));
-      if (score >= maxScore) {
-        maxScore = score;
-        value = each;
-      }
-      if (score >= 1) break;
-    }
-
-    if (maxScore < 0.25 || (!fuzzyMatch && maxScore < 1)) {
-      throw invalidFormat(text, type, value.name().toLowerCase(), null);
+    if (value == null || (!fuzzyMatch && !name.equalsIgnoreCase(value.name()))) {
+      throw invalidFormat(text, type, value != null ? value.name().toLowerCase() : null, null);
     }
 
     if (range != null && !range.contains(value)) {

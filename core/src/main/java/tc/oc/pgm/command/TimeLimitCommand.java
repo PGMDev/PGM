@@ -1,11 +1,15 @@
 package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.parametric.annotation.Maybe;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import java.time.Duration;
+import java.util.Optional;
 import net.kyori.adventure.text.format.NamedTextColor;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -16,22 +20,18 @@ import tc.oc.pgm.util.Audience;
 
 public final class TimeLimitCommand {
 
-  @Command(
-      aliases = {"timelimit", "tl"},
-      desc = "Start a time limit",
-      usage = "duration [result] [overtime] [max-overtime]",
-      help = "Result can be 'default', 'objectives', 'tie', or the name of a team",
-      flags = "r",
-      perms = Permissions.GAMEPLAY)
+  @CommandMethod("timelimit|tl <duration> [result] [overtime] [max-overtime] [end-overtime]")
+  @CommandDescription(
+      "Start a time limit. Result can be 'default', 'objectives', 'tie', or the name of a team")
+  @CommandPermission(Permissions.GAMEPLAY)
   public void timelimit(
       Audience audience,
       Match match,
-      Duration duration,
-      @Maybe VictoryCondition result,
-      @Maybe Duration overtime,
-      @Maybe Duration maxOvertime,
-      @Maybe Duration endOvertime) {
-
+      @Argument("duration") Duration duration,
+      @Argument(value = "result", defaultValue = CURRENT) Optional<VictoryCondition> result,
+      @Argument("overtime") Duration overtime,
+      @Argument("max-overtime") Duration maxOvertime,
+      @Argument("end-overtime") Duration endOvertime) {
     final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
 
     time.cancel();
@@ -42,7 +42,7 @@ public final class TimeLimitCommand {
             overtime,
             maxOvertime,
             endOvertime,
-            result,
+            result.orElse(null),
             true));
     time.start();
 
@@ -51,6 +51,6 @@ public final class TimeLimitCommand {
             "match.timeLimit.commandOutput",
             NamedTextColor.YELLOW,
             clock(duration).color(NamedTextColor.AQUA),
-            result != null ? result.getDescription(match) : translatable("misc.unknown")));
+            result.map(r -> r.getDescription(match)).orElse(translatable("misc.unknown"))));
   }
 }

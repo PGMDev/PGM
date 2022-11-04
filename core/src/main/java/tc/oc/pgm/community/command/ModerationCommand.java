@@ -4,27 +4,18 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.join;
-import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Default;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Switch;
-import app.ashcon.intake.parametric.annotation.Text;
 import com.google.common.collect.Lists;
-import com.google.common.net.InetAddresses;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -35,7 +26,6 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.BanEntry;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,24 +36,19 @@ import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import tc.oc.pgm.PGMConfig;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.community.events.PlayerPunishmentEvent;
-import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.LegacyFormatUtils;
-import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
-import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ModerationCommand implements Listener {
 
@@ -104,551 +89,551 @@ public class ModerationCommand implements Listener {
   private Optional<BannedAccountInfo> getBanWithMatchingName(String name) {
     return recentBans.stream().filter(b -> b.getUserName().equalsIgnoreCase(name)).findFirst();
   }
+  /*
+    @Command(
+        aliases = {"staff", "mods", "admins"},
+        desc = "List the online staff members")
+    public void staff(Audience viewer, CommandSender sender, Match match) {
+      // List of online staff based off of permission
+      List<Component> onlineStaff =
+          match.getPlayers().stream()
+              .filter(
+                  player ->
+                      (player.getBukkit().hasPermission(Permissions.STAFF)
+                          && (!player.isVanished() || sender.hasPermission(Permissions.STAFF))))
+              .map(p -> p.getName(NameStyle.VERBOSE))
+              .collect(Collectors.toList());
 
-  @Command(
-      aliases = {"staff", "mods", "admins"},
-      desc = "List the online staff members")
-  public void staff(Audience viewer, CommandSender sender, Match match) {
-    // List of online staff based off of permission
-    List<Component> onlineStaff =
-        match.getPlayers().stream()
-            .filter(
-                player ->
-                    (player.getBukkit().hasPermission(Permissions.STAFF)
-                        && (!player.isVanished() || sender.hasPermission(Permissions.STAFF))))
-            .map(p -> p.getName(NameStyle.VERBOSE))
-            .collect(Collectors.toList());
+      // FORMAT: Online Staff ({count}): {names}
+      Component staffCount =
+          text(onlineStaff.size())
+              .color(onlineStaff.isEmpty() ? NamedTextColor.RED : NamedTextColor.AQUA);
 
-    // FORMAT: Online Staff ({count}): {names}
-    Component staffCount =
-        text(onlineStaff.size())
-            .color(onlineStaff.isEmpty() ? NamedTextColor.RED : NamedTextColor.AQUA);
+      Component content =
+          onlineStaff.isEmpty()
+              ? translatable("moderation.staff.empty")
+              : TextFormatter.list(onlineStaff, NamedTextColor.GRAY);
 
-    Component content =
-        onlineStaff.isEmpty()
-            ? translatable("moderation.staff.empty")
-            : TextFormatter.list(onlineStaff, NamedTextColor.GRAY);
+      Component staff =
+          translatable("moderation.staff.name", NamedTextColor.GRAY, staffCount, content);
 
-    Component staff =
-        translatable("moderation.staff.name", NamedTextColor.GRAY, staffCount, content);
-
-    // Send message
-    viewer.sendMessage(staff);
-  }
-
-  @Command(
-      aliases = {"frozenlist", "fls", "flist"},
-      desc = "View a list of frozen players",
-      perms = Permissions.FREEZE)
-  public void sendFrozenList(Audience sender, Match match) {
-    FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
-
-    if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
-      sender.sendWarning(translatable("moderation.freeze.frozenList.none"));
-      return;
+      // Send message
+      viewer.sendMessage(staff);
     }
 
-    // Online Players
-    if (!fmm.getFrozenPlayers().isEmpty()) {
-      Component names =
-          join(
-              JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)),
-              fmm.getFrozenPlayers().stream()
-                  .map(m -> m.getName(NameStyle.FANCY))
-                  .collect(Collectors.toList()));
-      sender.sendMessage(
-          formatFrozenList(
-              "moderation.freeze.frozenList.online", fmm.getFrozenPlayers().size(), names));
-    }
-
-    // Offline Players
-    if (fmm.getOfflineFrozenCount() > 0) {
-      Component names = fmm.getOfflineFrozenNames();
-      sender.sendMessage(
-          formatFrozenList(
-              "moderation.freeze.frozenList.offline", fmm.getOfflineFrozenCount(), names));
-    }
-  }
-
-  private Component formatFrozenList(String key, int count, Component names) {
-    return translatable(key, NamedTextColor.GRAY, text(count, NamedTextColor.AQUA), names);
-  }
-
-  @Command(
-      aliases = {"freeze", "fz", "f"},
-      usage = "<player>",
-      flags = "s",
-      desc = "Toggle a player's frozen state",
-      perms = Permissions.FREEZE)
-  public void freeze(CommandSender sender, Match match, Player target, @Switch('s') boolean silent)
-      throws CommandException {
-    setFreeze(sender, match, target, checkSilent(silent, sender));
-  }
-
-  private void setFreeze(CommandSender sender, Match match, Player target, boolean silent) {
-    FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
-    MatchPlayer player = match.getPlayer(target);
-    if (player != null) {
-      fmm.setFrozen(sender, player, !fmm.isFrozen(player), silent);
-    }
-  }
-
-  @Command(
-      aliases = {"mute", "m"},
-      usage = "<player> <reason>",
-      desc = "Mute a player",
-      perms = Permissions.MUTE)
-  public void mute(
-      Audience viewer, CommandSender sender, Player target, Match match, @Text String reason) {
-    MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    if (chat.isMuted(targetMatchPlayer)) {
-      viewer.sendWarning(
-          translatable("moderation.mute.existing", targetMatchPlayer.getName(NameStyle.FANCY)));
-      return;
-    }
-
-    // Send a warning to the player to identify mute reason
-    warn(sender, target, match, reason);
-
-    if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, true)) {
-      chat.addMuted(targetMatchPlayer, reason);
-    }
-  }
-
-  @Command(
-      aliases = {"mutes", "mutelist"},
-      desc = "List of muted players",
-      perms = Permissions.MUTE)
-  public void listMutes(Audience viewer, CommandSender sender, MatchManager manager)
-      throws CommandException {
-    List<Component> onlineMutes =
-        chat.getMutedUUIDs().stream()
-            .filter(u -> (manager.getPlayer(u) != null))
-            .map(manager::getPlayer)
-            .map(mp -> mp.getName(NameStyle.FANCY))
-            .collect(Collectors.toList());
-    if (onlineMutes.isEmpty()) {
-      throw new CommandException(
-          TextTranslations.translateLegacy(
-              translatable("moderation.mute.none", NamedTextColor.RED), sender));
-    }
-
-    Component names =
-        join(JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)), onlineMutes);
-    Component message =
-        text()
-            .append(translatable("moderation.mute.list", NamedTextColor.GOLD))
-            .append(text("(", NamedTextColor.GRAY))
-            .append(text(onlineMutes.size(), NamedTextColor.YELLOW))
-            .append(text("): ", NamedTextColor.GRAY))
-            .append(names)
-            .build();
-
-    viewer.sendMessage(message);
-  }
-
-  @Command(
-      aliases = {"unmute", "um"},
-      usage = "<player>",
-      desc = "Unmute a player",
-      perms = Permissions.MUTE)
-  public void unMute(Audience viewer, CommandSender sender, Player target, Match match) {
-    MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    if (chat.isMuted(targetMatchPlayer)) {
-      chat.removeMuted(targetMatchPlayer);
-      targetMatchPlayer.sendMessage(translatable("moderation.unmute.target", NamedTextColor.GREEN));
-      viewer.sendMessage(
-          translatable(
-              "moderation.unmute.sender",
-              NamedTextColor.GRAY,
-              targetMatchPlayer.getName(NameStyle.FANCY)));
-    } else {
-      viewer.sendMessage(
-          translatable(
-              "moderation.unmute.none",
-              NamedTextColor.RED,
-              targetMatchPlayer.getName(NameStyle.FANCY)));
-    }
-  }
-
-  @Command(
-      aliases = {"warn", "w"},
-      usage = "<player> <reason>",
-      desc = "Warn a player for bad behavior",
-      perms = Permissions.WARN)
-  public void warn(CommandSender sender, Player target, Match match, @Text String reason) {
-    MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, true)) {
-      sendModerationWarning(targetMatchPlayer, reason);
-    }
-  }
-
-  @Command(
-      aliases = {"kick", "k"},
-      usage = "<player> <reason> -s (silent)",
-      desc = "Kick a player from the server",
-      flags = "s",
-      perms = Permissions.KICK)
-  public void kick(
-      CommandSender sender,
-      Player target,
-      Match match,
-      @Text String reason,
-      @Switch('s') boolean silent) {
-    silent = checkSilent(silent, sender);
-    MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    if (punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent)) {
-
-      // Unfreeze players who are kicked
+    @Command(
+        aliases = {"frozenlist", "fls", "flist"},
+        desc = "View a list of frozen players",
+        perms = Permissions.FREEZE)
+    public void sendFrozenList(Audience sender, Match match) {
       FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
-      if (fmm.isFrozen(targetMatchPlayer)) {
-        fmm.setFrozen(sender, targetMatchPlayer, false, false);
+
+      if (fmm.getFrozenPlayers().isEmpty() && fmm.getOfflineFrozenCount() < 1) {
+        sender.sendWarning(translatable("moderation.freeze.frozenList.none"));
+        return;
       }
 
-      target.kickPlayer(
-          formatPunishmentScreen(
-              PunishmentType.KICK,
-              UsernameFormatUtils.formatStaffName(sender, match),
-              reason,
-              null));
-    }
-  }
-
-  @Command(
-      aliases = {"ban", "permban", "pb"},
-      usage = "<player> <reason> -s (silent) -t (time)",
-      desc = "Ban an online player from the server",
-      flags = "st",
-      perms = Permissions.BAN)
-  public void ban(
-      CommandSender sender,
-      Player target,
-      Match match,
-      @Text String reason,
-      @Switch('s') boolean silent,
-      @Switch('t') Duration banLength)
-      throws CommandException {
-    silent = checkSilent(silent, sender);
-    boolean tempBan = banLength != null && !banLength.isZero();
-
-    MatchPlayer targetMatchPlayer = match.getPlayer(target);
-    Component senderName = UsernameFormatUtils.formatStaffName(sender, match);
-    if (punish(
-        tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
-        targetMatchPlayer,
-        sender,
-        reason,
-        banLength,
-        silent)) {
-      banPlayer(
-          target.getName(), reason, senderName, tempBan ? Instant.now().plus(banLength) : null);
-      cacheRecentBan(target, UsernameFormatUtils.formatStaffName(sender, match));
-      target.kickPlayer(
-          formatPunishmentScreen(
-              tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
-              senderName,
-              reason,
-              tempBan ? banLength : null));
-    }
-  }
-
-  @Command(
-      aliases = {"ipban", "banip", "ipb"},
-      usage = "<player|ip address> <reason> -s (silent)",
-      desc = "IP Ban a player from the server",
-      flags = "s",
-      perms = Permissions.BAN)
-  public void ipBan(
-      Audience viewer,
-      CommandSender sender,
-      MatchManager manager,
-      String target,
-      @Text String reason,
-      @Switch('s') boolean silent)
-      throws CommandException {
-    silent = checkSilent(silent, sender);
-
-    Player targetPlayer = Bukkit.getPlayerExact(target);
-    String address = target; // Default address to what was input
-
-    if (targetPlayer != null) {
-      // If target is a player, fetch their IP and use that
-      address = targetPlayer.getAddress().getAddress().getHostAddress();
-    } else if (getBanWithMatchingName(target).isPresent()) {
-      address = getBanWithMatchingName(target).get().getAddress();
-    }
-
-    // Validate if the IP is a valid IP
-    if (InetAddresses.isInetAddress(address)) {
-      // Special method for IP Ban
-      Bukkit.getBanList(BanList.Type.IP)
-          .addBan(
-              address,
-              reason,
-              null,
-              TextTranslations.translateLegacy(
-                  UsernameFormatUtils.formatStaffName(sender, manager.getMatch(sender)), sender));
-
-      int onlineBans = 0;
-      // Check all online players to find those with same IP.
-      for (Player player : Bukkit.getOnlinePlayers()) {
-        MatchPlayer matchPlayer = manager.getPlayer(player);
-        if (player.getAddress().getAddress().getHostAddress().equals(address)) {
-          // Kick players with same IP
-          if (punish(PunishmentType.BAN, matchPlayer, sender, reason, silent)) {
-
-            // Ban username to prevent rejoining
-            banPlayer(
-                player.getName(),
-                reason,
-                UsernameFormatUtils.formatStaffName(sender, matchPlayer.getMatch()),
-                null);
-
-            player.kickPlayer(
-                formatPunishmentScreen(
-                    PunishmentType.BAN,
-                    UsernameFormatUtils.formatStaffName(sender, manager.getMatch(sender)),
-                    reason,
-                    null));
-            onlineBans++;
-          }
-        }
+      // Online Players
+      if (!fmm.getFrozenPlayers().isEmpty()) {
+        Component names =
+            join(
+                JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)),
+                fmm.getFrozenPlayers().stream()
+                    .map(m -> m.getName(NameStyle.FANCY))
+                    .collect(Collectors.toList()));
+        sender.sendMessage(
+            formatFrozenList(
+                "moderation.freeze.frozenList.online", fmm.getFrozenPlayers().size(), names));
       }
 
-      Component formattedTarget = text(target, NamedTextColor.DARK_AQUA);
-      if (onlineBans > 0) {
+      // Offline Players
+      if (fmm.getOfflineFrozenCount() > 0) {
+        Component names = fmm.getOfflineFrozenNames();
+        sender.sendMessage(
+            formatFrozenList(
+                "moderation.freeze.frozenList.offline", fmm.getOfflineFrozenCount(), names));
+      }
+    }
+
+    private Component formatFrozenList(String key, int count, Component names) {
+      return translatable(key, NamedTextColor.GRAY, text(count, NamedTextColor.AQUA), names);
+    }
+
+    @Command(
+        aliases = {"freeze", "fz", "f"},
+        usage = "<player>",
+        flags = "s",
+        desc = "Toggle a player's frozen state",
+        perms = Permissions.FREEZE)
+    public void freeze(CommandSender sender, Match match, Player target, @Switch('s') boolean silent)
+        throws CommandException {
+      setFreeze(sender, match, target, checkSilent(silent, sender));
+    }
+
+    private void setFreeze(CommandSender sender, Match match, Player target, boolean silent) {
+      FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
+      MatchPlayer player = match.getPlayer(target);
+      if (player != null) {
+        fmm.setFrozen(sender, player, !fmm.isFrozen(player), silent);
+      }
+    }
+
+    @Command(
+        aliases = {"mute", "m"},
+        usage = "<player> <reason>",
+        desc = "Mute a player",
+        perms = Permissions.MUTE)
+    public void mute(
+        Audience viewer, CommandSender sender, Player target, Match match, @Text String reason) {
+      MatchPlayer targetMatchPlayer = match.getPlayer(target);
+      if (chat.isMuted(targetMatchPlayer)) {
         viewer.sendWarning(
-            translatable(
-                "moderation.ipBan.bannedWithAlts",
-                formattedTarget,
-                text(
-                    targetPlayer == null ? onlineBans : Math.max(0, onlineBans - 1),
-                    NamedTextColor.AQUA)));
-      } else {
-        viewer.sendMessage(
-            translatable("moderation.ipBan.banned", NamedTextColor.RED, formattedTarget));
+            translatable("moderation.mute.existing", targetMatchPlayer.getName(NameStyle.FANCY)));
+        return;
       }
 
-    } else {
-      viewer.sendMessage(
-          translatable(
-              "moderation.ipBan.invalidIP",
-              NamedTextColor.GRAY,
-              text(address, NamedTextColor.RED, TextDecoration.ITALIC)));
+      // Send a warning to the player to identify mute reason
+      warn(sender, target, match, reason);
+
+      if (punish(PunishmentType.MUTE, targetMatchPlayer, sender, reason, true)) {
+        chat.addMuted(targetMatchPlayer, reason);
+      }
     }
-  }
 
-  @Command(
-      aliases = {"offlineban", "offban"},
-      usage = "<player> <reason> -t (length)",
-      desc = "Ban an offline player from the server",
-      flags = "t",
-      perms = Permissions.BAN)
-  public void offlineBan(
-      CommandSender sender,
-      MatchManager manager,
-      String target,
-      @Text String reason,
-      @Switch('t') Duration duration)
-      throws CommandException {
-    boolean tempBan = duration != null && !duration.isZero();
-    PunishmentType type = tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN;
-    Component punisher = UsernameFormatUtils.formatStaffName(sender, manager.getMatch(sender));
-
-    banPlayer(target, reason, punisher, tempBan ? Instant.now().plus(duration) : null);
-    broadcastPunishment(
-        type,
-        manager.getMatch(sender),
-        sender,
-        text(target, NamedTextColor.DARK_AQUA),
-        reason,
-        true,
-        duration);
-
-    // Check if target is online, cache and kick after ban
-    Player player = Bukkit.getPlayerExact(target);
-    if (player != null) {
-      cacheRecentBan(player, punisher);
-      player.kickPlayer(formatPunishmentScreen(type, punisher, reason, tempBan ? duration : null));
-    }
-  }
-
-  @Command(
-      aliases = {"alts", "listalts"},
-      usage = "[target] [page]",
-      desc = "List online players on the same IP",
-      perms = Permissions.STAFF)
-  public void alts(
-      Audience viewer,
-      CommandSender sender,
-      MatchManager manager,
-      @Maybe Player targetPl,
-      @Default("1") int page)
-      throws CommandException {
-    if (targetPl != null) {
-      MatchPlayer target = manager.getPlayer(targetPl);
-      List<MatchPlayer> alts = getAltAccounts(targetPl, manager);
-      if (alts.isEmpty()) {
-        viewer.sendMessage(
-            translatable(
-                "moderation.alts.noAlts", NamedTextColor.RED, target.getName(NameStyle.FANCY)));
-      } else {
-        viewer.sendMessage(formatAltAccountList(target, alts));
-      }
-    } else {
-      List<Component> altAccounts = Lists.newArrayList();
-      List<MatchPlayer> accountedFor = Lists.newArrayList();
-
-      for (Player player : Bukkit.getOnlinePlayers()) {
-        MatchPlayer targetMP = manager.getPlayer(player);
-        List<MatchPlayer> alts = getAltAccounts(player, manager);
-
-        if (alts.isEmpty() || accountedFor.contains(targetMP)) {
-          continue;
-        } else {
-          altAccounts.add(formatAltAccountList(targetMP, alts));
-          accountedFor.add(targetMP);
-          accountedFor.addAll(alts);
-        }
+    @Command(
+        aliases = {"mutes", "mutelist"},
+        desc = "List of muted players",
+        perms = Permissions.MUTE)
+    public void listMutes(Audience viewer, CommandSender sender, MatchManager manager)
+        throws CommandException {
+      List<Component> onlineMutes =
+          chat.getMutedUUIDs().stream()
+              .filter(u -> (manager.getPlayer(u) != null))
+              .map(manager::getPlayer)
+              .map(mp -> mp.getName(NameStyle.FANCY))
+              .collect(Collectors.toList());
+      if (onlineMutes.isEmpty()) {
+        throw new CommandException(
+            TextTranslations.translateLegacy(
+                translatable("moderation.mute.none", NamedTextColor.RED), sender));
       }
 
-      int perPage = 8;
-      int pages = (altAccounts.size() + perPage - 1) / perPage;
-
-      Component pageHeader =
-          translatable(
-              "command.pageHeader",
-              NamedTextColor.GRAY,
-              text(page, NamedTextColor.DARK_AQUA),
-              text(pages, NamedTextColor.DARK_AQUA));
-
-      Component headerText = translatable("moderation.alts.header", NamedTextColor.DARK_AQUA);
-
-      Component header =
+      Component names =
+          join(JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)), onlineMutes);
+      Component message =
           text()
-              .append(headerText)
-              .append(text(" (", NamedTextColor.GRAY))
-              .append(text(altAccounts.size(), NamedTextColor.DARK_AQUA))
-              .append(text(") »", NamedTextColor.GRAY))
-              .append(pageHeader)
+              .append(translatable("moderation.mute.list", NamedTextColor.GOLD))
+              .append(text("(", NamedTextColor.GRAY))
+              .append(text(onlineMutes.size(), NamedTextColor.YELLOW))
+              .append(text("): ", NamedTextColor.GRAY))
+              .append(names)
               .build();
 
-      Component formattedHeader =
-          TextFormatter.horizontalLineHeading(sender, header, NamedTextColor.BLUE);
-
-      new PrettyPaginatedComponentResults<Component>(formattedHeader, perPage) {
-        @Override
-        public Component format(Component data, int index) {
-          return data;
-        }
-
-        @Override
-        public Component formatEmpty() throws CommandException {
-          throw new CommandException(ChatColor.RED + "No alternate accounts found!");
-        }
-      }.display(viewer, altAccounts, page);
+      viewer.sendMessage(message);
     }
-  }
 
-  @Command(
-      aliases = {"baninfo", "lookup", "l"},
-      usage = "[player/uuid]",
-      desc = "Lookup baninfo about a player",
-      perms = Permissions.STAFF)
-  public void banInfo(Audience viewer, CommandSender sender, String target)
-      throws CommandException {
-
-    if (!XMLUtils.USERNAME_REGEX.matcher(target).matches()) {
-      UUID uuid = UUID.fromString(target);
-      Username username = PGM.get().getDatastore().getUsername(uuid);
-      if (username.getNameLegacy() != null) {
-        target = username.getNameLegacy();
+    @Command(
+        aliases = {"unmute", "um"},
+        usage = "<player>",
+        desc = "Unmute a player",
+        perms = Permissions.MUTE)
+    public void unMute(Audience viewer, CommandSender sender, Player target, Match match) {
+      MatchPlayer targetMatchPlayer = match.getPlayer(target);
+      if (chat.isMuted(targetMatchPlayer)) {
+        chat.removeMuted(targetMatchPlayer);
+        targetMatchPlayer.sendMessage(translatable("moderation.unmute.target", NamedTextColor.GREEN));
+        viewer.sendMessage(
+            translatable(
+                "moderation.unmute.sender",
+                NamedTextColor.GRAY,
+                targetMatchPlayer.getName(NameStyle.FANCY)));
       } else {
+        viewer.sendMessage(
+            translatable(
+                "moderation.unmute.none",
+                NamedTextColor.RED,
+                targetMatchPlayer.getName(NameStyle.FANCY)));
+      }
+    }
+
+    @Command(
+        aliases = {"warn", "w"},
+        usage = "<player> <reason>",
+        desc = "Warn a player for bad behavior",
+        perms = Permissions.WARN)
+    public void warn(CommandSender sender, Player target, Match match, @Text String reason) {
+      MatchPlayer targetMatchPlayer = match.getPlayer(target);
+      if (punish(PunishmentType.WARN, targetMatchPlayer, sender, reason, true)) {
+        sendModerationWarning(targetMatchPlayer, reason);
+      }
+    }
+
+    @Command(
+        aliases = {"kick", "k"},
+        usage = "<player> <reason> -s (silent)",
+        desc = "Kick a player from the server",
+        flags = "s",
+        perms = Permissions.KICK)
+    public void kick(
+        CommandSender sender,
+        Player target,
+        Match match,
+        @Text String reason,
+        @Switch('s') boolean silent) {
+      silent = checkSilent(silent, sender);
+      MatchPlayer targetMatchPlayer = match.getPlayer(target);
+      if (punish(PunishmentType.KICK, targetMatchPlayer, sender, reason, silent)) {
+
+        // Unfreeze players who are kicked
+        FreezeMatchModule fmm = match.getModule(FreezeMatchModule.class);
+        if (fmm.isFrozen(targetMatchPlayer)) {
+          fmm.setFrozen(sender, targetMatchPlayer, false, false);
+        }
+
+        target.kickPlayer(
+            formatPunishmentScreen(
+                PunishmentType.KICK,
+                UsernameFormatUtils.formatStaffName(sender, match),
+                reason,
+                null));
+      }
+    }
+
+    @Command(
+        aliases = {"ban", "permban", "pb"},
+        usage = "<player> <reason> -s (silent) -t (time)",
+        desc = "Ban an online player from the server",
+        flags = "st",
+        perms = Permissions.BAN)
+    public void ban(
+        CommandSender sender,
+        Player target,
+        Match match,
+        @Text String reason,
+        @Switch('s') boolean silent,
+        @Switch('t') Duration banLength)
+        throws CommandException {
+      silent = checkSilent(silent, sender);
+      boolean tempBan = banLength != null && !banLength.isZero();
+
+      MatchPlayer targetMatchPlayer = match.getPlayer(target);
+      Component senderName = UsernameFormatUtils.formatStaffName(sender, match);
+      if (punish(
+          tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
+          targetMatchPlayer,
+          sender,
+          reason,
+          banLength,
+          silent)) {
+        banPlayer(
+            target.getName(), reason, senderName, tempBan ? Instant.now().plus(banLength) : null);
+        cacheRecentBan(target, UsernameFormatUtils.formatStaffName(sender, match));
+        target.kickPlayer(
+            formatPunishmentScreen(
+                tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN,
+                senderName,
+                reason,
+                tempBan ? banLength : null));
+      }
+    }
+
+    @Command(
+        aliases = {"ipban", "banip", "ipb"},
+        usage = "<player|ip address> <reason> -s (silent)",
+        desc = "IP Ban a player from the server",
+        flags = "s",
+        perms = Permissions.BAN)
+    public void ipBan(
+        Audience viewer,
+        CommandSender sender,
+        MatchManager manager,
+        String target,
+        @Text String reason,
+        @Switch('s') boolean silent)
+        throws CommandException {
+      silent = checkSilent(silent, sender);
+
+      Player targetPlayer = Bukkit.getPlayerExact(target);
+      String address = target; // Default address to what was input
+
+      if (targetPlayer != null) {
+        // If target is a player, fetch their IP and use that
+        address = targetPlayer.getAddress().getAddress().getHostAddress();
+      } else if (getBanWithMatchingName(target).isPresent()) {
+        address = getBanWithMatchingName(target).get().getAddress();
+      }
+
+      // Validate if the IP is a valid IP
+      if (InetAddresses.isInetAddress(address)) {
+        // Special method for IP Ban
+        Bukkit.getBanList(BanList.Type.IP)
+            .addBan(
+                address,
+                reason,
+                null,
+                TextTranslations.translateLegacy(
+                    UsernameFormatUtils.formatStaffName(sender, manager.getMatch(sender)), sender));
+
+        int onlineBans = 0;
+        // Check all online players to find those with same IP.
+        for (Player player : Bukkit.getOnlinePlayers()) {
+          MatchPlayer matchPlayer = manager.getPlayer(player);
+          if (player.getAddress().getAddress().getHostAddress().equals(address)) {
+            // Kick players with same IP
+            if (punish(PunishmentType.BAN, matchPlayer, sender, reason, silent)) {
+
+              // Ban username to prevent rejoining
+              banPlayer(
+                  player.getName(),
+                  reason,
+                  UsernameFormatUtils.formatStaffName(sender, matchPlayer.getMatch()),
+                  null);
+
+              player.kickPlayer(
+                  formatPunishmentScreen(
+                      PunishmentType.BAN,
+                      UsernameFormatUtils.formatStaffName(sender, manager.getMatch(sender)),
+                      reason,
+                      null));
+              onlineBans++;
+            }
+          }
+        }
+
+        Component formattedTarget = text(target, NamedTextColor.DARK_AQUA);
+        if (onlineBans > 0) {
+          viewer.sendWarning(
+              translatable(
+                  "moderation.ipBan.bannedWithAlts",
+                  formattedTarget,
+                  text(
+                      targetPlayer == null ? onlineBans : Math.max(0, onlineBans - 1),
+                      NamedTextColor.AQUA)));
+        } else {
+          viewer.sendMessage(
+              translatable("moderation.ipBan.banned", NamedTextColor.RED, formattedTarget));
+        }
+
+      } else {
+        viewer.sendMessage(
+            translatable(
+                "moderation.ipBan.invalidIP",
+                NamedTextColor.GRAY,
+                text(address, NamedTextColor.RED, TextDecoration.ITALIC)));
+      }
+    }
+
+    @Command(
+        aliases = {"offlineban", "offban"},
+        usage = "<player> <reason> -t (length)",
+        desc = "Ban an offline player from the server",
+        flags = "t",
+        perms = Permissions.BAN)
+    public void offlineBan(
+        CommandSender sender,
+        MatchManager manager,
+        String target,
+        @Text String reason,
+        @Switch('t') Duration duration)
+        throws CommandException {
+      boolean tempBan = duration != null && !duration.isZero();
+      PunishmentType type = tempBan ? PunishmentType.TEMP_BAN : PunishmentType.BAN;
+      Component punisher = UsernameFormatUtils.formatStaffName(sender, manager.getMatch(sender));
+
+      banPlayer(target, reason, punisher, tempBan ? Instant.now().plus(duration) : null);
+      broadcastPunishment(
+          type,
+          manager.getMatch(sender),
+          sender,
+          text(target, NamedTextColor.DARK_AQUA),
+          reason,
+          true,
+          duration);
+
+      // Check if target is online, cache and kick after ban
+      Player player = Bukkit.getPlayerExact(target);
+      if (player != null) {
+        cacheRecentBan(player, punisher);
+        player.kickPlayer(formatPunishmentScreen(type, punisher, reason, tempBan ? duration : null));
+      }
+    }
+
+    @Command(
+        aliases = {"alts", "listalts"},
+        usage = "[target] [page]",
+        desc = "List online players on the same IP",
+        perms = Permissions.STAFF)
+    public void alts(
+        Audience viewer,
+        CommandSender sender,
+        MatchManager manager,
+        @Maybe Player targetPl,
+        @Default("1") int page)
+        throws CommandException {
+      if (targetPl != null) {
+        MatchPlayer target = manager.getPlayer(targetPl);
+        List<MatchPlayer> alts = getAltAccounts(targetPl, manager);
+        if (alts.isEmpty()) {
+          viewer.sendMessage(
+              translatable(
+                  "moderation.alts.noAlts", NamedTextColor.RED, target.getName(NameStyle.FANCY)));
+        } else {
+          viewer.sendMessage(formatAltAccountList(target, alts));
+        }
+      } else {
+        List<Component> altAccounts = Lists.newArrayList();
+        List<MatchPlayer> accountedFor = Lists.newArrayList();
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+          MatchPlayer targetMP = manager.getPlayer(player);
+          List<MatchPlayer> alts = getAltAccounts(player, manager);
+
+          if (alts.isEmpty() || accountedFor.contains(targetMP)) {
+            continue;
+          } else {
+            altAccounts.add(formatAltAccountList(targetMP, alts));
+            accountedFor.add(targetMP);
+            accountedFor.addAll(alts);
+          }
+        }
+
+        int perPage = 8;
+        int pages = (altAccounts.size() + perPage - 1) / perPage;
+
+        Component pageHeader =
+            translatable(
+                "command.pageHeader",
+                NamedTextColor.GRAY,
+                text(page, NamedTextColor.DARK_AQUA),
+                text(pages, NamedTextColor.DARK_AQUA));
+
+        Component headerText = translatable("moderation.alts.header", NamedTextColor.DARK_AQUA);
+
+        Component header =
+            text()
+                .append(headerText)
+                .append(text(" (", NamedTextColor.GRAY))
+                .append(text(altAccounts.size(), NamedTextColor.DARK_AQUA))
+                .append(text(") »", NamedTextColor.GRAY))
+                .append(pageHeader)
+                .build();
+
+        Component formattedHeader =
+            TextFormatter.horizontalLineHeading(sender, header, NamedTextColor.BLUE);
+
+        new PrettyPaginatedComponentResults<Component>(formattedHeader, perPage) {
+          @Override
+          public Component format(Component data, int index) {
+            return data;
+          }
+
+          @Override
+          public Component formatEmpty() throws CommandException {
+            throw new CommandException(ChatColor.RED + "No alternate accounts found!");
+          }
+        }.display(viewer, altAccounts, page);
+      }
+    }
+
+    @Command(
+        aliases = {"baninfo", "lookup", "l"},
+        usage = "[player/uuid]",
+        desc = "Lookup baninfo about a player",
+        perms = Permissions.STAFF)
+    public void banInfo(Audience viewer, CommandSender sender, String target)
+        throws CommandException {
+
+      if (!XMLUtils.USERNAME_REGEX.matcher(target).matches()) {
+        UUID uuid = UUID.fromString(target);
+        Username username = PGM.get().getDatastore().getUsername(uuid);
+        if (username.getNameLegacy() != null) {
+          target = username.getNameLegacy();
+        } else {
+          throw new CommandException(
+              TextTranslations.translateLegacy(
+                  translatable(
+                      "command.notJoinedServer",
+                      NamedTextColor.RED,
+                      text(target, NamedTextColor.AQUA)),
+                  sender));
+        }
+      }
+
+      BanEntry ban = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(target);
+
+      if (ban == null
+          || ban.getExpiration() != null && ban.getExpiration().toInstant().isBefore(Instant.now())) {
         throw new CommandException(
             TextTranslations.translateLegacy(
                 translatable(
-                    "command.notJoinedServer",
-                    NamedTextColor.RED,
-                    text(target, NamedTextColor.AQUA)),
+                    "moderation.records.lookupNone",
+                    NamedTextColor.GRAY,
+                    text(target, NamedTextColor.DARK_AQUA)),
                 sender));
       }
-    }
 
-    BanEntry ban = Bukkit.getBanList(BanList.Type.NAME).getBanEntry(target);
+      Component header =
+          text()
+              .append(translatable("moderation.records.header", NamedTextColor.GRAY))
+              .append(BROADCAST_DIV)
+              .append(text(target, NamedTextColor.DARK_AQUA, TextDecoration.ITALIC))
+              .build();
+      boolean expires = ban.getExpiration() != null;
+      Component banType = translatable("moderation.type.ban", NamedTextColor.GOLD);
+      Component expireDate = empty();
+      if (expires) {
+        String length =
+            TextTranslations.translateLegacy(
+                TemporalComponent.briefNaturalApproximate(
+                    ban.getCreated().toInstant(), ban.getExpiration().toInstant()),
+                sender);
+        Component remaining =
+            TemporalComponent.briefNaturalApproximate(Instant.now(), ban.getExpiration().toInstant())
+                .color(NamedTextColor.YELLOW);
 
-    if (ban == null
-        || ban.getExpiration() != null && ban.getExpiration().toInstant().isBefore(Instant.now())) {
-      throw new CommandException(
-          TextTranslations.translateLegacy(
-              translatable(
-                  "moderation.records.lookupNone",
-                  NamedTextColor.GRAY,
-                  text(target, NamedTextColor.DARK_AQUA)),
-              sender));
-    }
+        banType =
+            translatable(
+                "moderation.type.temp_ban",
+                NamedTextColor.GOLD,
+                text(
+                    length.lastIndexOf('s') != -1
+                        ? length.substring(0, length.lastIndexOf('s'))
+                        : length));
+        expireDate = translatable("moderation.screen.expires", NamedTextColor.GRAY, remaining);
+      }
 
-    Component header =
-        text()
-            .append(translatable("moderation.records.header", NamedTextColor.GRAY))
-            .append(BROADCAST_DIV)
-            .append(text(target, NamedTextColor.DARK_AQUA, TextDecoration.ITALIC))
-            .build();
-    boolean expires = ban.getExpiration() != null;
-    Component banType = translatable("moderation.type.ban", NamedTextColor.GOLD);
-    Component expireDate = empty();
-    if (expires) {
-      String length =
-          TextTranslations.translateLegacy(
-              TemporalComponent.briefNaturalApproximate(
-                  ban.getCreated().toInstant(), ban.getExpiration().toInstant()),
-              sender);
-      Component remaining =
-          TemporalComponent.briefNaturalApproximate(Instant.now(), ban.getExpiration().toInstant())
-              .color(NamedTextColor.YELLOW);
+      Component createdAgo =
+          TemporalComponent.relativePastApproximate(ban.getCreated().toInstant())
+              .color(NamedTextColor.GRAY);
 
-      banType =
+      Component banTypeFormatted = translatable("moderation.type", NamedTextColor.GRAY, banType);
+
+      Component reason =
           translatable(
-              "moderation.type.temp_ban",
-              NamedTextColor.GOLD,
-              text(
-                  length.lastIndexOf('s') != -1
-                      ? length.substring(0, length.lastIndexOf('s'))
-                      : length));
-      expireDate = translatable("moderation.screen.expires", NamedTextColor.GRAY, remaining);
+              "moderation.records.reason",
+              NamedTextColor.GRAY,
+              text(ban.getReason(), NamedTextColor.RED));
+      Component source =
+          text()
+              .append(
+                  translatable(
+                      "moderation.screen.signoff",
+                      NamedTextColor.GRAY,
+                      text(ban.getSource(), NamedTextColor.AQUA)))
+              .append(space())
+              .append(createdAgo)
+              .build();
+
+      viewer.sendMessage(
+          TextFormatter.horizontalLineHeading(sender, header, NamedTextColor.DARK_PURPLE));
+      viewer.sendMessage(banTypeFormatted);
+      viewer.sendMessage(reason);
+      viewer.sendMessage(source);
+      if (expires) {
+        viewer.sendMessage(expireDate);
+      }
     }
-
-    Component createdAgo =
-        TemporalComponent.relativePastApproximate(ban.getCreated().toInstant())
-            .color(NamedTextColor.GRAY);
-
-    Component banTypeFormatted = translatable("moderation.type", NamedTextColor.GRAY, banType);
-
-    Component reason =
-        translatable(
-            "moderation.records.reason",
-            NamedTextColor.GRAY,
-            text(ban.getReason(), NamedTextColor.RED));
-    Component source =
-        text()
-            .append(
-                translatable(
-                    "moderation.screen.signoff",
-                    NamedTextColor.GRAY,
-                    text(ban.getSource(), NamedTextColor.AQUA)))
-            .append(space())
-            .append(createdAgo)
-            .build();
-
-    viewer.sendMessage(
-        TextFormatter.horizontalLineHeading(sender, header, NamedTextColor.DARK_PURPLE));
-    viewer.sendMessage(banTypeFormatted);
-    viewer.sendMessage(reason);
-    viewer.sendMessage(source);
-    if (expires) {
-      viewer.sendMessage(expireDate);
-    }
-  }
-
+  */
   private Component formatAltAccountList(MatchPlayer target, List<MatchPlayer> alts) {
     Component names =
         join(
@@ -753,7 +738,7 @@ public class ModerationCommand implements Listener {
    * Formatting of Kick Screens (KICK/BAN/TEMPBAN)
    */
   public static String formatPunishmentScreen(
-      PunishmentType type, Component punisher, String reason, @Maybe Duration expires) {
+      PunishmentType type, Component punisher, String reason, Duration expires) {
     List<Component> lines = Lists.newArrayList();
 
     Component header =
@@ -931,7 +916,7 @@ public class ModerationCommand implements Listener {
    * Bukkit method of banning players
    * NOTE: Will use this if not handled by other plugins
    */
-  private void banPlayer(String target, String reason, Component source, @Maybe Instant expires) {
+  private void banPlayer(String target, String reason, Component source, Instant expires) {
     Bukkit.getBanList(BanList.Type.NAME)
         .addBan(
             target,

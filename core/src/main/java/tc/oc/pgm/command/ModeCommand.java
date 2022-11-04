@@ -6,9 +6,11 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Default;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.specifier.Range;
 import java.time.Duration;
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -24,12 +26,11 @@ import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextFormatter;
 
-// TODO: make the output nicer
+@CommandMethod("mode|modes")
 public final class ModeCommand {
 
-  @Command(
-      aliases = {"next"},
-      desc = "Show the next objective mode")
+  @CommandMethod("next")
+  @CommandDescription("Show the next objective mode")
   public void next(Audience audience, Match match) {
     ObjectiveModesMatchModule modes = getModes(match);
 
@@ -72,19 +73,19 @@ public final class ModeCommand {
     }
   }
 
-  @Command(
-      aliases = {"list", "page"},
-      desc = "List all objective modes",
-      usage = "[page]")
-  public void list(Audience audience, Match match, @Default("1") int page) throws CommandException {
+  @CommandMethod("list|page [page]")
+  @CommandDescription("List all objective modes")
+  public void list(
+      Audience audience,
+      Match match,
+      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page) {
     showList(page, audience, getModes(match));
   }
 
-  @Command(
-      aliases = {"push"},
-      desc = "Reschedule all objective modes with active countdowns",
-      perms = Permissions.GAMEPLAY)
-  public void push(Audience audience, Match match, Duration duration) {
+  @CommandMethod("push <time>")
+  @CommandDescription("Reschedule all objective modes with active countdowns")
+  @CommandPermission(Permissions.GAMEPLAY)
+  public void push(Audience audience, Match match, @Argument("time") Duration duration) {
     ObjectiveModesMatchModule modes = getModes(match);
 
     if (!match.isRunning()) {
@@ -124,12 +125,10 @@ public final class ModeCommand {
     audience.sendMessage(builder);
   }
 
-  @Command(
-      aliases = {"start"},
-      desc = "Starts an objective mode",
-      perms = Permissions.GAMEPLAY)
-  public void start(Audience audience, Match match, int modeNumber, Duration duration)
-      throws CommandException {
+  @CommandMethod("start")
+  @CommandDescription("Starts an objective mode")
+  @CommandPermission(Permissions.GAMEPLAY)
+  public void start(Audience audience, Match match, int modeNumber, Duration duration) {
     ObjectiveModesMatchModule modes = getModes(match);
 
     if (!match.isRunning()) {
@@ -170,8 +169,7 @@ public final class ModeCommand {
     audience.sendMessage(builder);
   }
 
-  private static void showList(int page, Audience audience, ObjectiveModesMatchModule modes)
-      throws CommandException {
+  private static void showList(int page, Audience audience, ObjectiveModesMatchModule modes) {
     if (modes == null) {
       throwNoResults();
     } else {

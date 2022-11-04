@@ -4,17 +4,18 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static tc.oc.pgm.util.text.TextException.exception;
 
-import app.ashcon.intake.Command;
-import app.ashcon.intake.CommandException;
-import app.ashcon.intake.parametric.annotation.Maybe;
-import app.ashcon.intake.parametric.annotation.Text;
+import cloud.commandframework.annotations.Argument;
+import cloud.commandframework.annotations.CommandDescription;
+import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.specifier.Greedy;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
@@ -29,23 +30,20 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
-import tc.oc.pgm.util.text.TextTranslations;
 
+@CommandMethod("vote|votes")
 public class VotingCommand {
 
-  @Command(
-      aliases = {"add"},
-      desc = "Add a custom map to the next vote",
-      usage = "[map name]",
-      perms = Permissions.SETNEXT)
+  @CommandMethod("add [map]")
+  @CommandDescription("Add a custom map to the next vote")
+  @CommandPermission(Permissions.SETNEXT)
   public void addMap(
       Audience viewer,
       CommandSender sender,
       MapOrder mapOrder,
       Match match,
-      @Maybe @Text MapInfo map)
-      throws CommandException {
-    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
+      @Argument("map") @Greedy MapInfo map) {
+    VotePoolOptions vote = getVoteOptions(mapOrder);
 
     Component addMessage =
         translatable(
@@ -66,19 +64,16 @@ public class VotingCommand {
     }
   }
 
-  @Command(
-      aliases = {"remove", "rm"},
-      desc = "Remove a custom map from the next vote",
-      usage = "[map name]",
-      perms = Permissions.SETNEXT)
+  @CommandMethod("remove|rm [map]")
+  @CommandDescription("Remove a custom map from the next vote")
+  @CommandPermission(Permissions.SETNEXT)
   public void removeMap(
       Audience viewer,
       CommandSender sender,
       MapOrder mapOrder,
       Match match,
-      @Maybe @Text MapInfo map)
-      throws CommandException {
-    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
+      @Argument("map") @Greedy MapInfo map) {
+    VotePoolOptions vote = getVoteOptions(mapOrder);
     if (vote.removeMap(map)) {
       ChatDispatcher.broadcastAdminChatMessage(
           translatable(
@@ -92,13 +87,11 @@ public class VotingCommand {
     }
   }
 
-  @Command(
-      aliases = {"mode"},
-      desc = "Toggle the voting mode between replace and override",
-      perms = Permissions.SETNEXT)
-  public void mode(Audience viewer, CommandSender sender, MapOrder mapOrder, Match match)
-      throws CommandException {
-    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
+  @CommandMethod("mode")
+  @CommandDescription("Toggle the voting mode between replace and override")
+  @CommandPermission(Permissions.SETNEXT)
+  public void mode(CommandSender sender, MapOrder mapOrder, Match match) {
+    VotePoolOptions vote = getVoteOptions(mapOrder);
     Component voteModeName =
         translatable(
             vote.toggleMode() ? "vote.mode.replace" : "vote.mode.create",
@@ -112,13 +105,11 @@ public class VotingCommand {
         match);
   }
 
-  @Command(
-      aliases = {"clear"},
-      desc = "Clear all custom map selections from the next vote",
-      perms = Permissions.SETNEXT)
-  public void clearMaps(Audience viewer, CommandSender sender, Match match, MapOrder mapOrder)
-      throws CommandException {
-    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
+  @CommandMethod("clear")
+  @CommandDescription("Clear all custom map selections from the next vote")
+  @CommandPermission(Permissions.SETNEXT)
+  public void clearMaps(Audience viewer, CommandSender sender, Match match, MapOrder mapOrder) {
+    VotePoolOptions vote = getVoteOptions(mapOrder);
 
     List<Component> maps =
         vote.getCustomVoteMaps().stream()
@@ -140,12 +131,10 @@ public class VotingCommand {
     }
   }
 
-  @Command(
-      aliases = {"list", "ls"},
-      desc = "View a list of maps that have been selected for the next vote")
-  public void listMaps(CommandSender sender, Audience viewer, MapOrder mapOrder)
-      throws CommandException {
-    VotePoolOptions vote = getVoteOptions(sender, mapOrder);
+  @CommandMethod("list|ls")
+  @CommandDescription("View a list of maps that have been selected for the next vote")
+  public void listMaps(Audience viewer, MapOrder mapOrder) {
+    VotePoolOptions vote = getVoteOptions(mapOrder);
 
     int currentMaps = vote.getCustomVoteMaps().size();
     TextColor listNumColor =
@@ -190,23 +179,19 @@ public class VotingCommand {
     }
   }
 
-  public static VotePoolOptions getVoteOptions(CommandSender sender, MapOrder mapOrder)
-      throws CommandException {
+  public static VotePoolOptions getVoteOptions(MapOrder mapOrder) {
     if (mapOrder instanceof MapPoolManager) {
       MapPoolManager manager = (MapPoolManager) mapOrder;
       if (manager.getActiveMapPool() instanceof VotingPool) {
         VotingPool votePool = (VotingPool) manager.getActiveMapPool();
         if (votePool.getCurrentPoll() != null) {
-          throw new CommandException(
-              ChatColor.RED + TextTranslations.translate("vote.modify.disallow", sender));
+          throw exception("vote.modify.disallow");
         }
         return manager.getVoteOptions();
       }
-      throw new CommandException(
-          ChatColor.RED + TextTranslations.translate("vote.disabled", sender));
+      throw exception("vote.disabled");
     }
 
-    throw new CommandException(
-        ChatColor.RED + TextTranslations.translate("pool.mapPoolsDisabled", sender));
+    throw exception("pool.mapPoolsDisabled");
   }
 }

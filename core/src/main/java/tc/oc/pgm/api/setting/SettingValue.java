@@ -2,12 +2,7 @@ package tc.oc.pgm.api.setting;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.bukkit.DyeColor;
-import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.util.StringUtils;
 
 /**
  * Values of a particular {@link SettingKey}, a toggleable setting.
@@ -83,7 +78,7 @@ public enum SettingValue {
   /**
    * Get {@link DyeColor} related to this setting value .
    *
-   * @see {@link SettingMenu} for usage.
+   * @see tc.oc.pgm.settings.SettingsMenu for usage.
    * @return {@link DyeColor} for this setting value.
    */
   public DyeColor getColor() {
@@ -93,19 +88,5 @@ public enum SettingValue {
   @Override
   public String toString() {
     return getName();
-  }
-
-  public static SettingValue search(SettingKey key, @Nullable String query) {
-    final SettingValue value =
-        StringUtils.bestFuzzyMatch(
-            query,
-            Stream.of(SettingValue.values())
-                .filter(entry -> entry.getKey().equals(key))
-                .collect(Collectors.toMap(SettingValue::getName, Function.identity())),
-            0.6);
-    if (value == null) {
-      return key.getDefaultValue();
-    }
-    return value;
   }
 }
