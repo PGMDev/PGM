@@ -10,14 +10,17 @@ public class MercyRule {
   private final ScoreMatchModule scoreMatchModule;
   private final int scoreLimit;
   private final int mercyLimit;
+  private final int mercyLimitMin;
 
   private Map.Entry<Competitor, Double> leader;
   private Map.Entry<Competitor, Double> trailer;
 
-  public MercyRule(ScoreMatchModule scoreMatchModule, int scoreLimit, int mercyLimit) {
+  public MercyRule(
+      ScoreMatchModule scoreMatchModule, int scoreLimit, int mercyLimit, int mercyLimitMin) {
     this.scoreMatchModule = scoreMatchModule;
     this.scoreLimit = scoreLimit;
     this.mercyLimit = mercyLimit;
+    this.mercyLimitMin = mercyLimitMin;
 
     calculateLeaders();
   }
@@ -49,11 +52,13 @@ public class MercyRule {
   public int getScoreLimit() {
     int scoreBaseline = (int) getTrailerScore();
 
+    int mercyBaseline = Math.max(scoreBaseline + mercyLimit, mercyLimitMin);
+
     if (scoreLimit < 0) {
-      return scoreBaseline + mercyLimit;
+      return mercyBaseline;
     }
 
-    return Math.min(scoreBaseline + mercyLimit, scoreLimit);
+    return Math.min(mercyBaseline, scoreLimit);
   }
 
   public void handleEvent(CompetitorScoreChangeEvent event) {
