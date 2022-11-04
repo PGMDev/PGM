@@ -102,9 +102,9 @@ public final class StringUtils {
     }
 
     // Split and truncate the text, and restore the color in the suffix
-    String prefix = text.substring(0, split);
+    String prefix = substring(text, 0, split);
     String lastColors = ChatColor.getLastColors(prefix);
-    String suffix = lastColors + text.substring(split, split + MAX_SUFFIX - lastColors.length());
+    String suffix = lastColors + substring(text, split, split + MAX_SUFFIX - lastColors.length());
     return new String[] {prefix, suffix};
   }
 }
