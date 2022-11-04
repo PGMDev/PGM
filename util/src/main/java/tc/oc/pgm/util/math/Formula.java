@@ -21,6 +21,14 @@ public interface Formula<T> extends ToDoubleFunction<T> {
         }
       };
 
+  Function RANDOM =
+      new Function("random", 0) {
+        @Override
+        public double apply(double... doubles) {
+          return Math.random();
+        }
+      };
+
   static <T extends Supplier<Map<String, Double>>> Formula<T> of(
       String expression, Set<String> variables, Formula<T> fallback)
       throws IllegalArgumentException {
@@ -32,7 +40,8 @@ public interface Formula<T> extends ToDoubleFunction<T> {
   static <T> Formula<T> of(String expression, Set<String> variables, ContextBuilder<T> context)
       throws IllegalArgumentException {
 
-    Expression exp = new ExpressionBuilder(expression).variables(variables).function(BOUND).build();
+    Expression exp =
+        new ExpressionBuilder(expression).variables(variables).functions(BOUND, RANDOM).build();
 
     return new ExpFormula<>(exp, context);
   }
