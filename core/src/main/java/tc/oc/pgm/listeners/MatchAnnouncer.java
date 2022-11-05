@@ -9,10 +9,12 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
+import com.google.common.collect.Iterables;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -36,6 +38,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.named.Named;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class MatchAnnouncer implements Listener {
@@ -75,17 +78,19 @@ public class MatchAnnouncer implements Listener {
     // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
       Component title, subtitle = empty();
-      if (event.getWinner() == null) {
+      Collection<Competitor> winners = event.getWinners();
+      if (winners.isEmpty()) {
         title = translatable("broadcast.gameOver");
       } else {
+        boolean plural = winners.size() > 1 || Iterables.getOnlyElement(winners).isNamePlural();
         title =
             translatable(
-                event.getWinner().isNamePlural()
-                    ? "broadcast.gameOver.teamWinners"
-                    : "broadcast.gameOver.teamWinner",
-                event.getWinner().getName());
+                plural ? "broadcast.gameOver.teamWinners" : "broadcast.gameOver.teamWinner",
+                TextFormatter.list(
+                    winners.stream().map(Named::getName).collect(Collectors.toList()),
+                    NamedTextColor.WHITE));
 
-        if (event.getWinner() == viewer.getParty()) {
+        if (winners.stream().anyMatch(w -> w == viewer.getParty())) {
           // Winner
           viewer.playSound(SOUND_MATCH_WIN);
           if (viewer.getParty() instanceof Team) {
@@ -103,9 +108,19 @@ public class MatchAnnouncer implements Listener {
         }
       }
 
-      viewer.showTitle(
-          title(title, subtitle, Title.Times.of(Duration.ZERO, fromTicks(40), fromTicks(40))));
+      Title.Times titleTimes = Title.Times.of(Duration.ZERO, fromTicks(40), fromTicks(40));
+
+      if (winners.size() > 3)
+        viewer.showTitle(
+            title(
+                translatable(
+                    "broadcast.gameOver.winners", text(winners.size(), NamedTextColor.YELLOW)),
+                subtitle,
+                titleTimes));
+      else viewer.showTitle(title(title, subtitle, titleTimes));
+
       viewer.sendMessage(title);
+
       if (viewer.getParty() instanceof Competitor) viewer.sendMessage(subtitle);
     }
   }
