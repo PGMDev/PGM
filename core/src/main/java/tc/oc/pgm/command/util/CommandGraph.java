@@ -23,8 +23,6 @@ import cloud.commandframework.exceptions.NoPermissionException;
 import cloud.commandframework.exceptions.parsing.ParserException;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.extra.confirmation.CommandConfirmationManager;
-import cloud.commandframework.keys.CloudKey;
-import cloud.commandframework.keys.SimpleCloudKey;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
@@ -33,7 +31,6 @@ import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -79,16 +76,19 @@ import tc.oc.pgm.command.TeamCommand;
 import tc.oc.pgm.command.TimeLimitCommand;
 import tc.oc.pgm.command.VotingCommand;
 import tc.oc.pgm.command.injectors.AudienceProvider;
+import tc.oc.pgm.command.injectors.MapPollProvider;
+import tc.oc.pgm.command.injectors.MapPoolManagerProvider;
 import tc.oc.pgm.command.injectors.MatchPlayerProvider;
 import tc.oc.pgm.command.injectors.MatchProvider;
 import tc.oc.pgm.command.injectors.TeamModuleInjector;
 import tc.oc.pgm.command.parsers.DurationParser;
+import tc.oc.pgm.command.parsers.EnumParser;
 import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
 import tc.oc.pgm.command.parsers.PartyParser;
 import tc.oc.pgm.command.parsers.PlayerClassParser;
-import tc.oc.pgm.command.parsers.SettingKeyParser;
+import tc.oc.pgm.command.parsers.RotationParser;
 import tc.oc.pgm.command.parsers.SettingValueParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
@@ -96,15 +96,16 @@ import tc.oc.pgm.command.parsers.VictoryConditionParser;
 import tc.oc.pgm.community.command.ModerationCommand;
 import tc.oc.pgm.community.command.ReportCommand;
 import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
+import tc.oc.pgm.rotation.pools.MapPoolType;
+import tc.oc.pgm.rotation.pools.Rotation;
+import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
 
 public class CommandGraph {
-
-  public static final CloudKey<LinkedList<String>> INPUT_QUEUE =
-      SimpleCloudKey.of("_pgm_input_queue_", new TypeToken<LinkedList<String>>() {});
 
   private final PGM pgm;
   private final PaperCommandManager<CommandSender> manager;
@@ -135,7 +136,8 @@ public class CommandGraph {
 
     // Add the input queue to the context, this allows greedy suggestions to work on it
     this.manager.registerCommandPreProcessor(
-        context -> context.getCommandContext().store(INPUT_QUEUE, context.getInputQueue()));
+        context ->
+            context.getCommandContext().store(CommandKeys.INPUT_QUEUE, context.getInputQueue()));
 
     // By default, suggestions run by a filtered processor.
     // That prevents valid suggestions like "s" -> "Something" or "someh" -> "Something"
@@ -247,6 +249,8 @@ public class CommandGraph {
     registerInjector(Match.class, new MatchProvider());
     registerInjector(MatchPlayer.class, new MatchPlayerProvider());
     registerInjector(TeamMatchModule.class, new TeamModuleInjector());
+    registerInjector(MapPoolManager.class, new MapPoolManagerProvider());
+    registerInjector(MapPoll.class, new MapPollProvider());
   }
 
   private <T> void registerInjector(Class<T> type, ParameterInjector<CommandSender, T> provider) {
@@ -265,6 +269,8 @@ public class CommandGraph {
     registerParser(Duration.class, new DurationParser());
     registerParser(MatchPlayer.class, new MatchPlayerParser());
     registerParser(MapPool.class, new MapPoolParser());
+    registerParser(Rotation.class, new RotationParser());
+    registerParser(MapPoolType.class, new EnumParser<>(MapPoolType.class, CommandKeys.POOL_TYPE));
 
     registerParser(MapInfo.class, MapInfoParser::new);
     registerParser(Party.class, PartyParser::new);
@@ -274,7 +280,7 @@ public class CommandGraph {
     registerParser(
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());
-    registerParser(SettingKey.class, new SettingKeyParser());
+    registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
   }
 

@@ -231,10 +231,10 @@ public final class MapCommand {
     if (PGM.get().getMapOrder() instanceof MapPoolManager) {
       String mapPools =
           ((MapPoolManager) PGM.get().getMapOrder())
-              .getMapPools().stream()
-                  .filter(pool -> pool.getMaps().contains(map))
-                  .map(MapPool::getName)
-                  .collect(Collectors.joining(", "));
+              .getMapPoolStream()
+              .filter(pool -> pool.getMaps().contains(map))
+              .map(MapPool::getName)
+              .collect(Collectors.joining(", "));
       if (!mapPools.isEmpty()) {
         audience.sendMessage(
             text()

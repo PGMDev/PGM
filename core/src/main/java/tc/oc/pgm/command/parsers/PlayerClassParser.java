@@ -18,11 +18,11 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.pgm.command.util.CommandGraph;
+import tc.oc.pgm.command.util.CommandKeys;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StringUtils;
 
-public class PlayerClassParser extends StringLikeParser<CommandSender, PlayerClass> {
+public final class PlayerClassParser extends StringLikeParser<CommandSender, PlayerClass> {
 
   public PlayerClassParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options);
@@ -49,7 +49,7 @@ public class PlayerClassParser extends StringLikeParser<CommandSender, PlayerCla
     Match match = PGM.get().getMatchManager().getMatch(context.getSender());
     if (match == null) return Collections.emptyList();
 
-    List<String> inputQueue = context.get(CommandGraph.INPUT_QUEUE);
+    List<String> inputQueue = context.get(CommandKeys.INPUT_QUEUE);
     String text = StringUtils.getText(inputQueue);
     String mustKeep = StringUtils.getMustKeepText(inputQueue);
 

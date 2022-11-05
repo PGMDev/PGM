@@ -17,7 +17,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.command.util.CommandGraph;
+import tc.oc.pgm.command.util.CommandKeys;
 import tc.oc.pgm.util.StringUtils;
 
 public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
@@ -51,7 +51,7 @@ public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo
   @Override
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
-    List<String> inputQueue = context.get(CommandGraph.INPUT_QUEUE);
+    List<String> inputQueue = context.get(CommandKeys.INPUT_QUEUE);
 
     // Words to keep, as they cannot be replaced (they're not the last arg)
     String keep = StringUtils.getMustKeepText(inputQueue);

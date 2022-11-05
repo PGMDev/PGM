@@ -30,8 +30,9 @@ public class VotingPool extends MapPool {
 
   private MapPoll currentPoll;
 
-  public VotingPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    super(manager, section, name);
+  public VotingPool(
+      MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
+    super(type, name, manager, section);
 
     this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
 

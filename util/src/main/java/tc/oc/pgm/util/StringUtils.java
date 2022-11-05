@@ -17,6 +17,9 @@ public final class StringUtils {
   private StringUtils() {}
 
   public static <E extends Enum<E>> E bestFuzzyMatch(String query, Class<E> enumClass) {
+    if (Aliased.class.isAssignableFrom(enumClass))
+      return bestMultiFuzzyMatch(
+          query, Iterators.forArray(enumClass.getEnumConstants()), a -> (Aliased) a);
     return bestFuzzyMatch(query, Iterators.forArray(enumClass.getEnumConstants()), Enum::name);
   }
 
@@ -48,6 +51,37 @@ public final class StringUtils {
         if (score >= 1) break;
       } else if (score == bestScore) {
         bestObj = null;
+      }
+    }
+    return bestScore < 0.75 ? null : bestObj;
+  }
+
+  public static <A extends Aliased> A bestMultiFuzzyMatch(String query, Iterable<A> choices) {
+    return bestMultiFuzzyMatch(query, choices.iterator(), a -> a);
+  }
+
+  public static <A extends Aliased> A bestMultiFuzzyMatch(String query, Iterator<A> choices) {
+    return bestMultiFuzzyMatch(query, choices, a -> a);
+  }
+
+  // The top method could be an overload of this one, but for performance reasons we'll keep them
+  // separate
+  public static <T> T bestMultiFuzzyMatch(
+      String query, Iterator<T> choices, Function<T, Iterable<String>> toString) {
+    T bestObj = null;
+    double bestScore = 0.0;
+    while (choices.hasNext()) {
+      T next = choices.next();
+      for (String alias : toString.apply(next)) {
+        double score = LiquidMetal.score(alias, query);
+        if (score > bestScore) {
+          bestObj = next;
+          bestScore = score;
+          // Perfect match, no need to keep searching
+          if (score >= 1) break;
+        } else if (next != bestObj && score == bestScore) {
+          bestObj = null;
+        }
       }
     }
     return bestScore < 0.75 ? null : bestObj;
