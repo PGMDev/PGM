@@ -17,9 +17,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
+import tc.oc.pgm.command.util.CommandUtils;
 import tc.oc.pgm.result.VictoryConditions;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -35,12 +35,12 @@ public final class VictoryConditionParser
   public @NonNull ArgumentParseResult<@NonNull Optional<VictoryCondition>> parse(
       @NonNull CommandContext<@NonNull CommandSender> context,
       @NonNull Queue<@NonNull String> inputQueue) {
-    final String input = inputQueue.peek();
+    final String input = inputQueue.poll();
     if (input == null) {
       return failure(new NoInputProvidedException(VictoryConditionParser.class, context));
     }
 
-    final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
+    final Match match = CommandUtils.getMatch(context);
     if (match == null) return failure(playerOnly());
 
     // Default to current tl victory condition
@@ -63,7 +63,7 @@ public final class VictoryConditionParser
   @Override
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
-    final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
+    final Match match = CommandUtils.getMatch(context);
     if (match == null) return BASE_SUGGESTIONS;
 
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);

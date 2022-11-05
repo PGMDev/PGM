@@ -9,7 +9,6 @@ import cloud.commandframework.annotations.CommandMethod;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
@@ -26,7 +25,7 @@ public final class ProximityCommand {
 
   @CommandMethod("proximity|prox")
   @CommandDescription("Show the progress of each objective")
-  public void proximity(MatchPlayer player, Match match) {
+  public void proximity(MatchPlayer player, TeamMatchModule tmm, GoalMatchModule gmm) {
     if (player != null && player.isParticipating()) {
       throw noPermission();
     }
@@ -34,9 +33,8 @@ public final class ProximityCommand {
     // TODO: use components
     List<String> lines = new ArrayList<>();
 
-    for (Team team : match.needModule(TeamMatchModule.class).getParticipatingTeams()) {
+    for (Team team : tmm.getParticipatingTeams()) {
       boolean teamHeader = false;
-      final GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
 
       for (Goal<?> goal : gmm.getGoals(team)) {
         if (goal instanceof TouchableGoal && goal.hasShowOption(ShowOption.SHOW_INFO)) {

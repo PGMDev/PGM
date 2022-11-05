@@ -17,6 +17,9 @@ public final class StringUtils {
   private StringUtils() {}
 
   public static <E extends Enum<E>> E bestFuzzyMatch(String query, Class<E> enumClass) {
+    if (Aliased.class.isAssignableFrom(enumClass))
+      return bestMultiFuzzyMatch(
+          query, Iterators.forArray(enumClass.getEnumConstants()), a -> (Aliased) a);
     return bestFuzzyMatch(query, Iterators.forArray(enumClass.getEnumConstants()), Enum::name);
   }
 
@@ -53,15 +56,53 @@ public final class StringUtils {
     return bestScore < 0.75 ? null : bestObj;
   }
 
-  public static String getSuggestion(String suggestion, String input) {
-    // At least one of the two has no spaces, algorithm isn't needed.
-    if (input.length() > 1 && suggestion.contains(SPACE)) {
-      int matchIdx = LiquidMetal.getIndexOf(suggestion, input);
+  public static <A extends Aliased> A bestMultiFuzzyMatch(String query, Iterable<A> choices) {
+    return bestMultiFuzzyMatch(query, choices.iterator(), a -> a);
+  }
 
-      // Should never happen!
-      if (matchIdx == -1)
-        throw new IllegalStateException(
-            "Suggestion is not matched by input! '" + suggestion + "', '" + input + "'");
+  public static <A extends Aliased> A bestMultiFuzzyMatch(String query, Iterator<A> choices) {
+    return bestMultiFuzzyMatch(query, choices, a -> a);
+  }
+
+  // The top method could be an overload of this one, but for performance reasons we'll keep them
+  // separate
+  public static <T> T bestMultiFuzzyMatch(
+      String query, Iterator<T> choices, Function<T, Iterable<String>> toString) {
+    T bestObj = null;
+    double bestScore = 0.0;
+    while (choices.hasNext()) {
+      T next = choices.next();
+      for (String alias : toString.apply(next)) {
+        double score = LiquidMetal.score(alias, query);
+        if (score > bestScore) {
+          bestObj = next;
+          bestScore = score;
+          // Perfect match, no need to keep searching
+          if (score >= 1) break;
+        } else if (next != bestObj && score == bestScore) {
+          bestObj = null;
+        }
+      }
+    }
+    return bestScore < 0.75 ? null : bestObj;
+  }
+
+  public static String getSuggestion(String suggestion, String mustKeep) {
+    // At least one of the two has no spaces, algorithm isn't needed.
+    if (mustKeep.length() > 1 && suggestion.contains(SPACE)) {
+      int matchIdx = LiquidMetal.getIndexOf(suggestion, mustKeep);
+
+      // Bad case, this can happen when input was normalized before search
+      if (matchIdx == -1) {
+        int normalizedMatch = LiquidMetal.getIndexOf(suggestion, StringUtils.normalize(mustKeep));
+
+        // Keep until the end of the word, to compensate for removed chars in normalization.
+        // This is FAR from ideal, but it's the edge-case of an edge-case.
+        if (normalizedMatch != -1) {
+          int nextWordEnd = suggestion.indexOf(" ", normalizedMatch + 1);
+          matchIdx = nextWordEnd != -1 ? nextWordEnd : normalizedMatch;
+        }
+      }
 
       suggestion = suggestion.substring(matchIdx + 1);
     }

@@ -4,9 +4,7 @@ import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.material.MaterialData;
@@ -19,6 +17,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.goals.GoalMatchModule;
@@ -29,10 +28,10 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ObjectiveModesModule implements MapModule {
 
-  private List<Mode> modes;
+  private final ImmutableList<Mode> modes;
   public static final Duration DEFAULT_SHOW_BEFORE = Duration.ofSeconds(60L);
 
-  private ObjectiveModesModule(List<Mode> modes) {
+  private ObjectiveModesModule(ImmutableList<Mode> modes) {
     this.modes = modes;
   }
 
@@ -60,7 +59,7 @@ public class ObjectiveModesModule implements MapModule {
         return null;
       }
 
-      List<Mode> parsedModes = new ArrayList<>();
+      ImmutableList.Builder<Mode> parsedModes = ImmutableList.builder();
 
       if (doc.getRootElement().getChild("modes") == null) {
         return null;
@@ -88,15 +87,30 @@ public class ObjectiveModesModule implements MapModule {
 
         // Legacy
         boolean legacyShowBossBar = XMLUtils.parseBoolean(modeEl.getAttribute("boss-bar"), true);
-        if (!legacyShowBossBar) {
-          showBefore = Duration.ZERO;
+        if (!legacyShowBossBar) showBefore = Duration.ZERO;
+
+        // Autogenerate a unique id, required for /mode start
+        if (id == null) {
+          String legacyName = name != null ? name : ModeUtils.formatMaterial(material);
+          id = makeUniqueId(legacyName, factory.getFeatures());
         }
+
         Mode mode = new Mode(id, material, after, filter, name, showBefore);
         parsedModes.add(mode);
         factory.getFeatures().addFeature(modeEl, mode);
       }
 
-      return new ObjectiveModesModule(parsedModes);
+      return new ObjectiveModesModule(parsedModes.build());
+    }
+
+    private String makeUniqueId(String name, FeatureDefinitionContext features) {
+      String baseId = "mode-" + Mode.makeId(name);
+      if (!features.contains(baseId)) return baseId;
+
+      for (int i = 2; ; i++) {
+        String newId = baseId + "-" + i;
+        if (!features.contains(newId)) return newId;
+      }
     }
   }
 }

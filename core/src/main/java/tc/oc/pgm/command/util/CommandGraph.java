@@ -6,6 +6,7 @@ import static tc.oc.pgm.util.text.TextException.playerOnly;
 import static tc.oc.pgm.util.text.TextException.unknown;
 import static tc.oc.pgm.util.text.TextException.usage;
 
+import cloud.commandframework.CommandManager;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.annotations.injection.ParameterInjector;
 import cloud.commandframework.annotations.injection.ParameterInjectorRegistry;
@@ -23,8 +24,6 @@ import cloud.commandframework.exceptions.NoPermissionException;
 import cloud.commandframework.exceptions.parsing.ParserException;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.extra.confirmation.CommandConfirmationManager;
-import cloud.commandframework.keys.CloudKey;
-import cloud.commandframework.keys.SimpleCloudKey;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
@@ -33,7 +32,6 @@ import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
 import java.time.Duration;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -78,17 +76,21 @@ import tc.oc.pgm.command.StatsCommand;
 import tc.oc.pgm.command.TeamCommand;
 import tc.oc.pgm.command.TimeLimitCommand;
 import tc.oc.pgm.command.VotingCommand;
-import tc.oc.pgm.command.injectors.AudienceProvider;
+import tc.oc.pgm.command.injectors.MapPollProvider;
+import tc.oc.pgm.command.injectors.MapPoolManagerProvider;
+import tc.oc.pgm.command.injectors.MatchModuleInjectionService;
 import tc.oc.pgm.command.injectors.MatchPlayerProvider;
 import tc.oc.pgm.command.injectors.MatchProvider;
-import tc.oc.pgm.command.injectors.TeamModuleInjector;
+import tc.oc.pgm.command.injectors.TeamMatchModuleProvider;
 import tc.oc.pgm.command.parsers.DurationParser;
+import tc.oc.pgm.command.parsers.EnumParser;
 import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
+import tc.oc.pgm.command.parsers.ModeParser;
 import tc.oc.pgm.command.parsers.PartyParser;
 import tc.oc.pgm.command.parsers.PlayerClassParser;
-import tc.oc.pgm.command.parsers.SettingKeyParser;
+import tc.oc.pgm.command.parsers.RotationParser;
 import tc.oc.pgm.command.parsers.SettingValueParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
@@ -96,15 +98,17 @@ import tc.oc.pgm.command.parsers.VictoryConditionParser;
 import tc.oc.pgm.community.command.ModerationCommand;
 import tc.oc.pgm.community.command.ReportCommand;
 import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.modes.Mode;
+import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
+import tc.oc.pgm.rotation.pools.MapPoolType;
+import tc.oc.pgm.rotation.pools.Rotation;
+import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
 
 public class CommandGraph {
-
-  public static final CloudKey<LinkedList<String>> INPUT_QUEUE =
-      SimpleCloudKey.of("_pgm_input_queue_", new TypeToken<LinkedList<String>>() {});
 
   private final PGM pgm;
   private final PaperCommandManager<CommandSender> manager;
@@ -120,10 +124,10 @@ public class CommandGraph {
     this.manager =
         PaperCommandManager.createNative(pgm, CommandExecutionCoordinator.simpleCoordinator());
 
-    //
+    this.manager.setSetting(CommandManager.ManagerSettings.ALLOW_FLAGS_EVERYWHERE, true);
+
     // Create the Minecraft help menu system
-    //
-    this.minecraftHelp = new MinecraftHelp<>("/pgmhelp", Audience::get, manager);
+    this.minecraftHelp = new MinecraftHelp<>("/pgm help", Audience::get, manager);
 
     // Register Brigadier mappings
     if (this.manager.hasCapability(CloudBukkitCapabilities.BRIGADIER))
@@ -135,10 +139,11 @@ public class CommandGraph {
 
     // Add the input queue to the context, this allows greedy suggestions to work on it
     this.manager.registerCommandPreProcessor(
-        context -> context.getCommandContext().store(INPUT_QUEUE, context.getInputQueue()));
+        context ->
+            context.getCommandContext().store(CommandKeys.INPUT_QUEUE, context.getInputQueue()));
 
     // By default, suggestions run by a filtered processor.
-    // That prevents valid suggestions like "s" -> "Something" or "someh" -> "Something"
+    // By default, it prevents suggestions like "s" -> "Something" or "someh" -> "Something"
     this.manager.commandSuggestionProcessor((cpc, strings) -> strings);
 
     // Create the confirmation this.manager. This allows us to require certain commands to be
@@ -147,7 +152,7 @@ public class CommandGraph {
         new CommandConfirmationManager<>(
             30L,
             TimeUnit.SECONDS,
-            // TODO: clickable
+            // TODO: clickable & translatable
             context ->
                 Audience.get(context.getCommandContext().getSender())
                     .sendWarning(text("Confirmation required. Confirm using /pgm confirm.")),
@@ -184,7 +189,8 @@ public class CommandGraph {
 
     manager.command(
         manager
-            .commandBuilder("pgmhelp")
+            .commandBuilder("pgm")
+            .literal("help")
             .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))
             .handler(
                 context ->
@@ -192,9 +198,7 @@ public class CommandGraph {
                         context.<String>getOptional("query").orElse(""), context.getSender())));
   }
 
-  //
   // Commands
-  //
   public void registerCommands() {
     register(new AdminCommand());
     register(new CancelCommand());
@@ -207,7 +211,7 @@ public class CommandGraph {
     register(new ListCommand());
     register(new MapCommand());
     register(new MapOrderCommand());
-    register(new MapPoolCommand()); //
+    register(new MapPoolCommand());
     register(new MatchCommand());
     register(new ModeCommand());
     register(new ProximityCommand());
@@ -229,13 +233,11 @@ public class CommandGraph {
     register(ChatDispatcher.get());
   }
 
-  public void register(Object command) {
+  protected void register(Object command) {
     annotationParser.parse(command);
   }
 
-  //
   // Injectors
-  //
   protected void setupInjectors() {
     registerInjector(PGM.class, Function.identity());
     registerInjector(Config.class, PGM::getConfiguration);
@@ -243,61 +245,70 @@ public class CommandGraph {
     registerInjector(MapLibrary.class, PGM::getMapLibrary);
     registerInjector(MapOrder.class, PGM::getMapOrder);
 
-    registerInjector(Audience.class, new AudienceProvider());
+    // NOTE: order is important. Audience must be first, otherwise a Match or MatchPlayer (which
+    // implement Audience) would be used, causing everyone to get all command feedback (Match), or
+    // console being unable to use commands (MatchPlayer).
+    registerInjector(Audience.class, (c, s) -> Audience.get(c.getSender()));
     registerInjector(Match.class, new MatchProvider());
     registerInjector(MatchPlayer.class, new MatchPlayerProvider());
-    registerInjector(TeamMatchModule.class, new TeamModuleInjector());
+    registerInjector(TeamMatchModule.class, new TeamMatchModuleProvider());
+    registerInjector(MapPoolManager.class, new MapPoolManagerProvider());
+    registerInjector(MapPoll.class, new MapPollProvider());
+
+    // Able to inject any match module
+    injectors.registerInjectionService(new MatchModuleInjectionService());
   }
 
-  private <T> void registerInjector(Class<T> type, ParameterInjector<CommandSender, T> provider) {
+  protected <T> void registerInjector(Class<T> type, ParameterInjector<CommandSender, T> provider) {
     injectors.registerInjector(type, provider);
   }
 
-  private <T> void registerInjector(Class<T> type, Function<PGM, T> function) {
+  protected <T> void registerInjector(Class<T> type, Function<PGM, T> function) {
     registerInjector(type, (a, b) -> function.apply(PGM.get()));
   }
 
   //
   // Parsers
   //
-  private void setupParsers() {
+  protected void setupParsers() {
     // Cloud has a default duration parser, but time type is not optional
     registerParser(Duration.class, new DurationParser());
     registerParser(MatchPlayer.class, new MatchPlayerParser());
     registerParser(MapPool.class, new MapPoolParser());
+    registerParser(Rotation.class, new RotationParser());
+    registerParser(MapPoolType.class, new EnumParser<>(MapPoolType.class, CommandKeys.POOL_TYPE));
 
     registerParser(MapInfo.class, MapInfoParser::new);
     registerParser(Party.class, PartyParser::new);
     registerParser(Team.class, TeamParser::new);
     registerParser(TypeFactory.parameterizedClass(Collection.class, Team.class), TeamsParser::new);
     registerParser(PlayerClass.class, PlayerClassParser::new);
+    registerParser(Mode.class, ModeParser::new);
     registerParser(
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());
-    registerParser(SettingKey.class, new SettingKeyParser());
+    registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
   }
 
-  private <T> void registerParser(Class<T> type, ArgumentParser<CommandSender, T> parser) {
+  protected <T> void registerParser(Class<T> type, ArgumentParser<CommandSender, T> parser) {
     parsers.registerParserSupplier(TypeToken.get(type), op -> parser);
   }
 
-  private <T> void registerParser(Class<T> type, ParserBuilder<T> parser) {
+  protected <T> void registerParser(Class<T> type, ParserBuilder<T> parser) {
     parsers.registerParserSupplier(TypeToken.get(type), op -> parser.create(manager, op));
   }
 
-  private <T> void registerParser(Type type, ArgumentParser<CommandSender, T> parser) {
+  protected <T> void registerParser(Type type, ArgumentParser<CommandSender, T> parser) {
     parsers.registerParserSupplier(TypeToken.get(type), op -> parser);
   }
 
-  private <T> void registerParser(Type type, ParserBuilder<T> parser) {
+  protected <T> void registerParser(Type type, ParserBuilder<T> parser) {
     parsers.registerParserSupplier(TypeToken.get(type), op -> parser.create(manager, op));
   }
 
-  //
   // Exception handling
-  //
-  private void setupExceptionHandlers() {
+  protected void setupExceptionHandlers() {
     registerExceptionHandler(InvalidSyntaxException.class, e -> usage(e.getCorrectSyntax()));
     registerExceptionHandler(InvalidCommandSenderException.class, e -> playerOnly());
     registerExceptionHandler(NoPermissionException.class, e -> noPermission());
@@ -306,7 +317,7 @@ public class CommandGraph {
     manager.registerExceptionHandler(CommandExecutionException.class, this::handleException);
   }
 
-  private <E extends Exception> void registerExceptionHandler(
+  protected <E extends Exception> void registerExceptionHandler(
       Class<E> ex, Function<E, ComponentLike> toComponent) {
     manager.registerExceptionHandler(
         ex, (cs, e) -> Audience.get(cs).sendWarning(toComponent.apply(e)));
@@ -325,6 +336,7 @@ public class CommandGraph {
     ParserException parseException = getParentCause(t, ParserException.class);
     if (parseException != null) return text(parseException.getMessage());
 
+    t.printStackTrace();
     return unknown(t).componentMessage();
   }
 

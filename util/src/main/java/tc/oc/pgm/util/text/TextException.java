@@ -98,6 +98,6 @@ public class TextException extends RuntimeException
   }
 
   private static Component format(Class<?> type) {
-    return translatable("type." + type.getSimpleName().toLowerCase());
+    return translatable("type." + type.getSimpleName().toLowerCase(Locale.ROOT));
   }
 }

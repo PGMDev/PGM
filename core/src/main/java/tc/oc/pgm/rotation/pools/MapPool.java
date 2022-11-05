@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -22,6 +21,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   protected final MapPoolManager manager;
   protected final ConfigurationSection configSection;
 
+  protected final MapPoolType type;
   protected final String name;
   protected final boolean enabled;
   protected final List<MapInfo> maps;
@@ -30,26 +30,11 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
 
   protected final boolean dynamic;
 
-  public static MapPool of(MapPoolManager manager, FileConfiguration config, String key) {
-    ConfigurationSection section = config.getConfigurationSection("pools." + key);
-    String type = section.getString("type").toLowerCase();
-    switch (type) {
-      case "ordered":
-        return new Rotation(manager, section, key);
-      case "voted":
-        return new VotingPool(manager, section, key);
-      case "shuffled":
-        return new RandomMapPool(manager, section, key);
-      default:
-        PGM.get().getLogger().severe("Invalid map pool type for " + key + ": '" + type + "'");
-        return new DisabledMapPool(manager, section, key);
-    }
-  }
-
-  MapPool(MapPoolManager manager, ConfigurationSection section, String name) {
+  MapPool(MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
+    this.type = type;
+    this.name = name;
     this.manager = manager;
     this.configSection = section;
-    this.name = name;
     this.enabled = section.getBoolean("enabled");
     this.players = section.getInt("players");
     this.dynamic = section.getBoolean("dynamic", true);
@@ -71,6 +56,10 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
         .getLogger()
         .warning("[MapPool] [" + name + "] " + mapName + " not found in map repo. Ignoring...");
     return null;
+  }
+
+  public MapPoolType getType() {
+    return type;
   }
 
   public String getName() {

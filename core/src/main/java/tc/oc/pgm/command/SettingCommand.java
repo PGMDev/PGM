@@ -29,13 +29,9 @@ public final class SettingCommand {
 
   @CommandMethod("tools|observertools|ot")
   @CommandDescription("Open the observer tools menu")
-  public void observerTools(MatchPlayer player) {
+  public void observerTools(MatchPlayer player, ObserverToolsMatchModule tools) {
     if (player.isObserving()) {
-      final ObserverToolsMatchModule tools =
-          player.getMatch().getModule(ObserverToolsMatchModule.class);
-      if (tools != null) {
-        tools.openMenu(player);
-      }
+      tools.openMenu(player);
     } else {
       // TODO: reconsider when observer tools become settings
       throw exception("setting.observersOnly");
