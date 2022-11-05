@@ -1,6 +1,5 @@
 package tc.oc.pgm.api.map;
 
-
 public enum Gamemode {
   ATTACK_DEFEND("ad", "Attack/Defend", "A/D"),
   ARCADE("arcade", "Arcade", "Arcade"),
