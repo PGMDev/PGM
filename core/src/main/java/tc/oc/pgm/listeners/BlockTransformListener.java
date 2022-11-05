@@ -200,7 +200,7 @@ public class BlockTransformListener implements Listener {
         handleDoor(event, (Door) newData);
       }
     }
-    logger.fine("Generated event " + event);
+    logger.finest("Generated event " + event);
     currentEvents.put(event.getCause(), event);
   }
 
