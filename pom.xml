@@ -134,27 +134,32 @@
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-core</artifactId>
             <version>1.7.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-annotations</artifactId>
             <version>1.7.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-paper</artifactId>
             <version>1.7.1</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-minecraft-extras</artifactId>
             <version>1.7.1</version>
+            <scope>compile</scope>
         </dependency>
         <!-- Allows registering brigadier mappings -->
         <dependency>
             <groupId>me.lucko</groupId>
             <artifactId>commodore</artifactId>
             <version>1.9</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- Small reflection library for Scoreboards -->
