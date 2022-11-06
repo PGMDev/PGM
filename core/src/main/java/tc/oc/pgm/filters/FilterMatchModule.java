@@ -206,6 +206,11 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
           "Filter " + filter + " doesn't respond to " + scope.getSimpleName() + " scope.");
     }
 
+    if (filter.getRelevantEvents().isEmpty()) {
+      // In some cases filters can be dynamic but doesn't need event invalidation
+      return;
+    }
+
     final ListenerSet listenerSet =
         this.listeners.row(filter).computeIfAbsent(scope, s -> new ListenerSet());
 

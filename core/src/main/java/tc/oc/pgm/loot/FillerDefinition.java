@@ -3,7 +3,6 @@ package tc.oc.pgm.loot;
 import java.time.Duration;
 import java.util.Objects;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
@@ -14,7 +13,7 @@ public class FillerDefinition implements FeatureDefinition {
 
   private final Composition<ItemStack> loot;
   private final Filter filter;
-  private final @Nullable Filter refillTrigger; // Dynamic
+  private final Filter refillTrigger; // Dynamic
 
   private final Duration refillInterval;
 
@@ -23,7 +22,7 @@ public class FillerDefinition implements FeatureDefinition {
   public FillerDefinition(
       Composition<ItemStack> loot,
       Filter filter,
-      @Nullable Filter refillTrigger,
+      Filter refillTrigger,
       Duration refillInterval,
       boolean clearBeforeRefill) {
     this.loot = loot;
@@ -44,7 +43,6 @@ public class FillerDefinition implements FeatureDefinition {
   }
 
   /** Refill all blocks/entities when this filter goes high. */
-  @Nullable
   public Filter getRefillTrigger() {
     return this.refillTrigger;
   }

@@ -89,10 +89,10 @@ public class LootableModule implements MapModule<LootableMatchModule> {
         Duration refillInterval =
             XMLUtils.parseDuration(
                 filler.getAttribute("refill-interval"), TimeUtils.INFINITE_DURATION);
-        @Nullable
         Filter refillTrigger =
-            filters.parseProperty(filler, "refill-trigger", DynamicFilterValidation.MATCH);
-        if (refillTrigger == null && refillInterval == TimeUtils.INFINITE_DURATION)
+            filters.parseProperty(
+                filler, "refill-trigger", StaticFilter.DENY, DynamicFilterValidation.MATCH);
+        if (refillTrigger == StaticFilter.DENY && refillInterval == TimeUtils.INFINITE_DURATION)
           throw new InvalidXMLException(
               "Lootable filler needs either a refill trigger or a refill interval", filler);
 
