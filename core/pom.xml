@@ -62,7 +62,8 @@
                             <include>org.jdom:jdom2:*</include>
                             <include>net.kyori:*:*</include>
                             <include>cloud.commandframework:cloud-*:*</include>
-                            <include>me.lucko:commodore:*</include>
+                            <include>io.leangen.geantyref:*:*</include>
+                            <include>me.lucko:commodore</include>
                             <include>fr.mrmicky:*:*</include>
                             <include>org.eclipse.jgit:org.eclipse.jgit:*</include>
                             <include>org.slf4j:slf4j-api:*</include>
@@ -84,8 +85,12 @@
                             <shadedPattern>tc.oc.pgm.lib.cloud.commandframework</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>me.lucko</pattern>
-                            <shadedPattern>tc.oc.pgm.lib.me.lucko</shadedPattern>
+                            <pattern>io.leangen.geantyref</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.io.leangen.geantyref</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>me.lucko.commodore</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.me.lucko.commodore</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>fr.mrmicky</pattern>
