@@ -48,6 +48,10 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
     this(defaultValue, false);
   }
 
+  public DefaultMapAdapter(final V defaultValue, int initialSize, boolean putDefault) {
+    this(new HashMap<>(initialSize), defaultValue, putDefault);
+  }
+
   public DefaultMapAdapter(Function<? super K, ? extends V> defaultProvider) {
     this(defaultProvider, false);
   }

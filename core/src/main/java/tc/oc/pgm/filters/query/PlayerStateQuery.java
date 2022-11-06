@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
@@ -55,6 +56,12 @@ public class PlayerStateQuery extends Query implements PlayerQuery {
   @Override
   public Location getLocation() {
     return playerState.getLocation();
+  }
+
+  @Nullable
+  @Override
+  public Inventory getInventory() {
+    return this.playerState.getPlayer().map(MatchPlayer::getInventory).orElse(null);
   }
 
   @Override

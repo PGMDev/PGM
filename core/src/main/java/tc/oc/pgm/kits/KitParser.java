@@ -250,11 +250,7 @@ public abstract class KitParser {
     List<ItemStack> freeItems = new ArrayList<>();
 
     for (Element itemEl : el.getChildren()) {
-      ItemStack item = null;
-      switch (itemEl.getName()) {
-        case "item":
-          item = parseItem(itemEl, true);
-          break;
+      ItemStack item = this.parseItemStack(itemEl);
 
         case "book":
           item = parseBook(itemEl);
@@ -290,6 +286,22 @@ public abstract class KitParser {
     boolean dropOverflow = XMLUtils.parseBoolean(Node.fromAttr(el, "drop-overflow"), false);
 
     return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems, dropOverflow);
+  }
+
+  public @Nullable ItemStack parseItemStack(Element el) throws InvalidXMLException {
+    switch (el.getName()) {
+      case "item":
+        return parseItem(el, true);
+
+      case "book":
+        return parseBook(el);
+
+      case "head":
+        return parseHead(el);
+
+      default:
+        return null;
+    }
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {

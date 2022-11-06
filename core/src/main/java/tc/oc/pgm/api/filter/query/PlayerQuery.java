@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 /** A query for a player that may or may not be online or participating in the match. */
-public interface PlayerQuery extends PartyQuery, EntityTypeQuery, LocationQuery {
+public interface PlayerQuery extends PartyQuery, EntityTypeQuery, LocationQuery, InventoryQuery {
   UUID getId();
 
   /**
