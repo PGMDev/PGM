@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -310,6 +311,14 @@ public class SidebarMatchModule implements MatchModule, Listener {
       } else {
         break;
       }
+    }
+
+    // Display "Blitz: Rage" rather than "Blitz and Rage"
+    if (games.size() == 2
+        && Stream.of("blitz", "rage")
+            .allMatch(id -> map.getTags().stream().anyMatch(mt -> mt.getId().equals(id)))) {
+      games.clear();
+      games.add(translatable("gamemode.br.name").color(NamedTextColor.AQUA));
     }
 
     return TextFormatter.list(games, NamedTextColor.AQUA);
