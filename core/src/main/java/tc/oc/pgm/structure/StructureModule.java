@@ -28,6 +28,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
+import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -61,7 +62,8 @@ public class StructureModule implements MapModule<StructureMatchModule> {
     @Override
     public StructureModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      if (factory.getProto().isOlderThan(MapProtos.FILTER_FEATURES)) return null;
+      Version proto = factory.getProto();
+      if (proto.isOlderThan(MapProtos.FILTER_FEATURES)) return null;
 
       FilterParser filters = factory.getFilters();
       RegionParser regions = factory.getRegions();
@@ -95,9 +97,15 @@ public class StructureModule implements MapModule<StructureMatchModule> {
         final StructureDefinition structure =
             structures.get(el.getAttribute("structure").getValue());
 
-        Filter trigger =
-            filters.parseRequiredProperty(el, "trigger", DynamicFilterValidation.MATCH);
-        Filter filter = filters.parseProperty(el, "filter", StaticFilter.ALLOW);
+        Filter trigger, filter;
+        if (proto.isOlderThan(MapProtos.DYNAMIC_FILTERS)) {
+          // Legacy maps use "filter" as their trigger
+          trigger = filters.parseRequiredProperty(el, "filter", DynamicFilterValidation.MATCH);
+          filter = StaticFilter.ALLOW;
+        } else {
+          trigger = filters.parseRequiredProperty(el, "trigger", DynamicFilterValidation.MATCH);
+          filter = filters.parseProperty(el, "filter", StaticFilter.ALLOW);
+        }
 
         DynamicStructureDefinition definition =
             new DynamicStructureDefinition(id, structure, trigger, filter, position, offset);
