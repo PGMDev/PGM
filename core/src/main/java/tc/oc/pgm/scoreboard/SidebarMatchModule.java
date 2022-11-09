@@ -299,7 +299,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
         && Stream.of("blitz", "rage")
             .allMatch(id -> map.getTags().stream().anyMatch(mt -> mt.getId().equals(id)))) {
       games.clear();
-      games.add(translatable("gamemode.br.name").color(NamedTextColor.AQUA));
+      games.add(text(Gamemode.BLITZ_RAGE.getFullName()).color(NamedTextColor.AQUA));
     }
 
     return TextFormatter.list(games, NamedTextColor.AQUA);
