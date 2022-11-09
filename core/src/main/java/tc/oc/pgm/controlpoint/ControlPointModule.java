@@ -31,7 +31,7 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
       new MapTag("cp", "controlpoint", "Control the Point", true, false);
   private static final MapTag KOTH =
       new MapTag("koth", "controlpoint", "King of the Hill", true, false);
-  private static final MapTag PAYLOAD = new MapTag("pd", "payload", "Payload", true, false);
+  private static final MapTag PAYLOAD = new MapTag("payload", "Payload", true, false);
 
   private final List<ControlPointDefinition> definitions;
   private final Collection<MapTag> tags;

@@ -15,7 +15,7 @@ public enum Gamemode {
   KING_OF_THE_HILL("koth", "King of the Hill", "KotH"),
   KING_OF_THE_FLAG("kotf", "King of the Flag", "KotF"),
   MIXED("mixed", "Mixed", "Mixed"),
-  PAYLOAD("pd", "Payload", "PD"),
+  PAYLOAD("payload", "Payload", "Payload"),
   RAGE("rage", "Rage", "Rage"),
   RACE_FOR_WOOL("rfw", "Race for Wool", "RFW"),
   SCOREBOX("scorebox", "Scorebox", "Scorebox"),
