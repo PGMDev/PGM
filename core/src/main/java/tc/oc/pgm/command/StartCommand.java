@@ -20,14 +20,13 @@ public final class StartCommand {
   @CommandMethod("start|begin [duration]")
   @CommandDescription("Start the match")
   @CommandPermission(Permissions.START)
-  public void start(Audience audience, Match match, @Argument("duration") Duration duration) {
+  public void start(Audience audience, Match match, StartMatchModule start, @Argument("duration") Duration duration) {
     if (match.isRunning()) {
       throw exception("admin.start.matchRunning");
     } else if (match.isFinished()) {
       throw exception("admin.start.matchFinished");
     }
 
-    final StartMatchModule start = match.needModule(StartMatchModule.class);
     if (!start.canStart(true)) {
       audience.sendWarning(translatable("admin.start.unknownState"));
       for (UnreadyReason reason : start.getUnreadyReasons(true)) {

@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.command.util.CommandKeys;
+import tc.oc.pgm.command.util.CommandUtils;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.TextException;
@@ -54,7 +54,7 @@ public abstract class MatchObjectParser<T, M extends MatchModule>
   @Override
   public ArgumentParseResult<T> parse(
       @NotNull CommandContext<CommandSender> context, @NotNull String text) {
-    Match match = PGM.get().getMatchManager().getMatch(context.getSender());
+    Match match = CommandUtils.getMatch(context);
     if (match == null) return failure(playerOnly());
 
     M module = match.getModule(moduleType);
@@ -69,7 +69,7 @@ public abstract class MatchObjectParser<T, M extends MatchModule>
   @Override
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
-    Match match = PGM.get().getMatchManager().getMatch(context.getSender());
+    Match match = CommandUtils.getMatch(context);
     if (match == null) return Collections.emptyList();
 
     List<String> inputQueue = context.get(CommandKeys.INPUT_QUEUE);

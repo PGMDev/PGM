@@ -36,13 +36,13 @@ public final class TeamCommand {
   @CommandDescription("Force a player onto a team")
   @CommandPermission(Permissions.JOIN_FORCE)
   public void force(
-      Match match,
       MatchPlayer sender,
+      Match match,
+      JoinMatchModule join,
       @Argument("player") MatchPlayer joiner,
       @Argument("team") Party team) {
 
     final Party oldParty = joiner.getParty();
-    final JoinMatchModule join = match.needModule(JoinMatchModule.class);
 
     if (team != null && !(team instanceof Competitor)) {
       join.leave(joiner);

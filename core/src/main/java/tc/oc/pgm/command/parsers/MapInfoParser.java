@@ -16,19 +16,17 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.command.util.CommandKeys;
+import tc.oc.pgm.command.util.CommandUtils;
 import tc.oc.pgm.util.StringUtils;
 
 public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo> {
 
   private final MapLibrary library;
-  private final MatchManager matchManager;
 
   public MapInfoParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options);
     this.library = PGM.get().getMapLibrary();
-    this.matchManager = PGM.get().getMatchManager();
   }
 
   @Override
@@ -37,7 +35,7 @@ public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo
     MapInfo map = null;
 
     if (text.equals(CURRENT)) {
-      final Match match = matchManager.getMatch(context.getSender());
+      Match match = CommandUtils.getMatch(context);
       if (match != null) map = match.getMap();
     } else {
       map = library.getMap(text);

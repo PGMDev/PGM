@@ -6,13 +6,15 @@ import static tc.oc.pgm.util.text.TextException.exception;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import tc.oc.pgm.util.text.TextException;
 
 public abstract class PrettyPaginatedComponentResults<T> {
 
-  private Component header;
-  private int resultsPerPage;
+  private final Component header;
+  private final int resultsPerPage;
 
   /**
    * Constructor
@@ -107,5 +109,20 @@ public abstract class PrettyPaginatedComponentResults<T> {
         i++) {
       audience.sendMessage(format(data.get(i), i));
     }
+  }
+
+  public static <T> void display(
+      Audience audience,
+      List<? extends T> data,
+      int page,
+      int resultsPerPage,
+      Component header,
+      BiFunction<T, Integer, ComponentLike> toComponent) {
+    new PrettyPaginatedComponentResults<T>(header, resultsPerPage) {
+      @Override
+      public Component format(T data, int index) {
+        return toComponent.apply(data, index).asComponent();
+      }
+    }.display(audience, data, page);
   }
 }

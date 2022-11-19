@@ -10,6 +10,7 @@ import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
+import cloud.commandframework.annotations.processing.CommandContainer;
 import cloud.commandframework.annotations.specifier.Range;
 import java.time.Duration;
 import java.util.List;
@@ -33,9 +34,7 @@ public final class ModeCommand {
 
   @CommandMethod("next")
   @CommandDescription("Show the next objective mode")
-  public void next(Audience audience, Match match) {
-    ObjectiveModesMatchModule modes = getModes(match);
-
+  public void next(Audience audience, ObjectiveModesMatchModule modes) {
     List<ModeChangeCountdown> countdowns = modes.getActiveCountdowns();
 
     if (countdowns.isEmpty()) throwNoResults();
@@ -71,9 +70,8 @@ public final class ModeCommand {
   @CommandDescription("List all objective modes")
   public void list(
       Audience audience,
-      Match match,
+      ObjectiveModesMatchModule modes,
       @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page) {
-    ObjectiveModesMatchModule modes = getModes(match);
     List<ModeChangeCountdown> modeList = modes.getSortedCountdowns(true);
     int resultsPerPage = 8;
     int pages = (modeList.size() + resultsPerPage - 1) / resultsPerPage;
@@ -92,9 +90,7 @@ public final class ModeCommand {
   @CommandMethod("push <time>")
   @CommandDescription("Reschedule all objective modes with active countdowns")
   @CommandPermission(Permissions.GAMEPLAY)
-  public void push(Audience audience, Match match, @Argument("time") Duration duration) {
-    ObjectiveModesMatchModule modes = getModes(match);
-
+  public void push(Audience audience, Match match, ObjectiveModesMatchModule modes, @Argument("time") Duration duration) {
     if (!match.isRunning()) throwMatchNotStarted();
 
     CountdownContext countdowns = modes.getCountdown();
@@ -132,11 +128,10 @@ public final class ModeCommand {
   public void start(
       Audience audience,
       Match match,
+      ObjectiveModesMatchModule modes,
       @Argument("mode") Mode mode,
       @Argument(value = "time", defaultValue = "0s") Duration time) {
     if (!match.isRunning()) throwMatchNotStarted();
-
-    ObjectiveModesMatchModule modes = getModes(match);
     if (time.isNegative()) throwInvalidNumber(time.toString());
 
     CountdownContext context = modes.getCountdown();
@@ -153,12 +148,6 @@ public final class ModeCommand {
                     .append(space()));
     builder.append(clock(Math.abs(time.getSeconds())).color(NamedTextColor.AQUA));
     audience.sendMessage(builder);
-  }
-
-  private static @NotNull ObjectiveModesMatchModule getModes(Match match) {
-    return match
-        .moduleOptional(ObjectiveModesMatchModule.class)
-        .orElseThrow(() -> exception("command.moduleNotFound", text("modes")));
   }
 
   private static void throwNoResults() {

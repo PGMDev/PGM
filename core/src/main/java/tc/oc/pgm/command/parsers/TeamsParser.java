@@ -15,8 +15,8 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.command.util.CommandUtils;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 
@@ -33,7 +33,7 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
   @Override
   public ArgumentParseResult<Collection<Team>> parse(
       @NotNull CommandContext<CommandSender> context, @NotNull String text) {
-    final Match match = PGM.get().getMatchManager().getMatch(context.getSender());
+    final Match match = CommandUtils.getMatch(context);
     if (match == null) return failure(playerOnly());
 
     if (text.equalsIgnoreCase("*")) {
