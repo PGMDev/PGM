@@ -3,13 +3,16 @@ package tc.oc.pgm.modes;
 import static net.kyori.adventure.text.Component.text;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
+@FeatureInfo(name = "mode")
 public class Mode extends SelfIdentifyingFeatureDefinition {
   private final MaterialData material;
   private final Duration after;
@@ -38,6 +41,11 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     this.legacyName = name != null ? name : getPreformattedMaterialName();
     this.componentName = text(legacyName, NamedTextColor.RED);
     this.showBefore = showBefore;
+  }
+
+  @Override
+  protected String getDefaultId() {
+    return makeDefaultId() + "--" + makeId(legacyName);
   }
 
   public MaterialData getMaterialData() {
@@ -70,5 +78,9 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
 
   public @Nullable String getName() {
     return this.name;
+  }
+
+  public static String makeDefaultId(@Nullable String name, AtomicInteger serial) {
+    return "--" + makeTypeName(Mode.class) + "-" + makeId(name);
   }
 }

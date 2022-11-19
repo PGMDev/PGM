@@ -87,15 +87,22 @@ public final class StringUtils {
     return bestScore < 0.75 ? null : bestObj;
   }
 
-  public static String getSuggestion(String suggestion, String input) {
+  public static String getSuggestion(String suggestion, String mustKeep) {
     // At least one of the two has no spaces, algorithm isn't needed.
-    if (input.length() > 1 && suggestion.contains(SPACE)) {
-      int matchIdx = LiquidMetal.getIndexOf(suggestion, input);
+    if (mustKeep.length() > 1 && suggestion.contains(SPACE)) {
+      int matchIdx = LiquidMetal.getIndexOf(suggestion, mustKeep);
 
-      // Should never happen!
-      if (matchIdx == -1)
-        throw new IllegalStateException(
-            "Suggestion is not matched by input! '" + suggestion + "', '" + input + "'");
+      // Bad case, this can happen when input was normalized before search
+      if (matchIdx == -1) {
+        int normalizedMatch = LiquidMetal.getIndexOf(suggestion, StringUtils.normalize(mustKeep));
+
+        // Keep until the end of the word, to compensate for removed chars in normalization.
+        // This is FAR from ideal, but it's the edge-case of an edge-case.
+        if (normalizedMatch != -1) {
+          int nextWordEnd = suggestion.indexOf(" ", normalizedMatch + 1);
+          matchIdx = nextWordEnd != -1 ? nextWordEnd : normalizedMatch;
+        }
+      }
 
       suggestion = suggestion.substring(matchIdx + 1);
     }

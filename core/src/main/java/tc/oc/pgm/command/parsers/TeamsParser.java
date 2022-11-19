@@ -12,8 +12,6 @@ import cloud.commandframework.paper.PaperCommandManager;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
@@ -21,12 +19,15 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.LiquidMetal;
 
+/** Parses teams, supporting * for all teams */
 public final class TeamsParser extends StringLikeParser<CommandSender, Collection<Team>> {
+
+  private final TeamParser teamParser;
 
   public TeamsParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options);
+    this.teamParser = new TeamParser(manager, options);
   }
 
   @Override
@@ -41,14 +42,14 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
       return success(teams.getTeams());
     }
 
-    return TeamParser.getTeam(match, text).mapParsedValue(Collections::singleton);
+    return teamParser.parse(context, text).mapParsedValue(Collections::singleton);
   }
 
   @Override
   public @NonNull List<@NonNull String> suggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull String input) {
-    return Stream.concat(Stream.of("*"), TeamParser.getTeams(context.getSender()))
-        .filter(str -> LiquidMetal.match(str, input))
-        .collect(Collectors.toList());
+    List<String> teams = teamParser.suggestions(context, input);
+    if ("*".startsWith(input)) teams.add("*");
+    return teams;
   }
 }
