@@ -27,13 +27,12 @@ public final class TimeLimitCommand {
   public void timelimit(
       Audience audience,
       Match match,
+      TimeLimitMatchModule time,
       @Argument("duration") Duration duration,
       @Argument(value = "result", defaultValue = CURRENT) Optional<VictoryCondition> result,
       @Argument("overtime") Duration overtime,
       @Argument("max-overtime") Duration maxOvertime,
       @Argument("end-overtime") Duration endOvertime) {
-    final TimeLimitMatchModule time = match.needModule(TimeLimitMatchModule.class);
-
     time.cancel();
     time.setTimeLimit(
         new TimeLimit(

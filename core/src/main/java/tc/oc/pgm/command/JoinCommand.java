@@ -7,7 +7,6 @@ import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.annotations.Flag;
 import cloud.commandframework.annotations.specifier.FlagYielding;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -19,27 +18,26 @@ public final class JoinCommand {
   @CommandDescription("Join the match")
   @CommandPermission(Permissions.JOIN)
   public void join(
-      Match match,
+      JoinMatchModule joiner,
       MatchPlayer player,
       @Flag(value = "force", aliases = "f") boolean force,
       @Argument("team") @FlagYielding Party team) {
     if (team != null && !(team instanceof Competitor)) {
-      leave(player, match);
+      leave(joiner, player);
       return;
     }
 
-    final JoinMatchModule join = match.needModule(JoinMatchModule.class);
     if (force && player.getBukkit().hasPermission(Permissions.JOIN_FORCE)) {
-      join.forceJoin(player, (Competitor) team);
+      joiner.forceJoin(player, (Competitor) team);
     } else {
-      join.join(player, (Competitor) team);
+      joiner.join(player, (Competitor) team);
     }
   }
 
   @CommandMethod("leave|obs|spectator|spec")
   @CommandDescription("Leave the match")
   @CommandPermission(Permissions.LEAVE)
-  public void leave(MatchPlayer player, Match match) {
-    match.needModule(JoinMatchModule.class).leave(player);
+  public void leave(JoinMatchModule joiner, MatchPlayer player) {
+    joiner.leave(player);
   }
 }

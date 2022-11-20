@@ -3,16 +3,14 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.text.TextException.exception;
 
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.specifier.FlagYielding;
+import cloud.commandframework.annotations.specifier.Greedy;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -23,8 +21,9 @@ public final class ClassCommand {
   @CommandMethod("class|selectclass|c|cl [class]")
   @CommandDescription("Select your class")
   public void classSelect(
-      Match match, MatchPlayer player, @Argument("class") @FlagYielding PlayerClass newClass) {
-    final ClassMatchModule classes = getClasses(match);
+      ClassMatchModule classes,
+      MatchPlayer player,
+      @Argument("class") @Greedy PlayerClass newClass) {
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
     if (newClass == null) {
@@ -49,8 +48,7 @@ public final class ClassCommand {
 
   @CommandMethod("classlist|classes|listclasses|cls")
   @CommandDescription("List all available classes")
-  public void classList(Match match, MatchPlayer player) {
-    final ClassMatchModule classes = getClasses(match);
+  public void classList(ClassMatchModule classes, MatchPlayer player) {
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
     player.sendMessage(
@@ -82,11 +80,5 @@ public final class ClassCommand {
 
       player.sendMessage(result.build());
     }
-  }
-
-  private ClassMatchModule getClasses(Match match) {
-    final ClassMatchModule classes = match.getModule(ClassMatchModule.class);
-    if (classes == null) throw exception("match.class.notEnabled");
-    return classes;
   }
 }

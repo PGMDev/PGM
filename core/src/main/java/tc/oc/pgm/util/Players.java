@@ -13,7 +13,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public class Players {
 
   public static boolean shouldShow(CommandSender viewer, Player other) {
-    return !Integration.isVanished(other) && viewer.hasPermission(Permissions.VANISH);
+    return !Integration.isVanished(other) || viewer.hasPermission(Permissions.VANISH);
   }
 
   public static String getVisibleName(CommandSender viewer, Player other) {
@@ -21,8 +21,8 @@ public class Players {
     if (nick != null
         && viewer instanceof Player
         && !Integration.isFriend((Player) viewer, other)
-        && !viewer.hasPermission(Permissions.STAFF)) return other.getName();
-    return nick;
+        && !viewer.hasPermission(Permissions.STAFF)) return nick;
+    return other.getName();
   }
 
   public static List<String> getPlayerNames(CommandSender sender, String query) {

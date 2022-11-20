@@ -10,8 +10,9 @@ public class RandomMapPool extends MapPool {
 
   private final RandomMapOrder order;
 
-  public RandomMapPool(MapPoolManager manager, ConfigurationSection section, String name) {
-    super(manager, section, name);
+  public RandomMapPool(
+      MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
+    super(type, name, manager, section);
     this.order = new RandomMapOrder(maps);
   }
 

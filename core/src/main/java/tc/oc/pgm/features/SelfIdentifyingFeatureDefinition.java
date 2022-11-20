@@ -1,5 +1,8 @@
 package tc.oc.pgm.features;
 
+import java.text.Normalizer;
+import java.util.Locale;
+import org.bukkit.ChatColor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -39,6 +42,8 @@ public abstract class SelfIdentifyingFeatureDefinition implements FeatureDefinit
   }
 
   public static String makeId(String text) {
-    return text.toLowerCase().replaceAll("\\s+", "-");
+    return Normalizer.normalize(ChatColor.stripColor(text), Normalizer.Form.NFD)
+        .toLowerCase(Locale.ROOT)
+        .replaceAll("\\s+", "-");
   }
 }

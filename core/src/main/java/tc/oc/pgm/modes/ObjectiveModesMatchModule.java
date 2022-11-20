@@ -44,11 +44,11 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
                   .thenComparing(Mode::getLegacyName));
 
   private final Match match;
-  private final List<Mode> modes;
+  private final ImmutableList<Mode> modes;
   private final List<ModeChangeCountdown> countdowns;
   private final CountdownContext countdownContext;
 
-  public ObjectiveModesMatchModule(Match match, List<Mode> modes) {
+  public ObjectiveModesMatchModule(Match match, ImmutableList<Mode> modes) {
     this.match = match;
     this.modes = modes;
     this.countdowns = new ArrayList<>(this.modes.size());
@@ -91,6 +91,10 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
     }
   }
 
+  public ImmutableList<Mode> getModes() {
+    return modes;
+  }
+
   public CountdownContext getCountdown() {
     return this.countdownContext;
   }
@@ -113,6 +117,10 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
         .filter(mcc -> mcc.getRemaining().getSeconds() > 0)
         .sorted()
         .collect(Collectors.toList());
+  }
+
+  public ModeChangeCountdown getCountdown(Mode mode) {
+    return this.countdowns.stream().filter(mcc -> mcc.getMode() == mode).findFirst().orElse(null);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

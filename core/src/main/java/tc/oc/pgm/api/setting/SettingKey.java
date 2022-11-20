@@ -5,17 +5,20 @@ import static tc.oc.pgm.api.setting.SettingValue.*;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import org.bukkit.Material;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.modules.PlayerTimeMatchModule;
+import tc.oc.pgm.util.Aliased;
 
 /**
  * A toggleable setting with various possible {@link SettingValue}s.
  *
  * @see SettingValue
  */
-public enum SettingKey {
+public enum SettingKey implements Aliased {
   CHAT(
       "chat",
       Material.SIGN,
@@ -104,6 +107,12 @@ public enum SettingKey {
    */
   public List<String> getAliases() {
     return aliases;
+  }
+
+  @NotNull
+  @Override
+  public Iterator<String> iterator() {
+    return aliases.iterator();
   }
 
   /**

@@ -10,7 +10,7 @@ import tc.oc.pgm.api.map.MapLibrary;
 
 public final class AdminCommand {
 
-  @CommandMethod("pgm")
+  @CommandMethod("pgm reload")
   @CommandDescription("Reload the config")
   @CommandPermission(Permissions.RELOAD)
   public void pgm() {

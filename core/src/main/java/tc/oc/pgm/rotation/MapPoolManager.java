@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -30,6 +31,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.rotation.pools.MapPool;
+import tc.oc.pgm.rotation.pools.MapPoolType;
 import tc.oc.pgm.rotation.pools.Rotation;
 import tc.oc.pgm.rotation.pools.VotingPool;
 import tc.oc.pgm.rotation.vote.VotePoolOptions;
@@ -105,7 +107,7 @@ public class MapPoolManager implements MapOrder {
     ConfigurationSection pools = mapPoolFileConfig.getConfigurationSection("pools");
     if (pools != null && pools.getKeys(false) != null && !pools.getKeys(false).isEmpty()) {
       pools.getKeys(false).stream()
-          .map(key -> MapPool.of(this, mapPoolFileConfig, key))
+          .map(key -> MapPoolType.buildPool(this, mapPoolFileConfig, key))
           .filter(MapPool::isEnabled)
           .forEach(pool -> mapPools.put(pool, database.getMapActivity(pool.getName())));
 
@@ -153,6 +155,14 @@ public class MapPoolManager implements MapOrder {
 
   public List<MapPool> getMapPools() {
     return mapPools.keySet().stream().sorted().collect(Collectors.toList());
+  }
+
+  public Stream<MapPool> getMapPoolStream() {
+    return mapPools.keySet().stream();
+  }
+
+  public int getPoolSize() {
+    return mapPools.size();
   }
 
   private void updateActiveMapPool(MapPool mapPool, Match match) {
