@@ -124,7 +124,7 @@ public class CommandGraph {
     this.manager =
         PaperCommandManager.createNative(pgm, CommandExecutionCoordinator.simpleCoordinator());
 
-    this.manager.setSetting(CommandManager.ManagerSettings.ALLOW_FLAGS_EVERYWHERE, true);
+    this.manager.setSetting(CommandManager.ManagerSettings.LIBERAL_FLAG_PARSING, true);
 
     // Create the Minecraft help menu system
     this.minecraftHelp = new MinecraftHelp<>("/pgm help", Audience::get, manager);
