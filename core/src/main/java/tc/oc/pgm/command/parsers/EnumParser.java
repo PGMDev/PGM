@@ -11,7 +11,6 @@ import cloud.commandframework.exceptions.parsing.NoInputProvidedException;
 import cloud.commandframework.keys.CloudKey;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -87,14 +86,11 @@ public class EnumParser<E extends Enum<E>> implements ArgumentParser<CommandSend
           .flatMap(
               e ->
                   StreamUtils.of((Aliased) e)
-                      .map(al -> al.toLowerCase(Locale.ROOT))
                       .filter(name -> LiquidMetal.match(name, input))
                       .limit(1)); // Keep first matching alias, if any
     }
 
-    return options(context)
-        .map(e -> e.name().toLowerCase(Locale.ROOT))
-        .filter(name -> LiquidMetal.match(name, input));
+    return options(context).map(this::stringify).filter(name -> LiquidMetal.match(name, input));
   }
 
   protected String stringify(E e) {
