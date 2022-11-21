@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -19,9 +20,16 @@ import tc.oc.pgm.variables.VariablesModule;
 public class ActionModule implements MapModule<ActionMatchModule> {
 
   private final ImmutableList<Trigger<?>> triggers;
+  private ImmutableList<ExposedAction> actions;
 
   public ActionModule(ImmutableList<Trigger<?>> triggers) {
     this.triggers = triggers;
+  }
+
+  @Override
+  public void postParse(MapFactory factory, Logger logger, Document doc) {
+    // Must be post-parsed, as other parts of the XML may create other actions
+    this.actions = ImmutableList.copyOf(factory.getFeatures().getAll(ExposedAction.class));
   }
 
   @Nullable
@@ -33,7 +41,7 @@ public class ActionModule implements MapModule<ActionMatchModule> {
   @Nullable
   @Override
   public ActionMatchModule createMatchModule(Match match) throws ModuleLoadException {
-    return new ActionMatchModule(match, triggers);
+    return new ActionMatchModule(match, triggers, actions);
   }
 
   public static class Factory implements MapModuleFactory<ActionModule> {
