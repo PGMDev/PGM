@@ -21,6 +21,14 @@ import tc.oc.pgm.util.text.TextFormatter;
 // TODO: remove some of these when settings UI is released
 public final class SettingCommand {
 
+  public static final SettingCommand INSTANCE = new SettingCommand();
+
+  public static SettingCommand getInstance() {
+    return INSTANCE;
+  }
+
+  private SettingCommand() {}
+
   @CommandMethod("settings")
   @CommandDescription("Open the settings menu")
   public void settings(MatchPlayer player) {
