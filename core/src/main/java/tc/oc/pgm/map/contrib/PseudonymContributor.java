@@ -6,10 +6,10 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import com.google.common.base.Objects;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 
 public class PseudonymContributor implements Contributor {
 
@@ -33,7 +33,7 @@ public class PseudonymContributor implements Contributor {
 
   @Override
   public Component getName(NameStyle style) {
-    return text(getNameLegacy(), NamedTextColor.DARK_AQUA);
+    return text(getNameLegacy(), PlayerComponentProvider.OFFLINE_COLOR);
   }
 
   @Override

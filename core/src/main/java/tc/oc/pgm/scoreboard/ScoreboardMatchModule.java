@@ -79,7 +79,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
     team.setSuffix(ChatColor.WHITE.toString());
 
     team.setCanSeeFriendlyInvisibles(true);
-    team.setAllowFriendlyFire(match.getMap().getFriendlyFire());
+    team.setAllowFriendlyFire(match.isFriendlyFire());
 
     if (!forObservers && party instanceof Competitor) {
       NameTagVisibility nameTags = ((Competitor) party).getNameTagVisibility();
@@ -248,6 +248,14 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onPlayerChangeParty(PlayerPartyChangeEvent event) {
     changePlayerScoreboard(event.getPlayer(), event.getOldParty(), event.getNewParty());
+  }
+
+  public void updateAll() {
+    for (Party party : match.getParties()) {
+      if (party instanceof Competitor) {
+        updatePartyScoreboardTeam(party);
+      }
+    }
   }
 
   private static String toString(Scoreboard scoreboard) {

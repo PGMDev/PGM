@@ -6,6 +6,9 @@ pools:
   # A map pool named "default".
   default:
 
+    # Name of the pool displayed to users in broadcasts and commands
+    display-name: "default"
+    
     # A type of map pool.
     #
     #  "ordered"  = maps are played in the provided order.

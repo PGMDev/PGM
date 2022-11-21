@@ -44,10 +44,10 @@ public interface Datastore {
   /**
    * Get the activity related to a defined map pool.
    *
-   * @param poolName The name of a defined map pool.
+   * @param poolId The id of a defined map pool.
    * @return A {@link MapActivity}.
    */
-  MapActivity getMapActivity(String poolName);
+  MapActivity getMapActivity(String poolId);
 
   /** Cleans up any resources or connections. */
   void close();

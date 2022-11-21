@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -101,7 +102,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     }
 
     // Don't allow vanished players to join
-    if (joining.isVanished()) {
+    if (Integration.isVanished(joining.getBukkit())) {
       return GenericJoinResult.Status.VANISHED.toResult();
     }
 
@@ -160,7 +161,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
   @Override
   public boolean forceJoin(MatchPlayer joining, @Nullable Competitor forcedParty) {
-    if (joining.isVanished()) return join(joining, forcedParty);
+    if (Integration.isVanished(joining.getBukkit())) return join(joining, forcedParty);
 
     for (JoinHandler handler : handlers) {
       if (handler.forceJoin(joining, forcedParty)) return true;

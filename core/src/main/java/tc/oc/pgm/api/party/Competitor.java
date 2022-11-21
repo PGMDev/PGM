@@ -17,4 +17,11 @@ public interface Competitor extends Party {
    * @return a visibility
    */
   NameTagVisibility getNameTagVisibility();
+
+  /**
+   * Sets the name tag visibility
+   *
+   * @param visibility the visibility name tag should be set to
+   */
+  void setNameTagVisibility(NameTagVisibility visibility);
 }

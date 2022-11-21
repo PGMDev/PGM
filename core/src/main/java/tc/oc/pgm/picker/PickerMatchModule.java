@@ -35,6 +35,7 @@ import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.PlayerVanishEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -48,7 +49,6 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
-import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -349,7 +349,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     this.picking.remove(match.getPlayer((Player) event.getPlayer()));
   }
 
-  @EventHandler
+  @EventHandler(ignoreCancelled = true)
   public void rightClickIcon(final ObserverInteractEvent event) {
     final boolean right = event.getClickType() == ClickType.RIGHT;
     final boolean left = event.getClickType() == ClickType.LEFT;

@@ -217,6 +217,7 @@ public class Carried extends Spawned implements Missing {
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
     if (smm != null && this.flag.getDefinition().getPointsPerSecond() != 0) {
       smm.incrementScore(
+          this.getCarrier().getId(),
           this.getBeneficiary(this.flag.getDefinition().getOwner()),
           this.flag.getDefinition().getPointsPerSecond() / 20D);
     }

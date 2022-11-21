@@ -406,15 +406,6 @@ public interface Config {
   }
 
   /**
-   * Gets whether "community mode" should be installed if not present.
-   *
-   * <p>Includes features such as /report, /warn, /freeze, and more.
-   *
-   * @return If community mode is enabled.
-   */
-  boolean isCommunityMode();
-
-  /**
    * Gets experimental configuration settings that are not yet stable.
    *
    * @return A map of experimental settings.

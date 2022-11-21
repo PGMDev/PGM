@@ -23,12 +23,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.util.named.NameDecorationProvider;
-import tc.oc.pgm.util.text.PlayerComponent;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -87,8 +88,14 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @Override
   public String getDecoratedName(Player player, ChatColor partyColor) {
+    ChatColor party = (partyColor == null ? ChatColor.RESET : partyColor);
+
+    if (Integration.getNick(player) != null) {
+      return party + Integration.getNick(player);
+    }
+
     return getPrefix(player.getUniqueId())
-        + (partyColor == null ? ChatColor.RESET : partyColor)
+        + party
         + player.getName()
         + getSuffix(player.getUniqueId())
         + ChatColor.WHITE;
@@ -96,12 +103,16 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @Override
   public Component getDecoratedNameComponent(Player player, ChatColor partyColor) {
+    TextColor partyTextColor =
+        partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor);
+
+    if (Integration.getNick(player) != null) {
+      return text(Integration.getNick(player), partyTextColor);
+    }
+
     return text()
         .append(getPrefixComponent(player.getUniqueId()))
-        .append(
-            text(
-                player.getName(),
-                partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor)))
+        .append(text(player.getName(), partyTextColor))
         .append(getSuffixComponent(player.getUniqueId()))
         .build();
   }
@@ -116,7 +127,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   public TextColor getColor(UUID uuid) {
     MatchPlayer player = PGM.get().getMatchManager().getPlayer(uuid);
-    if (player == null) return PlayerComponent.OFFLINE_COLOR;
+    if (player == null) return PlayerComponentProvider.OFFLINE_COLOR;
     return TextFormatter.convert(player.getParty().getColor());
   }
 

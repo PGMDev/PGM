@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.tablist;
+package tc.oc.pgm.tablist;
 
 import static tc.oc.pgm.util.text.PlayerComponent.player;
 
@@ -6,10 +6,15 @@ import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.event.player.PlayerSkinChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.util.tablist.DynamicTabEntry;
+import tc.oc.pgm.util.tablist.SimpleTabEntry;
+import tc.oc.pgm.util.tablist.TabEntry;
+import tc.oc.pgm.util.tablist.TabView;
 
 /**
  * {@link TabEntry} showing a {@link Player}'s name and skin.
@@ -52,7 +57,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public Component getContent(TabView view) {
-    return player(player, NameStyle.TAB, view.getViewer());
+    return player(player, NameStyle.TAB);
   }
 
   @Override
@@ -67,7 +72,13 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public @Nullable Skin getSkin(TabView view) {
-    return NMSHacks.getPlayerSkin(this.player);
+    // TODO: UH fix this to re-support 1.8 spigot
+    // return NMSHacks.getPlayerSkin(this.player);
+    return view.getViewer() != null && this.player.hasFakeSkin(view.getViewer())
+        ? new Skin(
+            this.player.getFakeSkin(view.getViewer()).getData(),
+            this.player.getFakeSkin(view.getViewer()).getSignature())
+        : NMSHacks.getPlayerSkin(this.player);
   }
 
   @Override
@@ -80,6 +91,12 @@ public class PlayerTabEntry extends DynamicTabEntry {
   protected void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
     if (this.player == event.getPlayer()) {
       this.updateFakeEntity();
+    }
+  }
+
+  protected void onSkinChange(PlayerSkinChangeEvent event) {
+    if (this.player == event.getPlayer()) {
+      this.refresh();
     }
   }
 

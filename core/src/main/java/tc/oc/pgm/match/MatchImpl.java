@@ -112,6 +112,7 @@ public class MatchImpl implements Match {
   private final AtomicReference<Party> queuedParticipants;
   private final ObserverParty observers;
   private final MatchFeatureContext features;
+  private final AtomicBoolean friendlyFire;
 
   protected MatchImpl(String id, MapContext map, World world) {
     this.id = assertNotNull(id);
@@ -158,6 +159,7 @@ public class MatchImpl implements Match {
     this.queuedParticipants = new AtomicReference<>();
     this.observers = new ObserverParty(this);
     this.features = new MatchFeatureContext();
+    this.friendlyFire = new AtomicBoolean(map.getFriendlyFire());
   }
 
   @Override
@@ -936,5 +938,15 @@ public class MatchImpl implements Match {
         + ", phase="
         + this.getPhase()
         + "}";
+  }
+
+  @Override
+  public void setFriendlyFire(boolean enabled) {
+    this.friendlyFire.set(enabled);
+  }
+
+  @Override
+  public boolean isFriendlyFire() {
+    return friendlyFire.get();
   }
 }

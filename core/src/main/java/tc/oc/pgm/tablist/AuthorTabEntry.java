@@ -31,7 +31,7 @@ public class AuthorTabEntry extends DynamicTabEntry {
                 translatable(
                     authorIdx == 0 ? "misc.by" : "misc.and",
                     NamedTextColor.GRAY,
-                    author.getName(NameStyle.FANCY)))
+                    author.getName(NameStyle.CONCISE)))
         .orElse(empty());
   }
 }

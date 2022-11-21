@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import cloud.commandframework.annotations.Argument;
@@ -12,11 +13,13 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.annotations.specifier.Greedy;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -27,8 +30,8 @@ import tc.oc.pgm.rotation.pools.VotingPool;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
 import tc.oc.pgm.rotation.vote.VotePoolOptions;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @CommandMethod("vote|votes")
@@ -49,7 +52,7 @@ public class VotingCommand {
         translatable(
             "vote.add",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
+            player(sender, NameStyle.FANCY),
             map.getStyledName(MapNameStyle.COLOR));
 
     if (vote.isAdded(map)) {
@@ -57,7 +60,8 @@ public class VotingCommand {
       return;
     }
 
-    if (vote.addVote(map)) {
+    UUID playerId = (sender instanceof Player) ? ((Player) sender).getUniqueId() : null;
+    if (vote.addVote(map, playerId, false)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
       viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));
@@ -79,7 +83,7 @@ public class VotingCommand {
           translatable(
               "vote.remove",
               NamedTextColor.GRAY,
-              UsernameFormatUtils.formatStaffName(sender, match),
+              player(sender, NameStyle.FANCY),
               map.getStyledName(MapNameStyle.COLOR)),
           match);
     } else {
@@ -98,10 +102,7 @@ public class VotingCommand {
             NamedTextColor.LIGHT_PURPLE);
     ChatDispatcher.broadcastAdminChatMessage(
         translatable(
-            "vote.toggle",
-            NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
-            voteModeName),
+            "vote.toggle", NamedTextColor.GRAY, player(sender, NameStyle.FANCY), voteModeName),
         match);
   }
 
@@ -119,7 +120,7 @@ public class VotingCommand {
         translatable(
             "vote.remove",
             NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
+            player(sender, NameStyle.FANCY),
             TextFormatter.list(maps, NamedTextColor.GRAY));
 
     vote.clear();

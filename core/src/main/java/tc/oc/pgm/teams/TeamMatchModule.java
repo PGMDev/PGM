@@ -29,12 +29,14 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerFullJoinEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
@@ -293,7 +295,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     Party oldTeam = player.getParty();
     if (oldTeam == newTeam) return true;
 
-    if (!player.isVanished() && match.setParty(player, newTeam)) {
+    if (!Integration.isVanished(player.getBukkit()) && match.setParty(player, newTeam)) {
       setAutoJoin(player, autoJoin);
       return true;
     } else {
@@ -501,7 +503,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           } else {
             joining.sendWarning(translatable("join.err.full"));
           }
-
+          match.callEvent(new MatchPlayerFullJoinEvent(joining));
           return true;
 
         case REDUNDANT:

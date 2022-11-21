@@ -211,7 +211,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     match
         .getExecutor(MatchScope.LOADED)
         .schedule(
-            () -> match.callEvent(new MatchStatsEvent(match, bestStats, ownStats)),
+            () -> match.callEvent(new MatchStatsEvent(match, bestStats, ownStats, allPlayerStats)),
             showAfter.toMillis(),
             TimeUnit.MILLISECONDS);
   }

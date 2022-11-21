@@ -8,6 +8,7 @@ import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.Lists;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +71,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
   @Override
   public void load() {
     match.addVictoryCondition(new ScoreVictoryCondition());
+  }
+
+  public Map<UUID, Double> getContributions() {
+    return Collections.unmodifiableMap(contributions);
   }
 
   public boolean hasScoreLimit() {
@@ -279,6 +284,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
     int wholePoints = (int) points;
     if (wholePoints < 1 || box.isSilent()) return;
 
+    // match.callEvent(new PlayerScoreEvent(player, points));
+
     match.sendMessage(
         translatable(
             "scorebox.scored",
@@ -295,8 +302,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
     contributions.put(player, contribution);
     incrementScore(competitor, amount);
 
+    MatchPlayer mp = match.getPlayer(player);
+    if (mp != null) {
+      match.callEvent(new PlayerScoreEvent(mp, amount));
+    }
+
     if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
-      MatchPlayer mp = match.getPlayer(player);
       if (mp == null) return;
 
       // wait until the next tick to do this so stat recording and other stuff works

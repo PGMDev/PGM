@@ -32,10 +32,12 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.Audience;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -284,7 +286,8 @@ public final class TextTranslations {
    * @return The translated text.
    */
   public static Component translate(Component text, Locale locale) {
-    return GlobalTranslator.render(text, locale);
+    return GlobalTranslator.render(
+        Audience.RENDERER.render(text, Audience.get(Bukkit.getConsoleSender())), locale);
   }
 
   /**
@@ -296,7 +299,8 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translateLegacy(Component text, @Nullable CommandSender sender) {
-    return LegacyComponentSerializer.legacySection().serialize(translate(text, getLocale(sender)));
+    text = Audience.RENDERER.render(text, Audience.get(sender));
+    return LegacyComponentSerializer.legacySection().serialize(text);
   }
 
   /**
@@ -315,12 +319,11 @@ public final class TextTranslations {
         translatable(
             key,
             Stream.of(args).map(String::valueOf).map(Component::text).collect(Collectors.toList()));
-
     return LegacyComponentSerializer.legacySection().serialize(translate(text, locale));
   }
 
   public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
-    Component translated = translate(component, viewer == null ? SOURCE_LOCALE : getLocale(viewer));
-    return GsonComponentSerializer.colorDownsamplingGson().serialize(translated);
+    component = Audience.RENDERER.render(component, Audience.get(viewer));
+    return GsonComponentSerializer.colorDownsamplingGson().serialize(component);
   }
 }

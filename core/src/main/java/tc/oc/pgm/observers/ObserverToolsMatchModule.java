@@ -9,8 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
@@ -19,6 +17,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.inventory.ItemBuilder;
@@ -51,12 +50,12 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
     refreshKit(event.getPlayer());
   }
 
-  @EventHandler
-  public void onToolClick(PlayerInteractEvent event) {
-    if (isRightClick(event.getAction())) {
-      ItemStack item = event.getPlayer().getItemInHand();
-      MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null && item != null && item.isSimilar(createItem(player.getBukkit()))) {
+  @EventHandler(ignoreCancelled = true)
+  public void onToolClick(ObserverInteractEvent event) {
+    MatchPlayer player = event.getPlayer();
+    if (player != null) {
+      ItemStack item = event.getPlayer().getBukkit().getItemInHand();
+      if (item != null && item.getType().equals(TOOL_MATERIAL) && canUse(player)) {
         openMenu(player);
       }
     }
@@ -76,10 +75,6 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
 
   private boolean canUse(MatchPlayer player) {
     return player.isObserving();
-  }
-
-  private boolean isRightClick(Action action) {
-    return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
   }
 
   private ItemStack createItem(Player player) {

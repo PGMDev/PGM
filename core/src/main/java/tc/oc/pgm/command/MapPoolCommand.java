@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
@@ -204,11 +205,35 @@ public final class MapPoolCommand {
       MapPoolManager poolManager,
       @Argument("pool") MapPool newPool,
       @Flag(value = "timelimit", aliases = "t") Duration timeLimit,
-      @Flag(value = "matches", aliases = "m") Integer matchLimit) {
+      @Flag(value = "matches", aliases = "m") Integer matchLimit,
+      @Flag(value = "lock", aliases = "l") boolean lock) {
     if (!match.getCountdown().getAll(CycleCountdown.class).isEmpty())
       throw exception("admin.setPool.activeCycle");
 
     if (newPool == null) throw exception("pool.noPoolMatch");
+
+    // Send error when locked
+    if (poolManager.isLocked() && lock == poolManager.isLocked()) {
+      Component error =
+          translatable(
+              "pool.locked", text(poolManager.getActiveMapPool().getName(), NamedTextColor.GOLD));
+
+      Component button =
+          text()
+              .append(text(" ["))
+              .append(translatable("pool.locked.button", NamedTextColor.GREEN, TextDecoration.BOLD))
+              .append(text("]"))
+              .hoverEvent(
+                  HoverEvent.showText(translatable("pool.locked.hover", NamedTextColor.GREEN)))
+              .clickEvent(ClickEvent.runCommand("/setpool -l"))
+              .color(NamedTextColor.GRAY)
+              .build();
+
+      Component message = text().append(error).append(button).build();
+
+      sender.sendWarning(message);
+      return;
+    }
 
     if (newPool.equals(poolManager.getActiveMapPool())) {
       sender.sendMessage(
@@ -220,7 +245,7 @@ public final class MapPoolCommand {
     }
 
     poolManager.updateActiveMapPool(
-        newPool, match, true, source, timeLimit, matchLimit != null ? matchLimit : 0);
+        newPool, match, true, source, timeLimit, matchLimit != null ? matchLimit : 0, lock);
   }
 
   @CommandMethod("setpool reset")
@@ -232,7 +257,8 @@ public final class MapPoolCommand {
       Match match,
       MapPoolManager poolManager,
       @Flag(value = "timelimit", aliases = "t") Duration timeLimit,
-      @Flag(value = "matches", aliases = "m") Integer matchLimit) {
+      @Flag(value = "matches", aliases = "m") Integer matchLimit,
+      @Flag(value = "lock", aliases = "l") boolean lock) {
     setPool(
         sender,
         source,
@@ -240,7 +266,8 @@ public final class MapPoolCommand {
         poolManager,
         poolManager.getAppropriateDynamicPool(match).orElseThrow(() -> exception("pool.noDynamic")),
         timeLimit,
-        matchLimit);
+        matchLimit,
+        lock);
   }
 
   @CommandMethod("skip [positions]")
@@ -345,12 +372,13 @@ public final class MapPoolCommand {
       @Argument("rotation") Rotation rotation,
       @Flag(value = "timelimit", aliases = "t") Duration timeLimit,
       @Flag(value = "matches", aliases = "m") Integer matchLimit,
+      @Flag(value = "lock", aliases = "l") boolean lock,
       String[] rawArgs) {
     wrapLegacy(
         "setpool",
         sender,
         rawArgs,
-        () -> setPool(sender, source, match, poolManager, rotation, timeLimit, matchLimit));
+        () -> setPool(sender, source, match, poolManager, rotation, timeLimit, matchLimit, lock));
   }
 
   @CommandMethod("setrot reset")
@@ -365,6 +393,7 @@ public final class MapPoolCommand {
       MapPoolManager poolManager,
       @Flag(value = "timelimit", aliases = "t") Duration timeLimit,
       @Flag(value = "matches", aliases = "m") Integer matchLimit,
+      @Flag(value = "lock", aliases = "l") boolean lock,
       String[] rawArgs) {
 
     MapPool resetRot =
@@ -376,7 +405,7 @@ public final class MapPoolCommand {
         rawArgs,
         () -> {
           if (resetRot.getType() != MapPoolType.ORDERED) throw exception("pool.noRotation");
-          setPool(sender, source, match, poolManager, resetRot, timeLimit, matchLimit);
+          setPool(sender, source, match, poolManager, resetRot, timeLimit, matchLimit, lock);
         });
   }
 

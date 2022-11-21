@@ -1,5 +1,7 @@
 package tc.oc.pgm.rotation.pools;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
@@ -12,10 +14,24 @@ public class Rotation extends MapPool {
   private int position;
 
   public Rotation(
-      MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
-    super(type, name, manager, section);
+      MapPoolType type,
+      MapPoolManager manager,
+      String identifier,
+      String name,
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> maps) {
+    super(type, manager, identifier, name, enabled, players, dynamic, cycleTime, maps);
+  }
 
-    @Nullable MapInfo nextMap = PGM.get().getMapLibrary().getMap(manager.getNextMapForPool(name));
+  public Rotation(
+      MapPoolType type, MapPoolManager manager, ConfigurationSection section, String identifier) {
+    super(type, manager, section, identifier);
+
+    @Nullable
+    MapInfo nextMap = PGM.get().getMapLibrary().getMap(manager.getNextMapForPool(identifier));
     if (nextMap != null) this.position = getMapPosition(nextMap);
     else {
       PGM.get()

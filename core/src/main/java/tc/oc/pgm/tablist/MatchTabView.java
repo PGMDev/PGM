@@ -14,11 +14,12 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.PlayerVanishEvent;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.teams.Team;
@@ -322,7 +323,7 @@ public class MatchTabView extends TabView implements Listener {
 
   private boolean shouldHide(MatchPlayer other) {
     return other != matchPlayer
-        && other.isVanished()
+        && (Integration.isVanished(other.getBukkit()) || Integration.isHidden(other.getBukkit()))
         && !matchPlayer.getBukkit().hasPermission(Permissions.STAFF);
   }
 

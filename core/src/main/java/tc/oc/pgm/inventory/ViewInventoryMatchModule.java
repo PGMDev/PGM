@@ -51,6 +51,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -59,6 +60,12 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class ViewInventoryMatchModule implements MatchModule, Listener {
+
+  /**
+   * Amount of milliseconds after the match begins where players may not add / remove items from
+   * chests.
+   */
+  public static final Duration CHEST_PROTECT_TIME = Duration.ofSeconds(2);
 
   public static final Duration TICK = Duration.ofMillis(50);
 
@@ -99,6 +106,26 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       }
 
       iterator.remove();
+    }
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void checkInventoryClick(final InventoryClickEvent event) {
+    if (event.getWhoClicked() instanceof Player) {
+      MatchPlayer player = this.match.getPlayer((Player) event.getWhoClicked());
+      if (player == null) {
+        return;
+      }
+      // we only cancel when the view is a chest because the other views tend to crash
+      if (!allowedInventoryType(event.getInventory().getType())) {
+        // cancel the click if the player cannot interact with the world or if the match has just
+        // started
+        if (!player.canInteract()
+            || (player.getMatch().isRunning()
+                && TimeUtils.isShorterThan(player.getMatch().getDuration(), CHEST_PROTECT_TIME))) {
+          event.setCancelled(true);
+        }
+      }
     }
   }
 
@@ -264,6 +291,16 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     return viewer != null && holder != null && viewer.isObserving() && holder.isAlive();
   }
 
+  protected static boolean allowedInventoryType(InventoryType type) {
+    switch (type) {
+      case CREATIVE:
+      case PLAYER:
+        return true;
+      default:
+        return false;
+    }
+  }
+
   protected void scheduleCheck(Player updater) {
     if (this.updateQueue.containsKey(updater.getName())) return;
 
@@ -298,9 +335,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     // restrictions on inventory titles
     String title =
         StringUtils.substring(
-            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer),
-            0,
-            32);
+            TextTranslations.translateLegacy(player(holder, NameStyle.FANCY), viewer), 0, 32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 

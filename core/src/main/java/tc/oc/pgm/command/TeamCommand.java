@@ -26,7 +26,6 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
 @CommandMethod("team")
@@ -55,7 +54,7 @@ public final class TeamCommand {
         translatable(
             "join.ok.force",
             NamedTextColor.GRAY,
-            joiner.getName(NameStyle.FANCY),
+            joiner.getName(),
             joiner.getParty().getName(),
             oldParty.getName()));
   }

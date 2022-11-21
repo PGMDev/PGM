@@ -3,9 +3,11 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.identity.Identity.identity;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import cloud.commandframework.annotations.Argument;
@@ -15,8 +17,7 @@ import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.annotations.specifier.Greedy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Maps;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -37,21 +38,23 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.VanishManager;
+import tc.oc.pgm.api.player.event.MatchPlayerChatEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.Players;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.text.PlayerComponentProvider;
 import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.translation.Translation;
 
 public class ChatDispatcher implements Listener {
 
@@ -63,10 +66,7 @@ public class ChatDispatcher implements Listener {
   }
 
   private final MatchManager manager;
-  private final VanishManager vanish;
   private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
-
-  private final Map<UUID, String> muted;
 
   public static final TextComponent ADMIN_CHAT_PREFIX =
       text()
@@ -92,54 +92,36 @@ public class ChatDispatcher implements Listener {
 
   public ChatDispatcher() {
     this.manager = PGM.get().getMatchManager();
-    this.vanish = PGM.get().getVanishManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
-    this.muted = Maps.newHashMap();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
-  }
-
-  public void addMuted(MatchPlayer player, String reason) {
-    this.muted.put(player.getId(), reason);
-  }
-
-  public void removeMuted(MatchPlayer player) {
-    this.muted.remove(player.getId());
-  }
-
-  public boolean isMuted(MatchPlayer player) {
-    return player != null ? muted.containsKey(player.getId()) : false;
-  }
-
-  public Set<UUID> getMutedUUIDs() {
-    return muted.keySet();
   }
 
   @CommandMethod("g|all [message]")
   @CommandDescription("Send a message to everyone")
   public void sendGlobal(
       Match match, MatchPlayer sender, @Argument("message") @Greedy String message) {
-    if (sender != null && sender.isVanished()) {
+    if (sender != null && Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
 
-    if (checkMute(sender)) {
-      send(
-          match,
-          sender,
-          message,
-          GLOBAL_FORMAT,
-          getChatFormat(null, sender, message),
-          viewer -> true,
-          SettingValue.CHAT_GLOBAL);
-    }
+    send(
+        match,
+        sender,
+        message,
+        GLOBAL_FORMAT,
+        null,
+        viewer -> true,
+        SettingValue.CHAT_GLOBAL,
+        Channel.GLOBAL,
+        false);
   }
 
   @CommandMethod("t [message]")
   @CommandDescription("Send a message to your team")
   public void sendTeam(
       Match match, MatchPlayer sender, @Argument("message") @Greedy String message) {
-    if (sender != null && sender.isVanished()) {
+    if (sender != null && Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
@@ -152,19 +134,19 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    if (checkMute(sender)) {
-      send(
-          match,
-          sender,
-          message,
-          TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
-          getChatFormat(party.getChatPrefix(), sender, message),
-          viewer ->
-              party.equals(viewer.getParty())
-                  || (viewer.isObserving()
-                      && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
-          SettingValue.CHAT_TEAM);
-    }
+    send(
+        match,
+        sender,
+        message,
+        TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
+        party.getChatPrefix(),
+        viewer ->
+            party.equals(viewer.getParty())
+                || (viewer.isObserving()
+                    && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
+        SettingValue.CHAT_TEAM,
+        Channel.TEAM,
+        false);
   }
 
   @CommandMethod("a [message]")
@@ -185,17 +167,11 @@ public class ChatDispatcher implements Listener {
         sender,
         message != null ? BukkitUtils.colorize(message) : null,
         AC_FORMAT,
-        getChatFormat(ADMIN_CHAT_PREFIX, sender, message),
+        ADMIN_CHAT_PREFIX,
         AC_FILTER,
-        SettingValue.CHAT_ADMIN);
-
-    // Play sounds for admin chat
-    if (message != null) {
-      match.getPlayers().stream()
-          .filter(AC_FILTER) // Initial filter
-          .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
-          .forEach(pl -> playSound(pl, AC_SOUND));
-    }
+        SettingValue.CHAT_ADMIN,
+        Channel.ADMIN,
+        true);
   }
 
   @CommandMethod("msg|tell|pm|dm <player> <message>")
@@ -207,42 +183,63 @@ public class ChatDispatcher implements Listener {
       @Argument("message") @Greedy String message) {
     if (sender == null) return;
 
-    if (vanish.isVanished(sender.getId())) {
+    if (Integration.isVanished(sender.getBukkit())) {
       sender.sendWarning(translatable("vanish.chat.deny"));
       return;
     }
 
-    if (isMuted(sender) && !receiver.hasPermission(Permissions.STAFF)) {
-      sendMutedMessage(sender);
-      return; // Muted players may only message staff
+    // Sender muted, don't allow messages unless to staff
+    if (Integration.isMuted(sender.getBukkit()) && !receiver.hasPermission(Permissions.STAFF)) {
+      sender.sendWarning(
+          translatable(
+              "moderation.mute.message",
+              NamedTextColor.GRAY,
+              text(Integration.getMuteReason(sender.getBukkit()), NamedTextColor.RED)));
+      return;
     }
 
     MatchPlayer matchReceiver = manager.getPlayer(receiver);
     if (matchReceiver != null) {
 
       // Vanish Check - Don't allow messages to vanished
-      if (vanish.isVanished(matchReceiver.getId())) {
+      if (Integration.isVanished(receiver)) {
         sender.sendWarning(translatable("command.playerNotFound"));
         return;
       }
 
-      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
-
-      if (option.equals(SettingValue.MESSAGE_OFF)
-          && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
-        Component blocked =
-            translatable("command.message.blocked", matchReceiver.getName(NameStyle.FANCY));
-        sender.sendWarning(blocked);
+      // Sender setting check
+      SettingValue senderOptions = sender.getSettings().getValue(SettingKey.MESSAGE);
+      if (senderOptions.equals(SettingValue.MESSAGE_FRIEND)
+          && !Integration.isFriend(sender.getBukkit(), receiver)) {
+        sender.sendWarning(translatable("command.message.friendsOnly", matchReceiver.getName()));
         return;
       }
 
-      if (isMuted(matchReceiver) && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
+      if (senderOptions.equals(SettingValue.MESSAGE_OFF)) {
+        sender.sendWarning(
+            translatable(
+                "command.message.disabled", text("/toggle message", NamedTextColor.GREEN)));
+        return;
+      }
+
+      // Reciever Setting Check
+      SettingValue option = matchReceiver.getSettings().getValue(SettingKey.MESSAGE);
+      if (!sender.getBukkit().hasPermission(Permissions.STAFF)) {
+        if ((option.equals(SettingValue.MESSAGE_FRIEND)
+                && !Integration.isFriend(sender.getBukkit(), receiver))
+            || option.equals(SettingValue.MESSAGE_OFF)) {
+          Component blocked = translatable("command.message.blocked", matchReceiver.getName());
+          sender.sendWarning(blocked);
+          return;
+        }
+      }
+
+      if (Integration.isMuted(matchReceiver.getBukkit())
+          && !sender.getBukkit().hasPermission(Permissions.STAFF)) {
         Component muted =
             translatable("moderation.mute.target", matchReceiver.getName(NameStyle.CONCISE));
         sender.sendWarning(muted);
         return; // Only staff can message muted players
-      } else {
-        playSound(matchReceiver, DM_SOUND);
       }
     }
 
@@ -256,15 +253,14 @@ public class ChatDispatcher implements Listener {
         sender,
         message,
         formatPrivateMessage("misc.from", matchReceiver.getBukkit()),
-        getChatFormat(
-            text()
-                .append(translatable("misc.from", NamedTextColor.GRAY, TextDecoration.ITALIC))
-                .append(space())
-                .build(),
-            sender,
-            message),
+        text()
+            .append(translatable("misc.from", NamedTextColor.GRAY, TextDecoration.ITALIC))
+            .append(space())
+            .build(),
         viewer -> viewer.getBukkit().equals(receiver),
-        null);
+        null,
+        Channel.PRIVATE_RECEIVER,
+        false);
 
     // Send message to the sender
     send(
@@ -272,15 +268,14 @@ public class ChatDispatcher implements Listener {
         manager.getPlayer(receiver), // Allow for cross-match messages
         message,
         formatPrivateMessage("misc.to", sender.getBukkit()),
-        getChatFormat(
-            text()
-                .append(translatable("misc.to", NamedTextColor.GRAY, TextDecoration.ITALIC))
-                .append(space())
-                .build(),
-            manager.getPlayer(receiver),
-            message),
+        text()
+            .append(translatable("misc.to", NamedTextColor.GRAY, TextDecoration.ITALIC))
+            .append(space())
+            .build(),
         viewer -> viewer.getBukkit().equals(sender.getBukkit()),
-        null);
+        null,
+        Channel.PRIVATE_SENDER,
+        true);
   }
 
   private String formatPrivateMessage(String key, CommandSender viewer) {
@@ -370,9 +365,11 @@ public class ChatDispatcher implements Listener {
       MatchPlayer sender,
       @Nullable String text,
       String format,
-      Component componentMsg,
+      @Nullable Component prefix,
       Predicate<MatchPlayer> filter,
-      @Nullable SettingValue type) {
+      @Nullable SettingValue type,
+      Channel channel,
+      boolean skipTranslation) {
     // When a message is empty, this indicates the player wants to change their default chat channel
     if ((text == null || text.isEmpty()) && sender != null) {
       // FIXME: there should be a better way to do this
@@ -407,14 +404,71 @@ public class ChatDispatcher implements Listener {
                 event.setFormat(format);
                 CHAT_EVENT_CACHE.put(event, true);
                 match.callEvent(event);
+                match.callEvent(new MatchPlayerChatEvent(sender, text(message), channel));
 
                 if (event.isCancelled()) {
                   return;
                 }
+                Set<MatchPlayer> matchRecipients =
+                    event.getRecipients().stream()
+                        .map(manager::getPlayer)
+                        .collect(Collectors.toSet());
 
-                event.getRecipients().stream()
-                    .map(Audience::get)
-                    .forEach(player -> player.sendMessage(identity(sender.getId()), componentMsg));
+                // Non-translated players & sender receive message instantly
+                Set<MatchPlayer> nonTranslatedPlayers =
+                    matchRecipients.stream()
+                        .filter(
+                            mp ->
+                                mp.equals(sender)
+                                    || mp.getSettings().getValue(SettingKey.TRANSLATE)
+                                        == SettingValue.TRANSLATE_OFF
+                                    || skipTranslation)
+                        .collect(Collectors.toSet());
+
+                nonTranslatedPlayers.forEach(
+                    player -> {
+                      if (!player.equals(sender)) {
+                        if (channel.getSound() != null) {
+                          playSound(player, channel.getSound());
+                        }
+                      }
+
+                      Audience audience = Audience.get(player.getBukkit());
+                      audience.sendMessage(
+                          identity(sender.getId()),
+                          getChatFormat(
+                              prefix,
+                              player(sender.getBukkit(), NameStyle.VERBOSE),
+                              message,
+                              message,
+                              false));
+                    });
+
+                // Perform translation
+                Translation translated = Integration.translate(message).join();
+
+                // Send translated text to everyone else
+                matchRecipients.stream()
+                    .filter(player -> !nonTranslatedPlayers.contains(player))
+                    .forEach(
+                        player -> {
+                          if (!player.equals(sender)) {
+                            if (channel.getSound() != null) {
+                              playSound(player, channel.getSound());
+                            }
+                          }
+
+                          Audience audience = Audience.get(player.getBukkit());
+                          String translatedMessage = translated.getMessage(player.getBukkit());
+                          audience.sendMessage(
+                              identity(sender.getId()),
+                              getChatFormat(
+                                  prefix,
+                                  player(sender.getBukkit(), NameStyle.VERBOSE),
+                                  translatedMessage,
+                                  message,
+                                  !translatedMessage.equalsIgnoreCase(message)));
+                        });
               });
       return;
     }
@@ -427,26 +481,9 @@ public class ChatDispatcher implements Listener {
                         String.format(
                             format,
                             translate(
-                                UsernameFormatUtils.CONSOLE_NAME,
+                                PlayerComponentProvider.CONSOLE,
                                 TextTranslations.getLocale(player.getBukkit())),
                             message))));
-  }
-
-  private void sendMutedMessage(MatchPlayer player) {
-    Component warning =
-        translatable(
-            "moderation.mute.message",
-            text(muted.getOrDefault(player.getId(), ""), NamedTextColor.AQUA));
-    player.sendWarning(warning);
-  }
-
-  private boolean checkMute(MatchPlayer player) {
-    if (isMuted(player)) {
-      sendMutedMessage(player);
-      return false;
-    }
-
-    return true;
   }
 
   public static void broadcastAdminChatMessage(Component message, Match match) {
@@ -455,20 +492,17 @@ public class ChatDispatcher implements Listener {
 
   public static void broadcastAdminChatMessage(
       Component message, Match match, Optional<Sound> sound) {
-    TextComponent formatted = ADMIN_CHAT_PREFIX.append(message);
-    match.getPlayers().stream()
-        .filter(AC_FILTER)
-        .forEach(
-            mp -> {
-              // If provided a sound, play if setting allows
-              sound.ifPresent(
-                  s -> {
-                    if (canPlaySound(mp)) {
-                      mp.playSound(s);
-                    }
-                  });
-              mp.sendMessage(formatted);
-            });
+    TextComponent.Builder formatted = text().append(ADMIN_CHAT_PREFIX).append(message);
+    List<MatchPlayer> staffPlayers =
+        match.getPlayers().stream().filter(AC_FILTER).collect(Collectors.toList());
+    Audience staffAudience = Audience.get(staffPlayers);
+    staffAudience.sendMessage(formatted);
+    sound.ifPresent(
+        alertSound -> {
+          staffPlayers.stream()
+              .filter(ChatDispatcher::canPlaySound)
+              .forEach(mp -> mp.playSound(alertSound));
+        });
     Audience.console().sendMessage(formatted);
   }
 
@@ -476,20 +510,75 @@ public class ChatDispatcher implements Listener {
     return viewer.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL);
   }
 
-  private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
-    Component msg = text(message != null ? message : "");
+  private Component getChatFormat(
+      @Nullable Component prefix,
+      Component name,
+      String message,
+      String original,
+      boolean translate) {
+    TextComponent.Builder text = text().append(text(message != null ? message : ""));
+
+    if (translate) {
+      text.hoverEvent(getOriginalMessageHover(original));
+    }
+
+    TextComponent.Builder msg = text().append(text.build());
+    if (translate) {
+      msg.append(
+          text(" (translated)", NamedTextColor.GRAY, TextDecoration.ITALIC)
+              .hoverEvent(getTranslationInfoHover()));
+    }
+
     if (prefix == null)
       return text()
           .append(text("<", NamedTextColor.WHITE))
-          .append(player.getName(NameStyle.VERBOSE))
+          .append(name)
           .append(text(">: ", NamedTextColor.WHITE))
           .append(msg)
           .build();
     return text()
         .append(prefix)
-        .append(player.getName(NameStyle.VERBOSE))
+        .append(name)
         .append(text(": ", NamedTextColor.WHITE))
         .append(msg)
         .build();
+  }
+
+  private Component getOriginalMessageHover(String original) {
+    return text()
+        .append(text("Original: ", NamedTextColor.YELLOW, TextDecoration.BOLD))
+        .append(text(original, NamedTextColor.WHITE, TextDecoration.ITALIC))
+        .build();
+  }
+
+  private Component getTranslationInfoHover() {
+    return text()
+        .color(NamedTextColor.GRAY)
+        .append(text("This message was translated to your local language."))
+        .append(newline())
+        .append(text("Hover over message to view original wording."))
+        .append(newline())
+        .append(newline())
+        .append(text("Want to opt-out of auto translations? Use ", NamedTextColor.GRAY))
+        .append(text("/toggle translate", NamedTextColor.AQUA))
+        .build();
+  }
+
+  public static enum Channel {
+    GLOBAL(null),
+    TEAM(null),
+    PRIVATE_SENDER(null),
+    PRIVATE_RECEIVER(DM_SOUND),
+    ADMIN(AC_SOUND);
+
+    private @Nullable Sound sound;
+
+    Channel(@Nullable Sound sound) {
+      this.sound = sound;
+    }
+
+    public Sound getSound() {
+      return sound;
+    }
   }
 }

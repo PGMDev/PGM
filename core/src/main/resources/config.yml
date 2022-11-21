@@ -100,6 +100,10 @@ tablist:
   left: ""
   right: ""
 
+# Enables vanish features such as /vanish and auto vanish joining with 'vanish.<server.ip>'
+vanish:
+  enabled: true   # Is vanish enabled
+
 # Overrides the server MoTD.
 #
 #  {0} = The existing server MoTD.
@@ -179,13 +183,6 @@ groups:
     prefix: "&9*"
     permissions:
       - "+pgm.premium"
-
-# Enables "community mode" with features such as /report, /freeze, /warn, and /ban.
-community:
-  enabled: true   # Is community mode enabled?
-  server-name: "" # Name of your server, displayed when players are kicked.
-  rules-link: ""  # A URL to a rules website, displayed when players are kicked.
-  appeal-msg: ""  # A message, displayed on the kick screen, if a player is banned.
 
 # Overrides the default database uri.
 #

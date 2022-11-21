@@ -15,13 +15,13 @@ public enum NameStyle {
   // Simple formatting, just team color & teleport
   COLOR(EnumSet.of(Flag.COLOR, Flag.TELEPORT)),
   // Fancy formatting, flairs, color and click to teleport
-  FANCY(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE_OFFLINE)),
-  // Tab list format, flairs, color, death status, self, etc
-  TAB(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.SELF, Flag.DISGUISE, Flag.DEATH)),
+  FANCY(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.REVEAL)),
+  // Tab list format, flairs, color, death status, self, friend, etc
+  TAB(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.SELF, Flag.DISGUISE, Flag.DEATH, Flag.FRIEND)),
   // Fancy plus allowing disguised status reveal
-  VERBOSE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE)),
+  VERBOSE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE, Flag.REVEAL)),
   // Fancy without teleport
-  CONCISE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT));
+  CONCISE(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.TELEPORT, Flag.DISGUISE_OFFLINE));
 
   private final Set<Flag> flags;
 
@@ -37,9 +37,11 @@ public enum NameStyle {
     COLOR, // Color
     FLAIR, // Show flair (prefix & suffix)
     SELF, // Bold if self
-    DISGUISE, // Strikethrough if disguised (vanish/nick)
-    DISGUISE_OFFLINE, // Appear offline if disguised (vanish/nick)
+    DISGUISE, // Strikethrough if disguised (vanish/nick/hidden)
+    DISGUISE_OFFLINE, // Appear offline if disguised (vanish/nick/hidden)
+    REVEAL,
     DEATH, // Grey out name if dead
-    TELEPORT // Click name to teleport
+    TELEPORT, // Click name to teleport
+    FRIEND // Italicized if friends
   }
 }

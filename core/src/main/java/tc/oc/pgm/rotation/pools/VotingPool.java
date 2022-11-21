@@ -1,7 +1,9 @@
 package tc.oc.pgm.rotation.pools;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -31,12 +33,26 @@ public class VotingPool extends MapPool {
   private MapPoll currentPoll;
 
   public VotingPool(
-      MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
-    super(type, name, manager, section);
-
+      MapPoolType type, MapPoolManager manager, ConfigurationSection section, String name) {
+    super(type, manager, section, name);
     this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
-
     this.mapPicker = MapVotePicker.of(manager, section);
+    for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
+  }
+
+  public VotingPool(
+      MapPoolType type,
+      MapPoolManager manager,
+      String identifier,
+      String name,
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> maps) {
+    super(type, manager, identifier, name, enabled, players, dynamic, cycleTime, maps);
+    this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
+    this.mapPicker = MapVotePicker.of(manager, null);
     for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 
@@ -71,7 +87,10 @@ public class VotingPool extends MapPool {
     if (currentPoll == null) return getRandom();
 
     MapInfo map = currentPoll.finishVote();
-    updateScores(currentPoll.getVotes());
+    // Only update scores when no custom maps are added to the vote
+    if (!currentPoll.isCustom()) {
+      updateScores(currentPoll.getVotes());
+    }
     manager.getVoteOptions().clear();
     currentPoll = null;
     return map != null ? map : getRandom();
@@ -108,7 +127,10 @@ public class VotingPool extends MapPool {
               if (RestartManager.isQueued()) return;
 
               currentPoll =
-                  new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
+                  new MapPoll(
+                      match,
+                      mapPicker.getMaps(manager.getVoteOptions(), mapScores),
+                      manager.getVoteOptions());
             },
             5,
             TimeUnit.SECONDS);

@@ -407,6 +407,10 @@ public interface Match
    */
   boolean calculateVictory();
 
+  boolean isFriendlyFire();
+
+  void setFriendlyFire(boolean enabled);
+
   @Override
   default Match getMatch() {
     return this;

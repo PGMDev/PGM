@@ -55,6 +55,7 @@ public class RestartListener implements Listener {
         if (match.isRunning()) {
           attemptMatchEnd(match);
         } else {
+          this.plugin.getServer().getPluginManager().callEvent(new StartRestartCountdownEvent());
           SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();
           ctx.cancelAll();
 

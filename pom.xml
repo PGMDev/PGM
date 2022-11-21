@@ -44,6 +44,10 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <repository>
+            <id>sonatype-oss-snapshots</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
         </repository>
@@ -86,7 +90,7 @@
         <dependency>
             <groupId>com.viaversion</groupId>
             <artifactId>viaversion</artifactId>
-            <version>4.2.1</version>
+            <version>4.4.1</version>
             <scope>provided</scope>
             <optional>true</optional>
             <!-- Fix transitive dependency breaking builds -->
@@ -122,7 +126,7 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.1.2</version>
+            <version>4.1.2-SNAPSHOT</version>
             <scope>compile</scope>
             <!-- Exclude Spigot APIs since we already provide Bukkit -->
             <exclusions>

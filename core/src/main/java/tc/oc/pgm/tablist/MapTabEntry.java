@@ -37,6 +37,6 @@ public class MapTabEntry extends DynamicTabEntry {
         "misc.authorship",
         NamedTextColor.GRAY,
         text(map.getName(), NamedTextColor.AQUA, TextDecoration.BOLD),
-        TextFormatter.nameList(map.getAuthors(), NameStyle.FANCY, NamedTextColor.GRAY));
+        TextFormatter.nameList(map.getAuthors(), NameStyle.CONCISE, NamedTextColor.GRAY));
   }
 }

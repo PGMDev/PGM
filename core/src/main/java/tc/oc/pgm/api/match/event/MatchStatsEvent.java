@@ -1,8 +1,11 @@
 package tc.oc.pgm.api.match.event;
 
+import java.util.Map;
+import java.util.UUID;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.stats.PlayerStats;
 
 public class MatchStatsEvent extends MatchEvent implements Cancellable {
 
@@ -10,10 +13,14 @@ public class MatchStatsEvent extends MatchEvent implements Cancellable {
   private boolean showBest;
   private boolean showOwn;
 
-  public MatchStatsEvent(Match match, boolean showBest, boolean showOwn) {
+  private Map<UUID, PlayerStats> stats;
+
+  public MatchStatsEvent(
+      Match match, boolean showBest, boolean showOwn, Map<UUID, PlayerStats> stats) {
     super(match);
     this.showBest = showBest;
     this.showOwn = showOwn;
+    this.stats = stats;
   }
 
   public boolean isShowBest() {
@@ -30,6 +37,10 @@ public class MatchStatsEvent extends MatchEvent implements Cancellable {
 
   public void setShowOwn(boolean showOwn) {
     this.showOwn = showOwn;
+  }
+
+  public Map<UUID, PlayerStats> getStats() {
+    return stats;
   }
 
   @Override

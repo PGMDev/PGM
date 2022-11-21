@@ -59,6 +59,8 @@ public class MapPoolManager implements MapOrder {
   private int matchCountLimit = 0; // The limit for when to revert to dynamic pools
   private int matchCount = 0; // # of completed matches since start of pool
 
+  private boolean lockPool; // Whether the pool will ignore player count changing conditions
+
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
   private MapInfo overriderMap;
 
@@ -85,12 +87,12 @@ public class MapPoolManager implements MapOrder {
     reload();
   }
 
-  public @Nullable String getNextMapForPool(String poolName) {
-    String mapName = database.getMapActivity(poolName).getMapName();
+  public @Nullable String getNextMapForPool(String poolId) {
+    String mapName = database.getMapActivity(poolId).getMapName();
     if (mapName != null) {
       logger.log(
           Level.INFO,
-          String.format("%s was found in map activity as the next map (%s).", mapName, poolName));
+          String.format("%s was found in map activity as the next map (%s).", mapName, poolId));
     }
     return mapName;
   }
@@ -109,7 +111,7 @@ public class MapPoolManager implements MapOrder {
       pools.getKeys(false).stream()
           .map(key -> MapPoolType.buildPool(this, mapPoolFileConfig, key))
           .filter(MapPool::isEnabled)
-          .forEach(pool -> mapPools.put(pool, database.getMapActivity(pool.getName())));
+          .forEach(pool -> mapPools.put(pool, database.getMapActivity(pool.getIdentifier())));
 
       activeMapPool =
           mapPools.entrySet().stream()
@@ -143,7 +145,7 @@ public class MapPoolManager implements MapOrder {
 
           boolean active =
               getActiveMapPool() != null
-                  && getActiveMapPool().getName().equalsIgnoreCase(key.getName())
+                  && getActiveMapPool().getIdentifier().equalsIgnoreCase(key.getIdentifier())
                   && key.isDynamic();
           value.update(nextMap, active);
         });
@@ -165,8 +167,12 @@ public class MapPoolManager implements MapOrder {
     return mapPools.size();
   }
 
+  public boolean isLocked() {
+    return lockPool;
+  }
+
   private void updateActiveMapPool(MapPool mapPool, Match match) {
-    updateActiveMapPool(mapPool, match, false, null, null, 0);
+    updateActiveMapPool(mapPool, match, false, null, null, 0, false);
   }
 
   public void updateActiveMapPool(
@@ -175,12 +181,15 @@ public class MapPoolManager implements MapOrder {
       boolean force,
       @Nullable CommandSender sender,
       @Nullable Duration timeLimit,
-      int matchLimit) {
+      int matchLimit,
+      boolean lock) {
     saveMapPools();
+
+    this.lockPool = lock;
 
     if (mapPool == activeMapPool) return;
 
-    if (activeMapPool != null) {
+    if (activeMapPool != null && match != null) {
       activeMapPool.unloadPool(match);
     }
 
@@ -201,9 +210,11 @@ public class MapPoolManager implements MapOrder {
     }
 
     // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
-    match.callEvent(
-        new MapPoolAdjustEvent(
-            activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
+    if (match != null) {
+      match.callEvent(
+          new MapPoolAdjustEvent(
+              activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
+    }
   }
 
   /**
@@ -292,7 +303,7 @@ public class MapPoolManager implements MapOrder {
       return;
     }
 
-    if (activeMapPool.isDynamic() || shouldRevert(match)) {
+    if ((activeMapPool.isDynamic() || shouldRevert(match)) && !isLocked()) {
       getAppropriateDynamicPool(match).ifPresent(pool -> updateActiveMapPool(pool, match));
     }
 

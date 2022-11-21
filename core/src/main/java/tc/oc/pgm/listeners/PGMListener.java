@@ -3,14 +3,12 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.text.PlayerComponent.player;
 
-import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -46,15 +44,11 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.VanishManager;
-import tc.oc.pgm.api.setting.SettingKey;
-import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -73,15 +67,13 @@ public class PGMListener implements Listener {
 
   private final Plugin parent;
   private final MatchManager mm;
-  private final VanishManager vm;
 
   // Single-write, multi-read lock used to create the first match
   private final ReentrantReadWriteLock lock;
 
-  public PGMListener(Plugin parent, MatchManager mm, VanishManager vm) {
+  public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
-    this.vm = vm;
     this.lock = new ReentrantReadWriteLock();
   }
 
@@ -156,66 +148,10 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void broadcastJoinMessage(final PlayerJoinEvent event) {
-    // Handle join message and send it to all players except the one joining
-    Match match = this.mm.getMatch(event.getPlayer().getWorld());
-    if (match == null) return;
-
-    if (event.getJoinMessage() != null) {
-      event.setJoinMessage(null);
-      MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null) {
-        // Announce actual staff join
-        announceJoinOrLeave(player, true, vm.isVanished(player.getId()));
-      }
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void removePlayerOnDisconnect(PlayerQuitEvent event) {
     MatchPlayer player = this.mm.getPlayer(event.getPlayer());
     if (player == null) return;
-
-    if (event.getQuitMessage() != null) {
-      // Announce actual staff quit
-      announceJoinOrLeave(player, false, vm.isVanished(player.getId()));
-      event.setQuitMessage(null);
-    }
-
     player.getMatch().removePlayer(event.getPlayer());
-  }
-
-  public static void announceJoinOrLeave(MatchPlayer player, boolean join, boolean staffOnly) {
-    announceJoinOrLeave(player, join, staffOnly, false);
-  }
-
-  public static void announceJoinOrLeave(
-      MatchPlayer player, boolean join, boolean staffOnly, boolean force) {
-    assertNotNull(player);
-    Collection<MatchPlayer> viewers =
-        player.getMatch().getPlayers().stream()
-            .filter(p -> !staffOnly || p.getBukkit().hasPermission(Permissions.STAFF))
-            .collect(Collectors.toList());
-
-    for (MatchPlayer viewer : viewers) {
-      if (player.equals(viewer)) continue;
-      if (!staffOnly && player.isVanished() && viewer.getBukkit().hasPermission(Permissions.STAFF))
-        continue; // Skip staff during fake broadcast
-
-      final String key =
-          (join ? "misc.join" : "misc.leave")
-              + (staffOnly && (player.isVanished() || force) ? ".quiet" : "");
-
-      SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
-      if (option.equals(SettingValue.JOIN_ON)) {
-        Component component =
-            translatable(key, NamedTextColor.YELLOW, player.getName(NameStyle.CONCISE));
-        viewer.sendMessage(
-            staffOnly
-                ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(NamedTextColor.YELLOW))
-                : component.color(NamedTextColor.YELLOW));
-      }
-    }
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -373,8 +309,7 @@ public class PGMListener implements Listener {
     // Send feedback to staff, alerting them that the map pool has changed by force
     if (event.isForced()) {
       Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
-      Component staffName =
-          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
+      Component staffName = player(event.getSender(), NameStyle.FANCY);
       Component matchLimit =
           text()
               .append(text(event.getMatchLimit(), NamedTextColor.GREEN))

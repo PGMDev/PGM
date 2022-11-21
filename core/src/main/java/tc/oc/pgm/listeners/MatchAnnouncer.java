@@ -11,6 +11,7 @@ import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -21,6 +22,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -141,7 +143,13 @@ public class MatchAnnouncer implements Listener {
                   translatable(
                       "misc.createdBy",
                       NamedTextColor.GRAY,
-                      TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
+                      TextFormatter.nameList(authors, NameStyle.CONCISE, NamedTextColor.GRAY))));
+    }
+
+    // Extra lines set by integration (ex. Map Sponsor)
+    List<Component> extra = Integration.getExtraMatchInfoLines(mapInfo);
+    if (!extra.isEmpty()) {
+      extra.forEach(viewer::sendMessage);
     }
 
     viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));

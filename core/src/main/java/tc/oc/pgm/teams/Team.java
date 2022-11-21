@@ -24,6 +24,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
 
   private final TeamFactory info;
   private int min, max, overfill;
+  private NameTagVisibility nameTagVisibility;
 
   private TeamMatchModule tmm;
   private JoinMatchModule jmm;
@@ -34,6 +35,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     this.min = info.getMinPlayers();
     this.max = info.getMaxPlayers();
     this.overfill = info.getMaxOverfill();
+    this.nameTagVisibility = info.getNameTagVisibility();
   }
 
   private JoinMatchModule join() {
@@ -96,7 +98,12 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
 
   @Override
   public NameTagVisibility getNameTagVisibility() {
-    return info.getNameTagVisibility();
+    return nameTagVisibility;
+  }
+
+  @Override
+  public void setNameTagVisibility(NameTagVisibility visibility) {
+    this.nameTagVisibility = visibility;
   }
 
   public int getMinPlayers() {

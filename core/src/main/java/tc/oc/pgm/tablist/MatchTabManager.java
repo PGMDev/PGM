@@ -14,7 +14,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.event.FriendStatusChangeEvent;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
+import tc.oc.pgm.api.event.PlayerVanishEvent;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
@@ -23,7 +25,6 @@ import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
-import tc.oc.pgm.community.events.PlayerVanishEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.Tribute;
@@ -34,8 +35,9 @@ import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.concurrent.RateLimiter;
+import tc.oc.pgm.util.event.player.PlayerSkinChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
-import tc.oc.pgm.util.tablist.PlayerTabEntry;
 import tc.oc.pgm.util.tablist.TabEntry;
 import tc.oc.pgm.util.tablist.TabManager;
 
@@ -312,5 +314,27 @@ public class MatchTabManager extends TabManager implements Listener {
   public void onPlayerNameChange(NameDecorationChangeEvent event) {
     TabEntry entry = getPlayerEntryOrNull(Bukkit.getPlayer(event.getUUID()));
     if (entry instanceof DynamicTabEntry) ((DynamicTabEntry) entry).invalidate();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onFriendStatusChange(FriendStatusChangeEvent event) {
+    TabEntry entry = getPlayerEntryOrNull(Bukkit.getPlayer(event.getPlayerId()));
+    if (entry != null && entry instanceof DynamicTabEntry) ((DynamicTabEntry) entry).invalidate();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onSkinPartsChange(PlayerSkinPartsChangeEvent event) {
+    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
+    if (entry instanceof PlayerTabEntry) {
+      ((PlayerTabEntry) entry).onSkinPartsChange(event);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onSkinChange(PlayerSkinChangeEvent event) {
+    TabEntry entry = this.getPlayerEntryOrNull(event.getPlayer());
+    if (entry instanceof PlayerTabEntry) {
+      ((PlayerTabEntry) entry).onSkinChange(event);
+    }
   }
 }
