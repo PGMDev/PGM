@@ -216,7 +216,7 @@ public class CommandGraph {
     register(new ModeCommand());
     register(new ProximityCommand());
     register(new RestartCommand());
-    register(new SettingCommand());
+    register(SettingCommand.getInstance());
     register(new StartCommand());
     register(new StatsCommand());
     register(new TeamCommand());
