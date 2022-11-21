@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
@@ -61,8 +60,10 @@ public interface Audience extends ForwardingAudience.Single {
     return net.kyori.adventure.audience.Audience::empty;
   }
 
-  static @NotNull Collector<? super net.kyori.adventure.audience.Audience, ?, Audience> toAudience() {
-    return Collectors.collectingAndThen(Collectors.toCollection(ArrayList::new),
+  static @NotNull Collector<? super net.kyori.adventure.audience.Audience, ?, Audience>
+      toAudience() {
+    return Collectors.collectingAndThen(
+        Collectors.toCollection(ArrayList::new),
         audiences -> get(Collections.unmodifiableCollection(audiences)));
   }
 }
