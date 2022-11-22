@@ -285,6 +285,7 @@ public class ActionParser {
     return new FillAction(
         regions.parseProperty(Node.fromAttrOrSelf(el, "region"), BlockBoundedValidation.INSTANCE),
         XMLUtils.parseMaterialData(Node.fromRequiredAttr(el, "material")),
+        filters.parseProperty(Node.fromAttr(el, "filter")),
         XMLUtils.parseBoolean(el.getAttribute("events"), false));
   }
 }
