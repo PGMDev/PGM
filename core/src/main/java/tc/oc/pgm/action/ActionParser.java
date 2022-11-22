@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.ExposedAction;
+import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
@@ -29,6 +30,8 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.regions.BlockBoundedValidation;
+import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -44,6 +47,7 @@ public class ActionParser {
   private final MapFactory factory;
   private final FeatureDefinitionContext features;
   private final FilterParser filters;
+  private final RegionParser regions;
   private final VariablesModule variables;
   private final Map<String, Method> methodParsers;
 
@@ -51,6 +55,7 @@ public class ActionParser {
     this.factory = factory;
     this.features = factory.getFeatures();
     this.filters = factory.getFilters();
+    this.regions = factory.getRegions();
     this.variables = factory.needModule(VariablesModule.class);
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
@@ -261,7 +266,7 @@ public class ActionParser {
   @MethodParser("kill-entities")
   public KillEntitiesAction parseKillEntities(Element el, Class<?> scope)
       throws InvalidXMLException {
-    return new KillEntitiesAction(factory.getFilters().parseFilterProperty(el, "filter"));
+    return new KillEntitiesAction(filters.parseProperty(el, "filter"));
   }
 
   @MethodParser("replace-item")
@@ -273,5 +278,13 @@ public class ActionParser {
     boolean keepEnchants = XMLUtils.parseBoolean(el.getAttribute("keep-enchants"), false);
 
     return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants);
+  }
+
+  @MethodParser("fill")
+  public FillAction parseFill(Element el, Class<?> scope) throws InvalidXMLException {
+    return new FillAction(
+        regions.parseProperty(Node.fromAttrOrSelf(el, "region"), BlockBoundedValidation.INSTANCE),
+        XMLUtils.parseMaterialData(Node.fromRequiredAttr(el, "material")),
+        XMLUtils.parseBoolean(el.getAttribute("events"), false));
   }
 }
