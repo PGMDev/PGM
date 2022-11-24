@@ -2,7 +2,7 @@ package tc.oc.pgm.ffa;
 
 import static net.kyori.adventure.text.Component.*;
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.util.PlayerComponent.player;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -1,7 +1,7 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.util.PlayerComponent.player;
 
 import java.util.Optional;
 import java.util.UUID;

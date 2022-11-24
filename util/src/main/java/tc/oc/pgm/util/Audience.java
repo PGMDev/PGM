@@ -19,6 +19,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.text.ComponentRenderer;
 
 /** Receiver of chat messages, sounds, titles, and other media. */
 @FunctionalInterface
@@ -32,13 +33,16 @@ public interface Audience extends ForwardingAudience.Single {
     playSound(WARNING_SOUND);
   }
 
-  BukkitAudiences PROVIDER = BukkitAudiences.create(BukkitUtils.getPlugin());
+  BukkitAudiences PROVIDER =
+      BukkitAudiences.builder(BukkitUtils.getPlugin())
+          .componentRenderer(ComponentRenderer.RENDERER)
+          .build();
 
   static Audience console() {
     return PROVIDER::console;
   }
 
-  static Audience get(CommandSender sender) {
+  static Audience get(@NotNull CommandSender sender) {
     return () -> PROVIDER.sender(sender);
   }
 

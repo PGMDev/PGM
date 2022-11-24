@@ -214,7 +214,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public String getColoredName() {
-    return TextTranslations.translateLegacy(getComponentName(), null);
+    return TextTranslations.translateLegacy(getComponentName());
   }
 
   public ImmutableSet<NetDefinition> getNets() {

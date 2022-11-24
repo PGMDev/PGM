@@ -1,16 +1,16 @@
 package tc.oc.pgm.db;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.util.PlayerComponent.player;
 
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.Username;
+import tc.oc.pgm.util.PlayerComponent;
 import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.text.PlayerComponent;
 
 class UsernameImpl implements Username {
 

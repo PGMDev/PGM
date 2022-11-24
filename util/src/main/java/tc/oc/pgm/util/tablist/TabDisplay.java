@@ -75,7 +75,7 @@ public class TabDisplay {
     for (int slot = 0; slot < this.slots; ++slot) {
       Component playerName = this.slotName(slot);
       String name = LegacyComponentSerializer.legacySection().serialize(playerName);
-      String renderedPlayerName = TextTranslations.toMinecraftGson(playerName, null);
+      String renderedPlayerName = TextTranslations.toMinecraftGson(playerName, viewer);
 
       String teamName = this.slotTeamName(slot);
       this.teamCreatePackets[slot] =

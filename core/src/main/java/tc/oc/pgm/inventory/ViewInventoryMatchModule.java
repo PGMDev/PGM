@@ -1,6 +1,6 @@
 package tc.oc.pgm.inventory;
 
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.util.PlayerComponent.player;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -298,9 +298,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     // restrictions on inventory titles
     String title =
         StringUtils.substring(
-            TextTranslations.translateLegacy(player(holder, NameStyle.CONCISE, viewer), viewer),
-            0,
-            32);
+            TextTranslations.translateLegacy(player(holder, NameStyle.FANCY), viewer), 0, 32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 

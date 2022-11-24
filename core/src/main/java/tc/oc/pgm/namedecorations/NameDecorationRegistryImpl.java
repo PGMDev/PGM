@@ -27,8 +27,8 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.util.PlayerComponent;
 import tc.oc.pgm.util.named.NameDecorationProvider;
-import tc.oc.pgm.util.text.PlayerComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @SuppressWarnings("UnstableApiUsage")

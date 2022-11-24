@@ -48,7 +48,7 @@ public class TextException extends RuntimeException
 
   @Override
   public String getLocalizedMessage() {
-    final Component localized = translate(message, Locale.getDefault());
+    final Component localized = translate(message);
     return PlainTextComponentSerializer.plainText().serialize(localized);
   }
 

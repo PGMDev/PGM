@@ -1,13 +1,13 @@
 package tc.oc.pgm.util.tablist;
 
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static net.kyori.adventure.text.Component.text;
 
 import java.util.UUID;
+import java.util.function.BiFunction;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 
@@ -21,6 +21,12 @@ import tc.oc.pgm.util.skin.Skin;
 public class PlayerTabEntry extends DynamicTabEntry {
 
   private static boolean showPing = false;
+  private static BiFunction<Player, Player, Component> playerComponent =
+      (p, v) -> text(p.getName());
+
+  public static void setPlayerComponent(BiFunction<Player, Player, Component> playerComponent) {
+    PlayerTabEntry.playerComponent = playerComponent;
+  }
 
   public static void setShowRealPing(boolean showPing) {
     PlayerTabEntry.showPing = showPing;
@@ -52,7 +58,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public Component getContent(TabView view) {
-    return player(player, NameStyle.TAB, view.getViewer());
+    return playerComponent.apply(player, view.getViewer());
   }
 
   @Override
