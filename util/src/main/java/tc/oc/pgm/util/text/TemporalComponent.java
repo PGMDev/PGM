@@ -33,7 +33,7 @@ public final class TemporalComponent {
    * @param color a unit color
    * @return a component builder
    */
-  public static TranslatableComponent.Builder duration(
+  public static TranslatableComponent duration(
       final @Nullable Duration duration, final @Nullable TextColor color) {
     if (duration == null) {
       return duration(A_LONG_TIME, color);
@@ -47,7 +47,7 @@ public final class TemporalComponent {
    * @param duration a duration
    * @return a component builder
    */
-  public static TranslatableComponent.Builder duration(final @Nullable Duration duration) {
+  public static TranslatableComponent duration(final @Nullable Duration duration) {
     return duration(duration, null);
   }
 
@@ -58,7 +58,7 @@ public final class TemporalComponent {
    * @param color a unit color
    * @return a component builder
    */
-  public static TranslatableComponent.Builder duration(
+  public static TranslatableComponent duration(
       final long seconds, final @Nullable TextColor color) {
     final String key;
     long quantity = 1;
@@ -92,7 +92,7 @@ public final class TemporalComponent {
       key = "misc.eon";
     }
 
-    return translatable().key(key).args(color == null ? text(quantity) : text(quantity, color));
+    return translatable(key, text(quantity, color));
   }
 
   /**
@@ -101,13 +101,13 @@ public final class TemporalComponent {
    * @param seconds a number of seconds
    * @return a component builder
    */
-  public static TextComponent.Builder ticker(final long seconds) {
+  public static TextComponent ticker(final long seconds) {
     if (seconds >= MINUTE) {
-      return text().content((seconds % HOUR) / MINUTE + "m");
+      return text((seconds % HOUR) / MINUTE + "m");
     } else if (seconds >= SECOND) {
-      return text().content(seconds + "s");
+      return text(seconds + "s");
     } else {
-      return text().content("<1s");
+      return text("<1s");
     }
   }
 
@@ -117,7 +117,7 @@ public final class TemporalComponent {
    * @param duration a duration
    * @return a component builder
    */
-  public static TextComponent.Builder ticker(final Duration duration) {
+  public static TextComponent ticker(final Duration duration) {
     return ticker(duration.getSeconds());
   }
 
@@ -127,18 +127,13 @@ public final class TemporalComponent {
    * @param seconds a number of seconds
    * @return a component builder
    */
-  public static TextComponent.Builder clock(final long seconds) {
+  public static TextComponent clock(final long seconds) {
     if (seconds >= HOUR) {
-      return text()
-          .content(
-              String.format(
-                  CLOCK_FORMAT_LONG,
-                  seconds / HOUR,
-                  (seconds % HOUR) / MINUTE,
-                  (seconds % MINUTE)));
+      return text(
+          String.format(
+              CLOCK_FORMAT_LONG, seconds / HOUR, (seconds % HOUR) / MINUTE, (seconds % MINUTE)));
     } else {
-      return text()
-          .content(String.format(CLOCK_FORMAT, (seconds % HOUR) / MINUTE, (seconds % MINUTE)));
+      return text(String.format(CLOCK_FORMAT, (seconds % HOUR) / MINUTE, (seconds % MINUTE)));
     }
   }
 
@@ -148,7 +143,7 @@ public final class TemporalComponent {
    * @param duration a duration
    * @return a component builder
    */
-  public static TextComponent.Builder clock(final Duration duration) {
+  public static TextComponent clock(final Duration duration) {
     if (duration.isNegative()) {
       return clock(0);
     }
@@ -162,18 +157,15 @@ public final class TemporalComponent {
    * @param color a unit color
    * @return a component builder
    */
-  public static TranslatableComponent.Builder seconds(
-      final long seconds, final @Nullable TextColor color) {
-    return translatable()
-        .key((seconds == 1) ? "misc.second" : "misc.seconds")
-        .args(color == null ? text(seconds) : text(seconds, color));
+  public static TranslatableComponent seconds(final long seconds, final @Nullable TextColor color) {
+    return translatable((seconds == 1) ? "misc.second" : "misc.seconds", text(seconds, color));
   }
 
   // TODO: Change these signature after the Community refactor
 
   @Deprecated
   public static Component briefNaturalApproximate(final Duration duration) {
-    return duration(duration).build();
+    return duration(duration);
   }
 
   @Deprecated

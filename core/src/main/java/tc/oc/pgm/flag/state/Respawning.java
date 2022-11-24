@@ -2,6 +2,7 @@ package tc.oc.pgm.flag.state;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TemporalComponent.duration;
 
 import java.time.Duration;
 import net.kyori.adventure.text.Component;
@@ -14,7 +15,6 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
-import tc.oc.pgm.util.text.TemporalComponent;
 
 /**
  * State of a flag while it is waiting to respawn at a {@link Post} after being {@link Captured}.
@@ -57,8 +57,7 @@ public class Respawning extends Spawned implements Returning {
     // Respawn is delayed
     String postName = this.post.getPostName();
 
-    TranslatableComponent.Builder timeComponent =
-        TemporalComponent.duration(respawnTime, NamedTextColor.AQUA);
+    TranslatableComponent timeComponent = duration(respawnTime, NamedTextColor.AQUA);
     Component message =
         postName != null
             ? translatable(

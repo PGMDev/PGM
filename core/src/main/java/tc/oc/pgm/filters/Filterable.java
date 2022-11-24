@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.util.Audience;
 
 /**
  * An object that {@link Filter}s can be applied to.
@@ -20,7 +21,7 @@ import tc.oc.pgm.api.filter.query.Query;
  * Filterable<A>. Aside from this, the types of the Filterables may not have any particular
  * relationship.
  */
-public interface Filterable<Q extends MatchQuery> extends MatchQuery {
+public interface Filterable<Q extends MatchQuery> extends MatchQuery, Audience {
 
   /** The (single) Filterable that contains this one, or empty if this is a top-level object. */
   @Nullable

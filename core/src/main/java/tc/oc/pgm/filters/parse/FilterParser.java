@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -521,16 +522,18 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     if (duration.isNegative() || duration.isZero()) return StaticFilter.DENY;
 
     Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), DynamicFilterValidation.ANY);
-    return new MonostableFilter(child, duration);
+    Component message = XMLUtils.parseFormattedText(el, "message", null);
+    return new MonostableFilter(child, duration, message);
   }
 
   @MethodParser("after")
   public Filter parseAfterFilter(Element el) throws InvalidXMLException {
     Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"));
     Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), DynamicFilterValidation.ANY);
-
     if (duration.isNegative() || duration.isZero()) return child;
-    return MonostableFilter.after(child, duration);
+
+    Component message = XMLUtils.parseFormattedText(el, "message", null);
+    return MonostableFilter.after(child, duration, message);
   }
 
   @MethodParser("rank")

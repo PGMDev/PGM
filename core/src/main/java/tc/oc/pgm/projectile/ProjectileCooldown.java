@@ -39,7 +39,7 @@ public class ProjectileCooldown {
   }
 
   public String getTimeLeftString() {
-    return TextTranslations.translateLegacy(ticker(getTimeLeft()).build(), matchPlayer.getBukkit());
+    return TextTranslations.translateLegacy(ticker(getTimeLeft()), matchPlayer.getBukkit());
   }
 
   public boolean isActive() {
