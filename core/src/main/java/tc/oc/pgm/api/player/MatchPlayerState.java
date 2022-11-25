@@ -3,6 +3,8 @@ package tc.oc.pgm.api.player;
 import java.util.Optional;
 import java.util.UUID;
 import org.bukkit.Location;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.util.Audience;
@@ -18,6 +20,7 @@ public interface MatchPlayerState extends Audience, Named {
    *
    * @return The {@link Match}.
    */
+  @NotNull
   Match getMatch();
 
   /**
@@ -25,6 +28,7 @@ public interface MatchPlayerState extends Audience, Named {
    *
    * @return The {@link Party}.
    */
+  @NotNull
   Party getParty();
 
   /**
@@ -32,6 +36,7 @@ public interface MatchPlayerState extends Audience, Named {
    *
    * @return The unique identifier.
    */
+  @NotNull
   UUID getId();
 
   /**
@@ -39,7 +44,18 @@ public interface MatchPlayerState extends Audience, Named {
    *
    * @return The last known {@link Location}.
    */
+  @NotNull
   Location getLocation();
+
+  /** @return if the player is currently dead */
+  boolean isDead();
+
+  /** @return if the player is vanished */
+  boolean isVanished();
+
+  /** @return the players' current nick */
+  @Nullable
+  String getNick();
 
   /**
    * Get the current {@link tc.oc.pgm.api.player.MatchPlayer} if they are online and their {@link

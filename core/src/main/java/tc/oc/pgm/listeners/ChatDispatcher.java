@@ -90,7 +90,7 @@ public class ChatDispatcher implements Listener {
   private static final String GLOBAL_FORMAT = "<%s>: %s";
   private static final String PREFIX_FORMAT = "%s: %s";
   private static final String AC_FORMAT =
-      TextTranslations.translateLegacy(ADMIN_CHAT_PREFIX, null) + PREFIX_FORMAT;
+      TextTranslations.translateLegacy(ADMIN_CHAT_PREFIX) + PREFIX_FORMAT;
 
   private static final Predicate<MatchPlayer> AC_FILTER =
       viewer -> viewer.getBukkit().hasPermission(Permissions.ADMINCHAT);
@@ -162,7 +162,7 @@ public class ChatDispatcher implements Listener {
         match,
         sender,
         message,
-        TextTranslations.translateLegacy(party.getChatPrefix(), null) + PREFIX_FORMAT,
+        TextTranslations.translateLegacy(party.getChatPrefix()) + PREFIX_FORMAT,
         getChatFormat(party.getChatPrefix(), sender, message),
         match.getPlayers(),
         viewer ->
@@ -222,7 +222,7 @@ public class ChatDispatcher implements Listener {
         throw exception("command.message.blocked", receiver.getName(NameStyle.FANCY));
 
       if (isMuted(receiver))
-        throw exception("moderation.mute.target", receiver.getName(NameStyle.CONCISE));
+        throw exception("moderation.mute.target", receiver.getName(NameStyle.FANCY));
     }
 
     lastMessagedBy.put(receiver.getBukkit(), sender.getId());

@@ -1,8 +1,7 @@
 package tc.oc.pgm.ffa;
 
-import static net.kyori.adventure.text.Component.*;
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -64,7 +63,7 @@ public class Tribute implements Competitor {
     this.chatColor = color == null ? ChatColor.YELLOW : color;
     this.color = BukkitUtils.colorOf(this.chatColor);
     this.dyeColor = BukkitUtils.chatColorToDyeColor(this.chatColor);
-    this.textColor = TextFormatter.convert(color);
+    this.textColor = TextFormatter.convert(chatColor);
     this.query = new PartyQuery(null, this);
   }
 
@@ -110,7 +109,7 @@ public class Tribute implements Competitor {
 
   @Override
   public Component getName(final NameStyle style) {
-    return player(player != null ? player.getBukkit() : null, style);
+    return player(player, style);
   }
 
   @Override
@@ -120,7 +119,7 @@ public class Tribute implements Competitor {
 
   @Override
   public Component getChatPrefix() {
-    return empty();
+    return Component.empty();
   }
 
   @Override
@@ -158,7 +157,7 @@ public class Tribute implements Competitor {
   public void addPlayer(final MatchPlayer player) {
     checkPlayer(assertNotNull(player).getId());
     this.player = player;
-    this.players = Collections.unmodifiableList(Collections.singletonList(player));
+    this.players = Collections.singletonList(player);
   }
 
   @Override

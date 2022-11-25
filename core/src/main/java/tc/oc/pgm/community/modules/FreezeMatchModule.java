@@ -390,7 +390,7 @@ public class FreezeMatchModule implements MatchModule, Listener {
                   String.format("moderation.freeze.broadcast.%s", frozen ? "frozen" : "thaw"),
                   NamedTextColor.GRAY,
                   senderName,
-                  freezee.getName(NameStyle.CONCISE)))
+                  freezee.getName(NameStyle.FANCY)))
           .hoverEvent(
               showText(translatable("moderation.freeze.broadcast.hover", NamedTextColor.GRAY)))
           .clickEvent(runCommand("/f " + freezee.getBukkit().getName()))

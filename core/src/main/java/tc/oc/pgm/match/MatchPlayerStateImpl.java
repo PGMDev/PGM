@@ -1,7 +1,7 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -9,6 +9,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -17,39 +19,48 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class MatchPlayerStateImpl implements MatchPlayerState {
-  private final Match match;
-  private final String username;
-  private final UUID uuid;
-  private final Party party;
-  private final Vector location;
-  private final Audience audience;
+  private final @NotNull Match match;
+  private final @NotNull String username;
+  private final @NotNull UUID uuid;
+  private final @NotNull Party party;
+  private final boolean dead;
+  private final boolean vanished;
+  private final @Nullable String nick;
 
-  protected MatchPlayerStateImpl(MatchPlayer player) {
+  // Excluded from equals/hashcode
+  private final @NotNull Vector location;
+  private final @NotNull Audience audience;
+
+  protected MatchPlayerStateImpl(@NotNull MatchPlayer player) {
     this.match = assertNotNull(player).getMatch();
-    this.username = player.getBukkit().getName();
-    this.uuid = player.getId();
+    this.username = assertNotNull(player.getBukkit().getName());
+    this.uuid = assertNotNull(player.getId());
     this.party = assertNotNull(player.getParty());
-    this.location = player.getBukkit().getLocation().toVector();
-    this.audience = getPlayer().isPresent() ? getPlayer().get() : Audience.empty();
+    this.dead = player.isDead();
+    this.vanished = Integration.isVanished(player.getBukkit());
+    this.nick = Integration.getNick(player.getBukkit());
+
+    this.location = assertNotNull(player.getBukkit().getLocation().toVector());
+    this.audience = player;
   }
 
   @Override
-  public Match getMatch() {
+  public @NotNull Match getMatch() {
     return match;
   }
 
   @Override
-  public Party getParty() {
+  public @NotNull Party getParty() {
     return party;
   }
 
   @Override
-  public UUID getId() {
+  public @NotNull UUID getId() {
     return uuid;
   }
 
   @Override
-  public Location getLocation() {
+  public @NotNull Location getLocation() {
     return location.toLocation(match.getWorld());
   }
 
@@ -60,8 +71,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
 
   @Override
   public Component getName(NameStyle style) {
-    MatchPlayer player = match.getPlayer(uuid);
-    return player(player != null ? player.getBukkit() : null, username, style);
+    return player(this, style);
   }
 
   @Override
@@ -76,33 +86,46 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
+  public boolean isDead() {
+    return dead;
+  }
+
+  @Override
+  public boolean isVanished() {
+    return vanished;
+  }
+
+  @Override
+  @Nullable
+  public String getNick() {
+    return nick;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof MatchPlayerStateImpl)) return false;
+
+    MatchPlayerStateImpl that = (MatchPlayerStateImpl) o;
+
+    if (isDead() != that.isDead()) return false;
+    if (isVanished() != that.isVanished()) return false;
+    if (!getMatch().equals(that.getMatch())) return false;
+    if (!username.equals(that.username)) return false;
+    if (!uuid.equals(that.uuid)) return false;
+    if (!getParty().equals(that.getParty())) return false;
+    return getNick() != null ? getNick().equals(that.getNick()) : that.getNick() == null;
+  }
+
+  @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + this.getId().hashCode();
-    hash = 31 * hash + this.getParty().hashCode();
-    hash = 31 * hash + this.getMatch().hashCode();
-    return hash;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (!(obj instanceof MatchPlayerState)) return false;
-    final MatchPlayerState o = (MatchPlayerState) obj;
-    return this.getId().equals(o.getId())
-        && this.getParty().equals(o.getParty())
-        && this.getMatch().equals(o.getMatch());
-  }
-
-  @Override
-  public String toString() {
-    return "MatchPlayerState{id="
-        + this.getId()
-        + ", party="
-        + this.getParty().getDefaultName()
-        + ", match="
-        + this.getMatch().getId()
-        + ", location="
-        + this.location
-        + "}";
+    int result = getMatch().hashCode();
+    result = 31 * result + username.hashCode();
+    result = 31 * result + uuid.hashCode();
+    result = 31 * result + getParty().hashCode();
+    result = 31 * result + (isDead() ? 1 : 0);
+    result = 31 * result + (isVanished() ? 1 : 0);
+    result = 31 * result + (getNick() != null ? getNick().hashCode() : 0);
+    return result;
   }
 }

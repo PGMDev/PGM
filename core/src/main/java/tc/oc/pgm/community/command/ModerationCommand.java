@@ -638,7 +638,7 @@ public class ModerationCommand implements Listener {
     Component names =
         join(
             JoinConfiguration.separator(text(", ", NamedTextColor.GRAY)),
-            alts.stream().map(mp -> mp.getName(NameStyle.CONCISE)).collect(Collectors.toList()));
+            alts.stream().map(mp -> mp.getName(NameStyle.FANCY)).collect(Collectors.toList()));
     Component size = text(alts.size(), NamedTextColor.YELLOW);
 
     return text()
@@ -738,7 +738,7 @@ public class ModerationCommand implements Listener {
    * Formatting of Kick Screens (KICK/BAN/TEMPBAN)
    */
   public static String formatPunishmentScreen(
-      PunishmentType type, Component punisher, String reason, Duration expires) {
+      Player viewer, PunishmentType type, Component punisher, String reason, Duration expires) {
     List<Component> lines = Lists.newArrayList();
 
     Component header =
@@ -781,8 +781,7 @@ public class ModerationCommand implements Listener {
     lines.add(empty());
     lines.add(footer); // Footer line - END
 
-    return TextTranslations.translateLegacy(
-        join(JoinConfiguration.newlines(), lines), null); // TODO add viewer
+    return TextTranslations.translateLegacy(join(JoinConfiguration.newlines(), lines), viewer);
   }
 
   /*
@@ -824,7 +823,7 @@ public class ModerationCommand implements Listener {
         event.getType(),
         event.getPlayer().getMatch(),
         event.getSender(),
-        event.getPlayer().getName(NameStyle.CONCISE),
+        event.getPlayer().getName(NameStyle.FANCY),
         event.getReason(),
         event.isSilent(),
         event.getDuration());
@@ -922,7 +921,7 @@ public class ModerationCommand implements Listener {
             target,
             reason,
             expires != null ? Date.from(expires) : null,
-            TextTranslations.translateLegacy(source, null));
+            TextTranslations.translateLegacy(source));
   }
 
   // On login of accounts whose IP match a recently banned player, alert staff.
@@ -970,7 +969,7 @@ public class ModerationCommand implements Listener {
               : null;
 
       return formatPunishmentScreen(
-          type, text(ban.getSource(), NamedTextColor.AQUA), ban.getReason(), length);
+          viewer, type, text(ban.getSource(), NamedTextColor.AQUA), ban.getReason(), length);
     }
     return null;
   }

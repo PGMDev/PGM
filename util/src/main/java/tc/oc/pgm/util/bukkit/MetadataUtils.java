@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.bukkit;
 
+import java.util.Optional;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.Plugin;
@@ -12,5 +13,10 @@ public interface MetadataUtils {
       }
     }
     return null;
+  }
+
+  static Optional<MetadataValue> getOptionalMetadata(
+      Metadatable metadatable, String key, Plugin plugin) {
+    return Optional.ofNullable(getMetadata(metadatable, key, plugin));
   }
 }

@@ -1,6 +1,8 @@
 package tc.oc.pgm.util.text;
 
 import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.text.Component.score;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
@@ -26,8 +28,11 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -36,6 +41,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.Audience;
 
 /** A singleton for accessing {@link MessageFormat} and {@link Component} translations. */
 @SuppressWarnings("UnstableApiUsage")
@@ -271,56 +277,140 @@ public final class TextTranslations {
     return java.util.Locale.US;
   }
 
-  public static Locale getLocale(@Nullable CommandSender sender) {
-    if (!(sender instanceof Player)) return SOURCE_LOCALE;
-    return LOCALE_CACHE.getUnchecked(((Player) sender).spigot().getLocale());
+  public static Locale getLocale(@Nullable CommandSender viewer) {
+    if (!(viewer instanceof Player)) return SOURCE_LOCALE;
+    return LOCALE_CACHE.getUnchecked(((Player) viewer).spigot().getLocale());
+  }
+
+  public static Locale getLocale(@Nullable Pointered viewer) {
+    if (viewer == null) return SOURCE_LOCALE;
+    return viewer.get(Identity.LOCALE).orElse(SOURCE_LOCALE);
+  }
+
+  private static Pointered getPointered(@Nullable CommandSender viewer) {
+    return viewer == null ? Audience.empty() : Audience.get(viewer);
   }
 
   /**
    * Gets a translated text component.
    *
    * @param text The text.
-   * @param locale A locale.
    * @return The translated text.
    */
-  public static Component translate(Component text, Locale locale) {
-    return GlobalTranslator.render(text, locale);
+  public static Component translate(@NotNull Component text) {
+    return translate(text, Audience.empty());
+  }
+
+  /**
+   * Gets a translated text component.
+   *
+   * @param text The text.
+   * @param viewer The viewer that will see the component
+   * @return The translated text.
+   */
+  public static Component translate(@NotNull Component text, @Nullable CommandSender viewer) {
+    return translate(text, getPointered(viewer));
+  }
+
+  /**
+   * Gets a translated text component.
+   *
+   * @param text The text.
+   * @param viewer The viewer that will see the component
+   * @return The translated text.
+   */
+  public static Component translate(@NotNull Component text, @NotNull Pointered viewer) {
+    return ComponentRenderer.RENDERER.render(text, viewer);
   }
 
   /**
    * Gets a translated text in legacy format.
    *
    * @param text The text.
-   * @param sender A command sender or null.
    * @return The translated legacy text.
    */
   @Deprecated
-  public static String translateLegacy(Component text, @Nullable CommandSender sender) {
-    return LegacyComponentSerializer.legacySection().serialize(translate(text, getLocale(sender)));
+  public static String translateLegacy(Component text) {
+    return translateLegacy(text, Audience.empty());
+  }
+
+  /**
+   * Gets a translated text in legacy format.
+   *
+   * @param text The text.
+   * @param viewer A command sender or null.
+   * @return The translated legacy text.
+   */
+  @Deprecated
+  public static String translateLegacy(Component text, @Nullable CommandSender viewer) {
+    return translateLegacy(text, getPointered(viewer));
+  }
+
+  /**
+   * Gets a translated text in legacy format.
+   *
+   * @param text The text.
+   * @param viewer A command sender or null.
+   * @return The translated legacy text.
+   */
+  @Deprecated
+  public static String translateLegacy(Component text, @NotNull Pointered viewer) {
+    return LegacyComponentSerializer.legacySection().serialize(translate(text, viewer));
   }
 
   /**
    * Gets a translated legacy text.
    *
    * @param key A translation key.
-   * @param sender A command sender, or null for the source locale.
    * @param args Optional array of arguments.
    * @return A legacy text.
-   * @see #translate(Component, Locale) for the newer text system.
+   * @see #translate(Component, Pointered) for the newer text system.
    */
   @Deprecated
-  public static String translate(String key, @Nullable CommandSender sender, Object... args) {
-    final Locale locale = getLocale(sender);
+  public static String translate(String key, Object... args) {
+    return translate(key, Audience.empty(), args);
+  }
+
+  /**
+   * Gets a translated legacy text.
+   *
+   * @param key A translation key.
+   * @param viewer A command sender, or null for the source locale.
+   * @param args Optional array of arguments.
+   * @return A legacy text.
+   * @see #translate(Component, Pointered) for the newer text system.
+   */
+  @Deprecated
+  public static String translate(String key, @Nullable CommandSender viewer, Object... args) {
+    return translate(key, getPointered(viewer), args);
+  }
+
+  /**
+   * Gets a translated legacy text.
+   *
+   * @param key A translation key.
+   * @param viewer A command sender, or null for the source locale.
+   * @param args Optional array of arguments.
+   * @return A legacy text.
+   * @see #translate(Component, Pointered) for the newer text system.
+   */
+  @Deprecated
+  public static String translate(String key, @NotNull Pointered viewer, Object... args) {
     final Component text =
         translatable(
-            key,
-            Stream.of(args).map(String::valueOf).map(Component::text).collect(Collectors.toList()));
+            key, Stream.of(args).map(TextTranslations::toComponent).collect(Collectors.toList()));
 
-    return LegacyComponentSerializer.legacySection().serialize(translate(text, locale));
+    return LegacyComponentSerializer.legacySection().serialize(translate(text, viewer));
+  }
+
+  private static ComponentLike toComponent(Object obj) {
+    if (obj instanceof Component) return (Component) obj;
+    if (obj instanceof ComponentLike) return (ComponentLike) obj;
+    return text(String.valueOf(obj));
   }
 
   public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
-    Component translated = translate(component, viewer == null ? SOURCE_LOCALE : getLocale(viewer));
+    Component translated = translate(component, getPointered(viewer));
     return GsonComponentSerializer.colorDownsamplingGson().serialize(translated);
   }
 }

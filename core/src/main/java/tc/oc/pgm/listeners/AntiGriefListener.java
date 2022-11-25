@@ -2,14 +2,14 @@ package tc.oc.pgm.listeners;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.text.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -94,41 +94,33 @@ public class AntiGriefListener implements Listener {
         this.notifyDefuse(
             clicker,
             entity,
-            ChatColor.RED
-                + TextTranslations.translate(
-                    "moderation.defuse.player",
-                    clicker.getBukkit(),
-                    player(owner.getBukkit(), NameStyle.CONCISE, clicker.getBukkit())
-                        .color(NamedTextColor.RED)));
+            translatable("moderation.defuse.player", NamedTextColor.RED, owner.getName()));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(
                 "moderation.defuse.alert.player",
                 NamedTextColor.GRAY,
-                clicker.getName(NameStyle.FANCY),
-                owner.getName(NameStyle.FANCY),
+                clicker.getName(),
+                owner.getName(),
                 MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)),
             clicker.getMatch());
       } else {
         this.notifyDefuse(
-            clicker,
-            entity,
-            ChatColor.RED
-                + TextTranslations.translate("moderation.defuse.world", clicker.getBukkit()));
+            clicker, entity, translatable("moderation.defuse.world", NamedTextColor.RED));
 
         ChatDispatcher.broadcastAdminChatMessage(
             translatable(
                 "moderation.defuse.alert.world",
                 NamedTextColor.GRAY,
-                clicker.getName(NameStyle.FANCY),
+                clicker.getName(),
                 MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)),
             clicker.getMatch());
       }
     }
   }
 
-  private void notifyDefuse(MatchPlayer clicker, Entity entity, String message) {
-    clicker.sendMessage(text(message));
+  private void notifyDefuse(MatchPlayer clicker, Entity entity, Component message) {
+    clicker.sendMessage(message);
     clicker
         .getMatch()
         .playSound(

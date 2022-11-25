@@ -31,6 +31,13 @@ public interface MatchPlayerResolver {
   }
 
   @Nullable
+  default MatchPlayerState getPlayerState(@Nullable UUID playerId) {
+    if (playerId == null) return null;
+    MatchPlayer matchPlayer = getPlayer(playerId);
+    return matchPlayer == null ? null : matchPlayer.getState();
+  }
+
+  @Nullable
   default MatchPlayerState getPlayerState(@Nullable Player player) {
     if (player == null) return null;
     MatchPlayer matchPlayer = getPlayer(player);

@@ -9,7 +9,6 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 import static tc.oc.pgm.util.text.TextException.exception;
-import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import java.lang.ref.WeakReference;
 import java.util.Collection;
@@ -145,8 +144,7 @@ public class MapPoll {
     VOTE_BOOK_TAG.set(personalDummyVoteBook, VOTE_BOOK_METADATA);
     ItemMeta meta = personalDummyVoteBook.getItemMeta();
 
-    Component dummyTitle = translate(VOTE_BOOK_TITLE, locale);
-    meta.setDisplayName(TextTranslations.translateLegacy(dummyTitle, viewer.getBukkit()));
+    meta.setDisplayName(TextTranslations.translateLegacy(VOTE_BOOK_TITLE, viewer.getBukkit()));
 
     personalDummyVoteBook.setItemMeta(meta);
 

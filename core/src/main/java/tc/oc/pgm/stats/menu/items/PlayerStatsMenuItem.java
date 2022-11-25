@@ -3,7 +3,7 @@ package tc.oc.pgm.stats.menu.items;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
-import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
+import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -59,14 +59,14 @@ public class PlayerStatsMenuItem implements MenuItem {
         translatable(
             "match.stats.concise",
             RESET,
-            numberComponent(stats.getKills(), NamedTextColor.GREEN),
-            numberComponent(stats.getDeaths(), NamedTextColor.RED),
-            numberComponent(stats.getKD(), NamedTextColor.GREEN));
+            number(stats.getKills(), NamedTextColor.GREEN),
+            number(stats.getDeaths(), NamedTextColor.RED),
+            number(stats.getKD(), NamedTextColor.GREEN));
     Component killstreakLore =
         translatable(
             "match.stats.killstreak.concise",
             RESET,
-            numberComponent(stats.getMaxKillstreak(), NamedTextColor.GREEN));
+            number(stats.getMaxKillstreak(), NamedTextColor.GREEN));
     Component damageDealtLore =
         translatable(
             "match.stats.damage.dealt",
@@ -83,9 +83,9 @@ public class PlayerStatsMenuItem implements MenuItem {
         translatable(
             "match.stats.bow",
             RESET,
-            numberComponent(stats.getShotsHit(), NamedTextColor.YELLOW),
-            numberComponent(stats.getShotsTaken(), NamedTextColor.YELLOW),
-            numberComponent(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
+            number(stats.getShotsHit(), NamedTextColor.YELLOW),
+            number(stats.getShotsTaken(), NamedTextColor.YELLOW),
+            number(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
 
     lore.add(TextTranslations.translateLegacy(statLore, player));
     lore.add(TextTranslations.translateLegacy(killstreakLore, player));
@@ -116,8 +116,7 @@ public class PlayerStatsMenuItem implements MenuItem {
   private boolean optionalStat(List<String> lore, Number stat, String key, Player player) {
     if (stat.doubleValue() > 0) {
       lore.add(null);
-      Component loreComponent =
-          translatable(key, RESET, numberComponent(stat, NamedTextColor.AQUA));
+      Component loreComponent = translatable(key, RESET, number(stat, NamedTextColor.AQUA));
       lore.add(TextTranslations.translateLegacy(loreComponent, player));
       return true;
     }

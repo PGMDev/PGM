@@ -74,7 +74,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
   protected void updatePartyScoreboardTeam(Party party, Team team, boolean forObservers) {
     match.getLogger().fine("Updating scoreboard team " + toString(team) + " for party " + party);
 
-    team.setDisplayName(TextTranslations.translateLegacy(party.getName(), null));
+    team.setDisplayName(TextTranslations.translateLegacy(party.getName()));
     team.setPrefix(party.getColor().toString());
     team.setSuffix(ChatColor.WHITE.toString());
 

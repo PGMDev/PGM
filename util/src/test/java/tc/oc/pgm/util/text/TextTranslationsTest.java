@@ -8,7 +8,11 @@ import static tc.oc.pgm.util.text.TextTranslations.*;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Locale;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.pointer.Pointered;
+import net.kyori.adventure.pointer.Pointers;
 import net.kyori.adventure.text.TranslatableComponent;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -17,6 +21,17 @@ import org.junit.jupiter.params.provider.ValueSource;
 public final class TextTranslationsTest {
 
   private static final Locale US = Locale.US;
+
+  private static final Pointers US_POINTERS =
+      Pointers.builder().withStatic(Identity.LOCALE, US).build();
+
+  private static final Pointered POINTERED =
+      new Pointered() {
+        @Override
+        public @NotNull Pointers pointers() {
+          return US_POINTERS;
+        }
+      };
 
   @Test
   void testGetLocales() {
@@ -50,13 +65,15 @@ public final class TextTranslationsTest {
   @Test
   void testTranslateOurs() {
     assertEquals(
-        text("☃"), translate(translatable("misc.snowman"), US), "translation did not render");
+        text("☃"),
+        translate(translatable("misc.snowman"), POINTERED),
+        "translation did not render");
   }
 
   @Test
   void testTranslateMojang() {
     final TranslatableComponent text = translatable("entity.Creeper.name");
 
-    assertEquals(text, translate(text, US), "mojang translation did not pass-through");
+    assertEquals(text, translate(text, POINTERED), "mojang translation did not pass-through");
   }
 }

@@ -116,7 +116,7 @@ public class PGMListener implements Listener {
     if (!mm.getMatches().hasNext()) {
       event.disallow(
           AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          TextTranslations.translate("misc.incorrectWorld", null));
+          TextTranslations.translate("misc.incorrectWorld"));
     }
   }
 
@@ -209,7 +209,7 @@ public class PGMListener implements Listener {
       SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
       if (option.equals(SettingValue.JOIN_ON)) {
         Component component =
-            translatable(key, NamedTextColor.YELLOW, player.getName(NameStyle.CONCISE));
+            translatable(key, NamedTextColor.YELLOW, player.getName(NameStyle.FANCY));
         viewer.sendMessage(
             staffOnly
                 ? ChatDispatcher.ADMIN_CHAT_PREFIX.append(component.color(NamedTextColor.YELLOW))

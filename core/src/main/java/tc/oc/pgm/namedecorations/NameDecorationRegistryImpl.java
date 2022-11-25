@@ -28,7 +28,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.util.named.NameDecorationProvider;
-import tc.oc.pgm.util.text.PlayerComponent;
+import tc.oc.pgm.util.player.PlayerComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -39,7 +39,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   private NameDecorationProvider provider;
   private final LoadingCache<UUID, DecorationCacheEntry> decorationCache =
       CacheBuilder.newBuilder()
-          .expireAfterAccess(1, TimeUnit.HOURS)
+          .expireAfterAccess(15, TimeUnit.MINUTES)
           .build(
               new CacheLoader<UUID, DecorationCacheEntry>() {
                 @Override

@@ -1,5 +1,7 @@
 package tc.oc.pgm.tablist;
 
+import static tc.oc.pgm.util.player.PlayerComponent.player;
+
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +36,7 @@ import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.concurrent.RateLimiter;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.PlayerTabEntry;
 import tc.oc.pgm.util.tablist.TabEntry;
@@ -115,6 +118,8 @@ public class MatchTabManager extends TabManager implements Listener {
     } else {
       PlayerTabEntry.setShowRealPing(false);
     }
+
+    PlayerTabEntry.setPlayerComponent(pl -> player(pl, NameStyle.TAB));
   }
 
   protected static TabEntry[] headerFactory(Match match) {
