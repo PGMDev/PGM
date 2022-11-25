@@ -165,6 +165,10 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   private void checkEnd() {
     // Process eliminations within the same tick simultaneously, so that ties are properly detected
+
+    // Player leaving may have ended the match, causing a rejected execution.
+    if (!match.isRunning()) return;
+
     match
         .getExecutor(MatchScope.RUNNING)
         .execute(

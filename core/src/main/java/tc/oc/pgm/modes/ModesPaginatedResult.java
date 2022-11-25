@@ -1,5 +1,6 @@
 package tc.oc.pgm.modes;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -73,14 +74,14 @@ public class ModesPaginatedResult extends PrettyPaginatedComponentResults<ModeCh
    * @param countdown to format
    * @return Formatted text
    */
-  public TextComponent.Builder formatSingleCountdown(ModeChangeCountdown countdown) {
+  public TextComponent formatSingleCountdown(ModeChangeCountdown countdown) {
     Duration currentTimeLeft = modes.getCountdown().getTimeLeft(countdown);
 
     if (countdown.getMatch().isRunning() && currentTimeLeft != null) {
       return clock(currentTimeLeft).append(space().append(translatable("command.timeLeft")));
     }
 
-    return text();
+    return empty();
   }
 
   private boolean isRunning(ModeChangeCountdown countdown) {

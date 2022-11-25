@@ -153,10 +153,10 @@ public abstract class MatchCountdown extends Countdown {
   }
 
   protected Component secondsRemaining(TextColor color) {
-    return seconds(remaining.getSeconds(), color).build();
+    return seconds(remaining.getSeconds(), color);
   }
 
-  protected TextComponent.Builder colonTime() {
+  protected TextComponent colonTime() {
     return clock(remaining).color(urgencyColor());
   }
 

@@ -37,7 +37,7 @@ public final class TemporalComponentTest {
   })
   void testDurationSeconds(String key, long units, long seconds) {
     final TextColor color = NamedTextColor.GOLD;
-    assertEquals(translatable(key, text(units, color)), duration(seconds, color).build());
+    assertEquals(translatable(key, text(units, color)), duration(seconds, color));
   }
 
   @ParameterizedTest
@@ -48,7 +48,7 @@ public final class TemporalComponentTest {
     "misc.minute,  1,  60001"
   })
   void testDuration(String key, long units, long milliseconds) {
-    assertEquals(translatable(key, text(units)), duration(Duration.ofMillis(milliseconds)).build());
+    assertEquals(translatable(key, text(units)), duration(Duration.ofMillis(milliseconds)));
   }
 
   @ParameterizedTest
@@ -60,7 +60,7 @@ public final class TemporalComponentTest {
     "9m,  540",
   })
   void testTicker(String expected, long seconds) {
-    assertEquals(text(expected), ticker(seconds).build());
+    assertEquals(text(expected), ticker(seconds));
   }
 
   @ParameterizedTest
@@ -75,6 +75,6 @@ public final class TemporalComponentTest {
     "10:00:00, 36000",
   })
   void testClock(String expected, long seconds) {
-    assertEquals(text(expected), clock(seconds).build());
+    assertEquals(text(expected), clock(seconds));
   }
 }
