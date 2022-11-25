@@ -3,7 +3,7 @@ package tc.oc.pgm.util.tablist;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.UUID;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -21,10 +21,9 @@ import tc.oc.pgm.util.skin.Skin;
 public class PlayerTabEntry extends DynamicTabEntry {
 
   private static boolean showPing = false;
-  private static BiFunction<Player, Player, Component> playerComponent =
-      (p, v) -> text(p.getName());
+  private static Function<Player, Component> playerComponent = p -> text(p.getName());
 
-  public static void setPlayerComponent(BiFunction<Player, Player, Component> playerComponent) {
+  public static void setPlayerComponent(Function<Player, Component> playerComponent) {
     PlayerTabEntry.playerComponent = playerComponent;
   }
 
@@ -58,7 +57,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public Component getContent(TabView view) {
-    return playerComponent.apply(player, view.getViewer());
+    return playerComponent.apply(player);
   }
 
   @Override

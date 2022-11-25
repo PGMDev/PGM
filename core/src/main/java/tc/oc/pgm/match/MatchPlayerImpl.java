@@ -1,7 +1,7 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -413,7 +413,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public Component getName(NameStyle style) {
-    return player(getBukkit(), style);
+    return player(this, style);
   }
 
   @Override

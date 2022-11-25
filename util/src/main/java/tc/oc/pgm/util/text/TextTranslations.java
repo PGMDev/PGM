@@ -1,6 +1,8 @@
 package tc.oc.pgm.util.text;
 
 import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.text.Component.score;
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
@@ -30,6 +32,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
@@ -392,13 +395,18 @@ public final class TextTranslations {
    * @see #translate(Component, Pointered) for the newer text system.
    */
   @Deprecated
-  public static String translate(String key, @Nullable Pointered viewer, Object... args) {
+  public static String translate(String key, @NotNull Pointered viewer, Object... args) {
     final Component text =
         translatable(
-            key,
-            Stream.of(args).map(String::valueOf).map(Component::text).collect(Collectors.toList()));
+            key, Stream.of(args).map(TextTranslations::toComponent).collect(Collectors.toList()));
 
     return LegacyComponentSerializer.legacySection().serialize(translate(text, viewer));
+  }
+
+  private static ComponentLike toComponent(Object obj) {
+    if (obj instanceof Component) return (Component) obj;
+    if (obj instanceof ComponentLike) return (ComponentLike) obj;
+    return text(String.valueOf(obj));
   }
 
   public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {

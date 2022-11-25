@@ -1,7 +1,7 @@
 package tc.oc.pgm.spawns.states;
 
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.List;
 import net.kyori.adventure.text.Component;
@@ -123,7 +123,7 @@ public class Dead extends Spawning {
     return translatable(
         "deathScreen.title" + (spectator ? ".spectator" : ""),
         NamedTextColor.RED,
-        player(this.player.getBukkit(), NameStyle.SIMPLE_COLOR));
+        player(player, NameStyle.SIMPLE_COLOR));
   }
 
   @Override

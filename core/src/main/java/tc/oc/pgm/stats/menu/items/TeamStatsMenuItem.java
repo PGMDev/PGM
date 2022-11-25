@@ -3,7 +3,7 @@ package tc.oc.pgm.stats.menu.items;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
-import static tc.oc.pgm.stats.StatsMatchModule.numberComponent;
+import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import com.google.common.collect.Lists;
 import java.util.Collection;
@@ -94,9 +94,9 @@ public class TeamStatsMenuItem implements MenuItem {
         translatable(
             "match.stats.concise",
             RESET,
-            numberComponent(stats.getTeamKills(), NamedTextColor.GREEN),
-            numberComponent(stats.getTeamDeaths(), NamedTextColor.RED),
-            numberComponent(stats.getTeamKD(), NamedTextColor.GREEN));
+            number(stats.getTeamKills(), NamedTextColor.GREEN),
+            number(stats.getTeamDeaths(), NamedTextColor.RED),
+            number(stats.getTeamKD(), NamedTextColor.GREEN));
 
     Component damageDealtLore =
         translatable(
@@ -114,9 +114,9 @@ public class TeamStatsMenuItem implements MenuItem {
         translatable(
             "match.stats.bow",
             RESET,
-            numberComponent(stats.getShotsHit(), NamedTextColor.YELLOW),
-            numberComponent(stats.getShotsTaken(), NamedTextColor.YELLOW),
-            numberComponent(stats.getTeamBowAcc(), NamedTextColor.YELLOW).append(text('%')));
+            number(stats.getShotsHit(), NamedTextColor.YELLOW),
+            number(stats.getShotsTaken(), NamedTextColor.YELLOW),
+            number(stats.getTeamBowAcc(), NamedTextColor.YELLOW).append(text('%')));
 
     lore.add(TextTranslations.translateLegacy(statLore, player));
     lore.add(TextTranslations.translateLegacy(damageDealtLore, player));

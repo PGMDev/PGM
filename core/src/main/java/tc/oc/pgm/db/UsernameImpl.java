@@ -1,14 +1,13 @@
 package tc.oc.pgm.db;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.Username;
-import tc.oc.pgm.util.PlayerComponent;
 import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -35,7 +34,7 @@ class UsernameImpl implements Username {
 
   @Override
   public Component getName(NameStyle style) {
-    return name == null ? PlayerComponent.UNKNOWN : player(Bukkit.getPlayer(id), name, style);
+    return player(Bukkit.getPlayer(id), name, style);
   }
 
   @Override

@@ -3,7 +3,8 @@ package tc.oc.pgm.stats;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
-import static tc.oc.pgm.util.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
+import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import com.google.common.collect.Lists;
 import java.text.DecimalFormat;
@@ -23,7 +24,6 @@ import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -80,9 +80,15 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final int verboseItemSlot = PGM.get().getConfiguration().getVerboseItemSlot();
 
   /** Common formats used by stats with decimals */
-  public static final DecimalFormat TWO_DECIMALS = new DecimalFormat("#.##");
+  public static final DecimalFormat FORMATTER = new DecimalFormat("#.00");
 
-  public static final DecimalFormat ONE_DECIMAL = new DecimalFormat("#.#");
+  public static final DecimalFormat THOUSANDS_FORMATTER = new DecimalFormat("#.00");
+
+  static {
+    THOUSANDS_FORMATTER.setMultiplier(1000);
+    THOUSANDS_FORMATTER.setPositiveSuffix("k");
+    THOUSANDS_FORMATTER.setNegativeSuffix("k");
+  }
 
   public static final Component HEART_SYMBOL = text("\u2764"); // ❤
 
@@ -255,7 +261,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         best.add(
             translatable(
                 "match.stats.damage",
-                playerName(bestDamage.getKey()),
+                player(bestDamage.getKey(), NameStyle.FANCY),
                 damageComponent(bestDamage.getValue(), NamedTextColor.GREEN)));
       }
     }
@@ -276,16 +282,16 @@ public class StatsMatchModule implements MatchModule, Listener {
         Component ksHover =
             translatable(
                 "match.stats.killstreak.concise",
-                numberComponent(stats.getKillstreak(), NamedTextColor.GREEN));
+                number(stats.getKillstreak(), NamedTextColor.GREEN));
 
         viewer.sendMessage(
             translatable(
                 "match.stats.own",
-                numberComponent(stats.getKills(), NamedTextColor.GREEN),
-                numberComponent(stats.getMaxKillstreak(), NamedTextColor.GREEN)
+                number(stats.getKills(), NamedTextColor.GREEN),
+                number(stats.getMaxKillstreak(), NamedTextColor.GREEN)
                     .hoverEvent(showText(ksHover)),
-                numberComponent(stats.getDeaths(), NamedTextColor.RED),
-                numberComponent(stats.getKD(), NamedTextColor.GREEN),
+                number(stats.getDeaths(), NamedTextColor.RED),
+                number(stats.getKD(), NamedTextColor.GREEN),
                 damageComponent(stats.getDamageDone(), NamedTextColor.GREEN)));
       }
 
@@ -365,61 +371,13 @@ public class StatsMatchModule implements MatchModule, Listener {
   Component getMessage(
       String messageKey, Map.Entry<UUID, ? extends Number> mapEntry, TextColor color) {
     return translatable(
-        messageKey, playerName(mapEntry.getKey()), numberComponent(mapEntry.getValue(), color));
-  }
-
-  /**
-   * Wraps a {@link Number} in a {@link Component} that is colored with the given {@link TextColor}.
-   * Rounds the number to a maximum of 2 decimals
-   *
-   * <p>If the number is NaN "-" is wrapped instead
-   *
-   * <p>If the number is >= 10000 it will be represented in the thousands (10k, 25.5k, 120.3k etc.)
-   *
-   * @param stat The number you want wrapped
-   * @param color The color you want the number to be
-   * @return a colored component wrapping the given number or "-" if NaN
-   */
-  public static Component numberComponent(Number stat, TextColor color) {
-    double doubleStat = stat.doubleValue();
-    boolean tenThousand = doubleStat >= 10000;
-    String returnValue = null;
-    if (Double.isNaN(doubleStat)) returnValue = "-"; // If NaN, dont try to display as a number
-    else if (doubleStat % 1 == 0) { // Can the given number can be displayed as an integer?
-      int value = stat.intValue();
-      if (!tenThousand
-          || value % 1000
-              == 0) // If the number is above 999 we also need to check if the shortened number can
-        // be displayed as an integer
-        returnValue = Integer.toString(tenThousand ? value / 1000 : value);
-    }
-    if (returnValue
-        == null) { // If not yet defined, display as a double with either 1 or 2 decimals
-      if (tenThousand) doubleStat /= 1000;
-      String decimals = Double.toString(doubleStat).split("\\.")[1];
-      if (decimals.chars().sum() == 1 || tenThousand) returnValue = ONE_DECIMAL.format(doubleStat);
-      else returnValue = TWO_DECIMALS.format(doubleStat);
-    }
-    return text(returnValue + (tenThousand ? "k" : ""), color);
+        messageKey, player(mapEntry.getKey(), NameStyle.FANCY), number(mapEntry.getValue(), color));
   }
 
   /** Formats raw damage to damage relative to the amount of hearths the player would have broken */
   public static Component damageComponent(double damage, TextColor color) {
-
     double hearts = damage / (double) 2;
-
-    return numberComponent(hearts, color).append(HEART_SYMBOL);
-  }
-
-  private Component playerName(UUID playerUUID) {
-    return player( // TODO: make #player take a Supplier instead of the "defName" String
-        Bukkit.getPlayer(playerUUID),
-        allPlayerStats.keySet().stream()
-            .filter(id -> id.equals(playerUUID))
-            .findFirst()
-            .map(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy())
-            .orElse("Unknown"),
-        NameStyle.FANCY);
+    return number(hearts, color).append(HEART_SYMBOL);
   }
 
   private Stream<UUID> getOfflinePlayersWithStats() {

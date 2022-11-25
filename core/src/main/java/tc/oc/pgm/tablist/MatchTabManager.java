@@ -1,6 +1,6 @@
 package tc.oc.pgm.tablist;
 
-import static tc.oc.pgm.util.PlayerComponent.player;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -119,7 +119,7 @@ public class MatchTabManager extends TabManager implements Listener {
       PlayerTabEntry.setShowRealPing(false);
     }
 
-    PlayerTabEntry.setPlayerComponent((pl, viewer) -> player(pl, NameStyle.TAB).render(viewer));
+    PlayerTabEntry.setPlayerComponent(pl -> player(pl, NameStyle.TAB));
   }
 
   protected static TabEntry[] headerFactory(Match match) {

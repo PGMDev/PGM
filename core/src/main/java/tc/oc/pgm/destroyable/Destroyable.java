@@ -573,8 +573,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       return this.contributions;
     }
 
-    Map<MatchPlayerState, Integer> playerDamage =
-        new DefaultMapAdapter<>(new HashMap<MatchPlayerState, Integer>(), 0);
+    Map<MatchPlayerState, Integer> playerDamage = new DefaultMapAdapter<>(new HashMap<>(), 0);
 
     int totalDamage = 0;
     for (DestroyableHealthChange change : this.events) {
