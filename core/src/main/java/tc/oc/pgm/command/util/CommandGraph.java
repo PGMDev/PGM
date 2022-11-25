@@ -40,6 +40,7 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -53,6 +54,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.command.ActionCommand;
 import tc.oc.pgm.command.AdminCommand;
 import tc.oc.pgm.command.CancelCommand;
 import tc.oc.pgm.command.ClassCommand;
@@ -84,6 +86,7 @@ import tc.oc.pgm.command.injectors.MatchProvider;
 import tc.oc.pgm.command.injectors.TeamMatchModuleProvider;
 import tc.oc.pgm.command.parsers.DurationParser;
 import tc.oc.pgm.command.parsers.EnumParser;
+import tc.oc.pgm.command.parsers.ExposedActionParser;
 import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
@@ -200,6 +203,7 @@ public class CommandGraph {
 
   // Commands
   public void registerCommands() {
+    register(new ActionCommand());
     register(new AdminCommand());
     register(new CancelCommand());
     register(new ClassCommand());
@@ -210,6 +214,7 @@ public class CommandGraph {
     register(new JoinCommand());
     register(new ListCommand());
     register(new MapCommand());
+    register(new MapDevCommand());
     register(new MapOrderCommand());
     register(new MapPoolCommand());
     register(new MatchCommand());
@@ -222,7 +227,6 @@ public class CommandGraph {
     register(new TeamCommand());
     register(new TimeLimitCommand());
     register(new VotingCommand());
-    register(new MapDevCommand());
 
     if (pgm.getConfiguration().isCommunityMode()) {
       register(new ReportCommand());
@@ -284,6 +288,7 @@ public class CommandGraph {
     registerParser(TypeFactory.parameterizedClass(Collection.class, Team.class), TeamsParser::new);
     registerParser(PlayerClass.class, PlayerClassParser::new);
     registerParser(Mode.class, ModeParser::new);
+    registerParser(ExposedAction.class, ExposedActionParser::new);
     registerParser(
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());
