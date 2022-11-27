@@ -83,7 +83,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
   public static class Factory implements MapModuleFactory<VariablesModule> {
 
     // The limitation is due to them being used in exp4j formulas for.
-    private static final Pattern VARIABLE_ID = Pattern.compile("[A-Za-z_]\\w*");
+    public static final Pattern VARIABLE_ID = Pattern.compile("[A-Za-z_]\\w*");
 
     @Nullable
     @Override

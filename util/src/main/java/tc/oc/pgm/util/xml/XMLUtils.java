@@ -387,63 +387,77 @@ public final class XMLUtils {
   private static final Pattern RANGE_RE =
       Pattern.compile("\\s*(\\(|\\[)\\s*([^,]+)\\s*,\\s*([^\\)\\]]+)\\s*(\\)|\\])\\s*");
 
+  public static final Pattern RANGE_DOTTED =
+      Pattern.compile("(-oo|-?\\d*\\.?\\d+)?\\s*\\.\\.\\s*(oo|-?\\d*\\.?\\d+)?");
+
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
       @Nullable Node node, Class<T> type, @Nullable Range<T> fallback) throws InvalidXMLException {
     if (node == null) return fallback;
     return parseNumericRange(node, type);
   }
 
-  /**
-   * Parse a range in the standard mathematical format e.g.
-   *
-   * <p>[0, 1)
-   *
-   * <p>for a closed-open range from 0 to 1
-   *
-   * <p>Also supports singleton ranges derived from providing a number with no delimiter
-   */
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
       @NotNull Node node, Class<T> type) throws InvalidXMLException {
-    Matcher matcher = RANGE_RE.matcher(node.getValue());
-    if (!matcher.matches()) {
-      T value = parseNumber(node, node.getValue(), type, true);
+    return parseNumericRange(node, node.getValue(), type);
+  }
+
+  /**
+   * Parse a range in multiple formats.
+   *
+   * <p>Standard interval mathematical format: [0, 1) for a close-open range from 0 to 1
+   *
+   * <p>Singleton range (a standalone number)
+   *
+   * <p>Dotted range notation: 0..1 for a closed range from 0 to 1
+   */
+  public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
+      @NotNull Node node, String text, Class<T> type) throws InvalidXMLException {
+
+    String lowStr;
+    BoundType lowerBound;
+    String uppStr;
+    BoundType upperBound;
+
+    Matcher matcher;
+    if ((matcher = RANGE_DOTTED.matcher(text)).matches()) {
+      lowStr = matcher.group(1);
+      uppStr = matcher.group(2);
+      lowerBound = BoundType.CLOSED;
+      upperBound = BoundType.CLOSED;
+    } else if ((matcher = RANGE_RE.matcher(text)).matches()) {
+      lowStr = matcher.group(2);
+      uppStr = matcher.group(3);
+      lowerBound = "(".equals(matcher.group(1)) ? BoundType.OPEN : BoundType.CLOSED;
+      upperBound = ")".equals(matcher.group(4)) ? BoundType.OPEN : BoundType.CLOSED;
+    } else {
+      // Parse as singleton range
+      T value = parseNumber(node, text, type, true);
       if (value != null) {
         return Range.singleton(value);
       }
       throw new InvalidXMLException(
-          "Invalid " + type.getSimpleName().toLowerCase() + " range '" + node.getValue() + "'",
-          node);
+          "Invalid " + type.getSimpleName().toLowerCase() + " range '" + text + "'", node);
     }
 
-    T lower = parseNumber(node, matcher.group(2), type, true);
-    T upper = parseNumber(node, matcher.group(3), type, true);
+    T lower =
+        lowStr == null || lowStr.equals("-oo") ? null : parseNumber(node, lowStr, type, false);
+    T upper = uppStr == null || uppStr.equals("oo") ? null : parseNumber(node, uppStr, type, false);
 
-    BoundType lowerType = null, upperType = null;
-    if (!Double.isInfinite(lower.doubleValue())) {
-      lowerType = "(".equals(matcher.group(1)) ? BoundType.OPEN : BoundType.CLOSED;
-    }
-    if (!Double.isInfinite(upper.doubleValue())) {
-      upperType = ")".equals(matcher.group(4)) ? BoundType.OPEN : BoundType.CLOSED;
-    }
-
-    if (lower.compareTo(upper) == 1) {
-      throw new InvalidXMLException(
-          "range lower bound (" + lower + ") cannot be greater than upper bound (" + upper + ")",
-          node);
-    }
-
-    if (lowerType == null) {
-      if (upperType == null) {
-        return Range.all();
-      } else {
-        return Range.upTo(upper, upperType);
+    if (lower != null && upper != null) {
+      if (lower.compareTo(upper) > 0) {
+        throw new InvalidXMLException(
+            "range lower bound (" + lower + ") cannot be greater than upper bound (" + upper + ")",
+            node);
       }
+
+      return Range.range(lower, lowerBound, upper, upperBound);
+
+    } else if (lower != null) {
+      return Range.downTo(lower, lowerBound);
+    } else if (upper != null) {
+      return Range.upTo(upper, upperBound);
     } else {
-      if (upperType == null) {
-        return Range.downTo(lower, lowerType);
-      } else {
-        return Range.range(lower, lowerType, upper, upperType);
-      }
+      return Range.all();
     }
   }
 
