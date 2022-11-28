@@ -8,7 +8,7 @@ import tc.oc.pgm.api.module.ModuleFactory;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 /** A factory for creating {@link MapModule}s from a {@link Document}. */
-public interface MapModuleFactory<T extends MapModule> extends ModuleFactory<MapModule> {
+public interface MapModuleFactory<T extends MapModule<?>> extends ModuleFactory<MapModule<?>> {
 
   /**
    * Parses a {@link Document} to create a {@link MapModule}.

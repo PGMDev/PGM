@@ -15,7 +15,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitModule;
@@ -26,7 +25,7 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class SpawnModule implements MapModule {
+public class SpawnModule implements MapModule<SpawnMatchModule> {
 
   public static final Duration DEFAULT_RESPAWN_DELAY = Duration.ofMillis(2000);
   public static final Duration MINIMUM_RESPAWN_DELAY = Duration.ofMillis(1500);
@@ -44,7 +43,7 @@ public class SpawnModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public SpawnMatchModule createMatchModule(Match match) {
     return new SpawnMatchModule(match, this);
   }
 
@@ -53,12 +52,12 @@ public class SpawnModule implements MapModule {
     private FilterParser filterParser;
 
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, KitModule.class);
     }
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(TeamModule.class);
     }
 

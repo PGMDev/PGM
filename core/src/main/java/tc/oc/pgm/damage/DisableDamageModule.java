@@ -10,13 +10,12 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class DisableDamageModule implements MapModule {
+public class DisableDamageModule implements MapModule<DisableDamageMatchModule> {
   protected final SetMultimap<DamageCause, PlayerRelation> causes;
 
   public DisableDamageModule(SetMultimap<DamageCause, PlayerRelation> causes) {
@@ -24,7 +23,7 @@ public class DisableDamageModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public DisableDamageMatchModule createMatchModule(Match match) {
     return new DisableDamageMatchModule(match, this.causes);
   }
 

@@ -10,12 +10,11 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ToolRepairModule implements MapModule {
+public class ToolRepairModule implements MapModule<ToolRepairMatchModule> {
   protected final Set<Material> toRepair;
 
   public ToolRepairModule(Set<Material> toRepair) {
@@ -23,7 +22,7 @@ public class ToolRepairModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ToolRepairMatchModule createMatchModule(Match match) {
     return new ToolRepairMatchModule(match, this.toRepair);
   }
 

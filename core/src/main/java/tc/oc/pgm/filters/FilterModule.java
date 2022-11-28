@@ -43,7 +43,7 @@ public class FilterModule implements MapModule<FilterMatchModule> {
 
   public static class Factory implements MapModuleFactory<FilterModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(VariablesModule.class, TeamModule.class, ClassModule.class);
     }
 

@@ -4,6 +4,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
@@ -736,13 +737,21 @@ public class MatchImpl implements Match {
     return player == null ? null : players.get(player.getUniqueId());
   }
 
+  private ImmutableMap<Class<? extends MatchModule>, MatchModuleFactory<?>> buildModuleMap() {
+    ImmutableMap.Builder<Class<? extends MatchModule>, MatchModuleFactory<?>> builder =
+        ImmutableMap.builder();
+    builder.putAll(Modules.MATCH);
+    getMap()
+        .getModules()
+        .forEach(module -> builder.put(Modules.MAP_TO_MATCH.get(module.getClass()), module));
+    return builder.build();
+  }
+
   private class ModuleLoader
       extends ModuleGraph<MatchModule, MatchModuleFactory<? extends MatchModule>> {
 
     private ModuleLoader() throws ModuleLoadException {
-      super(new HashMap<>(Modules.MATCH), new HashMap<>(Modules.MATCH_DEPENDENCY_ONLY));
-      getMap().getModules().stream()
-          .forEach(module -> addFactory(Modules.MAP_TO_MATCH.get(module.getClass()), module));
+      super(buildModuleMap(), Modules.MATCH_DEPENDENCY_ONLY);
       loadAll();
     }
 
@@ -765,7 +774,7 @@ public class MatchImpl implements Match {
     }
 
     @Override
-    protected MatchModule createModule(MatchModuleFactory factory) throws ModuleLoadException {
+    protected MatchModule createModule(MatchModuleFactory<?> factory) throws ModuleLoadException {
       final MatchModule module = factory.createMatchModule(MatchImpl.this);
       if (module == null) return null;
 

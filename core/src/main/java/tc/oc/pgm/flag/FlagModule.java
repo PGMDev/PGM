@@ -19,7 +19,7 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
-public class FlagModule implements MapModule {
+public class FlagModule implements MapModule<FlagMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("ctf", "flag", "Capture the Flag", true, false));
@@ -40,7 +40,7 @@ public class FlagModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public FlagMatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new FlagMatchModule(match, this.posts, this.nets, this.flags);
   }
 
@@ -51,7 +51,7 @@ public class FlagModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<FlagModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(TeamModule.class, RegionModule.class, FilterModule.class);
     }
 

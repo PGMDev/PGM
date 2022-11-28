@@ -19,12 +19,11 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class CraftingModule implements MapModule {
+public class CraftingModule implements MapModule<CraftingMatchModule> {
 
   private final Set<Recipe> customRecipes;
   private final Set<SingleMaterialMatcher> disabledRecipes;
@@ -35,7 +34,7 @@ public class CraftingModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public CraftingMatchModule createMatchModule(Match match) {
     return new CraftingMatchModule(match, customRecipes, disabledRecipes);
   }
 

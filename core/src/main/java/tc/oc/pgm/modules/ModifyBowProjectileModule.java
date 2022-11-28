@@ -12,11 +12,10 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ModifyBowProjectileModule implements MapModule {
+public class ModifyBowProjectileModule implements MapModule<ModifyBowProjectileMatchModule> {
   protected final Class<? extends Entity> cls;
   protected final float velocityMod;
   protected final Set<PotionEffect> potionEffects;
@@ -29,7 +28,7 @@ public class ModifyBowProjectileModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ModifyBowProjectileMatchModule createMatchModule(Match match) {
     return new ModifyBowProjectileMatchModule(
         match, this.cls, this.velocityMod, this.potionEffects);
   }

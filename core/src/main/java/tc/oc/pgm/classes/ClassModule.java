@@ -22,7 +22,6 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
@@ -31,7 +30,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ClassModule implements MapModule {
+public class ClassModule implements MapModule<ClassMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("classes", "Classes", false, true));
@@ -51,7 +50,7 @@ public class ClassModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ClassMatchModule createMatchModule(Match match) {
     return new ClassMatchModule(match, this.family, this.classes, this.defaultClass);
   }
 
@@ -69,7 +68,7 @@ public class ClassModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ClassModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return Collections.singleton(KitModule.class);
     }
 

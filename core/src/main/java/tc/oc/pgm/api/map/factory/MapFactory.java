@@ -12,7 +12,7 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
 
 /** A factory for creating {@link MapInfo}s and {@link MapContext}s. */
-public interface MapFactory extends ModuleContext<MapModule>, AutoCloseable {
+public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
 
   /**
    * Get the {@link RegionParser} for parsing region references.

@@ -12,7 +12,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class WorldTimeModule implements MapModule, MatchModule {
+public class WorldTimeModule implements MapModule<WorldTimeModule>, MatchModule {
   private final boolean lock;
   private final Long time;
   private final boolean random;
@@ -70,15 +70,11 @@ public class WorldTimeModule implements MapModule, MatchModule {
   }
 
   public static boolean parseTimeLock(Element timelockEl) {
-    boolean lock = true;
-    if (timelockEl.getTextNormalize().equalsIgnoreCase("off")) {
-      lock = false;
-    }
-    return lock;
+    return !timelockEl.getTextNormalize().equalsIgnoreCase("off");
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) throws ModuleLoadException {
+  public WorldTimeModule createMatchModule(Match match) throws ModuleLoadException {
     return this;
   }
 }

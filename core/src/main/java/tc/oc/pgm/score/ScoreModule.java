@@ -21,7 +21,6 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.filters.FilterModule;
@@ -34,7 +33,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ScoreModule implements MapModule {
+public class ScoreModule implements MapModule<ScoreMatchModule> {
   private static final MapTag SCORE_TAG =
       new MapTag("tdm", "deathmatch", "Deathmatch", true, false);
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox", false, true);
@@ -56,7 +55,7 @@ public class ScoreModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ScoreMatchModule createMatchModule(Match match) {
     ImmutableSet.Builder<ScoreBox> scoreBoxes = ImmutableSet.builder();
     for (ScoreBoxFactory factory : this.scoreBoxFactories) {
       scoreBoxes.add(factory.createScoreBox(match));
@@ -75,12 +74,12 @@ public class ScoreModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<ScoreModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(BlitzModule.class);
     }
 

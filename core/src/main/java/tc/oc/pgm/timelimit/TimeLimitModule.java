@@ -45,7 +45,7 @@ public class TimeLimitModule implements MapModule<TimeLimitMatchModule> {
 
     @Nullable
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(TeamModule.class);
     }
 

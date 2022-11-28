@@ -22,7 +22,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class BlitzModule implements MapModule {
+public class BlitzModule implements MapModule<BlitzMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("blitz", "Blitz", true, true));
@@ -45,7 +45,7 @@ public class BlitzModule implements MapModule {
   public static class Factory implements MapModuleFactory<BlitzModule> {
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(FilterModule.class);
     }
 
