@@ -1,31 +1,34 @@
 package tc.oc.pgm.structure;
 
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.Feature;
-import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.snapshot.SnapshotMatchModule;
+import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.regions.TranslatedRegion;
+import tc.oc.pgm.snapshot.WorldSnapshot;
 
 public class DynamicStructure implements Feature<DynamicStructureDefinition> {
 
-  private final SnapshotMatchModule smm;
-  private final StructureDefinition structure;
+  private final Structure structure;
   private final BlockVector offset;
+  private final WorldSnapshot snapshot;
   private final DynamicStructureDefinition definition;
+  private final Region region;
 
   // Since the passive filter can skip placing the structure,
   // we need to keep track of whether its placed or not if we
   // want to avoid unnecessary clears.
   private boolean placed;
 
-  DynamicStructure(DynamicStructureDefinition definition, Match match) {
-    this.smm = match.needModule(SnapshotMatchModule.class);
+  DynamicStructure(
+      DynamicStructureDefinition definition, Structure structure, WorldSnapshot snapshot) {
+    this.structure = structure;
     this.definition = definition;
-    this.structure = this.definition.getStructureDefinition();
     this.offset = this.definition.getOffset();
+    this.snapshot = snapshot;
+    this.region = new TranslatedRegion(structure.getRegion(), offset);
 
-    // Position is the same as original structure, and it's not cleared
-    this.placed = offset.equals(new Vector()) && !structure.clearSource();
+    // Save the blocks at original position before dynamic is placed
+    snapshot.saveRegion(region);
   }
 
   @Override
@@ -42,14 +45,14 @@ public class DynamicStructure implements Feature<DynamicStructureDefinition> {
   public void place() {
     if (placed) return;
     placed = true;
-
-    smm.placeBlocks(structure.getRegion(), offset, structure.includeAir());
+    structure.place(offset);
   }
 
   /** Remove the structure from the world */
   public void clear() {
     if (!placed) return;
     placed = false;
-    smm.removeBlocks(structure.getRegion(), offset, structure.includeAir());
+
+    snapshot.placeBlocks(region, new BlockVector());
   }
 }
