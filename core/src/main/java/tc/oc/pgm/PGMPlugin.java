@@ -253,8 +253,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     if (!startup) {
       getGameLogger()
-          .log(
-              Level.INFO, ChatColor.GREEN + TextTranslations.translate("admin.reloadConfig", null));
+          .log(Level.INFO, ChatColor.GREEN + TextTranslations.translate("admin.reloadConfig"));
     }
 
     final Logger logger = getLogger();
