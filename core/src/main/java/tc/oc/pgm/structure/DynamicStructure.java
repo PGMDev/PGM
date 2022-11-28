@@ -2,6 +2,7 @@ package tc.oc.pgm.structure;
 
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.TranslatedRegion;
 import tc.oc.pgm.snapshot.WorldSnapshot;
 
@@ -11,6 +12,7 @@ public class DynamicStructure implements Feature<DynamicStructureDefinition> {
   private final BlockVector offset;
   private final WorldSnapshot snapshot;
   private final DynamicStructureDefinition definition;
+  private final Region region;
 
   // Since the passive filter can skip placing the structure,
   // we need to keep track of whether its placed or not if we
@@ -23,9 +25,10 @@ public class DynamicStructure implements Feature<DynamicStructureDefinition> {
     this.definition = definition;
     this.offset = this.definition.getOffset();
     this.snapshot = snapshot;
+    this.region = new TranslatedRegion(structure.getRegion(), offset);
 
     // Save the blocks at original position before dynamic is placed
-    snapshot.saveRegion(new TranslatedRegion(structure.getRegion(), offset));
+    snapshot.saveRegion(region);
   }
 
   @Override
@@ -50,6 +53,6 @@ public class DynamicStructure implements Feature<DynamicStructureDefinition> {
     if (!placed) return;
     placed = false;
 
-    snapshot.placeBlocks(structure.getRegion(), offset);
+    snapshot.placeBlocks(region, new BlockVector());
   }
 }

@@ -95,7 +95,7 @@ public class StructureModule implements MapModule<StructureMatchModule> {
               "attributes 'location' and 'offset' cannot be used together", el);
 
         final StructureDefinition structure =
-            structures.get(el.getAttribute("structure").getValue());
+            structures.get(XMLUtils.getRequiredAttribute(el, "structure").getValue());
 
         Filter trigger, filter;
         if (proto.isOlderThan(MapProtos.DYNAMIC_FILTERS)) {
