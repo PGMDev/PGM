@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.text;
 
 import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.text.Component.score;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
@@ -66,7 +65,7 @@ public final class TextTranslations {
   // A control to ensure that .properties are loaded in UTF-8 format
   private static final UTF8Control SOURCE_CONTROL = new UTF8Control();
 
-  // An list of all .properties files to load
+  // A list of all .properties files to load
   private static final List<String> SOURCE_NAMES =
       ImmutableList.of(
           "command",
@@ -367,7 +366,7 @@ public final class TextTranslations {
    * @see #translate(Component, Pointered) for the newer text system.
    */
   @Deprecated
-  public static String translate(String key, Object... args) {
+  public static String translate(String key, @NotNull Object... args) {
     return translate(key, Audience.empty(), args);
   }
 
@@ -381,7 +380,8 @@ public final class TextTranslations {
    * @see #translate(Component, Pointered) for the newer text system.
    */
   @Deprecated
-  public static String translate(String key, @Nullable CommandSender viewer, Object... args) {
+  public static String translate(
+      String key, @Nullable CommandSender viewer, @NotNull Object... args) {
     return translate(key, getPointered(viewer), args);
   }
 
@@ -395,7 +395,7 @@ public final class TextTranslations {
    * @see #translate(Component, Pointered) for the newer text system.
    */
   @Deprecated
-  public static String translate(String key, @NotNull Pointered viewer, Object... args) {
+  public static String translate(String key, @NotNull Pointered viewer, @NotNull Object... args) {
     final Component text =
         translatable(
             key, Stream.of(args).map(TextTranslations::toComponent).collect(Collectors.toList()));
