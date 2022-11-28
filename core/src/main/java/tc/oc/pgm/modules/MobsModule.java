@@ -11,13 +11,12 @@ import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class MobsModule implements MapModule {
+public class MobsModule implements MapModule<MobsMatchModule> {
 
   private final Filter mobsFilter;
 
@@ -26,13 +25,13 @@ public class MobsModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public MobsMatchModule createMatchModule(Match match) {
     return new MobsMatchModule(match, this.mobsFilter);
   }
 
   public static class Factory implements MapModuleFactory<MobsModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(FilterModule.class);
     }
 

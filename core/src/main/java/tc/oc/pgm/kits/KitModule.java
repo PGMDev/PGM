@@ -27,7 +27,7 @@ import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class KitModule implements MapModule {
+public class KitModule implements MapModule<KitMatchModule> {
 
   protected final Set<KitRule> kitRules;
 
@@ -42,7 +42,7 @@ public class KitModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public KitMatchModule createMatchModule(Match match) {
     return new KitMatchModule(match, kitRules);
   }
 
@@ -54,7 +54,7 @@ public class KitModule implements MapModule {
   public static class Factory implements MapModuleFactory<KitModule> {
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(ActionModule.class, TeamModule.class);
     }
 

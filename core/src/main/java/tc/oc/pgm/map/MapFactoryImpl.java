@@ -39,7 +39,8 @@ import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.SAXHandler;
 
-public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>>
+public class MapFactoryImpl
+    extends ModuleGraph<MapModule<?>, MapModuleFactory<? extends MapModule<?>>>
     implements MapFactory {
 
   private static final ThreadLocal<SAXBuilder> DOCUMENT_FACTORY =
@@ -68,7 +69,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   }
 
   @Override
-  protected MapModule createModule(MapModuleFactory factory) throws ModuleLoadException {
+  protected MapModule<?> createModule(MapModuleFactory<?> factory) throws ModuleLoadException {
     try {
       return factory.parse(this, logger, document);
     } catch (InvalidXMLException e) {
@@ -139,7 +140,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       throw e;
     }
 
-    for (MapModule module : getModules()) {
+    for (MapModule<?> module : getModules()) {
       module.postParse(this, logger, document);
     }
   }

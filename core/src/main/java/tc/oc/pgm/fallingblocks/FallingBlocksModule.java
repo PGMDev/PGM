@@ -12,7 +12,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -21,7 +20,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class FallingBlocksModule implements MapModule {
+public class FallingBlocksModule implements MapModule<FallingBlocksMatchModule> {
   private final List<FallingBlocksRule> rules;
 
   public FallingBlocksModule(List<FallingBlocksRule> rules) {
@@ -29,13 +28,13 @@ public class FallingBlocksModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public FallingBlocksMatchModule createMatchModule(Match match) {
     return new FallingBlocksMatchModule(match, this.rules);
   }
 
   public static class Factory implements MapModuleFactory<FallingBlocksModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(FilterModule.class, RegionModule.class);
     }
 

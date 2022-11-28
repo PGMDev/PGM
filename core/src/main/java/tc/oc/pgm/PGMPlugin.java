@@ -27,7 +27,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
-import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
@@ -116,7 +115,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       return; // Indicates the plugin failed to load, so exit early
     }
 
-    Modules.registerAll();
     Permissions.registerAll();
 
     final CommandSender console = getServer().getConsoleSender();

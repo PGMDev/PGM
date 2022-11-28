@@ -17,7 +17,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
@@ -25,17 +24,17 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ProjectileModule implements MapModule {
+public class ProjectileModule implements MapModule<ProjectileMatchModule> {
   Set<ProjectileDefinition> projectileDefinitions = new HashSet<>();
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ProjectileMatchModule createMatchModule(Match match) {
     return new ProjectileMatchModule(match, this.projectileDefinitions);
   }
 
   public static class Factory implements MapModuleFactory<ProjectileModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(FilterModule.class);
     }
 

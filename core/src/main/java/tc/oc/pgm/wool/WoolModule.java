@@ -32,7 +32,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class WoolModule implements MapModule {
+public class WoolModule implements MapModule<WoolMatchModule> {
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("ctw", "wool", "Capture the Wool", true, false));
 
@@ -49,7 +49,7 @@ public class WoolModule implements MapModule {
   }
 
   @Override
-  public Collection<Class> getSoftDependencies() {
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
     return ImmutableList.of(GoalMatchModule.class);
   }
 
@@ -58,7 +58,7 @@ public class WoolModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public WoolMatchModule createMatchModule(Match match) {
     Multimap<Team, MonumentWool> wools = ArrayListMultimap.create();
     for (Entry<TeamFactory, MonumentWoolFactory> woolEntry : this.woolFactories.entries()) {
       Team team = match.needModule(TeamMatchModule.class).getTeam(woolEntry.getKey());
@@ -72,7 +72,7 @@ public class WoolModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<WoolModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, TeamModule.class);
     }
 

@@ -8,13 +8,12 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.matcher.block.BlockFilter;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ItemKeepModule implements MapModule {
+public class ItemKeepModule implements MapModule<ItemKeepMatchModule> {
   protected final Set<BlockFilter> itemsToKeep;
   protected final Set<BlockFilter> armorToKeep;
 
@@ -24,7 +23,7 @@ public class ItemKeepModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ItemKeepMatchModule createMatchModule(Match match) {
     return new ItemKeepMatchModule(match, this.itemsToKeep, this.armorToKeep);
   }
 

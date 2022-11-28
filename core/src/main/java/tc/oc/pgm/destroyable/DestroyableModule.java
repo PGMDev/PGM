@@ -34,7 +34,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class DestroyableModule implements MapModule {
+public class DestroyableModule implements MapModule<DestroyableMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("dtm", "monument", "Destroy the Monument", true, false));
@@ -50,7 +50,7 @@ public class DestroyableModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public DestroyableMatchModule createMatchModule(Match match) {
     ImmutableList.Builder<Destroyable> destroyables = new ImmutableList.Builder<>();
     for (DestroyableFactory factory : this.destroyableFactories) {
       Destroyable destroyable = new Destroyable(factory, match);
@@ -69,12 +69,12 @@ public class DestroyableModule implements MapModule {
   public static class Factory implements MapModuleFactory<DestroyableModule> {
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(BlockDropsModule.class, ObjectiveModesModule.class);
     }
 
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(TeamModule.class, RegionModule.class);
     }
 

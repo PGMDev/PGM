@@ -13,7 +13,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.countdowns.CountdownRunner;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.util.TimeUtils;
@@ -21,7 +20,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class BroadcastModule implements MapModule {
+public class BroadcastModule implements MapModule<BroadcastMatchModule> {
   private final Multimap<Duration, Broadcast> broadcasts;
 
   public BroadcastModule(Multimap<Duration, Broadcast> broadcasts) {
@@ -29,7 +28,7 @@ public class BroadcastModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public BroadcastMatchModule createMatchModule(Match match) {
     return new BroadcastMatchModule(match, this.broadcasts);
   }
 

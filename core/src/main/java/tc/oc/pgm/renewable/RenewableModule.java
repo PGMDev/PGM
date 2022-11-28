@@ -44,7 +44,7 @@ public class RenewableModule implements MapModule<RenewableMatchModule> {
 
   public static class Factory implements MapModuleFactory<RenewableModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 
