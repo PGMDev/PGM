@@ -1379,4 +1379,11 @@ public interface NMSHacks {
     tag.setBoolean("NoGravity", true);
     nmsEntity.f(tag); // load from tag
   }
+
+  static void setFireballDirection(Fireball entity, Vector direction) {
+    EntityFireball fireball = ((CraftFireball) entity).getHandle();
+    fireball.dirX = direction.getX() * 0.1D;
+    fireball.dirY = direction.getY() * 0.1D;
+    fireball.dirZ = direction.getZ() * 0.1D;
+  }
 }

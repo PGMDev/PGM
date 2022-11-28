@@ -7,6 +7,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -40,6 +41,7 @@ import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule implements MatchModule, Listener {
@@ -92,6 +94,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
           projectile =
               player.launchProjectile(
                   projectileDefinition.projectile.asSubclass(Projectile.class), velocity);
+          if (projectile instanceof Fireball && projectileDefinition.precise) {
+            NMSHacks.setFireballDirection((Fireball) projectile, velocity);
+          }
         } else {
           projectile =
               player.getWorld().spawn(player.getEyeLocation(), projectileDefinition.projectile);

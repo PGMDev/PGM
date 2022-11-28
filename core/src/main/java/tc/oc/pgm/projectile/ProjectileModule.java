@@ -69,6 +69,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
         Duration coolDown = XMLUtils.parseDuration(projectileElement.getAttribute("cooldown"));
         boolean throwable =
             XMLUtils.parseBoolean(projectileElement.getAttribute("throwable"), true);
+        boolean precise = XMLUtils.parseBoolean(projectileElement.getAttribute("precise"), true);
 
         ProjectileDefinition projectileDefinition =
             new ProjectileDefinition(
@@ -81,7 +82,8 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
                 potionKit,
                 destroyFilter,
                 coolDown,
-                throwable);
+                throwable,
+                precise);
 
         factory.getFeatures().addFeature(projectileElement, projectileDefinition);
         projectileModule.projectileDefinitions.add(projectileDefinition);
