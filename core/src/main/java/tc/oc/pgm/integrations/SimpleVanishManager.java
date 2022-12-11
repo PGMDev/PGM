@@ -1,12 +1,8 @@
-package tc.oc.pgm.community.features;
+package tc.oc.pgm.integrations;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -36,10 +32,11 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
-import tc.oc.pgm.community.events.PlayerVanishEvent;
-import tc.oc.pgm.listeners.PGMListener;
+import tc.oc.pgm.api.player.event.PlayerVanishEvent;
+import tc.oc.pgm.listeners.JoinLeaveAnnouncer;
+import tc.oc.pgm.listeners.JoinLeaveAnnouncer.JoinVisibility;
 
-public class VanishManagerImpl implements VanishManager, Listener {
+public class SimpleVanishManager implements VanishManager, Listener {
 
   private static final String VANISH_KEY = "isVanished";
   private static final MetadataValue VANISH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -51,7 +48,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
       hotbarTask; // Task is run every second to ensure vanished players retain hotbar message
   private boolean hotbarFlash;
 
-  public VanishManagerImpl(MatchManager matchManager, ScheduledExecutorService tasks) {
+  public SimpleVanishManager(MatchManager matchManager, ScheduledExecutorService tasks) {
     this.vanishedPlayers = Lists.newArrayList();
     this.matchManager = matchManager;
     this.hotbarFlash = false;
@@ -101,18 +98,23 @@ public class VanishManagerImpl implements VanishManager, Listener {
       match.setParty(player, match.getDefaultParty());
     }
 
+    // Broadcast join/quit message before adjusting vanish status
+    // so name renders normally
+    if (!quiet) {
+      if (vanish) {
+        JoinLeaveAnnouncer.leave(player, JoinVisibility.NONSTAFF);
+      } else {
+        JoinLeaveAnnouncer.join(player, JoinVisibility.NONSTAFF);
+      }
+    }
+
     // Set vanish status in match player
     player.setVanished(vanish);
 
     // Reset visibility to hide/show player
     player.resetVisibility();
 
-    // Broadcast join/quit message
-    if (!quiet) {
-      PGMListener.announceJoinOrLeave(player, !vanish, false);
-    }
-
-    match.callEvent(new PlayerVanishEvent(player, vanish));
+    match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     return isVanished(player.getId());
   }
@@ -127,18 +129,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
   private void removeVanished(MatchPlayer player) {
     this.vanishedPlayers.remove(player.getId());
     player.getBukkit().removeMetadata(VANISH_KEY, VANISH_VALUE.getOwningPlugin());
-  }
-
-  /* Commands */
-  @CommandMethod("vanish|v")
-  @CommandDescription("Toggle vanish status")
-  @CommandPermission(Permissions.VANISH)
-  public void vanish(MatchPlayer sender, @Flag(value = "silent", aliases = "s") boolean silent) {
-    if (setVanished(sender, !isVanished(sender.getId()), silent)) {
-      sender.sendWarning(translatable("vanish.activate").color(NamedTextColor.GREEN));
-    } else {
-      sender.sendWarning(translatable("vanish.deactivate").color(NamedTextColor.RED));
-    }
   }
 
   /* Events */
@@ -163,6 +153,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     if (player == null) return;
     if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
+    if (!player.getBukkit().hasPermission(Permissions.VANISH)) return; // No perms
 
     if (isVanished(player.getId())) {
       player.setVanished(true);
@@ -192,7 +183,9 @@ public class VanishManagerImpl implements VanishManager, Listener {
       // Temporary vanish status is removed before quit,
       // so prevent regular quit msg and forces a staff only broadcast
       event.setQuitMessage(null);
-      PGMListener.announceJoinOrLeave(player, false, true, true);
+
+      // Broadcast a real leave message to staff
+      JoinLeaveAnnouncer.leave(player, JoinVisibility.STAFF);
     }
   }
 

@@ -24,6 +24,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
 
   private final TeamFactory info;
   private int min, max, overfill;
+  private @Nullable NameTagVisibility nameTagVisibilityOverride;
 
   private TeamMatchModule tmm;
   private JoinMatchModule jmm;
@@ -96,7 +97,14 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
 
   @Override
   public NameTagVisibility getNameTagVisibility() {
-    return info.getNameTagVisibility();
+    return nameTagVisibilityOverride != null
+        ? nameTagVisibilityOverride
+        : info.getNameTagVisibility();
+  }
+
+  @Override
+  public void setNameTagVisibilityOverride(NameTagVisibility visibility) {
+    this.nameTagVisibilityOverride = visibility;
   }
 
   public int getMinPlayers() {

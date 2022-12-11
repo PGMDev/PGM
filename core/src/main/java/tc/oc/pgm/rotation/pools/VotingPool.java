@@ -1,7 +1,9 @@
 package tc.oc.pgm.rotation.pools;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -37,6 +39,21 @@ public class VotingPool extends MapPool {
     this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
 
     this.mapPicker = MapVotePicker.of(manager, section);
+    for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
+  }
+
+  public VotingPool(
+      MapPoolType type,
+      MapPoolManager manager,
+      String name,
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> maps) {
+    super(type, name, manager, enabled, players, dynamic, cycleTime, maps);
+    this.ADJUST_FACTOR = DEFAULT_SCORE / maps.size();
+    this.mapPicker = MapVotePicker.of(manager, null);
     for (MapInfo map : maps) mapScores.put(map, DEFAULT_SCORE);
   }
 

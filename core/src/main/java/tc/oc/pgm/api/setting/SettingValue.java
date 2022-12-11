@@ -15,7 +15,9 @@ public enum SettingValue {
   CHAT_ADMIN("chat", "admin", DyeColor.RED), // Send to all server operators
 
   DEATH_OWN("death", "own", DyeColor.RED), // Only send death messages involving self
-  DEATH_ALL("death", "all", DyeColor.GREEN), // Send all death messages, highlight your own
+  DEATH_ALL("death", "all", DyeColor.ORANGE), // Send all death messages, highlight your own
+  DEATH_FRIENDS(
+      "death", "friends", DyeColor.GREEN), // Only send death messages involving yourself or friends
 
   PICKER_AUTO("picker", "auto", DyeColor.ORANGE), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on", DyeColor.GREEN), // Display the picker GUI always
@@ -23,12 +25,14 @@ public enum SettingValue {
 
   JOIN_ON("join", "all", DyeColor.ORANGE), // Send all join messages
   JOIN_OFF("join", "none", DyeColor.RED), // Never send join messages
+  JOIN_FRIENDS("join", "friends", DyeColor.GREEN), // Only send friend join messages
 
-  MESSAGE_ON("message", "on", DyeColor.GREEN), // Always accept direct messages
-  MESSAGE_OFF("message", "off", DyeColor.RED), // Never accept direct messages
+  MESSAGE_ON("message", "all", DyeColor.GREEN), // Always accept direct messages
+  MESSAGE_OFF("message", "none", DyeColor.RED), // Never accept direct messages
 
-  OBSERVERS_ON("observers", "on", DyeColor.GREEN), // Show observers
-  OBSERVERS_OFF("observers", "off", DyeColor.RED), // Hide observers
+  OBSERVERS_ON("observers", "all", DyeColor.GREEN), // Show observers
+  OBSERVERS_OFF("observers", "none", DyeColor.RED), // Hide observers
+  OBSERVERS_FRIEND("observers", "friends", DyeColor.YELLOW), // Only show friend observers
 
   SOUNDS_ALL("sounds", "all", DyeColor.GREEN), // Play all sounds
   SOUNDS_DM("sounds", "messages", DyeColor.ORANGE), // Only play DM sounds
@@ -42,6 +46,8 @@ public enum SettingValue {
 
   EFFECTS_ON("effects", "on", DyeColor.GREEN), // Display special particle effects
   EFFECTS_OFF("effects", "off", DyeColor.RED), // Don't display special particle effects
+
+  MESSAGE_FRIEND("message", "friends", DyeColor.YELLOW), // Only accept friend direct messages
 
   TIME_AUTO("time", "auto", DyeColor.ORANGE), // Player time is in sync
   TIME_DARK("time", "dark", DyeColor.GRAY), // Player time is always set to midday

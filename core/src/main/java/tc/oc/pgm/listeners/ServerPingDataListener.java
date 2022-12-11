@@ -19,6 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -26,7 +27,6 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.util.ClassLogger;
 
@@ -38,17 +38,11 @@ public class ServerPingDataListener implements Listener {
   private final AtomicBoolean ready;
   private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
-  private final VanishManager vanishManager;
 
-  public ServerPingDataListener(
-      MatchManager matchManager,
-      MapOrder mapOrder,
-      Logger parentLogger,
-      VanishManager vanishManager) {
+  public ServerPingDataListener(MatchManager matchManager, MapOrder mapOrder, Logger parentLogger) {
     this.matchManager = assertNotNull(matchManager);
     this.mapOrder = assertNotNull(mapOrder);
     this.logger = ClassLogger.get(assertNotNull(parentLogger), ServerPingDataListener.class);
-    this.vanishManager = assertNotNull(vanishManager);
     this.ready = new AtomicBoolean();
     this.legacySportPaper = new AtomicBoolean();
     this.matchCache =
@@ -79,7 +73,7 @@ public class ServerPingDataListener implements Listener {
     Iterator<Player> playerSample = event.iterator();
     while (playerSample.hasNext()) {
       Player player = playerSample.next();
-      if (vanishManager.isVanished(player.getUniqueId())) {
+      if (Integration.isVanished(player)) {
         playerSample.remove();
       }
     }

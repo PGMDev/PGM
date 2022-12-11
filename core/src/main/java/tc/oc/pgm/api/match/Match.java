@@ -407,6 +407,20 @@ public interface Match
    */
   boolean calculateVictory();
 
+  /**
+   * Get whether friendly fire should be on or off.
+   *
+   * @return True if friendly fire is on.
+   */
+  boolean getFriendlyFire();
+
+  /**
+   * Set an override for friendly fire
+   *
+   * @param allow True to allow friendly fire
+   */
+  void setFriendlyFireOverride(boolean allow);
+
   @Override
   default Match getMatch() {
     return this;

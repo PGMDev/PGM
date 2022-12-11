@@ -77,6 +77,7 @@ import tc.oc.pgm.command.StartCommand;
 import tc.oc.pgm.command.StatsCommand;
 import tc.oc.pgm.command.TeamCommand;
 import tc.oc.pgm.command.TimeLimitCommand;
+import tc.oc.pgm.command.VanishCommand;
 import tc.oc.pgm.command.VotingCommand;
 import tc.oc.pgm.command.injectors.MapPollProvider;
 import tc.oc.pgm.command.injectors.MapPoolManagerProvider;
@@ -98,8 +99,6 @@ import tc.oc.pgm.command.parsers.SettingValueParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
 import tc.oc.pgm.command.parsers.VictoryConditionParser;
-import tc.oc.pgm.community.command.ModerationCommand;
-import tc.oc.pgm.community.command.ReportCommand;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -227,13 +226,8 @@ public class CommandGraph {
     register(new TeamCommand());
     register(new TimeLimitCommand());
     register(new VotingCommand());
+    register(new VanishCommand());
 
-    if (pgm.getConfiguration().isCommunityMode()) {
-      register(new ReportCommand());
-      register(new ModerationCommand());
-    }
-
-    register(pgm.getVanishManager());
     register(ChatDispatcher.get());
   }
 

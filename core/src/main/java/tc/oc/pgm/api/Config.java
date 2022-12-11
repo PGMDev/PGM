@@ -406,13 +406,14 @@ public interface Config {
   }
 
   /**
-   * Gets whether "community mode" should be installed if not present.
+   * Gets whether a simple vanish manager should be installed.
    *
-   * <p>Includes features such as /report, /warn, /freeze, and more.
+   * <p>Allows for basic usage of /vanish. If you wish to allow third-party plugins to hook-in
+   * disable this
    *
-   * @return If community mode is enabled.
+   * @return If vanish is enabled.
    */
-  boolean isCommunityMode();
+  boolean isVanishEnabled();
 
   /**
    * Gets experimental configuration settings that are not yet stable.

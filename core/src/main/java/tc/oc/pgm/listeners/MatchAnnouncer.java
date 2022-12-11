@@ -26,6 +26,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchJoinMessageEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
@@ -112,18 +113,24 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearTitle(PlayerJoinMatchEvent event) {
     MatchPlayer player = event.getPlayer();
+    Match match = event.getMatch();
 
     player.clearTitle();
 
     // Bukkit assumes a player's locale is "en_US" before it receives a player's setting packet.
     // Thus, we delay sending this prominent message, so it is more likely its in the right locale.
-    player
-        .getMatch()
+    match
         .getExecutor(MatchScope.LOADED)
-        .schedule(() -> sendWelcomeMessage(event.getPlayer()), 500, TimeUnit.MILLISECONDS);
+        .schedule(
+            () -> match.callEvent(new MatchJoinMessageEvent(match, player)),
+            500,
+            TimeUnit.MILLISECONDS);
   }
 
-  private void sendWelcomeMessage(MatchPlayer viewer) {
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onMatchJoinMessage(MatchJoinMessageEvent event) {
+    MatchPlayer viewer = event.getPlayer();
+
     MapInfo mapInfo = viewer.getMatch().getMap();
 
     Component title = text(mapInfo.getName(), NamedTextColor.AQUA, TextDecoration.BOLD);
@@ -142,6 +149,11 @@ public class MatchAnnouncer implements Listener {
                       "misc.createdBy",
                       NamedTextColor.GRAY,
                       TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
+    }
+
+    // Send extra info from other plugins
+    for (Component extra : event.getExtraLines()) {
+      viewer.sendMessage(extra);
     }
 
     viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));

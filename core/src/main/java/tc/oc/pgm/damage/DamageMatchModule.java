@@ -94,7 +94,7 @@ public class DamageMatchModule implements MatchModule, Listener {
         }
 
       case ALLY:
-        if (!match.getMap().getFriendlyFire() && !isAllowedTeamDamage(damageInfo)) {
+        if (!match.getFriendlyFire() && !isAllowedTeamDamage(damageInfo)) {
           return Filter.QueryResponse.DENY;
         }
 
