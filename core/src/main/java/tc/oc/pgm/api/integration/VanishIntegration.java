@@ -22,18 +22,4 @@ public interface VanishIntegration {
    * @return whether the action was successful
    */
   boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet);
-
-  static VanishIntegration Noop = new NoopVanishIntegration();
-
-  public class NoopVanishIntegration implements VanishIntegration {
-    @Override
-    public boolean isVanished(UUID uuid) {
-      return false;
-    }
-
-    @Override
-    public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
-      return false;
-    }
-  }
 }

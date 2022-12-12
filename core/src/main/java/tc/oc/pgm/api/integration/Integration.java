@@ -2,6 +2,7 @@ package tc.oc.pgm.api.integration;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -10,13 +11,13 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public interface Integration {
 
   static final AtomicReference<FriendIntegration> FRIENDS =
-      new AtomicReference<FriendIntegration>(FriendIntegration.Noop);
+      new AtomicReference<FriendIntegration>(new NoopFriendIntegration());
   static final AtomicReference<NickIntegration> NICKS =
-      new AtomicReference<NickIntegration>(NickIntegration.Noop);
+      new AtomicReference<NickIntegration>(new NoopNickIntegration());
   static final AtomicReference<VanishIntegration> VANISH =
-      new AtomicReference<VanishIntegration>(VanishIntegration.Noop);
+      new AtomicReference<VanishIntegration>(new NoopVanishIntegration());
   static final AtomicReference<PunishmentIntegration> PUNISHMENTS =
-      new AtomicReference<PunishmentIntegration>(PunishmentIntegration.Noop);
+      new AtomicReference<PunishmentIntegration>(new NoopPunishmentIntegration());
 
   public static void setFriendIntegration(FriendIntegration integration) {
     FRIENDS.set(assertNotNull(integration));
@@ -58,5 +59,46 @@ public interface Integration {
   @Nullable
   public static String getMuteReason(Player player) {
     return PUNISHMENTS.get().getMuteReason(player);
+  }
+
+  // No-op Implementations
+
+  public class NoopFriendIntegration implements FriendIntegration {
+    @Override
+    public boolean isFriend(Player a, Player b) {
+      return false;
+    }
+  }
+
+  public class NoopNickIntegration implements NickIntegration {
+    @Override
+    public @Nullable String getNick(Player player) {
+      return null;
+    }
+  }
+
+  public class NoopPunishmentIntegration implements PunishmentIntegration {
+
+    @Override
+    public boolean isMuted(Player player) {
+      return false;
+    }
+
+    @Override
+    public @Nullable String getMuteReason(Player player) {
+      return null;
+    }
+  }
+
+  public class NoopVanishIntegration implements VanishIntegration {
+    @Override
+    public boolean isVanished(UUID uuid) {
+      return false;
+    }
+
+    @Override
+    public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
+      return false;
+    }
   }
 }
