@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 import static tc.oc.pgm.util.text.TextException.exception;
 
@@ -38,7 +39,6 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.rotation.vote.book.VotingBookCreator;
 import tc.oc.pgm.rotation.vote.book.VotingBookCreatorImpl;
-import tc.oc.pgm.rotation.vote.events.MapPollCreateEvent;
 import tc.oc.pgm.rotation.vote.events.MapPollVoteEvent;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.named.MapNameStyle;
@@ -62,8 +62,9 @@ public class MapPoll {
   static final String VOTE_BOOK_METADATA = "vote_book";
   static final ItemTag<String> VOTE_BOOK_TAG = ItemTag.newString(VOTE_BOOK_METADATA);
 
+  private static VotingBookCreator bookCreator = new VotingBookCreatorImpl();
+
   private final WeakReference<Match> match;
-  private VotingBookCreator bookCreator;
 
   private final Map<MapInfo, Set<UUID>> votes;
   private boolean running = true;
@@ -73,19 +74,15 @@ public class MapPoll {
     this.votes = new HashMap<>();
     maps.forEach(m -> votes.put(m, new HashSet<>()));
 
-    match.callEvent(new MapPollCreateEvent(this));
     match.addListener(new VotingBookListener(this, match), MatchScope.LOADED);
     match.getPlayers().forEach(viewer -> sendBook(viewer, false));
   }
 
-  public void setVotingBookCreator(VotingBookCreator bookCreator) {
-    this.bookCreator = bookCreator;
+  public static void setVotingBookCreator(VotingBookCreator bookCreator) {
+    bookCreator = assertNotNull(bookCreator);
   }
 
   public VotingBookCreator getVotingBookCreator() {
-    if (bookCreator == null) {
-      bookCreator = new VotingBookCreatorImpl();
-    }
     return bookCreator;
   }
 
@@ -179,21 +176,17 @@ public class MapPoll {
    * @throws tc.oc.pgm.util.text.TextException If the map is not an option in the poll
    */
   public boolean toggleVote(MapInfo vote, UUID player) throws TextException {
-    boolean addVote = false;
     Set<UUID> votes = this.votes.get(vote);
     if (votes == null) throw exception("map.notFound");
 
-    if (votes.add(player)) {
-      addVote = true;
-    } else {
-      votes.remove(player);
-    }
+    boolean added = votes.add(player);
+    if (!added) votes.remove(player);
 
     if (match.get() != null) {
-      match.get().callEvent(new MapPollVoteEvent(player, vote, addVote));
+      match.get().callEvent(new MapPollVoteEvent(player, vote, added));
     }
 
-    return addVote;
+    return added;
   }
 
   /** @return The map currently winning the vote, null if no vote is running. */
@@ -205,26 +198,32 @@ public class MapPoll {
   }
 
   /**
-   * Count the amount of votes for a set of uuids. Players with the
+   * Counts the number of votes for a set of player UUIDs. Players with the "pgm.vote.extra"
+   * permission node will have their vote count doubled. To provide a custom vote value,
+   * "pgm.vote.extra.#" can be used for the range of 2 to 5.
    *
-   * @param uuids The players who voted
-   * @return The number of votes counted
+   * @param uuids The UUIDs of the players who voted.
+   * @return The number of votes counted.
    */
   private int countVotes(Collection<UUID> uuids) {
     return uuids.stream().map(Bukkit::getPlayer).mapToInt(this::calcVoteMultiplier).sum();
   }
 
   private int calcVoteMultiplier(Player player) {
-    // Count disconnected players as 1, can't test for their perms
     if (player != null) {
+
+      // Determine the player's custom vote multiplier, if any.
       for (int i = 5; i > 1; i--) {
-        if (player.hasPermission(Permissions.VOTE_MULTIPLIER + "." + i)) {
+        if (player.hasPermission(Permissions.EXTRA_VOTE + "." + i)) {
           return i;
         }
       }
-      // Legacy extra vote permission node support
+
+      // Default extra vote permission
       return player.hasPermission(Permissions.EXTRA_VOTE) ? 2 : 1;
     }
+
+    // Count disconnected players as 1. We can't test for offline player perms
     return 1;
   }
 

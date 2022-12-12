@@ -198,7 +198,6 @@ public class ChatDispatcher implements Listener {
       @Argument("player") MatchPlayer receiver,
       @Argument("message") @Greedy String message) {
     if (Integration.isVanished(sender.getBukkit())) throw exception("vanish.chat.deny");
-    if (Integration.isVanished(receiver.getBukkit())) throw exception("command.playerNotFound");
 
     if (!receiver.getBukkit().hasPermission(Permissions.STAFF)) throwMuted(sender);
 
@@ -363,9 +362,10 @@ public class ChatDispatcher implements Listener {
     event.setFormat(format);
     CHAT_EVENT_CACHE.put(event, true);
     match.callEvent(event);
-    match.callEvent(new ChannelMessageEvent(channel, sender.getBukkit(), message));
 
     if (event.isCancelled()) return;
+    match.callEvent(new ChannelMessageEvent(channel, sender.getBukkit(), message));
+
     Identity senderId = identity(sender.getId());
 
     event.getRecipients().stream()
@@ -374,10 +374,11 @@ public class ChatDispatcher implements Listener {
   }
 
   private void throwMuted(MatchPlayer player) {
-    if (isMuted(player))
-      throw exception(
-          "moderation.mute.message",
-          text(Integration.getMuteReason(player.getBukkit()), NamedTextColor.AQUA));
+    if (isMuted(player)) {
+      Optional<String> muteReason =
+          Optional.ofNullable(Integration.getMuteReason(player.getBukkit()));
+      throw exception("moderation.mute.message", text(muteReason.orElse(""), NamedTextColor.AQUA));
+    }
   }
 
   public static void broadcastAdminChatMessage(Component message, Match match) {

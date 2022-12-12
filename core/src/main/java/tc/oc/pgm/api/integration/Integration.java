@@ -1,39 +1,37 @@
 package tc.oc.pgm.api.integration;
 
+import static tc.oc.pgm.util.Assert.assertNotNull;
+
 import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.integrations.NoopFriendIntegration;
-import tc.oc.pgm.integrations.NoopNickIntegration;
-import tc.oc.pgm.integrations.NoopPunishmentIntegration;
 
 public interface Integration {
 
   static final AtomicReference<FriendIntegration> FRIENDS =
-      new AtomicReference<FriendIntegration>(new NoopFriendIntegration());
+      new AtomicReference<FriendIntegration>(FriendIntegration.Noop);
   static final AtomicReference<NickIntegration> NICKS =
-      new AtomicReference<NickIntegration>(new NoopNickIntegration());
+      new AtomicReference<NickIntegration>(NickIntegration.Noop);
   static final AtomicReference<VanishIntegration> VANISH =
-      new AtomicReference<VanishIntegration>(PGM.get().getVanishManager());
+      new AtomicReference<VanishIntegration>(VanishIntegration.Noop);
   static final AtomicReference<PunishmentIntegration> PUNISHMENTS =
-      new AtomicReference<PunishmentIntegration>(new NoopPunishmentIntegration());
+      new AtomicReference<PunishmentIntegration>(PunishmentIntegration.Noop);
 
   public static void setFriendIntegration(FriendIntegration integration) {
-    FRIENDS.set(integration);
+    FRIENDS.set(assertNotNull(integration));
   }
 
   public static void setNickIntegration(NickIntegration integration) {
-    NICKS.set(integration);
+    NICKS.set(assertNotNull(integration));
   }
 
   public static void setVanishIntegration(VanishIntegration integration) {
-    VANISH.set(integration);
+    VANISH.set(assertNotNull(integration));
   }
 
   public static void setPunishmentIntegration(PunishmentIntegration integration) {
-    PUNISHMENTS.set(integration);
+    PUNISHMENTS.set(assertNotNull(integration));
   }
 
   public static boolean isFriend(Player a, Player b) {

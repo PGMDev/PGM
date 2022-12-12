@@ -415,11 +415,11 @@ public interface Match
   boolean getFriendlyFire();
 
   /**
-   * Set an override for friendly fire
+   * Set an override for friendly fire.
    *
-   * @param allow True to allow friendly fire
+   * @param allow True to allow, false to deny, null to reset.
    */
-  void setFriendlyFireOverride(boolean allow);
+  void setFriendlyFire(Boolean allow);
 
   @Override
   default Match getMatch() {

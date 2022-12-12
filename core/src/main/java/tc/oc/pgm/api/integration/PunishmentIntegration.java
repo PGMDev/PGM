@@ -21,4 +21,19 @@ public interface PunishmentIntegration {
    */
   @Nullable
   String getMuteReason(Player player);
+
+  static PunishmentIntegration Noop = new NoopPunishmentIntegration();
+
+  public class NoopPunishmentIntegration implements PunishmentIntegration {
+
+    @Override
+    public boolean isMuted(Player player) {
+      return false;
+    }
+
+    @Override
+    public @Nullable String getMuteReason(Player player) {
+      return null;
+    }
+  }
 }

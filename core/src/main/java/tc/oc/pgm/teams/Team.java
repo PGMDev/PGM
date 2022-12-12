@@ -103,7 +103,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   }
 
   @Override
-  public void setNameTagVisibilityOverride(NameTagVisibility visibility) {
+  public void setNameTagVisibility(NameTagVisibility visibility) {
     this.nameTagVisibilityOverride = visibility;
   }
 

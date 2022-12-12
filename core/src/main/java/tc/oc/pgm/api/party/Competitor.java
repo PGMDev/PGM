@@ -23,5 +23,5 @@ public interface Competitor extends Party {
    *
    * @param visibility A {@link NameTagVisibility}
    */
-  void setNameTagVisibilityOverride(NameTagVisibility visibility);
+  void setNameTagVisibility(NameTagVisibility visibility);
 }

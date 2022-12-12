@@ -16,6 +16,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.PlayerVanishEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 
@@ -49,15 +50,28 @@ public class JoinLeaveAnnouncer implements Listener {
     }
   }
 
-  public static void join(MatchPlayer player, JoinVisibility visibility) {
+  @EventHandler
+  public void onPlayerVanish(PlayerVanishEvent event) {
+    MatchPlayer player = event.getPlayer();
+    if (player == null) return;
+    if (event.isQuiet()) return;
+
+    if (event.isVanished()) {
+      leave(player, JoinVisibility.NONSTAFF);
+    } else {
+      join(player, JoinVisibility.NONSTAFF);
+    }
+  }
+
+  public void join(MatchPlayer player, JoinVisibility visibility) {
     handleJoinLeave(player, "misc.join", visibility);
   }
 
-  public static void leave(MatchPlayer player, JoinVisibility visibility) {
+  public void leave(MatchPlayer player, JoinVisibility visibility) {
     handleJoinLeave(player, "misc.leave", visibility);
   }
 
-  private static void handleJoinLeave(MatchPlayer player, String key, JoinVisibility visibility) {
+  private void handleJoinLeave(MatchPlayer player, String key, JoinVisibility visibility) {
     boolean staff = visibility == JoinVisibility.STAFF;
 
     Collection<MatchPlayer> viewers = player.getMatch().getPlayers();
@@ -78,8 +92,7 @@ public class JoinLeaveAnnouncer implements Listener {
     }
   }
 
-  private static boolean canView(
-      MatchPlayer viewer, MatchPlayer target, JoinVisibility visibility) {
+  private boolean canView(MatchPlayer viewer, MatchPlayer target, JoinVisibility visibility) {
     boolean isStaff = viewer.getBukkit().hasPermission(Permissions.STAFF);
 
     SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
@@ -97,7 +110,7 @@ public class JoinLeaveAnnouncer implements Listener {
     }
   }
 
-  private static boolean areFriends(SettingValue value, Player a, Player b) {
+  private boolean areFriends(SettingValue value, Player a, Player b) {
     return value.equals(SettingValue.JOIN_FRIENDS) && Integration.isFriend(a, b);
   }
 

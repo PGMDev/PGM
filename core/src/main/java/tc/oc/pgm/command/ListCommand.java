@@ -18,6 +18,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.Players;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -84,7 +85,7 @@ public final class ListCommand {
   private Component formatNames(Collection<MatchPlayer> players, CommandSender sender) {
     List<Component> names =
         players.stream()
-            .filter(mp -> sender.hasPermission(Permissions.STAFF) || !isVanished(mp.getBukkit()))
+            .filter(mp -> Players.isVisible(sender, mp.getBukkit()))
             .map(mp -> mp.getName(NameStyle.VERBOSE))
             .collect(Collectors.toList());
 

@@ -713,7 +713,7 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public void setFriendlyFireOverride(boolean allow) {
+  public void setFriendlyFire(Boolean allow) {
     this.friendlyFireOverride = allow;
   }
 

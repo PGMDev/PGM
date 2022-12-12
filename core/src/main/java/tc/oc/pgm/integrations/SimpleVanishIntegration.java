@@ -26,17 +26,15 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.VanishIntegration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 import tc.oc.pgm.api.player.event.PlayerVanishEvent;
-import tc.oc.pgm.listeners.JoinLeaveAnnouncer;
-import tc.oc.pgm.listeners.JoinLeaveAnnouncer.JoinVisibility;
 
-public class SimpleVanishManager implements VanishManager, Listener {
+public class SimpleVanishIntegration implements VanishIntegration, Listener {
 
   private static final String VANISH_KEY = "isVanished";
   private static final MetadataValue VANISH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -48,7 +46,7 @@ public class SimpleVanishManager implements VanishManager, Listener {
       hotbarTask; // Task is run every second to ensure vanished players retain hotbar message
   private boolean hotbarFlash;
 
-  public SimpleVanishManager(MatchManager matchManager, ScheduledExecutorService tasks) {
+  public SimpleVanishIntegration(MatchManager matchManager, ScheduledExecutorService tasks) {
     this.vanishedPlayers = Lists.newArrayList();
     this.matchManager = matchManager;
     this.hotbarFlash = false;
@@ -61,9 +59,11 @@ public class SimpleVanishManager implements VanishManager, Listener {
             0,
             1,
             TimeUnit.SECONDS);
+
+    // Register listener
+    PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
 
-  @Override
   public void disable() {
     hotbarTask.cancel(true);
   }
@@ -73,7 +73,6 @@ public class SimpleVanishManager implements VanishManager, Listener {
     return vanishedPlayers.contains(uuid);
   }
 
-  @Override
   public List<MatchPlayer> getOnlineVanished() {
     return vanishedPlayers.stream()
         .filter(u -> matchManager.getPlayer(u) != null)
@@ -83,6 +82,11 @@ public class SimpleVanishManager implements VanishManager, Listener {
 
   @Override
   public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
+    final Match match = player.getMatch();
+
+    // Call vanish event first so name renders existing state properly
+    match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
+
     // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
     // projects (i.e utils)
     if (vanish) {
@@ -91,21 +95,9 @@ public class SimpleVanishManager implements VanishManager, Listener {
       removeVanished(player);
     }
 
-    final Match match = player.getMatch();
-
     // Ensure player is an observer
     if (vanish && player.getParty() instanceof Competitor) {
       match.setParty(player, match.getDefaultParty());
-    }
-
-    // Broadcast join/quit message before adjusting vanish status
-    // so name renders normally
-    if (!quiet) {
-      if (vanish) {
-        JoinLeaveAnnouncer.leave(player, JoinVisibility.NONSTAFF);
-      } else {
-        JoinLeaveAnnouncer.join(player, JoinVisibility.NONSTAFF);
-      }
     }
 
     // Set vanish status in match player
@@ -113,8 +105,6 @@ public class SimpleVanishManager implements VanishManager, Listener {
 
     // Reset visibility to hide/show player
     player.resetVisibility();
-
-    match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     return isVanished(player.getId());
   }
@@ -153,24 +143,20 @@ public class SimpleVanishManager implements VanishManager, Listener {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     if (player == null) return;
     if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
-    if (!player.getBukkit().hasPermission(Permissions.VANISH)) return; // No perms
+    if (!player.getBukkit().hasPermission(Permissions.VANISH))
+      return; // Do not vanish players with no perms
 
     if (isVanished(player.getId())) {
       player.setVanished(true);
       return;
     }
 
-    if (player
-        .getBukkit()
-        .hasPermission(Permissions.VANISH)) { // Player is not vanished, but has permission to
-
-      // Automatic vanish if player logs in via a "vanish" subdomain
-      String domain = loginSubdomains.getIfPresent(player.getId());
-      if (domain != null) {
-        loginSubdomains.invalidate(player.getId());
-        tempVanish.add(player.getId());
-        setVanished(player, true, true);
-      }
+    // Automatic vanish if player logs in via a "vanish" subdomain
+    String domain = loginSubdomains.getIfPresent(player.getId());
+    if (domain != null) {
+      loginSubdomains.invalidate(player.getId());
+      tempVanish.add(player.getId());
+      setVanished(player, true, true);
     }
   }
 
@@ -180,12 +166,6 @@ public class SimpleVanishManager implements VanishManager, Listener {
     // If player is vanished & joined via "vanish" subdomain. Remove vanish status on quit
     if (isVanished(player.getId()) && tempVanish.contains(player.getId())) {
       setVanished(player, false, true);
-      // Temporary vanish status is removed before quit,
-      // so prevent regular quit msg and forces a staff only broadcast
-      event.setQuitMessage(null);
-
-      // Broadcast a real leave message to staff
-      JoinLeaveAnnouncer.leave(player, JoinVisibility.STAFF);
     }
   }
 

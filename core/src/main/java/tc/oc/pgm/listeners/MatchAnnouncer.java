@@ -11,6 +11,7 @@ import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -26,7 +27,6 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
-import tc.oc.pgm.api.match.event.MatchJoinMessageEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
@@ -114,6 +114,7 @@ public class MatchAnnouncer implements Listener {
   public void clearTitle(PlayerJoinMatchEvent event) {
     MatchPlayer player = event.getPlayer();
     Match match = event.getMatch();
+    List<Component> extraLines = event.getExtraLines();
 
     player.clearTitle();
 
@@ -121,16 +122,10 @@ public class MatchAnnouncer implements Listener {
     // Thus, we delay sending this prominent message, so it is more likely its in the right locale.
     match
         .getExecutor(MatchScope.LOADED)
-        .schedule(
-            () -> match.callEvent(new MatchJoinMessageEvent(match, player)),
-            500,
-            TimeUnit.MILLISECONDS);
+        .schedule(() -> sendWelcomeMessage(player, extraLines), 500, TimeUnit.MILLISECONDS);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onMatchJoinMessage(MatchJoinMessageEvent event) {
-    MatchPlayer viewer = event.getPlayer();
-
+  public void sendWelcomeMessage(MatchPlayer viewer, List<Component> extraLines) {
     MapInfo mapInfo = viewer.getMatch().getMap();
 
     Component title = text(mapInfo.getName(), NamedTextColor.AQUA, TextDecoration.BOLD);
@@ -152,7 +147,7 @@ public class MatchAnnouncer implements Listener {
     }
 
     // Send extra info from other plugins
-    for (Component extra : event.getExtraLines()) {
+    for (Component extra : extraLines) {
       viewer.sendMessage(extra);
     }
 

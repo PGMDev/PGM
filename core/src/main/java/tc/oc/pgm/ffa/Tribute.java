@@ -139,7 +139,7 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public void setNameTagVisibilityOverride(NameTagVisibility override) {
+  public void setNameTagVisibility(NameTagVisibility override) {
     this.nameTagOverride = override;
   }
 

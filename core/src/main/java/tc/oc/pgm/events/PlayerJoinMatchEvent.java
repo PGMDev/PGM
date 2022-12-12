@@ -2,6 +2,9 @@ package tc.oc.pgm.events;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import com.google.common.collect.Lists;
+import java.util.List;
+import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
@@ -18,7 +21,13 @@ import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
  */
 public class PlayerJoinMatchEvent extends PlayerJoinPartyEvent {
 
+  private List<Component> extraLines = Lists.newArrayList();
+
   public PlayerJoinMatchEvent(MatchPlayer player, Party newParty) {
     super(player, null, assertNotNull(newParty));
+  }
+
+  public List<Component> getExtraLines() {
+    return extraLines;
   }
 }

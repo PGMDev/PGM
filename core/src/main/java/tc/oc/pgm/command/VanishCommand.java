@@ -22,11 +22,6 @@ public class VanishCommand {
   @CommandDescription("Toggle vanish status")
   @CommandPermission(Permissions.VANISH)
   public void vanish(MatchPlayer sender, @Flag(value = "silent", aliases = "s") boolean silent) {
-    if (Integration.getNick(sender.getBukkit()) != null) {
-      sender.sendWarning(translatable("vanish.deny.nick"));
-      return;
-    }
-
     boolean isVanished = Integration.isVanished(sender.getBukkit());
     boolean result = Integration.setVanished(sender, !isVanished, silent);
     sender.sendWarning(result ? ACTIVATE : DEACTIVATE);

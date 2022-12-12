@@ -36,7 +36,6 @@ import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.concurrent.RateLimiter;
-import tc.oc.pgm.util.event.RefreshPlayerTabEntryEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.PlayerTabEntry;
@@ -317,12 +316,6 @@ public class MatchTabManager extends TabManager implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerNameChange(NameDecorationChangeEvent event) {
     TabEntry entry = getPlayerEntryOrNull(Bukkit.getPlayer(event.getUUID()));
-    if (entry instanceof DynamicTabEntry) ((DynamicTabEntry) entry).invalidate();
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onForceTabRefresh(RefreshPlayerTabEntryEvent event) {
-    TabEntry entry = getPlayerEntryOrNull(event.getPlayer());
     if (entry instanceof DynamicTabEntry) ((DynamicTabEntry) entry).invalidate();
   }
 }

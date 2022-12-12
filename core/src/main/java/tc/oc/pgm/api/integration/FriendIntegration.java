@@ -13,4 +13,13 @@ public interface FriendIntegration {
    * @return true if friends, false if not
    */
   boolean isFriend(Player a, Player b);
+
+  static FriendIntegration Noop = new NoopFriendIntegration();
+
+  public class NoopFriendIntegration implements FriendIntegration {
+    @Override
+    public boolean isFriend(Player a, Player b) {
+      return false;
+    }
+  }
 }

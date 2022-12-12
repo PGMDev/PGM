@@ -226,7 +226,8 @@ public class CommandGraph {
     register(new TeamCommand());
     register(new TimeLimitCommand());
     register(new VotingCommand());
-    register(new VanishCommand());
+
+    if (PGM.get().getConfiguration().isVanishEnabled()) register(new VanishCommand());
 
     register(ChatDispatcher.get());
   }

@@ -13,4 +13,13 @@ public interface NickIntegration {
    */
   @Nullable
   String getNick(Player player);
+
+  static NickIntegration Noop = new NoopNickIntegration();
+
+  public class NoopNickIntegration implements NickIntegration {
+    @Override
+    public @Nullable String getNick(Player player) {
+      return null;
+    }
+  }
 }

@@ -1,6 +1,7 @@
 package tc.oc.pgm.rotation.vote;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -11,13 +12,13 @@ import tc.oc.pgm.rotation.pools.VotingPool;
 
 public class VotePoolOptions {
 
-  // Set of maps w/ related data to be used in custom vote selection
-  private final Set<CustomMapEntry> customVoteMaps;
+  // Added maps w/ nullable playerId to be used in custom vote selection
+  private final Map<MapInfo, UUID> customVoteMaps;
   // Whether custom map selection should replace existing entries
   private boolean replace;
 
   public VotePoolOptions() {
-    this.customVoteMaps = Sets.newHashSet();
+    this.customVoteMaps = Maps.newHashMap();
     this.replace = true;
   }
 
@@ -44,23 +45,24 @@ public class VotePoolOptions {
 
   public boolean addVote(MapInfo map, @Nullable UUID playerId) {
     if (canAddVote()) {
-      this.customVoteMaps.add(new CustomMapEntry(map, playerId));
+      this.customVoteMaps.put(map, null);
       return true;
     }
     return false;
   }
 
   public boolean removeMap(MapInfo map) {
-    return this.customVoteMaps.removeIf(e -> e.getMap().equals(map));
+    boolean present = this.customVoteMaps.containsKey(map);
+    this.customVoteMaps.remove(map);
+    return present;
   }
 
   public Set<MapInfo> getCustomVoteMaps() {
-    return customVoteMaps.stream().map(CustomMapEntry::getMap).collect(Collectors.toSet());
+    return ImmutableSet.copyOf(customVoteMaps.keySet());
   }
 
   public boolean isAdded(MapInfo info) {
-    return customVoteMaps.stream()
-        .anyMatch(s -> s.getMap().getName().equalsIgnoreCase(info.getName()));
+    return getCustomVoteMaps().contains(info);
   }
 
   public void clear() {
@@ -68,37 +70,7 @@ public class VotePoolOptions {
   }
 
   public Map<MapInfo, Double> getCustomVoteMapWeighted() {
-    return customVoteMaps.stream()
-        .collect(Collectors.toMap(map -> map.getMap(), x -> VotingPool.DEFAULT_SCORE));
-  }
-
-  public static class CustomMapEntry {
-    private final MapInfo map;
-    private final @Nullable UUID playerId;
-
-    public CustomMapEntry(MapInfo map, @Nullable UUID playerId) {
-      this.map = map;
-      this.playerId = playerId;
-    }
-
-    public MapInfo getMap() {
-      return map;
-    }
-
-    public boolean isIdentified() {
-      return playerId != null;
-    }
-
-    public UUID getPlayerId() {
-      return playerId;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-      if (other instanceof CustomMapEntry) {
-        return ((CustomMapEntry) other).getMap().equals(getMap());
-      }
-      return false;
-    }
+    return customVoteMaps.keySet().stream()
+        .collect(Collectors.toMap(map -> map, score -> VotingPool.DEFAULT_SCORE));
   }
 }
