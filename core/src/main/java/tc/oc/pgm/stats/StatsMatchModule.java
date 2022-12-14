@@ -11,6 +11,7 @@ import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -94,6 +95,10 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   public StatsMatchModule(Match match) {
     this.match = match;
+  }
+
+  public Map<UUID, PlayerStats> getStats() {
+    return Collections.unmodifiableMap(allPlayerStats);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
