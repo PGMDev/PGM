@@ -278,7 +278,7 @@ public final class MapPoolCommand {
       MapPoll poll,
       @Flag(value = "open", aliases = "o") boolean forceOpen,
       @Argument("map") @FlagYielding MapInfo map) {
-    boolean voteResult = poll.toggleVote(map, player.getId());
+    boolean voteResult = poll.toggleVote(map, player);
     Component voteAction =
         translatable(
             voteResult ? "vote.for" : "vote.abstain",

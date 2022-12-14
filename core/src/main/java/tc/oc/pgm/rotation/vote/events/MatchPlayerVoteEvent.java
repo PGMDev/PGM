@@ -1,24 +1,19 @@
 package tc.oc.pgm.rotation.vote.events;
 
-import java.util.UUID;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
-public class MapPollVoteEvent extends Event {
+public class MatchPlayerVoteEvent extends MatchPlayerEvent {
 
-  private final UUID playerId;
   private final MapInfo map;
   private final boolean add;
 
-  public MapPollVoteEvent(UUID playerId, MapInfo map, boolean add) {
-    this.playerId = playerId;
+  public MatchPlayerVoteEvent(MatchPlayer player, MapInfo map, boolean add) {
+    super(player);
     this.map = map;
     this.add = add;
-  }
-
-  public UUID getPlayerId() {
-    return playerId;
   }
 
   public MapInfo getMap() {

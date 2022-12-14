@@ -39,7 +39,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.rotation.vote.book.VotingBookCreator;
 import tc.oc.pgm.rotation.vote.book.VotingBookCreatorImpl;
-import tc.oc.pgm.rotation.vote.events.MapPollVoteEvent;
+import tc.oc.pgm.rotation.vote.events.MatchPlayerVoteEvent;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextException;
@@ -171,19 +171,19 @@ public class MapPoll {
    * Toggle the vote of a user for a certain map. Player is allowed to vote for several maps.
    *
    * @param vote The map to vote for/against
-   * @param player The player voting
+   * @param player The {@link MatchPlayer} voting
    * @return true if the player is now voting for the map, false otherwise
    * @throws tc.oc.pgm.util.text.TextException If the map is not an option in the poll
    */
-  public boolean toggleVote(MapInfo vote, UUID player) throws TextException {
+  public boolean toggleVote(MapInfo vote, MatchPlayer player) throws TextException {
     Set<UUID> votes = this.votes.get(vote);
     if (votes == null) throw exception("map.notFound");
 
-    boolean added = votes.add(player);
-    if (!added) votes.remove(player);
+    boolean added = votes.add(player.getId());
+    if (!added) votes.remove(player.getId());
 
     if (match.get() != null) {
-      match.get().callEvent(new MapPollVoteEvent(player, vote, added));
+      match.get().callEvent(new MatchPlayerVoteEvent(player, vote, added));
     }
 
     return added;
