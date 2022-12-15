@@ -382,9 +382,8 @@ public class ChatDispatcher implements Listener {
           muteReason.isPresent()
               ? text(muteReason.get())
               : translatable("moderation.mute.noReason");
-      reason.color(NamedTextColor.AQUA);
 
-      throw exception("moderation.mute.message", reason);
+      throw exception("moderation.mute.message", reason.color(NamedTextColor.AQUA));
     }
   }
 
