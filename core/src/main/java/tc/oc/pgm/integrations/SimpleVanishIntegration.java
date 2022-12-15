@@ -84,8 +84,8 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
   public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
     final Match match = player.getMatch();
 
-    // Call vanish event first so name renders existing state properly
-    match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
+    // Call vanish event first so name renders existing state properly for leave msg
+    if (vanish) match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
     // projects (i.e utils)
@@ -105,6 +105,9 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
 
     // Reset visibility to hide/show player
     player.resetVisibility();
+
+    // Call vanish event after unvanish so name renders existing state properly for join msg
+    if (!vanish) match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     return isVanished(player.getId());
   }

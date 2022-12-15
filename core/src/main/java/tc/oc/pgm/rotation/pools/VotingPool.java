@@ -89,7 +89,7 @@ public class VotingPool extends MapPool {
 
     MapInfo map = currentPoll.finishVote();
     updateScores(currentPoll.getVotes());
-    manager.getVoteOptions().clear();
+    manager.getVoteOptions().clearMaps();
     currentPoll = null;
     return map != null ? map : getRandom();
   }

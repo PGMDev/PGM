@@ -100,13 +100,15 @@ public class JoinLeaveAnnouncer implements Listener {
         option.equals(SettingValue.JOIN_ON)
             || areFriends(option, viewer.getBukkit(), target.getBukkit());
 
+    if (!allowed) return false;
+
     switch (visibility) {
       case NONSTAFF:
-        return !isStaff && allowed;
+        return !isStaff;
       case STAFF:
-        return isStaff && allowed;
+        return isStaff;
       default:
-        return allowed;
+        return true;
     }
   }
 

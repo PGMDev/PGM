@@ -1,7 +1,7 @@
 package tc.oc.pgm.rotation.vote;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -35,16 +35,20 @@ public class VotePoolOptions {
     return replace;
   }
 
-  public boolean canAddVote() {
+  public boolean canAddMap() {
     return customVoteMaps.size() < MapVotePicker.MAX_VOTE_OPTIONS;
   }
 
-  public boolean addVote(MapInfo map) {
-    return addVote(map, null);
+  public boolean isMapAdded(MapInfo info) {
+    return customVoteMaps.containsKey(info);
   }
 
-  public boolean addVote(MapInfo map, @Nullable UUID playerId) {
-    if (canAddVote()) {
+  public boolean addMap(MapInfo map) {
+    return addMap(map, null);
+  }
+
+  public boolean addMap(MapInfo map, @Nullable UUID playerId) {
+    if (canAddMap()) {
       this.customVoteMaps.put(map, null);
       return true;
     }
@@ -57,19 +61,15 @@ public class VotePoolOptions {
     return present;
   }
 
-  public Set<MapInfo> getCustomVoteMaps() {
-    return ImmutableSet.copyOf(customVoteMaps.keySet());
-  }
-
-  public boolean isAdded(MapInfo info) {
-    return getCustomVoteMaps().contains(info);
-  }
-
-  public void clear() {
+  public void clearMaps() {
     customVoteMaps.clear();
   }
 
-  public Map<MapInfo, Double> getCustomVoteMapWeighted() {
+  public Set<MapInfo> getCustomVoteMaps() {
+    return Collections.unmodifiableSet(customVoteMaps.keySet());
+  }
+
+  public Map<MapInfo, Double> getCustomVoteMapsWeighted() {
     return customVoteMaps.keySet().stream()
         .collect(Collectors.toMap(map -> map, score -> VotingPool.DEFAULT_SCORE));
   }

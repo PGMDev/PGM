@@ -2,16 +2,13 @@ package tc.oc.pgm.rotation.pools;
 
 import static tc.oc.pgm.util.text.TextParser.parseDuration;
 
+import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -38,11 +35,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
         section.getInt("players"),
         section.getBoolean("dynamic", true),
         parseDuration(section.getString("cycle-time", "-1s")),
-        Collections.unmodifiableList(
-            section.getStringList("maps").stream()
-                .map(mapName -> getMap(PGM.get().getMapLibrary(), name, mapName))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList())));
+        buildMapList(section.getStringList("maps"), name));
   }
 
   MapPool(
@@ -64,13 +57,24 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     this.maps = maps;
   }
 
-  private static MapInfo getMap(MapLibrary library, String poolName, String mapName) {
-    @Nullable MapInfo map = library.getMap(mapName);
-    if (map != null) return map;
-    PGM.get()
-        .getLogger()
-        .warning("[MapPool] [" + poolName + "] " + mapName + " not found in map repo. Ignoring...");
-    return null;
+  private static List<MapInfo> buildMapList(List<String> mapNames, String poolName) {
+    List<MapInfo> mapList = Lists.newArrayList();
+
+    if (mapNames == null) return mapList;
+
+    for (String mapName : mapNames) {
+      MapInfo map = PGM.get().getMapLibrary().getMap(mapName);
+      if (map != null) {
+        mapList.add(map);
+      } else {
+        PGM.get()
+            .getLogger()
+            .warning(
+                "[MapPool] [" + poolName + "] " + mapName + " not found in map repo. Ignoring...");
+      }
+    }
+
+    return Collections.unmodifiableList(mapList);
   }
 
   public MapPoolType getType() {

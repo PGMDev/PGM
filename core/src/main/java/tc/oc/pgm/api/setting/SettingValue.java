@@ -15,9 +15,9 @@ public enum SettingValue {
   CHAT_ADMIN("chat", "admin", DyeColor.RED), // Send to all server operators
 
   DEATH_OWN("death", "own", DyeColor.RED), // Only send death messages involving self
+  DEATH_ALL("death", "all", DyeColor.ORANGE), // Send all death messages, highlight your own
   DEATH_FRIENDS(
       "death", "friends", DyeColor.GREEN), // Only send death messages involving yourself or friends
-  DEATH_ALL("death", "all", DyeColor.ORANGE), // Send all death messages, highlight your own
 
   PICKER_AUTO("picker", "auto", DyeColor.ORANGE), // Display after cycle, or with permissions.
   PICKER_ON("picker", "on", DyeColor.GREEN), // Display the picker GUI always

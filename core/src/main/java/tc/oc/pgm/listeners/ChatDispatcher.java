@@ -377,7 +377,14 @@ public class ChatDispatcher implements Listener {
     if (isMuted(player)) {
       Optional<String> muteReason =
           Optional.ofNullable(Integration.getMuteReason(player.getBukkit()));
-      throw exception("moderation.mute.message", text(muteReason.orElse(""), NamedTextColor.AQUA));
+
+      Component reason =
+          muteReason.isPresent()
+              ? text(muteReason.get())
+              : translatable("moderation.mute.noReason");
+      reason.color(NamedTextColor.AQUA);
+
+      throw exception("moderation.mute.message", reason);
     }
   }
 
