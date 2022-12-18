@@ -2,8 +2,8 @@ package tc.oc.pgm.rotation.pools;
 
 import static tc.oc.pgm.util.text.TextParser.parseDuration;
 
-import com.google.common.collect.Lists;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.configuration.ConfigurationSection;
@@ -58,9 +58,9 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   }
 
   private static List<MapInfo> buildMapList(List<String> mapNames, String poolName) {
-    List<MapInfo> mapList = Lists.newArrayList();
+    if (mapNames == null) return new ArrayList<>();
 
-    if (mapNames == null) return mapList;
+    List<MapInfo> mapList = new ArrayList<>(mapNames.size());
 
     for (String mapName : mapNames) {
       MapInfo map = PGM.get().getMapLibrary().getMap(mapName);
