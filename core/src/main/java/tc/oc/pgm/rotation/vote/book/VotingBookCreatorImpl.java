@@ -25,14 +25,14 @@ public class VotingBookCreatorImpl implements VotingBookCreator {
         text(
             voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
             voted ? NamedTextColor.DARK_GREEN : NamedTextColor.DARK_RED));
-    text.append(text(" ").decoration(TextDecoration.BOLD, !voted));
+    text.append(text(" ").decoration(TextDecoration.BOLD, !voted)); // Fix 1px symbol diff
     text.append(text(map.getName(), NamedTextColor.GOLD, TextDecoration.BOLD));
     text.hoverEvent(
         showText(
             text(
                 map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
                 NamedTextColor.YELLOW)));
-    text.clickEvent(runCommand("/votenext -o " + map.getName())); // Fix 1px symbol diff
+    text.clickEvent(runCommand("/votenext -o " + map.getName()));
     return text.build();
   }
 }
