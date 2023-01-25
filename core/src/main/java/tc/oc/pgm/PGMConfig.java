@@ -104,7 +104,7 @@ public final class PGMConfig implements Config {
   private final Component leftTablistText;
 
   // community.*
-  private final boolean communityMode;
+  private final boolean vanish;
 
   // groups.*
   private final List<Group> groups;
@@ -211,7 +211,7 @@ public final class PGMConfig implements Config {
     this.rightTablistText =
         rightText == null || rightText.isEmpty() ? null : parseComponent(rightText);
 
-    this.communityMode = parseBoolean(config.getString("community.enabled", "true"));
+    this.vanish = parseBoolean(config.getString("vanish", "true"));
 
     final ConfigurationSection section = config.getConfigurationSection("groups");
     this.groups = new ArrayList<>();
@@ -638,8 +638,8 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public boolean isCommunityMode() {
-    return communityMode;
+  public boolean isVanishEnabled() {
+    return vanish;
   }
 
   @Override

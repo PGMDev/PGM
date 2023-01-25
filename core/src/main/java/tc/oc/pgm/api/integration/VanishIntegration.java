@@ -1,17 +1,9 @@
-package tc.oc.pgm.api.player;
+package tc.oc.pgm.api.integration;
 
-import java.util.Collection;
 import java.util.UUID;
+import tc.oc.pgm.api.player.MatchPlayer;
 
-/** A manager that holds information related to {@link MatchPlayer}s who are vanished. */
-public interface VanishManager {
-
-  /**
-   * A collection of {@link MatchPlayer} who are online and vanished.
-   *
-   * @return A collection of {@link MatchPlayer}
-   */
-  Collection<MatchPlayer> getOnlineVanished();
+public interface VanishIntegration {
 
   /**
    * Returns whether the matching UUID is vanished
@@ -30,7 +22,4 @@ public interface VanishManager {
    * @return whether the action was successful
    */
   boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet);
-
-  /** Called when the vanish manager is disabled */
-  void disable();
 }

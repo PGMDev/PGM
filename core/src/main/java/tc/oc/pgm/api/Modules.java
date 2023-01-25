@@ -20,7 +20,6 @@ import tc.oc.pgm.broadcast.BroadcastMatchModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.ClassModule;
-import tc.oc.pgm.community.modules.FreezeMatchModule;
 import tc.oc.pgm.controlpoint.ControlPointMatchModule;
 import tc.oc.pgm.controlpoint.ControlPointModule;
 import tc.oc.pgm.core.CoreMatchModule;
@@ -221,9 +220,6 @@ public final class Modules {
 
     // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
-
-    // Community MatchModules
-    register(FreezeMatchModule.class, FreezeMatchModule::new);
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());

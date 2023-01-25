@@ -113,6 +113,7 @@ public class MatchImpl implements Match {
   private final AtomicReference<Party> queuedParticipants;
   private final ObserverParty observers;
   private final MatchFeatureContext features;
+  private Boolean friendlyFireOverride;
 
   protected MatchImpl(String id, MapContext map, World world) {
     this.id = assertNotNull(id);
@@ -704,6 +705,16 @@ public class MatchImpl implements Match {
     }
 
     return Duration.ofMillis(end - start);
+  }
+
+  @Override
+  public boolean getFriendlyFire() {
+    return friendlyFireOverride != null ? friendlyFireOverride : map.getFriendlyFire();
+  }
+
+  @Override
+  public void setFriendlyFire(Boolean allow) {
+    this.friendlyFireOverride = allow;
   }
 
   private class TickableTask implements Runnable {

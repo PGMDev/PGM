@@ -295,10 +295,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
     contributions.put(player, contribution);
     incrementScore(competitor, amount);
 
-    if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
-      MatchPlayer mp = match.getPlayer(player);
-      if (mp == null) return;
+    MatchPlayer mp = match.getPlayer(player);
+    if (mp == null) return;
 
+    match.callEvent(new MatchPlayerScoreEvent(mp, amount));
+
+    if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
       // wait until the next tick to do this so stat recording and other stuff works
       match
           .getExecutor(MatchScope.RUNNING)

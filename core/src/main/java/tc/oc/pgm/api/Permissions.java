@@ -23,9 +23,10 @@ public interface Permissions {
   String RESIZE = ROOT + ".resize"; // Resize the number of players per match
   String JOIN = ROOT + ".join"; // Allowed to join a match as a participant
   String JOIN_CHOOSE = JOIN + ".choose"; // Can choose which team to join
-  String EXTRA_VOTE = JOIN + ".extravote"; // Extra map voting power
   String JOIN_FULL = ROOT + ".full"; // Can join a team or server if it is full
   String JOIN_FORCE = JOIN + ".force"; // Can force other players onto teams
+  String VOTE = ROOT + ".vote"; // Can user vote in map pools
+  String EXTRA_VOTE = VOTE + ".extra"; // User vote in map pools count as double
   String LEAVE = ROOT + ".leave"; // Can join observers willingly
   String DEFUSE = ROOT + ".defuse"; // Defuse tnt from observers using shears
   String DEBUG = ROOT + ".debug"; // Errors from map loading and debug commands

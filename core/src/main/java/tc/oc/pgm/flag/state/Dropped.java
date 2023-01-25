@@ -33,6 +33,10 @@ public class Dropped extends Uncarried implements Missing {
     this.dropper = dropper;
   }
 
+  public MatchPlayer getDropper() {
+    return dropper;
+  }
+
   @Override
   protected Duration getDuration() {
     return this.post.getRecoverTime();

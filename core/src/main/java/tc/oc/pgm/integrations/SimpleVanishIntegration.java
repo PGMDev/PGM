@@ -1,12 +1,8 @@
-package tc.oc.pgm.community.features;
+package tc.oc.pgm.integrations;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -30,16 +26,15 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.VanishIntegration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
-import tc.oc.pgm.community.events.PlayerVanishEvent;
-import tc.oc.pgm.listeners.PGMListener;
+import tc.oc.pgm.api.player.event.PlayerVanishEvent;
 
-public class VanishManagerImpl implements VanishManager, Listener {
+public class SimpleVanishIntegration implements VanishIntegration, Listener {
 
   private static final String VANISH_KEY = "isVanished";
   private static final MetadataValue VANISH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -51,7 +46,7 @@ public class VanishManagerImpl implements VanishManager, Listener {
       hotbarTask; // Task is run every second to ensure vanished players retain hotbar message
   private boolean hotbarFlash;
 
-  public VanishManagerImpl(MatchManager matchManager, ScheduledExecutorService tasks) {
+  public SimpleVanishIntegration(MatchManager matchManager, ScheduledExecutorService tasks) {
     this.vanishedPlayers = Lists.newArrayList();
     this.matchManager = matchManager;
     this.hotbarFlash = false;
@@ -64,9 +59,11 @@ public class VanishManagerImpl implements VanishManager, Listener {
             0,
             1,
             TimeUnit.SECONDS);
+
+    // Register listener
+    PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
 
-  @Override
   public void disable() {
     hotbarTask.cancel(true);
   }
@@ -76,7 +73,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
     return vanishedPlayers.contains(uuid);
   }
 
-  @Override
   public List<MatchPlayer> getOnlineVanished() {
     return vanishedPlayers.stream()
         .filter(u -> matchManager.getPlayer(u) != null)
@@ -86,6 +82,11 @@ public class VanishManagerImpl implements VanishManager, Listener {
 
   @Override
   public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
+    final Match match = player.getMatch();
+
+    // Call vanish event first so name renders existing state properly for leave msg
+    if (vanish) match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
+
     // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
     // projects (i.e utils)
     if (vanish) {
@@ -93,8 +94,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
     } else {
       removeVanished(player);
     }
-
-    final Match match = player.getMatch();
 
     // Ensure player is an observer
     if (vanish && player.getParty() instanceof Competitor) {
@@ -107,12 +106,8 @@ public class VanishManagerImpl implements VanishManager, Listener {
     // Reset visibility to hide/show player
     player.resetVisibility();
 
-    // Broadcast join/quit message
-    if (!quiet) {
-      PGMListener.announceJoinOrLeave(player, !vanish, false);
-    }
-
-    match.callEvent(new PlayerVanishEvent(player, vanish));
+    // Call vanish event after unvanish so name renders existing state properly for join msg
+    if (!vanish) match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     return isVanished(player.getId());
   }
@@ -127,18 +122,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
   private void removeVanished(MatchPlayer player) {
     this.vanishedPlayers.remove(player.getId());
     player.getBukkit().removeMetadata(VANISH_KEY, VANISH_VALUE.getOwningPlugin());
-  }
-
-  /* Commands */
-  @CommandMethod("vanish|v")
-  @CommandDescription("Toggle vanish status")
-  @CommandPermission(Permissions.VANISH)
-  public void vanish(MatchPlayer sender, @Flag(value = "silent", aliases = "s") boolean silent) {
-    if (setVanished(sender, !isVanished(sender.getId()), silent)) {
-      sender.sendWarning(translatable("vanish.activate").color(NamedTextColor.GREEN));
-    } else {
-      sender.sendWarning(translatable("vanish.deactivate").color(NamedTextColor.RED));
-    }
   }
 
   /* Events */
@@ -163,23 +146,20 @@ public class VanishManagerImpl implements VanishManager, Listener {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     if (player == null) return;
     if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
+    if (!player.getBukkit().hasPermission(Permissions.VANISH))
+      return; // Do not vanish players with no perms
 
     if (isVanished(player.getId())) {
       player.setVanished(true);
       return;
     }
 
-    if (player
-        .getBukkit()
-        .hasPermission(Permissions.VANISH)) { // Player is not vanished, but has permission to
-
-      // Automatic vanish if player logs in via a "vanish" subdomain
-      String domain = loginSubdomains.getIfPresent(player.getId());
-      if (domain != null) {
-        loginSubdomains.invalidate(player.getId());
-        tempVanish.add(player.getId());
-        setVanished(player, true, true);
-      }
+    // Automatic vanish if player logs in via a "vanish" subdomain
+    String domain = loginSubdomains.getIfPresent(player.getId());
+    if (domain != null) {
+      loginSubdomains.invalidate(player.getId());
+      tempVanish.add(player.getId());
+      setVanished(player, true, true);
     }
   }
 
@@ -189,10 +169,6 @@ public class VanishManagerImpl implements VanishManager, Listener {
     // If player is vanished & joined via "vanish" subdomain. Remove vanish status on quit
     if (isVanished(player.getId()) && tempVanish.contains(player.getId())) {
       setVanished(player, false, true);
-      // Temporary vanish status is removed before quit,
-      // so prevent regular quit msg and forces a staff only broadcast
-      event.setQuitMessage(null);
-      PGMListener.announceJoinOrLeave(player, false, true, true);
     }
   }
 
