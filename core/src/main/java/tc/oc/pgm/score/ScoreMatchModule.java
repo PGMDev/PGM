@@ -334,4 +334,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     this.match.calculateVictory();
   }
+
+  public double getContribution(UUID player) {
+    return contributions.get(player);
+  }
 }
