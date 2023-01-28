@@ -177,7 +177,7 @@ public class ClassModule implements MapModule<ClassMatchModule> {
         kits.add(kit);
       }
 
-      MaterialData icon = XMLUtils.parseMaterialData(Node.fromAttr(classEl, "icon"));
+      MaterialData icon = XMLUtils.parseMaterialData(Node.fromRequiredAttr(classEl, "icon"));
 
       boolean restrict = XMLUtils.parseBoolean(classEl.getAttribute("restrict"), false);
 
