@@ -41,7 +41,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.module.Module;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.command.util.CommandGraph;
+import tc.oc.pgm.command.util.PGMCommandGraph;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
 import tc.oc.pgm.integrations.SimpleVanishIntegration;
@@ -324,7 +324,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
   private void registerCommands() {
     try {
-      new CommandGraph(this);
+      new PGMCommandGraph(this);
     } catch (Exception e) {
       getLogger().log(Level.SEVERE, "Exception registering commands", e);
     }

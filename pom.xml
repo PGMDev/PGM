@@ -134,31 +134,28 @@
         </dependency>
 
         <!-- Framework for defining and parsing commands -->
-        <!-- Version 1.8.0-pgm includes fixes/features not yet in upstream. To be changed when merged. -->
-        <!-- Source: https://github.com/Pablete1234/cloud/commits/1.8.0-pgm -->
-        <!-- Repo: https://repo.pgm.fyi/#/snapshots/cloud/commandframework -->
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-core</artifactId>
-            <version>1.8.0-pgm-SNAPSHOT</version>
+            <version>1.8.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-annotations</artifactId>
-            <version>1.8.0-pgm-SNAPSHOT</version>
+            <version>1.8.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-paper</artifactId>
-            <version>1.8.0-pgm-SNAPSHOT</version>
+            <version>1.8.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-minecraft-extras</artifactId>
-            <version>1.8.0-pgm-SNAPSHOT</version>
+            <version>1.8.1</version>
             <scope>compile</scope>
         </dependency>
         <!-- Allows registering brigadier mappings -->
