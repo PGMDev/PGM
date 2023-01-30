@@ -58,6 +58,7 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.Tribute;
+import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityGoal;
@@ -157,6 +158,33 @@ public class SidebarMatchModule implements MatchModule, Listener {
   @Override
   public void enable() {
     renderSidebarDebounce();
+
+    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
+    match
+        .needModule(GoalMatchModule.class)
+        .getGoals()
+        .forEach(
+            goal ->
+                fmm.onChange(
+                    Match.class,
+                    goal.getScoreboardFilter(),
+                    (m, v) -> this.renderSidebarDebounce()));
+    match
+        .moduleOptional(ScoreMatchModule.class)
+        .ifPresent(
+            smm ->
+                fmm.onChange(
+                    Party.class,
+                    smm.getScoreboardFilter(),
+                    (p, v) -> this.renderSidebarDebounce()));
+    match
+        .moduleOptional(BlitzMatchModule.class)
+        .ifPresent(
+            bmm ->
+                fmm.onChange(
+                    Party.class,
+                    bmm.getScoreboardFilter(),
+                    (p, v) -> this.renderSidebarDebounce()));
   }
 
   @Override
@@ -354,6 +382,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   private Component renderScore(Competitor competitor) {
     ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
+    if (!smm.getScoreboardFilter().response(competitor)) {
+      return null;
+    }
     Component score = text((int) smm.getScore(competitor), NamedTextColor.WHITE);
     if (!smm.hasScoreLimit()) {
       return score;
@@ -367,6 +398,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   private Component renderBlitz(Competitor competitor) {
     BlitzMatchModule bmm = match.needModule(BlitzMatchModule.class);
+    if (!bmm.getConfig().getScoreboardFilter().response(competitor)) {
+      return null;
+    }
     if (competitor instanceof Team) {
       return text(bmm.getRemainingPlayers(competitor), NamedTextColor.WHITE);
     } else if (competitor instanceof Tribute && bmm.getConfig().getNumLives() > 1) {
@@ -406,7 +440,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
     // Count the rows used for goals
     for (Goal<?> goal : gmm.getGoals()) {
-      if (goal.hasShowOption(ShowOption.SHOW_SIDEBAR)) {
+      if (goal.hasShowOption(ShowOption.SHOW_SIDEBAR)
+          && goal.getScoreboardFilter().response(match)) {
         if (goal.isShared()) {
           sharedGoals.add(goal);
         } else {
@@ -433,13 +468,15 @@ public class SidebarMatchModule implements MatchModule, Listener {
           } else {
             text = renderBlitz(competitor);
           }
-          if (text != empty()) {
-            text = text.append(space());
-          }
-          rows.add(text.append(competitor.getName(NameStyle.SIMPLE_COLOR)));
+          if (text != null) {
+            if (text != empty()) {
+              text = text.append(space());
+            }
+            rows.add(text.append(competitor.getName(NameStyle.SIMPLE_COLOR)));
 
-          // No point rendering more scores, usually seen in FFA
-          if (rows.size() >= MAX_ROWS) break;
+            // No point rendering more scores, usually seen in FFA
+            if (rows.size() >= MAX_ROWS) break;
+          }
         }
 
         if (!competitorsWithGoals.isEmpty() || !sharedGoals.isEmpty()) {

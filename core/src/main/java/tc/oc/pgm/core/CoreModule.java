@@ -138,7 +138,7 @@ public class CoreModule implements MapModule<CoreMatchModule> {
         }
 
         boolean showProgress = XMLUtils.parseBoolean(coreEl.getAttribute("show-progress"), false);
-        ShowOptions options = ShowOptions.parse(coreEl);
+        ShowOptions options = ShowOptions.parse(context.getFilters(), coreEl);
         Boolean required = XMLUtils.parseBoolean(coreEl.getAttribute("required"), null);
         ProximityMetric proximityMetric =
             ProximityMetric.parse(

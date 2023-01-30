@@ -25,6 +25,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
@@ -108,8 +109,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
         }
 
         // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
-        // tag
-        // is not present
+        // tag is not present
         boolean scoreKillsByDefault =
             proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) && scoreEl.getChild("king") == null;
         config.deathScore =
@@ -118,6 +118,15 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
         config.killScore =
             XMLUtils.parseNumber(
                 scoreEl.getChild("kills"), Integer.class, scoreKillsByDefault ? 1 : 0);
+
+        config.scoreboardFilter =
+            factory
+                .getFilters()
+                .parseProperty(
+                    scoreEl,
+                    "scoreboard-filter",
+                    StaticFilter.ALLOW,
+                    DynamicFilterValidation.PARTY);
 
         for (Element scoreBoxEl : scoreEl.getChildren("box")) {
           int points =

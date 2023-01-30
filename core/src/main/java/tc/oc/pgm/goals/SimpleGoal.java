@@ -12,6 +12,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -91,6 +92,10 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
   @Override
   public boolean hasShowOption(ShowOption flag) {
     return this.definition.hasShowOption(flag);
+  }
+
+  public Filter getScoreboardFilter() {
+    return this.definition.getShowOptions().getScoreboardFilter();
   }
 
   @Override
