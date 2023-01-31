@@ -95,6 +95,7 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
     }
     File[] files = includeFiles.listFiles();
     for (File file : files) {
+      if (!file.getName().endsWith(".xml")) continue;
       try {
         MapIncludeImpl include = new MapIncludeImpl(file);
         this.includes.put(include.getId(), include);
