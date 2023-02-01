@@ -127,7 +127,7 @@ public class RegionFilterApplicationParser {
     if (attrVelocity != null) {
       // Legacy support
       String velocityText = attrVelocity.getValue();
-      if (velocityText.charAt(0) == '@') velocityText = velocityText.substring(1);
+      if (velocityText.startsWith("@")) velocityText = velocityText.substring(1);
       Vector velocity = XMLUtils.parseVector(attrVelocity, velocityText);
       add(el, new RegionFilterApplication(RFAScope.EFFECT, region, effectFilter, velocity));
     }
