@@ -4,11 +4,13 @@ import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -47,6 +49,15 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
             viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
           }
           break;
+        case DEATH_FRIENDS:
+          if (event.isInvolved(viewer)) {
+            viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
+          } else if (isFriendInvolved(viewer.getBukkit(), event)) {
+            viewer.sendMessage(message);
+          } else if (event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF)) {
+            viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
+          }
+          break;
         case DEATH_ALL:
           if (event.isInvolved(viewer) || event.isInvolved(viewer.getSpectatorTarget())) {
             viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
@@ -56,5 +67,16 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
           break;
       }
     }
+  }
+
+  private boolean isFriendInvolved(Player viewer, MatchPlayerDeathEvent event) {
+    Player killer =
+        event.getKiller() != null && event.getKiller().getPlayer().isPresent()
+            ? event.getKiller().getPlayer().get().getBukkit()
+            : null;
+    Player victim = event.getVictim().getBukkit();
+
+    return (killer != null && Integration.isFriend(viewer, killer))
+        || (victim != null && Integration.isFriend(viewer, victim));
   }
 }
