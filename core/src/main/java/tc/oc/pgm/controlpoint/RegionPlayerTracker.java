@@ -8,6 +8,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
@@ -20,11 +22,19 @@ public class RegionPlayerTracker implements Listener {
   private final Match match;
   private final Set<MatchPlayer> players = Sets.newHashSet();
 
+  // The region to check against
   private Region region;
+  // A static filter players must match when entering
+  private @Nullable Filter staticFilter;
 
   public RegionPlayerTracker(Match match, Region region) {
+    this(match, region, null);
+  }
+
+  public RegionPlayerTracker(Match match, Region region, @Nullable Filter staticFilter) {
     this.match = match;
     this.region = region;
+    this.staticFilter = staticFilter;
   }
 
   public Set<MatchPlayer> getPlayers() {
@@ -52,7 +62,9 @@ public class RegionPlayerTracker implements Listener {
     MatchPlayer player = this.match.getPlayer(bukkit);
     if (!MatchPlayers.canInteract(player)) return;
 
-    if (!player.getBukkit().isDead() && this.region.contains(to.toBlockVector())) {
+    if (!player.getBukkit().isDead()
+        && this.region.contains(to.toBlockVector())
+        && (this.staticFilter == null || this.staticFilter.query(player).isAllowed())) {
       this.players.add(player);
     } else {
       this.players.remove(player);
