@@ -6,7 +6,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
@@ -71,8 +70,18 @@ public class PlayerTabEntry extends DynamicTabEntry {
   }
 
   @Override
-  public @Nullable Skin getSkin(TabView view) {
-    return NMSHacks.getPlayerSkin(this.player);
+  public Skin getSkin(TabView view) {
+    Player viewer = view.getViewer();
+    if (viewer == null) {
+      return null;
+    }
+
+    // TODO: find different solution for non-SportPaper servers
+    return this.player.hasFakeSkin(viewer)
+        ? new Skin(
+            this.player.getFakeSkin(viewer).getData(),
+            this.player.getFakeSkin(viewer).getSignature())
+        : NMSHacks.getPlayerSkin(this.player);
   }
 
   @Override

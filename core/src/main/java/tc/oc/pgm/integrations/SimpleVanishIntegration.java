@@ -84,7 +84,10 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
   public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
     final Match match = player.getMatch();
 
-    // Call vanish event first so name renders existing state properly for leave msg
+    // Set vanish status in match player
+    player.setVanished(vanish);
+
+    // Call vanish event next so name renders existing state properly for leave msg
     if (vanish) match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
@@ -99,9 +102,6 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
     if (vanish && player.getParty() instanceof Competitor) {
       match.setParty(player, match.getDefaultParty());
     }
-
-    // Set vanish status in match player
-    player.setVanished(vanish);
 
     // Reset visibility to hide/show player
     player.resetVisibility();
