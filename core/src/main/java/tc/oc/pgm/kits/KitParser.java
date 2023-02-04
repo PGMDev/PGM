@@ -40,6 +40,7 @@ import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.consumable.ConsumableDefinition;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
@@ -599,6 +600,16 @@ public abstract class KitParser {
               .getId());
       String name = itemStack.getItemMeta().getDisplayName();
       ItemTags.ORIGINAL_NAME.set(itemStack, name != null ? name : "");
+    }
+
+    Node consumableNode = Node.fromAttr(el, "consumable");
+    if (consumableNode != null) {
+      ItemTags.CONSUMABLE.set(
+          itemStack,
+          factory
+              .getFeatures()
+              .createReference(consumableNode, ConsumableDefinition.class)
+              .getId());
     }
   }
 
