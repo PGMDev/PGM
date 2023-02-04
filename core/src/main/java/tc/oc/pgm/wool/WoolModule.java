@@ -80,7 +80,6 @@ public class WoolModule implements MapModule<WoolMatchModule> {
     public WoolModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Multimap<TeamFactory, MonumentWoolFactory> woolFactories = ArrayListMultimap.create();
-      TeamModule teamModule = factory.needModule(TeamModule.class);
       RegionParser parser = factory.getRegions();
 
       for (Element woolEl : XMLUtils.flattenElements(doc.getRootElement(), "wools", "wool")) {
@@ -95,7 +94,7 @@ public class WoolModule implements MapModule<WoolMatchModule> {
         } else {
           placement = parser.parseRequiredRegionProperty(woolEl, "monument");
         }
-        ShowOptions options = ShowOptions.parse(woolEl);
+        ShowOptions options = ShowOptions.parse(factory.getFilters(), woolEl);
         Boolean required = XMLUtils.parseBoolean(woolEl.getAttribute("required"), null);
 
         ProximityMetric woolProximityMetric =

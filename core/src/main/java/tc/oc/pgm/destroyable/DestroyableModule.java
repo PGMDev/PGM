@@ -132,7 +132,7 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
             XMLUtils.parseBoolean(destroyableEl.getAttribute("show-progress"), false);
         boolean sparks = XMLUtils.parseBoolean(destroyableEl.getAttribute("sparks"), false);
         boolean repairable = XMLUtils.parseBoolean(destroyableEl.getAttribute("repairable"), true);
-        ShowOptions options = ShowOptions.parse(destroyableEl);
+        ShowOptions options = ShowOptions.parse(context.getFilters(), destroyableEl);
         Boolean required = XMLUtils.parseBoolean(destroyableEl.getAttribute("required"), null);
         ProximityMetric proximityMetric =
             ProximityMetric.parse(

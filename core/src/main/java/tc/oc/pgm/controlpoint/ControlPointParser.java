@@ -135,7 +135,7 @@ public abstract class ControlPointParser {
         XMLUtils.parseNumber(
             el.getAttribute("points-growth"), Float.class, Float.POSITIVE_INFINITY);
     boolean showProgress = XMLUtils.parseBoolean(el.getAttribute("show-progress"), koth || pd);
-    ShowOptions options = ShowOptions.parse(el);
+    ShowOptions options = ShowOptions.parse(filterParser, el);
     Boolean required = XMLUtils.parseBoolean(el.getAttribute("required"), null);
 
     ControlPointDefinition.CaptureCondition captureCondition =

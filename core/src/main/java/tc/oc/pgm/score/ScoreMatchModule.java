@@ -27,6 +27,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -78,6 +79,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
   public boolean hasMercyRule() {
     return this.mercyRule != null;
+  }
+
+  public Filter getScoreboardFilter() {
+    return this.config.scoreboardFilter;
   }
 
   public int getScoreLimit() {

@@ -20,6 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -53,6 +54,10 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   public BlitzConfig getConfig() {
     return this.config;
+  }
+
+  public Filter getScoreboardFilter() {
+    return config.getScoreboardFilter();
   }
 
   /** Whether or not the player participated in the match and was eliminated. */
