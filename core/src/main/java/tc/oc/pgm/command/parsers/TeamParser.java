@@ -23,7 +23,7 @@ public final class TeamParser extends MatchObjectParser<Team, TeamMatchModule> {
 
   @Override
   protected String getName(Team obj) {
-    return obj.getNameLegacy().replace(" ", "");
+    return obj.getNameLegacy();
   }
 
   @Override
