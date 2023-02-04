@@ -1,28 +1,28 @@
-name: build
+name: Build
 on:
   pull_request:
-  repository_dispatch:
+  workflow_dispatch:
 jobs:
   build:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
+    - id: checkout
+      name: Checkout
       uses: actions/checkout@v3
-    - name: setup
+    - id: setup-java
+      name: Setup Java
       uses: actions/setup-java@v3
       with:
         java-version: 8
-        distribution: adopt
-    - name: cache
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: build
+        distribution: temurin
+        cache: maven
+    - id: build
+      name: Build
       run: mvn install
-    - name: artifact
+    - id: artifact
+      name: Upload Jar
       uses: actions/upload-artifact@v3
       with:
         name: PGM.jar

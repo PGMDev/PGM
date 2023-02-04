@@ -3,9 +3,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <relativePath>../pom.xml</relativePath>
-        <version>0.15-SNAPSHOT</version>
+        <version>0.16-SNAPSHOT</version>
         <groupId>tc.oc.pgm</groupId>
-        <artifactId>PGM</artifactId>
+        <artifactId>pgm</artifactId>
     </parent>
 
     <name>Util</name>

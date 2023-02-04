@@ -28,8 +28,8 @@
     </developers>
 
     <groupId>tc.oc.pgm</groupId>
-    <artifactId>PGM</artifactId>
-    <version>0.15-SNAPSHOT</version>
+    <artifactId>pgm</artifactId>
+    <version>0.16-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -44,31 +44,31 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </repository>
         <repository>
-            <id>spigot-repo</id>
+            <id>spigotmc-org</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
         </repository>
         <repository>
-            <id>viaversion.com</id>
+            <id>sportpaper-github</id>
+            <url>https://maven.pkg.github.com/Electroid/SportPaper</url>
+        </repository>
+        <repository>
+            <id>jitpack-io</id>
+            <url>https://jitpack.io/</url>
+        </repository>
+        <repository>
+            <id>viaversion-com</id>
             <url>https://repo.viaversion.com/</url>
         </repository>
-        <repository>
-            <id>ashcon.app</id>
-            <url>https://repo.ashcon.app/content/repositories/snapshots</url>
-        </repository>
         <repository> <!-- Holds current build of cloud with fixes for PGM -->
-            <id>pgm.fyi</id>
+            <id>pgm-fyi</id>
             <url>https://repo.pgm.fyi/snapshots</url>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io/</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
-            <id>ashcon.app</id>
-            <url>https://repo.ashcon.app/content/repositories/snapshots</url>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/PGMDev/PGM</url>
         </repository>
     </distributionManagement>
 
