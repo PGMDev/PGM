@@ -261,10 +261,22 @@ public class ChatDispatcher implements Listener {
   @CommandDescription("Reply to a direct message")
   public void sendReply(
       Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
-    final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
+    MatchPlayer receiver = manager.getPlayer(getLastMessagedUser(sender.getBukkit()));
     if (receiver == null) throw exception("command.message.noReply", text("/msg"));
 
     sendDirect(match, sender, receiver, message);
+  }
+
+  private UUID getLastMessagedUser(Player sender) {
+    UUID targetId = lastMessagedBy.get(sender);
+    MatchPlayer target = manager.getPlayer(targetId);
+
+    // Prevent replying to vanished players
+    if (target == null || Integration.isVanished(target.getBukkit())) {
+      return null;
+    }
+
+    return targetId;
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
