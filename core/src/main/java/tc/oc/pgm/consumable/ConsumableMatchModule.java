@@ -33,7 +33,7 @@ public class ConsumableMatchModule implements MatchModule, Listener {
     Player player = event.getPlayer();
     MatchPlayer matchPlayer = match.getPlayer(player);
     ParticipantState playerState = match.getParticipantState(player);
-    if (playerState == null) return;
+    if (matchPlayer == null || playerState == null) return;
 
     if (consumableDefinition.getPreventDefault()) {
       ItemStack itemInHand = player.getItemInHand();

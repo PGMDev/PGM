@@ -51,22 +51,13 @@ public class ConsumableModule implements MapModule<ConsumableMatchModule> {
 
       Set<ConsumableDefinition> consumableDefinitions = new HashSet<>();
 
-      List<Element> consumableElements =
-          XMLUtils.flattenElements(doc.getRootElement(), "consumables", "consumable");
-      if (consumableElements.size() == 0) return null;
-
-      for (Element consumableElement : consumableElements) {
+      for (Element consumableElement : XMLUtils.flattenElements(doc.getRootElement(), "consumables", "consumable")) {
         String id = XMLUtils.getRequiredAttribute(consumableElement, "id").getValue();
         boolean preventDefault =
             XMLUtils.parseBoolean(consumableElement.getAttribute("prevent-default"), true);
 
-        Action<? super MatchPlayer> action;
-        Node actionNode = Node.fromAttr(consumableElement, "action", "kit");
-        if (actionNode != null) {
-          action = actionParser.parseReference(actionNode, null, MatchPlayer.class);
-        } else {
-          action = KitNode.EMPTY;
-        }
+        Node actionNode = Node.fromRequiredAttr(consumableElement, "action", "kit");
+        Action<? super MatchPlayer> action = actionParser.parseReference(actionNode, MatchPlayer.class);
 
         ConsumeCause cause =
             XMLUtils.parseEnum(
@@ -82,6 +73,7 @@ public class ConsumableModule implements MapModule<ConsumableMatchModule> {
         consumableDefinitions.add(consumableDefinition);
       }
 
+      if (consumableDefinitions.isEmpty()) return null;
       return new ConsumableModule(ImmutableSet.copyOf(consumableDefinitions));
     }
   }
