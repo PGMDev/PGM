@@ -68,7 +68,7 @@ public class ChatDispatcher implements Listener {
   }
 
   private final MatchManager manager;
-  private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
+  private final OnlinePlayerMapAdapter<MessageSenderIdentity> lastMessagedBy;
 
   public static final TextComponent ADMIN_CHAT_PREFIX =
       text()
@@ -198,6 +198,7 @@ public class ChatDispatcher implements Listener {
       @Argument("player") MatchPlayer receiver,
       @Argument("message") @Greedy String message) {
     if (Integration.isVanished(sender.getBukkit())) throw exception("vanish.chat.deny");
+    if (receiver.equals(sender)) throw exception("command.message.self");
 
     if (!receiver.getBukkit().hasPermission(Permissions.STAFF)) throwMuted(sender);
 
@@ -211,7 +212,7 @@ public class ChatDispatcher implements Listener {
         throw exception("moderation.mute.target", receiver.getName(NameStyle.FANCY));
     }
 
-    lastMessagedBy.put(receiver.getBukkit(), sender.getId());
+    trackMessage(receiver.getBukkit(), sender.getBukkit());
 
     // Send message to receiver
     send(
@@ -261,22 +262,10 @@ public class ChatDispatcher implements Listener {
   @CommandDescription("Reply to a direct message")
   public void sendReply(
       Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
-    MatchPlayer receiver = manager.getPlayer(getLastMessagedUser(sender.getBukkit()));
+    MatchPlayer receiver = manager.getPlayer(getLastMessagedId(sender.getBukkit()));
     if (receiver == null) throw exception("command.message.noReply", text("/msg"));
 
     sendDirect(match, sender, receiver, message);
-  }
-
-  private UUID getLastMessagedUser(Player sender) {
-    UUID targetId = lastMessagedBy.get(sender);
-    MatchPlayer target = manager.getPlayer(targetId);
-
-    // Prevent replying to vanished players
-    if (target == null || Integration.isVanished(target.getBukkit())) {
-      return null;
-    }
-
-    return targetId;
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
@@ -440,5 +429,51 @@ public class ChatDispatcher implements Listener {
         .append(text(": ", NamedTextColor.WHITE))
         .append(msg)
         .build();
+  }
+
+  private void trackMessage(Player receiver, Player sender) {
+    MessageSenderIdentity senderIdent = new MessageSenderIdentity(receiver, sender);
+    this.lastMessagedBy.put(receiver, senderIdent);
+  }
+
+  private UUID getLastMessagedId(Player sender) {
+    MessageSenderIdentity targetIdent = lastMessagedBy.get(sender);
+    if (targetIdent == null) return null;
+    MatchPlayer target = manager.getPlayer(targetIdent.getPlayerId());
+
+    // Prevent replying to offline players
+    if (target == null) return null;
+
+    // Compare last known and current name
+    String lastKnownName = targetIdent.getName();
+    String currentName = Players.getVisibleName(sender, target.getBukkit());
+
+    boolean reveal = Players.shouldReveal(sender, target.getBukkit());
+    boolean visible = Players.isVisible(sender, target.getBukkit());
+
+    if ((currentName.equalsIgnoreCase(lastKnownName) && visible) || reveal) {
+      return target.getId();
+    }
+
+    return null;
+  }
+
+  private class MessageSenderIdentity {
+
+    private UUID playerId;
+    private String name;
+
+    public MessageSenderIdentity(Player viewer, Player player) {
+      this.playerId = player.getUniqueId();
+      this.name = Players.getVisibleName(viewer, player);
+    }
+
+    public UUID getPlayerId() {
+      return playerId;
+    }
+
+    public String getName() {
+      return name;
+    }
   }
 }
