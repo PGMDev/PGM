@@ -1,6 +1,7 @@
 package tc.oc.pgm.projectile;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,7 +26,11 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ProjectileModule implements MapModule<ProjectileMatchModule> {
-  Set<ProjectileDefinition> projectileDefinitions = new HashSet<>();
+  private final ImmutableSet<ProjectileDefinition> projectileDefinitions;
+
+  public ProjectileModule(ImmutableSet<ProjectileDefinition> projectileDefinitions) {
+    this.projectileDefinitions = projectileDefinitions;
+  }
 
   @Override
   public ProjectileMatchModule createMatchModule(Match match) {
@@ -41,7 +46,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
     @Override
     public ProjectileModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      ProjectileModule projectileModule = new ProjectileModule();
+      Set<ProjectileDefinition> projectiles = new HashSet<>();
       KitParser kitParser = factory.getKits();
       FilterParser filterParser = factory.getFilters();
 
@@ -86,10 +91,10 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
                 precise);
 
         factory.getFeatures().addFeature(projectileElement, projectileDefinition);
-        projectileModule.projectileDefinitions.add(projectileDefinition);
+        projectiles.add(projectileDefinition);
       }
 
-      return projectileModule;
+      return projectiles.isEmpty() ? null : new ProjectileModule(ImmutableSet.copyOf(projectiles));
     }
   }
 }

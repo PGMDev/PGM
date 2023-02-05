@@ -2,6 +2,7 @@ package tc.oc.pgm.projectile;
 
 import static tc.oc.pgm.util.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Set;
 import org.bukkit.Material;
@@ -54,12 +55,13 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   private static final ThreadLocal<ProjectileDefinition> launchingDefinition = new ThreadLocal<>();
 
   private final Match match;
-  private final Set<ProjectileDefinition> projectileDefinitions;
-  private Set<ProjectileCooldown> projectileCooldowns = new HashSet<>();
+  private final ImmutableSet<ProjectileDefinition> projectileDefinitions;
+  private final Set<ProjectileCooldown> projectileCooldowns = new HashSet<>();
 
   private static final String DEFINITION_KEY = "projectileDefinition";
 
-  public ProjectileMatchModule(Match match, Set<ProjectileDefinition> projectileDefinitions) {
+  public ProjectileMatchModule(
+      Match match, ImmutableSet<ProjectileDefinition> projectileDefinitions) {
     this.match = match;
     this.projectileDefinitions = projectileDefinitions;
   }
