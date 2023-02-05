@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
@@ -50,8 +51,11 @@ public class ConsumableModule implements MapModule<ConsumableMatchModule> {
 
       Set<ConsumableDefinition> consumableDefinitions = new HashSet<>();
 
-      for (Element consumableElement :
-          XMLUtils.flattenElements(doc.getRootElement(), "consumables", "consumable")) {
+      List<Element> consumableElements =
+          XMLUtils.flattenElements(doc.getRootElement(), "consumables", "consumable");
+      if (consumableElements.size() == 0) return null;
+
+      for (Element consumableElement : consumableElements) {
         String id = XMLUtils.getRequiredAttribute(consumableElement, "id").getValue();
         boolean preventDefault =
             XMLUtils.parseBoolean(consumableElement.getAttribute("prevent-default"), true);
