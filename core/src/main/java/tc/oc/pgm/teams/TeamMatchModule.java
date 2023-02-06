@@ -29,6 +29,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -293,7 +294,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     Party oldTeam = player.getParty();
     if (oldTeam == newTeam) return true;
 
-    if (!player.isVanished() && match.setParty(player, newTeam)) {
+    if (!Integration.isVanished(player.getBukkit()) && match.setParty(player, newTeam)) {
       setAutoJoin(player, autoJoin);
       return true;
     } else {
