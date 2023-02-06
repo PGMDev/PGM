@@ -448,10 +448,10 @@ public class ChatDispatcher implements Listener {
     String lastKnownName = targetIdent.getName();
     String currentName = Players.getVisibleName(sender, target.getBukkit());
 
-    boolean reveal = Players.shouldReveal(sender, target.getBukkit());
+    // Ensure the target is visible to the viewing sender
     boolean visible = Players.isVisible(sender, target.getBukkit());
 
-    if ((currentName.equalsIgnoreCase(lastKnownName) && visible) || reveal) {
+    if (currentName.equalsIgnoreCase(lastKnownName) && visible) {
       return target.getId();
     }
 
