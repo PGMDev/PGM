@@ -206,10 +206,13 @@ public class ChatDispatcher implements Listener {
 
     if (!sender.getBukkit().hasPermission(Permissions.STAFF)) {
       if (option.equals(SettingValue.MESSAGE_OFF))
-        throw exception("command.message.blocked", receiver.getName(NameStyle.FANCY));
+        throw exception("command.message.blocked", receiver.getName());
 
-      if (isMuted(receiver))
-        throw exception("moderation.mute.target", receiver.getName(NameStyle.FANCY));
+      if (option.equals(SettingValue.MESSAGE_FRIEND)
+          && !Integration.isFriend(receiver.getBukkit(), sender.getBukkit()))
+        throw exception("command.message.friendsOnly", receiver.getName());
+
+      if (isMuted(receiver)) throw exception("moderation.mute.target", receiver.getName());
     }
 
     trackMessage(receiver.getBukkit(), sender.getBukkit());

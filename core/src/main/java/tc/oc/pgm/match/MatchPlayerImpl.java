@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -209,8 +210,11 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     if (!other.isVisible() && !isSpectatorTarget) return false;
     if (other.isParticipating()) return true;
     if (other.isVanished() && !getBukkit().hasPermission(Permissions.VANISH)) return false;
-    return isObserving()
-        && getSettings().getValue(SettingKey.OBSERVERS) == SettingValue.OBSERVERS_ON;
+    SettingValue setting = getSettings().getValue(SettingKey.OBSERVERS);
+    boolean friendsOnly =
+        Integration.isFriend(getBukkit(), other.getBukkit())
+            && setting == SettingValue.OBSERVERS_FRIEND;
+    return isObserving() && (setting == SettingValue.OBSERVERS_ON || friendsOnly);
   }
 
   @Override
