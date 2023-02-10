@@ -26,6 +26,7 @@ import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.DynamicFilterValidation;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
@@ -88,6 +89,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
     public ScoreModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Version proto = factory.getProto();
+      FilterParser filters = factory.getFilters();
 
       List<Element> scoreElements = doc.getRootElement().getChildren("score");
       if (scoreElements.size() == 0) {
@@ -95,38 +97,36 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
       }
 
       RegionParser regionParser = factory.getRegions();
-      ScoreConfig config = new ScoreConfig();
+      int scoreLimit = -1;
+      int deathScore = 0;
+      int killScore = 0;
+      int mercyLimit = 0;
+      int mercyLimitMin = 0;
+      Filter scoreboardFilter = StaticFilter.ALLOW;
       ImmutableSet.Builder<ScoreBoxFactory> scoreBoxFactories = ImmutableSet.builder();
 
       for (Element scoreEl : scoreElements) {
-        config.scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
+        scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
 
         Element mercyEl = XMLUtils.getUniqueChild(scoreEl, "mercy");
         if (mercyEl != null) {
-          config.mercyLimit = XMLUtils.parseNumber(mercyEl, Integer.class, -1);
-          config.mercyLimitMin =
-              XMLUtils.parseNumber(Node.fromAttr(mercyEl, "min"), Integer.class, -1);
+          mercyLimit = XMLUtils.parseNumber(mercyEl, Integer.class, -1);
+          mercyLimitMin = XMLUtils.parseNumber(Node.fromAttr(mercyEl, "min"), Integer.class, -1);
         }
 
-        // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
-        // tag is not present
-        boolean scoreKillsByDefault =
-            proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) && scoreEl.getChild("king") == null;
-        config.deathScore =
-            XMLUtils.parseNumber(
-                scoreEl.getChild("deaths"), Integer.class, scoreKillsByDefault ? 1 : 0);
-        config.killScore =
-            XMLUtils.parseNumber(
-                scoreEl.getChild("kills"), Integer.class, scoreKillsByDefault ? 1 : 0);
+        int defaultPoints = 0;
+        if (proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO)
+            && scoreEl.getChild("king") == null) {
+          // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
+          // tag is not present
+          defaultPoints = 1;
+        }
+        deathScore = XMLUtils.parseNumber(scoreEl.getChild("deaths"), Integer.class, defaultPoints);
+        killScore = XMLUtils.parseNumber(scoreEl.getChild("kills"), Integer.class, defaultPoints);
 
-        config.scoreboardFilter =
-            factory
-                .getFilters()
-                .parseProperty(
-                    scoreEl,
-                    "scoreboard-filter",
-                    StaticFilter.ALLOW,
-                    DynamicFilterValidation.PARTY);
+        scoreboardFilter =
+            filters.parseProperty(
+                scoreEl, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.PARTY);
 
         for (Element scoreBoxEl : scoreEl.getChildren("box")) {
           int points =
@@ -135,8 +135,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
                   Integer.class,
                   proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) ? 1 : 0);
 
-          Filter filter =
-              factory.getFilters().parseFilterProperty(scoreBoxEl, "filter", StaticFilter.ALLOW);
+          Filter filter = filters.parseProperty(scoreBoxEl, "filter", StaticFilter.ALLOW);
           Map<SingleMaterialMatcher, Double> redeemables = new HashMap<>();
           Region region;
 
@@ -161,7 +160,11 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
                   region, points, filter, ImmutableMap.copyOf(redeemables), silent));
         }
       }
-      return new ScoreModule(config, scoreBoxFactories.build());
+
+      return new ScoreModule(
+          new ScoreConfig(
+              scoreLimit, deathScore, killScore, mercyLimit, mercyLimitMin, scoreboardFilter),
+          scoreBoxFactories.build());
     }
   }
 }
