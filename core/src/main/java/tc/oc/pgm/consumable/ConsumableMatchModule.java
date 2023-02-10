@@ -10,8 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.util.MatchPlayers;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 
 public class ConsumableMatchModule implements MatchModule, Listener {
 
@@ -32,16 +33,10 @@ public class ConsumableMatchModule implements MatchModule, Listener {
 
     Player player = event.getPlayer();
     MatchPlayer matchPlayer = match.getPlayer(player);
-    ParticipantState playerState = match.getParticipantState(player);
-    if (matchPlayer == null || playerState == null) return;
+    if (!MatchPlayers.canInteract(matchPlayer)) return;
 
-    if (consumableDefinition.getPreventDefault()) {
-      ItemStack itemInHand = player.getItemInHand();
-      if (itemInHand.getAmount() > 1) {
-        itemInHand.setAmount(itemInHand.getAmount() - 1);
-      } else {
-        player.setItemInHand(null);
-      }
+    if (consumableDefinition.getOverride()) {
+      InventoryUtils.consumeItem(player);
       event.setCancelled(true);
     }
 

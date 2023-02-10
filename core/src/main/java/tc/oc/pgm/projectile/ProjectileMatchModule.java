@@ -41,6 +41,7 @@ import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -121,12 +122,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       }
 
       if (projectileDefinition.throwable) {
-        ItemStack itemInHand = player.getItemInHand();
-        if (itemInHand.getAmount() > 1) {
-          itemInHand.setAmount(itemInHand.getAmount() - 1);
-        } else {
-          player.setItemInHand(null);
-        }
+        InventoryUtils.consumeItem(player);
       }
 
       if (projectileDefinition.coolDown != null) {

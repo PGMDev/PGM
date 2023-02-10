@@ -10,17 +10,17 @@ public class ConsumableDefinition extends SelfIdentifyingFeatureDefinition {
   private final Action<? super MatchPlayer> action;
   private final ConsumeCause cause;
   /** If true, replaces vanilla behaviour, otherwise keeps vanilla behaviour */
-  private final boolean preventDefault;
+  private final boolean override;
 
   public ConsumableDefinition(
       @Nullable String id,
       Action<? super MatchPlayer> action,
       ConsumeCause cause,
-      boolean preventDefault) {
+      boolean override) {
     super(id);
     this.action = action;
     this.cause = cause;
-    this.preventDefault = preventDefault;
+    this.override = override;
   }
 
   public Action<? super MatchPlayer> getAction() {
@@ -31,7 +31,7 @@ public class ConsumableDefinition extends SelfIdentifyingFeatureDefinition {
     return cause;
   }
 
-  public boolean getPreventDefault() {
-    return preventDefault;
+  public boolean getOverride() {
+    return override;
   }
 }
