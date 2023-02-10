@@ -202,7 +202,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
         spectatorTarget != null && spectatorTarget.getId().equals(other.getId());
     if (!other.isVisible() && !isSpectatorTarget) return false;
     if (other.isParticipating()) return true;
-    if (Integration.isVanished(other.getBukkit()) && !getBukkit().hasPermission(Permissions.VANISH)) return false;
+    if (Integration.isVanished(other.getBukkit()) && !getBukkit().hasPermission(Permissions.VANISH))
+      return false;
     SettingValue setting = getSettings().getValue(SettingKey.OBSERVERS);
     boolean friendsOnly =
         Integration.isFriend(getBukkit(), other.getBukkit())

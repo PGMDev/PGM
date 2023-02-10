@@ -167,11 +167,11 @@ public final class MatchCommand {
     }
   }
 
-  private int getNonVanishedCount(Collection<MatchPlayer> players) {
+  private long getNonVanishedCount(Collection<MatchPlayer> players) {
     return players.stream()
         .map(MatchPlayer::getBukkit)
-        .mapToInt(p -> Integration.isVanished(p) ? 0 : 1)
-        .sum();
+        .filter(p -> !Integration.isVanished(p))
+        .count();
   }
 
   private MatchPlayer getMatchPlayer(CommandSender sender, Match match) {
