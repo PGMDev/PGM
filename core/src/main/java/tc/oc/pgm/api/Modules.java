@@ -103,6 +103,7 @@ import tc.oc.pgm.renewable.RenewableModule;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.score.ScoreModule;
 import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
+import tc.oc.pgm.scoreboard.ScoreboardModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.shield.ShieldMatchModule;
 import tc.oc.pgm.shops.ShopMatchModule;
@@ -223,13 +224,13 @@ public final class Modules {
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());
-    register(ScoreboardMatchModule.class, new ScoreboardMatchModule.Factory());
     register(JoinMatchModule.class, new JoinMatchModule.Factory());
     register(StartMatchModule.class, new StartMatchModule.Factory());
     register(SidebarMatchModule.class, new SidebarMatchModule.Factory());
     register(PickerMatchModule.class, new PickerMatchModule.Factory());
 
     // MapModules that create a MatchModule
+    register(ScoreboardModule.class, ScoreboardMatchModule.class, new ScoreboardModule.Factory());
     register(VariablesModule.class, VariablesMatchModule.class, new VariablesModule.Factory());
     register(TeamModule.class, TeamMatchModule.class, new TeamModule.Factory());
     register(FreeForAllModule.class, FreeForAllMatchModule.class, new FreeForAllModule.Factory());

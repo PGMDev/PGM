@@ -2,9 +2,7 @@ package tc.oc.pgm.scoreboard;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,6 +10,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.scoreboard.Criterias;
+import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
@@ -21,8 +21,6 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.api.match.factory.MatchModuleFactory;
-import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.PartyAddEvent;
@@ -31,32 +29,20 @@ import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
 public class ScoreboardMatchModule implements MatchModule, Listener {
 
-  public static class Factory implements MatchModuleFactory<ScoreboardMatchModule> {
-    @Override
-    public Collection<Class<? extends MatchModule>> getWeakDependencies() {
-      return ImmutableList.of(TeamMatchModule.class, FreeForAllMatchModule.class);
-    }
-
-    @Override
-    public ScoreboardMatchModule createMatchModule(Match match) throws ModuleLoadException {
-      return new ScoreboardMatchModule(match);
-    }
-  }
-
   private final Match match;
   private final Map<Party, Scoreboard> partyScoreboards = new HashMap<>();
   private final Scoreboard hiddenScoreboard;
+  private final ScoreboardDisplayItem belowName;
 
-  private ScoreboardMatchModule(Match match) {
+  public ScoreboardMatchModule(Match match, ScoreboardDisplayItem belowName) {
     this.match = match;
+    this.belowName = belowName;
     this.hiddenScoreboard = PGM.get().getServer().getScoreboardManager().getNewScoreboard();
   }
 
@@ -125,6 +111,15 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
     for (Map.Entry<Party, Scoreboard> entry : partyScoreboards.entrySet()) {
       createPartyScoreboardTeam(
           newParty, entry.getValue(), !(entry.getKey() instanceof Competitor));
+    }
+
+    switch (belowName) {
+      case NONE:
+        break;
+      case HEALTH:
+        Objective objective =
+            newScoreboard.registerNewObjective(ChatColor.DARK_RED + "❤", Criterias.HEALTH);
+        objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
     }
   }
 
