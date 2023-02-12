@@ -20,6 +20,8 @@ import tc.oc.pgm.broadcast.BroadcastMatchModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.ClassModule;
+import tc.oc.pgm.consumable.ConsumableMatchModule;
+import tc.oc.pgm.consumable.ConsumableModule;
 import tc.oc.pgm.controlpoint.ControlPointMatchModule;
 import tc.oc.pgm.controlpoint.ControlPointModule;
 import tc.oc.pgm.core.CoreMatchModule;
@@ -291,6 +293,7 @@ public final class Modules {
         new FallingBlocksModule.Factory());
     register(FlagModule.class, FlagMatchModule.class, new FlagModule.Factory());
     register(ProjectileModule.class, ProjectileMatchModule.class, new ProjectileModule.Factory());
+    register(ConsumableModule.class, ConsumableMatchModule.class, new ConsumableModule.Factory());
     register(
         DiscardPotionBottlesModule.class,
         DiscardPotionBottlesMatchModule.class,
