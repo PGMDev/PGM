@@ -24,6 +24,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.party.Competitor;
@@ -81,10 +82,7 @@ public final class MatchCommand {
         msg.append(text(teamName, TextFormatter.convert(team.getColor())))
             .append(
                 text(": ", NamedTextColor.GRAY)
-                    .append(
-                        text(
-                            team.getPlayers().stream().filter(mp -> !mp.isVanished()).count(),
-                            NamedTextColor.WHITE)));
+                    .append(text(getNonVanishedCount(team.getPlayers()), NamedTextColor.WHITE)));
 
         if (team.getMaxPlayers() != Integer.MAX_VALUE) {
           msg.append(text("/" + team.getMaxPlayers(), NamedTextColor.GRAY));
@@ -110,10 +108,7 @@ public final class MatchCommand {
                     TextTranslations.translate("match.info.observers", sender),
                     NamedTextColor.AQUA))
             .append(text(": ", NamedTextColor.GRAY))
-            .append(
-                text(
-                    match.getObservers().stream().filter(mp -> !mp.isVanished()).count(),
-                    NamedTextColor.WHITE))
+            .append(text(getNonVanishedCount(match.getObservers()), NamedTextColor.WHITE))
             .build());
 
     viewer.sendMessage(
@@ -170,6 +165,13 @@ public final class MatchCommand {
     if (smm != null) {
       viewer.sendMessage(smm.getStatusMessage(getMatchPlayer(sender, match)));
     }
+  }
+
+  private long getNonVanishedCount(Collection<MatchPlayer> players) {
+    return players.stream()
+        .map(MatchPlayer::getBukkit)
+        .filter(p -> !Integration.isVanished(p))
+        .count();
   }
 
   private MatchPlayer getMatchPlayer(CommandSender sender, Match match) {

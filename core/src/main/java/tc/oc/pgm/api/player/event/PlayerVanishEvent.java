@@ -7,14 +7,16 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public class PlayerVanishEvent extends MatchPlayerEvent {
 
   private final boolean quiet;
+  private final boolean vanished;
 
   public PlayerVanishEvent(MatchPlayer vanisher, boolean vanished, boolean quiet) {
     super(vanisher);
     this.quiet = quiet;
+    this.vanished = vanished;
   }
 
   public boolean isVanished() {
-    return getPlayer().isVanished();
+    return vanished;
   }
 
   public boolean isQuiet() {

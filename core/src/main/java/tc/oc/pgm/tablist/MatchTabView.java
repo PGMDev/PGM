@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -322,8 +323,8 @@ public class MatchTabView extends TabView implements Listener {
 
   private boolean shouldHide(MatchPlayer other) {
     return other != matchPlayer
-        && other.isVanished()
-        && !matchPlayer.getBukkit().hasPermission(Permissions.STAFF);
+        && Integration.isVanished(other.getBukkit())
+        && !matchPlayer.getBukkit().hasPermission(Permissions.VANISH);
   }
 
   private static int divideRoundingUp(int numerator, int denominator) {

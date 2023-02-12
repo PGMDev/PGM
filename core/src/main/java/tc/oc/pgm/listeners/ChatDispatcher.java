@@ -106,7 +106,7 @@ public class ChatDispatcher implements Listener {
   @CommandDescription("Send a message to everyone")
   public void sendGlobal(
       Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
-    if (sender.isVanished()) {
+    if (Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
@@ -128,7 +128,7 @@ public class ChatDispatcher implements Listener {
   @CommandDescription("Send a message to your team")
   public void sendTeam(
       Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
-    if (sender.isVanished()) {
+    if (Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
