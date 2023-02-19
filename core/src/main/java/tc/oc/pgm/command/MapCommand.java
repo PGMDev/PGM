@@ -15,7 +15,7 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.Flag;
 import cloud.commandframework.annotations.specifier.Greedy;
 import cloud.commandframework.annotations.specifier.Range;
-import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -112,7 +112,7 @@ public final class MapCommand {
                     .clickEvent(runCommand("/map " + map.getName())))
             .build();
       }
-    }.display(audience, ImmutableSortedSet.copyOf(maps), page);
+    }.display(audience, ImmutableList.copyOf(maps), page);
   }
 
   private static boolean matchesTags(

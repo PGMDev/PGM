@@ -2,16 +2,14 @@ package tc.oc.pgm.teams;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import java.util.Collection;
-import org.apache.commons.lang.math.Fraction;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.join.JoinRequest;
+import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.PartyImpl;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 
@@ -144,44 +142,8 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     return false;
   }
 
-  public int getMaxSize(MatchPlayer joining) {
-    return join().canJoinFull(joining) ? this.getMaxOverfill() : this.getMaxPlayers();
-  }
-
-  /**
-   * Return the number of players on this team. If priority is true, exclude players who can be
-   * bumped off the team.
-   */
-  public int getSize(boolean priority) {
-    return getSizeAfterJoin(null, null, priority);
-  }
-
-  /**
-   * Return the number of players that will be on this team after the given player joins the given
-   * team. If the player is null, just return the current team size.
-   *
-   * @param joining Player who is joining a team
-   * @param newTeam Team the player is joining, which may or may not be this team
-   * @param priority Exclude from the result players who can be priority kicked off this team
-   * @return Number of players on the team after the join
-   */
-  public int getSizeAfterJoin(
-      @Nullable MatchPlayer joining, @Nullable Team newTeam, boolean priority) {
-    Collection<MatchPlayer> members = this.getPlayers();
-    int size = members.size();
-
-    if (joining != null) {
-      boolean member = members.contains(joining);
-      if (!member && this == newTeam) size++;
-      if (member && this != newTeam) size--;
-    }
-
-    if (priority)
-      for (MatchPlayer member : members) {
-        if (join().canPriorityKick(member)) size--;
-      }
-
-    return size;
+  public int getMaxSize(JoinRequest request) {
+    return join().canJoinFull(request) ? this.getMaxOverfill() : this.getMaxPlayers();
   }
 
   public boolean isMinSize() {
@@ -189,12 +151,13 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   }
 
   /** Return a normalized "fullness" ratio for this team. */
-  public float getFullness(boolean priority) {
-    return (float) this.getSize(priority) / this.getMaxOverfill();
+  public float getFullness() {
+    return (float) this.getPlayers().size() / this.getMaxOverfill();
   }
 
-  public Fraction getFullnessAfterJoin(@Nullable MatchPlayer joining, @Nullable Team newTeam) {
-    return Fraction.getReducedFraction(getSizeAfterJoin(joining, newTeam, false), getMaxOverfill());
+  /** Return a normalized "fullness" ratio for this team. */
+  public float getFullnessAfterJoin(int players) {
+    return (float) (this.getPlayers().size() + players) / this.getMaxOverfill();
   }
 
   /**
@@ -205,7 +168,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     float minFullness = 1f;
     for (Team team : module().getParticipatingTeams()) {
       if (team != this) {
-        minFullness = Math.min(minFullness, team.getFullness(false));
+        minFullness = Math.min(minFullness, team.getFullness());
       }
     }
 
@@ -218,7 +181,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   }
 
   public boolean isStacked() {
-    return this.getSize(false) > this.getMaxBalancedSize();
+    return this.getPlayers().size() > this.getMaxBalancedSize();
   }
 
   /**
@@ -226,23 +189,16 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
    * player has priority kick privileges, assume that non-privileged players can be kicked off the
    * team to make room.
    */
-  public int getOpenSlots(MatchPlayer joining, boolean priorityKick) {
-    // Count existing team members with and without join privileges
-    int normal = 0, privileged = 0;
-
-    for (MatchPlayer player : this.getPlayers()) {
-      if (player != joining) {
-        if (join().canPriorityKick(player)) privileged++;
-        else normal++;
-      }
+  public int getOpenSlots(JoinRequest request, boolean priorityKick) {
+    int slots = this.getMaxSize(request);
+    if (!(priorityKick && join().canPriorityKick(request))) {
+      // Subtract all player who have already joined
+      slots -= this.getPlayers().size();
+    } else {
+      // Subtract all players who cannot be kicked
+      JoinMatchModule jmm = join();
+      slots -= this.getPlayers().stream().filter(pl -> !jmm.canBePriorityKicked(pl)).count();
     }
-
-    // Get the maximum slots and deduct priority players
-    int slots = this.getMaxSize(joining) - privileged;
-
-    // If normal players cannot be bumped, deduct them as well
-    if (!(priorityKick && join().canPriorityKick(joining))) slots -= normal;
-
     return Math.max(0, slots);
   }
 
@@ -250,22 +206,20 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
    * @return if there is a free slot available for the given player to join this team. If the player
    *     is already on this team, the test behaves as if they are not.
    */
-  public boolean hasOpenSlots(MatchPlayer joining, boolean priorityKick) {
-    return this.getOpenSlots(joining, priorityKick) > 0;
+  public boolean hasOpenSlots(JoinRequest request, boolean priorityKick) {
+    return this.getOpenSlots(request, priorityKick) >= request.getPlayerCount();
   }
 
-  public TeamMatchModule.TeamJoinResult queryJoin(
-      MatchPlayer joining, boolean priorityKick, boolean rejoin) {
-    GenericJoinResult.Status joinStatus =
-        rejoin ? GenericJoinResult.Status.REJOINED : GenericJoinResult.Status.JOINED;
-    if (hasOpenSlots(joining, false)) {
+  public TeamMatchModule.TeamJoinResult queryJoin(JoinRequest request, boolean rejoin) {
+    JoinResultOption joinStatus = rejoin ? JoinResultOption.REJOINED : JoinResultOption.JOINED;
+    if (hasOpenSlots(request, false)) {
       return new TeamMatchModule.TeamJoinResult(joinStatus, this, false);
     }
 
-    if (priorityKick && hasOpenSlots(joining, true)) {
+    if (join().canPriorityKick(request) && hasOpenSlots(request, true)) {
       return new TeamMatchModule.TeamJoinResult(joinStatus, this, true);
     }
 
-    return new TeamMatchModule.TeamJoinResult(GenericJoinResult.Status.FULL, this, false);
+    return new TeamMatchModule.TeamJoinResult(JoinResultOption.FULL, this, false);
   }
 }

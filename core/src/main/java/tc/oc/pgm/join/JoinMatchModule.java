@@ -1,18 +1,14 @@
 package tc.oc.pgm.join;
 
-import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Set;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -23,12 +19,12 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
+import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 
 @ListenerScope(MatchScope.LOADED)
 public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
@@ -45,16 +41,17 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     }
   }
 
-  private final Set<JoinGuard> guards = new LinkedHashSet<>();
-  private final Set<JoinHandler> handlers = new LinkedHashSet<>();
-
   // Players who have requested to join before match start
   private final QueuedParty queuedParticipants;
   private final Match match;
+  private final OnlinePlayerMapAdapter<JoinRequest> requests;
+
+  private JoinHandler handler;
 
   private JoinMatchModule(Match match) {
     this.match = match;
-    queuedParticipants = new QueuedParty(match);
+    this.queuedParticipants = new QueuedParty(match);
+    this.requests = new OnlinePlayerMapAdapter<>(PGM.get());
   }
 
   @Override
@@ -62,111 +59,100 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     match.addParty(queuedParticipants);
   }
 
-  public void registerHandler(JoinGuard guard) {
-    if (guard instanceof JoinHandler) {
-      handlers.add((JoinHandler) guard);
-    } else {
-      guards.add(guard);
-    }
+  @Override
+  public void unload() {
+    requests.disable();
+  }
+
+  public void setJoinHandler(JoinHandler handler) {
+    this.handler = handler;
   }
 
   private Config getConfig() {
     return PGM.get().getConfiguration();
   }
 
-  public boolean canJoinFull(MatchPlayer joining) {
-    return !getConfig().shouldLimitJoin()
-        || joining.getBukkit().hasPermission(Permissions.JOIN_FULL);
+  public boolean canJoinFull(JoinRequest request) {
+    return !getConfig().shouldLimitJoin() || request.isForcedOr(JoinRequest.Flag.JOIN_FULL);
   }
 
-  public boolean canPriorityKick(MatchPlayer joining) {
-    return getConfig().canPriorityKick()
-        && joining.getBukkit().hasPermission(Permissions.JOIN_FULL)
-        && !match.isRunning();
+  public boolean priorityKickAllowed() {
+    return getConfig().canPriorityKick() && !match.isRunning();
   }
 
-  private Iterable<JoinGuard> allGuards() {
-    return Iterables.concat(guards, handlers);
+  public boolean canPriorityKick(JoinRequest request) {
+    return priorityKickAllowed() && request.isForcedOr(JoinRequest.Flag.JOIN_FULL);
+  }
+
+  public boolean canBePriorityKicked(MatchPlayer player) {
+    JoinRequest request = requests.get(player.getBukkit());
+    if (request == null) return false;
+
+    return priorityKickAllowed()
+        && !request.isForcedOr(JoinRequest.Flag.JOIN_FULL)
+        && !request.has(JoinRequest.Flag.SQUAD);
+  }
+
+  public boolean isAutoJoin(MatchPlayer player) {
+    JoinRequest request = requests.get(player.getBukkit());
+    return request != null && request.getTeam() == null;
   }
 
   @Override
-  public @Nullable JoinResult queryJoin(MatchPlayer joining, @Nullable Competitor chosenParty) {
+  public JoinResult queryJoin(MatchPlayer joining, JoinRequest request) {
     // Player does not have permission to voluntarily join
-    if (!joining.getBukkit().hasPermission(Permissions.JOIN)) {
-      return GenericJoinResult.Status.NO_PERMISSION.toResult();
+    if (!request.isForcedOr(JoinRequest.Flag.JOIN)) {
+      return JoinResultOption.NO_PERMISSION;
     }
 
     // Can't join if the match is over
     if (match.isFinished()) {
-      return GenericJoinResult.Status.MATCH_FINISHED.toResult();
+      return JoinResultOption.MATCH_FINISHED;
     }
 
     // Don't allow vanished players to join
     if (Integration.isVanished(joining.getBukkit())) {
-      return GenericJoinResult.Status.VANISHED.toResult();
+      return JoinResultOption.VANISHED;
     }
 
     // If mid-match join is disabled, player cannot join for the first time after the match has
     // started
     if (match.isRunning() && !getConfig().canAnytimeJoin()) {
-      return GenericJoinResult.Status.MATCH_STARTED.toResult();
+      return JoinResultOption.MATCH_STARTED;
     }
 
-    for (JoinGuard guard : allGuards()) {
-      JoinResult result = guard.queryJoin(joining, chosenParty);
-      if (result != null) return result;
-    }
-
-    return null;
+    return handler.queryJoin(joining, request);
   }
 
   @Override
-  public boolean join(MatchPlayer joining, @Nullable Competitor chosenParty, JoinResult result) {
-    if (result instanceof GenericJoinResult) {
-      GenericJoinResult genericResult = (GenericJoinResult) result;
-      if (genericResult.getStatus() == GenericJoinResult.Status.QUEUED) {
+  public boolean join(MatchPlayer joining, JoinRequest request, @NotNull JoinResult result) {
+    if (result.isSuccess()) {
+      requests.put(joining.getBukkit(), request);
+    }
+
+    switch (result.getOption()) {
+      case QUEUED:
         queueToJoin(joining);
         return true;
-      }
 
-      switch (genericResult.getStatus()) {
-        case MATCH_STARTED:
-          joining.sendWarning(translatable("join.err.afterStart"));
-          return true;
+      case MATCH_STARTED:
+        joining.sendWarning(translatable("join.err.afterStart"));
+        return true;
 
-        case MATCH_FINISHED:
-          joining.sendWarning(translatable("join.err.afterFinish"));
-          return true;
+      case MATCH_FINISHED:
+        joining.sendWarning(translatable("join.err.afterFinish"));
+        return true;
 
-        case NO_PERMISSION:
-          joining.sendWarning(translatable("join.err.noPermission"));
-          return true;
+      case NO_PERMISSION:
+        joining.sendWarning(translatable("join.err.noPermission"));
+        return true;
 
-        case VANISHED:
-          joining.sendWarning(translatable("join.err.vanish"));
-          return true;
-      }
+      case VANISHED:
+        joining.sendWarning(translatable("join.err.vanish"));
+        return true;
     }
 
-    for (JoinGuard guard : allGuards()) {
-      if (guard.join(joining, chosenParty, result)) return true;
-    }
-
-    return false;
-  }
-
-  public boolean join(MatchPlayer joining, @Nullable Competitor chosenParty) {
-    return join(joining, chosenParty, queryJoin(joining, chosenParty));
-  }
-
-  @Override
-  public boolean forceJoin(MatchPlayer joining, @Nullable Competitor forcedParty) {
-    if (Integration.isVanished(joining.getBukkit())) return join(joining, forcedParty);
-
-    for (JoinHandler handler : handlers) {
-      if (handler.forceJoin(joining, forcedParty)) return true;
-    }
-    return false;
+    return handler.join(joining, request, result);
   }
 
   public boolean leave(MatchPlayer leaving) {
@@ -217,11 +203,8 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
   @Override
   public void queuedJoin(QueuedParty queue) {
-    // Give all handlers a chance to bulk join
-    for (JoinHandler handler : handlers) {
-      if (queue.getPlayers().isEmpty()) break;
-      handler.queuedJoin(queue);
-    }
+    // Give handler a chance to bulk join
+    handler.queuedJoin(queue);
 
     // Send any leftover players to obs
     for (MatchPlayer joining : queue.getOrderedPlayers()) {

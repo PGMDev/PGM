@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.action.actions.ExposedAction;
@@ -67,6 +68,7 @@ import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
 import tc.oc.pgm.command.parsers.ModeParser;
+import tc.oc.pgm.command.parsers.OfflinePlayerParser;
 import tc.oc.pgm.command.parsers.PartyParser;
 import tc.oc.pgm.command.parsers.PlayerClassParser;
 import tc.oc.pgm.command.parsers.PlayerParser;
@@ -192,6 +194,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     // Cloud has a default duration parser, but time type is not optional
     registerParser(Duration.class, new DurationParser());
     registerParser(Player.class, new PlayerParser());
+    registerParser(OfflinePlayer.class, new OfflinePlayerParser());
     registerParser(MatchPlayer.class, new MatchPlayerParser());
     registerParser(MapPool.class, new MapPoolParser());
     registerParser(Rotation.class, new RotationParser());

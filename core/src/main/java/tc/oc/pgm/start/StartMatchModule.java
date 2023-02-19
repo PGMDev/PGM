@@ -23,6 +23,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchLoadEndEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
@@ -45,17 +46,13 @@ public class StartMatchModule implements MatchModule, Listener {
   protected final BossBar unreadyBar;
   protected final Set<UnreadyReason> unreadyReasons = new HashSet<>();
   protected @Nullable BossBar startBar;
+  protected boolean finishedLoading;
   protected boolean autoStart; // Initialized from config, but is mutable
 
   private StartMatchModule(Match match) {
     this.match = match;
     this.unreadyBar = bossBar(space(), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
     this.autoStart = !PGM.get().getConfiguration().getStartTime().isNegative();
-  }
-
-  @Override
-  public void load() {
-    update();
   }
 
   @Override
@@ -79,6 +76,12 @@ public class StartMatchModule implements MatchModule, Listener {
   public void onLeave(PlayerLeaveMatchEvent event) {
     event.getPlayer().hideBossBar(unreadyBar);
     if (startBar != null) event.getPlayer().hideBossBar(startBar);
+  }
+
+  @EventHandler
+  public void onLoadEnd(MatchLoadEndEvent event) {
+    finishedLoading = true;
+    update();
   }
 
   // FIXME: Unsafe cast to SingleCountdownContext
@@ -219,8 +222,7 @@ public class StartMatchModule implements MatchModule, Listener {
   public void update() {
     final StartCountdown countdown = cc().getCountdown(StartCountdown.class);
     final boolean ready = canStart(countdown != null && countdown.isForced());
-    final boolean empty = match.getPlayers().isEmpty();
-    if (countdown == null && ready && isAutoStart()) {
+    if (countdown == null && ready && finishedLoading && isAutoStart()) {
       startCountdown(null, null, false);
     } else if (countdown != null && !ready) {
       cancelCountdown();

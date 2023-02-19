@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
+import tc.oc.pgm.join.JoinRequest;
 
 /**
  * Subclass of {@link PlayerJoinPartyEvent} called in cases where the player is joining the match
@@ -23,8 +24,8 @@ public class PlayerJoinMatchEvent extends PlayerJoinPartyEvent {
 
   private List<Component> extraLines = Lists.newArrayList();
 
-  public PlayerJoinMatchEvent(MatchPlayer player, Party newParty) {
-    super(player, null, assertNotNull(newParty));
+  public PlayerJoinMatchEvent(MatchPlayer player, Party newParty, JoinRequest request) {
+    super(player, null, assertNotNull(newParty), request);
   }
 
   public List<Component> getExtraLines() {

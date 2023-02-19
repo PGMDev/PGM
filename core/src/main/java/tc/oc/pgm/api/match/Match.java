@@ -29,6 +29,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.util.Audience;
 
 /**
@@ -356,6 +357,15 @@ public interface Match
    * @return Whether the operation was a success.
    */
   boolean setParty(MatchPlayer player, Party party);
+
+  /**
+   * Set or change the {@link Party} of a {@link MatchPlayer}.
+   *
+   * @param player The {@link MatchPlayer}.
+   * @param party The new {@link Party}.
+   * @return Whether the operation was a success.
+   */
+  boolean setParty(MatchPlayer player, Party party, JoinRequest request);
 
   /**
    * Add a {@link Party} to the {@link Match}.

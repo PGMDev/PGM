@@ -37,7 +37,6 @@ public final class TeamCommand {
   @CommandPermission(Permissions.JOIN_FORCE)
   public void force(
       MatchPlayer sender,
-      Match match,
       JoinMatchModule join,
       @Argument("player") MatchPlayer joiner,
       @Argument("team") Party team) {
@@ -47,7 +46,6 @@ public final class TeamCommand {
     if (team != null && !(team instanceof Competitor)) {
       join.leave(joiner);
     } else {
-      match.moduleOptional(TeamMatchModule.class).ifPresent(tmm -> tmm.setForced(joiner, true));
       join.forceJoin(joiner, (Competitor) team);
     }
 

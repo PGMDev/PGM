@@ -19,7 +19,7 @@ public class QueuedParty extends PartyImpl {
 
     @Override
     public int compare(final MatchPlayer a, final MatchPlayer b) {
-      return Boolean.compare(join.canPriorityKick(b), join.canPriorityKick(a));
+      return Boolean.compare(!join.canBePriorityKicked(b), !join.canBePriorityKicked(a));
     }
   }
 

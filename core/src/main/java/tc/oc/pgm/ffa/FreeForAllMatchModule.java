@@ -30,10 +30,11 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResult;
+import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
@@ -140,7 +141,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   @Override
   public void load() {
-    match.needModule(JoinMatchModule.class).registerHandler(this);
+    match.needModule(JoinMatchModule.class).setJoinHandler(this);
     match.setMaxPlayers(getMaxPlayers());
     updateReadiness();
   }
@@ -182,22 +183,22 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     return tribute;
   }
 
-  protected boolean canPriorityKick(MatchPlayer joining) {
-    if (!join().canPriorityKick(joining)) return false;
+  protected boolean canPriorityKick(JoinRequest request) {
+    if (!join().canPriorityKick(request)) return false;
 
     for (MatchPlayer player : match.getParticipants()) {
-      if (!join().canPriorityKick(player)) return true;
+      if (join().canBePriorityKicked(player)) return true;
     }
 
     return false;
   }
 
-  protected boolean priorityKick(MatchPlayer joining) {
-    if (!join().canPriorityKick(joining)) return false;
+  protected boolean priorityKick(JoinRequest request) {
+    if (!join().canPriorityKick(request)) return false;
 
     List<MatchPlayer> kickable = new ArrayList<>();
     for (MatchPlayer player : match.getParticipants()) {
-      if (!join().canPriorityKick(player)) kickable.add(player);
+      if (join().canBePriorityKicked(player)) kickable.add(player);
     }
     if (kickable.isEmpty()) return false;
 
@@ -212,53 +213,52 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   }
 
   @Override
-  public @Nullable GenericJoinResult queryJoin(
-      MatchPlayer joining, @Nullable Competitor chosenParty) {
-    if (chosenParty != null) return null;
+  public @Nullable JoinResult queryJoin(MatchPlayer joining, JoinRequest request) {
+    if (request.getTeam() != null) return null;
 
     if (joining.getParty() instanceof Tribute) {
-      return GenericJoinResult.Status.REDUNDANT.toResult();
+      return JoinResultOption.REDUNDANT;
+    }
+
+    if (request.has(JoinRequest.Flag.FORCE)) {
+      return JoinResultOption.JOINED;
     }
 
     int players = match.getParticipants().size();
 
-    if (join().canJoinFull(joining)) {
-      if (players >= getMaxOverfill() && !canPriorityKick(joining)) {
-        return GenericJoinResult.Status.FULL.toResult();
+    if (players >= getMaxPlayers()) {
+      if (!join().canJoinFull(request)) {
+        return JoinResultOption.FULL;
       }
-    } else {
-      if (players >= getMaxPlayers()) {
-        return GenericJoinResult.Status.FULL.toResult();
+      if (players >= getMaxOverfill() && !canPriorityKick(request)) {
+        return JoinResultOption.FULL;
       }
+      return new FfaJoinResult(JoinResultOption.JOINED, true);
     }
 
-    return GenericJoinResult.Status.JOINED.toResult();
+    return JoinResultOption.JOINED;
   }
 
   @Override
-  public boolean join(MatchPlayer joining, @Nullable Competitor chosenParty, JoinResult result) {
-    if (result instanceof GenericJoinResult) {
-      GenericJoinResult genericResult = (GenericJoinResult) result;
-      switch (genericResult.getStatus()) {
-        case FULL:
-          joining.sendWarning(translatable("join.err.full"));
-          return true;
+  public boolean join(MatchPlayer joining, JoinRequest request, JoinResult result) {
+    switch (result.getOption()) {
+      case FULL:
+        joining.sendWarning(translatable("join.err.full"));
+        return true;
 
-        case REDUNDANT:
-          joining.sendWarning(translatable("join.err.alreadyJoined"));
-          return true;
-      }
+      case REDUNDANT:
+        joining.sendWarning(translatable("join.err.alreadyJoined"));
+        return true;
     }
 
     if (!result.isSuccess()) return false;
 
-    if (!forceJoin(joining)) {
+    if (!match.setParty(joining, getTribute(joining))) {
       return false;
     }
 
-    if (result instanceof GenericJoinResult
-        && ((GenericJoinResult) result).priorityKickRequired()) {
-      priorityKick(joining);
+    if (result instanceof FfaJoinResult && ((FfaJoinResult) result).priorityKickRequired()) {
+      priorityKick(request);
     }
 
     return true;
@@ -267,21 +267,8 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   @Override
   public void queuedJoin(QueuedParty queue) {
     for (MatchPlayer player : queue.getOrderedPlayers()) {
-      join(player, null, queryJoin(player, null));
+      join(player, JoinRequest.fromPlayer(player, null, JoinRequest.Flag.IGNORE_QUEUE));
     }
-  }
-
-  @Override
-  public boolean forceJoin(MatchPlayer joining, @Nullable Competitor forcedParty) {
-    return forcedParty == null && forceJoin(joining);
-  }
-
-  public boolean forceJoin(MatchPlayer joining) {
-    if (joining.getParty() instanceof Tribute) {
-      joining.sendWarning(translatable("join.err.alreadyJoined"));
-    }
-
-    return match.setParty(joining, getTribute(joining));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -290,5 +277,29 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       event.getPlayer().sendMessage(translatable("join.ok"));
     }
     updateReadiness();
+  }
+
+  public static class FfaJoinResult implements JoinResult {
+    private final JoinResultOption status;
+    private final boolean priorityKick;
+
+    public FfaJoinResult(JoinResultOption status, boolean priorityKick) {
+      this.status = status;
+      this.priorityKick = priorityKick;
+    }
+
+    @Override
+    public boolean isSuccess() {
+      return status.isSuccess();
+    }
+
+    @Override
+    public JoinResultOption getOption() {
+      return status;
+    }
+
+    public boolean priorityKickRequired() {
+      return priorityKick;
+    }
   }
 }
