@@ -38,6 +38,8 @@ public interface Permissions {
   String BAN = ROOT + ".ban"; // Access to the /ban command
   String FREEZE = ROOT + ".freeze"; // Access to the /freeze command
   String VANISH = ROOT + ".vanish"; // Access to /vanish command
+  String VIEW_INVENTORY =
+      ROOT + ".inventory"; // Access to /inventory and can click on players to see their inventory
 
   String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
 
@@ -46,7 +48,11 @@ public interface Permissions {
       new Permission(
           "pgm.default",
           PermissionDefault.TRUE,
-          new ImmutableMap.Builder<String, Boolean>().put(JOIN, true).put(LEAVE, true).build());
+          new ImmutableMap.Builder<String, Boolean>()
+              .put(JOIN, true)
+              .put(LEAVE, true)
+              .put(VIEW_INVENTORY, true)
+              .build());
 
   Permission PREMIUM =
       new Permission(
