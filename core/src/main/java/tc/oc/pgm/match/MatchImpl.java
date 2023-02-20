@@ -449,17 +449,14 @@ public class MatchImpl implements Match {
     MatchPlayer player = players.get(bukkit.getUniqueId());
     if (player != null) {
       logger.fine("Removing player " + player);
-      setOrClearPlayerParty(player, null, null);
+      setOrClearPlayerParty(player, null, JoinRequest.of(null, JoinRequest.Flag.FORCE));
     }
   }
 
   @Override
-  public boolean setParty(MatchPlayer player, Party party) {
-    return setOrClearPlayerParty(player, assertNotNull(party), null);
-  }
-
-  @Override
-  public boolean setParty(MatchPlayer player, Party party, JoinRequest request) {
+  public boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request) {
+    if (request == null)
+      request = JoinRequest.of(party instanceof Team ? (Team) party : null, JoinRequest.Flag.FORCE);
     return setOrClearPlayerParty(player, assertNotNull(party), request);
   }
 
@@ -482,13 +479,7 @@ public class MatchImpl implements Match {
    * (and bail if either are cancelled) -
    */
   private boolean setOrClearPlayerParty(
-      MatchPlayer player, @Nullable Party newParty, @Nullable JoinRequest joinRequest) {
-    // Fallback if no join request is specified
-    if (joinRequest == null) {
-      joinRequest =
-          JoinRequest.of(newParty instanceof Team ? (Team) newParty : null, JoinRequest.Flag.FORCE);
-    }
-
+      MatchPlayer player, @Nullable Party newParty, @NotNull JoinRequest joinRequest) {
     Party oldParty = player.getParty();
 
     assertTrue(this == player.getMatch(), "Player belongs to a different match");

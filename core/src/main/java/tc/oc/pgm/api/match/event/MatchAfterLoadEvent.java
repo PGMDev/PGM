@@ -9,9 +9,9 @@ import tc.oc.pgm.api.match.Match;
  *
  * @see Match#load()
  */
-public class MatchLoadEndEvent extends MatchEvent {
+public class MatchAfterLoadEvent extends MatchEvent {
 
-  public MatchLoadEndEvent(Match match) {
+  public MatchAfterLoadEvent(Match match) {
     super(match);
   }
 

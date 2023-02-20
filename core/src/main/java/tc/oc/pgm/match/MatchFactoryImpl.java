@@ -29,7 +29,7 @@ import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.event.MatchLoadEndEvent;
+import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.FileUtils;
@@ -398,7 +398,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       // After all players have been teleported, remove the dummy team
       NMSHacks.sendPacket(NMSHacks.teamRemovePacket("dummy"));
 
-      match.callEvent(new MatchLoadEndEvent(match));
+      match.callEvent(new MatchAfterLoadEvent(match));
 
       return null;
     }

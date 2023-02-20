@@ -23,7 +23,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.match.MatchScope;
-import tc.oc.pgm.api.match.event.MatchLoadEndEvent;
+import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
@@ -79,7 +79,7 @@ public class StartMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler
-  public void onLoadEnd(MatchLoadEndEvent event) {
+  public void onLoadEnd(MatchAfterLoadEvent event) {
     finishedLoading = true;
     update();
   }

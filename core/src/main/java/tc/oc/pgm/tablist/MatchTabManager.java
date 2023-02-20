@@ -19,7 +19,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.event.MatchLoadEndEvent;
+import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
@@ -250,7 +250,7 @@ public class MatchTabManager extends TabManager implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onMatchLoad(MatchLoadEndEvent event) {
+  public void onMatchLoad(MatchAfterLoadEvent event) {
     rateLimit.setTimeout(0);
     forceRender();
   }
