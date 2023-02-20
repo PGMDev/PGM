@@ -19,6 +19,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchUnloadEvent;
@@ -51,7 +52,7 @@ public class MatchTabManager extends TabManager implements Listener {
   // How many MS must be waited for each TPS under 20 (last minute average)
   private static final int TPS_RATIO = 1000;
   // On match load, throttle tab-list until another match unloads, or this many MS pass.
-  private static final int MATCH_LOAD_TIMEOUT = 15_000;
+  private static final int MATCH_LOAD_TIMEOUT = 30_000;
 
   private final Map<Team, TeamTabEntry> teamEntries;
   private final Map<Match, MapTabEntry> mapEntries;
@@ -149,16 +150,24 @@ public class MatchTabManager extends TabManager implements Listener {
     super.invalidate();
 
     if (this.renderTask == null) {
-      Runnable render =
-          () -> {
-            rateLimit.beforeTask();
-            MatchTabManager.this.renderTask = null;
-            MatchTabManager.this.render();
-            rateLimit.afterTask();
-          };
-
       this.renderTask =
-          PGM.get().getExecutor().schedule(render, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
+          PGM.get()
+              .getExecutor()
+              .schedule(this::renderTasked, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
+    }
+  }
+
+  private void renderTasked() {
+    rateLimit.beforeTask();
+    this.render();
+    this.renderTask = null;
+    rateLimit.afterTask();
+  }
+
+  private void forceRender() {
+    if (renderTask == null || renderTask.cancel(false)) {
+      this.renderTask =
+          PGM.get().getExecutor().schedule(this::renderTasked, 100, TimeUnit.MILLISECONDS);
     }
   }
 
@@ -241,8 +250,13 @@ public class MatchTabManager extends TabManager implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onMatchUnload(MatchUnloadEvent event) {
+  public void onMatchLoad(MatchAfterLoadEvent event) {
     rateLimit.setTimeout(0);
+    forceRender();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onMatchUnload(MatchUnloadEvent event) {
     TeamMatchModule tmm = event.getMatch().getModule(TeamMatchModule.class);
     if (tmm != null) {
       for (Team team : tmm.getTeams()) {

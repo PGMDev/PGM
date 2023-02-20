@@ -52,9 +52,10 @@ import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResult;
+import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
@@ -132,7 +133,7 @@ public class PickerMatchModule implements MatchModule, Listener {
       case PICKER_ON: // When on always show the GUI
         return true;
       default: // Display after map cycle, but check perms when clicking button.
-        return (playerTriggered ? (hasPermission || hasClasses) : true);
+        return !playerTriggered || hasPermission || hasClasses;
     }
   }
 
@@ -142,10 +143,11 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private boolean canAutoJoin(MatchPlayer joining) {
-    JoinResult result = match.needModule(JoinMatchModule.class).queryJoin(joining, null);
-    return result.isSuccess()
-        || ((result instanceof GenericJoinResult)
-            && ((GenericJoinResult) result).getStatus() == GenericJoinResult.Status.FULL);
+    JoinResult result =
+        match
+            .needModule(JoinMatchModule.class)
+            .queryJoin(joining, JoinRequest.fromPlayer(joining, null));
+    return result.isSuccess() || result.getOption() == JoinResultOption.FULL;
   }
 
   private boolean canChooseMultipleTeams(MatchPlayer joining) {
@@ -158,15 +160,12 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     Set<Team> teams = new HashSet<>();
     for (Team team : tmm.getTeams()) {
-      JoinResult result = tmm.queryJoin(joining, team);
+      JoinResult result = tmm.queryJoin(joining, JoinRequest.fromPlayer(joining, team));
       // We still want to show the button if the team is full
       // or the player doesn't have join perms.
       if (result.isSuccess()
-          || result instanceof GenericJoinResult
-              && (((GenericJoinResult) result).getStatus() == GenericJoinResult.Status.FULL
-                  || ((GenericJoinResult) result).getStatus()
-                      == GenericJoinResult.Status.CHOICE_DENIED)) {
-
+          || result.getOption() == JoinResultOption.FULL
+          || result.getOption() == JoinResultOption.CHOICE_DENIED) {
         teams.add(team);
       }
     }
@@ -179,7 +178,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (player == null) return false;
 
     // Player is eliminated from Blitz
-    if (isBlitz && !match.needModule(BlitzMatchModule.class).canJoin(player)) return false;
+    if (isBlitz && !match.needModule(BlitzMatchModule.class).canJoin(player, null)) return false;
 
     // Player is not observing or dead
     if (!(player.isObserving() || player.isDead())) return false;
@@ -371,7 +370,7 @@ public class PickerMatchModule implements MatchModule, Listener {
         showWindow(player);
       } else {
         // If there is nothing to pick or setting is disabled, just join immediately
-        jmm.join(player, null);
+        jmm.join(player, JoinRequest.fromPlayer(player, null));
       }
     } else if (hand.getType() == Button.LEAVE.material && left) {
       jmm.leave(player);
@@ -631,9 +630,9 @@ public class PickerMatchModule implements MatchModule, Listener {
         this.getTeamSizeDescription(team.getPlayers().size(), team.getMaxPlayers());
     List<String> lore = Lists.newArrayList(capacityMessage);
 
-    JoinResult result = jmm.queryJoin(player, team);
-    if (result instanceof GenericJoinResult) {
-      switch (((GenericJoinResult) result).getStatus()) {
+    JoinResult result = jmm.queryJoin(player, JoinRequest.fromPlayer(player, team));
+    if (result instanceof JoinResultOption) {
+      switch ((JoinResultOption) result) {
         default:
           lore.add(
               ChatColor.GREEN

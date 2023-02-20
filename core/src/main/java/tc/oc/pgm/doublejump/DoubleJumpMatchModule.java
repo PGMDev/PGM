@@ -65,6 +65,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
       iterator.remove();
       this.refreshJump(player);
     }
+    this.jumpers.disable();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

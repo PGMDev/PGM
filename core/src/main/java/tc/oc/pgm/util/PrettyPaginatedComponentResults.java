@@ -3,8 +3,6 @@ package tc.oc.pgm.util;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 import net.kyori.adventure.text.Component;
@@ -65,19 +63,6 @@ public abstract class PrettyPaginatedComponentResults<T> {
    */
   public Component formatEmpty() throws TextException {
     throw exception("menu.page.empty");
-  }
-
-  /**
-   * Displays a list of items based on the page to an audience
-   *
-   * @param audience to display data to
-   * @param data to display
-   * @param page where the data is located
-   * @throws TextException no match exceptions
-   */
-  public void display(Audience audience, Collection<? extends T> data, int page)
-      throws TextException {
-    display(audience, new ArrayList<>(data), page);
   }
 
   /**

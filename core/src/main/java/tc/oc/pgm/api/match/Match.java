@@ -29,6 +29,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.util.Audience;
 
 /**
@@ -349,13 +350,28 @@ public interface Match
   Collection<Competitor> getWinners();
 
   /**
-   * Set or change the {@link Party} of a {@link MatchPlayer}.
+   * Set or change the {@link Party} of a {@link MatchPlayer}. Prefer {@link #setParty(MatchPlayer,
+   * Party, JoinRequest)} if you have a specific join request or want to avoid a generic force-join
    *
    * @param player The {@link MatchPlayer}.
    * @param party The new {@link Party}.
    * @return Whether the operation was a success.
    */
-  boolean setParty(MatchPlayer player, Party party);
+  default boolean setParty(MatchPlayer player, Party party) {
+    return setParty(player, party, null);
+  }
+
+  /**
+   * Set or change the {@link Party} of a {@link MatchPlayer}.
+   *
+   * @param player The {@link MatchPlayer}.
+   * @param party The new {@link Party}.
+   * @param request The {@link JoinRequest} that originated this call, and that will be passed down
+   *     resulting events. If null, it will be assumed that this is a forced join (bypassing
+   *     restrictions such as blitz).
+   * @return Whether the operation was a success.
+   */
+  boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request);
 
   /**
    * Add a {@link Party} to the {@link Match}.

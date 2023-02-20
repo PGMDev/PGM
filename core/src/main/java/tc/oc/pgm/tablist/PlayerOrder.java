@@ -40,6 +40,13 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     // Check if the viewer has staff permissions
     boolean isStaff = viewer.hasPermission(Permissions.STAFF);
 
+    // Check if viewer is in a squad with the player
+    boolean aSquad = Integration.areInSquad(viewer, a);
+    boolean bSquad = Integration.areInSquad(viewer, b);
+
+    if (aSquad && !bSquad) return -1;
+    else if (bSquad && !aSquad) return 1;
+
     // Check if viewer is friends with the player
     boolean aFriend = Integration.isFriend(viewer, a);
     boolean bFriend = Integration.isFriend(viewer, b);

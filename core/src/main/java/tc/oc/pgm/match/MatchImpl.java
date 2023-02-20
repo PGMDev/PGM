@@ -74,7 +74,9 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
+import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.FileUtils;
@@ -447,13 +449,15 @@ public class MatchImpl implements Match {
     MatchPlayer player = players.get(bukkit.getUniqueId());
     if (player != null) {
       logger.fine("Removing player " + player);
-      setOrClearPlayerParty(player, null);
+      setOrClearPlayerParty(player, null, JoinRequest.of(null, JoinRequest.Flag.FORCE));
     }
   }
 
   @Override
-  public boolean setParty(MatchPlayer player, Party party) {
-    return setOrClearPlayerParty(player, assertNotNull(party));
+  public boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request) {
+    if (request == null)
+      request = JoinRequest.of(party instanceof Team ? (Team) party : null, JoinRequest.Flag.FORCE);
+    return setOrClearPlayerParty(player, assertNotNull(party), request);
   }
 
   /**
@@ -474,7 +478,8 @@ public class MatchImpl implements Match {
    * <p>- Call {@link PlayerParticipationStartEvent} and/or {@link PlayerParticipationStopEvent}
    * (and bail if either are cancelled) -
    */
-  private boolean setOrClearPlayerParty(MatchPlayer player, @Nullable Party newParty) {
+  private boolean setOrClearPlayerParty(
+      MatchPlayer player, @Nullable Party newParty, @NotNull JoinRequest joinRequest) {
     Party oldParty = player.getParty();
 
     assertTrue(this == player.getMatch(), "Player belongs to a different match");
@@ -516,7 +521,7 @@ public class MatchImpl implements Match {
 
       if (newParty instanceof Competitor) {
         PlayerParticipationEvent request =
-            new PlayerParticipationStartEvent(player, (Competitor) newParty);
+            new PlayerParticipationStartEvent(player, (Competitor) newParty, joinRequest);
         callEvent(request);
         if (request.isCancelled()
             && oldParty != null) { // Can't cancel this if the player is joining the match
@@ -558,7 +563,7 @@ public class MatchImpl implements Match {
         removeTickable(player);
         this.players.remove(player.getId());
 
-        callEvent(new PlayerPartyChangeEvent(player, oldParty, null));
+        callEvent(new PlayerPartyChangeEvent(player, oldParty, null, joinRequest));
       } else {
         // Player is joining a party
         // Update the new party's state
@@ -566,9 +571,9 @@ public class MatchImpl implements Match {
 
         if (oldParty == null) {
           // If they are not leaving an old party, they are also joining the match
-          callEvent(new PlayerJoinMatchEvent(player, newParty));
+          callEvent(new PlayerJoinMatchEvent(player, newParty, joinRequest));
         } else {
-          callEvent(new PlayerJoinPartyEvent(player, oldParty, newParty));
+          callEvent(new PlayerJoinPartyEvent(player, oldParty, newParty, joinRequest));
         }
       }
 

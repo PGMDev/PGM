@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -297,6 +298,11 @@ public class MatchTabView extends TabView implements Listener {
   public void onPlayerVanish(PlayerVanishEvent event) {
     updatePlayerParty(
         event.getPlayer(), event.getPlayer().getParty(), event.getPlayer().getParty());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerNameChange(NameDecorationChangeEvent event) {
+    this.invalidateLayout();
   }
 
   private void updatePlayerParty(

@@ -22,13 +22,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title.Times;
 import net.kyori.adventure.util.Ticks;
-import org.apache.commons.lang.math.Fraction;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -39,10 +37,11 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.join.GenericJoinResult;
 import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResult;
+import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.match.PartyImpl;
 import tc.oc.pgm.match.QueuedParty;
@@ -93,31 +92,42 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     }
   };
 
-  public static class TeamJoinResult extends GenericJoinResult {
-    public TeamJoinResult(Status status, @Nullable Team competitor, boolean priorityKick) {
-      super(status, competitor, priorityKick);
+  public static class TeamJoinResult implements JoinResult {
+    private final JoinResultOption status;
+    private final Team team;
+    private final boolean priorityKick;
+
+    public TeamJoinResult(JoinResultOption status, @Nullable Team team, boolean priorityKick) {
+      this.status = status;
+      this.team = team;
+      this.priorityKick = priorityKick;
     }
 
-    public TeamJoinResult(Status status) {
+    public TeamJoinResult(JoinResultOption status) {
       this(status, null, false);
     }
 
-    public @Nullable Team getTeam() {
-      return (Team) getCompetitor();
+    @Override
+    public boolean isSuccess() {
+      return status.isSuccess();
+    }
+
+    @Override
+    public JoinResultOption getOption() {
+      return status;
+    }
+
+    public Team getTeam() {
+      return team;
+    }
+
+    public boolean priorityKickRequired() {
+      return priorityKick;
     }
   }
 
   // All teams in the match
   private final Set<Team> teams;
-
-  // Players who autojoined their current team
-  private final Set<MatchPlayer> autoJoins = new HashSet<>();
-
-  // Players who were forced into the match
-  private final Set<MatchPlayer> forced = new HashSet<>();
-
-  // Players who are being switched between teams see TeamSwitchKit
-  private final Map<MatchPlayer, Boolean> teamSwitchKit = new HashMap<>();
 
   // Minimum at any time of the number of additional players needed to start the match
   private int minPlayersNeeded = Integer.MAX_VALUE;
@@ -144,7 +154,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       match.addParty(team);
     }
 
-    match.needModule(JoinMatchModule.class).registerHandler(this);
+    match.needModule(JoinMatchModule.class).setJoinHandler(this);
 
     updateMaxPlayers();
     updateReadiness();
@@ -229,95 +239,18 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     return null;
   }
 
-  protected void setAutoJoin(MatchPlayer player, boolean autoJoined) {
-    if (autoJoined) {
-      autoJoins.add(player);
-    } else {
-      autoJoins.remove(player);
-    }
+  public boolean canSwitchTeams(JoinRequest request) {
+    return canChooseTeam(request);
   }
 
-  protected boolean isAutoJoin(MatchPlayer player) {
-    return autoJoins.contains(player);
+  public boolean canChooseTeam(JoinRequest request) {
+    return request.isForcedOr(JoinRequest.Flag.JOIN_CHOOSE);
   }
 
-  public void setForced(MatchPlayer player, boolean force) {
-    if (force) {
-      forced.add(player);
-    } else {
-      forced.remove(player);
-    }
-  }
-
-  public boolean isForced(MatchPlayer player) {
-    return forced.contains(player);
-  }
-
-  public void setTeamSwitchKit(MatchPlayer player, boolean showTitle, boolean add) {
-    setForced(player, add);
-    if (add) {
-      teamSwitchKit.put(player, showTitle);
-    } else {
-      teamSwitchKit.remove(player);
-    }
-  }
-
-  public boolean hasTeamSwitchKit(MatchPlayer player) {
-    return teamSwitchKit.containsKey(player);
-  }
-
-  public boolean showTeamSwitchTitle(MatchPlayer player) {
-    return teamSwitchKit.getOrDefault(player, false);
-  }
-
-  public boolean canSwitchTeams(MatchPlayer joining) {
-    return canChooseTeam(joining);
-  }
-
-  public boolean canChooseTeam(MatchPlayer joining) {
-    return joining.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
-  }
-
-  @Override
-  public boolean forceJoin(MatchPlayer joining, @Nullable Competitor forcedParty) {
-    if (forcedParty instanceof Team) {
-      return forceJoin(joining, (Team) forcedParty, false);
-    } else if (forcedParty == null) {
-      return forceJoin(joining, getEmptiestTeam(), true);
-    } else {
-      return false;
-    }
-  }
-
-  public boolean forceJoin(MatchPlayer player, Team newTeam, boolean autoJoin) {
+  public boolean internalJoin(MatchPlayer player, Team newTeam) {
     assertNotNull(newTeam);
-    Party oldTeam = player.getParty();
-    if (oldTeam == newTeam) return true;
-
-    if (!Integration.isVanished(player.getBukkit()) && match.setParty(player, newTeam)) {
-      setAutoJoin(player, autoJoin);
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  public boolean areTeamsEven() {
-    return areTeamsEvenAfterJoin(null, null);
-  }
-
-  /** Do all teams have equal fullness ratios? */
-  public boolean areTeamsEvenAfterJoin(@Nullable MatchPlayer joining, @Nullable Team newTeam) {
-    Fraction commonFullness = null;
-    for (Team team : getParticipatingTeams()) {
-      Fraction teamFullness = team.getFullnessAfterJoin(joining, newTeam);
-      if (commonFullness == null) {
-        commonFullness = teamFullness;
-      } else if (!commonFullness.equals(teamFullness)) {
-        return false;
-      }
-    }
-    return true;
+    return player.getParty() == newTeam
+        || (!Integration.isVanished(player.getBukkit()) && match.setParty(player, newTeam));
   }
 
   /** Return the most full participating team */
@@ -326,7 +259,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     float maxFullness = Float.MIN_VALUE;
 
     for (Team team : this.getParticipatingTeams()) {
-      float fullness = team.getFullness(false);
+      float fullness = team.getFullness();
       if (fullestTeam == null || fullness > maxFullness) {
         fullestTeam = team;
         maxFullness = fullness;
@@ -342,7 +275,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     float minFullness = Float.MAX_VALUE;
 
     for (Team team : this.getParticipatingTeams()) {
-      float fullness = team.getFullness(false);
+      float fullness = team.getFullness();
       if (emptiestTeam == null || fullness < minFullness) {
         emptiestTeam = team;
         minFullness = fullness;
@@ -354,8 +287,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   /**
    * Get the least full participating team currently in the match (based on the {@link
-   * Team#getFullness} result) that the given player can join, excluding any team that player is
-   * already on.
+   * Team#getFullnessAfterJoin} result) that the given player can join, excluding any team that
+   * player is already on.
    *
    * <p>If priority is true, then it will be assumed that players without "join full team"
    * privileges can be kicked from a team to make room for the joining player, though this will be
@@ -364,17 +297,17 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
    * <p>Ties are resolved randomly to ensure that one team doesn't consistently get more players
    * than any other.
    */
-  public TeamJoinResult getEmptiestJoinableTeam(MatchPlayer joining, boolean priorityKick) {
+  public TeamJoinResult getEmptiestJoinableTeam(Team ignoreTeam, JoinRequest request) {
     TeamJoinResult bestResult = null;
     float minFullness = Float.MAX_VALUE;
 
     List<Team> shuffledTeams = new ArrayList<>(getParticipatingTeams());
     Collections.shuffle(shuffledTeams, match.getRandom());
     for (Team team : shuffledTeams) {
-      if (team != joining.getParty()) {
-        TeamJoinResult result = team.queryJoin(joining, priorityKick, false);
+      if (team != ignoreTeam) {
+        TeamJoinResult result = team.queryJoin(request, false);
         if (result.isSuccess()) {
-          float fullness = team.getFullness(false);
+          float fullness = team.getFullnessAfterJoin(request.getPlayerCount());
           if (bestResult == null
               || (!result.priorityKickRequired() && bestResult.priorityKickRequired())
               || (result.priorityKickRequired() == bestResult.priorityKickRequired()
@@ -387,9 +320,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       }
     }
 
-    return bestResult != null
-        ? bestResult
-        : new TeamJoinResult(TeamJoinResult.Status.FULL, null, priorityKick);
+    return bestResult != null ? bestResult : new TeamJoinResult(JoinResultOption.FULL, null, false);
   }
 
   /**
@@ -402,22 +333,18 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   /** What would happen if the given player tried to join the given team right now? */
   @Override
-  public @Nullable JoinResult queryJoin(MatchPlayer joining, @Nullable Competitor chosenParty) {
-    if (chosenParty == null || chosenParty instanceof Team) {
-      return queryJoin(joining, (Team) chosenParty, false);
-    } else {
-      return null;
+  public JoinResult queryJoin(MatchPlayer joining, JoinRequest request) {
+    if (request.has(JoinRequest.Flag.FORCE)) {
+      return new TeamJoinResult(JoinResultOption.JOINED, request.getTeam(), false);
     }
-  }
 
-  private JoinResult queryJoin(MatchPlayer joining, @Nullable Team chosenTeam, boolean queued) {
     final Team lastTeam = getLastTeam(joining.getId());
 
-    if (chosenTeam == null) {
+    if (request.getTeam() == null) {
       // If autojoining, and the player is already on a team, the request is satisfied
       if (joining.getParty() instanceof Competitor) {
         return new TeamJoinResult(
-            GenericJoinResult.Status.REDUNDANT,
+            JoinResultOption.REDUNDANT,
             joining.getParty() instanceof Team ? (Team) joining.getParty() : null,
             false);
       }
@@ -425,68 +352,69 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       // If team choosing is disabled, and the match has not started yet, defer the join.
       // Note that this can only happen with autojoin. Choosing a team always fails if
       // the condition below is true.
-      if (!queued
-          && !canChooseTeam(joining)
-          && !match.isRunning()
-          && PGM.get().getConfiguration().shouldQueueJoin()) {
-        return GenericJoinResult.Status.QUEUED.toResult();
+      if (PGM.get().getConfiguration().shouldQueueJoin()
+          && !request.has(JoinRequest.Flag.IGNORE_QUEUE)
+          && !canChooseTeam(request)
+          && !match.isRunning()) {
+        return JoinResultOption.QUEUED;
       }
 
       if (lastTeam != null) {
         // If the player was previously on a team, try to join that team first
-        GenericJoinResult result = lastTeam.queryJoin(joining, true, true);
+        TeamJoinResult result = lastTeam.queryJoin(request, true);
         if (result.isSuccess()) return result;
 
         // If their previous team is full, and they are not allowed to switch, join fails
-        if (!canSwitchTeams(joining)) {
-          return new TeamJoinResult(GenericJoinResult.Status.FULL, lastTeam, false);
+        if (!canSwitchTeams(request)) {
+          return new TeamJoinResult(JoinResultOption.FULL, lastTeam, false);
         }
       }
 
       // Queue the player if there is an attempt to achieve balance
-      if (!queued && !match.isRunning() && PGM.get().getConfiguration().shouldQueueJoin()) {
-        return GenericJoinResult.Status.QUEUED.toResult();
+      if (PGM.get().getConfiguration().shouldQueueJoin()
+          && !request.has(JoinRequest.Flag.IGNORE_QUEUE)
+          && !match.isRunning()) {
+        return JoinResultOption.QUEUED;
       }
 
       // Try to find a team for the player to join
-      return getEmptiestJoinableTeam(joining, true);
-
+      return getEmptiestJoinableTeam(null, request);
     } else {
       // If the player is already on the chosen team, there is nothing to do
-      if (chosenTeam == joining.getParty()) {
-        return new TeamJoinResult(GenericJoinResult.Status.REDUNDANT, chosenTeam, false);
+      if (request.getTeam() == joining.getParty()) {
+        return new TeamJoinResult(JoinResultOption.REDUNDANT, request.getTeam(), false);
       }
 
       // If team switching is disabled and the player is choosing to re-join their
       // last team, don't consider it a "choice" since that's the only team they can
       // join anyway. In any other case, check that they are allowed to choose their team.
-      if (canSwitchTeams(joining) || chosenTeam != lastTeam) {
+      if (canSwitchTeams(request) || request.getTeam() != lastTeam) {
         // Player is not allowed to choose their team
-        if (!canChooseTeam(joining)) {
-          return new TeamJoinResult(GenericJoinResult.Status.CHOICE_DENIED);
+        if (!canChooseTeam(request)) {
+          return new TeamJoinResult(JoinResultOption.CHOICE_DENIED);
         }
       }
 
       // If team switching is disabled, check if the player is rejoining their former team
-      if (!canSwitchTeams(joining) && lastTeam != null) {
-        if (chosenTeam == lastTeam) {
-          return chosenTeam.queryJoin(joining, true, true);
+      if (!canSwitchTeams(request) && lastTeam != null) {
+        if (request.getTeam() == lastTeam) {
+          return request.getTeam().queryJoin(request, true);
         } else {
-          return new TeamJoinResult(GenericJoinResult.Status.SWITCH_DISABLED);
+          return new TeamJoinResult(JoinResultOption.SWITCH_DISABLED);
         }
       }
 
-      return chosenTeam.queryJoin(joining, true, false);
+      return request.getTeam().queryJoin(request, false);
     }
   }
 
   @Override
-  public boolean join(MatchPlayer joining, @Nullable Competitor chosenParty, JoinResult result) {
+  public boolean join(MatchPlayer joining, JoinRequest request, JoinResult result) {
     if (result instanceof TeamJoinResult) {
       TeamJoinResult teamResult = (TeamJoinResult) result;
       Team lastTeam = getLastTeam(joining.getId());
 
-      switch (teamResult.getStatus()) {
+      switch (teamResult.getOption()) {
         case SWITCH_DISABLED:
           joining.sendWarning(translatable("join.err.noSwitch", lastTeam.getName()));
           return true;
@@ -511,8 +439,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           return true;
       }
 
-      // FIXME: When a player rejoins their last team, we lose their autojoin status
-      if (!forceJoin(joining, teamResult.getTeam(), lastTeam == null && chosenParty == null)) {
+      if (!internalJoin(joining, teamResult.getTeam())) {
         return false;
       }
 
@@ -532,18 +459,19 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     // logic
     List<MatchPlayer> shortList = new ArrayList<>();
     for (MatchPlayer player : queue.getOrderedPlayers()) {
-      JoinResult result = queryJoin(player, null, true);
+      JoinRequest request = JoinRequest.fromPlayer(player, null, JoinRequest.Flag.IGNORE_QUEUE);
+
+      JoinResult result = queryJoin(player, request);
       if (result.isSuccess()) {
         shortList.add(player);
       } else {
         // This will send a failure message
-        join(player, null, result);
+        join(player, request, result);
       }
     }
 
-    for (int i = 0; i < shortList.size(); i++) {
-      MatchPlayer player = shortList.get(i);
-      join(player, null, queryJoin(player, null, true));
+    for (MatchPlayer player : shortList) {
+      join(player, JoinRequest.fromPlayer(player, null, JoinRequest.Flag.IGNORE_QUEUE));
     }
   }
 
@@ -567,7 +495,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     // Find all players who can be bumped
     List<MatchPlayer> kickable = new ArrayList<>();
     for (MatchPlayer player : kickFrom.getPlayers()) {
-      if (!jmm.canPriorityKick(player) || (forBalance && isAutoJoin(player))) {
+      if (jmm.canBePriorityKicked(player) || (forBalance && jmm.isAutoJoin(player))) {
         // Premium players can be auto-balanced if they auto-joined
         kickable.add(player);
       }
@@ -580,9 +508,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Try to put them on another team
     Party kickTo;
-    GenericJoinResult kickResult = this.getEmptiestJoinableTeam(kickMe, false);
+    TeamJoinResult kickResult =
+        this.getEmptiestJoinableTeam(kickFrom, JoinRequest.fromPlayer(kickMe, null));
     if (kickResult.isSuccess()) {
-      kickTo = kickResult.getCompetitor();
+      kickTo = kickResult.getTeam();
     } else {
       // If no teams are available, kick them to observers, if necessary
       if (forBalance) return false;
@@ -590,7 +519,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     }
 
     // Give them the bad news
-    if (jmm.canPriorityKick(kickMe)) {
+    if (jmm.canBePriorityKicked(kickMe)) {
       kickMe.sendMessage(translatable("join.ok.moved", kickTo.getName()));
       kickMe.sendMessage(translatable("join.ok.moved.explanation"));
     } else {
@@ -620,13 +549,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     if (event.getNewParty() instanceof Team
         || (event.getNewParty() instanceof ObserverParty && event.getOldParty() != null)) {
       Component joinMsg = translatable("join.ok.team", event.getNewParty().getName());
-      boolean title = false;
-
-      // Players with team switch kit, check for title value and remove from map
-      if (hasTeamSwitchKit(player)) {
-        title = showTeamSwitchTitle(player);
-        setTeamSwitchKit(player, false, false);
-      }
+      boolean title = event.getRequest().has(JoinRequest.Flag.SHOW_TITLE);
 
       if (title && !player.isLegacy()) {
         player.showTitle(
@@ -639,27 +562,13 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       }
     }
 
-    if (event.getNewParty() instanceof ObserverParty) {
-      setForced(event.getPlayer(), false);
-    }
     updateReadiness();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void addPlayerToMatch(PlayerJoinPartyEvent event) {
-    if (!(event.getNewParty() instanceof Team)) {
-      return;
-    }
-    UUID playerID = event.getPlayer().getId();
-    Team newTeam = (Team) event.getNewParty();
-    if (playerTeamMap.containsKey(playerID)
-        && !event
-            .getNewParty()
-            .isObserving()) { // If player was previously on team but joins obs, keep previous team
-      playerTeamMap.replace(playerID, newTeam);
-
-    } else if (!playerTeamMap.containsKey(playerID)) {
-      playerTeamMap.put(playerID, newTeam);
+    if (event.getNewParty() instanceof Team) {
+      playerTeamMap.put(event.getPlayer().getId(), (Team) event.getNewParty());
     }
   }
 

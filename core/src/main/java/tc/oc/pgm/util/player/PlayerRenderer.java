@@ -76,6 +76,9 @@ class PlayerRenderer {
     if (relation.reveal && data.style.has(NameStyle.Flag.FRIEND) && relation.friend) {
       name.decoration(TextDecoration.ITALIC, true);
     }
+    if (data.style.has(NameStyle.Flag.SQUAD) && relation.squad) {
+      name.decoration(TextDecoration.UNDERLINED, true);
+    }
     if (relation.reveal && data.style.has(NameStyle.Flag.DISGUISE) && disguised) {
       name.decoration(TextDecoration.STRIKETHROUGH, true);
 

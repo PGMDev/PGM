@@ -28,6 +28,7 @@ public class RateLimiter {
 
   public void setTimeout(long until) {
     this.timedOutUntil = until;
+    afterTask();
   }
 
   public long getDelay() {

@@ -2,6 +2,7 @@ package tc.oc.pgm.api.integration;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.entity.Player;
@@ -20,6 +21,8 @@ public final class Integration {
       new AtomicReference<PunishmentIntegration>(new NoopPunishmentIntegration());
   private static final AtomicReference<VanishIntegration> VANISH =
       new AtomicReference<VanishIntegration>(new NoopVanishIntegration());
+  private static final AtomicReference<SquadIntegration> SQUAD =
+      new AtomicReference<>(new NoopSquadIntegration());
 
   public static void setFriendIntegration(FriendIntegration integration) {
     FRIENDS.set(assertNotNull(integration));
@@ -37,6 +40,10 @@ public final class Integration {
     VANISH.set(assertNotNull(integration));
   }
 
+  public static void setSquadIntegration(SquadIntegration integration) {
+    SQUAD.set(assertNotNull(integration));
+  }
+
   public static boolean isFriend(Player a, Player b) {
     return FRIENDS.get().isFriend(a, b);
   }
@@ -48,6 +55,15 @@ public final class Integration {
 
   public static boolean isMuted(Player player) {
     return PUNISHMENTS.get().isMuted(player);
+  }
+
+  public static boolean areInSquad(Player a, Player b) {
+    return SQUAD.get().areInSquad(a, b);
+  }
+
+  @Nullable
+  public static Collection<UUID> getSquad(Player player) {
+    return SQUAD.get().getSquad(player);
   }
 
   @Nullable
@@ -101,6 +117,19 @@ public final class Integration {
     @Override
     public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
       return false;
+    }
+  }
+
+  private static class NoopSquadIntegration implements SquadIntegration {
+
+    @Override
+    public boolean areInSquad(Player a, Player b) {
+      return false;
+    }
+
+    @Override
+    public Collection<UUID> getSquad(Player player) {
+      return null;
     }
   }
 }

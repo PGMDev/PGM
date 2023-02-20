@@ -140,5 +140,6 @@ public class Spawner implements Listener, Tickable {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchEnd(MatchFinishEvent event) {
     this.players.clear();
+    this.players.disable();
   }
 }
