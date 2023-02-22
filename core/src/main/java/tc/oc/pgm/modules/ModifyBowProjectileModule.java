@@ -70,7 +70,8 @@ public class ModifyBowProjectileModule implements MapModule<ModifyBowProjectileM
           changed = true;
         }
 
-        for (Element noPickupElement : parent.getChildren("pickup")) {
+        Element noPickupElement = parent.getChild("pickup");
+        if (noPickupElement != null) {
           pickupFilter = filters.parseFilterProperty(noPickupElement, "filter");
           changed = true;
         }
