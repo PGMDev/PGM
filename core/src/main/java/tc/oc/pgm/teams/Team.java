@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResultOption;
@@ -150,14 +151,33 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     return getPlayers().size() >= getMinPlayers();
   }
 
+  public int getSize() {
+    return this.getPlayers().size();
+  }
+
+  @Deprecated // Kept to avoid other plugins breaking
+  public int getSize(boolean priority) {
+    return this.getPlayers().size();
+  }
+
+  @Deprecated // Kept to avoid other plugins breaking
+  public float getFullness(boolean priority) {
+    return getFullness();
+  }
+
+  @Deprecated // Kept to avoid other plugins breaking
+  public int getSizeAfterJoin(MatchPlayer joining, Team newTeam, boolean priority) {
+    return this.getSize() + (newTeam == this ? 1 : 0);
+  }
+
   /** Return a normalized "fullness" ratio for this team. */
   public float getFullness() {
-    return (float) this.getPlayers().size() / this.getMaxOverfill();
+    return (float) this.getSize() / this.getMaxOverfill();
   }
 
   /** Return a normalized "fullness" ratio for this team. */
   public float getFullnessAfterJoin(int players) {
-    return (float) (this.getPlayers().size() + players) / this.getMaxOverfill();
+    return (float) (this.getSize() + players) / this.getMaxOverfill();
   }
 
   /**
