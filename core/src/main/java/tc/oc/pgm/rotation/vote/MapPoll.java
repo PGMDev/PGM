@@ -79,7 +79,7 @@ public class MapPoll {
   }
 
   public static void setVotingBookCreator(VotingBookCreator bookCreator) {
-    bookCreator = assertNotNull(bookCreator);
+    MapPoll.bookCreator = assertNotNull(bookCreator);
   }
 
   public VotingBookCreator getVotingBookCreator() {
