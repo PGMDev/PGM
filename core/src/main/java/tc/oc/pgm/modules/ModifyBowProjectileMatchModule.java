@@ -171,9 +171,6 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
     if (!NMSHacks.isCraftItemArrowEntity(event.getItem())) {
       return;
     }
-    if (pickupFilter == null) {
-      return;
-    }
     Filter.QueryResponse response =
         pickupFilter.query(new PlayerQuery(event, match.getPlayer(event.getPlayer())));
     if (response.isDenied()) {

@@ -13,6 +13,7 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -50,7 +51,7 @@ public class ModifyBowProjectileModule implements MapModule<ModifyBowProjectileM
       Class<? extends Entity> projectile = Arrow.class;
       float velocityMod = 1;
       Set<PotionEffect> potionEffects = new HashSet<>();
-      Filter pickupFilter = null;
+      Filter pickupFilter = StaticFilter.ALLOW;
 
       for (Element parent : doc.getRootElement().getChildren("modifybowprojectile")) {
         Element projectileElement = parent.getChild("projectile");
@@ -70,11 +71,8 @@ public class ModifyBowProjectileModule implements MapModule<ModifyBowProjectileM
           changed = true;
         }
 
-        Element noPickupElement = parent.getChild("pickup");
-        if (noPickupElement != null) {
-          pickupFilter = filters.parseFilterProperty(noPickupElement, "filter");
-          changed = true;
-        }
+        pickupFilter = filters.parseFilterProperty(parent, "pickup-filter", StaticFilter.ALLOW);
+        changed |= pickupFilter != StaticFilter.ALLOW;
       }
 
       return !changed
