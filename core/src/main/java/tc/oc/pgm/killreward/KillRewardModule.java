@@ -59,7 +59,7 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
       for (Element elKillReward :
           XMLUtils.flattenElements(
               doc.getRootElement(),
-              ImmutableSet.of("kill-rewards"),
+              ImmutableSet.of("kill-rewards", "killrewards"),
               ImmutableSet.of("kill-reward", "killreward"),
               0)) {
         ImmutableList.Builder<ItemStack> items = ImmutableList.builder();
