@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 
 public class RateLimiter {
   private final int minDelay, maxDelay;
+  private final int timedOutDelay;
   private final int timeRatio;
   private final int tpsRatio;
 
@@ -11,9 +12,10 @@ public class RateLimiter {
   private long endedAt = 0;
   private long timedOutUntil = 0;
 
-  public RateLimiter(int minDelay, int maxDelay, int timeRatio, int tpsRatio) {
+  public RateLimiter(int minDelay, int maxDelay, int timedOutDelay, int timeRatio, int tpsRatio) {
     this.minDelay = minDelay;
     this.maxDelay = maxDelay;
+    this.timedOutDelay = timedOutDelay;
     this.timeRatio = timeRatio;
     this.tpsRatio = tpsRatio;
   }
@@ -34,11 +36,12 @@ public class RateLimiter {
   public long getDelay() {
     long now = System.currentTimeMillis();
 
+    boolean timedOut = timedOutUntil > now;
     long nextUpdate =
         (endedAt - now)
             + ((endedAt - startedAt) * timeRatio)
             + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * tpsRatio)
-            + (timedOutUntil > now ? maxDelay : 0);
-    return Math.min(Math.max(minDelay, nextUpdate), maxDelay);
+            + (timedOut ? timedOutDelay : 0);
+    return Math.min(Math.max(minDelay, nextUpdate), timedOut ? timedOutDelay : maxDelay);
   }
 }

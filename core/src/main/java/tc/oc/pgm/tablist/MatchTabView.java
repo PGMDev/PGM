@@ -112,7 +112,7 @@ public class MatchTabView extends TabView implements Listener {
   public void render() {
     if (this.manager == null) return;
 
-    if (this.match != null && this.isLayoutDirty()) {
+    if (this.match != null && dirtyTracker.isLayout()) {
       if (display == null) {
         this.setHeader(this.getManager().getMapEntry(this.match));
         this.setFooter(this.getManager().getFooterEntry(this.match));
@@ -283,7 +283,7 @@ public class MatchTabView extends TabView implements Listener {
         }
       }
 
-      this.invalidateLayout();
+      dirtyTracker.invalidateLayout();
     }
   }
 
@@ -292,6 +292,9 @@ public class MatchTabView extends TabView implements Listener {
     if (this.match != event.getMatch()) return;
 
     updatePlayerParty(event.getPlayer(), event.getOldParty(), event.getNewParty());
+
+    // Your own view should re-render quickly after join/leave
+    if (this.matchPlayer == event.getPlayer()) dirtyTracker.prioritize();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -302,7 +305,8 @@ public class MatchTabView extends TabView implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerNameChange(NameDecorationChangeEvent event) {
-    this.invalidateLayout();
+    MatchPlayer mp = match.getPlayer(event.getUUID());
+    if (mp != null) updatePlayerParty(mp, mp.getParty(), mp.getParty());
   }
 
   private void updatePlayerParty(
@@ -324,7 +328,7 @@ public class MatchTabView extends TabView implements Listener {
         this.teamPlayers.put((Team) newParty, player);
     }
 
-    this.invalidateLayout();
+    dirtyTracker.invalidateLayout();
   }
 
   private boolean shouldHide(MatchPlayer other) {

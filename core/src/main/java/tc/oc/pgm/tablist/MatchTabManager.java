@@ -2,8 +2,10 @@ package tc.oc.pgm.tablist;
 
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
+import com.google.common.collect.Range;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.bukkit.Bukkit;
@@ -42,16 +44,18 @@ import tc.oc.pgm.util.tablist.DynamicTabEntry;
 import tc.oc.pgm.util.tablist.PlayerTabEntry;
 import tc.oc.pgm.util.tablist.TabEntry;
 import tc.oc.pgm.util.tablist.TabManager;
+import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.text.TextParser;
 
 public class MatchTabManager extends TabManager implements Listener {
 
   // Min and max delay for an update after tab-list is invalidated
-  private static final int MIN_DELAY = 100, MAX_DELAY = 5000;
+  private static final int MIN_DELAY = 100, MAX_DELAY = 5_000;
   // How many MS must be waited for each MS spent rendering
   private static final int TIME_RATIO = 40;
   // How many MS must be waited for each TPS under 20 (last minute average)
   private static final int TPS_RATIO = 1000;
-  // On match load, throttle tab-list until another match unloads, or this many MS pass.
+  // On match load, throttle tab-list until all players are teleported, or this many MS pass.
   private static final int MATCH_LOAD_TIMEOUT = 30_000;
 
   private final Map<Team, TeamTabEntry> teamEntries;
@@ -60,10 +64,14 @@ public class MatchTabManager extends TabManager implements Listener {
   private final Map<Match, MatchFooterTabEntry> footerEntries;
   private final Map<Match, FreeForAllTabEntry> freeForAllEntries;
 
+  private final ScheduledExecutorService executor = PGM.get().getExecutor();
+
   private Future<?> pingUpdateTask;
-  private Future<?> renderTask;
+
+  private RenderTask renderTask;
+  private Future<?> renderHeaderFooterTask;
   private final RateLimiter rateLimit =
-      new RateLimiter(MIN_DELAY, MAX_DELAY, TIME_RATIO, TPS_RATIO);
+      new RateLimiter(MIN_DELAY, MAX_DELAY, MATCH_LOAD_TIMEOUT, TIME_RATIO, TPS_RATIO);
 
   public MatchTabManager(Plugin plugin) {
     this(
@@ -134,7 +142,7 @@ public class MatchTabManager extends TabManager implements Listener {
 
   public void disable() {
     if (this.renderTask != null) {
-      this.renderTask.cancel(true);
+      this.renderTask.cancel();
       this.renderTask = null;
     }
     if (this.pingUpdateTask != null) {
@@ -146,28 +154,27 @@ public class MatchTabManager extends TabManager implements Listener {
   }
 
   @Override
-  protected void invalidate() {
-    super.invalidate();
-
-    if (this.renderTask == null) {
-      this.renderTask =
-          PGM.get()
-              .getExecutor()
-              .schedule(this::renderTasked, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
+  protected void scheduleRender() {
+    if (dirty.isHeaderOrFooter() && this.renderHeaderFooterTask == null) {
+      this.renderHeaderFooterTask =
+          executor.schedule(
+              () -> {
+                this.renderHeaderFooterTask = null;
+                this.renderHeaderFooter();
+              },
+              100,
+              TimeUnit.MILLISECONDS);
     }
-  }
 
-  private void renderTasked() {
-    rateLimit.beforeTask();
-    this.render();
-    this.renderTask = null;
-    rateLimit.afterTask();
-  }
-
-  private void forceRender() {
-    if (renderTask == null || renderTask.cancel(false)) {
-      this.renderTask =
-          PGM.get().getExecutor().schedule(this::renderTasked, 100, TimeUnit.MILLISECONDS);
+    // Already a priority task scheduled, nothing to be done
+    if (dirty.isLayoutOrContent()) {
+      if (dirty.isPriority()) {
+        if (renderTask == null || !renderTask.isPriority()) {
+          this.renderTask = new RenderTask(true, 100);
+        }
+      } else if (renderTask == null) {
+        this.renderTask = new RenderTask(false, rateLimit.getDelay());
+      }
     }
   }
 
@@ -252,7 +259,11 @@ public class MatchTabManager extends TabManager implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMatchLoad(MatchAfterLoadEvent event) {
     rateLimit.setTimeout(0);
-    forceRender();
+    // Priority re-render after load, essentially forcing one full re-render
+    enabledViews.forEach(
+        (player, view) -> {
+          if (view != null) view.getDirtyTracker().prioritize();
+        });
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -331,5 +342,58 @@ public class MatchTabManager extends TabManager implements Listener {
   public void onPlayerNameChange(NameDecorationChangeEvent event) {
     TabEntry entry = getPlayerEntryOrNull(Bukkit.getPlayer(event.getUUID()));
     if (entry instanceof DynamicTabEntry) ((DynamicTabEntry) entry).invalidate();
+  }
+
+  private Integer getRenderBatchSize() {
+    try {
+      Map<String, Object> experiments = PGM.get().getConfiguration().getExperiments();
+
+      Object value = experiments.get("tablist-batch-size");
+      if (value == null) return null;
+
+      return TextParser.parseInteger(value.toString(), Range.atLeast(1));
+    } catch (TextException t) {
+      return null;
+    }
+  }
+
+  private class RenderTask implements Runnable {
+
+    private final boolean priority;
+    private final Future<?> future;
+
+    public RenderTask(boolean priority, long millis) {
+      if (renderTask != null) {
+        renderTask.cancel();
+        renderTask = null;
+      }
+      this.priority = priority;
+      this.future = executor.schedule(this, millis, TimeUnit.MILLISECONDS);
+    }
+
+    public boolean isPriority() {
+      return priority;
+    }
+
+    public void cancel() {
+      this.future.cancel(true);
+    }
+
+    @Override
+    public void run() {
+      renderTask = null;
+      if (priority) {
+        priorityRender();
+      } else {
+        rateLimit.beforeTask();
+        Integer batchSize = getRenderBatchSize();
+        if (batchSize != null) partialRender(batchSize);
+        else render();
+        rateLimit.afterTask();
+      }
+
+      // Try to re-schedule if anything is still dirty
+      if (dirty.isDirty()) scheduleRender();
+    }
   }
 }

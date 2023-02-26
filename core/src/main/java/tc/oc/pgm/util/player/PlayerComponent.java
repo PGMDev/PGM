@@ -30,7 +30,7 @@ public final class PlayerComponent implements RenderableComponent {
   public static final PlayerComponent UNKNOWN_PLAYER =
       new PlayerComponent(null, new PlayerData(null, null, NameStyle.PLAIN));
 
-  private static final PlayerRenderer RENDERER = new PlayerRenderer();
+  public static final PlayerRenderer RENDERER = new PlayerRenderer();
 
   // The data for player being rendered.
   private final @Nullable Player player;
