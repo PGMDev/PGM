@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
@@ -29,6 +30,7 @@ import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.vehicle.VehicleUpdateEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -49,6 +51,8 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
+import tc.oc.pgm.util.bukkit.WorldBorders;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -374,5 +378,27 @@ public class PGMListener implements Listener {
 
   public void setGameRule(MatchFinishEvent event, String gameRule, boolean gameRuleValue) {
     event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
+  }
+
+  /** Prevent teleporting outside the border */
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onPlayerTeleport(final PlayerTeleportEvent event) {
+    if (event.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN) {
+      if (WorldBorders.isInsideBorder(event.getFrom())
+          && !WorldBorders.isInsideBorder(event.getTo())) {
+        event.setCancelled(true);
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onPlayerMove(final PlayerCoarseMoveEvent event) {
+    MatchPlayer player = PGM.get().getMatchManager().getPlayer(event.getPlayer());
+    if (player != null && player.isObserving()) {
+      Location location = event.getTo();
+      if (WorldBorders.clampToBorder(location)) {
+        event.setTo(location);
+      }
+    }
   }
 }
