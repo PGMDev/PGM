@@ -24,7 +24,7 @@ import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
 
 @SuppressWarnings("UnstableApiUsage")
-class PlayerRenderer {
+public class PlayerRenderer {
   private static final TextColor DEAD_COLOR = NamedTextColor.DARK_GRAY;
   private static final Style NICK_STYLE =
       Style.style(TextDecoration.ITALIC).decoration(TextDecoration.STRIKETHROUGH, false);
@@ -46,6 +46,19 @@ class PlayerRenderer {
 
   public Component render(PlayerData data, PlayerRelationship relation) {
     return nameCache.getUnchecked(new PlayerCacheKey(data, relation));
+  }
+
+  public void decorationChanged(UUID uuid) {
+    nameCache
+        .asMap()
+        .entrySet()
+        .removeIf(
+            entry -> {
+              PlayerCacheKey key = entry.getKey();
+              return key.relationship.reveal
+                  && key.data.style.has(NameStyle.Flag.FLAIR)
+                  && uuid.equals(key.data.uuid);
+            });
   }
 
   private Component render(PlayerCacheKey key) {

@@ -1,5 +1,8 @@
 package tc.oc.pgm.util.tablist;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
@@ -38,16 +41,16 @@ import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
  * must be rendered together. It is not possible to render views individually, because this would
  * make the TabEntry dirty state very difficult to track.
  */
-public class TabManager implements Listener {
+public abstract class TabManager implements Listener {
   protected final Logger logger;
   protected final Plugin plugin;
-  final DefaultMapAdapter<Player, TabView> enabledViews;
+  protected final DefaultMapAdapter<Player, TabView> enabledViews;
 
   protected final DefaultMapAdapter<Player, TabEntry> playerEntries;
   final Map<Integer, TabEntry> blankEntries =
       new DefaultMapAdapter<Integer, TabEntry>(key -> new BlankTabEntry(), true);
 
-  boolean dirty;
+  protected TabManagerDirtyTracker dirty;
 
   public TabManager(
       Plugin plugin,
@@ -61,6 +64,7 @@ public class TabManager implements Listener {
     this.plugin = plugin;
     this.enabledViews = new DefaultMapAdapter<>(viewProvider, true);
     this.playerEntries = new DefaultMapAdapter<>(playerEntryProvider, true);
+    this.dirty = new TabManagerDirtyTracker(this::scheduleRender);
   }
 
   public TabManager(Plugin plugin) {
@@ -99,17 +103,66 @@ public class TabManager implements Listener {
     return this.blankEntries.get(index);
   }
 
-  protected void invalidate() {
-    this.dirty = true;
+  protected TabManagerDirtyTracker getDirty() {
+    return dirty;
   }
 
+  protected abstract void scheduleRender();
+
+  /** Re-render all tab views */
   public void render() {
-    if (this.dirty) {
+    if (this.dirty.isDirty()) {
       for (TabView view : this.enabledViews.values()) {
         if (view != null) view.render();
       }
+      dirty.validate();
+    }
+  }
 
-      this.dirty = false;
+  /** Re-render only prioritized tab views */
+  public void priorityRender() {
+    if (this.dirty.isPriority()) {
+      for (TabView view : this.enabledViews.values()) {
+        if (view != null && view.getDirtyTracker().isPriority()) view.render();
+      }
+      dirty.validatePriority();
+    }
+  }
+
+  /**
+   * Re-render up to N tab views, randomly picked
+   *
+   * @param batchSize Amount of views to render, at most
+   */
+  public void partialRender(int batchSize) {
+    if (this.dirty.isDirty()) {
+      List<TabView> dirtyViews = new ArrayList<>(this.enabledViews.size());
+      for (TabView view : this.enabledViews.values()) {
+        if (view != null && view.getDirtyTracker().isDirty()) dirtyViews.add(view);
+      }
+
+      boolean partial = dirtyViews.size() >= batchSize;
+      if (partial) {
+        Collections.shuffle(dirtyViews);
+        dirtyViews = dirtyViews.subList(0, batchSize);
+      }
+
+      for (TabView view : dirtyViews) {
+        view.render();
+      }
+
+      // Finally done rendering
+      if (!partial) this.dirty.validate();
+    }
+  }
+
+  /** Re-render header & footer for all views */
+  public void renderHeaderFooter() {
+    if (this.dirty.isHeaderOrFooter()) {
+      for (TabView view : this.enabledViews.values()) {
+        if (view != null) view.renderHeaderFooter();
+      }
+      this.dirty.validateHeaderAndFooter();
     }
   }
 

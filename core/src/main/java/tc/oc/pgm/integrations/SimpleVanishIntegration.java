@@ -84,27 +84,11 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
   public boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
     final Match match = player.getMatch();
 
-    // Call vanish event next so name renders existing state properly for leave msg
-    if (vanish) match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
-
-    // Keep track of the UUID and apply/remove META data, so we can detect vanish status from other
-    // projects (i.e utils)
-    if (vanish) {
-      addVanished(player);
-    } else {
-      removeVanished(player);
-    }
-
-    // Ensure player is an observer
-    if (vanish && player.getParty() instanceof Competitor) {
-      match.setParty(player, match.getDefaultParty());
-    }
+    // Call vanish event which will vanish/unvanish at appropriate levels
+    match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     // Reset visibility to hide/show player
     player.resetVisibility();
-
-    // Call vanish event after unvanish so name renders existing state properly for join msg
-    if (!vanish) match.callEvent(new PlayerVanishEvent(player, vanish, quiet));
 
     return isVanished(player.getId());
   }
@@ -119,6 +103,26 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
   private void removeVanished(MatchPlayer player) {
     this.vanishedPlayers.remove(player.getId());
     player.getBukkit().removeMetadata(VANISH_KEY, VANISH_VALUE.getOwningPlugin());
+  }
+
+  // Handle vanishing at high, so that medium priority (leave messages) is done before any change
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onPlayerVanish(PlayerVanishEvent event) {
+    if (!event.isVanished()) return;
+    MatchPlayer player = event.getPlayer();
+    addVanished(event.getPlayer());
+
+    // Ensure player is an observer
+    if (player.getParty() instanceof Competitor) {
+      player.getMatch().setParty(player, player.getMatch().getDefaultParty());
+    }
+  }
+
+  // Handle unvanishing at low, so by the time join message is shown player is already unvanished
+  @EventHandler(priority = EventPriority.LOW)
+  public void onPlayerUnvanish(PlayerVanishEvent event) {
+    if (event.isVanished()) return;
+    removeVanished(event.getPlayer());
   }
 
   /* Events */

@@ -76,7 +76,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   protected final Map<Goal<?>, BlinkTask> blinkingGoals = new HashMap<>();
 
   protected @Nullable Future<?> renderTask;
-  private final RateLimiter rateLimit = new RateLimiter(50, 1000, 40, 1000);
+  private final RateLimiter rateLimit = new RateLimiter(50, 1000, 5_000, 40, 1000);
 
   private final Match match;
   private final SidebarRenderer renderer;
