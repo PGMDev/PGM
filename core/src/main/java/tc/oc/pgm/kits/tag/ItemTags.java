@@ -9,6 +9,7 @@ public class ItemTags {
   public static final ItemTag<String> CONSUMABLE = ItemTag.newString("consumable");
   public static final ItemTag<String> ORIGINAL_NAME = ItemTag.newString("original-name");
   public static final ItemTag<Boolean> INFINITE = ItemTag.newBoolean("infinite");
+  public static final ItemTag<Boolean> LOCKED = ItemTag.newBoolean("locked");
 
   private ItemTags() {}
 }

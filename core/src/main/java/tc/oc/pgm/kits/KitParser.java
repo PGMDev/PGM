@@ -586,6 +586,10 @@ public abstract class KitParser {
       ItemTags.PREVENT_SHARING.set(itemStack, true);
     }
 
+    if (XMLUtils.parseBoolean(el.getAttribute("locked"), false)) {
+      ItemTags.LOCKED.set(itemStack, true);
+    }
+
     if (itemStack.getAmount() == -1) {
       ItemTags.INFINITE.set(itemStack, true);
     }
