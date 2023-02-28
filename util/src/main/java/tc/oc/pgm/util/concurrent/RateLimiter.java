@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 
 public class RateLimiter {
   private final int minDelay, maxDelay;
-  private final int timedOutDelay;
   private final int timeRatio;
   private final int tpsRatio;
 
@@ -12,10 +11,9 @@ public class RateLimiter {
   private long endedAt = 0;
   private long timedOutUntil = 0;
 
-  public RateLimiter(int minDelay, int maxDelay, int timedOutDelay, int timeRatio, int tpsRatio) {
+  public RateLimiter(int minDelay, int maxDelay, int timeRatio, int tpsRatio) {
     this.minDelay = minDelay;
     this.maxDelay = maxDelay;
-    this.timedOutDelay = timedOutDelay;
     this.timeRatio = timeRatio;
     this.tpsRatio = tpsRatio;
   }
@@ -28,20 +26,18 @@ public class RateLimiter {
     endedAt = System.currentTimeMillis();
   }
 
-  public void setTimeout(long until) {
-    this.timedOutUntil = until;
-    afterTask();
+  public void timeOut(long timeout) {
+    this.timedOutUntil = System.currentTimeMillis() + timeout;
   }
 
   public long getDelay() {
     long now = System.currentTimeMillis();
 
-    boolean timedOut = timedOutUntil > now;
     long nextUpdate =
         (endedAt - now)
             + ((endedAt - startedAt) * timeRatio)
-            + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * tpsRatio)
-            + (timedOut ? timedOutDelay : 0);
-    return Math.min(Math.max(minDelay, nextUpdate), timedOut ? timedOutDelay : maxDelay);
+            + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * tpsRatio);
+
+    return Math.max(timedOutUntil - now, 0) + Math.min(Math.max(minDelay, nextUpdate), maxDelay);
   }
 }

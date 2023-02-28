@@ -76,7 +76,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   protected final Map<Goal<?>, BlinkTask> blinkingGoals = new HashMap<>();
 
   protected @Nullable Future<?> renderTask;
-  private final RateLimiter rateLimit = new RateLimiter(50, 1000, 5_000, 40, 1000);
+  private final RateLimiter rateLimit = new RateLimiter(50, 1000, 40, 1000);
 
   private final Match match;
   private final SidebarRenderer renderer;
@@ -238,7 +238,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
   public void matchEnd(MatchFinishEvent event) {
     renderSidebarDebounce();
     // After match end, timeout rate-limit indefinitely
-    rateLimit.setTimeout(Long.MAX_VALUE);
+    rateLimit.timeOut(Integer.MAX_VALUE);
   }
 
   private void renderSidebarDebounce() {
