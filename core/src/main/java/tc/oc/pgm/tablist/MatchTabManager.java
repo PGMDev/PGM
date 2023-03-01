@@ -55,8 +55,6 @@ public class MatchTabManager extends TabManager implements Listener {
   private static final int TIME_RATIO = 40;
   // How many MS must be waited for each TPS under 20 (last minute average)
   private static final int TPS_RATIO = 1000;
-  // On match load, throttle tab-list until all players are teleported, or this many MS pass.
-  private static final int MATCH_LOAD_TIMEOUT = 30_000;
 
   private final Map<Team, TeamTabEntry> teamEntries;
   private final Map<Match, MapTabEntry> mapEntries;
@@ -68,10 +66,11 @@ public class MatchTabManager extends TabManager implements Listener {
 
   private Future<?> pingUpdateTask;
 
+  private boolean renderingEnabled = true;
   private RenderTask renderTask;
   private Future<?> renderHeaderFooterTask;
   private final RateLimiter rateLimit =
-      new RateLimiter(MIN_DELAY, MAX_DELAY, MATCH_LOAD_TIMEOUT, TIME_RATIO, TPS_RATIO);
+      new RateLimiter(MIN_DELAY, MAX_DELAY, TIME_RATIO, TPS_RATIO);
 
   public MatchTabManager(Plugin plugin) {
     this(
@@ -167,13 +166,32 @@ public class MatchTabManager extends TabManager implements Listener {
     }
 
     // Already a priority task scheduled, nothing to be done
-    if (dirty.isLayoutOrContent()) {
+    if (dirty.isLayoutOrContent() && renderingEnabled) {
       if (dirty.isPriority()) {
         if (renderTask == null || !renderTask.isPriority()) {
+          cancelScheduledRender();
           this.renderTask = new RenderTask(true, 100);
         }
       } else if (renderTask == null) {
         this.renderTask = new RenderTask(false, rateLimit.getDelay());
+      }
+    }
+  }
+
+  private void cancelScheduledRender() {
+    if (renderTask != null) {
+      renderTask.cancel();
+      this.renderTask = null;
+    }
+  }
+
+  private void setRenderingEnabled(boolean enabled) {
+    if (enabled != renderingEnabled) {
+      this.renderingEnabled = enabled;
+      if (renderingEnabled) {
+        scheduleRender();
+      } else {
+        cancelScheduledRender();
       }
     }
   }
@@ -253,13 +271,17 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMatchLoad(MatchLoadEvent event) {
-    rateLimit.setTimeout(System.currentTimeMillis() + MATCH_LOAD_TIMEOUT);
+    setRenderingEnabled(false);
+    cancelScheduledRender();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMatchLoad(MatchAfterLoadEvent event) {
-    rateLimit.setTimeout(0);
-    // Priority re-render after load, essentially forcing one full re-render
+    setRenderingEnabled(true);
+    // No regular renders for 5s after cycle, priority renders can still occur
+    rateLimit.timeOut(5_000);
+
+    // One priority render scheduled, essentially forcing one full re-render
     enabledViews.forEach(
         (player, view) -> {
           if (view != null) view.getDirtyTracker().prioritize();
@@ -363,10 +385,6 @@ public class MatchTabManager extends TabManager implements Listener {
     private final Future<?> future;
 
     public RenderTask(boolean priority, long millis) {
-      if (renderTask != null) {
-        renderTask.cancel();
-        renderTask = null;
-      }
       this.priority = priority;
       this.future = executor.schedule(this, millis, TimeUnit.MILLISECONDS);
     }
