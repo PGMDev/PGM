@@ -41,6 +41,7 @@ import tc.oc.pgm.filters.matcher.match.FlagStateFilter;
 import tc.oc.pgm.filters.matcher.match.MatchPhaseFilter;
 import tc.oc.pgm.filters.matcher.match.MonostableFilter;
 import tc.oc.pgm.filters.matcher.match.PlayerCountFilter;
+import tc.oc.pgm.filters.matcher.match.PulseFilter;
 import tc.oc.pgm.filters.matcher.match.RandomFilter;
 import tc.oc.pgm.filters.matcher.match.VariableFilter;
 import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
@@ -85,6 +86,7 @@ import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.XMLParser;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -534,6 +536,21 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
     Component message = XMLUtils.parseFormattedText(el, "message", null);
     return MonostableFilter.after(child, duration, message);
+  }
+
+  @MethodParser("pulse")
+  public Filter parsePulseFilter(Element el) throws InvalidXMLException {
+    Duration duration = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "duration"));
+    Duration period = XMLUtils.parseDuration(Node.fromRequiredAttr(el, "period"));
+
+    long durationTicks = TimeUtils.toTicks(duration);
+    long periodTicks = TimeUtils.toTicks(period);
+    if (durationTicks <= 0) throw new InvalidXMLException("Duration must be positive", el);
+    if (durationTicks >= periodTicks)
+      throw new InvalidXMLException("Duration in ticks must be smaller than period in ticks.", el);
+
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), DynamicFilterValidation.ANY);
+    return new PulseFilter(child, durationTicks, periodTicks);
   }
 
   @MethodParser("rank")
