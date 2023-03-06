@@ -31,8 +31,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.event.MatchPlayerAddEvent;
 import tc.oc.pgm.api.player.event.PlayerVanishEvent;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
 
 public class SimpleVanishIntegration implements VanishIntegration, Listener {
 
@@ -178,11 +178,11 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void checkMatchPlayer(MatchPlayerAddEvent event) {
+  public void checkMatchPlayer(PlayerJoinMatchEvent event) {
     MatchPlayer player = event.getPlayer();
     // Player is joining to a team so broadcast join
-    if (event.getInitialParty() instanceof Competitor) {
-      setVanished(player, false, false);
+    if (event.getNewParty() instanceof Competitor && isVanished(player.getId())) {
+      setVanished(player, false, true);
     }
   }
 
