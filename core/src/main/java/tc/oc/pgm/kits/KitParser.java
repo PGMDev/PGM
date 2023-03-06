@@ -439,9 +439,9 @@ public abstract class KitParser {
   }
 
   private List<Color> parseColors(List<Node> nodes) throws InvalidXMLException {
-    List<Color> colors = Lists.newArrayList();
+    List<Color> colors = new ArrayList<>(nodes.size());
     for (Node node : nodes) {
-      colors.add(XMLUtils.parseHexColor(node, Color.WHITE));
+      colors.add(XMLUtils.parseHexColor(node));
     }
     return colors;
   }
@@ -563,7 +563,7 @@ public abstract class KitParser {
       LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
       Node attrColor = Node.fromAttr(el, "color");
       if (attrColor != null) {
-        armorMeta.setColor(XMLUtils.parseHexColor(attrColor, Color.WHITE));
+        armorMeta.setColor(XMLUtils.parseHexColor(attrColor));
       }
     }
 
