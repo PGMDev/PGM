@@ -42,7 +42,8 @@ class PlayerData {
 
     this.name = mp.getNameLegacy();
     this.nick = Integration.getNick(mp.getBukkit());
-    this.teamColor = mp.getParty().getTextColor();
+    this.teamColor =
+        mp.getParty() == null ? PlayerComponent.OFFLINE_COLOR : mp.getParty().getTextColor();
     this.dead = mp.isDead();
     this.vanish = Integration.isVanished(mp.getBukkit());
     this.online = mp.getBukkit().isOnline();
