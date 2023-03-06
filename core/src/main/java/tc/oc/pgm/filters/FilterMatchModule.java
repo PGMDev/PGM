@@ -213,15 +213,17 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   @Override
   public <F extends Filterable<?>> void onChange(
       Class<F> scope, Filter filter, FilterListener<? super F> listener) {
-    match
-        .getLogger()
-        .fine(
-            "onChange scope="
-                + scope.getSimpleName()
-                + " listener="
-                + listener
-                + " filter="
-                + filter);
+    if (match.getLogger().isLoggable(Level.FINE)) {
+      match
+          .getLogger()
+          .fine(
+              "onChange scope="
+                  + scope.getSimpleName()
+                  + " listener="
+                  + listener
+                  + " filter="
+                  + filter);
+    }
     register(scope, filter, true, listener);
     register(scope, filter, false, listener);
   }
