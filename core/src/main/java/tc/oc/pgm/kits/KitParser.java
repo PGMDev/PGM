@@ -441,13 +441,7 @@ public abstract class KitParser {
   private List<Color> parseColors(List<Node> nodes) throws InvalidXMLException {
     List<Color> colors = Lists.newArrayList();
     for (Node node : nodes) {
-      String rawColor = node.getValue();
-      if (rawColor != null) {
-        if (!rawColor.matches("[a-fA-F0-9]{6}")) {
-          throw new InvalidXMLException("Invalid color format", rawColor);
-        }
-        colors.add(Color.fromRGB(Integer.parseInt(rawColor, 16)));
-      }
+      colors.add(XMLUtils.parseHexColor(node, Color.WHITE));
     }
     return colors;
   }
@@ -567,13 +561,9 @@ public abstract class KitParser {
 
     if (meta instanceof LeatherArmorMeta) {
       LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
-      org.jdom2.Attribute attrColor = el.getAttribute("color");
+      Node attrColor = Node.fromAttr(el, "color");
       if (attrColor != null) {
-        String raw = attrColor.getValue();
-        if (!raw.matches("[a-fA-F0-9]{6}")) {
-          throw new InvalidXMLException("Invalid color format", attrColor);
-        }
-        armorMeta.setColor(Color.fromRGB(Integer.parseInt(attrColor.getValue(), 16)));
+        armorMeta.setColor(XMLUtils.parseHexColor(attrColor, Color.WHITE));
       }
     }
 
