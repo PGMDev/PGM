@@ -10,7 +10,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.text.TextException;
 
-public final class TeamParser extends MatchObjectParser<Team, TeamMatchModule> {
+public final class TeamParser extends MatchObjectParser.Simple<Team, TeamMatchModule> {
 
   public TeamParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options, Team.class, TeamMatchModule.class, "teams");

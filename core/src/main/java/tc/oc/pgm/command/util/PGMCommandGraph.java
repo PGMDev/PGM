@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
@@ -64,6 +65,7 @@ import tc.oc.pgm.command.injectors.TeamMatchModuleProvider;
 import tc.oc.pgm.command.parsers.DurationParser;
 import tc.oc.pgm.command.parsers.EnumParser;
 import tc.oc.pgm.command.parsers.ExposedActionParser;
+import tc.oc.pgm.command.parsers.FilterArgumentParser;
 import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
@@ -210,6 +212,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     registerParser(
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());
+    registerParser(Filter.class, FilterArgumentParser::new);
     registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
   }

@@ -105,6 +105,10 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   // Filterables that need a check in the next tick (cleared every tick)
   private final Set<Filterable<?>> dirtySet = new HashSet<>();
 
+  public ContextStore<? super Filter> getFilterContext() {
+    return filterContext;
+  }
+
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
 
