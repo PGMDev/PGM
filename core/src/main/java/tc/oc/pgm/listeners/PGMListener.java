@@ -47,7 +47,7 @@ import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
-import tc.oc.pgm.events.PlayerParticipationStopEvent;
+import tc.oc.pgm.events.PlayerLeavePartyEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
@@ -293,7 +293,7 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void dropItemsOnQuit(PlayerParticipationStopEvent event) {
+  public void dropItemsOnQuit(PlayerLeavePartyEvent event) {
     MatchPlayer quitter = event.getPlayer();
     if (!quitter.isAlive()) return;
 

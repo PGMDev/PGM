@@ -247,10 +247,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     return request.isForcedOr(JoinRequest.Flag.JOIN_CHOOSE);
   }
 
-  public boolean internalJoin(MatchPlayer player, Team newTeam) {
+  public boolean internalJoin(MatchPlayer player, Team newTeam, JoinRequest request) {
     assertNotNull(newTeam);
     return player.getParty() == newTeam
-        || (!Integration.isVanished(player.getBukkit()) && match.setParty(player, newTeam));
+        || (!Integration.isVanished(player.getBukkit())
+            && match.setParty(player, newTeam, request));
   }
 
   /** Return the most full participating team */
@@ -439,7 +440,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           return true;
       }
 
-      if (!internalJoin(joining, teamResult.getTeam())) {
+      if (!internalJoin(joining, teamResult.getTeam(), request)) {
         return false;
       }
 
