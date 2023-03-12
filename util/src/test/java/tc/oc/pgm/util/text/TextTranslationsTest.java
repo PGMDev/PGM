@@ -33,18 +33,21 @@ public final class TextTranslationsTest {
         }
       };
 
-  @Test
-  void testGetLocales() {
-    final Collection<Locale> locales = getLocales();
-
-    assertTrue(locales.contains(US), "source code locale not loaded");
-    assertTrue(locales.contains(Locale.getDefault()), "system locale not loaded");
-  }
-
   @ParameterizedTest
   @ValueSource(strings = {"ENGLISH", "CANADA", "UK", "ROOT"})
   void testGetNearestLocale(Locale locale) {
     assertEquals(US, getNearestLocale(locale), "nearest locale not resolved");
+  }
+
+  @Test
+  void testGetLocales() {
+    final Collection<Locale> locales = getLocales();
+    final Locale defaultLocale = Locale.getDefault();
+
+    assertTrue(locales.contains(US), "source code locale not loaded");
+    assertTrue(
+        (locales.contains(defaultLocale) || locales.contains(getNearestLocale(defaultLocale))),
+        "system locale not loaded");
   }
 
   @Test

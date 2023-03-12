@@ -43,7 +43,7 @@
                         <path>
                             <groupId>cloud.commandframework</groupId>
                             <artifactId>cloud-annotations</artifactId>
-                            <version>1.7.1</version>
+                            <version>1.8.2</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -52,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.1</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>true</minimizeJar>
