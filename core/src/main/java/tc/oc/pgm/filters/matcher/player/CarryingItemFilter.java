@@ -8,7 +8,6 @@ import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.ApplyKitEvent;
-import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 
@@ -23,8 +22,7 @@ public class CarryingItemFilter extends ParticipantItemFilter {
         PlayerItemTransferEvent.class,
         ApplyKitEvent.class,
         PlayerItemBreakEvent.class,
-        EntityShootBowEvent.class,
-        EntityLaunchEvent.class);
+        EntityShootBowEvent.class);
   }
 
   @Override
