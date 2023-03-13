@@ -24,8 +24,7 @@ public abstract class ParticipantFilter extends TypedFilter.Impl<PlayerQuery> {
 
   @Override
   public boolean matches(PlayerQuery query) {
-    MatchPlayer player = query.getMatch().getPlayer(query.getId());
-
+    MatchPlayer player = query.getPlayer();
     return player != null && player.getParty() instanceof Competitor && matches(query, player);
   }
 }
