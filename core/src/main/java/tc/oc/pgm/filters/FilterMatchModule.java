@@ -9,6 +9,7 @@ import com.google.common.collect.Table;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -127,6 +128,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
               }
               this.registerListenersFor(filter.getRelevantEvents());
             });
+    // We always need to register this to handle players leaving the match cleaning-up filters.
+    // See comment in PlayerPartyChangeEvent handler for more info
+    this.registerListenersFor(Collections.singleton(PlayerPartyChangeEvent.class));
 
     // Lastly dispatch initial states of all dynamic filters for the relevant scopes
     // Has to be last since many filters depend on objects loaded in a non-consequent way during
@@ -495,6 +499,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       // force all filters false that are not already false before the player leaves.
       // Listeners don't need to do any cleanup as long as they don't hold on to
       // players that don't match the filter.
+      //
+      // Example: a countdown filter with a bossbar doesn't delete the bossbar if you /cycle 0 -f,
+      // due to the player matching the filter even while the player is leaving that match.
       this.listeners
           .columnMap()
           .forEach(

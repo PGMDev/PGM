@@ -40,7 +40,7 @@ public class CarryingFlagFilter extends TypedFilter.Impl<PartyQuery> {
     if (goal == null) throw new IllegalStateException("Flag not found");
 
     if (query instanceof PlayerQuery) {
-      MatchPlayer player = match.getPlayer(((PlayerQuery) query).getId());
+      MatchPlayer player = ((PlayerQuery) query).getPlayer();
       return player != null && goal.isCarrying(player);
     } else {
       final Party party = query.getParty();
