@@ -76,13 +76,13 @@ public final class TeamCommand {
     match.sendMessage(translatable("match.shuffle.ok", NamedTextColor.GREEN));
   }
 
-  @CommandMethod("alias <teams> <name>")
+  @CommandMethod("alias <team> <name>")
   @CommandDescription("Rename a team")
   @CommandPermission(Permissions.GAMEPLAY)
   public void alias(
       Match match,
       TeamMatchModule teams,
-      @Argument("teams") Team team,
+      @Argument("team") Team team,
       @Argument("name") @Greedy String name) {
     if (name.length() > 32) {
       name = name.substring(0, 32);
