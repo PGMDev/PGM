@@ -255,7 +255,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     mapSourceFactories.clear();
     mapSourceFactories.addAll(config.getMapSourceFactories());
-    mapIncludeProcessor.reload(config);
 
     if (mapOrder != null) {
       mapOrder.reload();
