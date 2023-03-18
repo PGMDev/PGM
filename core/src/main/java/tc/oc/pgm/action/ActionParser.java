@@ -28,6 +28,7 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.regions.BlockBoundedValidation;
@@ -159,7 +160,7 @@ public class ActionParser {
     Class<T> cls = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     return new Trigger<>(
         cls,
-        filters.parseProperty(el, "filter"),
+        filters.parseRequiredProperty(el, "filter", DynamicFilterValidation.of(cls)),
         parseProperty(Node.fromRequiredChildOrAttr(el, "trigger", "action"), cls));
   }
 

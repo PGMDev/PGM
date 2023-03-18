@@ -19,8 +19,16 @@ public class DynamicFilterValidation implements FeatureValidation<FilterDefiniti
 
   private final Class<? extends Filterable<?>> type;
 
-  public DynamicFilterValidation(Class<? extends Filterable<?>> type) {
+  private DynamicFilterValidation(Class<? extends Filterable<?>> type) {
     this.type = type;
+  }
+
+  public static DynamicFilterValidation of(Class<? extends Filterable<?>> type) {
+    if (type == null) return ANY;
+    if (type == Match.class) return MATCH;
+    if (type == Party.class) return PARTY;
+    if (type == MatchPlayer.class) return PLAYER;
+    return new DynamicFilterValidation(type);
   }
 
   @Override
