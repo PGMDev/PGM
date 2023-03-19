@@ -161,7 +161,7 @@ public class ActionParser {
     return new Trigger<>(
         cls,
         filters.parseRequiredProperty(el, "filter", DynamicFilterValidation.of(cls)),
-        parseProperty(Node.fromRequiredChildOrAttr(el, "trigger", "action"), cls));
+        parseProperty(Node.fromRequiredChildOrAttr(el, "action", "trigger"), cls));
   }
 
   private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
