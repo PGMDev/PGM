@@ -1130,4 +1130,14 @@ public final class XMLUtils {
 
     return Title.Times.times(fadeIn, stay, fadeOut);
   }
+
+  public static Color parseHexColor(Node node) throws InvalidXMLException {
+    if (node == null || node.getValue() == null)
+      throw new InvalidXMLException("No value provided for color", node);
+    String rawColor = node.getValue();
+    if (!rawColor.matches("[a-fA-F0-9]{6}")) {
+      throw new InvalidXMLException("Invalid color format", rawColor);
+    }
+    return Color.fromRGB(Integer.parseInt(rawColor, 16));
+  }
 }
