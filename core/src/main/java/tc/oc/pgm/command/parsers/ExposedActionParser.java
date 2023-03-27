@@ -7,7 +7,8 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.actions.ExposedAction;
 
-public class ExposedActionParser extends MatchObjectParser<ExposedAction, ActionMatchModule> {
+public class ExposedActionParser
+    extends MatchObjectParser.Simple<ExposedAction, ActionMatchModule> {
 
   public ExposedActionParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options, ExposedAction.class, ActionMatchModule.class, "actions");
