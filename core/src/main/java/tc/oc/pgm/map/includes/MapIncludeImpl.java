@@ -7,53 +7,57 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import org.jdom2.Content;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 
 public class MapIncludeImpl implements MapInclude {
 
-  private final String id;
-  private final Document source;
-  private final AtomicLong lastModified;
+  private final File file;
+  private final AtomicLong lastRead;
+  private Document source;
 
   public MapIncludeImpl(File file) throws MapMissingException, JDOMException, IOException {
-    try {
-      InputStream fileStream = new FileInputStream(file);
-      this.id = file.getName().replace(".xml", "");
-      this.source = MapIncludeProcessorImpl.DOCUMENT_FACTORY.get().build(fileStream);
+    this.file = file;
+    this.lastRead = new AtomicLong(-1);
+    reload();
+  }
+
+  private void reload() throws MapMissingException, JDOMException, IOException {
+    try (InputStream is = new FileInputStream(file)) {
+      this.source = MapIncludeProcessorImpl.DOCUMENT_FACTORY.get().build(is);
     } catch (FileNotFoundException e) {
       throw new MapMissingException(file.getPath(), "Unable to read map include document", e);
     } finally {
-      lastModified = new AtomicLong(file.lastModified());
+      lastRead.set(System.currentTimeMillis());
     }
   }
 
   @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
   public Collection<Content> getContent() {
+    if (getLastModified() > lastRead.get()) {
+      try {
+        reload();
+      } catch (MapMissingException | JDOMException | IOException e) {
+        PGM.get()
+            .getGameLogger()
+            .log(Level.SEVERE, "Failed to reload modified include document " + file.getName(), e);
+      }
+    }
     return source.getRootElement().cloneContent();
   }
 
   @Override
   public boolean equals(Object other) {
-    if (other == null || !(other instanceof MapInclude)) return false;
-    return ((MapInclude) other).getId().equalsIgnoreCase(getId());
+    return other instanceof MapIncludeImpl && file.equals(((MapIncludeImpl) other).file);
   }
 
   @Override
   public long getLastModified() {
-    return lastModified.get();
-  }
-
-  @Override
-  public boolean hasBeenModified(long time) {
-    return time > lastModified.get();
+    return file.lastModified();
   }
 }

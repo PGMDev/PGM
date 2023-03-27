@@ -2,6 +2,7 @@ package tc.oc.pgm.api.map;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collection;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 
@@ -41,12 +42,9 @@ public interface MapSource {
   boolean checkForUpdates() throws MapMissingException;
 
   /**
-   * Adds an associated {@link MapInclude}
+   * Sets the collection of includes the map source references
    *
    * @param include The {@link MapInclude}
    */
-  void addMapInclude(MapInclude include);
-
-  /** Remove all associated {@link MapInclude}, used when reloading document. */
-  void clearIncludes();
+  void setIncludes(Collection<MapInclude> include);
 }

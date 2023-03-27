@@ -132,6 +132,9 @@ public class MapLibraryImpl implements MapLibrary {
 
   @Override
   public CompletableFuture<?> loadNewMaps(boolean reset) {
+    // Try to search new includes before searching for new maps
+    includes.loadNewIncludes();
+
     final List<Iterator<? extends MapSource>> sources = new LinkedList<>();
 
     // Reload failed maps
