@@ -252,19 +252,6 @@ public abstract class KitParser {
     for (Element itemEl : el.getChildren()) {
       ItemStack item = this.parseItemStack(itemEl);
 
-        case "book":
-          item = parseBook(itemEl);
-          break;
-
-        case "head":
-          item = parseHead(itemEl);
-          break;
-
-        case "firework":
-          item = parseFirework(itemEl);
-          break;
-      }
-
       if (item != null) {
         Node nodeSlot = Node.fromAttr(itemEl, "slot");
         if (nodeSlot == null) {
@@ -298,6 +285,9 @@ public abstract class KitParser {
 
       case "head":
         return parseHead(el);
+
+      case "firework":
+        return parseFirework(el);
 
       default:
         return null;
