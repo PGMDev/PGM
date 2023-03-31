@@ -65,10 +65,10 @@ class SidebarRenderer {
 
     final Collection<Gamemode> gamemodes = map.getGamemodes();
     if (!gamemodes.isEmpty()) {
-      String suffix = gamemodes.size() <= 1 ? ".name" : ".acronym";
+      boolean acronyms = gamemodes.size() > 1;
       List<Component> gmComponents =
           gamemodes.stream()
-              .map(gm -> translatable("gamemode." + gm.getId() + suffix))
+              .map(gm -> text(acronyms ? gm.getAcronym() : gm.getFullName()))
               .collect(Collectors.toList());
       return TextFormatter.list(gmComponents, NamedTextColor.AQUA);
     }
@@ -85,7 +85,7 @@ class SidebarRenderer {
       }
 
       // When there are multiple, primary game modes
-      games.set(0, translatable("gamemode.generic.name", NamedTextColor.AQUA));
+      games.set(0, text(Gamemode.OBJECTIVES.getFullName(), NamedTextColor.AQUA));
       break;
     }
 
@@ -106,7 +106,7 @@ class SidebarRenderer {
         && Stream.of("blitz", "rage")
             .allMatch(id -> map.getTags().stream().anyMatch(mt -> mt.getId().equals(id)))) {
       games.clear();
-      games.add(translatable("gamemode.br.name").color(NamedTextColor.AQUA));
+      games.add(text(Gamemode.BLITZ_RAGE.getFullName(), NamedTextColor.AQUA));
     }
 
     return TextFormatter.list(games, NamedTextColor.AQUA);
