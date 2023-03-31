@@ -3,7 +3,6 @@ package tc.oc.pgm.scoreboard;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.ArrayList;
 import java.util.Collection;

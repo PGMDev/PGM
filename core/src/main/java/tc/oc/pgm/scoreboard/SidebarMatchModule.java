@@ -1,8 +1,5 @@
 package tc.oc.pgm.scoreboard;
 
-import static net.kyori.adventure.text.Component.empty;
-import static net.kyori.adventure.text.Component.space;
-import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
