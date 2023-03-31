@@ -140,8 +140,8 @@ public final class Modules {
   public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP;
   public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP_DEPENDENCY_ONLY;
 
-  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<?>> MATCH;
-  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<?>>
+  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> MATCH;
+  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
       MATCH_DEPENDENCY_ONLY;
 
   public static final Map<Class<? extends MapModule<?>>, Class<? extends MatchModule>> MAP_TO_MATCH;

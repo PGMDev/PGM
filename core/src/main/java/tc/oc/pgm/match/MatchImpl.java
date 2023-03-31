@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -75,6 +74,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.join.JoinRequest;
+import tc.oc.pgm.loot.WorldTickClock;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.Audience;
@@ -84,7 +84,6 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.collection.RankedSet;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchImpl implements Match {
 
@@ -93,6 +92,7 @@ public class MatchImpl implements Match {
   private final WeakReference<World> world;
   private final Map<Class<? extends MatchModule>, MatchModule> matchModules;
 
+  private final WorldTickClock clock;
   private final ClassLogger logger;
   private final Random random;
   private final Map<Long, Double> tickRandoms;
@@ -123,6 +123,7 @@ public class MatchImpl implements Match {
     this.world = new WeakReference<>(assertNotNull(world));
     this.matchModules = new ConcurrentHashMap<>();
 
+    this.clock = new WorldTickClock(world);
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
     this.random = new Random();
     this.tickRandoms = new HashMap<>();
@@ -245,14 +246,19 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public WorldTickClock getClock() {
+    return this.clock;
+  }
+
+  @Override
   public Tick getTick() {
-    long now = NMSHacks.getMonotonicTime(getWorld());
-    Tick old = tick.get();
-    if (old == null || old.tick != now) {
-      tick.set(new Tick(now, Instant.now()));
+    final Tick newTick = this.clock.getTick();
+    final Tick oldTick = this.tick.get();
+    if (oldTick == null || oldTick != newTick) {
+      this.tick.set(this.clock.getTick());
       tickRandoms.clear();
     }
-    return tick.get();
+    return this.tick.get();
   }
 
   @Override

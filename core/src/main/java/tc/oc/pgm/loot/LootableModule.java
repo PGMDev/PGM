@@ -31,7 +31,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class LootableModule implements MapModule<LootableMatchModule> {
 
-  private final java.util.List<FillerDefinition> fillers;
+  private final List<FillerDefinition> fillers;
   private final List<Cache> caches;
 
   public LootableModule(List<FillerDefinition> fillers, List<Cache> caches) {

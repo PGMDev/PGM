@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import org.bukkit.World;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.collection.InstantMap;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -17,8 +18,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 public class WorldTickClock extends Clock {
 
   private final World world;
-  private Instant now;
-  private long tick;
+  private Tick tick;
 
   public WorldTickClock(World world) {
     this.world = world;
@@ -36,15 +36,18 @@ public class WorldTickClock extends Clock {
 
   @Override
   public Instant instant() {
+    return this.now().instant;
+  }
+
+  public Tick getTick() {
     return this.now();
   }
 
-  private Instant now() {
+  private Tick now() {
     long tick = NMSHacks.getMonotonicTime(this.world);
-    if (this.now == null || tick != this.tick) {
-      this.tick = tick;
-      this.now = Instant.now();
+    if (this.tick == null || tick != this.tick.tick) {
+      this.tick = new Tick(tick, Instant.now());
     }
-    return this.now;
+    return this.tick;
   }
 }

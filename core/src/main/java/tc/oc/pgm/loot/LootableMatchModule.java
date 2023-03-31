@@ -27,7 +27,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.InventoryQuery;
-import tc.oc.pgm.api.filter.query.LocationQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -254,16 +253,14 @@ public class LootableMatchModule implements MatchModule, Listener {
           .region()
           .getChunkPositions()
           .map(cp -> cp.getChunk(match.getWorld()))
-          .flatMap(
+          .<InventoryQuery>flatMap(
               ch ->
                   Stream.concat(
                       Stream.of(ch.getTileEntities()).map(BlockQuery::new),
                       Stream.of(ch.getEntities())
                           .filter(e -> !(e instanceof Player))
                           .map(EntityQuery::new)))
-          .map(LocationQuery.class::cast)
           .filter(q -> cache.jointFilter().query(q).isAllowed())
-          .map(InventoryQuery.class::cast)
           .map(InventoryQuery::getInventory)
           .filter(Objects::nonNull);
     }
