@@ -418,7 +418,7 @@ public class ChatDispatcher implements Listener {
   }
 
   private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
-    Component msg = text(message != null ? message : "");
+    Component msg = text(message != null ? message.trim() : "");
     if (prefix == null)
       return text()
           .append(text("<", NamedTextColor.WHITE))
