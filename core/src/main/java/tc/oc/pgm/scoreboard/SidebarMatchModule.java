@@ -1,6 +1,5 @@
 package tc.oc.pgm.scoreboard;
 
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import fr.mrmicky.fastboard.FastBoard;
