@@ -387,8 +387,8 @@ public final class XMLUtils {
   private static final Pattern RANGE_RE =
       Pattern.compile("\\s*(\\(|\\[)\\s*([^,]+)\\s*,\\s*([^\\)\\]]+)\\s*(\\)|\\])\\s*");
 
-  private static final Pattern RANGE_LEGACY =
-      Pattern.compile("\\s*([^\\.]*\\.?[^\\.]+)?\\s*\\.\\.\\s*([^\\.]*\\.?[^\\.]+)?\\s*");
+  private static final Pattern RANGE_DOTTED =
+      Pattern.compile("\\s*(-oo|-?\\d*\\.?\\d+)?\\s*\\.\\.\\s*(oo|-?\\d*\\.?\\d+)?\\s*");
 
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
       @Nullable Node node, Class<T> type, @Nullable Range<T> fallback) throws InvalidXMLException {
@@ -421,80 +421,51 @@ public final class XMLUtils {
       Node node, Class<T> type) throws InvalidXMLException {
     String nodeValue = node.getValue();
 
-    String lower;
-    BoundType lowerBound = null;
-    String upper;
-    BoundType higherBound = null;
+    String lowStr;
+    BoundType lowerBound;
+    String uppStr;
+    BoundType upperBound;
 
-    Matcher matcher = RANGE_RE.matcher(nodeValue);
-
-    Matcher legacy = RANGE_LEGACY.matcher(nodeValue);
-
-    if (legacy.matches()) {
-      String first = legacy.group(1);
-      String second = legacy.group(2);
-
-      lower = first == null ? "-oo" : first.trim();
-      upper = second == null ? "oo" : second.trim();
+    Matcher matcher;
+    if ((matcher = RANGE_DOTTED.matcher(nodeValue)).matches()) {
+      lowStr = matcher.group(1);
+      uppStr = matcher.group(2);
       lowerBound = BoundType.CLOSED;
-      higherBound = BoundType.CLOSED;
-
-    } else if (matcher.matches()) {
-      lower = matcher.group(2);
-      upper = matcher.group(3);
+      upperBound = BoundType.CLOSED;
+    } else if ((matcher = RANGE_RE.matcher(nodeValue)).matches()) {
+      lowStr = matcher.group(2);
+      uppStr = matcher.group(3);
       lowerBound = "(".equals(matcher.group(1)) ? BoundType.OPEN : BoundType.CLOSED;
-      higherBound = ")".equals(matcher.group(4)) ? BoundType.OPEN : BoundType.CLOSED;
+      upperBound = ")".equals(matcher.group(4)) ? BoundType.OPEN : BoundType.CLOSED;
     } else {
       // Try to parse as singleton range
       T value = parseNumber(node, nodeValue, type, true);
       if (value != null) {
         return Range.singleton(value);
       }
-
       throw new InvalidXMLException(
           "Invalid " + type.getSimpleName().toLowerCase() + " range '" + nodeValue + "'", node);
     }
 
-    T lowerParsed;
-    T higherParsed;
+    T lower =
+        lowStr == null || lowStr.equals("-oo") ? null : parseNumber(node, lowStr, type, false);
+    T upper = uppStr == null || uppStr.equals("oo") ? null : parseNumber(node, uppStr, type, false);
 
-    if (lower.equals("oo")) {
-      throw new InvalidXMLException("Lower bound infinity needs to be negative! (\"-oo\")", node);
-    }
-    if (lower.equals("-oo")) {
-      lowerParsed = null;
-    } else {
-      lowerParsed = parseNumber(lower, type, false);
-    }
-
-    if (upper.equals("-oo")) {
-      throw new InvalidXMLException("Higher bound infinity needs to be positive! (\"oo\")", node);
-    }
-    if (upper.equals("oo")) {
-      higherParsed = null;
-    } else {
-      higherParsed = parseNumber(upper, type, false);
-    }
-
-    if (lowerParsed != null && higherParsed != null && lowerParsed.compareTo(higherParsed) > 0) {
-      throw new InvalidXMLException(
-          "range lower bound ("
-              + lowerParsed
-              + ") cannot be greater than upper bound ("
-              + higherParsed
-              + ")",
-          node);
-    }
-
-    if (lowerParsed == null) {
-      if (higherParsed == null) {
-        return Range.all();
+    if (lower != null && upper != null) {
+      if (lower.compareTo(upper) > 0) {
+        throw new InvalidXMLException(
+            "range lower bound (" + lower + ") cannot be greater than upper bound (" + upper + ")",
+            node);
       }
-      return Range.upTo(higherParsed, higherBound);
-    } else if (higherParsed == null) {
-      return Range.downTo(lowerParsed, lowerBound);
+
+      return Range.range(lower, lowerBound, upper, upperBound);
+
+    } else if (lower != null) {
+      return Range.downTo(lower, lowerBound);
+    } else if (upper != null) {
+      return Range.upTo(upper, upperBound);
     } else {
-      return Range.range(lowerParsed, lowerBound, higherParsed, higherBound);
+      return Range.all();
     }
   }
 

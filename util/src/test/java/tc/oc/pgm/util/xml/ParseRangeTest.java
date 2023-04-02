@@ -66,7 +66,18 @@ public final class ParseRangeTest {
   @Test
   public void testFaultyVanillaRanges() {
     final List<String> faultyRanges =
-        Lists.newArrayList("oo..1", "oo..oo", "5..1", "oo..oo", "-oo..-oo", "oo..-oo", "4..-oo");
+        Lists.newArrayList(
+            "oo..1",
+            "oo..oo",
+            "5..1",
+            "oo..oo",
+            "-oo..-oo",
+            "oo..-oo",
+            "4..-oo",
+            "===..5",
+            "3..###",
+            "3..wow",
+            "amazing..3");
 
     for (String faultyRange : faultyRanges) {
       AtomicReference<Range<Integer>> faultyResult = new AtomicReference<>(null);
