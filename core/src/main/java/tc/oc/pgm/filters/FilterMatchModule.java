@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -409,7 +410,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   public void invalidate(Filterable<?> filterable) {
-    if (dirtySet.add(filterable)) {
+    if (dirtySet.add(Objects.requireNonNull(filterable))) {
       filterable.getFilterableChildren().forEach(this::invalidate);
     }
   }
