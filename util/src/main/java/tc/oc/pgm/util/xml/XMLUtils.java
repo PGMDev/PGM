@@ -22,7 +22,6 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -35,6 +34,7 @@ import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
@@ -387,6 +387,9 @@ public final class XMLUtils {
   private static final Pattern RANGE_RE =
       Pattern.compile("\\s*(\\(|\\[)\\s*([^,]+)\\s*,\\s*([^\\)\\]]+)\\s*(\\)|\\])\\s*");
 
+  private static final Pattern RANGE_DOTTED =
+      Pattern.compile("\\s*(-oo|-?\\d*\\.?\\d+)?\\s*\\.\\.\\s*(oo|-?\\d*\\.?\\d+)?\\s*");
+
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
       @Nullable Node node, Class<T> type, @Nullable Range<T> fallback) throws InvalidXMLException {
     if (node == null) return fallback;
@@ -400,50 +403,69 @@ public final class XMLUtils {
    *
    * <p>for a closed-open range from 0 to 1
    *
+   * <p>Or in the vanilla Minecraft format e.g.
+   *
+   * <p>1..5 or ..5 or 1..
+   *
+   * <p>equal to [1, 5], (-oo, 5] and [1, oo)
+   *
    * <p>Also supports singleton ranges derived from providing a number with no delimiter
+   *
+   * @implNote Since infinity and "infinity"({@link Double#POSITIVE_INFINITY} etc.) is handled
+   *     differently by the Google ranges we find the infinities and create Ranges using {@link
+   *     Range#upTo(Comparable, BoundType) Range.upTo} and {@link Range#downTo(Comparable,
+   *     BoundType) Range.downTo} instead of resolving to the max or min value of the range type.
+   *     (Like {@link #parseNumber(String, Class, boolean)} does)
    */
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      @NotNull Node node, Class<T> type) throws InvalidXMLException {
-    Matcher matcher = RANGE_RE.matcher(node.getValue());
-    if (!matcher.matches()) {
-      T value = parseNumber(node, node.getValue(), type, true);
+      Node node, Class<T> type) throws InvalidXMLException {
+    String nodeValue = node.getValue();
+
+    String lowStr;
+    BoundType lowerBound;
+    String uppStr;
+    BoundType upperBound;
+
+    Matcher matcher;
+    if ((matcher = RANGE_DOTTED.matcher(nodeValue)).matches()) {
+      lowStr = matcher.group(1);
+      uppStr = matcher.group(2);
+      lowerBound = BoundType.CLOSED;
+      upperBound = BoundType.CLOSED;
+    } else if ((matcher = RANGE_RE.matcher(nodeValue)).matches()) {
+      lowStr = matcher.group(2);
+      uppStr = matcher.group(3);
+      lowerBound = "(".equals(matcher.group(1)) ? BoundType.OPEN : BoundType.CLOSED;
+      upperBound = ")".equals(matcher.group(4)) ? BoundType.OPEN : BoundType.CLOSED;
+    } else {
+      // Try to parse as singleton range
+      T value = parseNumber(node, nodeValue, type, true);
       if (value != null) {
         return Range.singleton(value);
       }
       throw new InvalidXMLException(
-          "Invalid " + type.getSimpleName().toLowerCase() + " range '" + node.getValue() + "'",
-          node);
+          "Invalid " + type.getSimpleName().toLowerCase() + " range '" + nodeValue + "'", node);
     }
 
-    T lower = parseNumber(node, matcher.group(2), type, true);
-    T upper = parseNumber(node, matcher.group(3), type, true);
+    T lower =
+        lowStr == null || lowStr.equals("-oo") ? null : parseNumber(node, lowStr, type, false);
+    T upper = uppStr == null || uppStr.equals("oo") ? null : parseNumber(node, uppStr, type, false);
 
-    BoundType lowerType = null, upperType = null;
-    if (!Double.isInfinite(lower.doubleValue())) {
-      lowerType = "(".equals(matcher.group(1)) ? BoundType.OPEN : BoundType.CLOSED;
-    }
-    if (!Double.isInfinite(upper.doubleValue())) {
-      upperType = ")".equals(matcher.group(4)) ? BoundType.OPEN : BoundType.CLOSED;
-    }
-
-    if (lower.compareTo(upper) == 1) {
-      throw new InvalidXMLException(
-          "range lower bound (" + lower + ") cannot be greater than upper bound (" + upper + ")",
-          node);
-    }
-
-    if (lowerType == null) {
-      if (upperType == null) {
-        return Range.all();
-      } else {
-        return Range.upTo(upper, upperType);
+    if (lower != null && upper != null) {
+      if (lower.compareTo(upper) > 0) {
+        throw new InvalidXMLException(
+            "range lower bound (" + lower + ") cannot be greater than upper bound (" + upper + ")",
+            node);
       }
+
+      return Range.range(lower, lowerBound, upper, upperBound);
+
+    } else if (lower != null) {
+      return Range.downTo(lower, lowerBound);
+    } else if (upper != null) {
+      return Range.upTo(upper, upperBound);
     } else {
-      if (upperType == null) {
-        return Range.downTo(lower, lowerType);
-      } else {
-        return Range.range(lower, lowerType, upper, upperType);
-      }
+      return Range.all();
     }
   }
 
@@ -508,6 +530,26 @@ public final class XMLUtils {
         return Range.range(lowerBound, lowerBoundType, upperBound, upperBoundType);
       }
     }
+  }
+
+  public static <T extends Number & Comparable<T>> Range<T> parseBoundedNumericRange(
+      Node node, Class<T> type) throws InvalidXMLException {
+    Range<T> result = parseNumericRange(node, type);
+    if (!Ranges.isBounded(result))
+      throw new InvalidXMLException("Range for this node needs to be bounded", node);
+    return result;
+  }
+
+  public static <T extends Number & Comparable<T>> Range<T> parseBoundedNumericRange(
+      Attribute attribute, Class<T> type, Range<T> def) throws InvalidXMLException {
+    if (attribute != null && attribute.getValue() != null)
+      return parseBoundedNumericRange(new Node(attribute), type);
+    return def;
+  }
+
+  public static <T extends Number & Comparable<T>> Range<T> parseBoundedNumericRange(
+      Attribute attribute, Class<T> type) throws InvalidXMLException {
+    return parseBoundedNumericRange(attribute, type, null);
   }
 
   public static Duration parseDuration(Node node, Duration def) throws InvalidXMLException {

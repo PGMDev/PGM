@@ -30,6 +30,7 @@ import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.join.JoinRequest;
+import tc.oc.pgm.loot.WorldTickClock;
 import tc.oc.pgm.util.Audience;
 
 /**
@@ -208,6 +209,9 @@ public interface Match
    * @param event The event to submit.
    */
   void callEvent(Event event);
+
+  /** Get the {@link WorldTickClock} providing {@link Tick}s for this match */
+  WorldTickClock getClock();
 
   /**
    * Get a {@link Tick} that is guaranteed to return the current Minecraft server tick.

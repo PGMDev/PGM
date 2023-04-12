@@ -62,6 +62,8 @@ import tc.oc.pgm.killreward.KillRewardMatchModule;
 import tc.oc.pgm.killreward.KillRewardModule;
 import tc.oc.pgm.kits.KitMatchModule;
 import tc.oc.pgm.kits.KitModule;
+import tc.oc.pgm.loot.LootableMatchModule;
+import tc.oc.pgm.loot.LootableModule;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.modules.ArrowRemovalMatchModule;
@@ -138,8 +140,9 @@ public final class Modules {
   public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP;
   public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP_DEPENDENCY_ONLY;
 
-  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<?>> MATCH;
-  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<?>>
+  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
+      MATCH;
+  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
       MATCH_DEPENDENCY_ONLY;
 
   public static final Map<Class<? extends MapModule<?>>, Class<? extends MatchModule>> MAP_TO_MATCH;
@@ -305,6 +308,7 @@ public final class Modules {
     register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
     register(EnderChestModule.class, EnderChestMatchModule.class, new EnderChestModule.Factory());
     register(StructureModule.class, StructureMatchModule.class, new StructureModule.Factory());
+    register(LootableModule.class, LootableMatchModule.class, new LootableModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());

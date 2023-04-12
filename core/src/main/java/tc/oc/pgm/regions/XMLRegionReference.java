@@ -18,6 +18,7 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.xml.Node;
 
 public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
@@ -143,5 +144,9 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   @Override
   public Iterable<Block> getBlocks(World world) {
     return get().getBlocks(world);
+  }
+
+  public Stream<ChunkVector> getChunkPositions() {
+    return get().getChunkPositions();
   }
 }
