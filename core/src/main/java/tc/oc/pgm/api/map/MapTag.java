@@ -2,7 +2,6 @@ package tc.oc.pgm.api.map;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
@@ -35,8 +34,12 @@ public final class MapTag implements Comparable<MapTag> {
         PATTERN.matcher(assertNotNull(id)).matches(), name + " must match " + PATTERN.pattern());
     this.id = id;
     if (gamemode) {
-      this.name = translatable("gamemode." + internalId + ".name");
-      this.acronym = translatable("gamemode." + internalId + ".acronym");
+      Gamemode gm = Gamemode.byId(internalId);
+      if (gm == null) {
+        throw new IllegalArgumentException("Gamemode id " + internalId + " not recognized");
+      }
+      this.name = text(gm.getFullName());
+      this.acronym = text(gm.getAcronym());
     } else {
       this.name = text(name);
       this.acronym = empty();
