@@ -12,11 +12,10 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
-public class GameRulesModule implements MapModule {
+public class GameRulesModule implements MapModule<GameRulesMatchModule> {
 
   private Map<String, String> gameRules;
 
@@ -24,13 +23,13 @@ public class GameRulesModule implements MapModule {
     this.gameRules = gamerules;
   }
 
-  public MatchModule createMatchModule(Match match) {
+  public GameRulesMatchModule createMatchModule(Match match) {
     return new GameRulesMatchModule(match, this.gameRules);
   }
 
   public static class Factory implements MapModuleFactory<GameRulesModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(WorldTimeModule.class);
     }
 

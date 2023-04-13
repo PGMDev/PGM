@@ -15,6 +15,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.Audience;
@@ -65,5 +66,19 @@ public class MapDevCommand {
         header,
         (v, i) ->
             text().append(text(v.getId() + ": ", NamedTextColor.AQUA), text(v.getValue(target))));
+  }
+
+  @CommandMethod("filter <filter> [target]")
+  @CommandDescription("Match a filter against a player")
+  @CommandPermission(Permissions.DEBUG)
+  public void evaluateFilter(
+      Audience audience,
+      @Argument("filter") Filter filter,
+      @Argument(value = "target", defaultValue = CURRENT) MatchPlayer target) {
+    audience.sendMessage(
+        text("Filter responded with ", NamedTextColor.YELLOW)
+            .append(text(filter.query(target) + "", NamedTextColor.AQUA))
+            .append(text(" to ", NamedTextColor.YELLOW))
+            .append(target.getName()));
   }
 }

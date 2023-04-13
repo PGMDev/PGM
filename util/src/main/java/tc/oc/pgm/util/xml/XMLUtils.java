@@ -22,7 +22,6 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -35,6 +34,7 @@ import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
@@ -387,8 +387,8 @@ public final class XMLUtils {
   private static final Pattern RANGE_RE =
       Pattern.compile("\\s*(\\(|\\[)\\s*([^,]+)\\s*,\\s*([^\\)\\]]+)\\s*(\\)|\\])\\s*");
 
-  public static final Pattern RANGE_DOTTED =
-      Pattern.compile("(-oo|-?\\d*\\.?\\d+)?\\s*\\.\\.\\s*(oo|-?\\d*\\.?\\d+)?");
+  private static final Pattern RANGE_DOTTED =
+      Pattern.compile("\\s*(-oo|-?\\d*\\.?\\d+)?\\s*\\.\\.\\s*(oo|-?\\d*\\.?\\d+)?\\s*");
 
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
       @Nullable Node node, Class<T> type, @Nullable Range<T> fallback) throws InvalidXMLException {
@@ -408,10 +408,21 @@ public final class XMLUtils {
    *
    * <p>Singleton range (a standalone number)
    *
-   * <p>Dotted range notation: 0..1 for a closed range from 0 to 1
+   * <p>Vanilla minecraft dotted range notation e.g.
+   *
+   * <p>1..5 or ..5 or 1..
+   *
+   * <p>equal to [1, 5], (-oo, 5] and [1, oo)
+   *
+   * @implNote Since infinity and "infinity"({@link Double#POSITIVE_INFINITY} etc.) is handled
+   *     differently by the Google ranges we find the infinities and create Ranges using {@link
+   *     Range#upTo(Comparable, BoundType) Range.upTo} and {@link Range#downTo(Comparable,
+   *     BoundType) Range.downTo} instead of resolving to the max or min value of the range type.
+   *     (Like {@link #parseNumber(String, Class, boolean)} does)
    */
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      @NotNull Node node, String text, Class<T> type) throws InvalidXMLException {
+      Node node, Class<T> type) throws InvalidXMLException {
+    String nodeValue = node.getValue();
 
     String lowStr;
     BoundType lowerBound;
@@ -419,24 +430,24 @@ public final class XMLUtils {
     BoundType upperBound;
 
     Matcher matcher;
-    if ((matcher = RANGE_DOTTED.matcher(text)).matches()) {
+    if ((matcher = RANGE_DOTTED.matcher(nodeValue)).matches()) {
       lowStr = matcher.group(1);
       uppStr = matcher.group(2);
       lowerBound = BoundType.CLOSED;
       upperBound = BoundType.CLOSED;
-    } else if ((matcher = RANGE_RE.matcher(text)).matches()) {
+    } else if ((matcher = RANGE_RE.matcher(nodeValue)).matches()) {
       lowStr = matcher.group(2);
       uppStr = matcher.group(3);
       lowerBound = "(".equals(matcher.group(1)) ? BoundType.OPEN : BoundType.CLOSED;
       upperBound = ")".equals(matcher.group(4)) ? BoundType.OPEN : BoundType.CLOSED;
     } else {
-      // Parse as singleton range
-      T value = parseNumber(node, text, type, true);
+      // Try to parse as singleton range
+      T value = parseNumber(node, nodeValue, type, true);
       if (value != null) {
         return Range.singleton(value);
       }
       throw new InvalidXMLException(
-          "Invalid " + type.getSimpleName().toLowerCase() + " range '" + text + "'", node);
+          "Invalid " + type.getSimpleName().toLowerCase() + " range '" + nodeValue + "'", node);
     }
 
     T lower =
@@ -522,6 +533,26 @@ public final class XMLUtils {
         return Range.range(lowerBound, lowerBoundType, upperBound, upperBoundType);
       }
     }
+  }
+
+  public static <T extends Number & Comparable<T>> Range<T> parseBoundedNumericRange(
+      Node node, Class<T> type) throws InvalidXMLException {
+    Range<T> result = parseNumericRange(node, type);
+    if (!Ranges.isBounded(result))
+      throw new InvalidXMLException("Range for this node needs to be bounded", node);
+    return result;
+  }
+
+  public static <T extends Number & Comparable<T>> Range<T> parseBoundedNumericRange(
+      Attribute attribute, Class<T> type, Range<T> def) throws InvalidXMLException {
+    if (attribute != null && attribute.getValue() != null)
+      return parseBoundedNumericRange(new Node(attribute), type);
+    return def;
+  }
+
+  public static <T extends Number & Comparable<T>> Range<T> parseBoundedNumericRange(
+      Attribute attribute, Class<T> type) throws InvalidXMLException {
+    return parseBoundedNumericRange(attribute, type, null);
   }
 
   public static Duration parseDuration(Node node, Duration def) throws InvalidXMLException {
@@ -905,7 +936,7 @@ public final class XMLUtils {
 
   public static String getNormalizedNullableText(Element el) {
     String text = el.getTextNormalize();
-    if (text == null || "".equals(text)) {
+    if (text == null || "".equals(text)) {>>>>>>> dev
       return null;
     } else {
       return text;
@@ -1143,5 +1174,15 @@ public final class XMLUtils {
     Duration fadeOut = XMLUtils.parseDuration(Node.fromAttr(el, "fade-out"), def.fadeOut());
 
     return Title.Times.times(fadeIn, stay, fadeOut);
+  }
+
+  public static Color parseHexColor(Node node) throws InvalidXMLException {
+    if (node == null || node.getValue() == null)
+      throw new InvalidXMLException("No value provided for color", node);
+    String rawColor = node.getValue();
+    if (!rawColor.matches("[a-fA-F0-9]{6}")) {
+      throw new InvalidXMLException("Invalid color format", rawColor);
+    }
+    return Color.fromRGB(Integer.parseInt(rawColor, 16));
   }
 }

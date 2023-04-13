@@ -8,6 +8,7 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -49,6 +50,8 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
    * chat.
    */
   boolean hasShowOption(ShowOption option);
+
+  Filter getScoreboardFilter();
 
   boolean isRequired();
 

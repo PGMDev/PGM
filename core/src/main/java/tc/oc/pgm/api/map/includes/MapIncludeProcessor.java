@@ -2,7 +2,6 @@ package tc.oc.pgm.api.map.includes;
 
 import java.util.Collection;
 import org.jdom2.Document;
-import tc.oc.pgm.api.Config;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 /** A processor to determine which {@link MapInclude}s should be included when loading a map * */
@@ -25,10 +24,6 @@ public interface MapIncludeProcessor {
    */
   MapInclude getMapIncludeById(String includeId);
 
-  /**
-   * Reload the processor to fetch new map includes or reload existing ones.
-   *
-   * @param config A configuration file.
-   */
-  void reload(Config config);
+  /** Reload the processor to fetch new map includes. */
+  void loadNewIncludes();
 }

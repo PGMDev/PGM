@@ -35,7 +35,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class CoreModule implements MapModule {
+public class CoreModule implements MapModule<CoreMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("dtc", "core", "Destroy the Core", true, false));
@@ -47,12 +47,12 @@ public class CoreModule implements MapModule {
   }
 
   @Override
-  public Collection<Class> getSoftDependencies() {
+  public Collection<Class<? extends MatchModule>> getSoftDependencies() {
     return ImmutableList.of(GoalMatchModule.class);
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public CoreMatchModule createMatchModule(Match match) {
     ImmutableList.Builder<Core> cores = new ImmutableList.Builder<>();
     for (CoreFactory factory : this.coreFactories) {
       Core core = new Core(factory, match);
@@ -72,12 +72,12 @@ public class CoreModule implements MapModule {
   public static class Factory implements MapModuleFactory<CoreModule> {
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(ObjectiveModesModule.class);
     }
 
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, TeamModule.class);
     }
 
@@ -138,7 +138,7 @@ public class CoreModule implements MapModule {
         }
 
         boolean showProgress = XMLUtils.parseBoolean(coreEl.getAttribute("show-progress"), false);
-        ShowOptions options = ShowOptions.parse(coreEl);
+        ShowOptions options = ShowOptions.parse(context.getFilters(), coreEl);
         Boolean required = XMLUtils.parseBoolean(coreEl.getAttribute("required"), null);
         ProximityMetric proximityMetric =
             ProximityMetric.parse(

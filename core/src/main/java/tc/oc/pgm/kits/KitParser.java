@@ -21,6 +21,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.FireworkEffect.Type;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -28,6 +30,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -40,6 +43,7 @@ import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.consumable.ConsumableDefinition;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.kits.tag.Grenade;
@@ -246,20 +250,7 @@ public abstract class KitParser {
     List<ItemStack> freeItems = new ArrayList<>();
 
     for (Element itemEl : el.getChildren()) {
-      ItemStack item = null;
-      switch (itemEl.getName()) {
-        case "item":
-          item = parseItem(itemEl, true);
-          break;
-
-        case "book":
-          item = parseBook(itemEl);
-          break;
-
-        case "head":
-          item = parseHead(itemEl);
-          break;
-      }
+      ItemStack item = this.parseItemStack(itemEl);
 
       if (item != null) {
         Node nodeSlot = Node.fromAttr(itemEl, "slot");
@@ -282,6 +273,25 @@ public abstract class KitParser {
     boolean dropOverflow = XMLUtils.parseBoolean(Node.fromAttr(el, "drop-overflow"), false);
 
     return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems, dropOverflow);
+  }
+
+  public @Nullable ItemStack parseItemStack(Element el) throws InvalidXMLException {
+    switch (el.getName()) {
+      case "item":
+        return parseItem(el, true);
+
+      case "book":
+        return parseBook(el);
+
+      case "head":
+        return parseHead(el);
+
+      case "firework":
+        return parseFirework(el);
+
+      default:
+        return null;
+    }
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
@@ -395,6 +405,47 @@ public abstract class KitParser {
         XMLUtils.parseUnsignedSkin(Node.fromRequiredChildOrAttr(el, "skin")));
     itemStack.setItemMeta(meta);
     return itemStack;
+  }
+
+  public ItemStack parseFirework(Element el) throws InvalidXMLException {
+    ItemStack itemStack = parseItem(el, Material.FIREWORK);
+    FireworkMeta meta = (FireworkMeta) itemStack.getItemMeta();
+    int power = XMLUtils.parseNumber(Node.fromAttr(el, "power"), Integer.class, false, 1);
+    meta.setPower(power);
+
+    for (Element explosionEl : el.getChildren("explosion")) {
+      Type type =
+          XMLUtils.parseEnum(Node.fromAttr(explosionEl, "type"), Type.class, null, Type.BURST);
+      boolean flicker = XMLUtils.parseBoolean(Node.fromAttr(explosionEl, "flicker"), false);
+      boolean trail = XMLUtils.parseBoolean(Node.fromAttr(explosionEl, "trail"), false);
+
+      List<Color> primary = parseColors(Node.fromChildren(explosionEl, "color"));
+      List<Color> fade = parseColors(Node.fromChildren(explosionEl, "fade"));
+
+      if (primary.isEmpty()) {
+        throw new InvalidXMLException("At least one <color> must be defined", explosionEl);
+      }
+
+      meta.addEffect(
+          FireworkEffect.builder()
+              .with(type)
+              .withColor(primary)
+              .withFade(fade)
+              .flicker(flicker)
+              .trail(trail)
+              .build());
+    }
+
+    itemStack.setItemMeta(meta);
+    return itemStack;
+  }
+
+  private List<Color> parseColors(List<Node> nodes) throws InvalidXMLException {
+    List<Color> colors = new ArrayList<>(nodes.size());
+    for (Node node : nodes) {
+      colors.add(XMLUtils.parseHexColor(node));
+    }
+    return colors;
   }
 
   public ItemMatcher parseItemMatcher(Element parent) throws InvalidXMLException {
@@ -512,13 +563,9 @@ public abstract class KitParser {
 
     if (meta instanceof LeatherArmorMeta) {
       LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
-      org.jdom2.Attribute attrColor = el.getAttribute("color");
+      Node attrColor = Node.fromAttr(el, "color");
       if (attrColor != null) {
-        String raw = attrColor.getValue();
-        if (!raw.matches("[a-fA-F0-9]{6}")) {
-          throw new InvalidXMLException("Invalid color format", attrColor);
-        }
-        armorMeta.setColor(Color.fromRGB(Integer.parseInt(attrColor.getValue(), 16)));
+        armorMeta.setColor(XMLUtils.parseHexColor(attrColor));
       }
     }
 
@@ -585,6 +632,10 @@ public abstract class KitParser {
       ItemTags.PREVENT_SHARING.set(itemStack, true);
     }
 
+    if (XMLUtils.parseBoolean(el.getAttribute("locked"), false)) {
+      ItemTags.LOCKED.set(itemStack, true);
+    }
+
     if (itemStack.getAmount() == -1) {
       ItemTags.INFINITE.set(itemStack, true);
     }
@@ -599,6 +650,16 @@ public abstract class KitParser {
               .getId());
       String name = itemStack.getItemMeta().getDisplayName();
       ItemTags.ORIGINAL_NAME.set(itemStack, name != null ? name : "");
+    }
+
+    Node consumableNode = Node.fromAttr(el, "consumable");
+    if (consumableNode != null) {
+      ItemTags.CONSUMABLE.set(
+          itemStack,
+          factory
+              .getFeatures()
+              .createReference(consumableNode, ConsumableDefinition.class)
+              .getId());
     }
   }
 

@@ -4,10 +4,10 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -73,7 +73,10 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.join.JoinRequest;
+import tc.oc.pgm.loot.WorldTickClock;
 import tc.oc.pgm.result.CompetitorVictoryCondition;
+import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.FileUtils;
@@ -81,7 +84,6 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.collection.RankedSet;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchImpl implements Match {
 
@@ -90,6 +92,7 @@ public class MatchImpl implements Match {
   private final WeakReference<World> world;
   private final Map<Class<? extends MatchModule>, MatchModule> matchModules;
 
+  private final WorldTickClock clock;
   private final ClassLogger logger;
   private final Random random;
   private final Map<Long, Double> tickRandoms;
@@ -112,6 +115,7 @@ public class MatchImpl implements Match {
   private final AtomicReference<Party> queuedParticipants;
   private final ObserverParty observers;
   private final MatchFeatureContext features;
+  private Boolean friendlyFireOverride;
 
   protected MatchImpl(String id, MapContext map, World world) {
     this.id = assertNotNull(id);
@@ -119,6 +123,7 @@ public class MatchImpl implements Match {
     this.world = new WeakReference<>(assertNotNull(world));
     this.matchModules = new ConcurrentHashMap<>();
 
+    this.clock = new WorldTickClock(world);
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
     this.random = new Random();
     this.tickRandoms = new HashMap<>();
@@ -241,14 +246,19 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public WorldTickClock getClock() {
+    return this.clock;
+  }
+
+  @Override
   public Tick getTick() {
-    long now = NMSHacks.getMonotonicTime(getWorld());
-    Tick old = tick.get();
-    if (old == null || old.tick != now) {
-      tick.set(new Tick(now, Instant.now()));
+    final Tick newTick = this.clock.getTick();
+    final Tick oldTick = this.tick.get();
+    if (oldTick == null || oldTick != newTick) {
+      this.tick.set(this.clock.getTick());
       tickRandoms.clear();
     }
-    return tick.get();
+    return this.tick.get();
   }
 
   @Override
@@ -445,13 +455,15 @@ public class MatchImpl implements Match {
     MatchPlayer player = players.get(bukkit.getUniqueId());
     if (player != null) {
       logger.fine("Removing player " + player);
-      setOrClearPlayerParty(player, null);
+      setOrClearPlayerParty(player, null, JoinRequest.of(null, JoinRequest.Flag.FORCE));
     }
   }
 
   @Override
-  public boolean setParty(MatchPlayer player, Party party) {
-    return setOrClearPlayerParty(player, assertNotNull(party));
+  public boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request) {
+    if (request == null)
+      request = JoinRequest.of(party instanceof Team ? (Team) party : null, JoinRequest.Flag.FORCE);
+    return setOrClearPlayerParty(player, assertNotNull(party), request);
   }
 
   /**
@@ -472,7 +484,8 @@ public class MatchImpl implements Match {
    * <p>- Call {@link PlayerParticipationStartEvent} and/or {@link PlayerParticipationStopEvent}
    * (and bail if either are cancelled) -
    */
-  private boolean setOrClearPlayerParty(MatchPlayer player, @Nullable Party newParty) {
+  private boolean setOrClearPlayerParty(
+      MatchPlayer player, @Nullable Party newParty, @NotNull JoinRequest joinRequest) {
     Party oldParty = player.getParty();
 
     assertTrue(this == player.getMatch(), "Player belongs to a different match");
@@ -514,7 +527,7 @@ public class MatchImpl implements Match {
 
       if (newParty instanceof Competitor) {
         PlayerParticipationEvent request =
-            new PlayerParticipationStartEvent(player, (Competitor) newParty);
+            new PlayerParticipationStartEvent(player, (Competitor) newParty, joinRequest);
         callEvent(request);
         if (request.isCancelled()
             && oldParty != null) { // Can't cancel this if the player is joining the match
@@ -556,7 +569,7 @@ public class MatchImpl implements Match {
         removeTickable(player);
         this.players.remove(player.getId());
 
-        callEvent(new PlayerPartyChangeEvent(player, oldParty, null));
+        callEvent(new PlayerPartyChangeEvent(player, oldParty, null, joinRequest));
       } else {
         // Player is joining a party
         // Update the new party's state
@@ -564,9 +577,9 @@ public class MatchImpl implements Match {
 
         if (oldParty == null) {
           // If they are not leaving an old party, they are also joining the match
-          callEvent(new PlayerJoinMatchEvent(player, newParty));
+          callEvent(new PlayerJoinMatchEvent(player, newParty, joinRequest));
         } else {
-          callEvent(new PlayerJoinPartyEvent(player, oldParty, newParty));
+          callEvent(new PlayerJoinPartyEvent(player, oldParty, newParty, joinRequest));
         }
       }
 
@@ -705,6 +718,16 @@ public class MatchImpl implements Match {
     return Duration.ofMillis(end - start);
   }
 
+  @Override
+  public boolean getFriendlyFire() {
+    return friendlyFireOverride != null ? friendlyFireOverride : map.getFriendlyFire();
+  }
+
+  @Override
+  public void setFriendlyFire(Boolean allow) {
+    this.friendlyFireOverride = allow;
+  }
+
   private class TickableTask implements Runnable {
     private final MatchScope scope;
 
@@ -736,13 +759,21 @@ public class MatchImpl implements Match {
     return player == null ? null : players.get(player.getUniqueId());
   }
 
+  private ImmutableMap<Class<? extends MatchModule>, MatchModuleFactory<?>> buildModuleMap() {
+    ImmutableMap.Builder<Class<? extends MatchModule>, MatchModuleFactory<?>> builder =
+        ImmutableMap.builder();
+    builder.putAll(Modules.MATCH);
+    getMap()
+        .getModules()
+        .forEach(module -> builder.put(Modules.MAP_TO_MATCH.get(module.getClass()), module));
+    return builder.build();
+  }
+
   private class ModuleLoader
       extends ModuleGraph<MatchModule, MatchModuleFactory<? extends MatchModule>> {
 
     private ModuleLoader() throws ModuleLoadException {
-      super(new HashMap<>(Modules.MATCH), new HashMap<>(Modules.MATCH_DEPENDENCY_ONLY));
-      getMap().getModules().stream()
-          .forEach(module -> addFactory(Modules.MAP_TO_MATCH.get(module.getClass()), module));
+      super(buildModuleMap(), Modules.MATCH_DEPENDENCY_ONLY);
       loadAll();
     }
 
@@ -765,7 +796,7 @@ public class MatchImpl implements Match {
     }
 
     @Override
-    protected MatchModule createModule(MatchModuleFactory factory) throws ModuleLoadException {
+    protected MatchModule createModule(MatchModuleFactory<?> factory) throws ModuleLoadException {
       final MatchModule module = factory.createMatchModule(MatchImpl.this);
       if (module == null) return null;
 

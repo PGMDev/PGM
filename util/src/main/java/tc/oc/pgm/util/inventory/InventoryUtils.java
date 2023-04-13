@@ -150,4 +150,13 @@ public final class InventoryUtils {
     // TODO: Newer versions of Bukkit can use HumanEntity#openMerchant(Merchant, boolean)
     viewer.openMerchantCopy(villager);
   }
+
+  public static void consumeItem(Player player) {
+    ItemStack itemInHand = player.getItemInHand();
+    if (itemInHand.getAmount() > 1) {
+      itemInHand.setAmount(itemInHand.getAmount() - 1);
+    } else {
+      player.setItemInHand(null);
+    }
+  }
 }

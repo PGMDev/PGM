@@ -11,6 +11,7 @@ import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -112,18 +113,19 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearTitle(PlayerJoinMatchEvent event) {
     MatchPlayer player = event.getPlayer();
+    Match match = event.getMatch();
+    List<Component> extraLines = event.getExtraLines();
 
     player.clearTitle();
 
     // Bukkit assumes a player's locale is "en_US" before it receives a player's setting packet.
     // Thus, we delay sending this prominent message, so it is more likely its in the right locale.
-    player
-        .getMatch()
+    match
         .getExecutor(MatchScope.LOADED)
-        .schedule(() -> sendWelcomeMessage(event.getPlayer()), 500, TimeUnit.MILLISECONDS);
+        .schedule(() -> sendWelcomeMessage(player, extraLines), 500, TimeUnit.MILLISECONDS);
   }
 
-  private void sendWelcomeMessage(MatchPlayer viewer) {
+  public void sendWelcomeMessage(MatchPlayer viewer, List<Component> extraLines) {
     MapInfo mapInfo = viewer.getMatch().getMap();
 
     Component title = text(mapInfo.getName(), NamedTextColor.AQUA, TextDecoration.BOLD);
@@ -142,6 +144,11 @@ public class MatchAnnouncer implements Listener {
                       "misc.createdBy",
                       NamedTextColor.GRAY,
                       TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
+    }
+
+    // Send extra info from other plugins
+    for (Component extra : extraLines) {
+      viewer.sendMessage(extra);
     }
 
     viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));

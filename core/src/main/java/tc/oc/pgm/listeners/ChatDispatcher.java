@@ -15,10 +15,8 @@ import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.annotations.specifier.Greedy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,11 +39,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.VanishManager;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.command.SettingCommand;
@@ -54,6 +52,8 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.Players;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.channels.Channel;
+import tc.oc.pgm.util.event.ChannelMessageEvent;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -68,10 +68,7 @@ public class ChatDispatcher implements Listener {
   }
 
   private final MatchManager manager;
-  private final VanishManager vanish;
-  private final OnlinePlayerMapAdapter<UUID> lastMessagedBy;
-
-  private final Map<UUID, String> muted;
+  private final OnlinePlayerMapAdapter<MessageSenderIdentity> lastMessagedBy;
 
   public static final TextComponent ADMIN_CHAT_PREFIX =
       text()
@@ -97,33 +94,19 @@ public class ChatDispatcher implements Listener {
 
   public ChatDispatcher() {
     this.manager = PGM.get().getMatchManager();
-    this.vanish = PGM.get().getVanishManager();
     this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
-    this.muted = Maps.newHashMap();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
 
-  public void addMuted(MatchPlayer player, String reason) {
-    this.muted.put(player.getId(), reason);
-  }
-
-  public void removeMuted(MatchPlayer player) {
-    this.muted.remove(player.getId());
-  }
-
   public boolean isMuted(MatchPlayer player) {
-    return player != null && muted.containsKey(player.getId());
-  }
-
-  public Set<UUID> getMutedUUIDs() {
-    return muted.keySet();
+    return player != null && Integration.isMuted(player.getBukkit());
   }
 
   @CommandMethod("g|all [message]")
   @CommandDescription("Send a message to everyone")
   public void sendGlobal(
       Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
-    if (sender.isVanished()) {
+    if (Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
@@ -137,14 +120,15 @@ public class ChatDispatcher implements Listener {
         getChatFormat(null, sender, message),
         match.getPlayers(),
         viewer -> true,
-        SettingValue.CHAT_GLOBAL);
+        SettingValue.CHAT_GLOBAL,
+        Channel.GLOBAL);
   }
 
   @CommandMethod("t [message]")
   @CommandDescription("Send a message to your team")
   public void sendTeam(
       Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
-    if (sender.isVanished()) {
+    if (Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
     }
@@ -169,7 +153,8 @@ public class ChatDispatcher implements Listener {
             party.equals(viewer.getParty())
                 || (viewer.isObserving()
                     && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
-        SettingValue.CHAT_TEAM);
+        SettingValue.CHAT_TEAM,
+        Channel.TEAM);
   }
 
   @CommandMethod("a [message]")
@@ -193,7 +178,8 @@ public class ChatDispatcher implements Listener {
         getChatFormat(ADMIN_CHAT_PREFIX, sender, message),
         match.getPlayers(),
         AC_FILTER,
-        SettingValue.CHAT_ADMIN);
+        SettingValue.CHAT_ADMIN,
+        Channel.ADMIN);
 
     // Play sounds for admin chat
     if (message != null) {
@@ -211,7 +197,8 @@ public class ChatDispatcher implements Listener {
       @NotNull MatchPlayer sender,
       @Argument("player") MatchPlayer receiver,
       @Argument("message") @Greedy String message) {
-    if (vanish.isVanished(sender.getId())) throw exception("vanish.chat.deny");
+    if (Integration.isVanished(sender.getBukkit())) throw exception("vanish.chat.deny");
+    if (receiver.equals(sender)) throw exception("command.message.self");
 
     if (!receiver.getBukkit().hasPermission(Permissions.STAFF)) throwMuted(sender);
 
@@ -219,13 +206,16 @@ public class ChatDispatcher implements Listener {
 
     if (!sender.getBukkit().hasPermission(Permissions.STAFF)) {
       if (option.equals(SettingValue.MESSAGE_OFF))
-        throw exception("command.message.blocked", receiver.getName(NameStyle.FANCY));
+        throw exception("command.message.blocked", receiver.getName());
 
-      if (isMuted(receiver))
-        throw exception("moderation.mute.target", receiver.getName(NameStyle.FANCY));
+      if (option.equals(SettingValue.MESSAGE_FRIEND)
+          && !Integration.isFriend(receiver.getBukkit(), sender.getBukkit()))
+        throw exception("command.message.friendsOnly", receiver.getName());
+
+      if (isMuted(receiver)) throw exception("moderation.mute.target", receiver.getName());
     }
 
-    lastMessagedBy.put(receiver.getBukkit(), sender.getId());
+    trackMessage(receiver.getBukkit(), sender.getBukkit());
 
     // Send message to receiver
     send(
@@ -242,7 +232,8 @@ public class ChatDispatcher implements Listener {
             message),
         Collections.singleton(receiver),
         r -> true,
-        null);
+        null,
+        Channel.PRIVATE_RECEIVER);
 
     // Send message to the sender
     send(
@@ -259,7 +250,8 @@ public class ChatDispatcher implements Listener {
             message),
         Collections.singleton(sender),
         s -> true,
-        null);
+        null,
+        Channel.PRIVATE_SENDER);
     playSound(receiver, DM_SOUND);
   }
 
@@ -273,7 +265,7 @@ public class ChatDispatcher implements Listener {
   @CommandDescription("Reply to a direct message")
   public void sendReply(
       Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
-    final MatchPlayer receiver = manager.getPlayer(lastMessagedBy.get(sender.getBukkit()));
+    MatchPlayer receiver = manager.getPlayer(getLastMessagedId(sender.getBukkit()));
     if (receiver == null) throw exception("command.message.noReply", text("/msg"));
 
     sendDirect(match, sender, receiver, message);
@@ -340,7 +332,8 @@ public class ChatDispatcher implements Listener {
       final @NotNull Component componentMsg,
       final @NotNull Collection<MatchPlayer> matchPlayers,
       final @NotNull Predicate<MatchPlayer> filter,
-      final @Nullable SettingValue type) {
+      final @Nullable SettingValue type,
+      final @NotNull Channel channel) {
     final String message = text == null ? null : text.trim();
     // When a message is empty, this indicates the player wants to change their default chat channel
     if (message == null || message.isEmpty()) {
@@ -356,7 +349,8 @@ public class ChatDispatcher implements Listener {
 
     PGM.get()
         .getAsyncExecutor()
-        .execute(() -> asyncSendChat(match, sender, message, format, componentMsg, players));
+        .execute(
+            () -> asyncSendChat(match, sender, message, format, componentMsg, players, channel));
   }
 
   private void asyncSendChat(
@@ -365,7 +359,8 @@ public class ChatDispatcher implements Listener {
       final @NotNull String message,
       final @NotNull String format,
       final @NotNull Component componentMsg,
-      final @NotNull Set<Player> players) {
+      final @NotNull Set<Player> players,
+      final @NotNull Channel channel) {
     final AsyncPlayerChatEvent event =
         new AsyncPlayerChatEvent(false, sender.getBukkit(), message, players);
     event.setFormat(format);
@@ -373,6 +368,8 @@ public class ChatDispatcher implements Listener {
     match.callEvent(event);
 
     if (event.isCancelled()) return;
+    match.callEvent(new ChannelMessageEvent(channel, sender.getBukkit(), message));
+
     Identity senderId = identity(sender.getId());
 
     event.getRecipients().stream()
@@ -381,10 +378,17 @@ public class ChatDispatcher implements Listener {
   }
 
   private void throwMuted(MatchPlayer player) {
-    if (isMuted(player))
-      throw exception(
-          "moderation.mute.message",
-          text(muted.getOrDefault(player.getId(), ""), NamedTextColor.AQUA));
+    if (isMuted(player)) {
+      Optional<String> muteReason =
+          Optional.ofNullable(Integration.getMuteReason(player.getBukkit()));
+
+      Component reason =
+          muteReason.isPresent()
+              ? text(muteReason.get())
+              : translatable("moderation.mute.noReason");
+
+      throw exception("moderation.mute.message", reason.color(NamedTextColor.AQUA));
+    }
   }
 
   public static void broadcastAdminChatMessage(Component message, Match match) {
@@ -414,7 +418,7 @@ public class ChatDispatcher implements Listener {
   }
 
   private Component getChatFormat(@Nullable Component prefix, MatchPlayer player, String message) {
-    Component msg = text(message != null ? message : "");
+    Component msg = text(message != null ? message.trim() : "");
     if (prefix == null)
       return text()
           .append(text("<", NamedTextColor.WHITE))
@@ -428,5 +432,51 @@ public class ChatDispatcher implements Listener {
         .append(text(": ", NamedTextColor.WHITE))
         .append(msg)
         .build();
+  }
+
+  private void trackMessage(Player receiver, Player sender) {
+    MessageSenderIdentity senderIdent = new MessageSenderIdentity(receiver, sender);
+    this.lastMessagedBy.put(receiver, senderIdent);
+  }
+
+  private UUID getLastMessagedId(Player sender) {
+    MessageSenderIdentity targetIdent = lastMessagedBy.get(sender);
+    if (targetIdent == null) return null;
+    MatchPlayer target = manager.getPlayer(targetIdent.getPlayerId());
+
+    // Prevent replying to offline players
+    if (target == null) return null;
+
+    // Compare last known and current name
+    String lastKnownName = targetIdent.getName();
+    String currentName = Players.getVisibleName(sender, target.getBukkit());
+
+    // Ensure the target is visible to the viewing sender
+    boolean visible = Players.isVisible(sender, target.getBukkit());
+
+    if (currentName.equalsIgnoreCase(lastKnownName) && visible) {
+      return target.getId();
+    }
+
+    return null;
+  }
+
+  private class MessageSenderIdentity {
+
+    private UUID playerId;
+    private String name;
+
+    public MessageSenderIdentity(Player viewer, Player player) {
+      this.playerId = player.getUniqueId();
+      this.name = Players.getVisibleName(viewer, player);
+    }
+
+    public UUID getPlayerId() {
+      return playerId;
+    }
+
+    public String getName() {
+      return name;
+    }
   }
 }

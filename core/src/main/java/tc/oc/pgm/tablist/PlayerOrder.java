@@ -6,6 +6,7 @@ import org.bukkit.permissions.Permission;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 /**
@@ -36,15 +37,35 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     Player b = mb.getBukkit();
     Player viewer = this.viewer.getBukkit();
 
-    boolean aStaff = a.hasPermission(Permissions.STAFF);
-    boolean bStaff = b.hasPermission(Permissions.STAFF);
+    // Check if the viewer has staff permissions
+    boolean isStaff = viewer.hasPermission(Permissions.STAFF);
 
-    // Staff take priority
-    if (aStaff && !bStaff) {
-      return -1;
-    } else if (bStaff && !aStaff) {
-      return 1;
-    }
+    // Check if viewer is in a squad with the player
+    boolean aSquad = Integration.areInSquad(viewer, a);
+    boolean bSquad = Integration.areInSquad(viewer, b);
+
+    if (aSquad && !bSquad) return -1;
+    else if (bSquad && !aSquad) return 1;
+
+    // Check if viewer is friends with the player
+    boolean aFriend = Integration.isFriend(viewer, a);
+    boolean bFriend = Integration.isFriend(viewer, b);
+
+    if (aFriend && !bFriend) return -1;
+    else if (bFriend && !aFriend) return 1;
+
+    String aNick = aFriend || isStaff ? null : Integration.getNick(a);
+    String bNick = bFriend || isStaff ? null : Integration.getNick(b);
+
+    // Check if 'a' and 'b' are staff members (only counts if they're not nicked)
+    boolean aStaff = aNick == null && a.hasPermission(Permissions.STAFF);
+    boolean bStaff = bNick == null && b.hasPermission(Permissions.STAFF);
+
+    if (aStaff && !bStaff) return -1;
+    else if (bStaff && !aStaff) return 1;
+
+    // Compare the nicknames of 'a' and 'b' if both are nicked, skip group permission check
+    if (aNick != null && bNick != null) return aNick.compareToIgnoreCase(bNick);
 
     // If players have different permissions, the player with the highest ranked perm
     // that the other one does't have is first. Disguised players effectively have no perms.

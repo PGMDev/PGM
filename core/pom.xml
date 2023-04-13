@@ -8,9 +8,9 @@
 
     <parent>
         <relativePath>../pom.xml</relativePath>
-        <version>0.15-SNAPSHOT</version>
+        <version>0.16-SNAPSHOT</version>
         <groupId>tc.oc.pgm</groupId>
-        <artifactId>PGM</artifactId>
+        <artifactId>pgm</artifactId>
     </parent>
 
     <name>Core</name>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>tc.oc.pgm</groupId>
             <artifactId>util</artifactId>
-            <version>0.15-SNAPSHOT</version>
+            <version>0.16-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -43,7 +43,7 @@
                         <path>
                             <groupId>cloud.commandframework</groupId>
                             <artifactId>cloud-annotations</artifactId>
-                            <version>1.7.1</version>
+                            <version>1.8.2</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -52,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.4.1</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                     <minimizeJar>true</minimizeJar>

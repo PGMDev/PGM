@@ -37,7 +37,6 @@ public final class TeamCommand {
   @CommandPermission(Permissions.JOIN_FORCE)
   public void force(
       MatchPlayer sender,
-      Match match,
       JoinMatchModule join,
       @Argument("player") MatchPlayer joiner,
       @Argument("team") Party team) {
@@ -47,7 +46,6 @@ public final class TeamCommand {
     if (team != null && !(team instanceof Competitor)) {
       join.leave(joiner);
     } else {
-      match.moduleOptional(TeamMatchModule.class).ifPresent(tmm -> tmm.setForced(joiner, true));
       join.forceJoin(joiner, (Competitor) team);
     }
 
@@ -78,13 +76,13 @@ public final class TeamCommand {
     match.sendMessage(translatable("match.shuffle.ok", NamedTextColor.GREEN));
   }
 
-  @CommandMethod("alias <teams> <name>")
+  @CommandMethod("alias <team> <name>")
   @CommandDescription("Rename a team")
   @CommandPermission(Permissions.GAMEPLAY)
   public void alias(
       Match match,
       TeamMatchModule teams,
-      @Argument("teams") Team team,
+      @Argument("team") Team team,
       @Argument("name") @Greedy String name) {
     if (name.length() > 32) {
       name = name.substring(0, 32);

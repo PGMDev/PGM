@@ -23,9 +23,10 @@ public interface Permissions {
   String RESIZE = ROOT + ".resize"; // Resize the number of players per match
   String JOIN = ROOT + ".join"; // Allowed to join a match as a participant
   String JOIN_CHOOSE = JOIN + ".choose"; // Can choose which team to join
-  String EXTRA_VOTE = JOIN + ".extravote"; // Extra map voting power
   String JOIN_FULL = ROOT + ".full"; // Can join a team or server if it is full
   String JOIN_FORCE = JOIN + ".force"; // Can force other players onto teams
+  String VOTE = ROOT + ".vote"; // Can user vote in map pools
+  String EXTRA_VOTE = VOTE + ".extra"; // User vote in map pools count as double
   String LEAVE = ROOT + ".leave"; // Can join observers willingly
   String DEFUSE = ROOT + ".defuse"; // Defuse tnt from observers using shears
   String DEBUG = ROOT + ".debug"; // Errors from map loading and debug commands
@@ -37,6 +38,8 @@ public interface Permissions {
   String BAN = ROOT + ".ban"; // Access to the /ban command
   String FREEZE = ROOT + ".freeze"; // Access to the /freeze command
   String VANISH = ROOT + ".vanish"; // Access to /vanish command
+  String VIEW_INVENTORY =
+      ROOT + ".inventory"; // Access to /inventory and can click on players to see their inventory
 
   String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
 
@@ -45,7 +48,11 @@ public interface Permissions {
       new Permission(
           "pgm.default",
           PermissionDefault.TRUE,
-          new ImmutableMap.Builder<String, Boolean>().put(JOIN, true).put(LEAVE, true).build());
+          new ImmutableMap.Builder<String, Boolean>()
+              .put(JOIN, true)
+              .put(LEAVE, true)
+              .put(VIEW_INVENTORY, true)
+              .build());
 
   Permission PREMIUM =
       new Permission(

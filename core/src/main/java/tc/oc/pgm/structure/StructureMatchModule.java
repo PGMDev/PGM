@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
+import tc.oc.pgm.snapshot.WorldSnapshot;
 
 public class StructureMatchModule implements MatchModule {
 
@@ -39,30 +39,41 @@ public class StructureMatchModule implements MatchModule {
   @Override
   public void load() throws ModuleLoadException {
     SnapshotMatchModule smm = match.needModule(SnapshotMatchModule.class);
-    for (StructureDefinition structure : structures.values()) {
-      smm.saveRegion(structure.getRegion());
+    WorldSnapshot originalWorld = smm.getOriginalSnapshot();
 
-      if (structure.clearSource())
-        smm.removeBlocks(structure.getRegion(), new BlockVector(), structure.includeAir());
+    boolean anyClears = false;
+
+    for (StructureDefinition def : structures.values()) {
+      Structure structure = new Structure(def, match, originalWorld);
+      match.getFeatureContext().add(structure);
+
+      anyClears |= def.clearSource();
     }
 
-    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
-    for (DynamicStructureDefinition dynamicDefinition : dynamics) {
-      DynamicStructure dynamicStructure = new DynamicStructure(dynamicDefinition, match);
+    // If no clears happened, then we're fine to use the same world snapshot.
+    // Otherwise, use a different one for dynamic clear
+    WorldSnapshot afterClear = anyClears ? new WorldSnapshot(match.getWorld()) : originalWorld;
 
-      match.getFeatureContext().add(dynamicStructure);
-      final DynamicStructureDefinition dynamicDef = dynamicStructure.getDefinition();
+    FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
+    for (DynamicStructureDefinition def : dynamics) {
+      Structure struct =
+          match.getFeatureContext().get(def.getStructureDefinition().getId(), Structure.class);
+
+      DynamicStructure dynamic = new DynamicStructure(def, struct, afterClear);
+
+      match.getFeatureContext().add(dynamic);
+
       fmm.onChange(
           Match.class,
-          dynamicDef.getTrigger(),
+          dynamic.getDefinition().getTrigger(),
           (m, response) -> {
             if (response) {
               // This is the passive filter, not the dynamic one
-              if (dynamicDef.getPassive().query(m).isAllowed()) {
-                this.queuePlace(dynamicStructure);
+              if (dynamic.getDefinition().getPassive().query(m).isAllowed()) {
+                this.queuePlace(dynamic);
               }
             } else {
-              this.queueClear(dynamicStructure);
+              this.queueClear(dynamic);
             }
           });
     }

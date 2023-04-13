@@ -13,7 +13,6 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.matcher.CauseFilter;
 import tc.oc.pgm.filters.operator.DenyFilter;
 import tc.oc.pgm.regions.EverywhereRegion;
@@ -24,7 +23,7 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class TNTModule implements MapModule {
+public class TNTModule implements MapModule<TNTMatchModule> {
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("autotnt", "Instant TNT", false, true));
   public static final int DEFAULT_DISPENSER_NUKE_LIMIT = 16;
@@ -42,13 +41,13 @@ public class TNTModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public TNTMatchModule createMatchModule(Match match) {
     return new TNTMatchModule(match, this.properties);
   }
 
   public static class Factory implements MapModuleFactory<TNTModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class);
     }
 

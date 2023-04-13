@@ -21,7 +21,7 @@ public class MapContextImpl extends MapInfoImpl implements MapContext {
   private final MapSource source;
   private final List<MapModule> modules;
 
-  public MapContextImpl(MapInfo info, MapSource source, Collection<MapModule> modules) {
+  public MapContextImpl(MapInfo info, MapSource source, Collection<MapModule<?>> modules) {
     super(info);
     this.source = assertNotNull(source);
     this.modules = ImmutableList.copyOf(assertNotNull(modules));

@@ -5,15 +5,18 @@ import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import tc.oc.pgm.api.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
@@ -83,9 +86,8 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
   }
 
   @Override
-  public void reload(Config config) {
-    this.includes.clear();
-
+  public void loadNewIncludes() {
+    Config config = PGM.get().getConfiguration();
     if (config.getIncludesDirectory() == null) return;
 
     File includeFiles = new File(config.getIncludesDirectory());
@@ -93,15 +95,29 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
       logger.warning(config.getIncludesDirectory() + " is not a directory!");
       return;
     }
+
+    Set<String> deletedIncludes = new HashSet<>(includes.keySet());
+
     File[] files = includeFiles.listFiles();
     for (File file : files) {
+      String filename = file.getName();
+      if (!filename.endsWith(".xml")) continue;
+
+      String id = filename.substring(0, filename.length() - ".xml".length());
+      // Already loaded, can ignore and continue
+      if (deletedIncludes.remove(id)) continue;
+
       try {
-        MapIncludeImpl include = new MapIncludeImpl(file);
-        this.includes.put(include.getId(), include);
+        this.includes.put(id, new MapIncludeImpl(file));
       } catch (MapMissingException | JDOMException | IOException error) {
-        logger.info("Unable to load " + file.getName() + " include document");
+        logger.log(Level.WARNING, "Failed to load " + filename + " include document", error);
         error.printStackTrace();
       }
+    }
+
+    for (String id : deletedIncludes) {
+      this.includes.remove(id);
+      logger.info("Removed deleted include file " + id);
     }
   }
 }

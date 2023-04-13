@@ -18,6 +18,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
   protected Filter destroyFilter;
   protected Duration coolDown;
   protected boolean throwable;
+  protected boolean precise;
 
   public ProjectileDefinition(
       @Nullable String id,
@@ -29,7 +30,8 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
       List<PotionEffect> potion,
       Filter destroyFilter,
       Duration coolDown,
-      boolean throwable) {
+      boolean throwable,
+      boolean precise) {
     super(id);
     this.name = name;
     this.damage = damage;
@@ -40,6 +42,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
     this.destroyFilter = destroyFilter;
     this.coolDown = coolDown;
     this.throwable = throwable;
+    this.precise = precise;
   }
 
   public @Nullable String getName() {

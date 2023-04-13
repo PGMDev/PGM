@@ -26,7 +26,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ObjectiveModesModule implements MapModule {
+public class ObjectiveModesModule implements MapModule<ObjectiveModesMatchModule> {
 
   private final ImmutableList<Mode> modes;
   public static final Duration DEFAULT_SHOW_BEFORE = Duration.ofSeconds(60L);
@@ -47,7 +47,7 @@ public class ObjectiveModesModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ObjectiveModesMatchModule createMatchModule(Match match) {
     return new ObjectiveModesMatchModule(match, this.modes);
   }
 

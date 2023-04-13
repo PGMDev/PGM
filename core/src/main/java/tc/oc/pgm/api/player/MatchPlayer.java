@@ -136,14 +136,6 @@ public interface MatchPlayer
   boolean isFrozen();
 
   /**
-   * Get whether the {@link MatchPlayer} is currently vanished. Determines whether to display to
-   * non-staff or not.
-   *
-   * @return Whether the {@link MatchPlayer} is vanished.
-   */
-  boolean isVanished();
-
-  /**
    * Get whether the {@link MatchPlayer} is using a legacy version (1.7.X)
    *
    * @return Whether the {@link MatchPlayer} is using a legacy version
@@ -215,13 +207,6 @@ public interface MatchPlayer
    * @param gameMode - The gamemode to set
    */
   void setGameMode(GameMode gameMode);
-
-  /**
-   * Mark the {@link MatchPlayer} as vanished or not.
-   *
-   * @param vanished - Whether the player is vanished
-   */
-  void setVanished(boolean vanished);
 
   /**
    * Get the protocol version of the {@link MatchPlayer}'s client

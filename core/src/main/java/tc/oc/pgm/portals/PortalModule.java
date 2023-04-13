@@ -41,7 +41,7 @@ import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class PortalModule implements MapModule {
+public class PortalModule implements MapModule<PortalMatchModule> {
   private static final Component PROTECT_MESSAGE = translatable("map.protectPortal");
 
   protected final Set<Portal> portals;
@@ -63,7 +63,7 @@ public class PortalModule implements MapModule {
 
   public static class Factory implements MapModuleFactory<PortalModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 

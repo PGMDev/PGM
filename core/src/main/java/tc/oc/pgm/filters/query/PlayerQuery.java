@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -63,6 +64,12 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
   @Override
   public Location getBlockCenter() {
     return blockCenter;
+  }
+
+  @Nullable
+  @Override
+  public PlayerInventory getInventory() {
+    return this.player.getInventory();
   }
 
   @Override

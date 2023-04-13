@@ -20,6 +20,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -29,8 +31,8 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
-import tc.oc.pgm.teams.TeamMatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
 public class BlitzMatchModule implements MatchModule, Listener {
@@ -53,6 +55,10 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   public BlitzConfig getConfig() {
     return this.config;
+  }
+
+  public Filter getScoreboardFilter() {
+    return config.getScoreboardFilter();
   }
 
   /** Whether or not the player participated in the match and was eliminated. */
@@ -98,18 +104,16 @@ public class BlitzMatchModule implements MatchModule, Listener {
     }
   }
 
-  public boolean canJoin(MatchPlayer player) {
+  public boolean canJoin(MatchPlayer player, @Nullable JoinRequest request) {
     if (isPlayerEliminated(player.getId())) return false;
-
-    TeamMatchModule tmm = player.getMatch().getModule(TeamMatchModule.class);
-    if (!match.isRunning() || (tmm != null && tmm.isForced(player))) return true;
+    if (!match.isRunning() || (request != null && request.has(JoinRequest.Flag.FORCE))) return true;
 
     return config.getJoinFilter().query(player.getMatch()).isAllowed();
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void handleJoin(final PlayerParticipationStartEvent event) {
-    if (canJoin(event.getPlayer())) return;
+    if (canJoin(event.getPlayer(), event.getRequest())) return;
 
     event.cancel(
         translatable("blitz.joinDenied", translatable("gamemode.blitz.name", NamedTextColor.AQUA)));

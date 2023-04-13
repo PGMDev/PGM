@@ -70,7 +70,7 @@ public class MapVotePicker {
    */
   public List<MapInfo> getMaps(VotePoolOptions options, Map<MapInfo, Double> scores) {
     if (options.shouldOverride())
-      return getMaps(new ArrayList<>(), options.getCustomVoteMapWeighted());
+      return getMaps(new ArrayList<>(), options.getCustomVoteMapsWeighted());
 
     List<MapInfo> maps = new ArrayList<>(options.getCustomVoteMaps());
     return getMaps(maps, scores);

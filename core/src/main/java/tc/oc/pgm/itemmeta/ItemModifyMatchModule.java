@@ -25,7 +25,12 @@ public class ItemModifyMatchModule implements MatchModule, Listener {
     this.imm = imm;
   }
 
-  private boolean applyRules(ItemStack stack) {
+  /**
+   * Apply {@link ItemRule}s to the given item stack if applicable.
+   *
+   * @return {@code true} if any rules were applied to the given item stack, {@code false} if not
+   */
+  public boolean applyRules(ItemStack stack) {
     return imm.applyRules(stack);
   }
 

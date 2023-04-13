@@ -9,11 +9,13 @@ import com.google.common.collect.Table;
 import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -104,6 +106,10 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   // Filterables that need a check in the next tick (cleared every tick)
   private final Set<Filterable<?>> dirtySet = new HashSet<>();
 
+  public ContextStore<? super Filter> getFilterContext() {
+    return filterContext;
+  }
+
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
 
@@ -127,6 +133,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
               }
               this.registerListenersFor(filter.getRelevantEvents());
             });
+    // We always need to register this to handle players leaving the match cleaning-up filters.
+    // See comment in PlayerPartyChangeEvent handler for more info
+    this.registerListenersFor(Collections.singleton(PlayerPartyChangeEvent.class));
 
     // Lastly dispatch initial states of all dynamic filters for the relevant scopes
     // Has to be last since many filters depend on objects loaded in a non-consequent way during
@@ -213,15 +222,17 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   @Override
   public <F extends Filterable<?>> void onChange(
       Class<F> scope, Filter filter, FilterListener<? super F> listener) {
-    match
-        .getLogger()
-        .fine(
-            "onChange scope="
-                + scope.getSimpleName()
-                + " listener="
-                + listener
-                + " filter="
-                + filter);
+    if (match.getLogger().isLoggable(Level.FINE)) {
+      match
+          .getLogger()
+          .fine(
+              "onChange scope="
+                  + scope.getSimpleName()
+                  + " listener="
+                  + listener
+                  + " filter="
+                  + filter);
+    }
     register(scope, filter, true, listener);
     register(scope, filter, false, listener);
   }
@@ -399,7 +410,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   public void invalidate(Filterable<?> filterable) {
-    if (dirtySet.add(filterable)) {
+    if (dirtySet.add(Objects.requireNonNull(filterable))) {
       filterable.getFilterableChildren().forEach(this::invalidate);
     }
   }
@@ -493,6 +504,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       // force all filters false that are not already false before the player leaves.
       // Listeners don't need to do any cleanup as long as they don't hold on to
       // players that don't match the filter.
+      //
+      // Example: a countdown filter with a bossbar doesn't delete the bossbar if you /cycle 0 -f,
+      // due to the player matching the filter even while the player is leaving that match.
       this.listeners
           .columnMap()
           .forEach(

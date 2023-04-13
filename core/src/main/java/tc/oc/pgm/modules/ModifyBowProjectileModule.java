@@ -8,40 +8,50 @@ import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ModifyBowProjectileModule implements MapModule {
+public class ModifyBowProjectileModule implements MapModule<ModifyBowProjectileMatchModule> {
   protected final Class<? extends Entity> cls;
   protected final float velocityMod;
   protected final Set<PotionEffect> potionEffects;
+  protected final Filter pickupFilter;
 
   public ModifyBowProjectileModule(
-      Class<? extends Entity> cls, float velocityMod, Set<PotionEffect> effects) {
+      Class<? extends Entity> cls,
+      float velocityMod,
+      Set<PotionEffect> effects,
+      Filter pickupFilter) {
     this.cls = cls;
     this.velocityMod = velocityMod;
     potionEffects = effects;
+    this.pickupFilter = pickupFilter;
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ModifyBowProjectileMatchModule createMatchModule(Match match) {
     return new ModifyBowProjectileMatchModule(
-        match, this.cls, this.velocityMod, this.potionEffects);
+        match, this.cls, this.velocityMod, this.potionEffects, this.pickupFilter);
   }
 
   public static class Factory implements MapModuleFactory<ModifyBowProjectileModule> {
     @Override
     public ModifyBowProjectileModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
+      FilterParser filters = factory.getFilters();
+
       boolean changed = false;
       Class<? extends Entity> projectile = Arrow.class;
       float velocityMod = 1;
       Set<PotionEffect> potionEffects = new HashSet<>();
+      Filter pickupFilter = StaticFilter.ALLOW;
 
       for (Element parent : doc.getRootElement().getChildren("modifybowprojectile")) {
         Element projectileElement = parent.getChild("projectile");
@@ -60,11 +70,14 @@ public class ModifyBowProjectileModule implements MapModule {
           potionEffects.add(XMLUtils.parsePotionEffect(potionElement));
           changed = true;
         }
+
+        pickupFilter = filters.parseFilterProperty(parent, "pickup-filter", StaticFilter.ALLOW);
+        changed |= pickupFilter != StaticFilter.ALLOW;
       }
 
       return !changed
           ? null
-          : new ModifyBowProjectileModule(projectile, velocityMod, potionEffects);
+          : new ModifyBowProjectileModule(projectile, velocityMod, potionEffects, pickupFilter);
     }
   }
 }

@@ -23,7 +23,7 @@ public class ProximityAlarmMatchModule implements MatchModule {
   @Override
   public void enable() {
     for (ProximityAlarm proximityAlarm : this.proximityAlarms) {
-      this.match.addListener(proximityAlarm, MatchScope.RUNNING);
+      this.match.addListener(proximityAlarm.playerTracker, MatchScope.RUNNING);
     }
 
     match

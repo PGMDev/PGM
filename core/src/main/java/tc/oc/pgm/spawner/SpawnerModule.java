@@ -18,7 +18,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -32,18 +31,18 @@ import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class SpawnerModule implements MapModule {
+public class SpawnerModule implements MapModule<SpawnerMatchModule> {
 
   private final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public SpawnerMatchModule createMatchModule(Match match) {
     return new SpawnerMatchModule(match, spawnerDefinitions);
   }
 
   public static class Factory implements MapModuleFactory<SpawnerModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class);
     }
 

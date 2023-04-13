@@ -15,7 +15,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitModule;
@@ -26,7 +25,7 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class SpawnModule implements MapModule {
+public class SpawnModule implements MapModule<SpawnMatchModule> {
 
   public static final Duration DEFAULT_RESPAWN_DELAY = Duration.ofMillis(2000);
   public static final Duration MINIMUM_RESPAWN_DELAY = Duration.ofMillis(1500);
@@ -44,28 +43,26 @@ public class SpawnModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public SpawnMatchModule createMatchModule(Match match) {
     return new SpawnMatchModule(match, this);
   }
 
   public static class Factory implements MapModuleFactory<SpawnModule> {
 
-    private FilterParser filterParser;
-
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(RegionModule.class, KitModule.class);
     }
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(TeamModule.class);
     }
 
     @Override
     public SpawnModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      this.filterParser = factory.getFilters();
+      FilterParser filterParser = factory.getFilters();
       SpawnParser parser = new SpawnParser(factory, new PointParser(factory));
       List<Spawn> spawns = Lists.newArrayList();
 
@@ -77,15 +74,17 @@ public class SpawnModule implements MapModule {
         throw new InvalidXMLException("map must have a single default spawn", doc);
       }
 
-      return new SpawnModule(parser.getDefaultSpawn(), spawns, parseRespawnOptions(doc));
+      return new SpawnModule(
+          parser.getDefaultSpawn(), spawns, parseRespawnOptions(doc, filterParser));
     }
 
-    private List<RespawnOptions> parseRespawnOptions(Document doc) throws InvalidXMLException {
+    private List<RespawnOptions> parseRespawnOptions(Document doc, FilterParser filterParser)
+        throws InvalidXMLException {
       List<RespawnOptions> respawnOptions = Lists.newArrayList();
 
       for (Element elRespawn :
           XMLUtils.flattenElements(doc.getRootElement(), "respawns", "respawn")) {
-        respawnOptions.add(getRespawnOptions(elRespawn));
+        respawnOptions.add(getRespawnOptions(elRespawn, filterParser));
       }
       // Parse root children respawn elements, Keeps old syntax and gives a default spawn if all
       // others fail
@@ -93,17 +92,22 @@ public class SpawnModule implements MapModule {
           getRespawnOptions(
               doc.getRootElement().getChildren("respawn"),
               doc.getRootElement().getChild("autorespawn") != null,
-              true));
+              true,
+              filterParser));
 
       return respawnOptions;
     }
 
-    private RespawnOptions getRespawnOptions(Element element) throws InvalidXMLException {
-      return getRespawnOptions(Collections.singleton(element), false, false);
+    private RespawnOptions getRespawnOptions(Element element, FilterParser filterParser)
+        throws InvalidXMLException {
+      return getRespawnOptions(Collections.singleton(element), false, false, filterParser);
     }
 
     protected RespawnOptions getRespawnOptions(
-        Collection<Element> elements, boolean autorespawn, boolean topLevel)
+        Collection<Element> elements,
+        boolean autorespawn,
+        boolean topLevel,
+        FilterParser filterParser)
         throws InvalidXMLException {
       Duration delay = DEFAULT_RESPAWN_DELAY;
       boolean auto = autorespawn;

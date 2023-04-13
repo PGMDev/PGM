@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 
-public class ModeParser extends MatchObjectParser<Mode, ObjectiveModesMatchModule> {
+public class ModeParser extends MatchObjectParser.Simple<Mode, ObjectiveModesMatchModule> {
 
   public ModeParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options, Mode.class, ObjectiveModesMatchModule.class, "modes");

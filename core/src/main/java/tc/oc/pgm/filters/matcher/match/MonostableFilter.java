@@ -181,9 +181,9 @@ public class MonostableFilter extends SingleFilterFunction
               long oldSeconds = lastTick.until(end, ChronoUnit.SECONDS);
               long newSeconds = now.until(end, ChronoUnit.SECONDS);
 
-              // Intentionally use old, as transitioning from 4s to 3.95s should show 4s
+              // Round up as going from 4s to 3.95s should show 4s
               if (oldSeconds != newSeconds)
-                updateBossBar(filterable, Duration.ofSeconds(oldSeconds));
+                updateBossBar(filterable, Duration.ofSeconds(newSeconds + 1));
             }
           });
 
@@ -241,7 +241,7 @@ public class MonostableFilter extends SingleFilterFunction
     }
 
     private float progress(Duration remaining) {
-      return Math.min(1f, (float) remaining.toMillis() / duration.toMillis());
+      return Math.min(1f, (float) remaining.getSeconds() / duration.getSeconds());
     }
   }
 }

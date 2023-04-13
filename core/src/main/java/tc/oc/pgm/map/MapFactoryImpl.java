@@ -39,7 +39,7 @@ import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.SAXHandler;
 
-public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? extends MapModule>>
+public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?>>
     implements MapFactory {
 
   private static final ThreadLocal<SAXBuilder> DOCUMENT_FACTORY =
@@ -68,7 +68,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
   }
 
   @Override
-  protected MapModule createModule(MapModuleFactory factory) throws ModuleLoadException {
+  protected MapModule<?> createModule(MapModuleFactory<?> factory) throws ModuleLoadException {
     try {
       return factory.parse(this, logger, document);
     } catch (InvalidXMLException e) {
@@ -76,18 +76,8 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     }
   }
 
-  private void storeInclude(MapInclude include) {
-    this.source.addMapInclude(include);
-  }
-
   private void preLoad()
       throws IOException, JDOMException, InvalidXMLException, MapMissingException {
-    if (document != null && !source.checkForUpdates()) {
-      return; // If a document is present and there are no updates, skip loading again
-    }
-
-    source.clearIncludes();
-
     try (final InputStream stream = source.getDocument()) {
       document = DOCUMENT_FACTORY.get().build(stream);
       document.setBaseURI(source.getId());
@@ -97,8 +87,8 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
     Collection<MapInclude> mapIncludes = includes.getMapIncludes(document);
     for (MapInclude include : mapIncludes) {
       document.getRootElement().addContent(0, include.getContent());
-      storeInclude(include);
     }
+    source.setIncludes(mapIncludes);
 
     info = new MapInfoImpl(document.getRootElement());
   }
@@ -139,7 +129,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule, MapModuleFactory<? ex
       throw e;
     }
 
-    for (MapModule module : getModules()) {
+    for (MapModule<?> module : getModules()) {
       module.postParse(this, logger, document);
     }
   }

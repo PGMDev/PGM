@@ -2,8 +2,9 @@ package tc.oc.pgm.api;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.ActionModule;
@@ -19,7 +20,8 @@ import tc.oc.pgm.broadcast.BroadcastMatchModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.ClassModule;
-import tc.oc.pgm.community.modules.FreezeMatchModule;
+import tc.oc.pgm.consumable.ConsumableMatchModule;
+import tc.oc.pgm.consumable.ConsumableModule;
 import tc.oc.pgm.controlpoint.ControlPointMatchModule;
 import tc.oc.pgm.controlpoint.ControlPointModule;
 import tc.oc.pgm.core.CoreMatchModule;
@@ -60,6 +62,8 @@ import tc.oc.pgm.killreward.KillRewardMatchModule;
 import tc.oc.pgm.killreward.KillRewardModule;
 import tc.oc.pgm.kits.KitMatchModule;
 import tc.oc.pgm.kits.KitModule;
+import tc.oc.pgm.loot.LootableMatchModule;
+import tc.oc.pgm.loot.LootableModule;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.modes.ObjectiveModesModule;
 import tc.oc.pgm.modules.ArrowRemovalMatchModule;
@@ -131,43 +135,72 @@ import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderMatchModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
 
-public interface Modules {
+public final class Modules {
 
-  Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> MAP =
-      new ConcurrentHashMap<>();
+  public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP;
+  public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP_DEPENDENCY_ONLY;
 
-  Map<Class<? extends MapModule>, MapModuleFactory<? extends MapModule>> MAP_DEPENDENCY_ONLY =
-      new ConcurrentHashMap<>(); // No modules fit this yet, exists for consistency.
-  Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> MATCH =
-      new ConcurrentHashMap<>();
+  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
+      MATCH;
+  public static final Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
+      MATCH_DEPENDENCY_ONLY;
 
-  Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>>
-      MATCH_DEPENDENCY_ONLY = new ConcurrentHashMap<>();
-  Map<Class<? extends MapModule>, Class<? extends MatchModule>> MAP_TO_MATCH =
-      new ConcurrentHashMap<>();
+  public static final Map<Class<? extends MapModule<?>>, Class<? extends MatchModule>> MAP_TO_MATCH;
 
-  static <M extends MatchModule> void register(Class<M> match, MatchModuleFactory<M> factory) {
-    if (MATCH.containsKey(assertNotNull(match)))
-      throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
-    MATCH.put(match, assertNotNull(factory));
+  static {
+    Modules modules = new Modules();
+
+    // Immutable maps maintain ordering
+    MAP = ImmutableMap.copyOf(modules.map);
+    MAP_DEPENDENCY_ONLY = ImmutableMap.copyOf(modules.mapDependencyOnly);
+    MATCH = ImmutableMap.copyOf(modules.match);
+    MATCH_DEPENDENCY_ONLY = ImmutableMap.copyOf(modules.matchDependencyOnly);
+    MAP_TO_MATCH = ImmutableMap.copyOf(modules.mapToMatch);
   }
 
-  static <M extends MatchModule, N extends MapModule<M>> void register(
-      Class<N> map, @Nullable Class<M> match, MapModuleFactory<N> factory) {
-    if (MAP.containsKey(assertNotNull(map)) || MAP_TO_MATCH.containsKey(map))
-      throw new IllegalArgumentException(map.getSimpleName() + " was registered twice");
-    MAP.put(map, assertNotNull(factory));
-    if (match != null) MAP_TO_MATCH.put(map, match);
+  Map<Class<? extends MapModule<?>>, MapModuleFactory<? extends MapModule<?>>> map;
+  // No modules fit this yet, exists for consistency.
+  Map<Class<? extends MapModule<?>>, MapModuleFactory<? extends MapModule<?>>> mapDependencyOnly;
+  Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> match;
+  Map<Class<? extends MatchModule>, MatchModuleFactory<? extends MatchModule>> matchDependencyOnly;
+
+  Map<Class<? extends MapModule<?>>, Class<? extends MatchModule>> mapToMatch;
+
+  private Modules() {
+    // Linked hash maps to have consistent ordering based on registration
+    this.map = new LinkedHashMap<>();
+    this.mapDependencyOnly = new LinkedHashMap<>();
+
+    this.match = new LinkedHashMap<>();
+    this.matchDependencyOnly = new LinkedHashMap<>();
+
+    this.mapToMatch = new LinkedHashMap<>();
+
+    registerAll();
   }
 
-  static <M extends MatchModule> void registerDependencyOnly(
-      Class<M> match, MatchModuleFactory<M> factory) {
-    if (MATCH_DEPENDENCY_ONLY.containsKey(assertNotNull(match)))
-      throw new IllegalArgumentException(match.getSimpleName() + " was registered twice");
-    MATCH_DEPENDENCY_ONLY.put(match, assertNotNull(factory));
+  <M extends MatchModule> void register(Class<M> matchModule, MatchModuleFactory<M> factory) {
+    if (match.containsKey(assertNotNull(matchModule)))
+      throw new IllegalArgumentException(matchModule.getSimpleName() + " was registered twice");
+    match.put(matchModule, assertNotNull(factory));
   }
 
-  static void registerAll() {
+  <M extends MatchModule, N extends MapModule<M>> void register(
+      Class<N> mapModule, @Nullable Class<M> matchModule, MapModuleFactory<N> factory) {
+    if (map.containsKey(assertNotNull(mapModule)) || mapToMatch.containsKey(mapModule))
+      throw new IllegalArgumentException(mapModule.getSimpleName() + " was registered twice");
+    map.put(mapModule, assertNotNull(factory));
+    if (matchModule != null) mapToMatch.put(mapModule, matchModule);
+  }
+
+  <M extends MatchModule> void registerDependencyOnly(
+      Class<M> matchModule, MatchModuleFactory<M> factory) {
+    if (matchDependencyOnly.containsKey(assertNotNull(matchModule)))
+      throw new IllegalArgumentException(matchModule.getSimpleName() + " was registered twice");
+    matchDependencyOnly.put(matchModule, assertNotNull(factory));
+  }
+
+  void registerAll() {
     // MatchModules that are always created
     register(EventFilterMatchModule.class, EventFilterMatchModule::new);
     register(MultiTradeMatchModule.class, MultiTradeMatchModule::new);
@@ -192,9 +225,6 @@ public interface Modules {
 
     // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
-
-    // Community MatchModules
-    register(FreezeMatchModule.class, FreezeMatchModule::new);
 
     // MatchModules that require other dependencies
     register(GoalMatchModule.class, new GoalMatchModule.Factory());
@@ -266,6 +296,7 @@ public interface Modules {
         new FallingBlocksModule.Factory());
     register(FlagModule.class, FlagMatchModule.class, new FlagModule.Factory());
     register(ProjectileModule.class, ProjectileMatchModule.class, new ProjectileModule.Factory());
+    register(ConsumableModule.class, ConsumableMatchModule.class, new ConsumableModule.Factory());
     register(
         DiscardPotionBottlesModule.class,
         DiscardPotionBottlesMatchModule.class,
@@ -277,6 +308,7 @@ public interface Modules {
     register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
     register(EnderChestModule.class, EnderChestMatchModule.class, new EnderChestModule.Factory());
     register(StructureModule.class, StructureMatchModule.class, new StructureModule.Factory());
+    register(LootableModule.class, LootableMatchModule.class, new LootableModule.Factory());
 
     // MapModules that are also MatchModules
     register(WorldTimeModule.class, WorldTimeModule.class, new WorldTimeModule.Factory());

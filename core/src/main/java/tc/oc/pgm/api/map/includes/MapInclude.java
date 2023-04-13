@@ -7,13 +7,6 @@ import org.jdom2.Content;
 public interface MapInclude {
 
   /**
-   * Get a unique id which identifies this MapInclude.
-   *
-   * @return A unique id
-   */
-  String getId();
-
-  /**
    * Get the system file time from when this MapInclude file was last modified.
    *
    * @return Time of last file modification
@@ -21,15 +14,8 @@ public interface MapInclude {
   long getLastModified();
 
   /**
-   * Gets whether the associated {@link MapInclude} files have changed since last loading.
-   *
-   * @param time The current system time
-   * @return True if given time is newer than last modified time
-   */
-  boolean hasBeenModified(long time);
-
-  /**
-   * Get a collection of {@link Content} which can be merged into an existing {@link Document}
+   * Get a collection of {@link Content} which can be merged into an existing {@link Document}. If
+   * the underlying file has changed, it will re-load the xml.
    *
    * @return a collection of {@link Content}
    */

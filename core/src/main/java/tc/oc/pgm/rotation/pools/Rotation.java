@@ -1,5 +1,7 @@
 package tc.oc.pgm.rotation.pools;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +25,18 @@ public class Rotation extends MapPool {
           .log(
               Level.SEVERE, "Could not resolve next map from rotations, resuming initial position");
     }
+  }
+
+  public Rotation(
+      MapPoolType type,
+      MapPoolManager manager,
+      String name,
+      boolean enabled,
+      int players,
+      boolean dynamic,
+      Duration cycleTime,
+      List<MapInfo> maps) {
+    super(type, name, manager, enabled, players, dynamic, cycleTime, maps);
   }
 
   public void setPosition(int position) {

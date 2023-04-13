@@ -14,7 +14,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
@@ -26,7 +25,7 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class KillRewardModule implements MapModule {
+public class KillRewardModule implements MapModule<KillRewardMatchModule> {
   protected final ImmutableList<KillReward> rewards;
 
   public KillRewardModule(List<KillReward> rewards) {
@@ -34,18 +33,18 @@ public class KillRewardModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public KillRewardMatchModule createMatchModule(Match match) {
     return new KillRewardMatchModule(match, this.rewards);
   }
 
   public static class Factory implements MapModuleFactory<KillRewardModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(RegionModule.class, FilterModule.class, ItemModifyModule.class);
     }
 
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(KitModule.class);
     }
 
@@ -60,7 +59,7 @@ public class KillRewardModule implements MapModule {
       for (Element elKillReward :
           XMLUtils.flattenElements(
               doc.getRootElement(),
-              ImmutableSet.of("kill-rewards"),
+              ImmutableSet.of("kill-rewards", "killrewards"),
               ImmutableSet.of("kill-reward", "killreward"),
               0)) {
         ImmutableList.Builder<ItemStack> items = ImmutableList.builder();

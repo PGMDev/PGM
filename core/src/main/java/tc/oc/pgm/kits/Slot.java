@@ -2,13 +2,17 @@ package tc.oc.pgm.kits;
 
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
+import com.google.common.collect.Table;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
@@ -24,10 +28,11 @@ public abstract class Slot {
   private final String key;
   private final int index; // -1 = auto
 
-  private Slot(String key, int index) {
+  private Slot(Class<? extends Slot> type, String key, int index) {
     this.key = key;
     this.index = index;
 
+    byIndex.put(type, index, this);
     byKey.put(key, this);
   }
 
@@ -60,10 +65,9 @@ public abstract class Slot {
     return index < 0;
   }
 
-  // If we support more inventory types, we would probably widen the type accepted by this method
-  public abstract Inventory getInventory(HumanEntity holder);
+  public abstract Inventory getInventory(InventoryHolder holder);
 
-  protected ItemStack addItem(HumanEntity holder, ItemStack stack) {
+  protected ItemStack addItem(InventoryHolder holder, ItemStack stack) {
     return InventoryUtils.placeStack(
         getInventory(holder),
         ContiguousSet.create(getAutoIndexRange(), DiscreteDomain.integers()),
@@ -74,7 +78,7 @@ public abstract class Slot {
    * @return the item in this slot of the given holder's inventory, or null if the slot is empty.
    *     This will never return a stack of {@link Material#AIR}.
    */
-  public @Nullable ItemStack getItem(HumanEntity holder) {
+  public @Nullable ItemStack getItem(InventoryHolder holder) {
     ItemStack stack = getInventory(holder).getItem(getIndex());
     return stack == null || stack.getType() == Material.AIR ? null : stack;
   }
@@ -85,7 +89,7 @@ public abstract class Slot {
    * @return a stack of any items that were NOT placed in the inventory, or null if the entire stack
    *     was placed. This can only be non-null when placing in the auto-slot.
    */
-  public @Nullable ItemStack putItem(HumanEntity holder, ItemStack stack) {
+  public @Nullable ItemStack putItem(InventoryHolder holder, ItemStack stack) {
     if (isAuto()) {
       stack = addItem(holder, stack);
       return stack.getAmount() > 0 ? stack : null;
@@ -95,15 +99,23 @@ public abstract class Slot {
     }
   }
 
+  public void putItem(Inventory inv, ItemStack stack) {
+    if (isAuto()) {
+      inv.addItem(stack);
+    } else {
+      inv.setItem(getIndex(), stack);
+    }
+  }
+
   public static class Player extends Slot {
     protected Player(String key, int index) {
-      super(key, index);
-
-      byIndex.put(index, this);
+      super(Player.class, key, index);
     }
 
     @Override
-    public Inventory getInventory(HumanEntity holder) {
+    public Inventory getInventory(InventoryHolder holder) {
+      if (!(holder instanceof HumanEntity))
+        throw new IllegalArgumentException("InventoryHolder " + holder + " is not a player");
       return holder.getInventory();
     }
 
@@ -117,7 +129,7 @@ public abstract class Slot {
      * index is out of range.
      */
     public static @Nullable Slot forIndex(int index) {
-      return byIndex.get(index);
+      return byIndex.get(Player.class, index);
     }
   }
 
@@ -166,14 +178,39 @@ public abstract class Slot {
     }
   }
 
-  public static class EnderChest extends Slot {
-    protected EnderChest(String key, int index) {
-      super(key, index);
+  public static class Container extends Slot {
+
+    private Container(String key, int index) {
+      super(Container.class, key, index);
     }
 
     @Override
-    public Inventory getInventory(HumanEntity holder) {
-      return holder.getEnderChest();
+    protected Range<Integer> getAutoIndexRange() {
+      return Range.closed(0, 53);
+    }
+
+    @Override
+    public Inventory getInventory(InventoryHolder holder) {
+      return holder.getInventory();
+    }
+
+    public static Slot forIndex(int index) {
+      return byIndex.get(Container.class, index);
+    }
+  }
+
+  public static class EnderChest extends Slot {
+    protected EnderChest(String key, int index) {
+      super(EnderChest.class, key, index);
+    }
+
+    @Override
+    public Inventory getInventory(InventoryHolder holder) {
+      if (holder instanceof HumanEntity) {
+        return ((HumanEntity) holder).getEnderChest();
+      }
+      throw new IllegalArgumentException(
+          "InventoryHolder " + holder + " does not have an ender chest");
     }
 
     @Override
@@ -183,7 +220,14 @@ public abstract class Slot {
   }
 
   private static final Map<String, Slot> byKey = new HashMap<>();
-  private static final Map<Integer, Player> byIndex = new HashMap<>();
+  private static final Table<Class<? extends Slot>, Integer, Slot> byIndex =
+      HashBasedTable.create();
+
+  private static final Map<Class<? extends Inventory>, Class<? extends Slot>> byInventoryType =
+      ImmutableMap.<Class<? extends Inventory>, Class<? extends Slot>>builder()
+          .put(PlayerInventory.class, Player.class)
+          .put(Inventory.class, Container.class)
+          .build();
   private static final Map<ArmorType, Armor> byArmorType = new EnumMap<>(ArmorType.class);
 
   /**
@@ -197,6 +241,16 @@ public abstract class Slot {
     return byKey.get(key);
   }
 
+  public static Slot forInventoryIndex(Inventory inv, int index) {
+    for (Map.Entry<Class<? extends Inventory>, Class<? extends Slot>> entry :
+        byInventoryType.entrySet()) {
+      if (entry.getKey().isAssignableFrom(inv.getClass())) {
+        return byIndex.get(entry.getValue(), index);
+      }
+    }
+    throw new UnsupportedOperationException("Unknown inventory type " + inv);
+  }
+
   static {
     // new Hotbar("hotbar", -1);
     for (int i = 0; i < 9; i++) {
@@ -208,6 +262,10 @@ public abstract class Slot {
     for (int i = 0; i < 27; i++) {
       new Pockets("inventory." + i, 9 + i);
       new EnderChest("enderchest." + i, i);
+    }
+
+    for (int i = 0; i < 54; i++) {
+      new Container("container." + i, i);
     }
 
     new Armor("armor.feet", 36, ArmorType.BOOTS);

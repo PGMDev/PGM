@@ -10,13 +10,12 @@ import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class RegionModule implements MapModule {
+public class RegionModule implements MapModule<RegionMatchModule> {
   protected final RFAContext rfaContext;
 
   public RegionModule(RFAContext rfaContext) {
@@ -28,13 +27,13 @@ public class RegionModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public RegionMatchModule createMatchModule(Match match) {
     return new RegionMatchModule(match, this.rfaContext);
   }
 
   public static class Factory implements MapModuleFactory<RegionModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(FilterModule.class, KitModule.class);
     }
 

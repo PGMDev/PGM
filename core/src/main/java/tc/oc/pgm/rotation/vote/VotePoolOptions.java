@@ -1,21 +1,24 @@
 package tc.oc.pgm.rotation.vote;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.rotation.pools.VotingPool;
 
 public class VotePoolOptions {
 
-  // Set of maps to be used in custom vote selection
-  private final Set<MapInfo> customVoteMaps;
+  // Added maps w/ nullable playerId to be used in custom vote selection
+  private final Map<MapInfo, UUID> customVoteMaps;
   // Whether custom map selection should replace existing entries
   private boolean replace;
 
   public VotePoolOptions() {
-    this.customVoteMaps = Sets.newHashSet();
+    this.customVoteMaps = Maps.newHashMap();
     this.replace = true;
   }
 
@@ -32,32 +35,42 @@ public class VotePoolOptions {
     return replace;
   }
 
-  public boolean addVote(MapInfo map) {
-    if (customVoteMaps.size() < MapVotePicker.MAX_VOTE_OPTIONS) {
-      this.customVoteMaps.add(map);
+  public boolean canAddMap() {
+    return customVoteMaps.size() < MapVotePicker.MAX_VOTE_OPTIONS;
+  }
+
+  public boolean isMapAdded(MapInfo info) {
+    return customVoteMaps.containsKey(info);
+  }
+
+  public boolean addMap(MapInfo map) {
+    return addMap(map, null);
+  }
+
+  public boolean addMap(MapInfo map, @Nullable UUID playerId) {
+    if (canAddMap()) {
+      this.customVoteMaps.put(map, null);
       return true;
     }
     return false;
   }
 
   public boolean removeMap(MapInfo map) {
-    return this.customVoteMaps.remove(map);
+    boolean present = this.customVoteMaps.containsKey(map);
+    this.customVoteMaps.remove(map);
+    return present;
   }
 
-  public Set<MapInfo> getCustomVoteMaps() {
-    return customVoteMaps;
-  }
-
-  public boolean isAdded(MapInfo info) {
-    return customVoteMaps.stream().anyMatch(s -> s.getName().equalsIgnoreCase(info.getName()));
-  }
-
-  public void clear() {
+  public void clearMaps() {
     customVoteMaps.clear();
   }
 
-  public Map<MapInfo, Double> getCustomVoteMapWeighted() {
-    return customVoteMaps.stream()
-        .collect(Collectors.toMap(map -> map, x -> VotingPool.DEFAULT_SCORE));
+  public Set<MapInfo> getCustomVoteMaps() {
+    return Collections.unmodifiableSet(customVoteMaps.keySet());
+  }
+
+  public Map<MapInfo, Double> getCustomVoteMapsWeighted() {
+    return customVoteMaps.keySet().stream()
+        .collect(Collectors.toMap(map -> map, score -> VotingPool.DEFAULT_SCORE));
   }
 }

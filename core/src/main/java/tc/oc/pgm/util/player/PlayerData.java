@@ -42,7 +42,8 @@ class PlayerData {
 
     this.name = mp.getNameLegacy();
     this.nick = Integration.getNick(mp.getBukkit());
-    this.teamColor = mp.getParty().getTextColor();
+    this.teamColor =
+        mp.getParty() == null ? PlayerComponent.OFFLINE_COLOR : mp.getParty().getTextColor();
     this.dead = mp.isDead();
     this.vanish = Integration.isVanished(mp.getBukkit());
     this.online = mp.getBukkit().isOnline();
@@ -72,7 +73,7 @@ class PlayerData {
     MatchPlayer mp = player != null ? PGM.get().getMatchManager().getPlayer(player) : null;
     this.teamColor = mp == null ? PlayerComponent.OFFLINE_COLOR : mp.getParty().getTextColor();
     this.dead = mp != null && mp.isDead();
-    this.vanish = mp != null && mp.isVanished();
+    this.vanish = mp != null && Integration.isVanished(mp.getBukkit());
     this.online = player != null && player.isOnline();
     this.conceal = true;
     this.style = style;

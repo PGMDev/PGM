@@ -26,8 +26,8 @@ public class RateLimiter {
     endedAt = System.currentTimeMillis();
   }
 
-  public void setTimeout(long until) {
-    this.timedOutUntil = until;
+  public void timeOut(long timeout) {
+    this.timedOutUntil = System.currentTimeMillis() + timeout;
   }
 
   public long getDelay() {
@@ -36,8 +36,8 @@ public class RateLimiter {
     long nextUpdate =
         (endedAt - now)
             + ((endedAt - startedAt) * timeRatio)
-            + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * tpsRatio)
-            + (timedOutUntil > now ? maxDelay : 0);
-    return Math.min(Math.max(minDelay, nextUpdate), maxDelay);
+            + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * tpsRatio);
+
+    return Math.max(timedOutUntil - now, 0) + Math.min(Math.max(minDelay, nextUpdate), maxDelay);
   }
 }

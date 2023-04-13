@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -45,12 +46,12 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
   protected static class SystemMapSource implements MapSource {
 
     private final String dir;
-    private final AtomicLong modified;
+    private final AtomicLong lastRead;
     private final Set<MapInclude> storedIncludes;
 
     private SystemMapSource(String dir) {
       this.dir = assertNotNull(dir);
-      this.modified = new AtomicLong(-1);
+      this.lastRead = new AtomicLong(-1);
       this.storedIncludes = Sets.newHashSet();
     }
 
@@ -113,7 +114,7 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
       } catch (FileNotFoundException e) {
         throw new MapMissingException(file.getPath(), "Unable to read map document", e);
       } finally {
-        modified.set(file.lastModified());
+        lastRead.set(System.currentTimeMillis());
       }
     }
 
@@ -121,8 +122,14 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
     public boolean checkForUpdates() throws MapMissingException {
       final File file = getFile();
 
-      final long mod = modified.get();
-      return (mod > 0 && file.lastModified() > mod) || checkForIncludeUpdates();
+      final long read = lastRead.get();
+      if (read <= 0) return false;
+      if (file.lastModified() > read) return true;
+
+      for (MapInclude include : storedIncludes) {
+        if (include.getLastModified() > read) return true;
+      }
+      return false;
     }
 
     @Override
@@ -138,26 +145,13 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
 
     @Override
     public String toString() {
-      return "SystemMapSourceFactory{dir=" + this.dir + ", modified=" + this.modified.get() + "}";
+      return "SystemMapSourceFactory{dir=" + this.dir + ", lastRead=" + this.lastRead.get() + "}";
     }
 
     @Override
-    public void addMapInclude(MapInclude include) {
-      this.storedIncludes.add(include);
-    }
-
-    @Override
-    public void clearIncludes() {
+    public void setIncludes(Collection<MapInclude> includes) {
       this.storedIncludes.clear();
-    }
-
-    private boolean checkForIncludeUpdates() {
-      for (MapInclude include : storedIncludes) {
-        if (include.hasBeenModified(include.getLastModified())) {
-          return true;
-        }
-      }
-      return false;
+      this.storedIncludes.addAll(includes);
     }
   }
 }

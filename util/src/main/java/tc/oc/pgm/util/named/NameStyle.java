@@ -17,7 +17,9 @@ public enum NameStyle {
   // Fancy formatting, flairs, color and click to teleport
   FANCY(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.FRIEND, Flag.DISGUISE, Flag.TELEPORT)),
   // Tab list format, flairs, color, death status, self, etc
-  TAB(EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.SELF, Flag.FRIEND, Flag.DISGUISE, Flag.DEATH)),
+  TAB(
+      EnumSet.of(
+          Flag.COLOR, Flag.FLAIR, Flag.SELF, Flag.FRIEND, Flag.SQUAD, Flag.DISGUISE, Flag.DEATH)),
   // Fancy plus full nickname
   VERBOSE(
       EnumSet.of(Flag.COLOR, Flag.FLAIR, Flag.FRIEND, Flag.DISGUISE, Flag.NICKNAME, Flag.TELEPORT));
@@ -37,6 +39,7 @@ public enum NameStyle {
     FLAIR, // Show flair
     SELF, // Bold if self
     FRIEND, // Italic if friend
+    SQUAD, // Underline if in the same squad
     DISGUISE, // Strikethrough if disguised
     NICKNAME, // Show nickname after real name
     DEATH, // Grey out name if dead

@@ -8,6 +8,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
@@ -83,6 +85,14 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   @Override
   public Match getMatch() {
     return PGM.get().getMatchManager().getMatch(world);
+  }
+
+  @Nullable
+  @Override
+  public Inventory getInventory() {
+    return this.block instanceof InventoryHolder
+        ? ((InventoryHolder) this.block).getInventory()
+        : null;
   }
 
   @Override

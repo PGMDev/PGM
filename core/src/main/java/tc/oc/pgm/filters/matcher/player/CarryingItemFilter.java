@@ -3,6 +3,7 @@ package tc.oc.pgm.filters.matcher.player;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -18,7 +19,10 @@ public class CarryingItemFilter extends ParticipantItemFilter {
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
     return ImmutableList.of(
-        PlayerItemTransferEvent.class, ApplyKitEvent.class, PlayerItemBreakEvent.class);
+        PlayerItemTransferEvent.class,
+        ApplyKitEvent.class,
+        PlayerItemBreakEvent.class,
+        EntityShootBowEvent.class);
   }
 
   @Override

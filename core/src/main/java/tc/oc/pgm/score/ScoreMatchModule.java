@@ -27,6 +27,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -78,6 +79,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
   public boolean hasMercyRule() {
     return this.mercyRule != null;
+  }
+
+  public Filter getScoreboardFilter() {
+    return this.config.scoreboardFilter;
   }
 
   public int getScoreLimit() {
@@ -295,10 +300,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
     contributions.put(player, contribution);
     incrementScore(competitor, amount);
 
-    if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
-      MatchPlayer mp = match.getPlayer(player);
-      if (mp == null) return;
+    MatchPlayer mp = match.getPlayer(player);
+    if (mp == null) return;
 
+    match.callEvent(new MatchPlayerScoreEvent(mp, amount));
+
+    if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
       // wait until the next tick to do this so stat recording and other stuff works
       match
           .getExecutor(MatchScope.RUNNING)
@@ -331,5 +338,9 @@ public class ScoreMatchModule implements MatchModule, Listener {
     }
 
     this.match.calculateVictory();
+  }
+
+  public double getContribution(UUID player) {
+    return contributions.get(player);
   }
 }

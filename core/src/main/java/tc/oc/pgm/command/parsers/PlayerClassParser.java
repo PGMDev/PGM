@@ -10,7 +10,8 @@ import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
 import tc.oc.pgm.util.text.TextException;
 
-public final class PlayerClassParser extends MatchObjectParser<PlayerClass, ClassMatchModule> {
+public final class PlayerClassParser
+    extends MatchObjectParser.Simple<PlayerClass, ClassMatchModule> {
 
   public PlayerClassParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options, PlayerClass.class, ClassMatchModule.class, "classes");

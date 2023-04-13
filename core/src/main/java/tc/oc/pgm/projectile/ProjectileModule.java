@@ -1,6 +1,7 @@
 package tc.oc.pgm.projectile;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,7 +18,6 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
@@ -25,24 +25,28 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ProjectileModule implements MapModule {
-  Set<ProjectileDefinition> projectileDefinitions = new HashSet<>();
+public class ProjectileModule implements MapModule<ProjectileMatchModule> {
+  private final ImmutableSet<ProjectileDefinition> projectileDefinitions;
+
+  public ProjectileModule(ImmutableSet<ProjectileDefinition> projectileDefinitions) {
+    this.projectileDefinitions = projectileDefinitions;
+  }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public ProjectileMatchModule createMatchModule(Match match) {
     return new ProjectileMatchModule(match, this.projectileDefinitions);
   }
 
   public static class Factory implements MapModuleFactory<ProjectileModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getSoftDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return ImmutableList.of(FilterModule.class);
     }
 
     @Override
     public ProjectileModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      ProjectileModule projectileModule = new ProjectileModule();
+      Set<ProjectileDefinition> projectiles = new HashSet<>();
       KitParser kitParser = factory.getKits();
       FilterParser filterParser = factory.getFilters();
 
@@ -70,6 +74,7 @@ public class ProjectileModule implements MapModule {
         Duration coolDown = XMLUtils.parseDuration(projectileElement.getAttribute("cooldown"));
         boolean throwable =
             XMLUtils.parseBoolean(projectileElement.getAttribute("throwable"), true);
+        boolean precise = XMLUtils.parseBoolean(projectileElement.getAttribute("precise"), true);
 
         ProjectileDefinition projectileDefinition =
             new ProjectileDefinition(
@@ -82,13 +87,14 @@ public class ProjectileModule implements MapModule {
                 potionKit,
                 destroyFilter,
                 coolDown,
-                throwable);
+                throwable,
+                precise);
 
         factory.getFeatures().addFeature(projectileElement, projectileDefinition);
-        projectileModule.projectileDefinitions.add(projectileDefinition);
+        projectiles.add(projectileDefinition);
       }
 
-      return projectileModule;
+      return projectiles.isEmpty() ? null : new ProjectileModule(ImmutableSet.copyOf(projectiles));
     }
   }
 }

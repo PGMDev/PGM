@@ -47,7 +47,7 @@ public class ActionModule implements MapModule<ActionMatchModule> {
   public static class Factory implements MapModuleFactory<ActionModule> {
 
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(VariablesModule.class);
     }
 

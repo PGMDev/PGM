@@ -21,7 +21,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class FreeForAllModule implements MapModule {
+public class FreeForAllModule implements MapModule<FreeForAllMatchModule> {
 
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("ffa", "Free for All", false, false));
@@ -46,13 +46,13 @@ public class FreeForAllModule implements MapModule {
   }
 
   @Override
-  public MatchModule createMatchModule(Match match) {
+  public FreeForAllMatchModule createMatchModule(Match match) {
     return new FreeForAllMatchModule(match, options);
   }
 
   public static class Factory implements MapModuleFactory<FreeForAllModule> {
     @Override
-    public Collection<Class<? extends MapModule>> getWeakDependencies() {
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
       return ImmutableList.of(TeamModule.class);
     }
 

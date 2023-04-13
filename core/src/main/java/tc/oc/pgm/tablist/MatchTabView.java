@@ -14,11 +14,13 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.event.NameDecorationChangeEvent;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.community.events.PlayerVanishEvent;
+import tc.oc.pgm.api.player.event.PlayerVanishEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.teams.Team;
@@ -110,7 +112,7 @@ public class MatchTabView extends TabView implements Listener {
   public void render() {
     if (this.manager == null) return;
 
-    if (this.match != null && this.isLayoutDirty()) {
+    if (this.match != null && dirtyTracker.isLayout()) {
       if (display == null) {
         this.setHeader(this.getManager().getMapEntry(this.match));
         this.setFooter(this.getManager().getFooterEntry(this.match));
@@ -281,7 +283,7 @@ public class MatchTabView extends TabView implements Listener {
         }
       }
 
-      this.invalidateLayout();
+      dirtyTracker.invalidateLayout();
     }
   }
 
@@ -290,12 +292,21 @@ public class MatchTabView extends TabView implements Listener {
     if (this.match != event.getMatch()) return;
 
     updatePlayerParty(event.getPlayer(), event.getOldParty(), event.getNewParty());
+
+    // Your own view should re-render quickly after join/leave
+    if (this.matchPlayer == event.getPlayer()) dirtyTracker.prioritize();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerVanish(PlayerVanishEvent event) {
     updatePlayerParty(
         event.getPlayer(), event.getPlayer().getParty(), event.getPlayer().getParty());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerNameChange(NameDecorationChangeEvent event) {
+    MatchPlayer mp = match.getPlayer(event.getUUID());
+    if (mp != null) updatePlayerParty(mp, mp.getParty(), mp.getParty());
   }
 
   private void updatePlayerParty(
@@ -317,13 +328,13 @@ public class MatchTabView extends TabView implements Listener {
         this.teamPlayers.put((Team) newParty, player);
     }
 
-    this.invalidateLayout();
+    dirtyTracker.invalidateLayout();
   }
 
   private boolean shouldHide(MatchPlayer other) {
     return other != matchPlayer
-        && other.isVanished()
-        && !matchPlayer.getBukkit().hasPermission(Permissions.STAFF);
+        && Integration.isVanished(other.getBukkit())
+        && !matchPlayer.getBukkit().hasPermission(Permissions.VANISH);
   }
 
   private static int divideRoundingUp(int numerator, int denominator) {

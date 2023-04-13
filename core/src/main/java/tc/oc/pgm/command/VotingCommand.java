@@ -52,12 +52,12 @@ public class VotingCommand {
             UsernameFormatUtils.formatStaffName(sender, match),
             map.getStyledName(MapNameStyle.COLOR));
 
-    if (vote.isAdded(map)) {
+    if (vote.isMapAdded(map)) {
       viewer.sendWarning(addMessage);
       return;
     }
 
-    if (vote.addVote(map)) {
+    if (vote.addMap(map)) {
       ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
     } else {
       viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));
@@ -122,7 +122,7 @@ public class VotingCommand {
             UsernameFormatUtils.formatStaffName(sender, match),
             TextFormatter.list(maps, NamedTextColor.GRAY));
 
-    vote.clear();
+    vote.clearMaps();
 
     if (maps.isEmpty()) {
       viewer.sendWarning(translatable("vote.noMapsFound"));

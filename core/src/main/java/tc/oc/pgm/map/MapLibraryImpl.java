@@ -132,6 +132,9 @@ public class MapLibraryImpl implements MapLibrary {
 
   @Override
   public CompletableFuture<?> loadNewMaps(boolean reset) {
+    // Try to search new includes before searching for new maps
+    includes.loadNewIncludes();
+
     final List<Iterator<? extends MapSource>> sources = new LinkedList<>();
 
     // Reload failed maps
@@ -229,7 +232,7 @@ public class MapLibraryImpl implements MapLibrary {
     maps.merge(
         context.getId(),
         new MapEntry(source, context.clone(), context),
-        (m1, m2) -> m1.info.getVersion().isOlderThan(m2.info.getVersion()) ? m2 : m1);
+        (m1, m2) -> m2.info.getVersion().isOlderThan(m1.info.getVersion()) ? m1 : m2);
     failed.remove(source);
 
     return context;

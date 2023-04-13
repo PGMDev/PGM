@@ -51,6 +51,7 @@ public class Tribute implements Competitor {
   private final DyeColor dyeColor;
   private final TextColor textColor;
   private final PartyQuery query;
+  private NameTagVisibility nameTagOverride;
 
   protected @Nullable MatchPlayer player;
   protected List<MatchPlayer> players = Collections.emptyList();
@@ -134,7 +135,12 @@ public class Tribute implements Competitor {
 
   @Override
   public NameTagVisibility getNameTagVisibility() {
-    return this.ffa.getOptions().nameTagVisibility;
+    return this.nameTagOverride != null ? nameTagOverride : ffa.getOptions().nameTagVisibility;
+  }
+
+  @Override
+  public void setNameTagVisibility(NameTagVisibility override) {
+    this.nameTagOverride = override;
   }
 
   @Override

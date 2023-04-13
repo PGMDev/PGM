@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.command.util.CommandKeys;
 import tc.oc.pgm.command.util.CommandUtils;
 import tc.oc.pgm.util.LiquidMetal;
+import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.TextException;
 
@@ -30,9 +32,11 @@ import tc.oc.pgm.util.text.TextException;
  * getting the module, and failing if module isn't enabled.
  *
  * @param <T> The object-type to parse
+ * @param <IT> intermediate type, this can be an intermediate type holding name and type inside, or
+ *     directly the same as type
  * @param <M> The match module that provides it
  */
-public abstract class MatchObjectParser<T, M extends MatchModule>
+public abstract class MatchObjectParser<T, IT, M extends MatchModule>
     extends StringLikeParser<CommandSender, T> {
 
   private final Class<T> objType;
@@ -60,10 +64,10 @@ public abstract class MatchObjectParser<T, M extends MatchModule>
     M module = match.getModule(moduleType);
     if (module == null) return failure(moduleNotFound());
 
-    T obj = StringUtils.bestFuzzyMatch(text, objects(module), this::getName);
+    IT obj = StringUtils.bestFuzzyMatch(text, objects(module), this::getName);
     if (obj == null) return failure(invalidFormat(text, objType));
 
-    return ArgumentParseResult.success(obj);
+    return ArgumentParseResult.success(getValue(obj));
   }
 
   @Override
@@ -76,19 +80,39 @@ public abstract class MatchObjectParser<T, M extends MatchModule>
     String text = StringUtils.getText(inputQueue);
     String mustKeep = StringUtils.getMustKeepText(inputQueue);
 
-    return match.moduleOptional(moduleType).map(this::objects).orElse(Collections.emptySet())
-        .stream()
+    return match
+        .moduleOptional(moduleType)
+        .map(module -> StreamUtils.of(this.objects(module)))
+        .orElse(Stream.of())
         .map(this::getName)
         .filter(name -> LiquidMetal.match(name, text))
         .map(name -> StringUtils.getSuggestion(name, mustKeep))
         .collect(Collectors.toList());
   }
 
-  protected abstract Collection<T> objects(M module);
+  protected abstract Collection<IT> objects(M module);
 
-  protected abstract String getName(T obj);
+  protected abstract String getName(IT obj);
+
+  protected abstract T getValue(IT obj);
 
   protected TextException moduleNotFound() {
     return exception("command.moduleNotFound", text(moduleName));
+  }
+
+  public abstract static class Simple<T, M extends MatchModule> extends MatchObjectParser<T, T, M> {
+    public Simple(
+        PaperCommandManager<CommandSender> manager,
+        ParserParameters options,
+        Class<T> objType,
+        Class<M> moduleType,
+        String moduleName) {
+      super(manager, options, objType, moduleType, moduleName);
+    }
+
+    @Override
+    protected T getValue(T obj) {
+      return obj;
+    }
   }
 }

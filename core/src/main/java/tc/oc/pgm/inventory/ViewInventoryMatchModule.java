@@ -38,6 +38,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -261,7 +262,11 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   }
 
   public boolean canPreviewInventory(MatchPlayer viewer, MatchPlayer holder) {
-    return viewer != null && holder != null && viewer.isObserving() && holder.isAlive();
+    return viewer != null
+        && holder != null
+        && viewer.isObserving()
+        && holder.isAlive()
+        && viewer.getBukkit().hasPermission(Permissions.VIEW_INVENTORY);
   }
 
   protected void scheduleCheck(Player updater) {

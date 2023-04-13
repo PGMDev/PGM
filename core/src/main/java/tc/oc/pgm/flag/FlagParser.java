@@ -248,7 +248,7 @@ public class FlagParser {
 
     String id = el.getAttributeValue("id");
     String name = el.getAttributeValue("name");
-    ShowOptions options = ShowOptions.parse(el);
+    ShowOptions options = ShowOptions.parse(filterParser, el);
     Boolean required = XMLUtils.parseBoolean(el.getAttribute("required"), null);
     DyeColor color = XMLUtils.parseDyeColor(el.getAttribute("color"), null);
     FeatureReference<TeamFactory> owner =

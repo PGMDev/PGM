@@ -43,7 +43,6 @@ import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.kits.ArmorType;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.kits.KitMatchModule;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
@@ -57,7 +56,6 @@ public class Carried extends Spawned implements Missing {
 
   protected final MatchPlayer carrier;
   protected ItemStack helmetItem;
-  protected boolean helmetLocked;
   protected @Nullable NetDefinition deniedByNet;
   protected @Nullable Flag deniedByFlag;
   protected @Nullable Component lastMessage;
@@ -112,13 +110,8 @@ public class Carried extends Spawned implements Missing {
     if (kit != null) carrier.applyKit(kit, false);
 
     this.helmetItem = this.carrier.getBukkit().getInventory().getHelmet();
-    this.helmetLocked =
-        this.flag
-            .getMatch()
-            .getModule(KitMatchModule.class)
-            .lockArmorSlot(this.carrier, ArmorType.HELMET, false);
-
     this.carrier.getBukkit().getInventory().setHelmet(this.flag.getBannerItem().clone());
+
     PGM.get()
         .getExecutor()
         .schedule(
@@ -152,11 +145,6 @@ public class Carried extends Spawned implements Missing {
 
     this.carrier.getInventory().remove(this.flag.getBannerItem());
     this.carrier.getInventory().setHelmet(this.helmetItem);
-
-    this.flag
-        .getMatch()
-        .getModule(KitMatchModule.class)
-        .lockArmorSlot(this.carrier, ArmorType.HELMET, this.helmetLocked);
 
     Kit kit = this.flag.getDefinition().getDropKit();
     if (kit != null) this.carrier.applyKit(kit, false);

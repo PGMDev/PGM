@@ -75,6 +75,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   public void onNameDecorationChange(NameDecorationChangeEvent event) {
     if (event.getUUID() == null) return;
     decorationCache.invalidate(event.getUUID());
+    PlayerComponent.RENDERER.decorationChanged(event.getUUID());
 
     final Player player = Bukkit.getPlayer(event.getUUID());
     final MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);

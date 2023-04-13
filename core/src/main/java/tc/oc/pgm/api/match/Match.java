@@ -29,6 +29,8 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.features.MatchFeatureContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.join.JoinRequest;
+import tc.oc.pgm.loot.WorldTickClock;
 import tc.oc.pgm.util.Audience;
 
 /**
@@ -208,6 +210,9 @@ public interface Match
    */
   void callEvent(Event event);
 
+  /** Get the {@link WorldTickClock} providing {@link Tick}s for this match */
+  WorldTickClock getClock();
+
   /**
    * Get a {@link Tick} that is guaranteed to return the current Minecraft server tick.
    *
@@ -349,13 +354,28 @@ public interface Match
   Collection<Competitor> getWinners();
 
   /**
-   * Set or change the {@link Party} of a {@link MatchPlayer}.
+   * Set or change the {@link Party} of a {@link MatchPlayer}. Prefer {@link #setParty(MatchPlayer,
+   * Party, JoinRequest)} if you have a specific join request or want to avoid a generic force-join
    *
    * @param player The {@link MatchPlayer}.
    * @param party The new {@link Party}.
    * @return Whether the operation was a success.
    */
-  boolean setParty(MatchPlayer player, Party party);
+  default boolean setParty(MatchPlayer player, Party party) {
+    return setParty(player, party, null);
+  }
+
+  /**
+   * Set or change the {@link Party} of a {@link MatchPlayer}.
+   *
+   * @param player The {@link MatchPlayer}.
+   * @param party The new {@link Party}.
+   * @param request The {@link JoinRequest} that originated this call, and that will be passed down
+   *     resulting events. If null, it will be assumed that this is a forced join (bypassing
+   *     restrictions such as blitz).
+   * @return Whether the operation was a success.
+   */
+  boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request);
 
   /**
    * Add a {@link Party} to the {@link Match}.
@@ -406,6 +426,20 @@ public interface Match
    * @return If the {@link Match} was just ended.
    */
   boolean calculateVictory();
+
+  /**
+   * Get whether friendly fire should be on or off.
+   *
+   * @return True if friendly fire is on.
+   */
+  boolean getFriendlyFire();
+
+  /**
+   * Set an override for friendly fire.
+   *
+   * @param allow True to allow, false to deny, null to reset.
+   */
+  void setFriendlyFire(Boolean allow);
 
   @Override
   default Match getMatch() {
