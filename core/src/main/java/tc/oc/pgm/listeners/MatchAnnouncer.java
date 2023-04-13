@@ -14,7 +14,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -38,7 +37,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.named.Named;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class MatchAnnouncer implements Listener {
@@ -73,33 +71,36 @@ public class MatchAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchEnd(final MatchFinishEvent event) {
-    Match match = event.getMatch();
+    final Match match = event.getMatch();
 
     // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
-      Component title, subtitle = empty();
-      Collection<Competitor> winners = event.getWinners();
+      Component title = null, subtitle = empty();
+      final Collection<Competitor> winners = event.getWinners();
+      final boolean singleWinner = winners.size() == 1;
       if (winners.isEmpty()) {
         title = translatable("broadcast.gameOver");
       } else {
-        boolean plural = winners.size() > 1 || Iterables.getOnlyElement(winners).isNamePlural();
-        title =
-            translatable(
-                plural ? "broadcast.gameOver.teamWinners" : "broadcast.gameOver.teamWinner",
-                TextFormatter.list(
-                    winners.stream().map(Named::getName).collect(Collectors.toList()),
-                    NamedTextColor.WHITE));
+        if (singleWinner) {
+          title =
+              translatable(
+                  Iterables.getOnlyElement(winners).isNamePlural()
+                      ? "broadcast.gameOver.teamWinners"
+                      : "broadcast.gameOver.teamWinner",
+                  TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
+        }
 
+        // Use stream here instead of #contains to avoid unchecked cast
         if (winners.stream().anyMatch(w -> w == viewer.getParty())) {
           // Winner
           viewer.playSound(SOUND_MATCH_WIN);
-          if (viewer.getParty() instanceof Team) {
+          if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamWon", NamedTextColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
           viewer.playSound(SOUND_MATCH_LOSE);
-          if (viewer.getParty() instanceof Team) {
+          if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamLost", NamedTextColor.RED);
           }
         } else {
@@ -108,20 +109,22 @@ public class MatchAnnouncer implements Listener {
         }
       }
 
-      Title.Times titleTimes = Title.Times.of(Duration.ZERO, fromTicks(40), fromTicks(40));
+      if (title == null) {
+        // 2 or more winners, show "Tied!" as the title
+        title = translatable("broadcast.gameOver.tied", NamedTextColor.YELLOW);
 
-      if (winners.size() > 3)
-        viewer.showTitle(
-            title(
-                translatable(
-                    "broadcast.gameOver.winners", text(winners.size(), NamedTextColor.YELLOW)),
-                subtitle,
-                titleTimes));
-      else viewer.showTitle(title(title, subtitle, titleTimes));
+        // If 2 or 3 winners we show the winners as the subtitle
+        if (winners.size() <= 3) {
+          subtitle = TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE);
+        }
+      }
+
+      final Title.Times titleTimes = Title.Times.times(Duration.ZERO, fromTicks(40), fromTicks(40));
+      viewer.showTitle(title(title, subtitle, titleTimes));
 
       viewer.sendMessage(title);
 
-      if (viewer.getParty() instanceof Competitor) viewer.sendMessage(subtitle);
+      if (viewer.getParty() instanceof Competitor || !singleWinner) viewer.sendMessage(subtitle);
     }
   }
 
