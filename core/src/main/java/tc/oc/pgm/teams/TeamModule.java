@@ -42,18 +42,15 @@ public class TeamModule implements MapModule<TeamMatchModule> {
   @Override
   public Collection<MapTag> getTags() {
     final int size = teams.size();
-    Collection<MapTag> tags = TAGS.get(size);
-    if (tags == null) {
-      tags =
-          ImmutableList.of(
-              new MapTag(
-                  size + "team" + (size == 1 ? "" : "s"),
-                  size + " Team" + (size == 1 ? "" : "s"),
-                  false,
-                  true));
-      TAGS.put(size, tags);
-    }
-    return tags;
+    return TAGS.computeIfAbsent(
+        size,
+        s ->
+            ImmutableList.of(
+                new MapTag(
+                    size + "team" + (size == 1 ? "" : "s"),
+                    size + " Team" + (size == 1 ? "" : "s"),
+                    false,
+                    true)));
   }
 
   @Override
