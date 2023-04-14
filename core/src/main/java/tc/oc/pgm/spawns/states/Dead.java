@@ -86,7 +86,9 @@ public class Dead extends Spawning {
   public void tick() {
     long age = age();
 
-    if (!kitted && ticksUntilRespawn() <= 0 && age >= 20) {
+    if (!kitted
+        && ticksUntilRespawn() <= 0
+        && age >= TimeUtils.toTicks(SpawnModule.MIN_KIT_DELAY)) {
       this.kitted = true;
       // Give the player the team/class picker, after death has cleared their inventory
       player.getMatch().callEvent(new DeathKitApplyEvent(player));
