@@ -25,7 +25,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jetbrains.annotations.Nullable;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -77,8 +76,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   public RespawnOptions getRespawnOptions(Query query) {
     return module.respawnOptions.stream()
-        .filter(
-            respawnOption -> respawnOption.filter.query(query).equals(Filter.QueryResponse.ALLOW))
+        .filter(respawn -> !respawn.filter.query(query).isDenied())
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No respawn option could be used"));
   }

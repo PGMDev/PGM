@@ -28,7 +28,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class SpawnModule implements MapModule<SpawnMatchModule> {
 
   public static final Duration DEFAULT_RESPAWN_DELAY = Duration.ofMillis(2000);
-  public static final Duration MINIMUM_RESPAWN_DELAY = Duration.ofMillis(1500);
+  public static final Duration MINIMUM_RESPAWN_DELAY = Duration.ofMillis(0);
   public static final Duration IGNORE_CLICKS_DELAY = Duration.ofMillis(500);
 
   protected final Spawn defaultSpawn;

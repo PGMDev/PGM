@@ -25,7 +25,7 @@ public class RespawnOptions {
       Filter filter,
       @Nullable Component message) {
     this.delay = delay;
-    this.delayTicks = Math.max(TimeUtils.toTicks(delay), 20);
+    this.delayTicks = Math.max(TimeUtils.toTicks(delay), 0);
     this.auto = auto;
     this.blackout = blackout;
     this.spectate = spectate;
