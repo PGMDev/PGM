@@ -24,6 +24,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
@@ -277,6 +278,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setWalkSpeed(WalkSpeedKit.BUKKIT_DEFAULT);
     NMSHacks.clearArrowsInPlayer(bukkit);
     NMSHacks.setKnockbackReduction(bukkit, 0);
+    bukkit.setVelocity(new Vector());
 
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
       if (effect.getType() != null) {

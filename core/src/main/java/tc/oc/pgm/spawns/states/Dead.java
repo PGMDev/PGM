@@ -36,11 +36,7 @@ public class Dead extends Spawning {
   private boolean kitted, rotted;
 
   public Dead(SpawnMatchModule smm, MatchPlayer player) {
-    this(smm, player, player.getMatch().getTick().tick);
-  }
-
-  public Dead(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
-    super(smm, player, deathTick);
+    super(smm, player, player.getMatch().getTick().tick);
   }
 
   @Override
@@ -80,6 +76,9 @@ public class Dead extends Spawning {
     bukkit.removePotionEffect(PotionEffectType.BLINDNESS);
     bukkit.removePotionEffect(PotionEffectType.CONFUSION);
 
+    // If regular rotting didn't end, force-finish it to avoid client-side
+    endRotting();
+
     super.leaveState(events);
   }
 
@@ -87,21 +86,26 @@ public class Dead extends Spawning {
   public void tick() {
     long age = age();
 
-    if (!kitted && ticksUntilRespawn() <= 0) {
+    if (!kitted
+        && ticksUntilRespawn() <= 0
+        && age >= TimeUtils.toTicks(SpawnModule.MIN_KIT_DELAY)) {
       this.kitted = true;
       // Give the player the team/class picker, after death has cleared their inventory
       player.getMatch().callEvent(new DeathKitApplyEvent(player));
       bukkit.updateInventory();
     }
 
-    if (!rotted && age >= CORPSE_ROT_TICKS) {
-      this.rotted = true;
-      // Make player invisible after the death animation is complete
-      player.setVisible(false);
-      player.resetVisibility();
-    }
+    // Make player invisible after the death animation is complete
+    if (age >= CORPSE_ROT_TICKS) endRotting();
 
     super.tick(); // May transition to a different state, so call last
+  }
+
+  private void endRotting() {
+    if (this.rotted) return;
+    this.rotted = true;
+    player.setVisible(false);
+    player.resetVisibility();
   }
 
   @Override

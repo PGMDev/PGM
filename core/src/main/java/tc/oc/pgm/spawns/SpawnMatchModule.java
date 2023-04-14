@@ -77,8 +77,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   public RespawnOptions getRespawnOptions(Query query) {
     return module.respawnOptions.stream()
-        .filter(
-            respawnOption -> respawnOption.filter.query(query).equals(Filter.QueryResponse.ALLOW))
+        .filter(respawn -> respawn.filter.query(query) == Filter.QueryResponse.ALLOW)
         .findFirst()
         .orElseThrow(() -> new IllegalStateException("No respawn option could be used"));
   }
