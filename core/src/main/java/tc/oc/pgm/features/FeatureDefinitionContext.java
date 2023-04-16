@@ -135,7 +135,19 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
    */
   public <T extends FeatureDefinition> T resolve(Node node, Class<T> cls)
       throws InvalidXMLException {
-    String id = node.getValueNormalize();
+    return resolve(node, node.getValueNormalize(), cls);
+  }
+
+  /**
+   * Warning: this should only be used when you're certain those features load before you call this
+   *
+   * @param node The XML node containing the ID of the feature
+   * @param cls The type of feature
+   * @return The feature if available
+   * @throws InvalidXMLException If the requested feature is not available
+   */
+  public <T extends FeatureDefinition> T resolve(Node node, String id, Class<T> cls)
+      throws InvalidXMLException {
     T val = get(id, cls);
     if (val == null)
       throw new InvalidXMLException(

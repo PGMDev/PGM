@@ -22,6 +22,7 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -387,7 +388,7 @@ public final class XMLUtils {
   private static final Pattern RANGE_RE =
       Pattern.compile("\\s*(\\(|\\[)\\s*([^,]+)\\s*,\\s*([^\\)\\]]+)\\s*(\\)|\\])\\s*");
 
-  private static final Pattern RANGE_DOTTED =
+  public static final Pattern RANGE_DOTTED =
       Pattern.compile("\\s*(-oo|-?\\d*\\.?\\d+)?\\s*\\.\\.\\s*(oo|-?\\d*\\.?\\d+)?\\s*");
 
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
@@ -396,20 +397,23 @@ public final class XMLUtils {
     return parseNumericRange(node, type);
   }
 
+  public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
+      @NotNull Node node, Class<T> type) throws InvalidXMLException {
+    return parseNumericRange(node, node.getValue(), type);
+  }
+
   /**
-   * Parse a range in the standard mathematical format e.g.
+   * Parse a range in multiple formats.
    *
-   * <p>[0, 1)
+   * <p>Standard interval mathematical format: [0, 1) for a close-open range from 0 to 1
    *
-   * <p>for a closed-open range from 0 to 1
+   * <p>Singleton range (a standalone number)
    *
-   * <p>Or in the vanilla Minecraft format e.g.
+   * <p>Vanilla minecraft dotted range notation e.g.
    *
    * <p>1..5 or ..5 or 1..
    *
    * <p>equal to [1, 5], (-oo, 5] and [1, oo)
-   *
-   * <p>Also supports singleton ranges derived from providing a number with no delimiter
    *
    * @implNote Since infinity and "infinity"({@link Double#POSITIVE_INFINITY} etc.) is handled
    *     differently by the Google ranges we find the infinities and create Ranges using {@link
@@ -418,8 +422,7 @@ public final class XMLUtils {
    *     (Like {@link #parseNumber(String, Class, boolean)} does)
    */
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      Node node, Class<T> type) throws InvalidXMLException {
-    String nodeValue = node.getValue();
+      Node node, String nodeValue, Class<T> type) throws InvalidXMLException {
 
     String lowStr;
     BoundType lowerBound;
