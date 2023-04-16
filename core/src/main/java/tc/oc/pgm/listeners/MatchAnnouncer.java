@@ -9,6 +9,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
 
+import com.google.common.collect.Iterables;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -70,31 +71,36 @@ public class MatchAnnouncer implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchEnd(final MatchFinishEvent event) {
-    Match match = event.getMatch();
+    final Match match = event.getMatch();
 
     // broadcast match finish message
     for (MatchPlayer viewer : match.getPlayers()) {
-      Component title, subtitle = empty();
-      if (event.getWinner() == null) {
+      Component title = null, subtitle = empty();
+      final Collection<Competitor> winners = event.getWinners();
+      final boolean singleWinner = winners.size() == 1;
+      if (winners.isEmpty()) {
         title = translatable("broadcast.gameOver");
       } else {
-        title =
-            translatable(
-                event.getWinner().isNamePlural()
-                    ? "broadcast.gameOver.teamWinners"
-                    : "broadcast.gameOver.teamWinner",
-                event.getWinner().getName());
+        if (singleWinner) {
+          title =
+              translatable(
+                  Iterables.getOnlyElement(winners).isNamePlural()
+                      ? "broadcast.gameOver.teamWinners"
+                      : "broadcast.gameOver.teamWinner",
+                  TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
+        }
 
-        if (event.getWinner() == viewer.getParty()) {
+        // Use stream here instead of #contains to avoid unchecked cast
+        if (winners.stream().anyMatch(w -> w == viewer.getParty())) {
           // Winner
           viewer.playSound(SOUND_MATCH_WIN);
-          if (viewer.getParty() instanceof Team) {
+          if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamWon", NamedTextColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
           viewer.playSound(SOUND_MATCH_LOSE);
-          if (viewer.getParty() instanceof Team) {
+          if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamLost", NamedTextColor.RED);
           }
         } else {
@@ -103,10 +109,22 @@ public class MatchAnnouncer implements Listener {
         }
       }
 
-      viewer.showTitle(
-          title(title, subtitle, Title.Times.of(Duration.ZERO, fromTicks(40), fromTicks(40))));
+      if (title == null) {
+        // 2 or more winners, show "Tied!" as the title
+        title = translatable("broadcast.gameOver.tied", NamedTextColor.YELLOW);
+
+        // If 2 or 3 winners we show the winners as the subtitle
+        if (winners.size() <= 3) {
+          subtitle = TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE);
+        }
+      }
+
+      final Title.Times titleTimes = Title.Times.times(Duration.ZERO, fromTicks(40), fromTicks(40));
+      viewer.showTitle(title(title, subtitle, titleTimes));
+
       viewer.sendMessage(title);
-      if (viewer.getParty() instanceof Competitor) viewer.sendMessage(subtitle);
+
+      if (viewer.getParty() instanceof Competitor || !singleWinner) viewer.sendMessage(subtitle);
     }
   }
 
