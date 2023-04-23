@@ -91,7 +91,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void handleLeave(final PlayerPartyChangeEvent event) {
     int lives = this.lifeManager.getLives(event.getPlayer().getId());
     if (event.getOldParty() instanceof Competitor && lives > 0) {

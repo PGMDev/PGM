@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -516,11 +517,12 @@ public class MatchImpl implements Match {
 
       if (oldParty instanceof Competitor) {
         PlayerParticipationEvent request =
-            new PlayerParticipationStopEvent(player, (Competitor) oldParty);
+            new PlayerParticipationStopEvent(player, (Competitor) oldParty, joinRequest, newParty);
         callEvent(request);
-        if (request.isCancelled()
-            && newParty != null) { // Can't cancel this if the player is leaving the match
-          player.sendWarning(request.getCancelReason());
+        // Can't cancel this if the player is leaving the match
+        if (request.isCancelled() && newParty != null) {
+          if (!Objects.equals(Component.empty(), request.getCancelReason()))
+            player.sendWarning(request.getCancelReason());
           return false;
         }
       }
@@ -529,9 +531,10 @@ public class MatchImpl implements Match {
         PlayerParticipationEvent request =
             new PlayerParticipationStartEvent(player, (Competitor) newParty, joinRequest);
         callEvent(request);
-        if (request.isCancelled()
-            && oldParty != null) { // Can't cancel this if the player is joining the match
-          player.sendWarning(request.getCancelReason());
+        // Can't cancel this if the player is joining the match
+        if (request.isCancelled() && oldParty != null) {
+          if (!Objects.equals(Component.empty(), request.getCancelReason()))
+            player.sendWarning(request.getCancelReason());
           return false;
         }
       }
