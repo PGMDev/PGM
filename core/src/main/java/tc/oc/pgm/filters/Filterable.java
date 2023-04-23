@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.Audience;
 
 /**
@@ -37,6 +38,13 @@ public interface Filterable<Q extends MatchQuery> extends MatchQuery, Audience {
   default <F extends Filterable<?>> F getFilterableAncestor(Class<F> type) {
     if (type.isInstance(this)) {
       return (F) this;
+    } else if (Match.class.isAssignableFrom(type)) {
+      // When disconnecting the player's party is set to null. A monostable filter calling
+      // #filterable(match) will end with null due to player -> (null) party -> match,
+      // however going straight to match works fine.
+      // A use-case for this is a time filter used for blitz. Doing /obs won't eliminate you,
+      // leaving the server does. This is due to the filter not finding the match and disallowing.
+      return (F) this.getMatch();
     } else {
       @Nullable Filterable<? super Q> parent = getFilterableParent();
       return parent == null ? null : parent.getFilterableAncestor(type);
