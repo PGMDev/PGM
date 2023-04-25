@@ -1,5 +1,6 @@
 package tc.oc.pgm.flag.state;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
@@ -7,7 +8,6 @@ import java.time.Instant;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -68,7 +68,8 @@ public class Dropped extends Uncarried implements Missing {
   protected void tickSeconds(long seconds) {
     super.tickSeconds(seconds);
     this.flag.getMatch().callEvent(new GoalStatusChangeEvent(this.flag.getMatch(), this.flag));
-    this.labelEntity.setCustomName(this.flag.getColoredName() + " " + ChatColor.AQUA + seconds);
+    this.hologramText.setText(
+        this.flag.getComponentName().appendSpace().append(text(seconds, NamedTextColor.AQUA)));
   }
 
   @Override
