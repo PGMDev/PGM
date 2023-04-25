@@ -3,7 +3,6 @@ package tc.oc.pgm.util;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Projectile;
