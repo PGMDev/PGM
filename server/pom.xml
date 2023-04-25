@@ -116,7 +116,7 @@
                 <version>3.3.1</version>
                 <configuration>
                     <from>
-                        <image>shipilev/openjdk-shenandoah:8</image>
+                        <image>shipilev/openjdk:8</image>
                     </from>
                     <to>
                         <image>pgm</image>
