@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -15,6 +16,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
+import tc.oc.pgm.hologram.HologramMatchModule;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -37,6 +39,11 @@ public class FlagModule implements MapModule<FlagMatchModule> {
   @Override
   public Collection<Class<? extends MatchModule>> getSoftDependencies() {
     return ImmutableList.of(GoalMatchModule.class);
+  }
+
+  @Override
+  public @Nullable Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(HologramMatchModule.class);
   }
 
   @Override

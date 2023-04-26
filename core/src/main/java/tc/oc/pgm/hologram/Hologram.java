@@ -5,28 +5,21 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Epic floating text, its like a sci-fi movie! */
-public class HologramText {
+public class Hologram {
 
   private final Match match;
 
-  private @Nullable ArmorStand labelEntity;
+  @Nullable ArmorStand labelEntity;
   private Location location;
   private Component text;
 
-  public HologramText(
+  Hologram(
       @NotNull Match match, @NotNull Location location, @NotNull Component text, boolean show) {
     assertNotNull(match, "match");
     this.match = match;
@@ -38,8 +31,6 @@ public class HologramText {
     if (show) this.show();
 
     this.setText(this.text);
-
-    match.addListener(this, MatchScope.LOADED);
   }
 
   /** Spawn in the hologram text at the previously given location, if not already spawned */

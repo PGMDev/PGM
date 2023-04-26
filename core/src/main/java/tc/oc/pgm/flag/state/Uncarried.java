@@ -18,7 +18,8 @@ import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
-import tc.oc.pgm.util.HologramText;
+import tc.oc.pgm.hologram.Hologram;
+import tc.oc.pgm.hologram.HologramMatchModule;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.material.Materials;
 
@@ -28,7 +29,7 @@ public abstract class Uncarried extends Spawned {
   protected final Location location;
   protected final BlockState oldBlock;
   protected final BlockState oldBase;
-  protected final HologramText hologramText;
+  protected final Hologram hologram;
   private @Nullable MatchPlayer pickingUp;
 
   public Uncarried(Flag flag, Post post, @Nullable Location location) {
@@ -51,9 +52,10 @@ public abstract class Uncarried extends Spawned {
       this.oldBlock = block.getState();
     }
     this.oldBase = block.getRelative(BlockFace.DOWN).getState();
-    this.hologramText =
-        new HologramText(
-            flag.getMatch(), this.location.clone().add(0, 1.7, 0), flag.getComponentName(), false);
+    this.hologram =
+        flag.getMatch()
+            .needModule(HologramMatchModule.class)
+            .createHologram(this.location.clone().add(0, 1.7, 0), flag.getComponentName(), false);
   }
 
   @Override
@@ -72,11 +74,11 @@ public abstract class Uncarried extends Spawned {
       PGM.get().getGameLogger().severe("Failed to place banner at " + this.location);
     }
 
-    this.hologramText.show();
+    this.hologram.show();
   }
 
   protected void breakBanner() {
-    this.hologramText.hide();
+    this.hologram.hide();
     oldBase.update(true, false);
     oldBlock.update(true, false);
   }

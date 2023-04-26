@@ -68,7 +68,7 @@ public class Dropped extends Uncarried implements Missing {
   protected void tickSeconds(long seconds) {
     super.tickSeconds(seconds);
     this.flag.getMatch().callEvent(new GoalStatusChangeEvent(this.flag.getMatch(), this.flag));
-    this.hologramText.setText(
+    this.hologram.setText(
         this.flag.getComponentName().appendSpace().append(text(seconds, NamedTextColor.AQUA)));
   }
 
