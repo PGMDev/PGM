@@ -1,4 +1,4 @@
-package tc.oc.pgm.util;
+package tc.oc.pgm.hologram;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
@@ -18,7 +18,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Epic floating text, its like a sci-fi movie! */
-public class HologramText implements Listener {
+public class HologramText {
 
   private final Match match;
 
@@ -104,18 +104,6 @@ public class HologramText implements Listener {
     this.location = location;
     if (this.labelEntity != null) {
       this.labelEntity.teleport(this.location);
-    }
-  }
-
-  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-  public void onEntityDamage(EntityDamageEvent event) {
-    if (event.getEntity() == this.labelEntity) {
-      event.setCancelled(true);
-
-      if (event instanceof EntityDamageByEntityEvent
-          && ((EntityDamageByEntityEvent) event).getDamager() instanceof Projectile) {
-        ((EntityDamageByEntityEvent) event).getDamager().remove();
-      }
     }
   }
 }
