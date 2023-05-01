@@ -1,9 +1,11 @@
 package tc.oc.pgm.api.map;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 
 /** A library of {@link MapInfo}s and {@link MapContext}s. */
@@ -17,6 +19,16 @@ public interface MapLibrary {
    */
   @Nullable
   MapInfo getMap(String idOrName);
+
+  /**
+   * Get the original location of a maps {@link MapSource}.
+   *
+   * @param mapInfo
+   * @return
+   * @throws MapMissingException If an error occurs while attempting to look up the location of the
+   *     source
+   */
+  URI getMapURI(MapInfo mapInfo) throws MapMissingException;
 
   /**
    * Get all {@link MapInfo}s matching the query.

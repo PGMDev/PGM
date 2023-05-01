@@ -2,11 +2,27 @@ package tc.oc.pgm.api.map;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Collection;
+import org.bukkit.World;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 
-/** A source where {@link MapInfo} documents and files are downloaded. */
+/**
+ * A directory where map documents and files are downloaded from. Methods might error if the source
+ * moves or changes after this object is created. (e.g a file moves to a new directory)
+ *
+ * <p>A valid source is a directory containing at least:
+ *
+ * <ul>
+ *   <li>An XML Document following the PGM spec(documented at <a href="https://pgm.dev">the PGM
+ *       website)</a>
+ *   <li>Files for generating a {@link World}
+ * </ul>
+ *
+ * @see MapMissingException
+ * @see MapContext
+ */
 public interface MapSource {
   String FILE = "map.xml";
 
@@ -18,7 +34,7 @@ public interface MapSource {
   String getId();
 
   /**
-   * Download the {@link org.bukkit.World} files to a local directory.
+   * Download the {@link World} files to a local directory.
    *
    * @param dir An existent, but empty directory.
    * @throws MapMissingException If an error occurs while creating the files.
@@ -32,6 +48,14 @@ public interface MapSource {
    * @return An xml document stream.
    */
   InputStream getDocument() throws MapMissingException;
+
+  /**
+   * Get the location of the source backing this {@link MapSource} in the form of an {@link URI}.
+   *
+   * @throws MapMissingException If an error occurs while attempting to look up the location of the
+   *     source
+   */
+  URI getURI() throws MapMissingException;
 
   /**
    * Get whether future calls to {@link #getDocument()} will return different results.

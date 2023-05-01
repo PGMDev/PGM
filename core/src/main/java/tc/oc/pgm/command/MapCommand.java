@@ -33,6 +33,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
+import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.util.Audience;
@@ -143,7 +144,8 @@ public final class MapCommand {
   public void map(
       Audience audience,
       CommandSender sender,
-      @Argument(value = "map", defaultValue = CURRENT) @Greedy MapInfo map) {
+      @Argument(value = "map", defaultValue = CURRENT) @Greedy MapInfo map)
+      throws MapMissingException {
     audience.sendMessage(
         TextFormatter.horizontalLineHeading(
             sender,
@@ -223,6 +225,13 @@ public final class MapCommand {
           text()
               .append(mapInfoLabel("map.info.phase"))
               .append(map.getPhase().toComponent().color(NamedTextColor.GOLD))
+              .build());
+
+      audience.sendMessage(
+          text()
+              .append(mapInfoLabel("map.info.directory"))
+              .append(
+                  text(PGM.get().getMapLibrary().getMapURI(map).toString(), NamedTextColor.GOLD))
               .build());
     }
 

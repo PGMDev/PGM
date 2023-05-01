@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -116,6 +117,13 @@ public class SystemMapSourceFactory extends PathMapSourceFactory {
       } finally {
         lastRead.set(System.currentTimeMillis());
       }
+    }
+
+    @Override
+    public URI getURI() throws MapMissingException {
+      final File file = getFile();
+
+      return file.toURI();
     }
 
     @Override

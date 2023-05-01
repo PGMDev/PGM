@@ -4,6 +4,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Iterators;
 import java.lang.ref.SoftReference;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -75,6 +76,16 @@ public class MapLibraryImpl implements MapLibrary {
     }
 
     return map == null ? null : map.info;
+  }
+
+  @Override
+  public URI getMapURI(MapInfo mapInfo) throws MapMissingException {
+    return maps.values().stream()
+        .filter(e -> e.info.equals(mapInfo))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("Could not find URI for MapInfo: " + mapInfo))
+        .source
+        .getURI();
   }
 
   @Override
