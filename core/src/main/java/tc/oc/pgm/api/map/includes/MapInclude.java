@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.map.includes;
 
-import java.util.Collection;
+import java.util.List;
 import org.jdom2.Content;
 
 /** Represents a snippet of XML that can be referenced for reuse * */
@@ -19,5 +19,5 @@ public interface MapInclude {
    *
    * @return a collection of {@link Content}
    */
-  Collection<Content> getContent();
+  List<Content> getContent();
 }

@@ -160,6 +160,9 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
       if (id == null || id.isEmpty())
         throw new InvalidXMLException("Variant id must not be empty", variant);
 
+      if ("default".equals(id))
+        throw new InvalidXMLException("Variant id must not be 'default'", variant);
+
       if (!collect.add(id))
         throw new InvalidXMLException("Duplicate variant ids are not allowed", variant);
     }

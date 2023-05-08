@@ -1,20 +1,17 @@
 package tc.oc.pgm.map.includes;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.exception.MapMissingException;
@@ -48,41 +45,28 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
   }
 
   @Override
-  public MapInclude getMapIncludeById(String includeId) {
+  public @Nullable MapInclude getMapIncludeById(String includeId) {
     return includes.get(includeId);
   }
 
   @Override
-  public Collection<MapInclude> getMapIncludes(Document document) throws InvalidXMLException {
-    Set<MapInclude> mapIncludes = Sets.newHashSet();
-
-    // Always add global include if present
-    if (getGlobalInclude() != null) {
-      mapIncludes.add(getGlobalInclude());
+  public MapInclude getMapInclude(Element element) throws InvalidXMLException {
+    if (Node.fromAttr(element, "src") != null) {
+      // Send a warning to legacy include statements without preventing them from loading
+      logger.warning(
+          "["
+              + element.getDocument().getBaseURI()
+              + "] "
+              + "Legacy include statements are no longer supported, please upgrade to the <include id='name'/> format.");
+      return null;
     }
 
-    List<Element> elements = document.getRootElement().getChildren("include");
-    for (Element element : elements) {
-
-      if (Node.fromAttr(element, "src") != null) {
-        // Send a warning to legacy include statements without preventing them from loading
-        logger.warning(
-            "["
-                + document.getBaseURI()
-                + "] "
-                + "Legacy include statements are no longer supported, please upgrade to the <include id='name'/> format.");
-        continue;
-      }
-
-      String id = XMLUtils.getRequiredAttribute(element, "id").getValue();
-      MapInclude include = getMapIncludeById(id);
-      if (include == null)
-        throw new InvalidXMLException(
-            "The provided include id '" + id + "' could not be found!", element);
-
-      mapIncludes.add(include);
-    }
-    return mapIncludes;
+    String id = XMLUtils.getRequiredAttribute(element, "id").getValue();
+    MapInclude include = getMapIncludeById(id);
+    if (include == null)
+      throw new InvalidXMLException(
+          "The provided include id '" + id + "' could not be found!", element);
+    return include;
   }
 
   @Override
