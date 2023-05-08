@@ -90,7 +90,7 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
     Config config = PGM.get().getConfiguration();
     if (config.getIncludesDirectory() == null) return;
 
-    File includeFiles = new File(config.getIncludesDirectory());
+    File includeFiles = config.getIncludesDirectory().toFile();
     if (!includeFiles.isDirectory()) {
       logger.warning(config.getIncludesDirectory() + " is not a directory!");
       return;

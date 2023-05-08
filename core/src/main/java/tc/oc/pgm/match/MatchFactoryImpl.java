@@ -230,7 +230,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
       final File dir = getDirectory();
       if (dir.mkdirs()) {
-        map.getSource().downloadTo(dir);
+        map.getMapInfo().getSource().downloadTo(dir);
       } else {
         throw new MapMissingException(dir.getPath(), "Unable to mkdirs world directory");
       }
@@ -261,7 +261,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     private Stage advanceSync() throws IllegalStateException {
-      final WorldInfo info = map.getWorld();
+      final WorldInfo info = map.getMapInfo().getWorld();
       WorldCreator creator = NMSHacks.detectWorld(worldName);
       if (creator == null) {
         creator = new WorldCreator(worldName);
@@ -279,7 +279,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       world.setPVP(true);
       world.setSpawnFlags(false, false);
       world.setAutoSave(false);
-      world.setDifficulty(difficulties[map.getDifficulty()]);
+      world.setDifficulty(difficulties[map.getMapInfo().getDifficulty()]);
 
       return new InitMatchStage(world, map);
     }

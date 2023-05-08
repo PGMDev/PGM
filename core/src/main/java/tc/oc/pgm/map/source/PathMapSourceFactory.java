@@ -3,57 +3,71 @@ package tc.oc.pgm.map.source;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.util.Iterator;
-import java.util.NavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 
-public abstract class PathMapSourceFactory implements MapSourceFactory {
+public class PathMapSourceFactory implements MapSourceFactory {
 
-  // Sources are held with weak reference because the callee is
-  // responsible for holding a strong reference.
-  private final NavigableMap<String, WeakReference<MapSource>> sources;
-  private final String path;
+  private final Set<Path> sources;
 
-  protected PathMapSourceFactory(String path) {
-    this.sources = new ConcurrentSkipListMap<>();
-    this.path = assertNotNull(path);
+  protected final Path base;
+  protected final @Nullable List<Path> children;
+
+  public PathMapSourceFactory(Path base) {
+    this(base, null);
   }
 
-  protected abstract MapSource loadSource(String dir);
+  public PathMapSourceFactory(Path base, @Nullable List<Path> children) {
+    this.sources = Collections.synchronizedSet(new ConcurrentSkipListSet<>());
+    this.base = assertNotNull(base).toAbsolutePath();
+    this.children = children;
+  }
 
-  private Stream<MapSource> loadNewSource(@Nullable String path) {
-    if (path == null || !path.startsWith(this.path) || sources.containsKey(path)) {
+  protected MapSource loadSource(Path path) {
+    return new SystemMapSource(path, null);
+  }
+
+  private Stream<MapSource> loadNewSource(Path path) {
+    if (path == null || !path.startsWith(this.base) || !sources.add(path)) {
       return Stream.empty();
     }
 
-    final int index = path.indexOf(MapSource.FILE);
-    if (index < 1) {
-      return Stream.empty();
+    if (path.getFileName().equals(MapSource.FILE)) {
+      return Stream.of(loadSource(path.getParent()));
     }
-
-    final MapSource source = loadSource(path.substring(0, index - 1));
-    sources.put(path, new WeakReference<>(source));
-    return Stream.of(source);
+    return Stream.empty();
   }
-
-  protected abstract Stream<String> loadAllPaths() throws IOException;
 
   @Override
-  public Iterator<? extends MapSource> loadNewSources() throws MapMissingException {
-    final Stream<String> paths;
-    try {
-      paths = loadAllPaths();
-    } catch (IOException e) {
-      throw new MapMissingException(path, "Unable to list files", e);
-    }
+  public Stream<? extends MapSource> loadNewSources(Consumer<MapException> exceptionHandler) {
+    if (!Files.exists(base) || !Files.isDirectory(base)) return Stream.empty();
 
-    return paths.parallel().flatMap(this::loadNewSource).iterator();
+    return (children == null ? Stream.of(base) : children.stream().map(base::resolve))
+        .flatMap(
+            b -> {
+              try {
+                return Files.walk(b, FileVisitOption.FOLLOW_LINKS);
+              } catch (IOException e) {
+                exceptionHandler.accept(
+                    new MapMissingException(b.toString(), "Unable to list files", e));
+                return Stream.empty();
+              }
+            })
+        .map(Path::toAbsolutePath)
+        .parallel()
+        .flatMap(this::loadNewSource);
   }
 
   @Override

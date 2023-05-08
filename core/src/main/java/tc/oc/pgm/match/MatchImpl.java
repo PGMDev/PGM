@@ -36,6 +36,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
@@ -132,7 +133,8 @@ public class MatchImpl implements Match {
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
-    this.capacity = new AtomicInteger(map.getMaxPlayers().stream().mapToInt(i -> i).sum());
+    this.capacity =
+        new AtomicInteger(map.getMapInfo().getMaxPlayers().stream().mapToInt(i -> i).sum());
     this.executors = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
@@ -232,8 +234,8 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public MapContext getMap() {
-    return map;
+  public MapInfo getMap() {
+    return map.getMapInfo();
   }
 
   @Override
@@ -723,7 +725,7 @@ public class MatchImpl implements Match {
 
   @Override
   public boolean getFriendlyFire() {
-    return friendlyFireOverride != null ? friendlyFireOverride : map.getFriendlyFire();
+    return friendlyFireOverride != null ? friendlyFireOverride : map.getMapInfo().getFriendlyFire();
   }
 
   @Override
@@ -766,8 +768,7 @@ public class MatchImpl implements Match {
     ImmutableMap.Builder<Class<? extends MatchModule>, MatchModuleFactory<?>> builder =
         ImmutableMap.builder();
     builder.putAll(Modules.MATCH);
-    getMap()
-        .getModules()
+    map.getModules()
         .forEach(module -> builder.put(Modules.MAP_TO_MATCH.get(module.getClass()), module));
     return builder.build();
   }
@@ -964,7 +965,7 @@ public class MatchImpl implements Match {
     return "Match{id="
         + this.id
         + ", map="
-        + this.map.getId()
+        + this.map.getMapInfo().getId()
         + ", world="
         + (world == null ? "<null>" : world.getName())
         + ", phase="
