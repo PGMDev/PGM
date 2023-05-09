@@ -215,6 +215,15 @@ public final class XMLUtils {
     return attr == null ? def : parseBoolean(new Node(attr));
   }
 
+  public static String parseRequiredId(Element element) throws InvalidXMLException {
+    String id = Node.fromRequiredAttr(element, "id").getValue();
+
+    if (id == null || id.isEmpty())
+      throw new InvalidXMLException("Id attribute cannot be empty", element);
+
+    return id;
+  }
+
   /**
    * Get the value of the given numeric type that best represents positive infinity.
    *

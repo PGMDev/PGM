@@ -156,10 +156,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   public Collection<String> getVariants() throws InvalidXMLException {
     Set<String> collect = new HashSet<>();
     for (Element variant : document.getRootElement().getChildren("variant")) {
-      String id = XMLUtils.getRequiredAttribute(variant, "id").getValue();
-      if (id == null || id.isEmpty())
-        throw new InvalidXMLException("Variant id must not be empty", variant);
-
+      String id = XMLUtils.parseRequiredId(variant);
       if ("default".equals(id))
         throw new InvalidXMLException("Variant id must not be 'default'", variant);
 
