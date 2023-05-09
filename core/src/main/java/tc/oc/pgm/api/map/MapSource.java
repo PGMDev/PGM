@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 
@@ -24,6 +25,7 @@ public interface MapSource {
    *
    * @return the variant the source, null for the parent source
    */
+  @Nullable
   String getVariant();
 
   /**
@@ -32,7 +34,7 @@ public interface MapSource {
    * @param variant variant to use
    * @return a new instance of map source, using the variant
    */
-  MapSource withVariant(String variant);
+  MapSource asVariant(String variant);
 
   /**
    * Download the {@link org.bukkit.World} files to a local directory.

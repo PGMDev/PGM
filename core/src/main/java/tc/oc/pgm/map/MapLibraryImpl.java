@@ -202,7 +202,7 @@ public class MapLibraryImpl implements MapLibrary {
       // We're not loading a specific map id, and we're not on a variant, load variants
       if (mapId == null && source.getVariant() == null) {
         for (String variant : factory.getVariants()) {
-          loadMapSafe(source.withVariant(variant), null);
+          loadMapSafe(source.asVariant(variant), null);
         }
       }
 
@@ -221,7 +221,7 @@ public class MapLibraryImpl implements MapLibrary {
           t.getCause());
     }
 
-    MapInfo info = context.getMapInfo();
+    MapInfo info = context.getInfo();
     maps.merge(
         info.getId(), info, (m1, m2) -> m2.getVersion().isOlderThan(m1.getVersion()) ? m1 : m2);
     failed.remove(source);

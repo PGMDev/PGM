@@ -46,7 +46,7 @@ public class MapContextImpl implements MapContext {
     }
   }
 
-  public MapInfo getMapInfo() {
+  public MapInfo getInfo() {
     return info;
   }
 

@@ -114,7 +114,7 @@ class SystemMapSource implements MapSource {
   }
 
   @Override
-  public MapSource withVariant(String variant) {
+  public MapSource asVariant(String variant) {
     if (Objects.equals(variant, this.variant)) return this;
     return new SystemMapSource(dir, variant);
   }

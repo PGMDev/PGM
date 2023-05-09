@@ -134,7 +134,7 @@ public class MatchImpl implements Match {
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
     this.capacity =
-        new AtomicInteger(map.getMapInfo().getMaxPlayers().stream().mapToInt(i -> i).sum());
+        new AtomicInteger(map.getInfo().getMaxPlayers().stream().mapToInt(i -> i).sum());
     this.executors = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
@@ -235,7 +235,7 @@ public class MatchImpl implements Match {
 
   @Override
   public MapInfo getMap() {
-    return map.getMapInfo();
+    return map.getInfo();
   }
 
   @Override
@@ -725,7 +725,7 @@ public class MatchImpl implements Match {
 
   @Override
   public boolean getFriendlyFire() {
-    return friendlyFireOverride != null ? friendlyFireOverride : map.getMapInfo().getFriendlyFire();
+    return friendlyFireOverride != null ? friendlyFireOverride : map.getInfo().getFriendlyFire();
   }
 
   @Override
@@ -965,7 +965,7 @@ public class MatchImpl implements Match {
     return "Match{id="
         + this.id
         + ", map="
-        + this.map.getMapInfo().getId()
+        + this.map.getInfo().getId()
         + ", world="
         + (world == null ? "<null>" : world.getName())
         + ", phase="

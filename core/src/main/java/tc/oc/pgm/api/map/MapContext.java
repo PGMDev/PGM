@@ -10,5 +10,5 @@ public interface MapContext extends ModuleContext<MapModule> {
    *
    * @return A {@link MapInfo} for this context.
    */
-  MapInfo getMapInfo();
+  MapInfo getInfo();
 }
