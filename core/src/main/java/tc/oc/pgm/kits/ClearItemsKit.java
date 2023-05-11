@@ -1,6 +1,9 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -45,6 +48,15 @@ public class ClearItemsKit extends AbstractKit {
     if (this.items) {
       player.getBukkit().getInventory().clear();
       player.getBukkit().getOpenInventory().setCursor(null);
+      InventoryView openInventory = player.getBukkit().getOpenInventory();
+      if (openInventory != null
+          && (openInventory.getType().equals(InventoryType.CRAFTING)
+              || openInventory.getType().equals(InventoryType.WORKBENCH))) {
+        Inventory topInventory = openInventory.getTopInventory();
+        if (topInventory != null) {
+          topInventory.clear();
+        }
+      }
     }
   }
 }
