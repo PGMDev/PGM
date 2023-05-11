@@ -15,6 +15,9 @@ import com.google.common.collect.Range;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,9 +26,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -38,7 +43,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.map.source.GitMapSourceFactory;
-import tc.oc.pgm.map.source.SystemMapSourceFactory;
+import tc.oc.pgm.map.source.PathMapSourceFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
 
@@ -56,8 +61,8 @@ public final class PGMConfig implements Config {
 
   // map.*
   private final List<MapSourceFactory> mapSourceFactories;
-  private final String mapPoolFile;
-  private final String includesDirectory;
+  private final Path mapPoolFile;
+  private final Path includesDirectory;
 
   // countdown.*
   private final Duration startTime;
@@ -150,22 +155,11 @@ public final class PGMConfig implements Config {
     }
 
     for (String folder : folders) {
-      File folderFile = new File(folder);
-      this.mapSourceFactories.add(
-          new SystemMapSourceFactory(
-              folderFile.isAbsolute() ? folderFile : folderFile.getAbsoluteFile()));
+      this.mapSourceFactories.add(new PathMapSourceFactory(Paths.get(folder)));
     }
 
-    final String mapPoolFile = config.getString("map.pools");
-    this.mapPoolFile =
-        mapPoolFile == null || mapPoolFile.isEmpty()
-            ? null
-            : new File(dataFolder, mapPoolFile).getAbsolutePath();
-    final String includesDirectory = config.getString("map.includes");
-    this.includesDirectory =
-        includesDirectory == null || includesDirectory.isEmpty()
-            ? null
-            : new File(dataFolder, includesDirectory).getAbsolutePath();
+    this.mapPoolFile = getPath(dataFolder.toPath(), config.getString("map.pools"));
+    this.includesDirectory = getPath(dataFolder.toPath(), config.getString("map.includes"));
 
     this.startTime = parseDuration(config.getString("countdown.start", "30s"));
     this.huddleTime = parseDuration(config.getString("countdown.huddle", "0s"));
@@ -225,6 +219,12 @@ public final class PGMConfig implements Config {
     this.experiments = experiments == null ? ImmutableMap.of() : experiments.getValues(false);
   }
 
+  private Path getPath(Path base, String dir) {
+    if (dir == null || dir.isEmpty()) return null;
+    Path path = Paths.get(dir);
+    return path.isAbsolute() ? path : base.resolve(path);
+  }
+
   public static final Map<?, ?> DEFAULT_REMOTE_REPO =
       ImmutableMap.of("uri", "https://github.com/PGMDev/Maps", "path", "default-maps");
 
@@ -238,31 +238,26 @@ public final class PGMConfig implements Config {
     }
 
     String path = String.valueOf(repository.get("path"));
-    final File folder;
     if (path.isEmpty() || path.equals("null")) {
-      folder =
-          new File("maps", (uri.getHost() + uri.getPath()).replaceAll("[/._]", "-").toLowerCase());
-    } else {
-      folder = new File(path);
+      String normalizedPath =
+          Normalizer.normalize(uri.getHost() + uri.getPath(), Normalizer.Form.NFD)
+              .replaceAll("[^A-Za-z0-9_]", "-")
+              .toLowerCase(Locale.ROOT);
+      path = "maps" + File.pathSeparator + normalizedPath;
     }
 
-    mapSources.add(new GitMapSourceFactory(folder, uri, branch));
+    Path base = Paths.get(path).toAbsolutePath();
 
-    TreeSet<File> folders = new TreeSet<>();
+    // Set up a path filter, if needed
+    List<Path> children = null;
     final Object subFolders = repository.get("folders");
     if (subFolders instanceof List) {
-      for (Object subFolder : (List) subFolders) {
-        folders.add(new File(folder, subFolder.toString()));
-      }
-    } else {
-      folders.add(folder);
+      children =
+          ((List<?>) subFolders)
+              .stream().map(Object::toString).map(Paths::get).collect(Collectors.toList());
     }
 
-    for (File folderFile : folders) {
-      mapSources.add(
-          new SystemMapSourceFactory(
-              folderFile.isAbsolute() ? folderFile : folderFile.getAbsoluteFile()));
-    }
+    mapSources.add(new GitMapSourceFactory(base, children, uri, branch));
   }
 
   // TODO: Can be removed after 1.0 release
@@ -469,12 +464,12 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public String getMapPoolFile() {
+  public Path getMapPoolFile() {
     return mapPoolFile;
   }
 
   @Override
-  public @Nullable String getIncludesDirectory() {
+  public @Nullable Path getIncludesDirectory() {
     return includesDirectory;
   }
 

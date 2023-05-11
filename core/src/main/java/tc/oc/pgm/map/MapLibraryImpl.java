@@ -2,14 +2,11 @@ package tc.oc.pgm.map;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import com.google.common.collect.Iterators;
-import java.lang.ref.SoftReference;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
@@ -28,8 +25,8 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
+import tc.oc.pgm.map.source.StreamMapSourceFactory;
 import tc.oc.pgm.util.LiquidMetal;
-import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameResolver;
 
@@ -37,21 +34,9 @@ public class MapLibraryImpl implements MapLibrary {
 
   private final Logger logger;
   private final List<MapSourceFactory> factories;
-  private final SortedMap<String, MapEntry> maps;
+  private final SortedMap<String, MapInfo> maps;
   private final Set<MapSource> failed;
   private final MapIncludeProcessor includes;
-
-  private static class MapEntry {
-    private final MapSource source;
-    private final MapInfo info;
-    private final SoftReference<MapContext> context;
-
-    private MapEntry(MapSource source, MapInfo info, MapContext context) {
-      this.source = assertNotNull(source);
-      this.info = assertNotNull(info);
-      this.context = new SoftReference<>(assertNotNull(context));
-    }
-  }
 
   public MapLibraryImpl(
       Logger logger, List<MapSourceFactory> factories, MapIncludeProcessor includes) {
@@ -66,20 +51,20 @@ public class MapLibraryImpl implements MapLibrary {
   public MapInfo getMap(String idOrName) {
 
     // Exact match
-    MapEntry map = maps.get(StringUtils.slugify(idOrName));
+    MapInfo map = maps.get(StringUtils.slugify(idOrName));
     if (map == null) {
       // Fuzzy match
       map =
           StringUtils.bestFuzzyMatch(
-              StringUtils.normalize(idOrName), maps.values(), m -> m.info.getNormalizedName());
+              StringUtils.normalize(idOrName), maps.values(), MapInfo::getNormalizedName);
     }
 
-    return map == null ? null : map.info;
+    return map;
   }
 
   @Override
   public Stream<MapInfo> getMaps(@Nullable String query) {
-    Stream<MapInfo> maps = this.maps.values().stream().map(e -> e.info);
+    Stream<MapInfo> maps = this.maps.values().stream();
     if (query != null) {
       String normalized = StringUtils.normalize(query);
       maps = maps.filter(mi -> LiquidMetal.match(mi.getNormalizedName(), normalized));
@@ -135,52 +120,51 @@ public class MapLibraryImpl implements MapLibrary {
     // Try to search new includes before searching for new maps
     includes.loadNewIncludes();
 
-    final List<Iterator<? extends MapSource>> sources = new LinkedList<>();
+    final List<MapSourceFactory> sources = new LinkedList<>();
 
     // Reload failed maps
     if (reset) {
       failed.clear();
     } else {
-      sources.add(failed.iterator());
+      sources.add(new StreamMapSourceFactory(failed.stream()));
     }
 
-    final int fail = failed.size();
-    final int ok = reset ? 0 : maps.size();
+    final int oldFail = failed.size();
+    final int oldOk = reset ? 0 : maps.size();
 
     // Discover new maps
-    final Iterator<MapSourceFactory> factories = this.factories.listIterator();
-    while (factories.hasNext()) {
-      final MapSourceFactory factory = factories.next();
-      try {
-        if (reset) factory.reset();
-        sources.add(factory.loadNewSources());
-      } catch (MapMissingException e) {
-        factories.remove();
-        logMapError(e);
-      }
+    for (MapSourceFactory factory : this.factories) {
+      if (reset) factory.reset();
+      sources.add(factory);
     }
 
-    // Reload existing maps that have updates
-    final Iterator<Map.Entry<String, MapEntry>> maps = this.maps.entrySet().iterator();
-    while (maps.hasNext()) {
-      final MapEntry entry = maps.next().getValue();
-      try {
-        if (reset || entry.source.checkForUpdates()) {
-          sources.add(Iterators.singletonIterator(entry.source));
-        }
-      } catch (MapMissingException e) {
-        maps.remove();
-        logMapError(e);
-      }
-    }
+    // Reload or delete existing maps that have updates
+    sources.add(
+        new StreamMapSourceFactory(
+            this.maps.entrySet().stream()
+                .filter(
+                    entry -> {
+                      try {
+                        return reset || entry.getValue().getSource().checkForUpdates();
+                      } catch (MapMissingException e) {
+                        logMapError(e);
+                        this.maps.remove(entry.getKey());
+                        return false;
+                      }
+                    })
+                .map(entry -> entry.getValue().getSource())));
 
     return CompletableFuture.runAsync(
-            () ->
-                StreamUtils.of(Iterators.concat(sources.iterator()))
-                    .parallel()
-                    .unordered()
-                    .forEach(source -> loadMapSafe(source, null)))
-        .thenRunAsync(() -> logMapSuccess(fail, ok))
+            () -> {
+              try (Stream<? extends MapSource> stream =
+                  sources.stream()
+                      .flatMap(s -> s.loadNewSources(this::logMapError))
+                      .parallel()
+                      .unordered()) {
+                stream.forEach(s -> this.loadMapSafe(s, null));
+              }
+            })
+        .thenRunAsync(() -> logMapSuccess(oldFail, oldOk))
         .thenRunAsync(UsernameResolver::resolveAll);
   }
 
@@ -188,25 +172,25 @@ public class MapLibraryImpl implements MapLibrary {
   public CompletableFuture<MapContext> loadExistingMap(String id) {
     return CompletableFuture.supplyAsync(
         () -> {
-          final MapEntry entry = maps.get(id);
-          if (entry == null) {
+          final MapInfo info = maps.get(id);
+          if (info == null) {
             throw new RuntimeException(
                 new MapMissingException(id, "Unable to find map from id (was it deleted?)"));
           }
 
-          final MapContext context = entry.context.get();
+          final MapContext context = info.getContext();
           try {
-            if (context != null && !entry.source.checkForUpdates()) {
+            if (context != null && !info.getSource().checkForUpdates()) {
               return context;
             }
           } catch (MapMissingException e) {
-            failed.remove(entry.source);
+            failed.remove(info.getSource());
             maps.remove(id);
             throw new RuntimeException(e);
           }
 
           logger.info(ChatColor.GREEN + "XML changes detected, reloading");
-          return loadMapSafe(entry.source, entry.info.getId());
+          return loadMapSafe(info.getSource(), info.getId());
         });
   }
 
@@ -214,6 +198,14 @@ public class MapLibraryImpl implements MapLibrary {
     final MapContext context;
     try (final MapFactory factory = new MapFactoryImpl(logger, source, includes)) {
       context = factory.load();
+
+      // We're not loading a specific map id, and we're not on a variant, load variants
+      if (mapId == null && source.getVariant() == null) {
+        for (String variant : factory.getVariants()) {
+          loadMapSafe(source.asVariant(variant), null);
+        }
+      }
+
     } catch (MapMissingException e) {
       failed.remove(source);
       if (mapId != null) maps.remove(mapId);
@@ -229,10 +221,9 @@ public class MapLibraryImpl implements MapLibrary {
           t.getCause());
     }
 
+    MapInfo info = context.getInfo();
     maps.merge(
-        context.getId(),
-        new MapEntry(source, context.clone(), context),
-        (m1, m2) -> m2.info.getVersion().isOlderThan(m1.info.getVersion()) ? m1 : m2);
+        info.getId(), info, (m1, m2) -> m2.getVersion().isOlderThan(m1.getVersion()) ? m1 : m2);
     failed.remove(source);
 
     return context;

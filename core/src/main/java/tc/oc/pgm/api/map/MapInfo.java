@@ -20,6 +20,14 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   String getId();
 
   /**
+   * The map variant this info represents
+   *
+   * @return A variant for the map, if any.
+   */
+  @Nullable
+  String getVariant();
+
+  /**
    * Get the proto of the map's {@link org.jdom2.Document}.
    *
    * @see MapProtos
@@ -157,11 +165,19 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   boolean getFriendlyFire();
 
   /**
-   * Create an immutable copy of this info.
+   * Get a {@link MapSource} to access the maps's files.
    *
-   * @return A cloned {@link MapInfo}.
+   * @return A {@link MapSource}.
    */
-  MapInfo clone();
+  MapSource getSource();
+
+  /**
+   * Get the {@link MapContext} for this map, it may be null if the map unloaded
+   *
+   * @return A {@link MapContext} for this map, or null if unloaded.
+   */
+  @Nullable
+  MapContext getContext();
 
   @Override
   default int compareTo(MapInfo o) {

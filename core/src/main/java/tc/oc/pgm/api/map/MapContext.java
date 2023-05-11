@@ -3,12 +3,12 @@ package tc.oc.pgm.api.map;
 import tc.oc.pgm.api.module.ModuleContext;
 
 /** A {@link MapInfo} that is "loaded" with its {@link MapModule}s and a {@link MapSource}. */
-public interface MapContext extends MapInfo, ModuleContext<MapModule> {
+public interface MapContext extends ModuleContext<MapModule> {
 
   /**
-   * Get a {@link MapSource} to access the maps's files.
+   * Get an immutable {@link MapInfo} which doesn't hold strong references to the context.
    *
-   * @return A {@link MapSource}.
+   * @return A {@link MapInfo} for this context.
    */
-  MapSource getSource();
+  MapInfo getInfo();
 }
