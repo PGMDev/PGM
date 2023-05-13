@@ -130,7 +130,7 @@ public class MapFilePreprocessor {
   private List<Content> processConditional(Element el, boolean shouldContain)
       throws InvalidXMLException {
     boolean contains =
-        Arrays.asList(Node.fromRequiredAttr(el, "variant").getValue().split("[\\\\s,]"))
+        Arrays.asList(Node.fromRequiredAttr(el, "variant").getValue().split("[\\s,]+"))
             .contains(variant);
 
     return contains == shouldContain ? el.cloneContent() : Collections.emptyList();
