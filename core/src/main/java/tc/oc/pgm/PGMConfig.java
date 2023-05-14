@@ -243,7 +243,7 @@ public final class PGMConfig implements Config {
           Normalizer.normalize(uri.getHost() + uri.getPath(), Normalizer.Form.NFD)
               .replaceAll("[^A-Za-z0-9_]", "-")
               .toLowerCase(Locale.ROOT);
-      path = "maps" + File.pathSeparator + normalizedPath;
+      path = "maps" + File.separator + normalizedPath;
     }
 
     Path base = Paths.get(path).toAbsolutePath();
