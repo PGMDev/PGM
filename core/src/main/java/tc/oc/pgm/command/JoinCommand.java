@@ -11,6 +11,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.join.JoinRequest;
 
 public final class JoinCommand {
 
@@ -38,6 +39,6 @@ public final class JoinCommand {
   @CommandDescription("Leave the match")
   @CommandPermission(Permissions.LEAVE)
   public void leave(JoinMatchModule joiner, MatchPlayer player) {
-    joiner.leave(player);
+    joiner.leave(player, JoinRequest.empty());
   }
 }

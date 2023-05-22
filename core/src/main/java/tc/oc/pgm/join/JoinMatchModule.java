@@ -155,7 +155,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     return handler.join(joining, request, result);
   }
 
-  public boolean leave(MatchPlayer leaving) {
+  public boolean leave(MatchPlayer leaving, JoinRequest request) {
     if (cancelQueuedJoin(leaving)) return true;
 
     if (leaving.getParty() instanceof ObserverParty) {
@@ -169,7 +169,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       return false;
     }
 
-    return match.setParty(leaving, match.getDefaultParty());
+    return match.setParty(leaving, match.getDefaultParty(), request);
   }
 
   public QueuedParty getQueuedParticipants() {
