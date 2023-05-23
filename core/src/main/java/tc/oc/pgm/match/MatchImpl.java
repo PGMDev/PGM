@@ -465,7 +465,10 @@ public class MatchImpl implements Match {
   @Override
   public boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request) {
     if (request == null)
-      request = JoinRequest.of(party instanceof Team ? (Team) party : null, JoinRequest.Flag.FORCE);
+      request =
+          party instanceof Team
+              ? JoinRequest.of((Team) party, JoinRequest.Flag.FORCE)
+              : JoinRequest.force();
     return setOrClearPlayerParty(player, assertNotNull(party), request);
   }
 
