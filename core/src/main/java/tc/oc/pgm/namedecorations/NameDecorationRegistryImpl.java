@@ -17,6 +17,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
@@ -69,6 +70,12 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
     Player player = event.getPlayer().getBukkit();
     Party party = event.getNewParty();
     player.setDisplayName(getDecoratedName(player, party == null ? null : party.getColor()));
+  }
+
+  @EventHandler
+  public void onPlayerQuit(PlayerQuitEvent event) {
+    decorationCache.invalidate(event.getPlayer().getUniqueId());
+    PlayerComponent.RENDERER.decorationChanged(event.getPlayer().getUniqueId());
   }
 
   @EventHandler
