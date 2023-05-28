@@ -100,7 +100,6 @@ public class BlockDropsRuleSet {
     if (event instanceof BlockBreakEvent) {
       rightToolUsed =
           NMSHacks.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
-      ;
     } else {
       rightToolUsed = true;
     }

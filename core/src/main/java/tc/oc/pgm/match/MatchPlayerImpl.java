@@ -54,7 +54,6 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.attribute.AttributeMap;
-import tc.oc.pgm.util.attribute.AttributeMapImpl;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -95,7 +94,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.visible = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
-    this.attributeMap = new AttributeMapImpl(player);
+    this.attributeMap = NMSHacks.buildAttributeMap(player);
   }
 
   @Override
@@ -329,7 +328,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
         NMSHacks.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy());
         NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
       } else {
-        NMSHacks.destroyEntities(bukkit, FROZEN_VEHICLE_ENTITY_ID);
+        NMSHacks.sendPacket(bukkit, NMSHacks.destroyEntitiesPacket(FROZEN_VEHICLE_ENTITY_ID));
       }
       resetInteraction();
     }

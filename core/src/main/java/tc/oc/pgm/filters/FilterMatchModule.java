@@ -48,8 +48,10 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.util.MapUtils;
 import tc.oc.pgm.util.MethodHandleUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 /**
  * Handler of dynamic filter magic.
@@ -105,6 +107,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   // Filterables that need a check in the next tick (cleared every tick)
   private final Set<Filterable<?>> dirtySet = new HashSet<>();
+
+  // cleanup players from onPartyChange for non SportPaper servers
+  private Set<MatchPlayer> nonSportCleanUpSet = new HashSet<>();
 
   public ContextStore<? super Filter> getFilterContext() {
     return filterContext;
@@ -387,6 +392,15 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   public void tick() {
+    // Always empty when the server is running sportpaper
+    if (!nonSportCleanUpSet.isEmpty()) {
+      for (MatchPlayer matchPlayer : nonSportCleanUpSet) {
+        dirtySet.remove(matchPlayer);
+        this.lastResponses.columnKeySet().remove(matchPlayer);
+      }
+      nonSportCleanUpSet.clear();
+    }
+
     final Set<Filterable<?>> checked = new HashSet<>();
     Set<Filterable<?>> checking;
     // Collect Filterables that are dirty, and have not already been checked in this tick
@@ -483,7 +497,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
     if (player != null) {
       this.invalidate(player);
-      PGM.get().getServer().postToMainThread(PGM.get(), true, this::tick);
+      NMSHacks.postToMainThread(PGM.get(), true, this::tick);
     }
   }
 
@@ -530,11 +544,16 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
                 }
               });
 
-      event.yield();
+      if (BukkitUtils.isSportPaper()) {
+        event.yield();
 
-      // Wait until after the event to remove them, in case they get invalidated during the event.
-      dirtySet.remove(event.getPlayer());
-      this.lastResponses.columnKeySet().remove(event.getPlayer());
+        // Wait until after the event to remove them, in case they get invalidated during the event.
+        dirtySet.remove(event.getPlayer());
+        this.lastResponses.columnKeySet().remove(event.getPlayer());
+      } else {
+        // Clean up at the start of the next tick. Most platforms don't include event.yield()
+        nonSportCleanUpSet.add(event.getPlayer());
+      }
     }
   }
 

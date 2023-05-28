@@ -1,17 +1,20 @@
-package tc.oc.pgm.util.attribute;
+package tc.oc.pgm.util.nms.attribute;
 
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import tc.oc.pgm.util.attribute.Attribute;
+import tc.oc.pgm.util.attribute.AttributeInstance;
+import tc.oc.pgm.util.attribute.AttributeModifier;
 
-public class AttributeInstanceImpl implements AttributeInstance {
+public class AttributeInstance1_8 implements AttributeInstance {
 
   private final net.minecraft.server.v1_8_R3.AttributeInstance handle;
   private final Attribute attribute;
 
-  public AttributeInstanceImpl(
+  public AttributeInstance1_8(
       net.minecraft.server.v1_8_R3.AttributeInstance handle, Attribute attribute) {
     this.handle = handle;
     this.attribute = attribute;

@@ -37,6 +37,7 @@ import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class BlockDropsMatchModule implements MatchModule, Listener {
@@ -106,7 +107,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   }
 
   private void dropItems(BlockDrops drops, MatchPlayer player, Location location, double yield) {
-    if (player == null || player.getBukkit().getGameMode() != GameMode.CREATIVE) {
+    if (player == null || player.getGameMode() != GameMode.CREATIVE) {
       Random random = match.getRandom();
       for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
         if (random.nextFloat() < yield * entry.getValue()) {
@@ -142,8 +143,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
       if (!event.isCancelled()) {
         BlockState state = block.getState();
-        state.setType(drops.replacement.getItemType());
-        state.setData(drops.replacement);
+        NMSHacks.setBlockStateData(state, drops.replacement);
         state.update(true, true);
       }
     }
@@ -280,7 +280,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
     replaceBlock(drops, event.getBlock(), player);
 
-    Location location = player.getBukkit().getLocation();
+    Location location = player.getLocation();
     dropObjects(drops, player, location, 1d, false);
   }
 }

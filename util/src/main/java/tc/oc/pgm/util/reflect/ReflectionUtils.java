@@ -1,11 +1,14 @@
 package tc.oc.pgm.util.reflect;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.ClassLogger;
 
 public final class ReflectionUtils {
+
   private ReflectionUtils() {}
 
   public static Class<?> getClassFromName(String className) {
@@ -17,29 +20,42 @@ public final class ReflectionUtils {
     }
   }
 
-  public static Method getMethod(Class<?> parent, String name) {
+  public static Method getMethod(Class<?> parent, String name, Class<?>... parameterTypes) {
     try {
-      Method method = parent.getDeclaredMethod(name);
+      Method method = parent.getDeclaredMethod(name, parameterTypes);
       method.setAccessible(true);
       return method;
+    } catch (NoSuchMethodException e) {
+      ClassLogger classLogger = ClassLogger.get(ReflectionUtils.class);
+      for (Method method : parent.getMethods()) {
+        classLogger.warning(method.toString());
+      }
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static Object callMethod(Method method, Object object, Object... parameters) {
+    try {
+      return method.invoke(object, parameters);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static Constructor<?> getConstructor(Class<?> parent, Class<?>... parameters) {
+    try {
+      Constructor<?> constructor = parent.getConstructor(parameters);
+      constructor.setAccessible(true);
+      return constructor;
     } catch (NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public static void callMethod(Class<?> parent, String name, Object object) {
+  public static Object callConstructor(Constructor<?> constructor, Object... parameters) {
     try {
-      Method method = getMethod(parent, name);
-      method.invoke(object);
-    } catch (IllegalAccessException | InvocationTargetException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public static void callMethod(Method method, Object object) {
-    try {
-      method.invoke(object);
-    } catch (IllegalAccessException | InvocationTargetException e) {
+      return constructor.newInstance(parameters);
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
       throw new RuntimeException(e);
     }
   }

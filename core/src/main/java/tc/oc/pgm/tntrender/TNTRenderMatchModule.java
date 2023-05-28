@@ -68,18 +68,19 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
 
     public PrimedTnt(TNTPrimed entity) {
       this.entity = entity;
-      this.lastLocation = currentLocation = entity.getLocation().toBlockLocation();
+      this.lastLocation = currentLocation = toBlockLocation(entity.getLocation());
     }
 
     public boolean update() {
       if (entity.isDead()) {
-        for (MatchPlayer viewer : viewers)
+        for (MatchPlayer viewer : viewers) {
           NMSHacks.sendBlockChange(currentLocation, viewer.getBukkit(), null);
+        }
         return true;
       }
 
       this.lastLocation = currentLocation;
-      this.currentLocation = entity.getLocation().toBlockLocation();
+      this.currentLocation = toBlockLocation(entity.getLocation());
       this.moved = !currentLocation.equals(lastLocation);
 
       for (MatchPlayer player : match.getPlayers()) {
@@ -100,5 +101,14 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
         NMSHacks.sendBlockChange(lastLocation, player.getBukkit(), null);
       }
     }
+  }
+
+  private static Location toBlockLocation(Location location) {
+    // Spigot 1.8 doesn't have Location.toBlockLocation()
+    Location blockLoc = location.clone();
+    blockLoc.setX(blockLoc.getBlockX());
+    blockLoc.setY(blockLoc.getBlockY());
+    blockLoc.setZ(blockLoc.getBlockZ());
+    return blockLoc;
   }
 }

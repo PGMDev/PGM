@@ -1,21 +1,20 @@
-package tc.oc.pgm.util.attribute;
+package tc.oc.pgm.util.nms.attribute;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import net.minecraft.server.v1_8_R3.AttributeMapBase;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.util.attribute.Attribute;
+import tc.oc.pgm.util.attribute.AttributeInstance;
+import tc.oc.pgm.util.attribute.AttributeMap;
 
-public class AttributeMapImpl implements AttributeMap {
+public class AttributeMap1_8 implements AttributeMap {
 
   private final AttributeMapBase handle;
 
-  public AttributeMapImpl(Player player) {
+  public AttributeMap1_8(Player player) {
     handle = ((CraftPlayer) player).getHandle().getAttributeMap();
-  }
-
-  public AttributeMapImpl(AttributeMapBase handle) {
-    this.handle = handle;
   }
 
   @Override
@@ -23,7 +22,7 @@ public class AttributeMapImpl implements AttributeMap {
     assertNotNull(attribute, "attribute");
     net.minecraft.server.v1_8_R3.AttributeInstance nms = handle.a(toMinecraft(attribute.name()));
 
-    return (nms == null) ? null : new AttributeInstanceImpl(nms, attribute);
+    return (nms == null) ? null : new AttributeInstance1_8(nms, attribute);
   }
 
   static String toMinecraft(String bukkit) {

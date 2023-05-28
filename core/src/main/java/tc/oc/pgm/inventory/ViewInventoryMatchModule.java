@@ -53,6 +53,7 @@ import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.attribute.Attribute;
+import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -341,25 +342,30 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
             ChatColor.LIGHT_PURPLE + TextTranslations.translate("preview.doubleJump", viewer));
       }
 
-      double knockbackResistance =
-          matchHolder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).getValue();
-      if (knockbackResistance > 0) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.knockbackResistance",
-                    viewer,
-                    (int) Math.ceil(knockbackResistance * 100)));
+      AttributeInstance knockbackAttribute =
+          matchHolder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+      if (knockbackAttribute != null) {
+        double knockbackResistance = knockbackAttribute.getValue();
+        if (knockbackResistance > 0) {
+          specialLore.add(
+              ChatColor.LIGHT_PURPLE
+                  + TextTranslations.translate(
+                      "preview.knockbackResistance",
+                      viewer,
+                      (int) Math.ceil(knockbackResistance * 100)));
+        }
       }
 
-      double knockbackReduction = holder.getKnockbackReduction();
-      if (knockbackReduction > 0) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.knockbackReduction",
-                    viewer,
-                    (int) Math.ceil(knockbackReduction * 100)));
+      if (BukkitUtils.isSportPaper()) {
+        double knockbackReduction = holder.getKnockbackReduction();
+        if (knockbackReduction > 0) {
+          specialLore.add(
+              ChatColor.LIGHT_PURPLE
+                  + TextTranslations.translate(
+                      "preview.knockbackReduction",
+                      viewer,
+                      (int) Math.ceil(knockbackReduction * 100)));
+        }
       }
 
       double walkSpeed = holder.getWalkSpeed();
