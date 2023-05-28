@@ -72,7 +72,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
     player.setDisplayName(getDecoratedName(player, party == null ? null : party.getColor()));
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerQuit(PlayerQuitEvent event) {
     decorationCache.invalidate(event.getPlayer().getUniqueId());
     PlayerComponent.RENDERER.decorationChanged(event.getPlayer().getUniqueId());
