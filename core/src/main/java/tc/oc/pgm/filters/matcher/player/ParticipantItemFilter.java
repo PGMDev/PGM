@@ -2,6 +2,8 @@ package tc.oc.pgm.filters.matcher.player;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import java.util.Objects;
+import java.util.stream.Stream;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -14,14 +16,10 @@ public abstract class ParticipantItemFilter extends ParticipantFilter {
     this.matcher = assertNotNull(matcher, "item");
   }
 
-  protected abstract ItemStack[] getItems(MatchPlayer player);
+  protected abstract Stream<ItemStack> getItems(MatchPlayer player);
 
   @Override
   public boolean matches(PlayerQuery query, MatchPlayer player) {
-    for (ItemStack item : getItems(player)) {
-      if (item == null) continue;
-      if (matcher.matches(item)) return true;
-    }
-    return false;
+    return getItems(player).filter(Objects::nonNull).anyMatch(matcher::matches);
   }
 }
