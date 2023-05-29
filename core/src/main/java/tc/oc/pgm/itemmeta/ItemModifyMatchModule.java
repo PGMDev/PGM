@@ -1,14 +1,17 @@
 package tc.oc.pgm.itemmeta;
 
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -61,10 +64,16 @@ public class ItemModifyMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onInventoryOpen(InventoryOpenEvent event) {
-    ItemStack[] contents = event.getInventory().getContents();
+    Inventory inventory = event.getInventory();
+    // Custom GUIs use chest inventory type with player as the holder
+    if (inventory.getType() == InventoryType.CHEST && inventory.getHolder() instanceof Player) {
+      return;
+    }
+
+    ItemStack[] contents = inventory.getContents();
     for (int i = 0; i < contents.length; i++) {
       if (applyRules(contents[i])) {
-        event.getInventory().setItem(i, contents[i]);
+        inventory.setItem(i, contents[i]);
       }
     }
   }
