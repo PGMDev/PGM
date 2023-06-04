@@ -37,7 +37,7 @@ public class Hologram {
   public void show() {
     if (this.labelEntity != null) return;
 
-    this.labelEntity = match.getWorld().spawn(location, ArmorStand.class);
+    this.labelEntity = match.getWorld().spawn(this.location, ArmorStand.class);
     this.labelEntity.setVisible(false);
     this.labelEntity.setMarker(true);
     this.labelEntity.setGravity(false);
@@ -61,9 +61,8 @@ public class Hologram {
    */
   public void show(@NotNull Location location) {
     assertNotNull(location, "location");
-    if (this.labelEntity != null) return;
-    this.show();
     this.setLocation(location);
+    this.show();
   }
 
   /** Hide the hologram text if currently spawned */
