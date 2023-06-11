@@ -110,7 +110,11 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       Random random = match.getRandom();
       for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
         if (random.nextFloat() < yield * entry.getValue()) {
-          location.getWorld().dropItemNaturally(location, entry.getKey());
+          Location dropLocation = location.clone();
+          dropLocation.setX(dropLocation.getBlockX() + random.nextDouble() * 0.5 + 0.25);
+          dropLocation.setY(dropLocation.getBlockY() + random.nextDouble() * 0.5 + 0.25);
+          dropLocation.setZ(dropLocation.getBlockZ() + random.nextDouble() * 0.5 + 0.25);
+          dropLocation.getWorld().dropItem(dropLocation, entry.getKey());
         }
       }
     }
