@@ -16,6 +16,7 @@ import cloud.commandframework.annotations.specifier.FlagYielding;
 import cloud.commandframework.annotations.specifier.Range;
 import java.text.DecimalFormat;
 import java.time.Duration;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,9 @@ public final class MapPoolCommand {
       @Flag(value = "type", aliases = "t") MapPoolType type,
       @Flag(value = "pool", aliases = "p") MapPool mapPool,
       @Flag(value = "score", aliases = "s") boolean scores,
-      @Flag(value = "chance", aliases = "c") boolean chance) {
+      @Flag(value = "chance", aliases = "c") boolean chance,
+      @Flag(value = "order", aliases = "o") boolean order,
+      @Flag(value = "all", aliases = "a") boolean all) {
     // Default to current pool
     if (mapPool == null) mapPool = poolManager.getActiveMapPool();
 
@@ -66,8 +69,8 @@ public final class MapPoolCommand {
       throw exception("pool.noPoolMatch");
     List<MapInfo> maps = mapPool.getMaps();
 
-    int resultsPerPage = 8;
-    int pages = (maps.size() + resultsPerPage - 1) / resultsPerPage;
+    int resultsPerPage = all ? maps.size() : 8;
+    int pages = all ? 1 : (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
     Component mapPoolComponent =
         TextFormatter.paginate(
@@ -100,6 +103,14 @@ public final class MapPoolCommand {
     }
 
     int nextPos = mapPool instanceof Rotation ? ((Rotation) mapPool).getNextPosition() : -1;
+
+    if (order && votes != null) {
+      maps =
+          maps.stream()
+              .sorted(
+                  Comparator.comparingDouble(chance ? chances::get : votes::getMapScore).reversed())
+              .collect(Collectors.toList());
+    }
 
     new PrettyPaginatedComponentResults<MapInfo>(title, resultsPerPage) {
       @Override
@@ -304,8 +315,7 @@ public final class MapPoolCommand {
       CommandSender source,
       MapPoolManager poolManager,
       @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
-      @Flag(value = "score", aliases = "s") boolean scores,
-      @Flag(value = "chance", aliases = "c") boolean chance,
+      @Flag(value = "all", aliases = "a") boolean all,
       String[] rawArgs) {
     wrapLegacy(
         "pool",
@@ -315,7 +325,17 @@ public final class MapPoolCommand {
           if (poolManager.getActiveMapPool().getType() != MapPoolType.ORDERED)
             throw exception("pool.noRotation");
 
-          pool(sender, source, poolManager, page, MapPoolType.ORDERED, null, scores, chance);
+          pool(
+              sender,
+              source,
+              poolManager,
+              page,
+              MapPoolType.ORDERED,
+              null,
+              false,
+              false,
+              false,
+              all);
         });
   }
 
