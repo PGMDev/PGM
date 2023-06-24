@@ -5,14 +5,15 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +26,6 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
-import tc.oc.pgm.map.source.StreamMapSourceFactory;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.UsernameResolver;
@@ -120,47 +120,48 @@ public class MapLibraryImpl implements MapLibrary {
     // Try to search new includes before searching for new maps
     includes.loadNewIncludes();
 
-    final List<MapSourceFactory> sources = new LinkedList<>();
-
-    // Reload failed maps
     if (reset) {
       failed.clear();
-    } else {
-      sources.add(new StreamMapSourceFactory(failed.stream()));
+      this.factories.forEach(MapSourceFactory::reset);
     }
 
     final int oldFail = failed.size();
     final int oldOk = reset ? 0 : maps.size();
 
-    // Discover new maps
-    for (MapSourceFactory factory : this.factories) {
-      if (reset) factory.reset();
-      sources.add(factory);
-    }
-
-    // Reload or delete existing maps that have updates
-    sources.add(
-        new StreamMapSourceFactory(
-            this.maps.entrySet().stream()
-                .filter(
-                    entry -> {
-                      try {
-                        return reset || entry.getValue().getSource().checkForUpdates();
-                      } catch (MapMissingException e) {
-                        logMapError(e);
-                        this.maps.remove(entry.getKey());
-                        return false;
-                      }
-                    })
-                .map(entry -> entry.getValue().getSource())));
-
     return CompletableFuture.runAsync(
             () -> {
+              // First ensure loadNewSources is called for all factories, this may take some time
+              // (eg: Git pull)
+              List<Stream<? extends MapSource>> mapSources =
+                  factories
+                      .parallelStream()
+                      .map(s -> s.loadNewSources(this::logMapError))
+                      .collect(Collectors.toList());
+
+              if (reset) {
+                // Doing full reset; add all known maps to be re-loaded
+                mapSources.add(this.maps.values().stream().map(MapInfo::getSource));
+              } else {
+                // Not a full reset; reload failed & modified maps
+                mapSources.add(failed.stream());
+
+                mapSources.add(
+                    this.maps.entrySet().stream()
+                        .filter(
+                            entry -> {
+                              try {
+                                return entry.getValue().getSource().checkForUpdates();
+                              } catch (MapMissingException e) {
+                                logMapError(e);
+                                this.maps.remove(entry.getKey());
+                                return false;
+                              }
+                            })
+                        .map(entry -> entry.getValue().getSource()));
+              }
+
               try (Stream<? extends MapSource> stream =
-                  sources.stream()
-                      .flatMap(s -> s.loadNewSources(this::logMapError))
-                      .parallel()
-                      .unordered()) {
+                  mapSources.stream().flatMap(Function.identity()).parallel().unordered()) {
                 stream.forEach(s -> this.loadMapSafe(s, null));
               }
             })
