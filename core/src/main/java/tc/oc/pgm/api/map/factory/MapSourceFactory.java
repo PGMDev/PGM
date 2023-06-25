@@ -17,7 +17,7 @@ public interface MapSourceFactory {
    * @param exceptionHandler place to send any exception when loading maps
    * @return An iterator of new {@link MapSource}s.
    */
-  Stream<? extends MapSource> loadNewSources(Consumer<MapException> exceptionHandler);
+  Stream<MapSource> loadNewSources(Consumer<MapException> exceptionHandler);
 
   /**
    * Reset any caches so when {@link #loadNewSources(Consumer)} is next called, it discovers

@@ -47,7 +47,7 @@ public class GitMapSourceFactory extends PathMapSourceFactory {
   }
 
   @Override
-  public Stream<? extends MapSource> loadNewSources(Consumer<MapException> exceptionHandler) {
+  public Stream<MapSource> loadNewSources(Consumer<MapException> exceptionHandler) {
     try {
       git.pull()
           .setCredentialsProvider(credentials)
