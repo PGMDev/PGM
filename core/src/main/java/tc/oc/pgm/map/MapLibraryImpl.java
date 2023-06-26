@@ -132,7 +132,7 @@ public class MapLibraryImpl implements MapLibrary {
             () -> {
               // First ensure loadNewSources is called for all factories, this may take some time
               // (eg: Git pull)
-              List<Stream<? extends MapSource>> mapSources =
+              List<Stream<MapSource>> mapSources =
                   factories
                       .parallelStream()
                       .map(s -> s.loadNewSources(this::logMapError))
@@ -160,7 +160,8 @@ public class MapLibraryImpl implements MapLibrary {
                         .map(entry -> entry.getValue().getSource()));
               }
 
-              try (Stream<? extends MapSource> stream =
+              // Finally load all the maps
+              try (Stream<MapSource> stream =
                   mapSources.stream().flatMap(Function.identity()).parallel().unordered()) {
                 stream.forEach(s -> this.loadMapSafe(s, null));
               }

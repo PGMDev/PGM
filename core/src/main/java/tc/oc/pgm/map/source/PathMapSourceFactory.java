@@ -51,7 +51,7 @@ public class PathMapSourceFactory implements MapSourceFactory {
   }
 
   @Override
-  public Stream<? extends MapSource> loadNewSources(Consumer<MapException> exceptionHandler) {
+  public Stream<MapSource> loadNewSources(Consumer<MapException> exceptionHandler) {
     if (!Files.exists(base) || !Files.isDirectory(base)) return Stream.empty();
 
     return (children == null ? Stream.of(base) : children.stream().map(base::resolve))
