@@ -24,8 +24,7 @@ public enum Gamemode {
   SCOREBOX("scorebox", "Scorebox", "Scorebox"),
   SKYWARS("skywars", "Skywars", "Skywars"),
   SURVIVAL_GAMES("sg", "Survival Games", "SG"),
-  DEATHMATCH("tdm", "Deathmatch", "TDM"),
-  OBJECTIVES("obj", "Objectives", "Objectives");
+  DEATHMATCH("tdm", "Deathmatch", "TDM");
 
   private final String id;
 
