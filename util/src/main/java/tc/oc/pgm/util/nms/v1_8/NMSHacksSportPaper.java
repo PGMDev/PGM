@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.nms;
+package tc.oc.pgm.util.nms.v1_8;
 
 import com.google.common.collect.SetMultimap;
 import java.util.Collection;
@@ -27,7 +27,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.skin.Skin;
 
 public class NMSHacksSportPaper extends NMSHacks1_8 {
@@ -118,7 +120,8 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
   }
 
   @Override
-  public void sendSpawnEntityPacket(Player player, int entityId, Location location) {
+  public void sendSpawnEntityPacket(
+      Player player, int entityId, Location location, Vector velocity) {
     sendPacket(
         player,
         new PacketPlayOutSpawnEntity(
@@ -126,9 +129,9 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
             location.getX(),
             location.getY(),
             location.getZ(),
-            0,
-            0,
-            0,
+            (int) (velocity.getX() * 8000),
+            (int) (velocity.getY() * 8000),
+            (int) (velocity.getZ() * 8000),
             (int) location.getPitch(),
             (int) location.getYaw(),
             66,
@@ -147,29 +150,32 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
       sendSpawnEntityPacket(player, entityId, location);
     } else {
       Location loc = player.getLocation().subtract(0, 1.1, 0);
-      int flags = 0;
-      flags |= 0x20;
-      DataWatcher dataWatcher = new DataWatcher(null);
-      dataWatcher.a(0, (byte) (byte) flags);
-      dataWatcher.a(1, (short) (short) 0);
-      int flags1 = 0;
-      dataWatcher.a(10, (byte) flags1);
-      sendPacket(
-          player,
-          new PacketPlayOutSpawnEntityLiving(
-              entityId,
-              (byte) EntityType.ARMOR_STAND.getTypeId(),
-              loc.getX(),
-              loc.getY(),
-              loc.getZ(),
-              loc.getYaw(),
-              loc.getPitch(),
-              loc.getPitch(),
-              0,
-              0,
-              0,
-              dataWatcher));
+      Vector velocity = new Vector();
+      spawnFakeArmorStand(player, entityId, loc, velocity);
     }
+  }
+
+  @Override
+  public void spawnFakeArmorStand(Player player, int entityId, Location loc, Vector velocity) {
+    DataWatcher dataWatcher = new DataWatcher(null);
+    dataWatcher.a(0, (byte) 0x20);
+    dataWatcher.a(1, (short) 0);
+    dataWatcher.a(10, (byte) 0);
+    sendPacket(
+        player,
+        new PacketPlayOutSpawnEntityLiving(
+            entityId,
+            (byte) EntityType.ARMOR_STAND.getTypeId(),
+            loc.getX(),
+            loc.getY(),
+            loc.getZ(),
+            loc.getYaw(),
+            loc.getPitch(),
+            loc.getPitch(),
+            (int) (velocity.getX() * 8000),
+            (int) (velocity.getY() * 8000),
+            (int) (velocity.getZ() * 8000),
+            dataWatcher));
   }
 
   @Override

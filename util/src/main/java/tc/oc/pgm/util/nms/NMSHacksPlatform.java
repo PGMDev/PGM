@@ -154,9 +154,15 @@ public interface NMSHacksPlatform {
       float deltaPitch,
       PlayerTeleportEvent.TeleportCause cause);
 
-  void sendSpawnEntityPacket(Player player, int entityId, Location location);
+  void sendSpawnEntityPacket(Player player, int entityId, Location location, Vector velocity);
+
+  default void sendSpawnEntityPacket(Player player, int entityId, Location location) {
+    sendSpawnEntityPacket(player, entityId, location, new Vector());
+  }
 
   void spawnFreezeEntity(Player player, int entityId, boolean legacy);
+
+  void spawnFakeArmorStand(Player player, int entityId, Location location, Vector velocity);
 
   /**
    * Test if the given tool is capable of "efficiently" mining the given block.

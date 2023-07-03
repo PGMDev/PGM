@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
@@ -34,37 +33,17 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.Platform;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacks {
 
-  NMSHacksPlatform INSTANCE = chooseNMSHacks();
-
-  static NMSHacksPlatform chooseNMSHacks() {
-    NMSHacksPlatform choice;
-    Logger logger = ClassLogger.get(NMSHacks.class);
-
-    try {
-      if (BukkitUtils.isSportPaper()) {
-        choice = new NMSHacksSportPaper();
-        logger.info("Using NMSHacksSportPaper");
-      } else {
-        choice = new NMSHacks1_8();
-        logger.info("Using NMSHacks1_8");
-      }
-    } catch (Throwable throwable) {
-      logger.severe("You are trying to run PGM on an unsupported version!");
-      throw throwable;
-    }
-    return choice;
-  }
+  NMSHacksPlatform INSTANCE = Platform.SERVER_PLATFORM.getNMSHacks();
 
   AtomicInteger ENTITY_IDS = new AtomicInteger(Integer.MAX_VALUE);
 
@@ -317,8 +296,17 @@ public interface NMSHacks {
     return INSTANCE.teleportRelative(player, deltaPos, deltaYaw, deltaPitch, cause);
   }
 
+  static void sendSpawnEntityPacket(
+      Player player, int entityId, Location location, Vector velocity) {
+    INSTANCE.sendSpawnEntityPacket(player, entityId, location, velocity);
+  }
+
   static void spawnFreezeEntity(Player player, int entityId, boolean legacy) {
     INSTANCE.spawnFreezeEntity(player, entityId, legacy);
+  }
+
+  static void spawnFakeArmorStand(Player player, int entityId, Location location, Vector velocity) {
+    INSTANCE.spawnFakeArmorStand(player, entityId, location, velocity);
   }
 
   /**

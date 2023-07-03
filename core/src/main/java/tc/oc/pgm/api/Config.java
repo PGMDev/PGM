@@ -209,6 +209,13 @@ public interface Config {
   boolean showTabList();
 
   /**
+   * Gets whether the tab list should be resized to 4 rows for 1.7 players.
+   *
+   * @return If the tab list will be resized.
+   */
+  boolean resizeTabList();
+
+  /**
    * Gets whether the tab list is should show real ping.
    *
    * @return If the tab list should show real ping.

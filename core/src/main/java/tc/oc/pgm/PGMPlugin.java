@@ -73,6 +73,8 @@ import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
+import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -113,6 +115,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     } catch (IllegalArgumentException e) {
       return; // Indicates the plugin failed to load, so exit early
     }
+
+    // Sanity test PGM is running on a supported version before doing any work
+    NMSHacks.allocateEntityId();
 
     Permissions.registerAll();
 
@@ -214,6 +219,14 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
+
+      if (config.resizeTabList()) {
+        if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+          TablistResizer.registerAdapter(this);
+        } else {
+          logger.warning("ProtocolLib is required when 'ui.resize' is enabled");
+        }
+      }
     }
 
     if (!config.getUptimeLimit().isNegative()) {
