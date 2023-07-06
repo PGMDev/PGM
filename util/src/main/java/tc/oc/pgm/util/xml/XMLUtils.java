@@ -3,6 +3,7 @@ package tc.oc.pgm.util.xml;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
+import io.github.bananapuncher714.nbteditor.NBTEditor;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
@@ -28,7 +29,6 @@ import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
@@ -37,6 +37,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.range.Ranges;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
@@ -721,6 +722,10 @@ public final class XMLUtils {
 
   public static DyeColor parseDyeColor(Attribute attr) throws InvalidXMLException {
     String name = attr.getValue().replace(" ", "_").toUpperCase();
+    if (MinecraftReflectionUtils.MINECRAFT_VERSION.greaterThanOrEqualTo(
+        NBTEditor.MinecraftVersion.v1_13)) {
+      name = name.replace("SILVER", "LIGHT_GRAY");
+    }
     try {
       return DyeColor.valueOf(name);
     } catch (IllegalArgumentException e) {
@@ -733,7 +738,7 @@ public final class XMLUtils {
   }
 
   public static Material parseMaterial(Node node, String text) throws InvalidXMLException {
-    Material material = Materials.parseMaterial(text);
+    Material material = MaterialDataProvider.from(text).getMaterial();
     if (material == null) {
       throw new InvalidXMLException("Unknown material '" + text + "'", node);
     }
@@ -745,15 +750,11 @@ public final class XMLUtils {
   }
 
   public static MaterialData parseMaterialData(Node node, String text) throws InvalidXMLException {
-    String[] pieces = text.split(":");
-    Material material = parseMaterial(node, pieces[0]);
-    byte data;
-    if (pieces.length > 1) {
-      data = parseNumber(node, pieces[1], Byte.class);
-    } else {
-      data = 0;
+    MaterialData materialData = MaterialDataProvider.from(text);
+    if (materialData == null) {
+      throw new InvalidXMLException("Unknown material '" + text + "'", node);
     }
-    return MaterialDataProvider.from(material, data);
+    return materialData;
   }
 
   public static MaterialData parseMaterialData(Node node, MaterialData def)
@@ -798,18 +799,8 @@ public final class XMLUtils {
     return parseMaterialPattern(node, node.getValue());
   }
 
-  public static SingleMaterialMatcher parseMaterialPattern(Node node, SingleMaterialMatcher def)
-      throws InvalidXMLException {
-    return node == null ? def : parseMaterialPattern(node);
-  }
-
   public static SingleMaterialMatcher parseMaterialPattern(Element el) throws InvalidXMLException {
     return parseMaterialPattern(new Node(el));
-  }
-
-  public static SingleMaterialMatcher parseMaterialPattern(Attribute attr)
-      throws InvalidXMLException {
-    return parseMaterialPattern(new Node(attr));
   }
 
   public static ImmutableSet<SingleMaterialMatcher> parseMaterialPatternSet(Node node)

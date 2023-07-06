@@ -2,7 +2,7 @@ package tc.oc.pgm.modules;
 
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Color;
-import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -22,6 +22,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileTrailMatchModule implements MatchModule, Listener {
@@ -58,39 +59,20 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
                           .getSettings()
                           .getValue(SettingKey.EFFECTS)
                           .equals(SettingValue.EFFECTS_ON);
+                  Player playerBukkit = player.getBukkit();
+                  Location projectileLocation = projectile.getLocation();
                   if (colors) {
-                    player
-                        .getBukkit()
-                        .spigot()
-                        .playEffect(
-                            projectile.getLocation(),
-                            Effect.COLOURED_DUST,
-                            0,
-                            0,
-                            rgbToParticle(color.getRed()),
-                            rgbToParticle(color.getGreen()),
-                            rgbToParticle(color.getBlue()),
-                            1,
-                            0,
-                            50);
+                    NMSHacks.spawnColoredArrowParticles(color, playerBukkit, projectileLocation);
                   } else {
                     // Play the critical effect to those who have effects off, to replicate original
                     // arrow behavior
                     if (isCriticalArrow(projectile)) {
-                      player
-                          .getBukkit()
-                          .spigot()
-                          .playEffect(
-                              projectile.getLocation(), Effect.CRIT, 0, 0, 0, 0, 0, 1, 0, 50);
+                      NMSHacks.spawnCritArrowParticles(playerBukkit, projectileLocation);
                     }
                   }
                 }
               }
             });
-  }
-
-  private float rgbToParticle(int rgb) {
-    return Math.max(0.001f, (rgb / 255.0f));
   }
 
   private boolean isCriticalArrow(Projectile projectile) {

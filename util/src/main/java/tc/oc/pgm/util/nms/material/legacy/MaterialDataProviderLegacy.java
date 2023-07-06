@@ -40,6 +40,9 @@ public class MaterialDataProviderLegacy implements MaterialDataProviderPlatform 
 
   @Override
   public MaterialData from(Material material) {
+    if (material == null) {
+      return new MaterialDataLegacy(Material.AIR);
+    }
     switch (material) {
       case DARK_OAK_DOOR:
       case ACACIA_DOOR:
@@ -101,25 +104,30 @@ public class MaterialDataProviderLegacy implements MaterialDataProviderPlatform 
 
   @NotNull
   private static MaterialDataLegacy from(org.bukkit.material.MaterialData data) {
+    Material material = data.getItemType();
     if (data instanceof Door) {
       return new DoorLegacy(data);
     } else if (data instanceof Wool) {
       return new WoolLegacy(data);
     } else if (data instanceof Banner) {
       return new BannerLegacy(data);
-    } else if (data instanceof Colorable) {
+    } else if (data instanceof Colorable
+        || material.equals(Material.STAINED_CLAY)
+        || material.equals(Material.STAINED_GLASS)
+        || material.equals(Material.STAINED_GLASS_PANE)
+        || material.equals(Material.CARPET)) {
       return new ColorableLegacy(data);
     } else if (data instanceof Rails) {
       return new RailLegacy(data);
     } else if (data instanceof PistonExtensionMaterial) {
       return new PistonExtensionLegacy(data);
     } else {
-      switch (data.getItemType()) {
+      switch (material) {
         case WATER:
         case STATIONARY_WATER:
         case LAVA:
         case STATIONARY_LAVA:
-          return new LiquidLegacy(data.getItemType());
+          return new LiquidLegacy(data);
         default:
           return new MaterialDataLegacy(data);
       }
@@ -129,5 +137,26 @@ public class MaterialDataProviderLegacy implements MaterialDataProviderPlatform 
   @Override
   public MaterialData from(EntityChangeBlockEvent event) {
     return from(event.getTo().getNewData(event.getData()));
+  }
+
+  @Override
+  public MaterialData from(String materialString) {
+    String[] split = materialString.split(":");
+    String text = split[0];
+
+    if (text.matches("(?)snow_?ball")) {
+      text = text.contains("_") ? "snowball" : "snow_ball";
+    }
+
+    Material material = Material.matchMaterial(text);
+    if (material == null) {
+      return null;
+    }
+
+    if (split.length > 1) {
+      return from(material, Byte.parseByte(split[1]));
+    } else {
+      return from(material);
+    }
   }
 }

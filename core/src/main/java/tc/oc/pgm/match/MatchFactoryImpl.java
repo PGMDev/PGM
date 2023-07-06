@@ -33,7 +33,6 @@ import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.FileUtils;
-import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
@@ -272,7 +271,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
               .createWorld(
                   creator
                       .environment(environments[info.getEnvironment()])
-                      .generator(info.hasTerrain() ? null : NullChunkGenerator.INSTANCE)
+                      .generator(info.hasTerrain() ? null : NMSHacks.nullChunkGenerator())
                       .seed(info.hasTerrain() ? info.getSeed() : creator.seed()));
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 

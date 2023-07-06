@@ -67,7 +67,6 @@ import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.compatability.SportPaperListener;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.ItemTransferListener;
@@ -276,7 +275,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
   @Override
   public ChunkGenerator getDefaultWorldGenerator(final String worldName, final String id) {
-    return NullChunkGenerator.INSTANCE;
+    return NMSHacks.nullChunkGenerator();
   }
 
   @Override

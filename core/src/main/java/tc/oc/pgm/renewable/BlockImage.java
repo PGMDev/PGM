@@ -84,7 +84,7 @@ public class BlockImage {
     int offset = 0;
     for (BlockVector v : this.bounds.getBlocks()) {
       Block block = this.world.getBlockAt(v.getBlockX(), v.getBlockY(), v.getBlockZ());
-      this.encodedBlocks[offset] = MaterialDataProvider.from(block).hashCode();
+      this.encodedBlocks[offset] = MaterialDataProvider.from(block).encode();
       ++offset;
     }
   }

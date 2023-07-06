@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import io.github.bananapuncher714.nbteditor.NBTEditor;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,7 @@ import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -159,10 +161,15 @@ public class PGMListener implements Listener {
     player.getMatch().removePlayer(event.getPlayer());
   }
 
+  Material block36 =
+      MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(NBTEditor.MinecraftVersion.v1_12)
+          ? Material.valueOf("PISTON_MOVING_PIECE")
+          : Material.valueOf("MOVING_PISTON");
+
   @EventHandler(ignoreCancelled = true)
   public void protect36(final PlayerInteractEvent event) {
     if (event.getClickedBlock() != null) {
-      if (event.getClickedBlock().getType() == Material.PISTON_MOVING_PIECE) {
+      if (event.getClickedBlock().getType() == block36) {
         event.setCancelled(true);
       }
     }

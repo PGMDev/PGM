@@ -3,7 +3,11 @@ package tc.oc.pgm.util.bukkit;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
+import org.bukkit.World;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
@@ -69,6 +73,16 @@ public interface BukkitUtils {
     }
   }
 
+  DyeColor DYE_COLOR_SILVER = getSilverDyeColor();
+
+  static DyeColor getSilverDyeColor() {
+    try {
+      return DyeColor.SILVER;
+    } catch (Throwable t) {
+      return DyeColor.valueOf("LIGHT_GRAY");
+    }
+  }
+
   Map<DyeColor, ChatColor> DYE_CHAT_MAP =
       ImmutableMap.<DyeColor, ChatColor>builder()
           .put(DyeColor.BLACK, ChatColor.BLACK)
@@ -78,7 +92,7 @@ public interface BukkitUtils {
           .put(DyeColor.RED, ChatColor.DARK_RED)
           .put(DyeColor.PURPLE, ChatColor.DARK_PURPLE)
           .put(DyeColor.ORANGE, ChatColor.GOLD)
-          .put(DyeColor.SILVER, ChatColor.GRAY)
+          .put(DYE_COLOR_SILVER, ChatColor.GRAY)
           .put(DyeColor.GRAY, ChatColor.DARK_GRAY)
           .put(DyeColor.LIGHT_BLUE, ChatColor.BLUE)
           .put(DyeColor.LIME, ChatColor.GREEN)
@@ -101,7 +115,7 @@ public interface BukkitUtils {
           .put(ChatColor.DARK_PURPLE, DyeColor.PURPLE)
           .put(ChatColor.DARK_RED, DyeColor.RED)
           .put(ChatColor.GOLD, DyeColor.ORANGE)
-          .put(ChatColor.GRAY, DyeColor.SILVER)
+          .put(ChatColor.GRAY, DYE_COLOR_SILVER)
           .put(ChatColor.GREEN, DyeColor.LIME)
           .put(ChatColor.LIGHT_PURPLE, DyeColor.MAGENTA)
           .put(ChatColor.RED, DyeColor.RED)

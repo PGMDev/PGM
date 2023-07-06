@@ -1,5 +1,6 @@
 package tc.oc.pgm.kits;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -57,8 +58,9 @@ import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -396,7 +398,7 @@ public abstract class KitParser {
   }
 
   public ItemStack parseHead(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.SKULL_ITEM, (short) 3);
+    ItemStack itemStack = parseItem(el, XMaterial.PLAYER_HEAD.parseMaterial(), (short) 3);
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
     NMSHacks.setSkullMetaOwner(
         meta,
@@ -408,7 +410,7 @@ public abstract class KitParser {
   }
 
   public ItemStack parseFirework(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.FIREWORK);
+    ItemStack itemStack = parseItem(el, XMaterial.FIREWORK_ROCKET.parseMaterial());
     FireworkMeta meta = (FireworkMeta) itemStack.getItemMeta();
     int power = XMLUtils.parseNumber(Node.fromAttr(el, "power"), Integer.class, false, 1);
     meta.setPower(power);
@@ -485,7 +487,11 @@ public abstract class KitParser {
 
     org.jdom2.Attribute attrMaterial = el.getAttribute("material");
     String name = attrMaterial != null ? attrMaterial.getValue() : el.getValue();
-    Material type = Materials.parseMaterial(name);
+    MaterialData materialData = MaterialDataProvider.from(name);
+    if (materialData == null) {
+      throw new InvalidXMLException("Invalid material type '" + name + "'", el);
+    }
+    Material type = materialData.getMaterial();
     if (type == null || (type == Material.AIR && !allowAir)) {
       throw new InvalidXMLException("Invalid material type '" + name + "'", el);
     }
@@ -505,12 +511,8 @@ public abstract class KitParser {
     if (amount == Integer.MAX_VALUE) amount = -1;
 
     // must be CraftItemStack to keep track of NBT data
-    ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
-
-    if (itemStack.getType() != type) {
-      throw new InvalidXMLException("Invalid item/block", el);
-    }
-
+    ItemStack itemStack =
+        NMSHacks.craftItemCopy(new ItemStack(type, amount == -1 ? 64 : amount, damage));
     if (amount == -1 && !itemStack.getType().isBlock()) {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }

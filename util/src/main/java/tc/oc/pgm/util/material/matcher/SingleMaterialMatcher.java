@@ -7,7 +7,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
@@ -25,10 +24,6 @@ import tc.oc.pgm.util.nms.material.MaterialDataProvider;
  */
 public class SingleMaterialMatcher implements MaterialMatcher {
   private final MaterialData materialData;
-
-  public SingleMaterialMatcher(Material material, byte data) {
-    this.materialData = MaterialDataProvider.from(material, data);
-  }
 
   public SingleMaterialMatcher(MaterialData materialData) {
     this.materialData = materialData;
@@ -77,19 +72,10 @@ public class SingleMaterialMatcher implements MaterialMatcher {
   }
 
   public static SingleMaterialMatcher parse(String text) {
-    String[] pieces = text.split(":");
-    Material material = Materials.parseMaterial(pieces[0]);
+    MaterialData material = MaterialDataProvider.from(text);
     if (material == null) {
-      throw new IllegalArgumentException("Could not find material '" + pieces[0] + "'.");
+      throw new IllegalArgumentException("Could not find material '" + text + "'.");
     }
-    if (pieces.length > 1) {
-      try {
-        return new SingleMaterialMatcher(material, Byte.parseByte(pieces[1]));
-      } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("Invalid damage value: " + pieces[1], e);
-      }
-    } else {
-      return new SingleMaterialMatcher(material);
-    }
+    return new SingleMaterialMatcher(material);
   }
 }

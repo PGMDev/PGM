@@ -1,8 +1,9 @@
 package tc.oc.pgm.util.block;
 
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
+import com.cryptomorin.xseries.XMaterial;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -95,8 +96,8 @@ public interface BlockVectors {
     return encodePos(block.getX(), block.getY(), block.getZ());
   }
 
-  static TLongSet encodePosSet(Collection<?> vectors) {
-    TLongSet encoded = new TLongHashSet(vectors.size());
+  static Set<Long> encodePosSet(Collection<?> vectors) {
+    Set<Long> encoded = new HashSet<>(vectors.size());
     for (Object o : vectors) {
       if (o instanceof BlockVector) {
         encoded.add(encodePos((BlockVector) o));
@@ -126,6 +127,8 @@ public interface BlockVectors {
         (int) unpack(encoded, SHIFT),
         (int) unpack(encoded, SHIFT + SHIFT));
   }
+
+  Material lillyPad = XMaterial.LILY_PAD.parseMaterial();
 
   /** Block world that a player can stand on */
   static boolean isSupportive(Material type) {
@@ -162,11 +165,11 @@ public interface BlockVectors {
         case TNT:
         case BARRIER:
         case CARPET:
-        case WATER_LILY:
         case CAKE_BLOCK:
         case SLIME_BLOCK:
           return true;
       }
+      if (type.equals(lillyPad)) return true;
     }
 
     return false;

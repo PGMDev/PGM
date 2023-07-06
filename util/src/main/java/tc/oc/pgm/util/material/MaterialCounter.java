@@ -1,26 +1,19 @@
 package tc.oc.pgm.util.material;
 
-import gnu.trove.impl.Constants;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import org.bukkit.block.BlockState;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
-import tc.oc.pgm.util.nms.material.legacy.MaterialDataLegacy;
 
-/** Efficiently counts distinct {@link MaterialDataLegacy}s */
+/** Efficiently counts distinct {@link MaterialData}s */
 public class MaterialCounter {
   private static int ENCODED_NULL_MATERIAL = -1;
-  private final TIntIntMap counts;
-
-  private MaterialCounter(TIntIntMap counts) {
-    this.counts = counts;
-  }
+  private final Map<Integer, Integer> counts;
 
   public MaterialCounter() {
-    this(new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, 0));
+    this.counts = new HashMap<>();
   }
 
   public boolean contains(int encodedMaterial) {
@@ -40,7 +33,12 @@ public class MaterialCounter {
   }
 
   public int increment(int encodedMaterial, int count) {
-    return counts.adjustOrPutValue(encodedMaterial, count, count);
+    Integer oldCount = counts.get(encodedMaterial);
+    if (oldCount == null) oldCount = 0;
+    int newCount = oldCount + count;
+    counts.put(encodedMaterial, newCount);
+
+    return newCount;
   }
 
   public int increment(BlockState block, int count) {
@@ -51,7 +49,7 @@ public class MaterialCounter {
   public Iterable<MaterialData> materials() {
     return () ->
         new Iterator<MaterialData>() {
-          final TIntIterator iter = counts.keySet().iterator();
+          final Iterator<Integer> iter = counts.keySet().iterator();
 
           @Override
           public boolean hasNext() {

@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.collect.Lists;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.content.InventoryContents;
@@ -156,7 +157,7 @@ public class ShopMenu extends InventoryMenu {
   private ClickableItem getMenuSeperator(DyeColor color) {
     return ClickableItem.empty(
         new ItemBuilder()
-            .material(Material.STAINED_GLASS_PANE)
+            .material(XMaterial.WHITE_STAINED_GLASS.parseMaterial())
             .color(color)
             .name(" ")
             .flags(ItemFlag.values())

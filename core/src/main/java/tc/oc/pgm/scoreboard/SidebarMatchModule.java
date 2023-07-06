@@ -89,7 +89,8 @@ public class SidebarMatchModule implements MatchModule, Listener {
   }
 
   private void addSidebar(MatchPlayer player) {
-    FastBoard sidebar = new FastBoard(player.getBukkit());
+    FastBoard sidebar = new PGMFastBoard(player.getBukkit());
+
     // Only render the title once, since it does not change during the match.
     sidebar.updateTitle(renderer.renderTitle(title, player));
 

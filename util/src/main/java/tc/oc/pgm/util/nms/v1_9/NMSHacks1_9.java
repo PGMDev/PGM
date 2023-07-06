@@ -65,14 +65,16 @@ public class NMSHacks1_9 extends NMSHacksNoOp {
 
   static ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
-  static Refl refl = ReflectionProxy.getProxy(Refl.class);
-  static Refl.NBTTagString nbtTagString = ReflectionProxy.getProxy(Refl.NBTTagString.class);
-  static Refl.NBTTagList nbtTagList = ReflectionProxy.getProxy(Refl.NBTTagList.class);
-  static Refl.NBTTagCompound nbtTagCompound = ReflectionProxy.getProxy(Refl.NBTTagCompound.class);
-  static Refl.CraftMagicNumbers craftMagicNumbers =
+  public static Refl refl = ReflectionProxy.getProxy(Refl.class);
+  public static Refl.NBTTagString nbtTagString = ReflectionProxy.getProxy(Refl.NBTTagString.class);
+  public static Refl.NBTTagList nbtTagList = ReflectionProxy.getProxy(Refl.NBTTagList.class);
+  public static Refl.NBTTagCompound nbtTagCompound =
+      ReflectionProxy.getProxy(Refl.NBTTagCompound.class);
+  public static Refl.CraftMagicNumbers craftMagicNumbers =
       ReflectionProxy.getProxy(Refl.CraftMagicNumbers.class);
-  static Refl.Block reflBlock = ReflectionProxy.getProxy(Refl.Block.class);
-  static Refl.CraftItemStack craftItemStack = ReflectionProxy.getProxy(Refl.CraftItemStack.class);
+  public static Refl.Block reflBlock = ReflectionProxy.getProxy(Refl.Block.class);
+  public static Refl.CraftItemStack craftItemStack =
+      ReflectionProxy.getProxy(Refl.CraftItemStack.class);
 
   @Override
   public Set<Material> getMaterialCollection(ItemMeta itemMeta, String key) {

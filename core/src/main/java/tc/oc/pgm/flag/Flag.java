@@ -5,6 +5,7 @@ import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.collect.ImmutableSet;
 import java.util.Iterator;
 import java.util.Optional;
@@ -172,12 +173,12 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
     this.bannerMeta = Materials.getItemMeta(banner);
     this.bannerMeta.setDisplayName(getColoredName());
-    this.bannerItem = new ItemStack(Material.BANNER);
+    this.bannerItem = new ItemStack(XMaterial.WHITE_BANNER.parseMaterial());
     this.bannerItem.setItemMeta(this.getBannerMeta());
 
     this.legacyBannerItem =
         new ItemBuilder()
-            .material(Material.WOOL)
+            .material(XMaterial.WHITE_WOOL.parseMaterial())
             .color(getDyeColor())
             .name(getColoredName())
             .build();

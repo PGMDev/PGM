@@ -9,6 +9,9 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -20,6 +23,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -30,6 +34,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.nms.attribute.AttributeMapNoOp;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntityNoOp;
@@ -37,6 +42,8 @@ import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotionBukkit;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.nms.material.MaterialDataProviderPlatform;
+import tc.oc.pgm.util.nms.material.legacy.MaterialDataProviderLegacy;
 import tc.oc.pgm.util.nms.reflect.Refl;
 import tc.oc.pgm.util.nms.reflect.ReflectionProxy;
 import tc.oc.pgm.util.skin.Skin;
@@ -302,5 +309,81 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     // runs the task on the next tick, not a perfect replacement
     plugin.getServer().getScheduler().runTask(plugin, task);
+  }
+
+  @Override
+  public ChunkGenerator nullChunkGenerator() {
+    return NullChunkGenerator.INSTANCE;
+  }
+
+  @Override
+  public void spawnFlagParticles(Player bukkitPlayer, DyeColor dyeColor, Location location) {
+    bukkitPlayer
+        .spigot()
+        .playEffect(
+            location.clone().add(0, 56, 0),
+            Effect.TILE_DUST,
+            Material.WOOL.getId(),
+            dyeColor.getWoolData(),
+            0.15f, // radius on each axis of the particle ball
+            24f,
+            0.15f,
+            0f, // initial horizontal velocity
+            40, // number of particles
+            200); // radius in blocks to show particles
+  }
+
+  public void spawnCritArrowParticles(Player playerBukkit, Location projectileLocation) {
+    playerBukkit.spigot().playEffect(projectileLocation, Effect.CRIT, 0, 0, 0, 0, 0, 1, 0, 50);
+  }
+
+  public void spawnColoredArrowParticles(
+      Color color, Player playerBukkit, Location projectileLocation) {
+    playerBukkit
+        .spigot()
+        .playEffect(
+            projectileLocation,
+            Effect.COLOURED_DUST,
+            0,
+            0,
+            Math.max(0.001f, (color.getRed() / 255.0f)),
+            Math.max(0.001f, (color.getGreen() / 255.0f)),
+            Math.max(0.001f, (color.getBlue() / 255.0f)),
+            1,
+            0,
+            50);
+  }
+
+  public void spawnPayloadParticles(World world, Location loc, Color color) {
+    world
+        .spigot()
+        .playEffect(
+            loc,
+            Effect.COLOURED_DUST,
+            0,
+            (byte) 0,
+            (float) Math.max(0.001, color.getRed() / 255.0),
+            (float) Math.max(0.001, color.getGreen() / 255.0),
+            (float) Math.max(0.001, color.getBlue() / 255.0),
+            1,
+            0,
+            50);
+  }
+
+  @Override
+  public void showExplosionParticle(Location explosion, Player playerBukkit) {
+    playerBukkit
+        .spigot()
+        .playEffect(explosion, Effect.EXPLOSION_HUGE, 0, 0, 0f, 0f, 0f, 1f, 1, 256);
+  }
+
+  @Override
+  public void spawnSpawnerParticles(World world, Location location) {
+    world.spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
+  }
+
+  @Override
+  public MaterialDataProviderPlatform getMaterialDataProvider() {
+    return new MaterialDataProviderLegacy();
   }
 }

@@ -249,7 +249,7 @@ public class CombatLogTracker implements Listener {
         if (block != null) {
           landingBlock = block;
 
-          if (Materials.isWater(landingBlock.getType())) {
+          if (landingBlock.isLiquid() && Materials.isWater(landingBlock.getType())) {
             // If the player falls through water, reset fall distance and inc the water depth
             fallDistance = -1;
             waterDepth += 1;

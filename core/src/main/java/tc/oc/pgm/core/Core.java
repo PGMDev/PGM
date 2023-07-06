@@ -8,6 +8,7 @@ import static net.kyori.adventure.text.format.Style.style;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import io.github.bananapuncher714.nbteditor.NBTEditor;
 import java.util.Collections;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
@@ -39,6 +40,7 @@ import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 
 // TODO: Consider making Core extend Destroyable
 public class Core extends TouchableGoal<CoreFactory>
@@ -74,13 +76,23 @@ public class Core extends TouchableGoal<CoreFactory>
           .warning("No casing world (" + this.material + ") found in core " + this.getName());
     }
 
-    this.lavaRegion =
-        FiniteBlockRegion.fromWorld(
-            region,
-            match.getWorld(),
-            match.getMap().getProto(),
-            new SingleMaterialMatcher(Material.LAVA),
-            new SingleMaterialMatcher(Material.STATIONARY_LAVA));
+    if (MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(
+        NBTEditor.MinecraftVersion.v1_12)) {
+      this.lavaRegion =
+          FiniteBlockRegion.fromWorld(
+              region,
+              match.getWorld(),
+              match.getMap().getProto(),
+              new SingleMaterialMatcher(Material.LAVA),
+              new SingleMaterialMatcher(Material.STATIONARY_LAVA));
+    } else {
+      this.lavaRegion =
+          FiniteBlockRegion.fromWorld(
+              region,
+              match.getWorld(),
+              match.getMap().getProto(),
+              new SingleMaterialMatcher(Material.LAVA));
+    }
     if (this.lavaRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }

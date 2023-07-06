@@ -31,7 +31,9 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public abstract class ControlPointParser {
   private static final Filter VISUAL_MATERIALS =
       AnyFilter.of(
-          ItemModifier.COLOR_AFFECTED.stream().map(BlockFilter::new).collect(Collectors.toList()));
+          ItemModifier.COLOR_AFFECTED.stream()
+              .map((BlockFilter::new))
+              .collect(Collectors.toList()));
 
   public enum Type {
     HILL,

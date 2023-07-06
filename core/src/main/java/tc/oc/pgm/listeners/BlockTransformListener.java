@@ -121,7 +121,7 @@ public class BlockTransformListener implements Listener {
                               try {
                                 method.invoke(listener, event);
                               } catch (InvocationTargetException ex) {
-                                throw new EventException(ex.getCause(), event);
+                                throw new EventException(ex.getCause());
                               } catch (Throwable t) {
                                 throw new EventException(t, event);
                               }
@@ -303,7 +303,7 @@ public class BlockTransformListener implements Listener {
 
       // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
       // When lava flows into water, it creates stone or cobblestone
-      if (isWater(oldState.getType()) && isLava(newState.getType())) {
+      if (Materials.isWater(oldState.getType()) && Materials.isLava(newState.getType())) {
         MaterialDataProvider.from(
                 event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE)
             .apply(newState);
@@ -320,14 +320,6 @@ public class BlockTransformListener implements Listener {
       // Check for lava ownership
       this.callEvent(event, oldState, newState, Trackers.getOwner(event.getBlock()));
     }
-  }
-
-  private boolean isWater(Material material) {
-    return material == Material.WATER || material == Material.STATIONARY_WATER;
-  }
-
-  private boolean isLava(Material material) {
-    return material == Material.LAVA || material == Material.STATIONARY_LAVA;
   }
 
   @EventWrapper

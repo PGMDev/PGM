@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,6 +21,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -34,6 +37,7 @@ import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProviderPlatform;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacksPlatform {
@@ -206,4 +210,20 @@ public interface NMSHacksPlatform {
   AttributeMap buildAttributeMap(Player player);
 
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);
+
+  ChunkGenerator nullChunkGenerator();
+
+  void spawnFlagParticles(Player bukkitPlayer, DyeColor dyeColor, Location location);
+
+  void spawnCritArrowParticles(Player playerBukkit, Location projectileLocation);
+
+  void spawnColoredArrowParticles(Color color, Player playerBukkit, Location projectileLocation);
+
+  void spawnPayloadParticles(World world, Location loc, Color color);
+
+  void showExplosionParticle(Location explosion, Player playerBukkit);
+
+  void spawnSpawnerParticles(World world, Location location);
+
+  MaterialDataProviderPlatform getMaterialDataProvider();
 }

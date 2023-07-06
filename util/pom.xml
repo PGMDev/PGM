@@ -12,6 +12,15 @@
     <artifactId>util</artifactId>
     <packaging>jar</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>app.ashcon</groupId>
+            <artifactId>sportpaper</artifactId>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
+            <scope>compile</scope> <!-- Remember to exclude in shading -->
+        </dependency>
+    </dependencies>
+
     <build>
         <resources>
             <resource>

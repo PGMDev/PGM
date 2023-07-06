@@ -4,12 +4,14 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
+import io.github.bananapuncher714.nbteditor.NBTEditor;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.bukkit.World;
@@ -27,6 +29,7 @@ import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -88,15 +91,20 @@ public class MatchManagerImpl implements MatchManager, Listener {
     matchById.remove(assertNotNull(match).getId());
     matchByWorld.remove(assertNotNull(match.getWorld()).getName());
 
-    PGM.get()
-        .getAsyncExecutor()
-        .schedule(
-            () -> {
-              match.destroy();
-              logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
-            },
-            destroyDelaySecs,
-            TimeUnit.SECONDS);
+    ScheduledExecutorService scheduler;
+    if (MinecraftReflectionUtils.MINECRAFT_VERSION.greaterThanOrEqualTo(
+        NBTEditor.MinecraftVersion.v1_9)) {
+      scheduler = PGM.get().getExecutor();
+    } else {
+      scheduler = PGM.get().getAsyncExecutor();
+    }
+    scheduler.schedule(
+        () -> {
+          match.destroy();
+          logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+        },
+        destroyDelaySecs,
+        TimeUnit.SECONDS);
   }
 
   private void onNonMatchUnload(World world) {

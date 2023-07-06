@@ -3,6 +3,7 @@ package tc.oc.pgm.fireworks;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.Collections;
@@ -242,7 +243,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
     assertNotNull(effect, "firework effect");
     assertTrue(power >= 0, "power must be positive");
 
-    FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK);
+    FireworkMeta meta =
+        (FireworkMeta)
+            Bukkit.getItemFactory().getItemMeta(XMaterial.FIREWORK_ROCKET.parseMaterial());
     meta.setPower(power);
     meta.addEffect(effect);
 

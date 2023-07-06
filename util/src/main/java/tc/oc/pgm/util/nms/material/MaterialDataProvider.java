@@ -7,11 +7,11 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Minecart;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.util.nms.material.legacy.MaterialDataProviderLegacy;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public interface MaterialDataProvider {
 
-  MaterialDataProviderPlatform PROVIDER = new MaterialDataProviderLegacy();
+  MaterialDataProviderPlatform PROVIDER = NMSHacks.getMaterialDataProvider();
 
   static MaterialData from(int hash) {
     return PROVIDER.from(hash);
@@ -47,5 +47,12 @@ public interface MaterialDataProvider {
 
   static MaterialData from(EntityChangeBlockEvent event) {
     return PROVIDER.from(event);
+  }
+
+  static MaterialData from(String materialString) {
+    if (materialString == null || materialString.isEmpty()) {
+      return null;
+    }
+    return PROVIDER.from(materialString);
   }
 }

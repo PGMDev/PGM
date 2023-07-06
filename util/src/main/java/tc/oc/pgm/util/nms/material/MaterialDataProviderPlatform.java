@@ -26,4 +26,6 @@ public interface MaterialDataProviderPlatform {
   MaterialData from(ChunkSnapshot chunkSnapshot, int x, int y, int z);
 
   MaterialData from(EntityChangeBlockEvent event);
+
+  MaterialData from(String materialString);
 }

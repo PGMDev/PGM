@@ -3,9 +3,6 @@ package tc.oc.pgm.util.collection;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ForwardingSet;
-import gnu.trove.impl.Constants;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.*;
 
 /**
@@ -18,17 +15,14 @@ import java.util.*;
  * rank is 0.
  *
  * <p>The elements are lazily sorted and cached whenever a method is called that depends on the
- * ranking order. These methods are {@link #iterator}, {@link #getPosition}, and {@link #getRank}.
- * The cache is invalidated whenever the collection is changed, or {@link #invalidateRanking} is
- * called.
+ * ranking order. These methods are {@link #iterator} and {@link #getRank}. The cache is invalidated
+ * whenever the collection is changed, or {@link #invalidateRanking} is called.
  */
 public class RankedSet<E> extends ForwardingSet<E> {
 
   private final Comparator<E> comparator;
   private final Set<E> set;
   private final List<E> list = new ArrayList<>();
-  private final TObjectIntMap<E> rankByElement =
-      new TObjectIntHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
   private final List<Set<E>> ranks = new ArrayList<>();
   private boolean sorted;
 
@@ -59,7 +53,6 @@ public class RankedSet<E> extends ForwardingSet<E> {
           ranks.add(rank = new HashSet<>());
         }
         rank.add(e);
-        rankByElement.put(e, ranks.size() - 1);
         last = e;
       }
     }
@@ -71,15 +64,6 @@ public class RankedSet<E> extends ForwardingSet<E> {
   public void invalidateRanking() {
     sorted = false;
     ranks.clear();
-    rankByElement.clear();
-  }
-
-  /**
-   * Return the position of the given element in the ranking, or -1 if the element is not present.
-   */
-  public int getPosition(E e) {
-    freshenRanking();
-    return rankByElement.get(e);
   }
 
   /**
@@ -96,11 +80,6 @@ public class RankedSet<E> extends ForwardingSet<E> {
   public Iterator<E> iterator() {
     freshenRanking();
     return list.iterator();
-  }
-
-  /** Iterate in arbitrary order */
-  public Iterator<E> unorderedIterator() {
-    return super.iterator();
   }
 
   @Override

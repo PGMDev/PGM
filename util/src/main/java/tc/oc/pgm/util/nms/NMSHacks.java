@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,6 +24,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -38,6 +41,7 @@ import tc.oc.pgm.util.bukkit.Platform;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProviderPlatform;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacks {
@@ -437,5 +441,38 @@ public interface NMSHacks {
 
   static void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     INSTANCE.postToMainThread(plugin, priority, task);
+  }
+
+  static ChunkGenerator nullChunkGenerator() {
+    return INSTANCE.nullChunkGenerator();
+  }
+
+  static void spawnFlagParticles(Player bukkitPlayer, DyeColor dyeColor, Location location) {
+    INSTANCE.spawnFlagParticles(bukkitPlayer, dyeColor, location);
+  }
+
+  static void spawnCritArrowParticles(Player playerBukkit, Location projectileLocation) {
+    INSTANCE.spawnCritArrowParticles(playerBukkit, projectileLocation);
+  }
+
+  static void spawnColoredArrowParticles(
+      Color color, Player playerBukkit, Location projectileLocation) {
+    INSTANCE.spawnColoredArrowParticles(color, playerBukkit, projectileLocation);
+  }
+
+  static void spawnPayloadParticles(World world, Location loc, Color color) {
+    INSTANCE.spawnPayloadParticles(world, loc, color);
+  }
+
+  static void showExplosionParticle(Location explosion, Player playerBukkit) {
+    INSTANCE.showExplosionParticle(explosion, playerBukkit);
+  }
+
+  static void spawnSpawnerParticles(World world, Location location) {
+    INSTANCE.spawnSpawnerParticles(world, location);
+  }
+
+  static MaterialDataProviderPlatform getMaterialDataProvider() {
+    return INSTANCE.getMaterialDataProvider();
   }
 }

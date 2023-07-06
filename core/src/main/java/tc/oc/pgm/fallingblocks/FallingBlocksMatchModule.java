@@ -4,12 +4,11 @@ import static tc.oc.pgm.util.block.BlockVectors.blockAt;
 import static tc.oc.pgm.util.block.BlockVectors.encodePos;
 import static tc.oc.pgm.util.block.BlockVectors.neighborPos;
 
-import gnu.trove.iterator.TLongObjectIterator;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -50,8 +49,7 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
   private int visitsThisTick, visitsWorstTick;
 
   private final List<FallingBlocksRule> rules;
-  private final TLongObjectMap<TLongObjectMap<ParticipantState>> blockDisturbersByTick =
-      new TLongObjectHashMap<>();
+  private final Map<Long, Map<Long, ParticipantState>> blockDisturbersByTick = new HashMap<>();
   private final Match match;
 
   public FallingBlocksMatchModule(Match match, List<FallingBlocksRule> rules) {
@@ -99,12 +97,12 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
    * @param unsupported set of blocks already known to be unsupported
    * @return true iff the given block is definitely supported
    */
-  private boolean isSupported(long pos, TLongSet supported, TLongSet unsupported)
+  private boolean isSupported(long pos, Set<Long> supported, Set<Long> unsupported)
       throws MaxSearchVisitsExceeded {
     World world = match.getWorld();
 
     LongDeque queue = new LongDeque();
-    TLongSet visited = new TLongHashSet();
+    Set<Long> visited = new HashSet<>();
     queue.add(pos);
     visited.add(pos);
 
@@ -172,8 +170,8 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
    * greater or equal to the given limit, though this cannot be guaranteed.
    */
   private int countUnsupportedNeighbors(long pos, int limit) {
-    TLongSet supported = new TLongHashSet();
-    TLongSet unsupported = new TLongHashSet();
+    Set<Long> supported = new HashSet<>();
+    Set<Long> unsupported = new HashSet<>();
 
     try {
       for (BlockFace face : NEIGHBORS) {
@@ -216,13 +214,13 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
     this.visitsThisTick = 0;
 
     World world = match.getWorld();
-    TLongObjectMap<ParticipantState> blockDisturbers =
+    Map<Long, ParticipantState> blockDisturbers =
         this.blockDisturbersByTick.remove(match.getTick().tick);
     if (blockDisturbers == null) return;
 
-    TLongSet supported = new TLongHashSet();
-    TLongSet unsupported = new TLongHashSet();
-    TLongObjectMap<ParticipantState> fallsByBreaker = new TLongObjectHashMap<>();
+    Set<Long> supported = new HashSet<>();
+    Set<Long> unsupported = new HashSet<>();
+    Map<Long, ParticipantState> fallsByBreaker = new HashMap<>();
 
     try {
       while (!blockDisturbers.isEmpty()) {
@@ -246,9 +244,8 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
       this.logError(ex);
     }
 
-    for (TLongObjectIterator<ParticipantState> iter = fallsByBreaker.iterator(); iter.hasNext(); ) {
-      iter.advance();
-      this.fall(iter.key(), iter.value());
+    for (Map.Entry<Long, ParticipantState> longParticipantStateEntry : fallsByBreaker.entrySet()) {
+      this.fall(longParticipantStateEntry.getKey(), longParticipantStateEntry.getValue());
     }
   }
 
@@ -282,14 +279,9 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
     FallingBlocksRule rule = this.ruleWithShortestDelay(blockState);
     if (rule != null) {
       long tick = match.getTick().tick + rule.delay;
-      TLongObjectMap<ParticipantState> blockDisturbers = this.blockDisturbersByTick.get(tick);
+      Map<Long, ParticipantState> blockDisturbers =
+          this.blockDisturbersByTick.computeIfAbsent(tick, k -> new HashMap<>());
 
-      if (blockDisturbers == null) {
-        blockDisturbers = new TLongObjectHashMap<>();
-        this.blockDisturbersByTick.put(tick, blockDisturbers);
-      }
-
-      Block block = blockState.getBlock();
       if (!blockDisturbers.containsKey(pos)) {
         blockDisturbers.put(pos, disturber);
       }

@@ -3,6 +3,7 @@ package tc.oc.pgm.core;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
+import io.github.bananapuncher714.nbteditor.NBTEditor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Material;
@@ -31,6 +32,7 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class CoreMatchModule implements MatchModule, Listener {
@@ -61,7 +63,10 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void leakCheck(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    if (event.getNewState().getType() == Material.STATIONARY_LAVA) {
+    if (MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(
+            NBTEditor.MinecraftVersion.v1_12)
+        ? event.getNewState().getType() == Material.STATIONARY_LAVA
+        : event.getNewState().getType() == Material.LAVA) {
       Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
       // Vector ensuring it's inside leak region if it's above
       Vector minVector = blockVector.clone().setY(0.5);

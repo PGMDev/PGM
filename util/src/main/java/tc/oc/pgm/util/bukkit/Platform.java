@@ -33,7 +33,19 @@ public enum Platform {
   SPIGOT_1_11("Spigot", "1.11", NMSHacks1_10_12.class, true),
   PAPER_1_11("Paper", "1.11", NMSHacks1_10_12.class, true),
   SPIGOT_1_12("Spigot", "1.12", NMSHacks1_10_12.class, true),
-  PAPER_1_12("Paper", "1.12", NMSHacks1_10_12.class, true);
+  PAPER_1_12("Paper", "1.12", NMSHacks1_10_12.class, true),
+  SPIGOT_1_13(
+      "Spigot",
+      "1.13",
+      (Class<? extends NMSHacksPlatform>)
+          ReflectionUtils.getClassFromName("tc.oc.pgm.platform.v1_13.nms.NMSHacks1_13"),
+      true),
+  PAPER_1_13(
+      "Paper",
+      "1.13",
+      (Class<? extends NMSHacksPlatform>)
+          ReflectionUtils.getClassFromName("tc.oc.pgm.platform.v1_13.nms.NMSHacks1_13"),
+      true);
 
   private static ClassLogger logger = ClassLogger.get(Platform.class);;
   public static Platform SERVER_PLATFORM = computeServerPlatform();

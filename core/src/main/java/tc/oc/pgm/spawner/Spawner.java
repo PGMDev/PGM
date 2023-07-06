@@ -1,8 +1,8 @@
 package tc.oc.pgm.spawner;
 
 import java.util.Objects;
-import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,6 +22,7 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Spawner implements Listener, Tickable {
 
@@ -48,10 +49,11 @@ public class Spawner implements Listener, Tickable {
     if (!canSpawn()) return;
     if (match.getTick().tick - lastTick >= currentDelay) {
       for (Spawnable spawnable : definition.objects) {
+        World world = match.getWorld();
         final Location location =
-            definition.spawnRegion.getRandom(match.getRandom()).toLocation(match.getWorld());
+            definition.spawnRegion.getRandom(match.getRandom()).toLocation(world);
         spawnable.spawn(location, match);
-        match.getWorld().spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
+        NMSHacks.spawnSpawnerParticles(world, location);
         spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
       }
       calculateDelay();

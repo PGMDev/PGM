@@ -2,6 +2,7 @@ package tc.oc.pgm.api.setting;
 
 import static tc.oc.pgm.api.setting.SettingValue.*;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,7 +28,7 @@ public enum SettingKey implements Aliased {
       CHAT_ADMIN), // Changes the default chat channel
   DEATH(
       Arrays.asList("death", "dms"),
-      Material.SKULL_ITEM,
+      XMaterial.PLAYER_HEAD.parseMaterial(),
       DEATH_ALL,
       DEATH_OWN,
       DEATH_FRIENDS), // Changes which death messages are seen
@@ -39,19 +40,19 @@ public enum SettingKey implements Aliased {
       PICKER_OFF), // Changes when the picker is displayed
   JOIN(
       Arrays.asList("join", "jms"),
-      Material.WOOD_DOOR,
+      XMaterial.OAK_DOOR.parseMaterial(),
       JOIN_ON,
       JOIN_FRIENDS,
       JOIN_OFF), // Changes if join messages are seen
   MESSAGE(
       Arrays.asList("message", "dm"),
-      Material.BOOK_AND_QUILL,
+      XMaterial.WRITABLE_BOOK.parseMaterial(),
       MESSAGE_ON,
       MESSAGE_FRIEND,
       MESSAGE_OFF), // Changes if direct messages are accepted
   OBSERVERS(
       Arrays.asList("observers", "obs"),
-      Material.EYE_OF_ENDER,
+      XMaterial.ENDER_EYE.parseMaterial(),
       OBSERVERS_ON,
       OBSERVERS_FRIEND,
       OBSERVERS_OFF) {
@@ -74,10 +75,15 @@ public enum SettingKey implements Aliased {
   STATS("stats", Material.PAPER, STATS_ON, STATS_OFF), // Changes if stats are tracked
   EFFECTS(
       "effects",
-      Material.FIREWORK,
+      XMaterial.FIREWORK_ROCKET.parseMaterial(),
       EFFECTS_ON,
       EFFECTS_OFF), // Changes if special particle effects are shown
-  TIME(Arrays.asList("time", "theme"), Material.WATCH, TIME_AUTO, TIME_DARK, TIME_LIGHT) {
+  TIME(
+      Arrays.asList("time", "theme"),
+      XMaterial.CLOCK.parseMaterial(),
+      TIME_AUTO,
+      TIME_DARK,
+      TIME_LIGHT) {
     @Override
     public void update(MatchPlayer player) {
       PlayerTimeMatchModule.updatePlayerTime(player);

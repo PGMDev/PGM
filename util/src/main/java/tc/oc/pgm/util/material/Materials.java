@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.material;
 
+import com.cryptomorin.xseries.XMaterial;
+import io.github.bananapuncher714.nbteditor.NBTEditor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,17 +13,9 @@ import org.bukkit.inventory.meta.BannerMeta;
 import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 
 public interface Materials {
-
-  static Material parseMaterial(String text) {
-    // Since Bukkit changed SNOW_BALL to SNOWBALL, support both
-    if (text.matches("(?)snow_?ball")) {
-      text = text.contains("_") ? "snowball" : "snow_ball";
-    }
-
-    return Material.matchMaterial(text);
-  }
 
   static boolean isWeapon(Material material) {
     if (material == null) return false;
@@ -93,18 +87,28 @@ public interface Materials {
   }
 
   static boolean isWater(Material material) {
-    return material == Material.WATER || material == Material.STATIONARY_WATER;
+    return material == Material.WATER
+        || (MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(
+                NBTEditor.MinecraftVersion.v1_12)
+            && material == Material.STATIONARY_WATER);
   }
 
   static boolean isWater(Location location) {
-    return isWater(location.getBlock().getType());
+    Block block = location.getBlock();
+    if (!block.isLiquid()) return false;
+    return isWater(block.getType());
   }
 
   static boolean isLava(Material material) {
-    return material == Material.LAVA || material == Material.STATIONARY_LAVA;
+    return material == Material.LAVA
+        || (MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(
+                NBTEditor.MinecraftVersion.v1_12)
+            && material == Material.STATIONARY_LAVA);
   }
 
   static boolean isLava(Location location) {
+    Block block = location.getBlock();
+    if (!block.isLiquid()) return false;
     return isLava(location.getBlock().getType());
   }
 
@@ -156,7 +160,7 @@ public interface Materials {
   }
 
   static BannerMeta getItemMeta(Banner block) {
-    BannerMeta meta = (BannerMeta) Bukkit.getItemFactory().getItemMeta(Material.BANNER);
+    BannerMeta meta = (BannerMeta) Bukkit.getItemFactory().getItemMeta(block.getType());
     meta.setBaseColor(block.getBaseColor());
     meta.setPatterns(block.getPatterns());
     return meta;
@@ -169,7 +173,7 @@ public interface Materials {
 
   static boolean placeStanding(Location location, BannerMeta meta) {
     Block block = location.getBlock();
-    block.setType(Material.STANDING_BANNER, false);
+    block.setType(XMaterial.WHITE_BANNER.parseMaterial(), false);
 
     final BlockState state = block.getState();
     if (state instanceof Banner) {
@@ -181,6 +185,7 @@ public interface Materials {
           (tc.oc.pgm.util.nms.material.Banner) material;
       bannerMaterial.setFacingDirection(BlockFaces.yawToFace(location.getYaw()));
       material.apply(banner);
+      applyToBlock(banner, meta);
       banner.update(true, false);
 
       return true;

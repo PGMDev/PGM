@@ -2,6 +2,7 @@ package tc.oc.pgm.listeners;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import io.github.bananapuncher714.nbteditor.NBTEditor;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.*;
@@ -22,6 +23,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.nms.material.Door;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 
 public class WorldProblemListener implements Listener {
 
@@ -61,23 +63,33 @@ public class WorldProblemListener implements Listener {
     block36Locations.remove(event.getWorld());
   }
 
+  Material block36 =
+      MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(NBTEditor.MinecraftVersion.v1_12)
+          ? Material.valueOf("PISTON_MOVING_PIECE")
+          : Material.valueOf("MOVING_PISTON");
+
   @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void repairChunk(ChunkLoadEvent event) {
     if (this.repairedChunks.put(event.getWorld(), event.getChunk())) {
-      // Replace formerly invisible half-iron-door blocks with barriers
-      for (Block ironDoor : NMSHacks.getBlocks(event.getChunk(), Material.IRON_DOOR_BLOCK)) {
-        MaterialData materialData = MaterialDataProvider.from(ironDoor);
-        if (materialData instanceof Door) {
-          BlockFace half = ((Door) materialData).isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
-          if (ironDoor.getRelative(half.getOppositeFace()).getType() != Material.IRON_DOOR_BLOCK) {
-            ironDoor.setType(Material.BARRIER, false);
+      if (MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(
+          NBTEditor.MinecraftVersion.v1_12)) {
+        // Replace formerly invisible half-iron-door blocks with barriers
+        // Assume 1.13+ maps are already fixed
+        for (Block ironDoor : NMSHacks.getBlocks(event.getChunk(), Material.IRON_DOOR_BLOCK)) {
+          MaterialData materialData = MaterialDataProvider.from(ironDoor);
+          if (materialData instanceof Door) {
+            BlockFace half = ((Door) materialData).isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
+            if (ironDoor.getRelative(half.getOppositeFace()).getType()
+                != Material.IRON_DOOR_BLOCK) {
+              ironDoor.setType(Material.BARRIER, false);
+            }
           }
         }
       }
 
       // Remove all block 36 and remember the ones at y=0 so VoidFilter can check them
-      for (Block block36 : NMSHacks.getBlocks(event.getChunk(), Material.PISTON_MOVING_PIECE)) {
+      for (Block block36 : NMSHacks.getBlocks(event.getChunk(), block36)) {
         if (block36.getY() == 0) {
           block36Locations
               .get(event.getWorld())

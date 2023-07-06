@@ -1,6 +1,8 @@
 package tc.oc.pgm.damage;
 
 import com.google.common.collect.SetMultimap;
+import io.github.bananapuncher714.nbteditor.NBTEditor;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,6 +20,7 @@ import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DisableDamageMatchModule implements MatchModule, Listener {
@@ -34,9 +37,13 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
     if (block == null) {
       return DamageCause.CONTACT;
     }
+    if (MinecraftReflectionUtils.MINECRAFT_VERSION.lessThanOrEqualTo(
+            NBTEditor.MinecraftVersion.v1_12)
+        && block.getType().equals(Material.STATIONARY_LAVA)) {
+      return DamageCause.LAVA;
+    }
     switch (block.getType()) {
       case LAVA:
-      case STATIONARY_LAVA:
         return DamageCause.LAVA;
 
       case FIRE:

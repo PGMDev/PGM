@@ -1,11 +1,11 @@
 package tc.oc.pgm.payload;
 
+import com.cryptomorin.xseries.XMaterial;
 import java.time.Duration;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -16,6 +16,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.ControlPoint;
 import tc.oc.pgm.payload.track.Track;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.nms.material.Wool;
@@ -58,7 +59,7 @@ public class Payload extends ControlPoint {
     Minecart minecart =
         match.getWorld().spawn(position.toLocation(match.getWorld()), Minecart.class);
 
-    MaterialDataProvider.from(Material.WOOL).apply(minecart);
+    MaterialDataProvider.from(XMaterial.WHITE_WOOL.parseMaterial()).apply(minecart);
     minecart.setSlowWhenEmpty(true);
     minecart.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), true));
     return minecart;
@@ -102,7 +103,8 @@ public class Payload extends ControlPoint {
     double diff = Math.PI * 2 / PARTICLE_AMOUNT;
     double offset = (double) tick * diff / PARTICLE_ROTATION;
 
-    Location loc = new Location(match.getWorld(), 0, 0, 0);
+    World matchWorld = match.getWorld();
+    Location loc = new Location(matchWorld, 0, 0, 0);
     for (int i = 0; i < PARTICLE_AMOUNT; i++) {
       double angle = i * diff + offset;
       // Height between 0.2 and 0.8
@@ -113,25 +115,8 @@ public class Payload extends ControlPoint {
           height,
           definition.getRadius() * Math.sin(angle));
       loc.add(position);
-      match
-          .getWorld()
-          .spigot()
-          .playEffect(
-              loc,
-              Effect.COLOURED_DUST,
-              0,
-              (byte) 0,
-              rgbToParticle(color.getRed()),
-              rgbToParticle(color.getGreen()),
-              rgbToParticle(color.getBlue()),
-              1,
-              0,
-              50);
+      NMSHacks.spawnPayloadParticles(matchWorld, loc, color);
     }
-  }
-
-  private float rgbToParticle(int rgb) {
-    return (float) Math.max(0.001, rgb / 255.0);
   }
 
   private void tickMinecart() {

@@ -2,6 +2,7 @@ package tc.oc.pgm.flag;
 
 import static java.util.stream.IntStream.range;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -142,7 +142,11 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     Beam(Flag flag) {
       this.flag = flag;
 
-      ItemStack wool = new ItemBuilder().material(Material.WOOL).color(flag.getDyeColor()).build();
+      ItemStack wool =
+          new ItemBuilder()
+              .material(XMaterial.WHITE_WOOL.parseMaterial())
+              .color(flag.getDyeColor())
+              .build();
       this.base = NMSHacks.fakeArmorStand(match.getWorld(), wool);
       this.legacyBase = NMSHacks.fakeWitherSkull(match.getWorld());
       this.segments =

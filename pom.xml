@@ -36,6 +36,7 @@
         <module>util</module>
         <module>core</module>
         <module>server</module>
+        <module>platform</module>
     </modules>
 
     <repositories>
@@ -70,6 +71,10 @@
         <repository> <!-- NBT Editing without NMS -->
             <id>CodeMC</id>
             <url>https://repo.codemc.org/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>maven-central</id>
+            <url>https://repo1.maven.org/maven2/</url>
         </repository>
     </repositories>
 
@@ -185,7 +190,7 @@
         <dependency>
             <groupId>fr.mrmicky</groupId>
             <artifactId>FastBoard</artifactId>
-            <version>1.2.1</version>
+            <version>2.0.0</version>
             <scope>compile</scope>
         </dependency>
 
@@ -202,7 +207,13 @@
             <artifactId>smart-invs</artifactId>
             <version>1.2.7</version>
             <scope>compile</scope>
-        </dependency>	
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.cryptomorin</groupId>
+            <artifactId>XSeries</artifactId>
+            <version>9.4.0</version>
+        </dependency>
 
         <!-- Git library for cloning and pulling repositories -->
         <dependency>
