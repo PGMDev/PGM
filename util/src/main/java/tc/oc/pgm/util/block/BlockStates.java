@@ -4,9 +4,9 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public interface BlockStates {
 
@@ -15,30 +15,20 @@ public interface BlockStates {
   }
 
   static BlockState toAir(Block block) {
-    BlockState newState = block.getState(); // this creates a new copy of the state
-    newState.setType(Material.AIR);
-    newState.setRawData((byte) 0);
-    return newState;
+    return MaterialDataProvider.from(Material.AIR).apply(block.getState());
+  }
+
+  static BlockState cloneWithMaterial(Block block, MaterialData material) {
+    return material.apply(block.getState());
   }
 
   static BlockState cloneWithMaterial(Block block, Material material) {
-    return cloneWithMaterial(block, material, (byte) 0);
-  }
-
-  static BlockState cloneWithMaterial(Block block, Material material, byte data) {
-    BlockState state = block.getState();
-    state.setType(material);
-    state.setRawData(data);
-    return state;
-  }
-
-  static BlockState cloneWithMaterial(Block block, MaterialData materialData) {
-    return cloneWithMaterial(block, materialData.getItemType(), materialData.getData());
+    return MaterialDataProvider.from(material).apply(block.getState());
   }
 
   static BlockState create(World world, BlockVector pos, MaterialData materialData) {
     BlockState state = pos.toLocation(world).getBlock().getState();
-    NMSHacks.setBlockStateData(state, materialData);
+    materialData.apply(state);
     return state;
   }
 
@@ -50,7 +40,7 @@ public interface BlockStates {
         + ", "
         + state.getZ()
         + ") world="
-        + state.getData()
+        + state
         + "}";
   }
 }

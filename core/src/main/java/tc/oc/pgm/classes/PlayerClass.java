@@ -5,9 +5,9 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import org.bukkit.entity.Player;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.util.nms.material.MaterialData;
 
 public class PlayerClass {
   private final String name;

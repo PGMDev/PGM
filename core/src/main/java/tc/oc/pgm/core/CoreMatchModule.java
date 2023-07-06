@@ -99,7 +99,7 @@ public class CoreMatchModule implements MatchModule, Listener {
 
             if (team == core.getOwner()) {
               event.setCancelled(translatable("objective.damageOwn", core.getComponentName()));
-            } else if (event.getOldState().getData().equals(core.getMaterial())) {
+            } else if (core.getMaterial().matches(event.getOldState())) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
 

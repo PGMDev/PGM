@@ -4,7 +4,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -15,6 +14,7 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.chunk.ChunkVector;
+import tc.oc.pgm.util.nms.material.MaterialData;
 
 /**
  * Keeps a snapshot of the block state of the entire match world at build time, using a

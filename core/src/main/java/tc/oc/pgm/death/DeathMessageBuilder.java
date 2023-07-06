@@ -29,6 +29,7 @@ import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class DeathMessageBuilder {
@@ -378,8 +379,8 @@ public class DeathMessageBuilder {
   void fire(FireInfo fire) throws NoMessage {
     require("fire");
     player();
-    if (!(fire.getIgniter() instanceof BlockInfo
-        && ((BlockInfo) fire.getIgniter()).getMaterial().getItemType() == Material.FIRE)) {
+    MaterialData materialData = ((BlockInfo) fire.getIgniter()).getMaterial();
+    if (!(fire.getIgniter() instanceof BlockInfo && materialData.getMaterial() == Material.FIRE)) {
       // "burned by fire" is redundant
       physical(fire.getIgniter());
     }
@@ -435,7 +436,8 @@ public class DeathMessageBuilder {
     } else if (info instanceof FallingBlockInfo) {
       squash((FallingBlockInfo) info);
     } else if (info instanceof BlockInfo) {
-      final Material material = ((BlockInfo) info).getMaterial().getItemType();
+      MaterialData materialData = ((BlockInfo) info).getMaterial();
+      final Material material = materialData.getMaterial();
       if (material == Material.ANVIL) {
         squash((BlockInfo) info);
       } else if (material == Material.CACTUS) {

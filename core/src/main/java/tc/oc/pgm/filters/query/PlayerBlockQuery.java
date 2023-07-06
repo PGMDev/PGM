@@ -5,11 +5,12 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public class PlayerBlockQuery extends PlayerStateQuery implements BlockQuery {
 
@@ -36,7 +37,7 @@ public class PlayerBlockQuery extends PlayerStateQuery implements BlockQuery {
 
   @Override
   public MaterialData getMaterial() {
-    return block.getData();
+    return MaterialDataProvider.from(block);
   }
 
   @Override

@@ -96,7 +96,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -116,6 +115,8 @@ import tc.oc.pgm.util.nms.entity.fake.armorstand.FakeArmorStand1_8;
 import tc.oc.pgm.util.nms.entity.fake.wither.FakeWitherSkull1_8;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion1_8;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.legacy.MaterialDataLegacy;
 import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 import tc.oc.pgm.util.skin.Skin;
@@ -647,7 +648,7 @@ class NMSHacks1_8 extends NMSHacksNoOp {
     if (states != null) {
       for (IBlockData state : states) {
         int data = nmsBlock.toLegacyData(state);
-        materials.add(material.getNewData((byte) data));
+        materials.add(new MaterialDataLegacy(material.getNewData((byte) data)));
       }
     }
     return materials.build();
@@ -822,13 +823,12 @@ class NMSHacks1_8 extends NMSHacksNoOp {
   }
 
   @Override
-  public boolean canMineBlock(MaterialData blockMaterial, ItemStack tool) {
-    if (!blockMaterial.getItemType().isBlock()) {
-      throw new IllegalArgumentException("Material '" + blockMaterial + "' is not a block");
+  public boolean canMineBlock(Material material, ItemStack tool) {
+    if (!material.isBlock()) {
+      throw new IllegalArgumentException("Material '" + material + "' is not a block");
     }
 
-    net.minecraft.server.v1_8_R3.Block nmsBlock =
-        CraftMagicNumbers.getBlock(blockMaterial.getItemType());
+    net.minecraft.server.v1_8_R3.Block nmsBlock = CraftMagicNumbers.getBlock(material);
     net.minecraft.server.v1_8_R3.Item nmsTool =
         tool == null ? null : CraftMagicNumbers.getItem(tool.getType());
 

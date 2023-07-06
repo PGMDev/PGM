@@ -28,7 +28,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Firework;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,6 +58,8 @@ import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {
@@ -184,7 +185,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   void addMaterials(SingleMaterialMatcher pattern) {
     materialPatterns.add(pattern);
-    if (pattern.dataMatters()) {
+    if (pattern.getMaterialData().dataMatters()) {
       materials.add(pattern.getMaterialData());
     } else {
       // Hacky, but there is no other simple way to deal with block replacement
@@ -204,7 +205,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       this.maxHealth = this.blockRegion.getBlockVolume();
       this.health = 0;
       for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
-        if (this.hasMaterial(block.getState().getData())) {
+        if (this.hasMaterial(block)) {
           this.health++;
         }
       }
@@ -306,14 +307,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     }
 
     if (this.blockMaterialHealth == null) {
-      return this.hasMaterial(blockState.getData()) ? 1 : 0;
+      return this.hasMaterial(blockState) ? 1 : 0;
     } else {
       Map<MaterialData, Integer> materialHealthMap =
           this.blockMaterialHealth.get(blockState.getLocation().toVector().toBlockVector());
       if (materialHealthMap == null) {
         return 0;
       }
-      Integer health = materialHealthMap.get(blockState.getData());
+      Integer health = materialHealthMap.get(MaterialDataProvider.from(blockState));
       return health == null ? 0 : health;
     }
   }
@@ -447,6 +448,20 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   public boolean hasMaterial(MaterialData data) {
     for (SingleMaterialMatcher material : materialPatterns) {
       if (material.matches(data)) return true;
+    }
+    return false;
+  }
+
+  public boolean hasMaterial(Block block) {
+    for (SingleMaterialMatcher material : materialPatterns) {
+      if (material.matches(block)) return true;
+    }
+    return false;
+  }
+
+  public boolean hasMaterial(BlockState blockState) {
+    for (SingleMaterialMatcher material : materialPatterns) {
+      if (material.matches(blockState)) return true;
     }
     return false;
   }
@@ -618,7 +633,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       int oldHealth = this.getBlockHealth(oldState);
 
       if (oldHealth > 0) {
-        block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
+        newMaterial.apply(block, true);
       }
     }
 
@@ -635,7 +650,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   @Override
   public boolean isObjectiveMaterial(Block block) {
-    return this.hasMaterial(block.getState().getData());
+    return this.hasMaterial(block);
   }
 
   public String getModeChangeMessage(Material material) {

@@ -39,17 +39,17 @@ public class ItemKeepMatchModule implements MatchModule, Listener {
 
   private boolean canKeepItem(ItemStack stack) {
     for (BlockFilter filter : this.itemsToKeep) {
-      if (filter.matches(stack.getData())) return true;
+      if (filter.matches(stack)) return true;
     }
     return false;
   }
 
   private boolean canKeepArmor(ItemStack stack) {
     for (BlockFilter filter : this.itemsToKeep) {
-      if (filter.matches(stack.getData())) return true;
+      if (filter.matches(stack)) return true;
     }
     for (BlockFilter filter : this.armorToKeep) {
-      if (filter.matches(stack.getData())) return true;
+      if (filter.matches(stack)) return true;
     }
     return false;
   }

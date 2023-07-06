@@ -142,6 +142,7 @@ public class PlayerStatsMenuItem implements MenuItem {
 
   @Override
   public ItemStack createItem(Player player) {
+    // TODO: fix raw byte data usage
     ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
     ItemMeta meta = stack.getItemMeta();
 

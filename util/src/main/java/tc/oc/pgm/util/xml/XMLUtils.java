@@ -13,7 +13,6 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
-import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -35,6 +34,8 @@ import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
@@ -752,7 +753,7 @@ public final class XMLUtils {
     } else {
       data = 0;
     }
-    return material.getNewData(data);
+    return MaterialDataProvider.from(material, data);
   }
 
   public static MaterialData parseMaterialData(Node node, MaterialData def)
@@ -768,9 +769,9 @@ public final class XMLUtils {
       throws InvalidXMLException {
     if (node == null) return null;
     MaterialData material = parseMaterialData(node, text);
-    if (!material.getItemType().isBlock()) {
+    if (!material.getMaterial().isBlock()) {
       throw new InvalidXMLException(
-          "Material " + material.getItemType().name() + " is not a block", node);
+          "Material " + material.getMaterial().name() + " is not a block", node);
     }
     return material;
   }

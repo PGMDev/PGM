@@ -1,7 +1,6 @@
 package tc.oc.pgm.core;
 
 import com.google.common.collect.ImmutableSet;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
@@ -10,6 +9,7 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.util.nms.material.MaterialData;
 
 @FeatureInfo(name = "core")
 public class CoreFactory extends ProximityGoalDefinition {

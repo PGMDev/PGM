@@ -5,9 +5,9 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
-import org.bukkit.material.Wool;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
@@ -16,6 +16,9 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.ControlPoint;
 import tc.oc.pgm.payload.track.Track;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.nms.material.Wool;
 
 public class Payload extends ControlPoint {
 
@@ -55,7 +58,7 @@ public class Payload extends ControlPoint {
     Minecart minecart =
         match.getWorld().spawn(position.toLocation(match.getWorld()), Minecart.class);
 
-    minecart.setDisplayBlock(new Wool(DyeColor.WHITE));
+    MaterialDataProvider.from(Material.WOOL).apply(minecart);
     minecart.setSlowWhenEmpty(true);
     minecart.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), true));
     return minecart;
@@ -144,9 +147,10 @@ public class Payload extends ControlPoint {
     Competitor display = getDisplayTeam();
     DyeColor color = display != null ? display.getDyeColor() : DyeColor.WHITE;
 
-    Wool data = (Wool) minecart.getDisplayBlock();
-    data.setColor(color);
-    minecart.setDisplayBlock(data);
+    MaterialData materialData = MaterialDataProvider.from(minecart);
+    Wool woolData = (Wool) materialData;
+    woolData.setColor(color);
+    materialData.apply(minecart);
   }
 
   @Override

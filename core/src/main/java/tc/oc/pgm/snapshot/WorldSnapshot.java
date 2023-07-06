@@ -6,14 +6,17 @@ import java.util.Map;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.nms.material.legacy.MaterialDataLegacy;
 
 public class WorldSnapshot {
 
@@ -27,20 +30,19 @@ public class WorldSnapshot {
   }
 
   public MaterialData getOriginalMaterial(int x, int y, int z) {
-    if (y < 0 || y >= 256) return new MaterialData(Material.AIR);
+    if (y < 0 || y >= 256) return MaterialDataProvider.from(Material.AIR);
 
     ChunkVector chunkVector = ChunkVector.ofBlock(x, y, z);
     ChunkSnapshot chunkSnapshot = chunkSnapshots.get(chunkVector);
     if (chunkSnapshot != null) {
       BlockVector chunkPos = chunkVector.worldToChunk(x, y, z);
-      return new MaterialData(
-          chunkSnapshot.getBlockTypeId(
-              chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ()),
-          (byte)
-              chunkSnapshot.getBlockData(
-                  chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ()));
+      int x1 = chunkPos.getBlockX();
+      int y1 = chunkPos.getBlockY();
+      int z1 = chunkPos.getBlockZ();
+      return MaterialDataProvider.from(chunkSnapshot, x1, y1, z1);
     } else {
-      return world.getBlockAt(x, y, z).getState().getData();
+      Block block = world.getBlockAt(x, y, z);
+      return MaterialDataProvider.from(block);
     }
   }
 
@@ -52,14 +54,11 @@ public class WorldSnapshot {
     ChunkSnapshot chunkSnapshot = chunkSnapshots.get(chunkVector);
     if (chunkSnapshot != null) {
       BlockVector chunkPos = chunkVector.worldToChunk(x, y, z);
-      NMSHacks.setBlockStateData(
-          state,
-          new MaterialData(
-              chunkSnapshot.getBlockTypeId(
-                  chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ()),
-              (byte)
-                  chunkSnapshot.getBlockData(
-                      chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ())));
+
+      int x1 = chunkPos.getBlockX();
+      int y1 = chunkPos.getBlockY();
+      int z1 = chunkPos.getBlockZ();
+      MaterialDataProvider.from(chunkSnapshot, x1, y1, z1).apply(state);
     }
     return state;
   }
@@ -117,8 +116,7 @@ public class WorldSnapshot {
     private ChunkSnapshot snapshot = null;
 
     private BlockVector blockVector;
-    private int materialId;
-    private int data;
+    private int encodedMaterial;
 
     private BlockDataIterator(Region region) {
       this.vectors = region.getBlockVectorIterator();
@@ -148,20 +146,14 @@ public class WorldSnapshot {
       int offsetZ = blockVector.getBlockZ() - chunkVector.getBlockMinZ();
 
       // Calling getMaterialData would cause an allocation, so instead use raw types
-      materialId = snapshot.getBlockTypeId(offsetX, offsetY, offsetZ);
-      data = snapshot.getBlockData(offsetX, offsetY, offsetZ);
+      encodedMaterial = MaterialDataLegacy.encodedMaterialAt(snapshot, offsetX, offsetY, offsetZ);
 
       return this;
     }
 
     @Override
-    public int getTypeId() {
-      return materialId;
-    }
-
-    @Override
-    public int getData() {
-      return data;
+    public MaterialData getMaterialData() {
+      return MaterialDataProvider.from(encodedMaterial);
     }
 
     @Override

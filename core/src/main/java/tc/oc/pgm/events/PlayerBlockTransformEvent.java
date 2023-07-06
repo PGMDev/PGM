@@ -56,9 +56,9 @@ public class PlayerBlockTransformEvent extends BlockTransformEvent {
         + "{pos="
         + this.getOldState().getLocation().toVector()
         + " oldState="
-        + this.getOldState().getData()
+        + this.getOldState()
         + " newState="
-        + this.getNewState().getData()
+        + this.getNewState()
         + " drops="
         + this.getDrops()
         + " cancelled="

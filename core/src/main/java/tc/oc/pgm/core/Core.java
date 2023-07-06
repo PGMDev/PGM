@@ -15,7 +15,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +37,8 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 // TODO: Consider making Core extend Destroyable
 public class Core extends TouchableGoal<CoreFactory>
@@ -78,8 +79,8 @@ public class Core extends TouchableGoal<CoreFactory>
             region,
             match.getWorld(),
             match.getMap().getProto(),
-            new SingleMaterialMatcher(Material.LAVA, (byte) 0),
-            new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
+            new SingleMaterialMatcher(Material.LAVA),
+            new SingleMaterialMatcher(Material.STATIONARY_LAVA));
     if (this.lavaRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }
@@ -232,21 +233,18 @@ public class Core extends TouchableGoal<CoreFactory>
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void replaceBlocks(MaterialData newMaterial) {
     for (Block block : this.getCasingRegion().getBlocks(match.getWorld())) {
       if (this.isObjectiveMaterial(block)) {
-        block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
+        newMaterial.apply(block, true);
       }
     }
     this.material = newMaterial;
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public boolean isObjectiveMaterial(Block block) {
-    return block.getType() == this.material.getItemType()
-        && block.getData() == this.material.getData();
+    return this.material.equals(MaterialDataProvider.from(block));
   }
 
   public String getModeChangeMessage(Material material) {

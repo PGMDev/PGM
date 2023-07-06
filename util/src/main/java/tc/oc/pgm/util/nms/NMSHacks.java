@@ -15,7 +15,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
@@ -27,7 +26,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -39,6 +37,7 @@ import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.Platform;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
+import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacks {
@@ -81,6 +80,11 @@ public interface NMSHacks {
 
   static void freezeEntity(Entity entity) {
     INSTANCE.freezeEntity(entity);
+  }
+
+  static void createFakeArmorStand(
+      Player player, int entityId, Location location, Vector velocity) {
+    INSTANCE.createFakeArmorStand(player, entityId, location, velocity);
   }
 
   static void setFireballDirection(Fireball entity, Vector direction) {
@@ -271,10 +275,6 @@ public interface NMSHacks {
     return INSTANCE.getBlockStates(material);
   }
 
-  static void setBlockStateData(BlockState state, MaterialData materialData) {
-    INSTANCE.setBlockStateData(state, materialData);
-  }
-
   static Skin getPlayerSkin(Player player) {
     return INSTANCE.getPlayerSkin(player);
   }
@@ -314,9 +314,8 @@ public interface NMSHacks {
    *
    * <p>Derived from CraftBlock.itemCausesDrops()
    */
-  @Deprecated
-  static boolean canMineBlock(MaterialData blockMaterial, ItemStack tool) {
-    return INSTANCE.canMineBlock(blockMaterial, tool);
+  static boolean canMineBlock(Material material, ItemStack tool) {
+    return INSTANCE.canMineBlock(material, tool);
   }
 
   static void resetDimension(World world) {

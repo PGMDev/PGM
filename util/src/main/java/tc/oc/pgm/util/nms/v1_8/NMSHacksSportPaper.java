@@ -24,7 +24,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
@@ -36,11 +35,6 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
   @Override
   public void updateChunkSnapshot(ChunkSnapshot snapshot, BlockState blockState) {
     snapshot.updateBlock(blockState);
-  }
-
-  @Override
-  public void setBlockStateData(BlockState state, MaterialData materialData) {
-    state.setMaterialData(materialData);
   }
 
   @Override

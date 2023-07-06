@@ -8,8 +8,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -19,6 +17,10 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.nms.material.Colorable;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.nms.material.Wool;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @FeatureInfo(name = "wool")
@@ -120,11 +122,11 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public boolean isObjectiveWool(ItemStack stack) {
-    return stack != null && this.isObjectiveWool(stack.getData());
+    return stack != null && this.isObjectiveWool(MaterialDataProvider.from(stack));
   }
 
   public boolean isObjectiveWool(MaterialData material) {
-    return material instanceof Wool && ((Wool) material).getColor() == this.color;
+    return material instanceof Wool && ((Colorable) material).getColor() == this.color;
   }
 
   public boolean isHolding(InventoryHolder holder) {

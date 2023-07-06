@@ -41,7 +41,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -115,12 +114,12 @@ public class NMSHacks1_9 extends NMSHacksNoOp {
   }
 
   @Override
-  public boolean canMineBlock(MaterialData blockMaterial, ItemStack tool) {
-    if (!blockMaterial.getItemType().isBlock()) {
-      throw new IllegalArgumentException("Material '" + blockMaterial + "' is not a block");
+  public boolean canMineBlock(Material material, ItemStack tool) {
+    if (!material.isBlock()) {
+      throw new IllegalArgumentException("Material '" + material + "' is not a block");
     }
 
-    Object nmsBlock = craftMagicNumbers.getBlock(blockMaterial.getItemType());
+    Object nmsBlock = craftMagicNumbers.getBlock(material);
     Object nmsTool = tool == null ? null : craftMagicNumbers.getItem(tool.getType());
 
     Object iBlockData = reflBlock.getBlockData(nmsBlock);

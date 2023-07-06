@@ -10,10 +10,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Dye;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.nms.material.Colorable;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** A nice way to build {@link ItemStack}s. */
@@ -50,8 +50,7 @@ public class ItemBuilder {
   }
 
   public ItemBuilder material(MaterialData material) {
-    item.setType(material.getItemType());
-    item.setData(material);
+    material.apply(item);
     return this;
   }
 
@@ -108,21 +107,11 @@ public class ItemBuilder {
 
   public ItemBuilder color(DyeColor color) {
     final Material type = item.getType();
-    switch (type) {
-      case INK_SACK:
-        item.setData(new Dye(color));
-        break;
-
-      case WOOL:
-        item.setData(new Wool(color));
-        break;
-
-      default:
-        // banners/other colored blocks
-        item.setData(new MaterialData(type, color.getWoolData()));
-        break;
+    MaterialData materialData = MaterialDataProvider.from(type);
+    if (materialData instanceof Colorable) {
+      ((Colorable) materialData).setColor(color);
+      materialData.apply(item);
     }
-    item.setDurability(item.getData().getData());
     return this;
   }
 }

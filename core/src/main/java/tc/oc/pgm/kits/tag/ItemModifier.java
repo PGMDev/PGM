@@ -1,25 +1,32 @@
 package tc.oc.pgm.kits.tag;
 
-import com.google.common.collect.ImmutableSet;
-import org.bukkit.DyeColor;
+import java.util.EnumSet;
+import java.util.HashSet;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
+import tc.oc.pgm.util.nms.material.Colorable;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public class ItemModifier {
 
   public static final ItemTag<Boolean> TEAM_COLOR = ItemTag.newBoolean("team-color");
 
-  public static final ImmutableSet<Material> COLOR_AFFECTED =
-      ImmutableSet.of(
-          Material.WOOL,
-          Material.CARPET,
-          Material.STAINED_CLAY,
-          Material.STAINED_GLASS,
-          Material.STAINED_GLASS_PANE);
+  public static EnumSet<Material> COLOR_AFFECTED = getColorableMaterials();
+
+  private static EnumSet<Material> getColorableMaterials() {
+    HashSet<Material> colorableMaterials = new HashSet<>();
+    for (Material value : Material.values()) {
+      if (MaterialDataProvider.from(value) instanceof Colorable) {
+        colorableMaterials.add(value);
+      }
+    }
+    return EnumSet.copyOf(colorableMaterials);
+  }
 
   // Apply per-player customizations of items.
   // This may be expanded on the future but currently only handles coloring armor & blocks.
@@ -35,12 +42,11 @@ public class ItemModifier {
       leather.setColor(player.getParty().getFullColor());
       item.setItemMeta(meta);
     } else if (COLOR_AFFECTED.contains(item.getType())) {
-      item.setDurability(getWoolColor(player.getParty().getDyeColor()));
+      MaterialData materialData = MaterialDataProvider.from(item);
+      if (materialData instanceof Colorable) {
+        ((Colorable) materialData).setColor(player.getParty().getDyeColor());
+        materialData.apply(item);
+      }
     }
-  }
-
-  @SuppressWarnings("deprecation")
-  private static byte getWoolColor(DyeColor color) {
-    return color.getWoolData();
   }
 }

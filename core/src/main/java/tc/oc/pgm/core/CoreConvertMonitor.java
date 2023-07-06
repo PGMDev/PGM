@@ -4,6 +4,8 @@ import static net.kyori.adventure.text.Component.text;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public class CoreConvertMonitor implements Runnable {
   private final CoreMatchModule parent;
@@ -11,7 +13,8 @@ public class CoreConvertMonitor implements Runnable {
 
   public CoreConvertMonitor(CoreMatchModule parent) {
     this.parent = parent;
-    this.nextMaterial = getNext(parent.cores.iterator().next().getMaterial().getItemType());
+    MaterialData materialData = parent.cores.iterator().next().getMaterial();
+    this.nextMaterial = getNext(materialData.getMaterial());
   }
 
   @Override
@@ -19,7 +22,7 @@ public class CoreConvertMonitor implements Runnable {
   public void run() {
     if (this.nextMaterial != null) {
       for (Core core : this.parent.cores) {
-        core.replaceBlocks(this.nextMaterial.getNewData((byte) 0));
+        core.replaceBlocks(MaterialDataProvider.from(this.nextMaterial));
       }
       String name = getName(this.nextMaterial);
       if (name == null) {

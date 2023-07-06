@@ -44,9 +44,6 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
-import org.bukkit.material.Door;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -68,7 +65,11 @@ import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.Door;
+import tc.oc.pgm.util.nms.material.Liquid;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.nms.material.PistonExtension;
 
 public class BlockTransformListener implements Listener {
   private static final BlockFace[] NEIGHBORS = {
@@ -171,8 +172,7 @@ public class BlockTransformListener implements Listener {
     }
   }
 
-  private void handleDoor(BlockTransformEvent event, Door door) {
-    BlockFace relative = door.isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
+  private void handleDoor(BlockTransformEvent event, BlockFace relative) {
     BlockState oldState = event.getOldState().getBlock().getRelative(relative).getState();
     BlockState newState = event.getBlock().getRelative(relative).getState();
     BlockTransformEvent toCall;
@@ -192,13 +192,16 @@ public class BlockTransformListener implements Listener {
 
   private void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
-      MaterialData oldData = event.getOldState().getData();
-      MaterialData newData = event.getNewState().getData();
+      MaterialData oldData = MaterialDataProvider.from(event.getOldState());
+      BlockState blockState = event.getNewState();
+      MaterialData newData = MaterialDataProvider.from(blockState);
       if (oldData instanceof Door) {
-        handleDoor(event, (Door) oldData);
+        BlockFace relative = ((Door) oldData).isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
+        handleDoor(event, relative);
       }
       if (newData instanceof Door) {
-        handleDoor(event, (Door) newData);
+        BlockFace relative = ((Door) newData).isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
+        handleDoor(event, relative);
       }
     }
     logger.finest("Generated event " + event);
@@ -296,31 +299,22 @@ public class BlockTransformListener implements Listener {
     if (event.getToBlock().getType() != event.getBlock().getType()) {
       BlockState oldState = event.getToBlock().getState();
       BlockState newState = event.getToBlock().getState();
-      newState.setType(event.getBlock().getType());
-      newState.setRawData(event.getBlock().getData());
+      MaterialDataProvider.from(event.getBlock()).apply(newState);
 
       // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
       // When lava flows into water, it creates stone or cobblestone
       if (isWater(oldState.getType()) && isLava(newState.getType())) {
-        newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
-        newState.setRawData((byte) 0);
+        MaterialDataProvider.from(
+                event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE)
+            .apply(newState);
       }
 
       // For some reason, the newState has the data value of the old source.
       // This corrects for that manually.
-      if (isWater(newState.getType()) || isLava(newState.getType())) {
-        byte oldData = newState.getRawData();
-        if (event.getFace() == BlockFace.DOWN) {
-          // A data value of 8 (or higher) represents water flowing down
-          newState.setRawData((byte) (8));
-        } else if (oldData < 7) {
-          // Data values 0-7 represent water on the ground, and increase by 1 as they spread
-          newState.setRawData((byte) (oldData + 1));
-        } else {
-          // Otherwise, the previous block must have been flowing down, so it spreads to a data
-          // value of 1
-          newState.setRawData((byte) (1));
-        }
+      MaterialData newStateMaterialData = MaterialDataProvider.from(newState);
+      if (newStateMaterialData instanceof Liquid) {
+        ((Liquid) newStateMaterialData).fixDataState(event.getFace());
+        newStateMaterialData.apply(newState);
       }
 
       // Check for lava ownership
@@ -452,7 +446,7 @@ public class BlockTransformListener implements Listener {
     // Add the pushed blocks at their destination
     for (Block block : blocks) {
       Block dest = block.getRelative(event.getDirection());
-      newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState().getData()));
+      newStates.put(dest, BlockStates.cloneWithMaterial(dest, MaterialDataProvider.from(block)));
     }
 
     // Add air blocks where a block is leaving, and no other block is replacing it
@@ -485,11 +479,11 @@ public class BlockTransformListener implements Listener {
     Map<Block, BlockState> newStates = new HashMap<>();
 
     // Add the arm of the piston, which will extend into the adjacent block.
-    PistonExtensionMaterial pistonExtension =
-        new PistonExtensionMaterial(Material.PISTON_EXTENSION);
+    MaterialData materialData = MaterialDataProvider.from(Material.PISTON_EXTENSION);
+    PistonExtension pistonExtension = (PistonExtension) materialData;
     pistonExtension.setFacingDirection(event.getDirection());
     BlockState pistonExtensionState = event.getBlock().getRelative(event.getDirection()).getState();
-    NMSHacks.setBlockStateData(pistonExtensionState, pistonExtension);
+    materialData.apply(pistonExtensionState);
     newStates.put(event.getBlock(), pistonExtensionState);
 
     this.onPistonMove(event, event.getBlocks(), newStates);
@@ -508,7 +502,7 @@ public class BlockTransformListener implements Listener {
     callEvent(
         event,
         event.getBlock().getState(),
-        BlockStates.cloneWithMaterial(event.getBlock(), event.getTo(), event.getData()),
+        BlockStates.cloneWithMaterial(event.getBlock(), MaterialDataProvider.from(event)),
         Trackers.getOwner(event.getEntity()));
   }
 

@@ -22,7 +22,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -36,8 +35,8 @@ import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
-import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 @ListenerScope(MatchScope.RUNNING)
 public class BlockDropsMatchModule implements MatchModule, Listener {
@@ -134,16 +133,12 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   private void replaceBlock(BlockDrops drops, Block block, MatchPlayer player) {
     if (drops.replacement != null) {
       EntityChangeBlockEvent event =
-          new EntityChangeBlockEvent(
-              player.getBukkit(),
-              block,
-              drops.replacement.getItemType(),
-              drops.replacement.getData());
+          drops.replacement.buildEntityChangeBlockEvent(player.getBukkit(), block);
       match.callEvent(event);
 
       if (!event.isCancelled()) {
         BlockState state = block.getState();
-        NMSHacks.setBlockStateData(state, drops.replacement);
+        drops.replacement.apply(state);
         state.update(true, true);
       }
     }
@@ -165,10 +160,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       final BlockState oldState = event.getOldState();
       final BlockState newState = event.getNewState();
       final Block block = event.getOldState().getBlock();
-      final int newTypeId = newState.getTypeId();
-      final byte newData = newState.getRawData();
-
-      block.setTypeIdAndData(newTypeId, newData, true);
+      MaterialData materialData = MaterialDataProvider.from(newState);
+      materialData.apply(block, true);
 
       float yield = 1f;
       boolean explosion = false;
@@ -183,14 +176,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
             && oldState.getType().isBlock()
             && oldState.getType() != Material.AIR
             && match.getRandom().nextFloat() < drops.fallChance) {
-
           FallingBlock fallingBlock =
-              match
-                  .getWorld()
-                  .spawnFallingBlock(
-                      block.getLocation(),
-                      event.getOldState().getType(),
-                      event.getOldState().getRawData());
+              MaterialDataProvider.from(event.getOldState()).spawnFallingBlock(block.getLocation());
           fallingBlock.setDropItem(false);
 
           if (drops.landChance != null && match.getRandom().nextFloat() >= drops.landChance) {
@@ -261,11 +248,11 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
         getRuleSet().getDrops(event, hit.getBlock().getState(), player.getParticipantState());
     if (drops == null) return;
 
-    MaterialData oldMaterial = hit.getBlock().getState().getData();
+    MaterialData oldMaterial = MaterialDataProvider.from(hit.getBlock());
     replaceBlock(drops, hit.getBlock(), player);
     Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
 
-    Materials.playBreakEffect(location, oldMaterial);
+    oldMaterial.playStepEffect(location);
     dropObjects(drops, player, location, 1d, false);
   }
 

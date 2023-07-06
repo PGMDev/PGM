@@ -3,13 +3,12 @@ package tc.oc.pgm.action.actions;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
 
 public class FillAction extends AbstractAction<Match> {
 
@@ -33,7 +32,7 @@ public class FillAction extends AbstractAction<Match> {
       if (filter != null && filter.query(new BlockQuery(block)).isDenied()) continue;
 
       BlockState newState = block.getState();
-      NMSHacks.setBlockStateData(newState, materialData);
+      materialData.apply(newState);
 
       if (events) {
         BlockFormEvent event = new BlockFormEvent(block, newState);

@@ -3,9 +3,11 @@ package tc.oc.pgm.util.material.matcher;
 import java.util.Collection;
 import java.util.Collections;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.nms.material.MaterialData;
 
 public class NoMaterialMatcher implements MaterialMatcher {
 
@@ -25,6 +27,16 @@ public class NoMaterialMatcher implements MaterialMatcher {
 
   @Override
   public boolean matches(ItemStack stack) {
+    return false;
+  }
+
+  @Override
+  public boolean matches(Block block) {
+    return false;
+  }
+
+  @Override
+  public boolean matches(BlockState blockState) {
     return false;
   }
 

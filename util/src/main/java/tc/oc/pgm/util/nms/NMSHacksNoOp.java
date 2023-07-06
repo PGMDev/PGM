@@ -14,7 +14,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
@@ -26,7 +25,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -37,6 +35,8 @@ import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntityNoOp;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotionBukkit;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.nms.reflect.Refl;
 import tc.oc.pgm.util.nms.reflect.ReflectionProxy;
 import tc.oc.pgm.util.skin.Skin;
@@ -172,6 +172,13 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   }
 
   @Override
+  public void createFakeArmorStand(
+      Player player, int entityId, Location location, Vector velocity) {
+    // Only used by ProtocolLib, implemented there
+    throw new UnsupportedOperationException("Not implemented for your version!");
+  }
+
+  @Override
   public ItemStack craftItemCopy(ItemStack item) {
     return item.clone();
   }
@@ -227,7 +234,7 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
     // TODO: MaterialData is not version compatible
     Set<MaterialData> materialDataSet = new HashSet<>();
     for (byte i = 0; i < 16; i++) {
-      materialDataSet.add(new MaterialData(material, i));
+      materialDataSet.add(MaterialDataProvider.from(material, i));
     }
     return materialDataSet;
   }
@@ -272,12 +279,6 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   @Override
   public Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
     return getMaterialCollection(itemMeta, "CanPlaceOn");
-  }
-
-  @Override
-  public void setBlockStateData(BlockState state, MaterialData materialData) {
-    state.setType(materialData.getItemType());
-    state.setData(materialData);
   }
 
   @Override

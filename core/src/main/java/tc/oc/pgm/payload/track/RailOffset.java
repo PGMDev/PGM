@@ -2,8 +2,9 @@ package tc.oc.pgm.payload.track;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.material.Rails;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.nms.material.Rail;
 
 public interface RailOffset {
 
@@ -21,7 +22,7 @@ public interface RailOffset {
     BlockFace face = getNext();
     Block next = current.getRelative(face);
 
-    if (!(next.getState().getMaterialData() instanceof Rails))
+    if (!(MaterialDataProvider.from(next.getState()) instanceof Rail))
       next = next.getRelative(BlockFace.DOWN);
 
     return next;

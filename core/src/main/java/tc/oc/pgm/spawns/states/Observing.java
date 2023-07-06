@@ -13,7 +13,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.material.Door;
 import org.bukkit.permissions.PermissionAttachment;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
@@ -26,6 +25,8 @@ import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.nms.material.Door;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public class Observing extends State {
 
@@ -139,7 +140,7 @@ public class Observing extends State {
       return;
 
     ItemStack item = event.getCursor();
-    if (BAD_TYPES.contains(item.getType()) || item.getData() instanceof Door) {
+    if (BAD_TYPES.contains(item.getType()) || MaterialDataProvider.from(item) instanceof Door) {
       event.setCancelled(true);
     }
   }

@@ -32,13 +32,13 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
 
       if (cores.size() > destroyables.size() && cores.size() > 0) {
         this.name =
-            cores.iterator().next().getModeChangeMessage(this.mode.getMaterialData().getItemType());
+            cores.iterator().next().getModeChangeMessage(this.mode.getMaterialData().getMaterial());
       } else if (destroyables.size() >= cores.size() && destroyables.size() > 0) {
         this.name =
             destroyables
                 .iterator()
                 .next()
-                .getModeChangeMessage(this.mode.getMaterialData().getItemType());
+                .getModeChangeMessage(this.mode.getMaterialData().getMaterial());
       } else {
         this.name = "Unknown Mode";
       }

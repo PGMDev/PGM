@@ -19,6 +19,9 @@ import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.SectorRegion;
 import tc.oc.pgm.renewable.BlockImage;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.nms.material.Colorable;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
 public class ControlPointBlockDisplay implements Listener {
@@ -84,25 +87,32 @@ public class ControlPointBlockDisplay implements Listener {
           this.controllerDisplayImage.restore(block);
         }
       } else {
-        byte blockData = controllingTeam.getDyeColor().getWoolData();
         for (BlockVector pos : this.controllerDisplayRegion.getBlockVectors()) {
-          BlockVectors.blockAt(match.getWorld(), pos).setData(blockData);
+          Block block = BlockVectors.blockAt(match.getWorld(), pos);
+          MaterialData materialData = MaterialDataProvider.from(block);
+          if (materialData instanceof Colorable) {
+            ((Colorable) materialData).setColor(controllingTeam.getDyeColor());
+            materialData.apply(block, false);
+          }
         }
       }
       this.controllingTeam = controllingTeam;
     }
   }
 
-  @SuppressWarnings("deprecation")
   private void setBlock(BlockVector pos, Competitor team) {
     final Block block = BlockVectors.blockAt(match.getWorld(), pos);
-    if (this.controlPoint
-        .getDefinition()
-        .getVisualMaterials()
-        .query(new BlockQuery(block))
-        .isAllowed()) {
+    MaterialData materialData = MaterialDataProvider.from(block);
+    if (materialData instanceof Colorable
+        && this.controlPoint
+            .getDefinition()
+            .getVisualMaterials()
+            .query(new BlockQuery(block))
+            .isAllowed()) {
       if (team != null) {
-        block.setData(team.getDyeColor().getWoolData());
+        Colorable colorable = (Colorable) materialData;
+        colorable.setColor(team.getDyeColor());
+        materialData.apply(block, false);
       } else {
         this.progressDisplayImage.restore(block);
       }

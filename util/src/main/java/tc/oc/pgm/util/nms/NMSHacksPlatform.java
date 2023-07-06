@@ -12,7 +12,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
@@ -24,7 +23,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -35,6 +33,7 @@ import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
+import tc.oc.pgm.util.nms.material.MaterialData;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacksPlatform {
@@ -56,6 +55,8 @@ public interface NMSHacksPlatform {
   boolean isCraftItemArrowEntity(org.bukkit.entity.Item item);
 
   void freezeEntity(Entity entity);
+
+  void createFakeArmorStand(Player player, int entityId, Location location, Vector velocity);
 
   void setFireballDirection(Fireball entity, Vector direction);
 
@@ -138,9 +139,6 @@ public interface NMSHacksPlatform {
   @Deprecated
   Set<MaterialData> getBlockStates(Material material);
 
-  // TODO: Material api
-  void setBlockStateData(BlockState state, MaterialData materialData);
-
   Skin getPlayerSkin(Player player);
 
   Skin getPlayerSkinForViewer(Player player, Player viewer);
@@ -169,7 +167,7 @@ public interface NMSHacksPlatform {
    *
    * <p>Derived from CraftBlock.itemCausesDrops()
    */
-  boolean canMineBlock(MaterialData blockMaterial, ItemStack tool);
+  boolean canMineBlock(Material material, ItemStack tool);
 
   void resetDimension(World world);
 

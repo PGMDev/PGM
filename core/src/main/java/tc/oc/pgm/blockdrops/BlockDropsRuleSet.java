@@ -10,7 +10,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
@@ -26,6 +25,8 @@ import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public class BlockDropsRuleSet {
   private final ImmutableList<BlockDropsRule> rules;
@@ -78,7 +79,7 @@ public class BlockDropsRuleSet {
   }
 
   public BlockDrops getDrops(@Nullable Event event, BlockState block, ParticipantState player) {
-    return this.getDrops(event, block, block.getData(), player);
+    return this.getDrops(event, block, MaterialDataProvider.from(block), player);
   }
 
   public BlockDrops getDrops(
@@ -99,7 +100,8 @@ public class BlockDropsRuleSet {
     boolean rightToolUsed;
     if (event instanceof BlockBreakEvent) {
       rightToolUsed =
-          NMSHacks.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
+          NMSHacks.canMineBlock(
+              material.getMaterial(), ((BlockBreakEvent) event).getPlayer().getItemInHand());
     } else {
       rightToolUsed = true;
     }

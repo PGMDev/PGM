@@ -28,6 +28,7 @@ import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -52,6 +53,7 @@ import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {
@@ -299,9 +301,10 @@ public class RegionMatchModule implements MatchModule, Listener {
         // If the frame is empty and it's right clicked with an item, this will place the item in
         // the frame,
         // which is handled as a "place" event, with the placed item as the block world
+        ItemStack itemStack = event.getPlayer().getItemInHand();
         BlockState blockState =
             BlockStates.cloneWithMaterial(
-                itemFrame.getLocation().getBlock(), event.getPlayer().getItemInHand().getData());
+                itemFrame.getLocation().getBlock(), MaterialDataProvider.from(itemStack));
         this.handleHangingPlace(event, blockState, event.getPlayer());
       }
     }

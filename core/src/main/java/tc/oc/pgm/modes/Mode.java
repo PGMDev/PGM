@@ -6,11 +6,11 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.util.nms.material.MaterialData;
 
 @FeatureInfo(name = "mode")
 public class Mode extends SelfIdentifyingFeatureDefinition {

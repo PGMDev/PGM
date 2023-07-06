@@ -31,7 +31,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -65,6 +64,8 @@ import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -108,7 +109,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
 
     public boolean matches(MaterialData material) {
-      return this.material.equals(material.getItemType());
+      return this.material.equals(material.getMaterial());
     }
   }
 
@@ -330,10 +331,11 @@ public class PickerMatchModule implements MatchModule, Listener {
       MatchPlayer player = match.getPlayer((Player) event.getWhoClicked());
       if (player == null || !this.picking.contains(player)) return;
 
+      ItemStack itemStack = event.getCurrentItem();
       this.handleInventoryClick(
           player,
           ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()),
-          event.getCurrentItem().getData());
+          MaterialDataProvider.from(itemStack));
       event.setCancelled(true);
     }
   }

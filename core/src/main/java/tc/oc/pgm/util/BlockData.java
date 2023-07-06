@@ -2,10 +2,11 @@ package tc.oc.pgm.util;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.legacy.MaterialDataLegacy;
 
-/** Util class to reference a {@link MaterialData} and location of a block. */
+/** Util class to reference a {@link MaterialDataLegacy} and location of a block. */
 public interface BlockData {
 
   /**
@@ -14,23 +15,7 @@ public interface BlockData {
    *
    * @return a new material data with proper material type and metadata
    */
-  default MaterialData getMaterialData() {
-    return new MaterialData(getTypeId(), (byte) getData());
-  }
-
-  /**
-   * Get the material type id.
-   *
-   * @return the material type id for this block data.
-   */
-  int getTypeId();
-
-  /**
-   * Get the metadata.
-   *
-   * @return the metadata for the block data.
-   */
-  int getData();
+  MaterialData getMaterialData();
 
   /**
    * Get the current position.

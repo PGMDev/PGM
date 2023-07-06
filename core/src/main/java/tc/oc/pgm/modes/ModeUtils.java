@@ -1,7 +1,7 @@
 package tc.oc.pgm.modes;
 
 import org.bukkit.Material;
-import org.bukkit.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialData;
 
 public class ModeUtils {
   public static String formatMaterial(Material m) {
@@ -14,6 +14,6 @@ public class ModeUtils {
   }
 
   public static String formatMaterial(MaterialData m) {
-    return formatMaterial(m.getItemType());
+    return formatMaterial(m.getMaterial());
   }
 }

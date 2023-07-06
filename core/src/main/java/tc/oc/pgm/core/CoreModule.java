@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 import org.bukkit.Material;
-import org.bukkit.material.MaterialData;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -32,6 +31,8 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -91,7 +92,7 @@ public class CoreModule implements MapModule<CoreMatchModule> {
       for (Element coreEl : XMLUtils.flattenElements(doc.getRootElement(), "cores", "core")) {
         MaterialData material =
             XMLUtils.parseBlockMaterialData(
-                Node.fromAttr(coreEl, "material"), Material.OBSIDIAN.getNewData((byte) 0));
+                Node.fromAttr(coreEl, "material"), MaterialDataProvider.from(Material.OBSIDIAN));
 
         int leakLevel = Integer.parseInt(coreEl.getAttributeValue("leak", "5"));
 

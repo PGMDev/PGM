@@ -19,6 +19,9 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.material.Door;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 public class WorldProblemListener implements Listener {
 
@@ -64,9 +67,12 @@ public class WorldProblemListener implements Listener {
     if (this.repairedChunks.put(event.getWorld(), event.getChunk())) {
       // Replace formerly invisible half-iron-door blocks with barriers
       for (Block ironDoor : NMSHacks.getBlocks(event.getChunk(), Material.IRON_DOOR_BLOCK)) {
-        BlockFace half = (ironDoor.getData() & 8) == 0 ? BlockFace.DOWN : BlockFace.UP;
-        if (ironDoor.getRelative(half.getOppositeFace()).getType() != Material.IRON_DOOR_BLOCK) {
-          ironDoor.setType(Material.BARRIER, false);
+        MaterialData materialData = MaterialDataProvider.from(ironDoor);
+        if (materialData instanceof Door) {
+          BlockFace half = ((Door) materialData).isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
+          if (ironDoor.getRelative(half.getOppositeFace()).getType() != Material.IRON_DOOR_BLOCK) {
+            ironDoor.setType(Material.BARRIER, false);
+          }
         }
       }
 

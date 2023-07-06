@@ -3,10 +3,13 @@ package tc.oc.pgm.util.material.matcher;
 import java.util.Collection;
 import java.util.Collections;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
 
 /**
  * A pattern that matches a specific Material and optionally, its metadata/damage value. If
@@ -21,31 +24,22 @@ import tc.oc.pgm.util.material.Materials;
  * default state.
  */
 public class SingleMaterialMatcher implements MaterialMatcher {
-  private final Material material;
-
-  private final byte data;
-  private final boolean dataMatters;
+  private final MaterialData materialData;
 
   public SingleMaterialMatcher(Material material, byte data) {
-    this.material = material;
-    this.data = data;
-    this.dataMatters = true;
+    this.materialData = MaterialDataProvider.from(material, data);
   }
 
   public SingleMaterialMatcher(MaterialData materialData) {
-    this.material = materialData.getItemType();
-    this.data = materialData.getData();
-    this.dataMatters = true;
+    this.materialData = materialData;
   }
 
   public SingleMaterialMatcher(Material material) {
-    this.material = material;
-    this.data = 0;
-    this.dataMatters = false;
+    this.materialData = MaterialDataProvider.from(material);
   }
 
   public Material getMaterial() {
-    return this.material;
+    return this.materialData.getMaterial();
   }
 
   @Override
@@ -53,34 +47,33 @@ public class SingleMaterialMatcher implements MaterialMatcher {
     return Collections.singleton(getMaterial());
   }
 
-  public byte getData() {
-    return this.data;
-  }
-
-  @SuppressWarnings("deprecation")
   public MaterialData getMaterialData() {
-    return this.material.getNewData(this.data);
-  }
-
-  public boolean dataMatters() {
-    return this.dataMatters;
+    return this.materialData;
   }
 
   @Override
   public boolean matches(Material material) {
-    return material == this.material && (!this.dataMatters || this.data == 0);
+    return this.materialData.matches(material);
   }
 
   @Override
   public boolean matches(MaterialData materialData) {
-    return materialData.getItemType() == this.material
-        && (!this.dataMatters || materialData.getData() == this.data);
+    return this.materialData.matches(materialData);
+  }
+
+  @Override
+  public boolean matches(Block block) {
+    return this.materialData.matches(block);
+  }
+
+  @Override
+  public boolean matches(BlockState blockState) {
+    return this.materialData.matches(blockState);
   }
 
   @Override
   public boolean matches(ItemStack stack) {
-    return stack.getType() == this.material
-        && (!this.dataMatters || stack.getData().getData() == this.data);
+    return this.materialData.matches(stack);
   }
 
   public static SingleMaterialMatcher parse(String text) {

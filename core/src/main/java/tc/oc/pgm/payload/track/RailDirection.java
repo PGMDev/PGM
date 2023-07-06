@@ -2,9 +2,10 @@ package tc.oc.pgm.payload.track;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Rails;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.nms.material.MaterialData;
+import tc.oc.pgm.util.nms.material.MaterialDataProvider;
+import tc.oc.pgm.util.nms.material.Rail;
 
 public enum RailDirection {
   SOUTH(new StraightRail(BlockFace.SOUTH), new StraightRail(BlockFace.NORTH)),
@@ -43,11 +44,12 @@ public enum RailDirection {
   }
 
   public static @Nullable RailDirection getRail(Block block) {
-    MaterialData md = block.getState().getMaterialData();
-    if (!(md instanceof Rails)) return null;
+    MaterialData md = MaterialDataProvider.from(block);
+    if (!(md instanceof Rail)) return null;
+    Rail railMd = (Rail) md;
 
-    byte data = md.getData();
-    if (data < 0 || data >= DIRECTIONS.length)
+    byte data = railMd.getDirectionIndex();
+    if (!railMd.dataIsValid())
       throw new IllegalStateException(
           "Invalid rail metadata: " + data + " @ " + block.getLocation());
 
