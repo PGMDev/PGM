@@ -45,11 +45,11 @@ public class ReflectionProxy implements InvocationHandler {
 
   @Nullable
   private static Function<Object[], Object> processComponent(Method method, Object[] args) {
-    if (method.isAnnotationPresent(Reflect.NMS.class)) {
+    if (method.getDeclaredAnnotationsByType(Reflect.NMS.class).length > 0) {
       return processNMSComponent(method, args);
-    } else if (method.isAnnotationPresent(Reflect.CB.class)) {
+    } else if (method.getDeclaredAnnotationsByType(Reflect.CB.class).length > 0) {
       return processCBComponent(method, args);
-    } else if (method.isAnnotationPresent(Reflect.B.class)) {
+    } else if (method.getDeclaredAnnotationsByType(Reflect.B.class).length > 0) {
       return processBukkitComponent(method, args);
     }
     throw new RuntimeException("Error processing Method: " + method);
@@ -58,13 +58,13 @@ public class ReflectionProxy implements InvocationHandler {
   @Nullable
   private static Function<Object[], Object> processComponent(
       Method method, Object[] args, Class<?> parentClass) {
-    if (method.isAnnotationPresent(Reflect.StaticMethod.class)) {
+    if (method.getDeclaredAnnotationsByType(Reflect.StaticMethod.class).length > 0) {
       return processStaticMethod(method, parentClass);
-    } else if (method.isAnnotationPresent(Reflect.Method.class)) {
+    } else if (method.getDeclaredAnnotationsByType(Reflect.Method.class).length > 0) {
       return processMethod(method, args, parentClass);
-    } else if (method.isAnnotationPresent(Reflect.Field.class)) {
+    } else if (method.getDeclaredAnnotationsByType(Reflect.Field.class).length > 0) {
       return processField(method, args, parentClass);
-    } else if (method.isAnnotationPresent(Reflect.Constructor.class)) {
+    } else if (method.getDeclaredAnnotationsByType(Reflect.Constructor.class).length > 0) {
       return processConstructor(method, parentClass);
     }
     throw new RuntimeException("Error processing method: " + method);
@@ -87,11 +87,11 @@ public class ReflectionProxy implements InvocationHandler {
 
   private static Function<Object[], Object> processMethod(
       Method method, Object[] args, Class<?> parentClass) {
-    for (Reflect.Method staticMethod : method.getDeclaredAnnotationsByType(Reflect.Method.class)) {
+    for (Reflect.Method reflectMethod : method.getDeclaredAnnotationsByType(Reflect.Method.class)) {
       try {
         Method reflectedMethod =
             parentClass.getMethod(
-                staticMethod.value(), processParameters(staticMethod.parameters()));
+                reflectMethod.value(), processParameters(reflectMethod.parameters()));
         return callMethod(args, reflectedMethod);
       } catch (NoSuchMethodException ignored) {
       }

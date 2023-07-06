@@ -121,7 +121,7 @@ import tc.oc.pgm.util.reflect.ReflectionUtils;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.skin.Skins;
 
-class NMSHacks1_8 extends NMSHacksNoOp {
+public class NMSHacks1_8 extends NMSHacksNoOp {
 
   public NMSHacks1_8() {}
 
