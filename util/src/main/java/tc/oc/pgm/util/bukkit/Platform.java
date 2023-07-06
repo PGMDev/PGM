@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.nms.NMSHacksNoOp;
 import tc.oc.pgm.util.nms.NMSHacksPlatform;
+import tc.oc.pgm.util.nms.v1_10_12.NMSHacks1_10_12;
 import tc.oc.pgm.util.nms.v1_8.NMSHacksSportPaper;
 import tc.oc.pgm.util.nms.v1_9.NMSHacks1_9;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
@@ -26,7 +27,13 @@ public enum Platform {
           ReflectionUtils.getClassFromName("tc.oc.pgm.util.nms.v1_8.NMSHacks1_8"),
       false),
   SPIGOT_1_9("Spigot", "1.9", NMSHacks1_9.class, true),
-  PAPER_1_9("Paper", "1.9", NMSHacks1_9.class, true);
+  PAPER_1_9("Paper", "1.9", NMSHacks1_9.class, true),
+  SPIGOT_1_10("Spigot", "1.10", NMSHacks1_10_12.class, true),
+  PAPER_1_10("Paper", "1.10", NMSHacks1_10_12.class, true),
+  SPIGOT_1_11("Spigot", "1.11", NMSHacks1_10_12.class, true),
+  PAPER_1_11("Paper", "1.11", NMSHacks1_10_12.class, true),
+  SPIGOT_1_12("Spigot", "1.12", NMSHacks1_10_12.class, true),
+  PAPER_1_12("Paper", "1.12", NMSHacks1_10_12.class, true);
 
   private static ClassLogger logger = ClassLogger.get(Platform.class);;
   public static Platform SERVER_PLATFORM = computeServerPlatform();

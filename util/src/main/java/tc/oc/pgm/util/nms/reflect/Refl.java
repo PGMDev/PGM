@@ -71,6 +71,7 @@ public interface Refl {
     Object build(String string);
 
     @Reflect.Method("a_")
+    @Reflect.Method("c_")
     String getString(Object item);
   };
 
@@ -157,9 +158,13 @@ public interface Refl {
     Object getBlockData(Object self);
 
     @Reflect.Method("q")
+    @Reflect.Method(value = "q", parameters = IBlockData.class)
     Object getMaterial(Object self);
   }
 
   @Reflect.NMS("IBlockData")
-  interface IBlockData {}
+  interface IBlockData {
+    @Reflect.Method("getMaterial")
+    Object getMaterial(Object self);
+  }
 }
