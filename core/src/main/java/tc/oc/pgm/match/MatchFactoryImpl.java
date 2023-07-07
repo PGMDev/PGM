@@ -360,10 +360,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
         for (Player player : Bukkit.getOnlinePlayers()) {
           if (viewer.canSee(player) && viewer != player) players.add(player.getName());
         }
+        String prefix = ChatColor.AQUA.toString();
         NMSHacks.sendPacket(
-            viewer,
-            NMSHacks.teamCreatePacket(
-                "dummy", "dummy", ChatColor.AQUA.toString(), "", false, false, players));
+            viewer, NMSHacks.teamCreatePacket("dummy", "dummy", prefix, "", false, false, players));
       }
 
       int tpPerSecond = Integer.MAX_VALUE;
@@ -400,7 +399,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       }
 
       // After all players have been teleported, remove the dummy team
-      NMSHacks.sendPacket(NMSHacks.teamRemovePacket("dummy"));
+      NMSHacks.sendDestroyTeamDummyPacket();
 
       match.callEvent(new MatchAfterLoadEvent(match));
 

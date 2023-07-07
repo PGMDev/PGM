@@ -12,11 +12,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -50,11 +49,11 @@ public class TabDisplay {
   private final String[] rendered;
 
   // Cached packets used to setup and tear down the player list
-  private final Packet[] teamCreatePackets;
-  private final Packet[] teamRemovePackets;
+  private final Object[] teamCreatePackets;
+  private final Object[] teamRemovePackets;
 
-  private final PacketPlayOutPlayerInfo listAddPacket;
-  private final PacketPlayOutPlayerInfo listRemovePacket;
+  private final Object listAddPacket;
+  private final Object listRemovePacket;
 
   public TabDisplay(Player viewer, int width) {
     // Number of columns is maxPlayers/rows rounded up
@@ -64,13 +63,11 @@ public class TabDisplay {
     this.viewer = viewer;
     this.rendered = new String[this.slots];
 
-    this.teamCreatePackets = new Packet[this.slots];
-    this.teamRemovePackets = new Packet[this.slots];
+    this.teamCreatePackets = new Object[this.slots];
+    this.teamRemovePackets = new Object[this.slots];
 
-    this.listAddPacket =
-        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
-    this.listRemovePacket =
-        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
+    this.listAddPacket = NMSHacks.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
+    this.listRemovePacket = NMSHacks.createPlayerInfoPacket(EnumPlayerInfoAction.REMOVE_PLAYER);
 
     for (int slot = 0; slot < this.slots; ++slot) {
       Component playerName = this.slotName(slot);
@@ -84,17 +81,10 @@ public class TabDisplay {
       this.teamRemovePackets[slot] = NMSHacks.teamRemovePacket(teamName);
       UUID uuid = UUID.randomUUID();
 
-      NMSHacks.getPlayerInfoDataList(listAddPacket)
-          .add(
-              NMSHacks.playerListPacketData(
-                  listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, renderedPlayerName));
-      NMSHacks.getPlayerInfoDataList(listRemovePacket)
-          .add(NMSHacks.playerListPacketData(listRemovePacket, uuid, renderedPlayerName));
+      NMSHacks.addPlayerInfoToPacket(
+          listAddPacket, uuid, name, GameMode.SURVIVAL, 9999, null, renderedPlayerName);
+      NMSHacks.addPlayerInfoToPacket(listRemovePacket, uuid, renderedPlayerName);
     }
-  }
-
-  public int getWidth() {
-    return width;
   }
 
   private int slotIndex(int x, int y) {

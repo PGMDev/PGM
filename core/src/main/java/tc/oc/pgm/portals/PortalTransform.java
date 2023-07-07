@@ -56,7 +56,9 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
 
     private Location mutate(Location v) {
       Vector mutated = mutate(v.toVector());
-      v.set(mutated.getX(), mutated.getY(), mutated.getZ());
+      v.setX(mutated.getX());
+      v.setY(mutated.getY());
+      v.setZ(mutated.getZ());
       v.setYaw((float) yaw.apply(v.getYaw()));
       v.setPitch((float) pitch.apply(v.getPitch()));
       return v;
@@ -138,7 +140,9 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
     public Location apply(Location v) {
       v = v.clone();
       Vector region = to.getRandom(random);
-      v.set(region.getX(), region.getY(), region.getZ());
+      v.setX(region.getX());
+      v.setY(region.getY());
+      v.setZ(region.getZ());
       return v;
     }
 

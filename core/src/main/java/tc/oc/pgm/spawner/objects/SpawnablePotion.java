@@ -12,6 +12,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.spawner.Spawnable;
 import tc.oc.pgm.spawner.Spawner;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 
 public class SpawnablePotion implements Spawnable {
   private final ItemStack potionItem;
@@ -31,7 +32,7 @@ public class SpawnablePotion implements Spawnable {
 
   @Override
   public void spawn(Location location, Match match) {
-    NMSHacks.EntityPotion entityPotion = new NMSHacks.EntityPotion(location, potionItem);
+    EntityPotion entityPotion = NMSHacks.entityPotion(location, potionItem);
     entityPotion.spawn();
     entityPotion
         .getBukkitEntity()

@@ -54,6 +54,7 @@ import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -369,7 +370,10 @@ public class PGMListener implements Listener {
   @EventHandler // We only need to store skins for the post match stats
   public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
     final MatchPlayer player = event.getPlayer();
-    PGM.get().getDatastore().setSkin(player.getId(), NMSHacks.getPlayerSkin(player.getBukkit()));
+    Skin playerSkin = NMSHacks.getPlayerSkin(player.getBukkit());
+    if (playerSkin != null) {
+      PGM.get().getDatastore().setSkin(player.getId(), playerSkin);
+    }
   }
 
   public void setGameRule(MatchLoadEvent event, String gameRule, boolean gameRuleValue) {

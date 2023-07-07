@@ -9,6 +9,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.query.BlockQuery;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class FillAction extends AbstractAction<Match> {
 
@@ -32,7 +33,7 @@ public class FillAction extends AbstractAction<Match> {
       if (filter != null && filter.query(new BlockQuery(block)).isDenied()) continue;
 
       BlockState newState = block.getState();
-      newState.setMaterialData(materialData);
+      NMSHacks.setBlockStateData(newState, materialData);
 
       if (events) {
         BlockFormEvent event = new BlockFormEvent(block, newState);

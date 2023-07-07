@@ -68,6 +68,7 @@ import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class BlockTransformListener implements Listener {
   private static final BlockFace[] NEIGHBORS = {
@@ -488,8 +489,7 @@ public class BlockTransformListener implements Listener {
         new PistonExtensionMaterial(Material.PISTON_EXTENSION);
     pistonExtension.setFacingDirection(event.getDirection());
     BlockState pistonExtensionState = event.getBlock().getRelative(event.getDirection()).getState();
-    pistonExtensionState.setType(pistonExtension.getItemType());
-    pistonExtensionState.setData(pistonExtension);
+    NMSHacks.setBlockStateData(pistonExtensionState, pistonExtension);
     newStates.put(event.getBlock(), pistonExtensionState);
 
     this.onPistonMove(event, event.getBlocks(), newStates);

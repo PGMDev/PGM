@@ -77,11 +77,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
     }
 
     // TODO: find different solution for non-SportPaper servers
-    return this.player.hasFakeSkin(viewer)
-        ? new Skin(
-            this.player.getFakeSkin(viewer).getData(),
-            this.player.getFakeSkin(viewer).getSignature())
-        : NMSHacks.getPlayerSkin(this.player);
+    return NMSHacks.getPlayerSkinForViewer(player, viewer);
   }
 
   @Override
