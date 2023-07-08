@@ -3,6 +3,7 @@ package tc.oc.pgm.scoreboard;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,7 +85,7 @@ class SidebarRenderer {
       }
 
       // When there are multiple, primary game modes
-      games.set(0, text(Gamemode.OBJECTIVES.getFullName(), NamedTextColor.AQUA));
+      games.set(0, translatable("gamemode.generic.name", NamedTextColor.AQUA));
       break;
     }
 
