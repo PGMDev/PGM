@@ -27,6 +27,10 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   @Nullable
   String getVariant();
 
+  /** @return the subfolder in which the world is in, or null for the parent folder */
+  @Nullable
+  String getWorldFolder();
+
   /**
    * Get the proto of the map's {@link org.jdom2.Document}.
    *
