@@ -577,8 +577,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     ItemStack item = cls.getIcon().toItemStack(1);
     ItemMeta meta = item.getItemMeta();
 
-    meta.setDisplayName(
-        (cls.canUse(viewer.getBukkit()) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
+    meta.setDisplayName((cls.canUse(viewer) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
     if (match.getModule(ClassMatchModule.class).getSelectedClass(viewer.getId()).equals(cls)) {
       meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
     }
@@ -591,10 +590,13 @@ public class PickerMatchModule implements MatchModule, Listener {
       lore.add(ChatColor.GOLD + cls.getDescription());
     }
 
-    if (!cls.canUse(viewer.getBukkit())) {
+    if (!cls.canUse(viewer)) {
+      String denyMessage = cls.getDenyMessage();
       lore.add(
           ChatColor.RED
-              + TextTranslations.translate("class.picker.restricted", viewer.getBukkit()));
+              + (denyMessage != null
+                  ? denyMessage
+                  : TextTranslations.translate("picker.class.filtered", viewer.getBukkit())));
     }
 
     meta.setLore(lore);
@@ -686,7 +688,15 @@ public class PickerMatchModule implements MatchModule, Listener {
       PlayerClass cls = cmm.getPlayerClass(name);
 
       if (cls != null && cls.getIcon().equals(material)) {
-        if (!cls.canUse(player.getBukkit())) return;
+        if (!cls.canUse(player)) {
+          if (cls.getDenyMessage() != null) {
+            player.sendMessage(text(cls.getDenyMessage(), NamedTextColor.RED));
+          } else {
+            player.sendMessage(
+                translatable("match.class.filtered", NamedTextColor.RED, text(cls.getName())));
+          }
+          return;
+        }
 
         if (cls != cmm.getSelectedClass(player.getId())) {
           if (cmm.getCanChangeClass(player.getId())) {

@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,11 +18,14 @@ import org.bukkit.material.MaterialData;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
@@ -36,12 +40,13 @@ public class ClassModule implements MapModule<ClassMatchModule> {
       ImmutableList.of(new MapTag("classes", "Classes", false, true));
   final String family;
   final Map<String, PlayerClass> classes;
-  final PlayerClass defaultClass;
+  final List<PlayerClass> defaultClasses;
 
-  public ClassModule(String family, Map<String, PlayerClass> classes, PlayerClass defaultClass) {
+  public ClassModule(
+      String family, Map<String, PlayerClass> classes, List<PlayerClass> defaultClass) {
     this.family = assertNotNull(family, "family");
     this.classes = ImmutableMap.copyOf(assertNotNull(classes, "classes"));
-    this.defaultClass = assertNotNull(defaultClass, "default class");
+    this.defaultClasses = assertNotNull(defaultClass, "default class");
   }
 
   @Override
@@ -51,7 +56,7 @@ public class ClassModule implements MapModule<ClassMatchModule> {
 
   @Override
   public ClassMatchModule createMatchModule(Match match) {
-    return new ClassMatchModule(match, this.family, this.classes, this.defaultClass);
+    return new ClassMatchModule(match, this.family, this.classes, this.defaultClasses);
   }
 
   public String getFamily() {
@@ -105,10 +110,10 @@ public class ClassModule implements MapModule<ClassMatchModule> {
 
       Set<String> usedNames = Sets.newHashSet();
       ImmutableMap.Builder<String, PlayerClass> builder = ImmutableMap.builder();
-      PlayerClass defaultClass = null;
+      List<PlayerClass> defaultClasses = new ArrayList<>();
 
       for (Element classEl : classElements) {
-        PlayerClass cls = parseClass(classEl, factory.getKits(), family);
+        PlayerClass cls = parseClass(classEl, factory.getKits(), factory.getFilters(), family);
 
         if (usedNames.contains(cls.getName().toLowerCase())) {
           throw new InvalidXMLException(
@@ -128,12 +133,7 @@ public class ClassModule implements MapModule<ClassMatchModule> {
         }
 
         if (XMLUtils.parseBoolean(classEl.getAttribute("default"), false)) {
-          if (defaultClass != null) {
-            throw new InvalidXMLException(
-                "Default class already registered to " + defaultClass.getName(), classEl);
-          } else {
-            defaultClass = cls;
-          }
+          defaultClasses.add(cls);
         }
 
         builder.put(cls.getName(), cls);
@@ -142,8 +142,8 @@ public class ClassModule implements MapModule<ClassMatchModule> {
       Map<String, PlayerClass> classes = builder.build();
 
       if (!classes.isEmpty()) {
-        if (defaultClass != null) {
-          return new ClassModule(family, classes, defaultClass);
+        if (!defaultClasses.isEmpty()) {
+          return new ClassModule(family, classes, defaultClasses);
         } else {
           throw new InvalidXMLException("No default class set", doc);
         }
@@ -152,7 +152,8 @@ public class ClassModule implements MapModule<ClassMatchModule> {
       return null;
     }
 
-    private static PlayerClass parseClass(Element classEl, KitParser kitParser, String family)
+    private static PlayerClass parseClass(
+        Element classEl, KitParser kitParser, FilterParser filters, String family)
         throws InvalidXMLException {
       String name = classEl.getAttributeValue("name");
       if (name == null) {
@@ -181,8 +182,24 @@ public class ClassModule implements MapModule<ClassMatchModule> {
 
       boolean restrict = XMLUtils.parseBoolean(classEl.getAttribute("restrict"), false);
 
+      Filter filter = filters.parseFilterProperty(classEl, "filter", StaticFilter.ALLOW);
+
+      String denyMessage = classEl.getAttributeValue("deny-message");
+      if (denyMessage != null) {
+        denyMessage = BukkitUtils.colorize(denyMessage);
+      }
+
       return new PlayerClass(
-          name, family, description, longdescription, sticky, kits.build(), icon, restrict);
+          name,
+          family,
+          description,
+          longdescription,
+          sticky,
+          kits.build(),
+          icon,
+          restrict,
+          filter,
+          denyMessage);
     }
   }
 }

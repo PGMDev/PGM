@@ -65,7 +65,7 @@ public final class ClassCommand {
 
       if (cls == currentClass) {
         color = NamedTextColor.GOLD;
-      } else if (cls.canUse(player.getBukkit())) {
+      } else if (cls.canUse(player)) {
         color = NamedTextColor.GREEN;
       } else {
         color = NamedTextColor.RED;

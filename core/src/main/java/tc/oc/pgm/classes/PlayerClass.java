@@ -4,9 +4,11 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
-import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.kits.Kit;
 
 public class PlayerClass {
@@ -18,6 +20,8 @@ public class PlayerClass {
   private final Set<Kit> kits;
   private final MaterialData icon;
   private final boolean restrict;
+  private final Filter filter;
+  private final String denyMessage;
 
   public PlayerClass(
       String name,
@@ -27,7 +31,9 @@ public class PlayerClass {
       boolean sticky,
       Set<Kit> kits,
       MaterialData icon,
-      boolean restrict) {
+      boolean restrict,
+      Filter filter,
+      String denyMessage) {
     this.name = assertNotNull(name, "name");
     this.familyName = assertNotNull(familyName, "family name");
     this.description = description;
@@ -36,6 +42,8 @@ public class PlayerClass {
     this.kits = ImmutableSet.copyOf(assertNotNull(kits, "kits"));
     this.icon = assertNotNull(icon, "icon");
     this.restrict = restrict;
+    this.filter = filter;
+    this.denyMessage = denyMessage;
   }
 
   public String getName() {
@@ -70,8 +78,18 @@ public class PlayerClass {
     return this.restrict;
   }
 
-  public boolean canUse(Player player) {
-    return true; // Restricted classes are removed: !this.isRestricted() || player.isOp();
+  public boolean canUse(MatchPlayer player) {
+    if (player == null) return false;
+    PlayerQuery playerQuery = new PlayerQuery(null, player);
+    Filter.QueryResponse response = filter.query(playerQuery);
+    return response.isAllowed();
+    // Restricted classes are removed:
+    // return response.isAllowed() && (!this.isRestricted() || player.getBukkit().isOp());
+  }
+
+  @Nullable
+  public String getDenyMessage() {
+    return denyMessage;
   }
 
   @Override
@@ -89,6 +107,7 @@ public class PlayerClass {
     result = prime * result + (this.sticky ? 1231 : 1237);
     result = prime * result + this.kits.hashCode();
     result = prime * result + this.icon.hashCode();
+    result = prime * result + this.filter.hashCode();
     return result;
   }
 
@@ -109,6 +128,8 @@ public class PlayerClass {
     if (this.sticky != other.sticky) return false;
     if (!this.kits.equals(other.kits)) return false;
     if (!this.icon.equals(other.icon)) return false;
+    if (!this.filter.equals(other.filter)) return false;
+    if (!this.denyMessage.equals(other.denyMessage)) return false;
     return true;
   }
 }
