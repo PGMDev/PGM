@@ -22,7 +22,7 @@ public class EntityPotion1_8 implements EntityPotion {
 
   @Override
   public void spawn() {
-    handle.spawnIn(handle.getWorld());
+    handle.getWorld().addEntity(handle);
   }
 
   @Override
