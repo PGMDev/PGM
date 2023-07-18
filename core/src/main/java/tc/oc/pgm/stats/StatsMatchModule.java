@@ -6,12 +6,14 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +22,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -52,6 +53,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.destroyable.DestroyableHealthChange;
 import tc.oc.pgm.destroyable.DestroyableHealthChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
@@ -60,7 +62,6 @@ import tc.oc.pgm.stats.menu.StatsMainMenu;
 import tc.oc.pgm.stats.menu.items.PlayerStatsMenuItem;
 import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.UsernameResolver;
@@ -73,6 +74,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
+  private final Table<Team, UUID, PlayerStats> stats = HashBasedTable.create();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
   private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
@@ -97,8 +99,8 @@ public class StatsMatchModule implements MatchModule, Listener {
     this.match = match;
   }
 
-  public Map<UUID, PlayerStats> getStats() {
-    return Collections.unmodifiableMap(allPlayerStats);
+  public Table<Team, UUID, PlayerStats> getStats() {
+    return Tables.unmodifiableTable(stats);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -187,6 +189,11 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
   }
 
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onParticipationStop(PlayerParticipationStopEvent event) {
+    getPlayerStat(event.getPlayer()).onTeamSwitch();
+  }
+
   private void sendPlayerStats(MatchPlayer player, PlayerStats stats) {
     if (player.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) return;
     if (stats.getHotbarTask() != null && !stats.getHotbarTask().isDone()) {
@@ -235,19 +242,17 @@ public class StatsMatchModule implements MatchModule, Listener {
     Map<UUID, Integer> allKills = new HashMap<>();
     Map<UUID, Integer> allStreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
-    Map<UUID, Integer> allBowshots = new HashMap<>();
+    Map<UUID, Integer> allBowShots = new HashMap<>();
     Map<UUID, Double> allDamage = new HashMap<>();
 
     for (Map.Entry<UUID, PlayerStats> mapEntry : allPlayerStats.entrySet()) {
       UUID playerUUID = mapEntry.getKey();
       PlayerStats playerStats = mapEntry.getValue();
 
-      getPlayerStat(playerUUID);
-
       allKills.put(playerUUID, playerStats.getKills());
       allStreaks.put(playerUUID, playerStats.getMaxKillstreak());
       allDeaths.put(playerUUID, playerStats.getDeaths());
-      allBowshots.put(playerUUID, playerStats.getLongestBowKill());
+      allBowShots.put(playerUUID, playerStats.getLongestBowKill());
       allDamage.put(playerUUID, playerStats.getDamageDone());
     }
 
@@ -257,7 +262,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       best.add(getMessage("match.stats.killstreak", sortStats(allStreaks), NamedTextColor.GREEN));
       best.add(getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED));
 
-      Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
+      Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowShots);
       if (bestBowshot.getValue() > 1)
         best.add(getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW));
 
@@ -282,7 +287,8 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       best.forEach(viewer::sendMessage);
 
-      PlayerStats stats = allPlayerStats.get(viewer.getId());
+      PlayerStats stats = getPlayerGlobalStat(viewer);
+
       if (event.isShowOwn() && stats != null) {
         Component ksHover =
             translatable(
@@ -337,21 +343,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     if (teams == null) {
       teams = Lists.newArrayList();
-      TeamMatchModule tmm = match.needModule(TeamMatchModule.class);
-      Collection<MatchPlayer> observers = match.getObservers();
-
       for (Competitor competitor : competitors) {
-        Collection<MatchPlayer> relevantObservers =
-            observers.stream()
-                .filter(o -> tmm.getLastTeam(o.getId()) == competitor)
-                .collect(Collectors.toSet());
-
-        Collection<UUID> relevantOfflinePlayers =
-            this.getOfflinePlayersWithStats()
-                .filter(id -> tmm.getLastTeam(id) == competitor)
-                .collect(Collectors.toSet());
-        teams.add(
-            new TeamStatsMenuItem(match, competitor, relevantObservers, relevantOfflinePlayers));
+        Map<UUID, PlayerStats> playerStats = stats.row((Team) competitor);
+        teams.add(new TeamStatsMenuItem(match, competitor, playerStats));
       }
     }
 
@@ -390,28 +384,45 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   // Creates a new PlayerStat if the player does not have one yet
-  public final PlayerStats getPlayerStat(UUID uuid) {
-    if (hasNoStats(uuid)) putNewPlayer(uuid);
+  public final PlayerStats getPlayerStat(Competitor competitor, UUID uuid) {
+    if (hasNoStats(competitor, uuid)) putNewPlayer(competitor, uuid);
+
+    if (competitor instanceof Team) {
+      return stats.get((Team) competitor, uuid);
+    }
+
     return allPlayerStats.get(uuid);
   }
 
-  private void putNewPlayer(UUID player) {
-    allPlayerStats.put(player, new PlayerStats());
+  private void putNewPlayer(Competitor competitor, UUID player) {
+    PlayerStats globalStats = allPlayerStats.computeIfAbsent(player, uuid -> new PlayerStats());
+
+    if (competitor instanceof Team) {
+      stats.put((Team) competitor, player, new PlayerStats(globalStats));
+    }
   }
 
-  public boolean hasNoStats(UUID player) {
-    return allPlayerStats.get(player) == null;
+  public boolean hasNoStats(Competitor competitor, UUID player) {
+    if (competitor instanceof Team) {
+      return !stats.contains((Team) competitor, player);
+    }
+
+    return !allPlayerStats.containsKey(player);
   }
 
   public final PlayerStats getPlayerStat(ParticipantState player) {
-    return getPlayerStat(player.getId());
+    return getPlayerStat(player.getParty(), player.getId());
   }
 
   public final PlayerStats getPlayerStat(MatchPlayer player) {
-    return getPlayerStat(player.getId());
+    return getPlayerStat(player.getCompetitor(), player.getId());
   }
 
-  public Component getBasicStatsMessage(UUID player) {
+  public final PlayerStats getPlayerGlobalStat(MatchPlayer player) {
+    return allPlayerStats.getOrDefault(player.getId(), new PlayerStats());
+  }
+
+  public Component getBasicStatsMessage(MatchPlayer player) {
     return getPlayerStat(player).getBasicStatsMessage();
   }
 }

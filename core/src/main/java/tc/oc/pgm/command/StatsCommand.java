@@ -37,7 +37,7 @@ public final class StatsCommand {
               sender,
               translatable("match.stats.you", NamedTextColor.DARK_GREEN),
               NamedTextColor.WHITE));
-      audience.sendMessage(stats.getBasicStatsMessage(player.getId()));
+      audience.sendMessage(stats.getBasicStatsMessage(player));
     } else {
       throw exception("match.stats.disabled");
     }

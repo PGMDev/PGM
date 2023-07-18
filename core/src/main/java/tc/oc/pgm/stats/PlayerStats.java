@@ -11,6 +11,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 
 /** A wrapper for stat info belonging to a {@link tc.oc.pgm.api.player.MatchPlayer} */
 public class PlayerStats {
+
+  // A reference to the players global stats to be incremented along with team based stats
+  private PlayerStats parent = null;
+
   // K/D
   private int kills;
   private int deaths;
@@ -39,17 +43,25 @@ public class PlayerStats {
   // See StatsMatchModule#sendLongHotbarMessage
   private Future<?> hotbarTaskCache;
 
+  public PlayerStats() {}
+
+  public PlayerStats(PlayerStats parent) {
+    this.parent = parent;
+  }
+
   // Methods to update the stats, should only be accessed by StatsMatchModule
 
   protected void onMurder() {
     kills++;
     killstreak++;
     if (killstreak > killstreakMax) killstreakMax = killstreak;
+    if (parent != null) parent.onMurder();
   }
 
   protected void onDeath() {
     deaths++;
     killstreak = 0;
+    if (parent != null) parent.onDeath();
   }
 
   protected void onDamage(double damage, boolean bow) {
@@ -58,6 +70,7 @@ public class PlayerStats {
       bowDamage += damage;
       shotsHit++;
     }
+    if (parent != null) parent.onDamage(damage, bow);
   }
 
   protected void onDamaged(double damage, boolean bow) {
@@ -65,39 +78,52 @@ public class PlayerStats {
     if (bow) {
       bowDamageTaken += damage;
     }
+    if (parent != null) parent.onDamaged(damage, bow);
   }
 
   protected void onDestroyablePieceBroken(int change) {
     destroyablePiecesBroken += change;
+    if (parent != null) parent.onDestroyablePieceBroken(change);
   }
 
   protected void onFlagCapture() {
     flagsCaptured++;
     onFlagDrop();
+    if (parent != null) parent.onFlagCapture();
   }
 
   protected void onFlagPickup() {
     longestFlagHoldCache = Instant.now();
+    if (parent != null) parent.onFlagPickup();
   }
 
   protected void onFlagDrop() {
     setLongestFlagHold(
         Duration.ofMillis(Instant.now().toEpochMilli() - longestFlagHoldCache.toEpochMilli()));
+    if (parent != null) parent.onFlagDrop();
   }
 
   protected void setLongestFlagHold(Duration time) {
     if (longestFlagHold == null || (time.toNanos() - longestFlagHold.toNanos()) > 0)
       longestFlagHold = time;
+    if (parent != null) parent.setLongestFlagHold(time);
   }
 
   protected void setLongestBowKill(double distance) {
     if (distance > longestBowKill) {
       longestBowKill = (int) Math.round(distance);
     }
+    if (parent != null) parent.setLongestBowKill(distance);
   }
 
   protected void onBowShoot() {
     shotsTaken++;
+    if (parent != null) parent.onBowShoot();
+  }
+
+  protected void onTeamSwitch() {
+    killstreak = 0;
+    if (parent != null) parent.onTeamSwitch();
   }
 
   // Makes a simple stat message for this player that fits in one line

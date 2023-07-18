@@ -62,7 +62,7 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
         && viewer.getParty() instanceof Competitor
         && (match.isRunning() || match.isFinished())
         && viewer.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
-      content.append(match.needModule(StatsMatchModule.class).getBasicStatsMessage(viewer.getId()));
+      content.append(match.needModule(StatsMatchModule.class).getBasicStatsMessage(viewer));
       content.append(newline());
     }
 
