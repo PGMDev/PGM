@@ -230,7 +230,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
       final File dir = getDirectory();
       if (dir.mkdirs()) {
-        map.getInfo().getSource().downloadTo(dir);
+        map.getInfo().getSource().downloadTo(map.getInfo().getWorldFolder(), dir);
       } else {
         throw new MapMissingException(dir.getPath(), "Unable to mkdirs world directory");
       }

@@ -33,8 +33,8 @@ class SystemMapSource implements MapSource {
     this.storedIncludes = Sets.newHashSet();
   }
 
-  private File getDirectory() throws MapMissingException {
-    final File dir = this.dir.toFile();
+  private File getDirectory(String subdir) throws MapMissingException {
+    final File dir = subdir == null ? this.dir.toFile() : this.dir.resolve(subdir).toFile();
 
     if (!dir.exists()) {
       throw new MapMissingException(dir.getPath(), "Unable to find map folder (was it moved?)");
@@ -73,8 +73,8 @@ class SystemMapSource implements MapSource {
   }
 
   @Override
-  public void downloadTo(File dst) throws MapMissingException {
-    final File src = getDirectory();
+  public void downloadTo(String worldDir, File dst) throws MapMissingException {
+    final File src = getDirectory(worldDir);
     try {
       FileUtils.copy(src, dst, true);
     } catch (IOException e) {

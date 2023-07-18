@@ -40,6 +40,7 @@ public class MapInfoImpl implements MapInfo {
 
   private final String id;
   private final String variant;
+  private final String worldFolder;
   private final Version proto;
   private final Version version;
   private final Phase phase;
@@ -66,6 +67,7 @@ public class MapInfoImpl implements MapInfo {
     this.variant = source.getVariant();
 
     String tmpName = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
+    String tmpWorld = null;
     if (variant != null) {
       Element variantEl =
           root.getChildren("variant").stream()
@@ -76,7 +78,9 @@ public class MapInfoImpl implements MapInfo {
 
       boolean override = XMLUtils.parseBoolean(Node.fromAttr(variantEl, "override"), false);
       tmpName = (override ? "" : tmpName + ": ") + variantEl.getTextNormalize();
+      tmpWorld = variantEl.getAttributeValue("world");
     }
+    this.worldFolder = tmpWorld;
 
     this.name = tmpName;
     this.normalizedName = StringUtils.normalize(name);
@@ -124,6 +128,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public String getVariant() {
     return variant;
+  }
+
+  @Override
+  public String getWorldFolder() {
+    return worldFolder;
   }
 
   @Override

@@ -39,10 +39,11 @@ public interface MapSource {
   /**
    * Download the {@link org.bukkit.World} files to a local directory.
    *
+   * @param folder subfolder to download, null for parent
    * @param dir An existent, but empty directory.
    * @throws MapMissingException If an error occurs while creating the files.
    */
-  void downloadTo(File dir) throws MapMissingException;
+  void downloadTo(String folder, File dir) throws MapMissingException;
 
   /**
    * Get an {@link InputStream} of the map's xml document.
