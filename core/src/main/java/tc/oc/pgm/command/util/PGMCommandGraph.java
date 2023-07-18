@@ -89,6 +89,7 @@ import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.Players;
 
 public class PGMCommandGraph extends CommandGraph<PGM> {
 
@@ -215,5 +216,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     registerParser(Filter.class, FilterArgumentParser::new);
     registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
+
+    parsers.registerSuggestionProvider("players", Players::suggestPlayers);
   }
 }
