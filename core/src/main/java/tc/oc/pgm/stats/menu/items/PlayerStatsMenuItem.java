@@ -7,12 +7,14 @@ import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -20,6 +22,12 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.integration.Integration;
+import tc.oc.pgm.api.integration.NickIntegration;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
+import tc.oc.pgm.match.MatchPlayerImpl;
 import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.PlayerStats;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -145,13 +153,25 @@ public class PlayerStatsMenuItem implements MenuItem {
     ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
     ItemMeta meta = stack.getItemMeta();
 
+    String username = name;
+    Skin playerSkin = skin;
+
+    Player bukkitPlayer = Bukkit.getPlayer(uuid);
+    if (bukkitPlayer != null) {
+      String nick = Integration.getNick(bukkitPlayer);
+      if (nick != null) username = nick;
+      playerSkin = NMSHacks.getPlayerSkin(bukkitPlayer);
+    }
+
     meta.setDisplayName(
         TextTranslations.translateLegacy(
-            getDisplayName().decoration(TextDecoration.BOLD, true), player));
+            text(username, color).decoration(TextDecoration.BOLD, true), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
 
-    stack.setItemMeta(modifyMeta(meta));
+    SkullMeta skullMeta = (SkullMeta) meta;
+    NMSHacks.setSkullMetaOwner(skullMeta, name, uuid, playerSkin);
+    stack.setItemMeta(skullMeta);
 
     return stack;
   }

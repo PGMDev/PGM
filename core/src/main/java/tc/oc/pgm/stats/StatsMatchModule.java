@@ -37,6 +37,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -287,7 +288,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       best.forEach(viewer::sendMessage);
 
-      PlayerStats stats = getPlayerGlobalStat(viewer);
+      PlayerStats stats = getPlayerStat(viewer);
 
       if (event.isShowOwn() && stats != null) {
         Component ksHover =
@@ -327,7 +328,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   public PlayerStatsMenuItem getPlayerStatsItem(MatchPlayer player) {
     return new PlayerStatsMenuItem(
         player.getId(),
-        this.getPlayerStat(player),
+        this.getGlobalPlayerStat(player),
         NMSHacks.getPlayerSkin(player.getBukkit()),
         player.getNameLegacy(),
         player.getParty().getName().color());
@@ -384,45 +385,60 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   // Creates a new PlayerStat if the player does not have one yet
-  public final PlayerStats getPlayerStat(Competitor competitor, UUID uuid) {
-    if (hasNoStats(competitor, uuid)) putNewPlayer(competitor, uuid);
-
-    if (competitor instanceof Team) {
-      return stats.get((Team) competitor, uuid);
-    }
-
+  public final PlayerStats getPlayerStat(UUID uuid) {
+    if (hasNoStats(uuid)) putNewPlayer(uuid);
     return allPlayerStats.get(uuid);
   }
 
-  private void putNewPlayer(Competitor competitor, UUID player) {
-    PlayerStats globalStats = allPlayerStats.computeIfAbsent(player, uuid -> new PlayerStats());
-
-    if (competitor instanceof Team) {
-      stats.put((Team) competitor, player, new PlayerStats(globalStats));
-    }
+  public final @Nullable PlayerStats getPlayerStat(UUID uuid, Team team) {
+    return stats.row(team).getOrDefault(uuid, null);
   }
 
-  public boolean hasNoStats(Competitor competitor, UUID player) {
-    if (competitor instanceof Team) {
-      return !stats.contains((Team) competitor, player);
-    }
+  private void putNewPlayer(UUID player) {
+    allPlayerStats.put(player, new PlayerStats());
+  }
 
-    return !allPlayerStats.containsKey(player);
+  public boolean hasNoStats(UUID player) {
+    return allPlayerStats.get(player) == null;
+  }
+
+  public final PlayerStats getGlobalPlayerStat(ParticipantState player) {
+      return getPlayerStat(player.getId());
+  }
+
+  public final PlayerStats getGlobalPlayerStat(MatchPlayer player) {
+    return getPlayerStat(player.getId());
   }
 
   public final PlayerStats getPlayerStat(ParticipantState player) {
-    return getPlayerStat(player.getParty(), player.getId());
+    PlayerStats globalStats = getPlayerStat(player.getId());
+
+    if (player.getParty() instanceof Team) {
+      PlayerStats playerStats = stats.get((Team) player.getParty(), player.getId());
+      if (playerStats == null) { // Create new team stats with reference to global
+        stats.put((Team) player.getParty(), player.getId(), playerStats = new PlayerStats(globalStats));
+      }
+      return playerStats;
+    }
+
+    return globalStats;
   }
 
   public final PlayerStats getPlayerStat(MatchPlayer player) {
-    return getPlayerStat(player.getCompetitor(), player.getId());
+    PlayerStats globalStats = getPlayerStat(player.getId());
+
+    if (player.getParty() instanceof Team) {
+      PlayerStats playerStats = stats.get((Team) player.getParty(), player.getId());
+      if (playerStats == null) {// Create new team stats with reference to global
+        stats.put((Team) player.getParty(), player.getId(), playerStats = new PlayerStats(globalStats));
+      }
+      return playerStats;
+    }
+
+    return globalStats;
   }
 
-  public final PlayerStats getPlayerGlobalStat(MatchPlayer player) {
-    return allPlayerStats.getOrDefault(player.getId(), new PlayerStats());
-  }
-
-  public Component getBasicStatsMessage(MatchPlayer player) {
+  public Component getBasicStatsMessage(UUID player) {
     return getPlayerStat(player).getBasicStatsMessage();
   }
 }

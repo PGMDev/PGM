@@ -65,7 +65,8 @@ public class TeamStatsMenuItem implements MenuItem {
                 p.getId(),
                 stats,
                 NMSHacks.getPlayerSkin(p.getBukkit()),
-                p.getNameLegacy(),
+                p.getNameLegacy(), // p.getName(NameStyle.SIMPLE_COLOR), //
+                // Integration.getNick(p.getBukkit())
                 p.getParty().getName().color()));
       } else {
         offlinePlayers.add(
