@@ -52,6 +52,7 @@ import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.controlpoint.events.ControlPointEvent;
 import tc.oc.pgm.core.CoreLeakEvent;
 import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.destroyable.DestroyableHealthChange;
@@ -104,6 +105,10 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   public StatsMatchModule(Match match) {
     this.match = match;
+  }
+
+  public Map<UUID, PlayerStats> getGlobalStats() {
+    return allPlayerStats;
   }
 
   public Table<Team, UUID, PlayerStats> getStats() {
