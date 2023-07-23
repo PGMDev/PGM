@@ -37,7 +37,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -45,20 +44,25 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStatsEvent;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.core.CoreLeakEvent;
+import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.destroyable.DestroyableHealthChange;
 import tc.oc.pgm.destroyable.DestroyableHealthChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
+import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
-import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
+import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.stats.menu.StatsMainMenu;
 import tc.oc.pgm.stats.menu.items.PlayerStatsMenuItem;
 import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
@@ -69,6 +73,8 @@ import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.wool.MonumentWool;
+import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class StatsMatchModule implements MatchModule, Listener {
@@ -141,13 +147,57 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onFlagCapture(FlagCaptureEvent event) {
-    getPlayerStat(event.getCarrier()).onFlagCapture();
+  public void onMonumentDestroy(DestroyableDestroyedEvent event) {
+    event
+        .getDestroyable()
+        .getContributions()
+        .forEach(
+            destroyer -> {
+              if (destroyer.getPlayerState() != null) {
+                getPlayerStat(destroyer.getPlayerState()).onMonumentDestroyed();
+              }
+            });
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onFlagHold(FlagPickupEvent event) {
-    getPlayerStat(event.getCarrier()).onFlagPickup();
+  public void onCoreLeak(CoreLeakEvent event) {
+    event
+        .getCore()
+        .getContributions()
+        .forEach(
+            leaker -> {
+              if (leaker.getPlayerState() != null) {
+                // TODO: wrong method
+                getPlayerStat(leaker.getPlayerState()).onCoreLeak();
+              }
+            });
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onGoalTouch(GoalTouchEvent event) {
+    if (event.getPlayer() == null || !event.getPlayer().getPlayer().isPresent()) return;
+
+    if (event.getGoal() instanceof MonumentWool) {
+      if (event.isFirstForPlayer()) {
+        getPlayerStat(event.getPlayer()).onWoolTouch();
+      }
+    }
+
+    if (event.getGoal() instanceof Flag) {
+      getPlayerStat(event.getPlayer()).onFlagPickup(event.isFirstForPlayer());
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onWoolCapture(PlayerWoolPlaceEvent event) {
+    if (event.getPlayer() != null && event.getPlayer().getPlayer().isPresent()) {
+      getPlayerStat(event.getPlayer()).onWoolCapture();
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onFlagCapture(FlagCaptureEvent event) {
+    getPlayerStat(event.getCarrier()).onFlagCapture();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -329,9 +379,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     return new PlayerStatsMenuItem(
         player.getId(),
         this.getGlobalPlayerStat(player),
-        NMSHacks.getPlayerSkin(player.getBukkit()),
-        player.getNameLegacy(),
-        player.getParty().getName().color());
+        NMSHacks.getPlayerSkin(player.getBukkit()));
   }
 
   private List<TeamStatsMenuItem> teams;
@@ -390,20 +438,31 @@ public class StatsMatchModule implements MatchModule, Listener {
     return allPlayerStats.get(uuid);
   }
 
-  public final @Nullable PlayerStats getPlayerStat(UUID uuid, Team team) {
-    return stats.row(team).getOrDefault(uuid, null);
-  }
-
   private void putNewPlayer(UUID player) {
     allPlayerStats.put(player, new PlayerStats());
   }
 
-  public boolean hasNoStats(UUID player) {
-    return allPlayerStats.get(player) == null;
+  private PlayerStats computeTeamStatsIfAbsent(UUID id, Party party) {
+    // Only players on a team have team specific stats
+    PlayerStats globalStats = getPlayerStat(id);
+    if (!(party instanceof Team)) return globalStats;
+
+    Team team = (Team) party;
+    PlayerStats playerStats = stats.get(team, id);
+    if (playerStats != null) return playerStats;
+
+    MatchPlayer player = team.getPlayer(id);
+    if (player == null) return globalStats;
+
+    // Create player team stats with reference to global stats
+    playerStats = new PlayerStats(globalStats, player.getName());
+    stats.put(team, id, playerStats);
+
+    return playerStats;
   }
 
-  public final PlayerStats getGlobalPlayerStat(ParticipantState player) {
-      return getPlayerStat(player.getId());
+  public boolean hasNoStats(UUID player) {
+    return allPlayerStats.get(player) == null;
   }
 
   public final PlayerStats getGlobalPlayerStat(MatchPlayer player) {
@@ -411,31 +470,15 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   public final PlayerStats getPlayerStat(ParticipantState player) {
-    PlayerStats globalStats = getPlayerStat(player.getId());
-
-    if (player.getParty() instanceof Team) {
-      PlayerStats playerStats = stats.get((Team) player.getParty(), player.getId());
-      if (playerStats == null) { // Create new team stats with reference to global
-        stats.put((Team) player.getParty(), player.getId(), playerStats = new PlayerStats(globalStats));
-      }
-      return playerStats;
-    }
-
-    return globalStats;
+    return computeTeamStatsIfAbsent(player.getId(), player.getParty());
   }
 
   public final PlayerStats getPlayerStat(MatchPlayer player) {
-    PlayerStats globalStats = getPlayerStat(player.getId());
+    return computeTeamStatsIfAbsent(player.getId(), player.getParty());
+  }
 
-    if (player.getParty() instanceof Team) {
-      PlayerStats playerStats = stats.get((Team) player.getParty(), player.getId());
-      if (playerStats == null) {// Create new team stats with reference to global
-        stats.put((Team) player.getParty(), player.getId(), playerStats = new PlayerStats(globalStats));
-      }
-      return playerStats;
-    }
-
-    return globalStats;
+  private PlayerStats getPlayerStat(MatchPlayerState playerState) {
+    return computeTeamStatsIfAbsent(playerState.getId(), playerState.getParty());
   }
 
   public Component getBasicStatsMessage(UUID player) {

@@ -3,6 +3,7 @@ package tc.oc.pgm.stats.menu.items;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import com.google.common.collect.Lists;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -29,6 +29,7 @@ import tc.oc.pgm.stats.PlayerStats;
 import tc.oc.pgm.stats.TeamStats;
 import tc.oc.pgm.stats.menu.TeamStatsMenu;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a team with same color & lore. Clicking will open {@link TeamStatsMenu} * */
@@ -47,40 +48,22 @@ public class TeamStatsMenuItem implements MenuItem {
     this.members = Lists.newArrayList();
     this.stats = new TeamStats(team, new ArrayList<>(playerStats.values()));
 
-    // Split the playerStats in to a list of online and offline players
-    List<PlayerStatsMenuItem> onlinePlayers = new ArrayList<>();
-    List<PlayerStatsMenuItem> offlinePlayers = new ArrayList<>();
-
     Datastore datastore = PGM.get().getDatastore();
 
-    for (Map.Entry<UUID, PlayerStats> entry : playerStats.entrySet()) {
-      UUID uuid = entry.getKey();
-      PlayerStats stats = entry.getValue();
-
-      MatchPlayer p = match.getPlayer(uuid);
-
-      if (p != null) {
-        onlinePlayers.add(
-            new PlayerStatsMenuItem(
-                p.getId(),
-                stats,
-                NMSHacks.getPlayerSkin(p.getBukkit()),
-                p.getNameLegacy(), // p.getName(NameStyle.SIMPLE_COLOR), //
-                // Integration.getNick(p.getBukkit())
-                p.getParty().getName().color()));
-      } else {
-        offlinePlayers.add(
-            new PlayerStatsMenuItem(
-                uuid,
-                stats,
-                datastore.getSkin(uuid),
-                datastore.getUsername(uuid).getNameLegacy(),
-                NamedTextColor.DARK_AQUA));
-      }
-    }
-
     this.members =
-        Stream.concat(onlinePlayers.stream(), offlinePlayers.stream()).collect(Collectors.toList());
+        playerStats.entrySet().stream()
+            .map(
+                entry -> {
+                  UUID uuid = entry.getKey();
+                  PlayerStats stats = entry.getValue();
+
+                  MatchPlayer p = match.getPlayer(uuid);
+                  Skin skin =
+                      (p != null) ? NMSHacks.getPlayerSkin(p.getBukkit()) : datastore.getSkin(uuid);
+
+                  return new PlayerStatsMenuItem(uuid, stats, skin);
+                })
+            .collect(Collectors.toList());
 
     this.match = match;
   }

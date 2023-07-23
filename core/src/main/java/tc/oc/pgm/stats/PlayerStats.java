@@ -13,7 +13,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 public class PlayerStats {
 
   // A reference to the players global stats to be incremented along with team based stats
-  private PlayerStats parent = null;
+  private final PlayerStats parent;
+  private final Component component;
 
   // K/D
   private int kills;
@@ -34,7 +35,15 @@ public class PlayerStats {
 
   // Objectives
   private int destroyablePiecesBroken;
+  private int monumentsDestroyed;
+
   private int flagsCaptured;
+  private int flagPickups;
+
+  private int coresLeaked;
+
+  private int woolsCaptured;
+  private int woolsTouched;
 
   private Duration longestFlagHold = Duration.ZERO;
   private Instant longestFlagHoldCache;
@@ -43,10 +52,14 @@ public class PlayerStats {
   // See StatsMatchModule#sendLongHotbarMessage
   private Future<?> hotbarTaskCache;
 
-  public PlayerStats() {}
+  public PlayerStats() {
+    this.parent = null;
+    this.component = null;
+  }
 
-  public PlayerStats(PlayerStats parent) {
+  public PlayerStats(PlayerStats parent, Component component) {
     this.parent = parent;
+    this.component = component;
   }
 
   // Methods to update the stats, should only be accessed by StatsMatchModule
@@ -86,15 +99,21 @@ public class PlayerStats {
     if (parent != null) parent.onDestroyablePieceBroken(change);
   }
 
+  protected void onMonumentDestroyed() {
+    monumentsDestroyed++;
+    if (parent != null) parent.onMonumentDestroyed();
+  }
+
   protected void onFlagCapture() {
     flagsCaptured++;
     onFlagDrop();
     if (parent != null) parent.onFlagCapture();
   }
 
-  protected void onFlagPickup() {
+  protected void onFlagPickup(boolean isFirstPickup) {
+    if (isFirstPickup) flagPickups++;
     longestFlagHoldCache = Instant.now();
-    if (parent != null) parent.onFlagPickup();
+    if (parent != null) parent.onFlagPickup(isFirstPickup);
   }
 
   protected void onFlagDrop() {
@@ -107,6 +126,21 @@ public class PlayerStats {
     if (longestFlagHold == null || (time.toNanos() - longestFlagHold.toNanos()) > 0)
       longestFlagHold = time;
     if (parent != null) parent.setLongestFlagHold(time);
+  }
+
+  protected void onCoreLeak() {
+    coresLeaked++;
+    if (parent != null) parent.onCoreLeak();
+  }
+
+  protected void onWoolCapture() {
+    woolsCaptured++;
+    if (parent != null) parent.onWoolCapture();
+  }
+
+  protected void onWoolTouch() {
+    woolsTouched++;
+    if (parent != null) parent.onWoolTouch();
   }
 
   protected void setLongestBowKill(double distance) {
@@ -198,8 +232,28 @@ public class PlayerStats {
     return destroyablePiecesBroken;
   }
 
+  public int getMonumentsDestroyed() {
+    return monumentsDestroyed;
+  }
+
   public int getFlagsCaptured() {
     return flagsCaptured;
+  }
+
+  public int getFlagPickups() {
+    return flagPickups;
+  }
+
+  public int getCoresLeaked() {
+    return coresLeaked;
+  }
+
+  public int getWoolsCaptured() {
+    return woolsCaptured;
+  }
+
+  public int getWoolsTouched() {
+    return woolsTouched;
   }
 
   public Duration getLongestFlagHold() {
@@ -212,5 +266,9 @@ public class PlayerStats {
 
   public void putHotbarTaskCache(Future<?> task) {
     hotbarTaskCache = task;
+  }
+
+  public Component getPlayerComponent() {
+    return component;
   }
 }

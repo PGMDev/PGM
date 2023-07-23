@@ -3,11 +3,11 @@ package tc.oc.pgm.stats.menu.items;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
@@ -22,14 +22,9 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.integration.Integration;
-import tc.oc.pgm.api.integration.NickIntegration;
-import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.MatchPlayerState;
-import tc.oc.pgm.match.MatchPlayerImpl;
 import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.PlayerStats;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -42,21 +37,16 @@ public class PlayerStatsMenuItem implements MenuItem {
   private final UUID uuid;
   private final PlayerStats stats;
   private final Skin skin;
-  private final String name;
-  private final TextColor color;
 
-  public PlayerStatsMenuItem(
-      UUID uuid, PlayerStats stats, Skin skin, String name, TextColor color) {
+  public PlayerStatsMenuItem(UUID uuid, PlayerStats stats, Skin skin) {
     this.uuid = uuid;
     this.stats = stats;
     this.skin = skin;
-    this.name = name;
-    this.color = color;
   }
 
   @Override
   public Component getDisplayName() {
-    return text(name == null ? "Unknown" : name, color);
+    return stats.getPlayerComponent();
   }
 
   @Override
@@ -142,8 +132,15 @@ public class PlayerStatsMenuItem implements MenuItem {
   @Override
   public ItemMeta modifyMeta(ItemMeta meta) {
     SkullMeta skullMeta = (SkullMeta) meta;
+    Skin playerSkin = skin;
 
-    NMSHacks.setSkullMetaOwner(skullMeta, name, uuid, skin);
+    // Fetch fake skin if using one
+    Player bukkitPlayer = Bukkit.getPlayer(uuid);
+    if (bukkitPlayer != null) {
+      playerSkin = NMSHacks.getPlayerSkin(bukkitPlayer);
+    }
+
+    NMSHacks.setSkullMetaOwner(skullMeta, "name", uuid, playerSkin);
 
     return skullMeta;
   }
@@ -153,25 +150,18 @@ public class PlayerStatsMenuItem implements MenuItem {
     ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
     ItemMeta meta = stack.getItemMeta();
 
-    String username = name;
-    Skin playerSkin = skin;
-
-    Player bukkitPlayer = Bukkit.getPlayer(uuid);
-    if (bukkitPlayer != null) {
-      String nick = Integration.getNick(bukkitPlayer);
-      if (nick != null) username = nick;
-      playerSkin = NMSHacks.getPlayerSkin(bukkitPlayer);
-    }
+    Component playerComponent =
+        stats.getPlayerComponent() != null
+            ? stats.getPlayerComponent()
+            : player(uuid, NameStyle.FANCY);
 
     meta.setDisplayName(
         TextTranslations.translateLegacy(
-            text(username, color).decoration(TextDecoration.BOLD, true), player));
+            playerComponent.decoration(TextDecoration.BOLD, true), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
 
-    SkullMeta skullMeta = (SkullMeta) meta;
-    NMSHacks.setSkullMetaOwner(skullMeta, name, uuid, playerSkin);
-    stack.setItemMeta(skullMeta);
+    stack.setItemMeta(modifyMeta(meta));
 
     return stack;
   }
