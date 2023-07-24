@@ -14,6 +14,7 @@ import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +53,6 @@ import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
-import tc.oc.pgm.controlpoint.events.ControlPointEvent;
 import tc.oc.pgm.core.CoreLeakEvent;
 import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.destroyable.DestroyableHealthChange;
@@ -107,11 +107,11 @@ public class StatsMatchModule implements MatchModule, Listener {
     this.match = match;
   }
 
-  public Map<UUID, PlayerStats> getGlobalStats() {
-    return allPlayerStats;
+  public Map<UUID, PlayerStats> getStats() {
+    return Collections.unmodifiableMap(allPlayerStats);
   }
 
-  public Table<Team, UUID, PlayerStats> getStats() {
+  public Table<Team, UUID, PlayerStats> getParticipationStats() {
     return Tables.unmodifiableTable(stats);
   }
 
@@ -172,7 +172,6 @@ public class StatsMatchModule implements MatchModule, Listener {
         .forEach(
             leaker -> {
               if (leaker.getPlayerState() != null) {
-                // TODO: wrong method
                 getPlayerStat(leaker.getPlayerState()).onCoreLeak();
               }
             });
@@ -180,7 +179,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onGoalTouch(GoalTouchEvent event) {
-    if (event.getPlayer() == null || !event.getPlayer().getPlayer().isPresent()) return;
+    if (event.getPlayer() == null) return;
 
     if (event.getGoal() instanceof MonumentWool) {
       if (event.isFirstForPlayer()) {
@@ -195,7 +194,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onWoolCapture(PlayerWoolPlaceEvent event) {
-    if (event.getPlayer() != null && event.getPlayer().getPlayer().isPresent()) {
+    if (event.getPlayer() != null) {
       getPlayerStat(event.getPlayer()).onWoolCapture();
     }
   }
