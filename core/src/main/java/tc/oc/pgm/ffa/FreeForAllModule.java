@@ -8,6 +8,7 @@ import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -24,7 +25,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class FreeForAllModule implements MapModule<FreeForAllMatchModule> {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("ffa", "Free for All", false, false));
+      ImmutableList.of(new MapTag("ffa", Gamemode.FREE_FOR_ALL, true));
   private final FreeForAllOptions options;
 
   public FreeForAllModule(FreeForAllOptions options) {

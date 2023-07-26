@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapTag;
@@ -37,7 +38,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class DestroyableModule implements MapModule<DestroyableMatchModule> {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("dtm", "monument", "Destroy the Monument", true, false));
+      ImmutableList.of(new MapTag("monument", Gamemode.DESTROY_THE_MONUMENT, false));
   protected final List<DestroyableFactory> destroyableFactories;
 
   public DestroyableModule(List<DestroyableFactory> destroyableFactories) {

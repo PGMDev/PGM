@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -22,7 +23,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 public class FlagModule implements MapModule<FlagMatchModule> {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("ctf", "flag", "Capture the Flag", true, false));
+      ImmutableList.of(new MapTag("flag", Gamemode.CAPTURE_THE_FLAG, false));
   private final ImmutableList<PostDefinition> posts;
   private final ImmutableList<NetDefinition> nets;
   private final ImmutableList<FlagDefinition> flags;

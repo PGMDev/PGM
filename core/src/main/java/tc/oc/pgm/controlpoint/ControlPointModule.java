@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -27,11 +28,9 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
-  private static final MapTag CP =
-      new MapTag("cp", "controlpoint", "Control the Point", true, false);
-  private static final MapTag KOTH =
-      new MapTag("koth", "controlpoint", "King of the Hill", true, false);
-  private static final MapTag PAYLOAD = new MapTag("payload", "Payload", true, false);
+  private static final MapTag CP = new MapTag("controlpoint", Gamemode.CONTROL_THE_POINT, false);
+  private static final MapTag KOTH = new MapTag("controlpoint", Gamemode.KING_OF_THE_HILL, false);
+  private static final MapTag PAYLOAD = new MapTag("payload", Gamemode.PAYLOAD, false);
 
   private final List<ControlPointDefinition> definitions;
   private final Collection<MapTag> tags;
@@ -94,7 +93,8 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
 
       for (Element kingEl : doc.getRootElement().getChildren("king")) {
         for (Element hillEl : XMLUtils.flattenElements(kingEl, "hills", "hill")) {
-          tags.add(KOTH);
+          // CP and KOTH are mutually exclusive, they're the same ID.
+          if (tags.isEmpty()) tags.add(KOTH);
           ControlPointDefinition definition =
               ControlPointParser.parseControlPoint(factory, hillEl, Type.HILL, serialNumber);
           factory.getFeatures().addFeature(kingEl, definition);

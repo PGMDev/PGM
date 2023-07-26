@@ -21,8 +21,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WorldBorderModule implements MapModule<WorldBorderMatchModule> {
-  private final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("border", "World Border", false, true));
+  private final Collection<MapTag> TAGS = ImmutableList.of(new MapTag("border", "World Border"));
   private final List<WorldBorder> borders;
 
   public WorldBorderModule(List<WorldBorder> borders) {
