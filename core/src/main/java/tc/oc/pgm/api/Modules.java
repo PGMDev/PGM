@@ -8,6 +8,7 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.ActionModule;
+import tc.oc.pgm.activity.ActivityMatchModule;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.MatchModule;
@@ -219,6 +220,7 @@ public final class Modules {
     register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
     register(PlayerTimeMatchModule.class, PlayerTimeMatchModule::new);
     register(SpectateMatchModule.class, SpectateMatchModule::new);
+    register(ActivityMatchModule.class, ActivityMatchModule::new);
 
     // FIXME: Disabled due to lag - look into future optimization
     // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
