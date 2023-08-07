@@ -1,9 +1,8 @@
-package tc.oc.pgm.util.nms;
+package tc.oc.pgm.util.nms.v1_8;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.SetMultimap;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import java.lang.reflect.Constructor;
@@ -109,17 +108,23 @@ import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
+import tc.oc.pgm.util.nms.NMSHacksNoOp;
 import tc.oc.pgm.util.nms.attribute.AttributeMap1_8;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.fake.armorstand.FakeArmorStand1_8;
 import tc.oc.pgm.util.nms.entity.fake.wither.FakeWitherSkull1_8;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion1_8;
+import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.skin.Skins;
 
-public class NMSHacks1_8 extends NMSHacksNoOp {
+class NMSHacks1_8 extends NMSHacksNoOp {
+
+  public NMSHacks1_8() {}
+
   @Override
   public void sendPacket(Player bukkitPlayer, Object packet) {
     if (bukkitPlayer.isOnline()) {
@@ -655,11 +660,6 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
   }
 
   @Override
-  public Skin getPlayerSkinForViewer(Player player, Player viewer) {
-    return getPlayerSkin(player);
-  }
-
-  @Override
   public void updateVelocity(Player player) {
     EntityPlayer handle = ((CraftPlayer) player).getHandle();
     handle.velocityChanged = false;
@@ -743,7 +743,8 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
   }
 
   @Override
-  public void sendSpawnEntityPacket(Player player, int entityId, Location location) {
+  public void sendSpawnEntityPacket(
+      Player player, int entityId, Location location, Vector velocity) {
     PacketPlayOutSpawnEntity packet = new PacketPlayOutSpawnEntity();
 
     ReflectionUtils.setField(packet, entityId, EntitySpawnFields.a.getField());
@@ -779,40 +780,45 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
     } else {
       Location loc = player.getLocation().subtract(0, 1.1, 0);
 
-      DataWatcher dataWatcher = new DataWatcher(null);
-      int flags = 0;
-      flags |= 0x20;
-      dataWatcher.a(0, (byte) flags);
-      dataWatcher.a(1, (short) 0);
-      int flags1 = 0;
-      dataWatcher.a(10, (byte) flags1);
-      PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving();
-
-      ReflectionUtils.setField(packet, entityId, LivingEntitySpawnFields.a.getField());
-      ReflectionUtils.setField(
-          packet, (byte) EntityType.ARMOR_STAND.getTypeId(), LivingEntitySpawnFields.b.getField());
-      ReflectionUtils.setField(
-          packet, MathHelper.floor(loc.getX() * 32.0D), LivingEntitySpawnFields.c.getField());
-      ReflectionUtils.setField(
-          packet, MathHelper.floor(loc.getY() * 32.0D), LivingEntitySpawnFields.d.getField());
-      ReflectionUtils.setField(
-          packet, MathHelper.floor(loc.getZ() * 32.0D), LivingEntitySpawnFields.e.getField());
-      ReflectionUtils.setField(
-          packet,
-          (byte) ((int) (((byte) loc.getYaw()) * 256.0F / 360.0F)),
-          LivingEntitySpawnFields.i.getField());
-      ReflectionUtils.setField(
-          packet,
-          (byte) ((int) (((byte) loc.getPitch()) * 256.0F / 360.0F)),
-          LivingEntitySpawnFields.j.getField());
-      ReflectionUtils.setField(
-          packet,
-          (byte) ((int) (((byte) loc.getPitch()) * 256.0F / 360.0F)),
-          LivingEntitySpawnFields.k.getField());
-      ReflectionUtils.setField(packet, dataWatcher, LivingEntitySpawnFields.l.getField());
-
-      sendPacket(player, packet);
+      spawnFakeArmorStand(player, entityId, loc, new Vector());
     }
+  }
+
+  @Override
+  public void spawnFakeArmorStand(Player player, int entityId, Location location, Vector velocity) {
+    DataWatcher dataWatcher = new DataWatcher(null);
+    int flags = 0;
+    flags |= 0x20;
+    dataWatcher.a(0, (byte) flags);
+    dataWatcher.a(1, (short) 0);
+    int flags1 = 0;
+    dataWatcher.a(10, (byte) flags1);
+    PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving();
+
+    ReflectionUtils.setField(packet, entityId, LivingEntitySpawnFields.a.getField());
+    ReflectionUtils.setField(
+        packet, (byte) EntityType.ARMOR_STAND.getTypeId(), LivingEntitySpawnFields.b.getField());
+    ReflectionUtils.setField(
+        packet, MathHelper.floor(location.getX() * 32.0D), LivingEntitySpawnFields.c.getField());
+    ReflectionUtils.setField(
+        packet, MathHelper.floor(location.getY() * 32.0D), LivingEntitySpawnFields.d.getField());
+    ReflectionUtils.setField(
+        packet, MathHelper.floor(location.getZ() * 32.0D), LivingEntitySpawnFields.e.getField());
+    ReflectionUtils.setField(
+        packet,
+        (byte) ((int) (((byte) location.getYaw()) * 256.0F / 360.0F)),
+        LivingEntitySpawnFields.i.getField());
+    ReflectionUtils.setField(
+        packet,
+        (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+        LivingEntitySpawnFields.j.getField());
+    ReflectionUtils.setField(
+        packet,
+        (byte) ((int) (((byte) location.getPitch()) * 256.0F / 360.0F)),
+        LivingEntitySpawnFields.k.getField());
+    ReflectionUtils.setField(packet, dataWatcher, LivingEntitySpawnFields.l.getField());
+
+    sendPacket(player, packet);
   }
 
   @Override
@@ -848,7 +854,7 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
 
   Field unhandledTagsField =
       ReflectionUtils.getField(
-          "org.bukkit.craftbukkit.v1_8_R3.inventory.CraftMetaItem", "unhandledTags");
+          MinecraftReflectionUtils.getCraftBukkitClass("inventory.CraftMetaItem"), "unhandledTags");
   static Field nbtListField = ReflectionUtils.getField(NBTTagList.class, "list");
 
   @Override
@@ -909,14 +915,6 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
   @Override
   public Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
     return getMaterialCollection(itemMeta, "CanPlaceOn");
-  }
-
-  @Override
-  public void copyAttributeModifiers(ItemMeta destination, ItemMeta source) {
-    SetMultimap<String, tc.oc.pgm.util.attribute.AttributeModifier> attributeModifiers =
-        getAttributeModifiers(source);
-    attributeModifiers.putAll(getAttributeModifiers(destination));
-    applyAttributeModifiers(attributeModifiers, destination);
   }
 
   @Override
@@ -1048,24 +1046,10 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
     return new AttributeMap1_8(player);
   }
 
-  public <T> ListenableFutureTask<T> constructFutureTask(Runnable task) {
-    final ListenableFutureTask<T> future = ListenableFutureTask.create(task, null);
-    return future;
-  }
-
-  static Field TASK_QUEUE = ReflectionUtils.getField(MinecraftServer.class, "j");
-
   @Override
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     MinecraftServer server = ((CraftServer) plugin.getServer()).getHandle().getServer();
     server.a(Executors.callable(task));
-
-    //    ListenableFutureTask<Object> futureTask = constructFutureTask(task);
-    //    Queue<FutureTask<?>> taskQueue = (Queue<FutureTask<?>>) ReflectionUtils.readField(server,
-    // TASK_QUEUE);
-    //    synchronized (taskQueue) {
-    //      taskQueue.add(futureTask);
-    //    }
   }
 
   @NotNull

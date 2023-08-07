@@ -1,33 +1,49 @@
 package tc.oc.pgm.util.nms;
 
-import java.lang.reflect.Method;
+import com.google.common.collect.SetMultimap;
+import com.mojang.authlib.GameProfile;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.util.attribute.AttributeMap;
+import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.nms.attribute.AttributeMapNoOp;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntityNoOp;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotionBukkit;
-import tc.oc.pgm.util.reflect.MinecraftReflectionUtils;
-import tc.oc.pgm.util.reflect.ReflectionUtils;
+import tc.oc.pgm.util.nms.reflect.Refl;
+import tc.oc.pgm.util.nms.reflect.ReflectionProxy;
+import tc.oc.pgm.util.skin.Skin;
+import tc.oc.pgm.util.skin.Skins;
 
 public abstract class NMSHacksNoOp implements NMSHacksPlatform {
+  static Refl refl = ReflectionProxy.getProxy(Refl.class);
 
   @Override
   public boolean isCraftItemArrowEntity(Item item) {
@@ -128,20 +144,14 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
     }
   }
 
-  static Class<?> craftWorldClass = MinecraftReflectionUtils.getCraftBukkitClass("CraftWorld");
-  static Method getHandleMethod = ReflectionUtils.getMethod(craftWorldClass, "getHandle");
-  static Class<?> nmsWorldClass = MinecraftReflectionUtils.getNMSClass("World");
-  static Method getTimeMethod = ReflectionUtils.getMethod(nmsWorldClass, "getTime");
-
   @Override
   public long getMonotonicTime(World world) {
-    Object handle = ReflectionUtils.callMethod(getHandleMethod, world);
-    return (long) ReflectionUtils.callMethod(getTimeMethod, handle);
+    return refl.getWorldTime(refl.getWorldHandle(world));
   }
 
   @Override
   public int getPing(Player player) {
-    return 100;
+    return refl.getPlayerPing(refl.getPlayerHandle(player));
   }
 
   @Override
@@ -167,6 +177,52 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   }
 
   @Override
+  public Set<Block> getBlocks(Chunk bukkitChunk, Material material) {
+    Set<Block> blockSet = new HashSet<>();
+    ChunkSnapshot chunkSnapshot = bukkitChunk.getChunkSnapshot();
+    for (int x = 0; x < 16; x++) {
+      for (int z = 0; z < 16; z++) {
+        int highestBlockY = chunkSnapshot.getHighestBlockYAt(x, z);
+        for (int y = 0; y < highestBlockY; y++) {
+          Block block = bukkitChunk.getBlock(x, y, z);
+          if (block.getType() == material) {
+            blockSet.add(block);
+          }
+        }
+      }
+    }
+
+    return blockSet;
+  }
+
+  @Override
+  public void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin) {
+    GameProfile gameProfile = new GameProfile(uuid, name);
+    Skins.setProperties(skin, gameProfile.getProperties());
+    refl.setSkullProfile(meta, gameProfile);
+  }
+
+  @Override
+  public WorldCreator detectWorld(String worldName) {
+    return null; // Usage handles this nicely
+  }
+
+  @Override
+  public void setAbsorption(LivingEntity entity, double health) {
+    refl.setAbsorptionHearts(refl.getCraftEntityHandle(entity), (float) health);
+  }
+
+  @Override
+  public double getAbsorption(LivingEntity entity) {
+    return refl.getAbsorptionHearts(refl.getCraftEntityHandle(entity));
+  }
+
+  @Override
+  public Skin getPlayerSkinForViewer(Player player, Player viewer) {
+    return getPlayerSkin(player); // not possible here outside of sportpaper
+  }
+
+  @Override
   public Set<MaterialData> getBlockStates(Material material) {
     // TODO: MaterialData is not version compatible
     Set<MaterialData> materialDataSet = new HashSet<>();
@@ -174,6 +230,48 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
       materialDataSet.add(new MaterialData(material, i));
     }
     return materialDataSet;
+  }
+
+  @Override
+  public boolean teleportRelative(
+      Player player,
+      Vector deltaPos,
+      float deltaYaw,
+      float deltaPitch,
+      PlayerTeleportEvent.TeleportCause cause) {
+    // From = Players current Location
+    Location from = player.getLocation();
+    // To = Players new Location if Teleport is Successful
+    Location to = from.clone().add(deltaPos);
+    to.setYaw(to.getYaw() + deltaYaw);
+    to.setPitch(to.getPitch() + deltaPitch);
+
+    return player.teleport(to, cause);
+  }
+
+  @Override
+  public void resetDimension(World world) {
+    // NoOp Other dimensions dont currently work in PGM
+  }
+
+  @Override
+  public void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
+    setMaterialCollection(itemMeta, materials, "CanDestroy");
+  }
+
+  @Override
+  public Set<Material> getCanDestroy(ItemMeta itemMeta) {
+    return getMaterialCollection(itemMeta, "CanDestroy");
+  }
+
+  @Override
+  public void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
+    setMaterialCollection(itemMeta, materials, "CanPlaceOn");
+  }
+
+  @Override
+  public Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
+    return getMaterialCollection(itemMeta, "CanPlaceOn");
   }
 
   @Override
@@ -185,6 +283,13 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   @Override
   public double getTPS() {
     return 20.0;
+  }
+
+  @Override
+  public void copyAttributeModifiers(ItemMeta destination, ItemMeta source) {
+    SetMultimap<String, AttributeModifier> attributeModifiers = getAttributeModifiers(source);
+    attributeModifiers.putAll(getAttributeModifiers(destination));
+    applyAttributeModifiers(attributeModifiers, destination);
   }
 
   @Override

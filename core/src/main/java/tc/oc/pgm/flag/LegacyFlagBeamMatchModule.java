@@ -189,8 +189,8 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
       spawn(bukkit, base(player));
       segments.forEach(segment -> spawn(bukkit, segment));
       range(1, segments.size())
-          .forEachOrdered(i -> segments.get(i - 1).ride(bukkit, segments.get(i).entity()));
-      base(player).ride(bukkit, segments.get(0).entity());
+          .forEachOrdered(i -> segments.get(i - 1).ride(bukkit, segments.get(i).entityId()));
+      base(player).ride(bukkit, segments.get(0).entityId());
 
       update(player);
     }

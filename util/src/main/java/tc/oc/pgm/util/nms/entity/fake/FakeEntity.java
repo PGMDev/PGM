@@ -9,8 +9,6 @@ import tc.oc.pgm.util.nms.NMSHacks;
 public interface FakeEntity {
   int entityId();
 
-  Entity entity();
-
   void spawn(Player viewer, Location location, org.bukkit.util.Vector velocity);
 
   default void spawn(Player viewer, Location location) {
@@ -26,10 +24,9 @@ public interface FakeEntity {
     NMSHacks.sendPacket(viewer, NMSHacks.teleportEntityPacket(entityId(), location));
   }
 
-  default void ride(Player viewer, Entity rider) {
-    int entityID = rider.getEntityId();
+  default void ride(Player viewer, int riderID) {
     int vehicleID = entityId();
-    NMSHacks.entityAttach(viewer, entityID, vehicleID, false);
+    NMSHacks.entityAttach(viewer, riderID, vehicleID, false);
   }
 
   default void mount(Player viewer, Entity vehicle) {

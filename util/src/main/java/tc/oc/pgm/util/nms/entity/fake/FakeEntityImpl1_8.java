@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.nms.entity.fake;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -12,11 +11,6 @@ public abstract class FakeEntityImpl1_8<T extends net.minecraft.server.v1_8_R3.E
 
   protected FakeEntityImpl1_8(T entity) {
     this.entity = entity;
-  }
-
-  @Override
-  public Entity entity() {
-    return entity.getBukkitEntity();
   }
 
   @Override

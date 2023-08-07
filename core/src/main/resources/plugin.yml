@@ -1,5 +1,5 @@
 name: PGM
-softdepend: [ViaVersion]
+softdepend: [ViaVersion, ProtocolLib]
 description: ${project.parent.description}
 main: ${project.mainClass}
 version: ${project.version} (git-${git.commit.id.abbrev})

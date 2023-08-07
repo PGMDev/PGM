@@ -15,6 +15,14 @@ public enum Attribute {
   GENERIC_MOVEMENT_SPEED("generic.movementSpeed"),
   /** Attack damage of an Entity. */
   GENERIC_ATTACK_DAMAGE("generic.attackDamage"),
+  /** Attack speed of an Entity */
+  GENERIC_ATTACK_SPEED("generic.attackSpeed"),
+  /** Armor of an Entity */
+  GENERIC_ARMOR("generic.armor"),
+  /** Armor Toughness of an Entity */
+  GENERIC_ARMOR_TOUGHNESS("generic.armorToughness"),
+  /** Luck */
+  GENERIC_LUCK("generic.luck"),
   /** Strength with which a horse will jump. */
   HORSE_JUMP_STRENGTH("horse.jumpStrength"),
   /** Chance of a zombie to spawn reinforcements. */
