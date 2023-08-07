@@ -15,6 +15,8 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.Flag;
 import cloud.commandframework.annotations.specifier.Greedy;
 import cloud.commandframework.annotations.specifier.Range;
+import cloud.commandframework.annotations.suggestions.Suggestions;
+import cloud.commandframework.context.CommandContext;
 import com.google.common.collect.ImmutableList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +38,7 @@ import tc.oc.pgm.api.map.Phase;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
@@ -52,7 +55,8 @@ public final class MapCommand {
       CommandSender sender,
       MapLibrary library,
       @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
-      @Flag(value = "tags", aliases = "t", repeatable = true) List<String> tags,
+      @Flag(value = "tags", aliases = "t", repeatable = true, suggestions = "maptags")
+          List<String> tags,
       @Flag(value = "author", aliases = "a") String author,
       @Flag(value = "name", aliases = "n") String name,
       @Flag(value = "phase", aliases = "p") Phase phase) {
@@ -113,6 +117,20 @@ public final class MapCommand {
             .build();
       }
     }.display(audience, ImmutableList.copyOf(maps), page);
+  }
+
+  @Suggestions("maptags")
+  public List<String> suggestMapTags(CommandContext<CommandSender> sender, String input) {
+    int commaIdx = input.lastIndexOf(',');
+
+    final String prefix = input.substring(0, commaIdx == -1 ? 0 : commaIdx + 1);
+    final String toComplete =
+        input.substring(commaIdx + 1).toLowerCase(Locale.ROOT).replace("!", "");
+
+    return MapTag.getAllTagIds().stream()
+        .filter(mt -> LiquidMetal.match(mt, toComplete))
+        .flatMap(tag -> Stream.of(prefix + tag, prefix + "!" + tag))
+        .collect(Collectors.toList());
   }
 
   private static boolean matchesTags(

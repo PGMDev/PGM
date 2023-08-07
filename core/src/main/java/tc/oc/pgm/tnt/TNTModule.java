@@ -25,7 +25,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class TNTModule implements MapModule<TNTMatchModule> {
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("autotnt", "Instant TNT", false, true));
+      ImmutableList.of(new MapTag("autotnt", "Instant TNT"));
   public static final int DEFAULT_DISPENSER_NUKE_LIMIT = 16;
   public static final float DEFAULT_DISPENSER_NUKE_MULTIPLIER = 0.25f;
 
