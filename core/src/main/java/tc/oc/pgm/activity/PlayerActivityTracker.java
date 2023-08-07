@@ -2,6 +2,7 @@ package tc.oc.pgm.activity;
 
 import com.google.common.collect.Maps;
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,15 +16,15 @@ public class PlayerActivityTracker {
     this.records = Maps.newHashMap();
   }
 
-  public void start(Competitor competitor) {
+  protected void start(Competitor competitor) {
     records.computeIfAbsent(competitor, k -> new TeamTimeRecord()).start();
   }
 
-  public void endAll() {
+  protected void endAll() {
     records.keySet().forEach(this::end);
   }
 
-  public void end(Competitor competitor) {
+  protected void end(Competitor competitor) {
     if (records.containsKey(competitor)) {
       records.get(competitor).end();
     }
@@ -49,5 +50,9 @@ public class PlayerActivityTracker {
         .max(Comparator.comparing(entry -> entry.getValue().getTimePlayed()))
         .map(Entry::getKey)
         .orElse(null);
+  }
+
+  public Map<Competitor, TeamTimeRecord> getRecords() {
+    return Collections.unmodifiableMap(records);
   }
 }
