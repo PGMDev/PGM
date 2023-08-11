@@ -105,7 +105,9 @@ public class ChatDispatcher implements Listener {
   @CommandMethod("g|all [message]")
   @CommandDescription("Send a message to everyone")
   public void sendGlobal(
-      Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
+      Match match,
+      @NotNull MatchPlayer sender,
+      @Argument(value = "message", suggestions = "players") @Greedy String message) {
     if (Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
@@ -127,7 +129,9 @@ public class ChatDispatcher implements Listener {
   @CommandMethod("t [message]")
   @CommandDescription("Send a message to your team")
   public void sendTeam(
-      Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
+      Match match,
+      @NotNull MatchPlayer sender,
+      @Argument(value = "message", suggestions = "players") @Greedy String message) {
     if (Integration.isVanished(sender.getBukkit())) {
       sendAdmin(match, sender, message);
       return;
@@ -161,7 +165,9 @@ public class ChatDispatcher implements Listener {
   @CommandDescription("Send a message to operators")
   @CommandPermission(Permissions.ADMINCHAT)
   public void sendAdmin(
-      Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
+      Match match,
+      @NotNull MatchPlayer sender,
+      @Argument(value = "message", suggestions = "players") @Greedy String message) {
     // If a player managed to send a default message without permissions, reset their chat channel
     if (!sender.getBukkit().hasPermission(Permissions.ADMINCHAT)) {
       sender.getSettings().resetValue(SettingKey.CHAT);
@@ -196,7 +202,7 @@ public class ChatDispatcher implements Listener {
       Match match,
       @NotNull MatchPlayer sender,
       @Argument("player") MatchPlayer receiver,
-      @Argument("message") @Greedy String message) {
+      @Argument(value = "message", suggestions = "players") @Greedy String message) {
     if (Integration.isVanished(sender.getBukkit())) throw exception("vanish.chat.deny");
     if (receiver.equals(sender)) throw exception("command.message.self");
 
@@ -264,7 +270,9 @@ public class ChatDispatcher implements Listener {
   @CommandMethod("reply|r <message>")
   @CommandDescription("Reply to a direct message")
   public void sendReply(
-      Match match, @NotNull MatchPlayer sender, @Argument("message") @Greedy String message) {
+      Match match,
+      @NotNull MatchPlayer sender,
+      @Argument(value = "message", suggestions = "players") @Greedy String message) {
     MatchPlayer receiver = manager.getPlayer(getLastMessagedId(sender.getBukkit()));
     if (receiver == null) throw exception("command.message.noReply", text("/msg"));
 

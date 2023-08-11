@@ -373,7 +373,7 @@ public class PickerMatchModule implements MatchModule, Listener {
         jmm.join(player, JoinRequest.fromPlayer(player, null));
       }
     } else if (hand.getType() == Button.LEAVE.material && left) {
-      jmm.leave(player);
+      jmm.leave(player, JoinRequest.empty());
     }
 
     if (handled) {
@@ -763,7 +763,7 @@ public class PickerMatchModule implements MatchModule, Listener {
         .execute(
             () -> {
               if (bukkit.isOnline()) {
-                match.needModule(JoinMatchModule.class).leave(player);
+                match.needModule(JoinMatchModule.class).leave(player, JoinRequest.empty());
               }
             });
   }

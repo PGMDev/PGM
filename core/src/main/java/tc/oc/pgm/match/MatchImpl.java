@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -35,6 +36,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchPhase;
@@ -131,7 +133,8 @@ public class MatchImpl implements Match {
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
-    this.capacity = new AtomicInteger(map.getMaxPlayers().stream().mapToInt(i -> i).sum());
+    this.capacity =
+        new AtomicInteger(map.getInfo().getMaxPlayers().stream().mapToInt(i -> i).sum());
     this.executors = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
@@ -231,8 +234,8 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public MapContext getMap() {
-    return map;
+  public MapInfo getMap() {
+    return map.getInfo();
   }
 
   @Override
@@ -462,7 +465,10 @@ public class MatchImpl implements Match {
   @Override
   public boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request) {
     if (request == null)
-      request = JoinRequest.of(party instanceof Team ? (Team) party : null, JoinRequest.Flag.FORCE);
+      request =
+          party instanceof Team
+              ? JoinRequest.of((Team) party, JoinRequest.Flag.FORCE)
+              : JoinRequest.force();
     return setOrClearPlayerParty(player, assertNotNull(party), request);
   }
 
@@ -516,11 +522,12 @@ public class MatchImpl implements Match {
 
       if (oldParty instanceof Competitor) {
         PlayerParticipationEvent request =
-            new PlayerParticipationStopEvent(player, (Competitor) oldParty);
+            new PlayerParticipationStopEvent(player, (Competitor) oldParty, joinRequest, newParty);
         callEvent(request);
-        if (request.isCancelled()
-            && newParty != null) { // Can't cancel this if the player is leaving the match
-          player.sendWarning(request.getCancelReason());
+        // Can't cancel this if the player is leaving the match
+        if (request.isCancelled() && newParty != null) {
+          if (!Objects.equals(Component.empty(), request.getCancelReason()))
+            player.sendWarning(request.getCancelReason());
           return false;
         }
       }
@@ -529,9 +536,10 @@ public class MatchImpl implements Match {
         PlayerParticipationEvent request =
             new PlayerParticipationStartEvent(player, (Competitor) newParty, joinRequest);
         callEvent(request);
-        if (request.isCancelled()
-            && oldParty != null) { // Can't cancel this if the player is joining the match
-          player.sendWarning(request.getCancelReason());
+        // Can't cancel this if the player is joining the match
+        if (request.isCancelled() && oldParty != null) {
+          if (!Objects.equals(Component.empty(), request.getCancelReason()))
+            player.sendWarning(request.getCancelReason());
           return false;
         }
       }
@@ -720,7 +728,7 @@ public class MatchImpl implements Match {
 
   @Override
   public boolean getFriendlyFire() {
-    return friendlyFireOverride != null ? friendlyFireOverride : map.getFriendlyFire();
+    return friendlyFireOverride != null ? friendlyFireOverride : map.getInfo().getFriendlyFire();
   }
 
   @Override
@@ -763,8 +771,7 @@ public class MatchImpl implements Match {
     ImmutableMap.Builder<Class<? extends MatchModule>, MatchModuleFactory<?>> builder =
         ImmutableMap.builder();
     builder.putAll(Modules.MATCH);
-    getMap()
-        .getModules()
+    map.getModules()
         .forEach(module -> builder.put(Modules.MAP_TO_MATCH.get(module.getClass()), module));
     return builder.build();
   }
@@ -961,7 +968,7 @@ public class MatchImpl implements Match {
     return "Match{id="
         + this.id
         + ", map="
-        + this.map.getId()
+        + this.map.getInfo().getId()
         + ", world="
         + (world == null ? "<null>" : world.getName())
         + ", phase="

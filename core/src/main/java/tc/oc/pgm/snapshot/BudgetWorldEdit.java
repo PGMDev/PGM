@@ -8,6 +8,7 @@ import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.BlockData;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 /**
  * Utils to save, remove and paste blocks in some {@link Region} in some {@link Match} using the
@@ -33,7 +34,7 @@ class BudgetWorldEdit {
     for (BlockData blockData : snapshot.getMaterials(region)) {
 
       BlockState state = blockData.getBlock(world, offset).getState();
-      state.setMaterialData(blockData.getMaterialData());
+      NMSHacks.setBlockStateData(state, blockData.getMaterialData());
       state.update(true, true);
     }
   }

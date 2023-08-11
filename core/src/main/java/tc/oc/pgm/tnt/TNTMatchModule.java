@@ -69,6 +69,17 @@ public class TNTMatchModule implements MatchModule, Listener {
     }
   }
 
+  private static Sound FUSE_SOUND = chooseFuseSound();
+
+  private static Sound chooseFuseSound() {
+    try {
+      return Sound.FUSE;
+    } catch (NoSuchFieldError error) {
+      // TODO: make or use a 1.8 -> 1.9+ sound conversion api
+      return Sound.valueOf("ENTITY_TNT_PRIMED");
+    }
+  }
+
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleInstantActivation(BlockPlaceEvent event) {
     if (this.properties.instantIgnite && event.getBlock().getType() == Material.TNT) {
@@ -88,7 +99,7 @@ public class TNTMatchModule implements MatchModule, Listener {
 
       if (callPrimeEvent(tnt, event.getPlayer())) {
         event.setCancelled(true); // Allow the block to be placed if priming is cancelled
-        world.playSound(tnt.getLocation(), Sound.FUSE, 1, 1);
+        world.playSound(tnt.getLocation(), FUSE_SOUND, 1, 1);
 
         ItemStack inHand = event.getPlayer().getItemInHand();
         if (inHand.getAmount() == 1) {

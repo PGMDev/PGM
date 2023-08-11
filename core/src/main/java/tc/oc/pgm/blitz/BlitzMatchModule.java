@@ -91,7 +91,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void handleLeave(final PlayerPartyChangeEvent event) {
     int lives = this.lifeManager.getLives(event.getPlayer().getId());
     if (event.getOldParty() instanceof Competitor && lives > 0) {
@@ -142,7 +142,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onBlitzPlayerEliminated(final BlitzPlayerEliminatedEvent event) {
-    this.eliminatedPlayers.add(event.getPlayer().getBukkit().getUniqueId());
+    this.eliminatedPlayers.add(event.getPlayer().getId());
 
     World world = event.getMatch().getWorld();
     Location death = event.getDeathLocation();
@@ -162,8 +162,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
   private void handleElimination(final MatchPlayer player, Competitor competitor) {
     if (!eliminatedPlayers.add(player.getBukkit().getUniqueId())) return;
 
-    match.callEvent(
-        new BlitzPlayerEliminatedEvent(player, competitor, player.getBukkit().getLocation()));
+    match.callEvent(new BlitzPlayerEliminatedEvent(player, competitor, player.getLocation()));
 
     checkEnd();
   }
@@ -179,8 +178,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
         .execute(
             () -> {
               ImmutableSet.copyOf(match.getParticipants()).stream()
-                  .filter(
-                      participating -> isPlayerEliminated(participating.getBukkit().getUniqueId()))
+                  .filter(participating -> isPlayerEliminated(participating.getId()))
                   .forEach(participating -> match.setParty(participating, match.getDefaultParty()));
 
               match.calculateVictory();

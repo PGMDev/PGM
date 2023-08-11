@@ -12,6 +12,7 @@ import org.bukkit.material.MaterialData;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapTag;
@@ -38,7 +39,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class CoreModule implements MapModule<CoreMatchModule> {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("dtc", "core", "Destroy the Core", true, false));
+      ImmutableList.of(new MapTag("core", Gamemode.DESTROY_THE_CORE, false));
   protected final List<CoreFactory> coreFactories;
 
   public CoreModule(List<CoreFactory> coreFactories) {

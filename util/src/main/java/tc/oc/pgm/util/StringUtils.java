@@ -141,7 +141,7 @@ public final class StringUtils {
   }
 
   public static String slugify(String text) {
-    return normalize(text).replace(" ", "");
+    return normalize(text).replace(" ", "_");
   }
 
   public static String substring(String text, int begin, int end) {

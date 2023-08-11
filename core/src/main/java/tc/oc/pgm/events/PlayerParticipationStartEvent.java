@@ -15,17 +15,8 @@ import tc.oc.pgm.join.JoinRequest;
  * <p>If cancellation is not required, {@link PlayerPartyChangeEvent} should be used instead.
  */
 public class PlayerParticipationStartEvent extends PlayerParticipationEvent {
-
-  private final JoinRequest request;
-
   public PlayerParticipationStartEvent(
       @NotNull MatchPlayer player, @NotNull Competitor competitor, @NotNull JoinRequest request) {
-    super(player, competitor);
-    this.request = request;
-  }
-
-  @NotNull
-  public JoinRequest getRequest() {
-    return request;
+    super(player, competitor, request);
   }
 }

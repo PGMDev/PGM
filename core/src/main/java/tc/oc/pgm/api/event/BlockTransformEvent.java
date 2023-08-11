@@ -20,6 +20,7 @@ import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Called when a {@link Block} transforms from one {@link BlockState} to another. */
 public class BlockTransformEvent extends GeneralizedEvent {
@@ -97,8 +98,7 @@ public class BlockTransformEvent extends GeneralizedEvent {
       return newState;
     } else {
       final BlockState state = newState.getBlock().getState();
-      state.setType(drops.replacement.getItemType());
-      state.setData(drops.replacement);
+      NMSHacks.setBlockStateData(state, drops.replacement);
       return state;
     }
   }

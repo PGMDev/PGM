@@ -23,7 +23,7 @@ public interface BukkitUtils {
     return PLUGIN.get();
   }
 
-  Boolean isSportPaper = Bukkit.getServer().getVersion().contains("SportPaper");
+  Boolean isSportPaper = Platform.SERVER_PLATFORM == Platform.SPORTPAPER_1_8;
 
   static boolean isSportPaper() {
     return isSportPaper;

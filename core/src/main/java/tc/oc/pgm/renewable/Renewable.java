@@ -30,6 +30,7 @@ import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.MaterialCounter;
 import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Renewable implements Listener, Tickable {
 
@@ -266,8 +267,7 @@ public class Renewable implements Listener, Tickable {
     Location location = pos.toLocation(match.getWorld());
     Block block = location.getBlock();
     BlockState newState = location.getBlock().getState();
-    newState.setType(material.getItemType());
-    newState.setData(material);
+    NMSHacks.setBlockStateData(newState, material);
 
     BlockRenewEvent event = new BlockRenewEvent(block, newState, this);
     match.callEvent(event); // Our own handler will get this and remove the block from the pool

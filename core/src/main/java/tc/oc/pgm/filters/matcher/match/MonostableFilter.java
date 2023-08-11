@@ -79,6 +79,7 @@ public class MonostableFilter extends SingleFilterFunction
       implements Tickable {
 
     protected final Class<F> scope;
+    protected Instant lastTick = Instant.MIN;
 
     // Filterables that currently pass the inner filter, mapped to the instants that they expire.
     // They are not actually removed until the inner filter goes false.
@@ -123,10 +124,11 @@ public class MonostableFilter extends SingleFilterFunction
 
       endTimes.forEach(
           (filterable, end) -> {
-            if (now.isAfter(end)) {
+            if (!now.isBefore(end) && lastTick.isBefore(end)) {
               this.invalidate(filterable);
             }
           });
+      lastTick = now;
     }
   }
 

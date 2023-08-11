@@ -23,6 +23,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
@@ -44,7 +45,7 @@ public final class TeamCommand {
     final Party oldParty = joiner.getParty();
 
     if (team != null && !(team instanceof Competitor)) {
-      join.leave(joiner);
+      join.leave(joiner, JoinRequest.force());
     } else {
       join.forceJoin(joiner, (Competitor) team);
     }

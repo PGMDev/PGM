@@ -2,53 +2,28 @@ package tc.oc.pgm.map;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.MapSource;
-import tc.oc.pgm.api.map.MapTag;
-import tc.oc.pgm.ffa.FreeForAllModule;
-import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.teams.TeamModule;
 
-public class MapContextImpl extends MapInfoImpl implements MapContext {
-  private static final MapTag TERRAIN = new MapTag("terrain", "Terrain", false, true);
+public class MapContextImpl implements MapContext {
 
-  private final MapSource source;
+  private final MapInfo info;
   private final List<MapModule> modules;
 
-  public MapContextImpl(MapInfo info, MapSource source, Collection<MapModule<?>> modules) {
-    super(info);
-    this.source = assertNotNull(source);
+  public MapContextImpl(MapInfoImpl info, Collection<MapModule<?>> modules) {
+    this.info = info;
     this.modules = ImmutableList.copyOf(assertNotNull(modules));
 
-    for (MapModule module : this.modules) {
-      this.tags.addAll(module.getTags());
-
-      if (module instanceof TeamModule) {
-        this.players.clear();
-        this.players.addAll(
-            Collections2.transform(((TeamModule) module).getTeams(), TeamFactory::getMaxPlayers));
-      }
-
-      if (module instanceof FreeForAllModule) {
-        this.players.clear();
-        this.players.add(((FreeForAllModule) module).getOptions().maxPlayers);
-      }
-    }
-
-    if (getWorld().hasTerrain()) {
-      this.tags.add(TERRAIN);
-    }
+    // Update the map info with stuff derived from modules, like team sizes or tags.
+    info.setContext(this);
   }
 
-  @Override
-  public MapSource getSource() {
-    return source;
+  public MapInfo getInfo() {
+    return info;
   }
 
   @Override

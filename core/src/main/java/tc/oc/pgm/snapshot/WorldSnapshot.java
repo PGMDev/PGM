@@ -52,7 +52,8 @@ public class WorldSnapshot {
     ChunkSnapshot chunkSnapshot = chunkSnapshots.get(chunkVector);
     if (chunkSnapshot != null) {
       BlockVector chunkPos = chunkVector.worldToChunk(x, y, z);
-      state.setMaterialData(
+      NMSHacks.setBlockStateData(
+          state,
           new MaterialData(
               chunkSnapshot.getBlockTypeId(
                   chunkPos.getBlockX(), chunkPos.getBlockY(), chunkPos.getBlockZ()),

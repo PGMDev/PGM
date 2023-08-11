@@ -52,8 +52,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ShopModule implements MapModule<ShopMatchModule> {
 
-  private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("shops", "Shops", false, true));
+  private static final Collection<MapTag> TAGS = ImmutableList.of(new MapTag("shops", "Shops"));
 
   private final ImmutableMap<String, Shop> shops;
   private final ImmutableSet<ShopKeeper> shopKeepers;

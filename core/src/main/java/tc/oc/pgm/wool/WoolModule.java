@@ -10,6 +10,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapTag;
@@ -34,7 +35,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WoolModule implements MapModule<WoolMatchModule> {
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("ctw", "wool", "Capture the Wool", true, false));
+      ImmutableList.of(new MapTag("wool", Gamemode.CAPTURE_THE_WOOL, false));
 
   protected final Multimap<TeamFactory, MonumentWoolFactory> woolFactories;
 

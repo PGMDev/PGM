@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import org.jdom2.Content;
@@ -38,7 +38,7 @@ public class MapIncludeImpl implements MapInclude {
   }
 
   @Override
-  public Collection<Content> getContent() {
+  public List<Content> getContent() {
     if (getLastModified() > lastRead.get()) {
       try {
         reload();

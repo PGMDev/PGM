@@ -2,6 +2,7 @@ package tc.oc.pgm.filters.matcher.player;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.stream.Stream;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -26,7 +27,7 @@ public class HoldingItemFilter extends ParticipantItemFilter {
   }
 
   @Override
-  protected ItemStack[] getItems(MatchPlayer player) {
-    return new ItemStack[] {player.getBukkit().getItemInHand()};
+  protected Stream<ItemStack> getItems(MatchPlayer player) {
+    return Stream.of(player.getBukkit().getItemInHand());
   }
 }

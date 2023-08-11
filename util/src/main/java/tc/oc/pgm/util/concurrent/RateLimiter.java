@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.concurrent;
 
-import org.bukkit.Bukkit;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class RateLimiter {
   private final int minDelay, maxDelay;
@@ -36,7 +36,7 @@ public class RateLimiter {
     long nextUpdate =
         (endedAt - now)
             + ((endedAt - startedAt) * timeRatio)
-            + (long) Math.max(0, (20 - Bukkit.getServer().spigot().getTPS()[0]) * tpsRatio);
+            + (long) Math.max(0, (20 - NMSHacks.getTPS()) * tpsRatio);
 
     return Math.max(timedOutUntil - now, 0) + Math.min(Math.max(minDelay, nextUpdate), maxDelay);
   }

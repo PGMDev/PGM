@@ -3,24 +3,21 @@ package tc.oc.pgm.map;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
-import org.jdom2.JDOMException;
+import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
-import org.jdom2.input.SAXBuilder;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapException;
-import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
-import tc.oc.pgm.api.map.includes.MapInclude;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.api.module.ModuleGraph;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
@@ -37,24 +34,16 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.SAXHandler;
+import tc.oc.pgm.util.xml.XMLUtils;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?>>
     implements MapFactory {
-
-  private static final ThreadLocal<SAXBuilder> DOCUMENT_FACTORY =
-      ThreadLocal.withInitial(
-          () -> {
-            final SAXBuilder builder = new SAXBuilder();
-            builder.setSAXHandlerFactory(SAXHandler.FACTORY);
-            return builder;
-          });
 
   private final Logger logger;
   private final MapSource source;
   private final MapIncludeProcessor includes;
   private Document document;
-  private MapInfo info;
+  private MapInfoImpl info;
   private RegionParser regions;
   private FilterParser filters;
   private KitParser kits;
@@ -76,27 +65,12 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     }
   }
 
-  private void preLoad()
-      throws IOException, JDOMException, InvalidXMLException, MapMissingException {
-    try (final InputStream stream = source.getDocument()) {
-      document = DOCUMENT_FACTORY.get().build(stream);
-      document.setBaseURI(source.getId());
-    }
-
-    // Check for any included map sources, appending them to the document if present
-    Collection<MapInclude> mapIncludes = includes.getMapIncludes(document);
-    for (MapInclude include : mapIncludes) {
-      document.getRootElement().addContent(0, include.getContent());
-    }
-    source.setIncludes(mapIncludes);
-
-    info = new MapInfoImpl(document.getRootElement());
-  }
-
   @Override
   public MapContext load() throws MapException {
     try {
-      preLoad();
+      document = MapFilePreprocessor.getDocument(source, includes);
+
+      info = new MapInfoImpl(source, document.getRootElement());
       try {
         loadAll();
       } catch (ModuleLoadException e) {
@@ -121,7 +95,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
       throw new MapException(source, info, "Unhandled " + t.getClass().getName(), t);
     }
 
-    return new MapContextImpl(info, source, getModules());
+    return new MapContextImpl(info, getModules());
   }
 
   private void postLoad() throws InvalidXMLException {
@@ -176,6 +150,20 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
       features = new FeatureDefinitionContext();
     }
     return features;
+  }
+
+  @Override
+  public Collection<String> getVariants() throws InvalidXMLException {
+    Set<String> collect = new HashSet<>();
+    for (Element variant : document.getRootElement().getChildren("variant")) {
+      String id = XMLUtils.parseRequiredId(variant);
+      if ("default".equals(id))
+        throw new InvalidXMLException("Variant id must not be 'default'", variant);
+
+      if (!collect.add(id))
+        throw new InvalidXMLException("Duplicate variant ids are not allowed", variant);
+    }
+    return collect;
   }
 
   @Override

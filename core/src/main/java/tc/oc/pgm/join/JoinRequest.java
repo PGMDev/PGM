@@ -10,6 +10,9 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 
 public class JoinRequest {
+  private static final JoinRequest FORCE = new JoinRequest(null, 1, EnumSet.of(Flag.FORCE));
+  private static final JoinRequest EMPTY = new JoinRequest(null, 1, EnumSet.noneOf(Flag.class));
+
   private final @Nullable Team team;
   private final int players;
   private final ImmutableSet<Flag> flags;
@@ -34,6 +37,14 @@ public class JoinRequest {
 
   public static JoinRequest group(@Nullable Team team, int size, Set<Flag> flags) {
     return new JoinRequest(team, size, flags);
+  }
+
+  public static JoinRequest empty() {
+    return EMPTY;
+  }
+
+  public static JoinRequest force() {
+    return FORCE;
   }
 
   @Nullable

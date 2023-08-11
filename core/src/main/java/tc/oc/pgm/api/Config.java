@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public interface Config {
    * @return A path to a map pool, or null for no map pools.
    */
   @Nullable
-  String getMapPoolFile();
+  Path getMapPoolFile();
 
   /**
    * Gets a path to the includes directory.
@@ -66,7 +67,7 @@ public interface Config {
    * @return A path to the includes directory, or null for none.
    */
   @Nullable
-  String getIncludesDirectory();
+  Path getIncludesDirectory();
 
   /**
    * Gets a duration to wait before starting a match.
@@ -206,6 +207,13 @@ public interface Config {
    * @return If the tab list is rendered.
    */
   boolean showTabList();
+
+  /**
+   * Gets whether the tab list should be resized to 4 rows for 1.7 players.
+   *
+   * @return If the tab list will be resized.
+   */
+  boolean resizeTabList();
 
   /**
    * Gets whether the tab list is should show real ping.

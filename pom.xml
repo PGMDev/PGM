@@ -63,6 +63,14 @@
             <id>pgm-fyi</id>
             <url>https://repo.pgm.fyi/snapshots</url>
         </repository>
+        <repository> <!-- Protocol Lib -->
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
+        <repository> <!-- NBT Editing without NMS -->
+            <id>CodeMC</id>
+            <url>https://repo.codemc.org/repository/maven-public/</url>
+        </repository>
     </repositories>
 
     <distributionManagement>
@@ -96,6 +104,13 @@
                     <artifactId>bungeecord-chat</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <!-- Send packets to players -->
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>5.0.0</version>
         </dependency>
 
         <!-- XML parsing library used for all "map.xml" configuration loading -->
@@ -172,6 +187,13 @@
             <artifactId>FastBoard</artifactId>
             <version>1.2.1</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Small reflection library for editing NBT -->
+        <dependency>
+            <groupId>io.github.bananapuncher714</groupId>
+            <artifactId>nbteditor</artifactId>
+            <version>7.18.5</version>
         </dependency>
         
         <!--Framework for creating interactive GUIs - https://github.com/MinusKube/SmartInvs -->

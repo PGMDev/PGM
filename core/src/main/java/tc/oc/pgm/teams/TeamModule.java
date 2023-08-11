@@ -48,9 +48,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
             ImmutableList.of(
                 new MapTag(
                     size + "team" + (size == 1 ? "" : "s"),
-                    size + " Team" + (size == 1 ? "" : "s"),
-                    false,
-                    true)));
+                    size + " Team" + (size == 1 ? "" : "s"))));
   }
 
   @Override

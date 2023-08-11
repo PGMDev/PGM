@@ -81,12 +81,11 @@ public final class InventoryUtils {
       PotionMeta meta = (PotionMeta) potion.getItemMeta();
       if (meta.hasCustomEffects()) {
         return meta.getCustomEffects();
-      } else {
+      } else if (potion.getType() == Material.POTION) { // Sanity check, SpawnablePotionBukkit
         return Potion.fromItemStack(potion).getEffects();
       }
-    } else {
-      return Collections.emptyList();
     }
+    return Collections.emptyList();
   }
 
   public static @Nullable PotionEffectType getPrimaryEffectType(ItemStack potion) {
