@@ -74,7 +74,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
   @Override
   public VariablesMatchModule createMatchModule(Match match) throws ModuleLoadException {
     for (VariableDefinition<?> varDef : this.variables) {
-      match.getFeatureContext().add(new Variable<>(varDef));
+      match.getFeatureContext().add(varDef.buildInstance());
     }
 
     return new VariablesMatchModule();
@@ -102,8 +102,17 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         Class<? extends Filterable<?>> scope =
             Filterables.parse(Node.fromRequiredAttr(variable, "scope"));
         double def = XMLUtils.parseNumber(Node.fromAttr(variable, "default"), Double.class, 0d);
+        Node variableTypeNode = Node.fromAttr(variable, "type");
+        VariableType variableType =
+            XMLUtils.parseEnum(
+                variableTypeNode, VariableType.class, "variable type", VariableType.DUMMY);
+        if (!variableType.supports(scope)) {
+          throw new InvalidXMLException(
+              "VariableType: " + variableType + " Does not support scope: " + scope,
+              variableTypeNode);
+        }
 
-        VariableDefinition<?> varDef = new VariableDefinition<>(id, scope, def);
+        VariableDefinition<?> varDef = new VariableDefinition<>(id, scope, def, variableType);
         factory.getFeatures().addFeature(variable, varDef);
         variables.add(varDef);
       }

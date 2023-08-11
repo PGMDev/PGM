@@ -76,6 +76,16 @@ public class BlitzMatchModule implements MatchModule, Listener {
     return lifeManager.getLives(id);
   }
 
+  public void setLives(MatchPlayer matchPlayer, int lives) {
+    UUID id = matchPlayer.getId();
+    if (lives == lifeManager.getLives(id)) return;
+
+    lifeManager.setLives(id, lives);
+    if (this.config.getBroadcastLives()) {
+      this.showLivesTitle(matchPlayer);
+    }
+  }
+
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void handleDeath(final MatchPlayerDeathEvent event) {
     MatchPlayer victim = event.getVictim();
@@ -123,21 +133,22 @@ public class BlitzMatchModule implements MatchModule, Listener {
   @EventHandler
   public void handleSpawn(final ParticipantSpawnEvent event) {
     if (this.config.getBroadcastLives()) {
-      int lives = this.lifeManager.getLives(event.getPlayer().getId());
-      event
-          .getPlayer()
-          .showTitle(
-              title(
-                  empty(),
-                  translatable(
-                      "blitz.livesRemaining",
-                      NamedTextColor.RED,
-                      translatable(
-                          lives == 1 ? "misc.life" : "misc.lives",
-                          NamedTextColor.AQUA,
-                          text(lives))),
-                  Title.Times.times(Duration.ZERO, fromTicks(60), fromTicks(20))));
+      MatchPlayer matchPlayer = event.getPlayer();
+      showLivesTitle(matchPlayer);
     }
+  }
+
+  public void showLivesTitle(MatchPlayer matchPlayer) {
+    int lives = this.lifeManager.getLives(matchPlayer.getId());
+    matchPlayer.showTitle(
+        title(
+            empty(),
+            translatable(
+                "blitz.livesRemaining",
+                NamedTextColor.RED,
+                translatable(
+                    lives == 1 ? "misc.life" : "misc.lives", NamedTextColor.AQUA, text(lives))),
+            Title.Times.times(Duration.ZERO, fromTicks(60), fromTicks(20))));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
