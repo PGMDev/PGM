@@ -16,6 +16,9 @@ public class PlayerStats {
   private final PlayerStats parent;
   private final Component component;
 
+  private Duration timePlayed;
+  private Instant inTime;
+
   // K/D
   private int kills;
   private int deaths;
@@ -55,11 +58,15 @@ public class PlayerStats {
   public PlayerStats() {
     this.parent = null;
     this.component = null;
+    this.timePlayed = Duration.ZERO;
+    this.inTime = null;
   }
 
   public PlayerStats(PlayerStats parent, Component component) {
     this.parent = parent;
     this.component = component;
+    this.timePlayed = Duration.ZERO;
+    this.inTime = null;
   }
 
   // Methods to update the stats, should only be accessed by StatsMatchModule
@@ -270,5 +277,29 @@ public class PlayerStats {
 
   public Component getPlayerComponent() {
     return component;
+  }
+
+  public void startParticipation() {
+    if (inTime == null) this.inTime = Instant.now();
+
+    if (parent != null) parent.startParticipation();
+  }
+
+  public void endParticipation() {
+    if (this.inTime == null) return;
+
+    this.timePlayed = timePlayed.plus(getActiveSessionDuration());
+    this.inTime = null;
+
+    if (parent != null) parent.endParticipation();
+  }
+
+  public Duration getTimePlayed() {
+    // If not ended yet add the current session time up
+    return inTime == null ? timePlayed : timePlayed.plus(getActiveSessionDuration());
+  }
+
+  public Duration getActiveSessionDuration() {
+    return (inTime == null) ? Duration.ZERO : Duration.between(inTime, Instant.now());
   }
 }

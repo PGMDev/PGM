@@ -43,6 +43,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.event.MatchStatsEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -58,6 +59,8 @@ import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.destroyable.DestroyableHealthChange;
 import tc.oc.pgm.destroyable.DestroyableHealthChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.events.PlayerLeavePartyEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
@@ -113,6 +116,42 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   public Table<Team, UUID, PlayerStats> getParticipationStats() {
     return Tables.unmodifiableTable(stats);
+  }
+
+  @EventHandler
+  public void onMatchStart(final MatchStartEvent event) {
+    event
+        .getMatch()
+        .getParticipants()
+        .forEach(player -> getPlayerStat(player).startParticipation());
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST)
+  public void onMatchFinish(final MatchFinishEvent event) {
+    event.getMatch().getParticipants().forEach(player -> getPlayerStat(player).endParticipation());
+  }
+
+  @EventHandler
+  public void onPlayerJoinMatch(final PlayerJoinPartyEvent event) {
+    // Only modify trackers when match is running
+    if (!event.getMatch().isRunning()) return;
+
+    // End time tracking for old party
+    if (event.getOldParty() instanceof Competitor) {
+      computeTeamStatsIfAbsent(event.getPlayer().getId(), event.getOldParty()).endParticipation();
+    }
+
+    // When joining a party that's playing, start time tracking
+    if (event.getNewParty() instanceof Competitor) {
+      computeTeamStatsIfAbsent(event.getPlayer().getId(), event.getNewParty()).startParticipation();
+    }
+  }
+
+  @EventHandler
+  public void onPlayerLeaveMatch(final PlayerLeavePartyEvent event) {
+    if (event.getMatch().isRunning() && event.getParty() instanceof Competitor) {
+      getPlayerStat(event.getPlayer()).endParticipation();
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -436,10 +475,9 @@ public class StatsMatchModule implements MatchModule, Listener {
     return allPlayerStats.keySet().stream().filter(id -> match.getPlayer(id) == null);
   }
 
-  // Creates a new PlayerStat if the player does not have one yet
+  @Deprecated
   public final PlayerStats getPlayerStat(UUID uuid) {
-    if (hasNoStats(uuid)) putNewPlayer(uuid);
-    return allPlayerStats.get(uuid);
+    return getGlobalPlayerStat(uuid);
   }
 
   private void putNewPlayer(UUID player) {
@@ -448,7 +486,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private PlayerStats computeTeamStatsIfAbsent(UUID id, Party party) {
     // Only players on a team have team specific stats
-    PlayerStats globalStats = getPlayerStat(id);
+    PlayerStats globalStats = getGlobalPlayerStat(id);
     if (!(party instanceof Team)) return globalStats;
 
     Team team = (Team) party;
@@ -470,7 +508,13 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   public final PlayerStats getGlobalPlayerStat(MatchPlayer player) {
-    return getPlayerStat(player.getId());
+    return getGlobalPlayerStat(player.getId());
+  }
+
+  // Creates a new PlayerStat if the player does not have one yet
+  public final PlayerStats getGlobalPlayerStat(UUID uuid) {
+    if (hasNoStats(uuid)) putNewPlayer(uuid);
+    return allPlayerStats.get(uuid);
   }
 
   public final PlayerStats getPlayerStat(ParticipantState player) {
@@ -486,6 +530,32 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   public Component getBasicStatsMessage(UUID player) {
-    return getPlayerStat(player).getBasicStatsMessage();
+    return getGlobalPlayerStat(player).getBasicStatsMessage();
+  }
+
+  /**
+   * Retrieves the team the player has spent the most time in, may include/exclude observing time.
+   *
+   * @param uuid The UUID of the player.
+   * @param includeObservers Should observers be considered for the primary team
+   * @return Primary team of the player, null if no team found or observer time exceeds playtime
+   */
+  public Team getPrimaryTeam(UUID uuid, boolean includeObservers) {
+    Map.Entry<Team, PlayerStats> primaryTeam =
+        stats.column(uuid).entrySet().stream()
+            .max(Comparator.comparing(entry -> entry.getValue().getTimePlayed()))
+            .orElse(null);
+
+    if (primaryTeam == null) return null;
+
+    if (includeObservers) {
+      // If the player has spent more time in observers than teams return null
+      Duration obsTime = match.getDuration().minus(getGlobalPlayerStat(uuid).getTimePlayed());
+      return (obsTime.compareTo(primaryTeam.getValue().getTimePlayed()) > 0)
+          ? null
+          : primaryTeam.getKey();
+    }
+
+    return primaryTeam.getKey();
   }
 }
