@@ -7,7 +7,6 @@ import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -46,7 +45,7 @@ public class TeamStatsMenuItem implements MenuItem {
 
     this.team = team;
     this.members = Lists.newArrayList();
-    this.stats = new TeamStats(team, new ArrayList<>(playerStats.values()));
+    this.stats = new TeamStats(playerStats.values());
 
     Datastore datastore = PGM.get().getDatastore();
 

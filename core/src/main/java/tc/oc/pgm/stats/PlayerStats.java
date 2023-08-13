@@ -56,10 +56,7 @@ public class PlayerStats {
   private Future<?> hotbarTaskCache;
 
   public PlayerStats() {
-    this.parent = null;
-    this.component = null;
-    this.timePlayed = Duration.ZERO;
-    this.inTime = null;
+    this(null, null);
   }
 
   public PlayerStats(PlayerStats parent, Component component) {
