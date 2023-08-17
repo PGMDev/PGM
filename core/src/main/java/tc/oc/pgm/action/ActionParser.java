@@ -1,10 +1,13 @@
 package tc.oc.pgm.action;
 
+import static net.kyori.adventure.key.Key.key;
+import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
 
 import com.google.common.collect.ImmutableList;
 import java.lang.reflect.Method;
 import java.util.Map;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.inventory.ItemStack;
@@ -19,6 +22,7 @@ import tc.oc.pgm.action.actions.MessageAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
+import tc.oc.pgm.action.actions.SoundAction;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
@@ -237,6 +241,26 @@ public class ActionParser {
           "Expected at least one of text, title, subtitle or actionbar", el);
 
     return new MessageAction(text, actionbar, title);
+  }
+
+  @MethodParser("sound")
+  public SoundAction parseSoundAction(Element el, Class<?> scope) throws InvalidXMLException {
+    SoundType soundType =
+        XMLUtils.parseEnum(
+            Node.fromAttr(el, "preset"), SoundType.class, "preset", SoundType.CUSTOM);
+    Node resourceNode = Node.fromAttr(el, "key");
+    String resource = resourceNode == null ? soundType.getResource() : resourceNode.getValue();
+
+    float volume =
+        Math.min(
+            1f,
+            XMLUtils.parseNumber(Node.fromAttr(el, "volume"), Float.class, soundType.getVolume()));
+    float pitch =
+        XMLUtils.parseNumber(Node.fromAttr(el, "pitch"), Float.class, soundType.getPitch());
+
+    Sound sound = sound(key(resource, ':'), Sound.Source.MASTER, volume, pitch);
+
+    return new SoundAction(sound);
   }
 
   @MethodParser("set")
