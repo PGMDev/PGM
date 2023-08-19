@@ -59,10 +59,7 @@ public class ConsumableModule implements MapModule<ConsumableMatchModule> {
             actionParser.parseReference(actionNode, MatchPlayer.class);
 
         ConsumeCause cause =
-            XMLUtils.parseEnum(
-                Node.fromRequiredAttr(consumableElement, "on"),
-                ConsumeCause.class,
-                "consume cause");
+            XMLUtils.parseEnum(Node.fromRequiredAttr(consumableElement, "on"), ConsumeCause.class);
 
         ConsumableDefinition consumableDefinition =
             new ConsumableDefinition(id, action, cause, override);

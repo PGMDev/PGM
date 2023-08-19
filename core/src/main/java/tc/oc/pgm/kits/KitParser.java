@@ -414,8 +414,7 @@ public abstract class KitParser {
     meta.setPower(power);
 
     for (Element explosionEl : el.getChildren("explosion")) {
-      Type type =
-          XMLUtils.parseEnum(Node.fromAttr(explosionEl, "type"), Type.class, null, Type.BURST);
+      Type type = XMLUtils.parseEnum(Node.fromAttr(explosionEl, "type"), Type.class, Type.BURST);
       boolean flicker = XMLUtils.parseBoolean(Node.fromAttr(explosionEl, "flicker"), false);
       boolean trail = XMLUtils.parseBoolean(Node.fromAttr(explosionEl, "trail"), false);
 

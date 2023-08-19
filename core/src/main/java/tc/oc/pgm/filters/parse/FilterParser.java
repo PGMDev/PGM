@@ -295,7 +295,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("entity")
   public EntityTypeFilter parseEntity(Element el) throws InvalidXMLException {
-    return new EntityTypeFilter(XMLUtils.parseEnum(el, EntityType.class, "entity type"));
+    return new EntityTypeFilter(XMLUtils.parseEnum(el, EntityType.class));
   }
 
   @MethodParser("mob")
@@ -309,8 +309,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("spawn")
   public SpawnReasonFilter parseSpawnReason(Element el) throws InvalidXMLException {
-    return new SpawnReasonFilter(
-        XMLUtils.parseEnum(new Node(el), SpawnReason.class, "spawn reason"));
+    return new SpawnReasonFilter(XMLUtils.parseEnum(new Node(el), SpawnReason.class));
   }
 
   @MethodParser("kill-streak")
@@ -465,13 +464,12 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("cause")
   public CauseFilter parseCause(Element el) throws InvalidXMLException {
-    return new CauseFilter(XMLUtils.parseEnum(el, CauseFilter.Cause.class, "cause filter"));
+    return new CauseFilter(XMLUtils.parseEnum(el, CauseFilter.Cause.class));
   }
 
   @MethodParser("relation")
   public RelationFilter parseRelation(Element el) throws InvalidXMLException {
-    return new RelationFilter(
-        XMLUtils.parseEnum(el, PlayerRelation.class, "player relation filter"));
+    return new RelationFilter(XMLUtils.parseEnum(el, PlayerRelation.class));
   }
 
   @MethodParser("carrying")

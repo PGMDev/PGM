@@ -70,10 +70,7 @@ public class ProximityMetric {
 
     ProximityMetric.Type type =
         XMLUtils.parseEnum(
-            Node.fromAttr(el, prefix + "proximity-metric"),
-            ProximityMetric.Type.class,
-            "proximity metric",
-            def.type);
+            Node.fromAttr(el, prefix + "proximity-metric"), ProximityMetric.Type.class, def.type);
 
     // If proximity metric is none, use null proximity so that it doesn't try to get tracked nor
     // shows in the scoreboard

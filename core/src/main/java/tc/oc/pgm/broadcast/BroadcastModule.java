@@ -42,8 +42,7 @@ public class BroadcastModule implements MapModule<BroadcastMatchModule> {
         for (Element elBroadcast : elBroadcasts.getChildren()) {
           final Node nodeBroadcast = new Node(elBroadcast);
           Broadcast.Type type =
-              XMLUtils.parseEnum(
-                  nodeBroadcast, elBroadcast.getName(), Broadcast.Type.class, "broadcast type");
+              XMLUtils.parseEnum(nodeBroadcast, elBroadcast.getName(), Broadcast.Type.class);
 
           Component message = XMLUtils.parseFormattedText(nodeBroadcast);
 

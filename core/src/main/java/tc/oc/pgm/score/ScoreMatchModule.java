@@ -26,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -99,7 +100,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
     return this.scores;
   }
 
-  public double getScore(Competitor competitor) {
+  public double getScore(@NotNull Competitor competitor) {
     return this.scores.get(competitor);
   }
 
@@ -319,10 +320,18 @@ public class ScoreMatchModule implements MatchModule, Listener {
     }
   }
 
+  public void setScore(@NotNull Competitor competitor, double value) {
+    double curr = getScore(competitor);
+    if (curr != value) setScore(competitor, curr, value);
+  }
+
   public void incrementScore(Competitor competitor, double amount) {
     double oldScore = this.scores.get(competitor);
     double newScore = oldScore + amount;
+    setScore(competitor, oldScore, newScore);
+  }
 
+  private void setScore(Competitor competitor, double oldScore, double newScore) {
     if (this.config.scoreLimit > 0 && newScore > this.config.scoreLimit) {
       newScore = this.config.scoreLimit;
     }
