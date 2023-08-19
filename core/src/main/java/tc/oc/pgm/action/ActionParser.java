@@ -246,8 +246,7 @@ public class ActionParser {
   @MethodParser("sound")
   public SoundAction parseSoundAction(Element el, Class<?> scope) throws InvalidXMLException {
     SoundType soundType =
-        XMLUtils.parseEnum(
-            Node.fromAttr(el, "preset"), SoundType.class, "preset", SoundType.CUSTOM);
+        XMLUtils.parseEnum(Node.fromAttr(el, "preset"), SoundType.class, SoundType.CUSTOM);
     Node resourceNode = Node.fromAttr(el, "key");
     String resource = resourceNode == null ? soundType.getResource() : resourceNode.getValue();
 

@@ -21,7 +21,6 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.VariableDefinition;
-import tc.oc.pgm.variables.VariableType;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class FeatureFilterParser extends FilterParser {
@@ -100,9 +99,6 @@ public class FeatureFilterParser extends FilterParser {
     if (varMatch.matches()) {
       VariableDefinition<?> variable =
           features.resolve(node, varMatch.group(1), VariableDefinition.class);
-      if (!variable.getVariableType().equals(VariableType.DUMMY)) {
-        throw new InvalidXMLException("Variable filters only support dummy variables!", node);
-      }
       Range<Double> range = XMLUtils.parseNumericRange(node, varMatch.group(2), Double.class);
       return new VariableFilter(variable, range);
     }

@@ -37,8 +37,7 @@ public class VariableFilter implements FilterDefinition {
 
   @Override
   public boolean isDynamic() {
-    // Variables' setValue will always invalidate the filterable directly, no events required
-    return true;
+    return variable.isDynamic();
   }
 
   @Override

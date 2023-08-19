@@ -24,7 +24,6 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class VariablesModule implements MapModule<VariablesMatchModule> {
@@ -101,41 +100,15 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         throws InvalidXMLException {
 
       ImmutableList.Builder<VariableDefinition<?>> variables = ImmutableList.builder();
-      for (Element variable :
-          XMLUtils.flattenElements(doc.getRootElement(), "variables", "variable")) {
+      VariableParser parser = new VariableParser(factory);
 
-        String id = Node.fromRequiredAttr(variable, "id").getValue();
-        if (!VARIABLE_ID.matcher(id).matches())
-          throw new InvalidXMLException(
-              "Variable IDs must start with a letter or underscore and can only include letters, digits or underscores.",
-              variable);
-        VariableType type =
-            XMLUtils.parseEnum(
-                Node.fromAttr(variable, "type"), VariableType.class, VariableType.DUMMY);
-
-        Class<? extends Filterable<?>> scope = parseScope(variable, type);
-        double def = XMLUtils.parseNumber(Node.fromAttr(variable, "default"), Double.class, 0d);
-
-        if (!type.supports(scope)) {
-          throw new InvalidXMLException(
-              "VariableType " + type + " does not support scope: " + scope, variable);
-        }
-
-        VariableDefinition<?> varDef =
-            new VariableDefinition.Context<>(id, scope, def, type, type.build(factory, variable));
+      for (Element variable : XMLUtils.flattenElements(doc.getRootElement(), "variables", null)) {
+        VariableDefinition<?> varDef = parser.parse(variable);
         factory.getFeatures().addFeature(variable, varDef);
         variables.add(varDef);
       }
 
       return new VariablesModule(variables.build());
-    }
-
-    private Class<? extends Filterable<?>> parseScope(Element variable, VariableType type)
-        throws InvalidXMLException {
-      if (type.getDefaultScope() != null && variable.getAttribute("scope") == null) {
-        return type.getDefaultScope();
-      }
-      return Filterables.parse(Node.fromRequiredAttr(variable, "scope"));
     }
   }
 }

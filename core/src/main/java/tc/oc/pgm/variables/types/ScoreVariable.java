@@ -6,12 +6,12 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.variables.VariableDefinition;
 
-public class ScoreVariable extends AbstractVariable<Party, VariableDefinition<Party>> {
+public class ScoreVariable extends AbstractVariable<Party> {
 
   private ScoreMatchModule smm;
 
-  public ScoreVariable(VariableDefinition<?> definition) {
-    super((VariableDefinition<Party>) definition);
+  public ScoreVariable(VariableDefinition<Party> definition) {
+    super(definition);
   }
 
   @Override

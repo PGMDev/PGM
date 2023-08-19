@@ -5,12 +5,12 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.variables.VariableDefinition;
 
-public class BlitzVariable extends AbstractVariable<MatchPlayer, VariableDefinition<MatchPlayer>> {
+public class BlitzVariable extends AbstractVariable<MatchPlayer> {
 
   private BlitzMatchModule bmm;
 
-  public BlitzVariable(VariableDefinition<?> definition) {
-    super((VariableDefinition<MatchPlayer>) definition);
+  public BlitzVariable(VariableDefinition<MatchPlayer> definition) {
+    super(definition);
   }
 
   @Override

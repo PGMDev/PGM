@@ -4,16 +4,15 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariableDefinition;
 
-public abstract class AbstractVariable<T extends Filterable<?>, D extends VariableDefinition<T>>
-    implements Variable<T> {
-  protected final D definition;
+public abstract class AbstractVariable<T extends Filterable<?>> implements Variable<T> {
+  protected final VariableDefinition<T> definition;
 
-  public AbstractVariable(D definition) {
+  public AbstractVariable(VariableDefinition<T> definition) {
     this.definition = definition;
   }
 
   @Override
-  public D getDefinition() {
+  public VariableDefinition<T> getDefinition() {
     return definition;
   }
 

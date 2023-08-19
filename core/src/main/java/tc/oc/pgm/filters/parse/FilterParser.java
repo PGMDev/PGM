@@ -93,7 +93,6 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.VariableDefinition;
-import tc.oc.pgm.variables.VariableType;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
@@ -660,9 +659,6 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   public Filter parseVariableFilter(Element el) throws InvalidXMLException {
     VariableDefinition<?> varDef =
         features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
-    if (!varDef.getVariableType().equals(VariableType.DUMMY)) {
-      throw new InvalidXMLException("Variable filters only support dummy variables!", el);
-    }
     Range<Double> range = XMLUtils.parseNumericRange(new Node(el), Double.class);
 
     if (varDef.getScope() == Party.class)
