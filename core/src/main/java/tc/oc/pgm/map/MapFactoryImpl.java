@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -33,6 +34,7 @@ import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.xml.DocumentWrapper;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -106,6 +108,13 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     for (MapModule<?> module : getModules()) {
       module.postParse(this, logger, document);
     }
+
+    ((DocumentWrapper) document)
+        .checkUnvisited(
+            node -> {
+              InvalidXMLException ex = new InvalidXMLException("Unused node, maybe a typo?", node);
+              logger.log(Level.WARNING, ex.getMessage(), ex);
+            });
   }
 
   @Override

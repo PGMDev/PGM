@@ -14,6 +14,7 @@ import org.jdom2.JDOMException;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
+import tc.oc.pgm.util.xml.DocumentWrapper;
 
 public class MapIncludeImpl implements MapInclude {
 
@@ -30,6 +31,8 @@ public class MapIncludeImpl implements MapInclude {
   private void reload() throws MapMissingException, JDOMException, IOException {
     try (InputStream is = new FileInputStream(file)) {
       this.source = MapIncludeProcessorImpl.DOCUMENT_FACTORY.get().build(is);
+      // Includes should never visit, let the map XML visit instead
+      ((DocumentWrapper) this.source).setVisitingAllowed(false);
     } catch (FileNotFoundException e) {
       throw new MapMissingException(file.getPath(), "Unable to read map include document", e);
     } finally {

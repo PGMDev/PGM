@@ -21,6 +21,7 @@ import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
+import tc.oc.pgm.util.xml.DocumentWrapper;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.SAXHandler;
@@ -60,20 +61,23 @@ public class MapFilePreprocessor {
 
   public Document getDocument()
       throws MapMissingException, IOException, JDOMException, InvalidXMLException {
-    Document document;
+    DocumentWrapper document;
     try (final InputStream stream = source.getDocument()) {
-      document = DOCUMENT_FACTORY.get().build(stream);
+      document = (DocumentWrapper) DOCUMENT_FACTORY.get().build(stream);
       document.setBaseURI(source.getId());
     }
 
-    MapInclude global = includeProcessor.getGlobalInclude();
-    if (global != null) {
-      document.getRootElement().addContent(0, global.getContent());
-      includes.add(global);
-    }
+    document.runWithoutVisitation(
+        () -> {
+          MapInclude global = includeProcessor.getGlobalInclude();
+          if (global != null) {
+            document.getRootElement().addContent(0, global.getContent());
+            includes.add(global);
+          }
 
-    preprocessChildren(document.getRootElement());
-    source.setIncludes(includes);
+          preprocessChildren(document.getRootElement());
+          source.setIncludes(includes);
+        });
 
     for (Element constant :
         XMLUtils.flattenElements(document.getRootElement(), "constants", "constant", 0)) {
@@ -81,8 +85,8 @@ public class MapFilePreprocessor {
     }
 
     // If no constants are set, assume we can skip the step
-    if (constants.size() > 0) {
-      postprocessChildren(document.getRootElement());
+    if (!constants.isEmpty()) {
+      document.runWithoutVisitation(() -> postprocessChildren(document.getRootElement()));
     }
 
     return document;

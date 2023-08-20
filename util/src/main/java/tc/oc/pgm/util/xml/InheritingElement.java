@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.xml;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -16,6 +18,7 @@ import org.jdom2.located.LocatedElement;
  */
 public class InheritingElement extends LocatedElement {
 
+  private AtomicBoolean visited = new AtomicBoolean();
   private int startLine, endLine;
   private int indexInParent = Integer.MIN_VALUE;
 
@@ -29,6 +32,7 @@ public class InheritingElement extends LocatedElement {
     setStartLine(bounded.getStartLine());
     setEndLine(bounded.getEndLine());
     this.indexInParent = bounded.indexInParent();
+    this.visited = bounded.visited;
 
     setContent(el.cloneContent());
 
@@ -86,6 +90,35 @@ public class InheritingElement extends LocatedElement {
     return indexInParent;
   }
 
+  public boolean wasVisited() {
+    return visited.get();
+  }
+
+  @Override
+  public List<Element> getChildren() {
+    List<Element> children = super.getChildren();
+    if (visitingAllowed()) children.forEach(child -> ((InheritingElement) child).visited.set(true));
+    return children;
+  }
+
+  @Override
+  public List<Element> getChildren(String cname, Namespace ns) {
+    List<Element> children = super.getChildren(cname, ns);
+    if (visitingAllowed()) children.forEach(child -> ((InheritingElement) child).visited.set(true));
+    return children;
+  }
+
+  @Override
+  public Element getChild(String cname, Namespace ns) {
+    Element child = super.getChild(cname, ns);
+    if (visitingAllowed() && child != null) ((InheritingElement) child).visited.set(true);
+    return child;
+  }
+
+  private boolean visitingAllowed() {
+    return ((DocumentWrapper) getDocument()).isVisitingAllowed();
+  }
+
   @Override
   public InheritingElement clone() {
     final InheritingElement that = (InheritingElement) super.clone();
@@ -93,6 +126,7 @@ public class InheritingElement extends LocatedElement {
     that.setColumn(getColumn());
     that.setStartLine(getStartLine());
     that.setEndLine(getEndLine());
+    that.visited = this.visited;
     return that;
   }
 }
