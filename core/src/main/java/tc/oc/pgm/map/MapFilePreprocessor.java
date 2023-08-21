@@ -64,7 +64,7 @@ public class MapFilePreprocessor {
     DocumentWrapper document;
     try (final InputStream stream = source.getDocument()) {
       document = (DocumentWrapper) DOCUMENT_FACTORY.get().build(stream);
-      document.setBaseURI(source.getId());
+      document.setBaseURI(source.getId() + ("default".equals(variant) ? "" : "[" + variant + "]"));
     }
 
     document.runWithoutVisitation(

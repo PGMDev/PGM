@@ -1,6 +1,8 @@
 package tc.oc.pgm.util.xml;
 
+import com.google.common.collect.Iterables;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -19,6 +21,7 @@ import org.jdom2.located.LocatedElement;
 public class InheritingElement extends LocatedElement {
 
   private AtomicBoolean visited = new AtomicBoolean();
+  private String originalUri;
   private int startLine, endLine;
   private int indexInParent = Integer.MIN_VALUE;
 
@@ -32,6 +35,7 @@ public class InheritingElement extends LocatedElement {
     setStartLine(bounded.getStartLine());
     setEndLine(bounded.getEndLine());
     this.indexInParent = bounded.indexInParent();
+    this.originalUri = bounded.originalUri;
     this.visited = bounded.visited;
 
     setContent(el.cloneContent());
@@ -94,29 +98,50 @@ public class InheritingElement extends LocatedElement {
     return visited.get();
   }
 
+  private void setVisited() {
+    visited.set(true);
+  }
+
   @Override
   public List<Element> getChildren() {
     List<Element> children = super.getChildren();
-    if (visitingAllowed()) children.forEach(child -> ((InheritingElement) child).visited.set(true));
+    if (visitingAllowed()) children.forEach(child -> ((InheritingElement) child).setVisited());
     return children;
+  }
+
+  public Iterable<Element> getChildren(Set<String> names) {
+    boolean visitingAllowed = visitingAllowed();
+    return Iterables.filter(
+        super.getChildren(),
+        el -> {
+          if (names.contains(el.getName())) {
+            if (visitingAllowed) ((InheritingElement) el).setVisited();
+            return true;
+          }
+          return false;
+        });
   }
 
   @Override
   public List<Element> getChildren(String cname, Namespace ns) {
     List<Element> children = super.getChildren(cname, ns);
-    if (visitingAllowed()) children.forEach(child -> ((InheritingElement) child).visited.set(true));
+    if (visitingAllowed()) children.forEach(child -> ((InheritingElement) child).setVisited());
     return children;
   }
 
   @Override
   public Element getChild(String cname, Namespace ns) {
     Element child = super.getChild(cname, ns);
-    if (visitingAllowed() && child != null) ((InheritingElement) child).visited.set(true);
+    if (visitingAllowed() && child != null) ((InheritingElement) child).setVisited();
     return child;
   }
 
   private boolean visitingAllowed() {
     return ((DocumentWrapper) getDocument()).isVisitingAllowed();
+  }
+
+  public String getOriginalUri() {
+    return originalUri;
   }
 
   @Override
@@ -127,6 +152,7 @@ public class InheritingElement extends LocatedElement {
     that.setStartLine(getStartLine());
     that.setEndLine(getEndLine());
     that.visited = this.visited;
+    that.originalUri = getDocument().getBaseURI();
     return that;
   }
 }
