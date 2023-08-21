@@ -67,6 +67,7 @@ import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.compatability.SportPaperListener;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
@@ -118,6 +119,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     // Sanity test PGM is running on a supported version before doing any work
     NMSHacks.allocateEntityId();
+    // Fix before any audiences have the chance of creating
+    ViaUtils.removeViaChatFacet();
 
     Permissions.registerAll();
 
