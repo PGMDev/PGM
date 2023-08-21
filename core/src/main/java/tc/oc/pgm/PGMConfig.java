@@ -63,6 +63,7 @@ public final class PGMConfig implements Config {
   private final List<MapSourceFactory> mapSourceFactories;
   private final Path mapPoolFile;
   private final Path includesDirectory;
+  private final boolean showUnusedXml;
 
   // countdown.*
   private final Duration startTime;
@@ -161,6 +162,7 @@ public final class PGMConfig implements Config {
 
     this.mapPoolFile = getPath(dataFolder.toPath(), config.getString("map.pools"));
     this.includesDirectory = getPath(dataFolder.toPath(), config.getString("map.includes"));
+    this.showUnusedXml = parseBoolean(config.getString("map.show-unused-xml", "true"));
 
     this.startTime = parseDuration(config.getString("countdown.start", "30s"));
     this.huddleTime = parseDuration(config.getString("countdown.huddle", "0s"));
@@ -473,6 +475,11 @@ public final class PGMConfig implements Config {
   @Override
   public @Nullable Path getIncludesDirectory() {
     return includesDirectory;
+  }
+
+  @Override
+  public boolean showUnusedXml() {
+    return showUnusedXml;
   }
 
   @Override

@@ -3,6 +3,7 @@ package tc.oc.pgm.util.bukkit;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.nms.NMSHacksNoOp;
 import tc.oc.pgm.util.nms.NMSHacksPlatform;
@@ -32,7 +33,8 @@ public enum Platform {
   public static Platform SERVER_PLATFORM = computeServerPlatform();
 
   private static Platform computeServerPlatform() {
-    String versionString = Bukkit.getServer().getVersion();
+    Server sv = Bukkit.getServer();
+    String versionString = sv == null ? "" : sv.getVersion();
     for (Platform platform : Platform.values()) {
       if (versionString.contains(platform.variant)
           && versionString.contains("MC: " + platform.majorVersion)) {

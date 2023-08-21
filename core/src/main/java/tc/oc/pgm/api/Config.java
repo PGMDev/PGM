@@ -69,6 +69,9 @@ public interface Config {
   @Nullable
   Path getIncludesDirectory();
 
+  /** @return If unused XML tags should be reported or ignored */
+  boolean showUnusedXml();
+
   /**
    * Gets a duration to wait before starting a match.
    *

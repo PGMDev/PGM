@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.xml;
 
+import com.google.common.collect.Sets;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.jdom2.Attribute;
 import org.jdom2.Content;
@@ -9,6 +11,8 @@ import org.jdom2.Element;
 import org.jdom2.Namespace;
 
 public class DocumentWrapper extends Document {
+
+  private static final Set<String> IGNORED = Sets.newHashSet("variant", "tutorial");
 
   private boolean visitingAllowed = true;
 
@@ -55,12 +59,10 @@ public class DocumentWrapper extends Document {
 
     for (int i = 0; i < el.getContentSize(); i++) {
       Content c = el.getContent(i);
-      if (c instanceof InheritingElement) {
-        InheritingElement child = (InheritingElement) c;
+      if (!(c instanceof InheritingElement)) continue;
+      InheritingElement child = (InheritingElement) c;
 
-        // Only main map reads all variants, others read just their own. Skip the check.
-        if ("variant".equals(child.getName())) continue;
-
+      if (child.getNamespace() == Namespace.NO_NAMESPACE && !IGNORED.contains(child.getName())) {
         if (!child.wasVisited()) unvisited.accept(Node.fromNullable(child));
         else checkVisited(child, unvisited);
       }
