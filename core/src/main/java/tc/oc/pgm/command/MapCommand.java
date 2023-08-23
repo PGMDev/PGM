@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
@@ -21,20 +22,26 @@ import com.google.common.collect.ImmutableList;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+import org.yaml.snakeyaml.util.UriEncoder;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
+import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
+import tc.oc.pgm.map.source.MapRoot;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.util.Audience;
@@ -252,16 +259,18 @@ public final class MapCommand {
               .getMapPoolStream()
               .filter(pool -> pool.getMaps().contains(map))
               .map(MapPool::getName)
-              .collect(Collectors.joining(", "));
+              .collect(Collectors.joining(" "));
       if (!mapPools.isEmpty()) {
         audience.sendMessage(
             text()
                 .append(mapInfoLabel("map.info.pools"))
-                .append(text(mapPools))
-                .colorIfAbsent(NamedTextColor.GOLD)
-                .decoration(TextDecoration.BOLD, false)
+                .append(text(mapPools, NamedTextColor.GOLD))
                 .build());
       }
+    }
+
+    if (!map.getSource().getRoot().isPrivate() || sender.hasPermission(Permissions.DEBUG)) {
+      audience.sendMessage(formatMapSource(sender, map));
     }
   }
 
@@ -288,11 +297,12 @@ public final class MapCommand {
                           "map.info.mapTag.hover",
                           NamedTextColor.GRAY,
                           text(mapTag, NamedTextColor.GOLD))))
+              .color(NamedTextColor.GOLD)
               .build();
 
       result.append(tag);
     }
-    return result.color(NamedTextColor.GOLD).build();
+    return result.build();
   }
 
   private static Component createPlayerLimitComponent(CommandSender sender, MapInfo map) {
@@ -340,5 +350,41 @@ public final class MapCommand {
         .append(translatable(key, NamedTextColor.DARK_PURPLE, TextDecoration.BOLD))
         .append(text(": "))
         .build();
+  }
+
+  @NotNull
+  private ComponentLike formatMapSource(CommandSender sender, MapInfo map) {
+    MapSource source = map.getSource();
+    MapRoot root = source.getRoot();
+
+    Builder xmlText =
+        text()
+            .append(mapInfoLabel("map.info.xml"))
+            .append(
+                text(root.getDisplayName(), NamedTextColor.YELLOW)
+                    .hoverEvent(showText(text("Repository", NamedTextColor.YELLOW))))
+            .append(space())
+            .append(
+                text("/" + source.getRelativeDir().toString(), NamedTextColor.GOLD)
+                    .hoverEvent(showText(text("Relative directory", NamedTextColor.GOLD))));
+
+    if (root.getBaseUrl() != null && root.getRemoteHost() != null) {
+      String mapPath = root.getBaseUrl() + UriEncoder.encode(source.getRelativeXml().toString());
+      xmlText.append(
+          text(" [Open]", NamedTextColor.GREEN, TextDecoration.BOLD)
+              .clickEvent(openUrl(mapPath))
+              .hoverEvent(
+                  showText(
+                      text("Click to open XML in " + root.getRemoteHost(), NamedTextColor.GREEN))));
+    }
+
+    if (ShowXmlCommand.isEnabledFor(sender)) {
+      xmlText.append(
+          text(" [Editor]", NamedTextColor.AQUA, TextDecoration.BOLD)
+              .clickEvent(runCommand("/showxml " + map.getId()))
+              .hoverEvent(
+                  showText(text("Click to open XML in a local file editor", NamedTextColor.AQUA))));
+    }
+    return xmlText;
   }
 }

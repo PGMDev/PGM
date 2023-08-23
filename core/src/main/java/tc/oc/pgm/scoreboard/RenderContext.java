@@ -59,7 +59,7 @@ class RenderContext {
   }
 
   public void startSection() {
-    addSpace = rows.size() > 0;
+    addSpace = !rows.isEmpty();
   }
 
   public void addRow(Component row) {

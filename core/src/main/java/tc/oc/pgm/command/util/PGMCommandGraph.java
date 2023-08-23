@@ -49,6 +49,7 @@ import tc.oc.pgm.command.ModeCommand;
 import tc.oc.pgm.command.ProximityCommand;
 import tc.oc.pgm.command.RestartCommand;
 import tc.oc.pgm.command.SettingCommand;
+import tc.oc.pgm.command.ShowXmlCommand;
 import tc.oc.pgm.command.StartCommand;
 import tc.oc.pgm.command.StatsCommand;
 import tc.oc.pgm.command.TeamCommand;
@@ -144,6 +145,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     register(new TimeLimitCommand());
     register(new VotingCommand());
 
+    if (ShowXmlCommand.isEnabled()) register(ShowXmlCommand.getInstance());
     if (PGM.get().getConfiguration().isVanishEnabled()) register(new VanishCommand());
 
     register(ChatDispatcher.get());

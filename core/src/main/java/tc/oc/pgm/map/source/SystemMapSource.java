@@ -21,12 +21,15 @@ import tc.oc.pgm.util.FileUtils;
 
 class SystemMapSource implements MapSource {
 
+  private final MapRoot root;
   private final Path dir;
+
   private final String variant;
   private final AtomicLong lastRead;
   private final Set<MapInclude> storedIncludes;
 
-  public SystemMapSource(Path dir, @Nullable String variant) {
+  public SystemMapSource(MapRoot root, Path dir, @Nullable String variant) {
+    this.root = assertNotNull(root);
     this.dir = assertNotNull(dir);
     this.variant = variant;
     this.lastRead = new AtomicLong(-1);
@@ -34,7 +37,8 @@ class SystemMapSource implements MapSource {
   }
 
   private File getDirectory(String subdir) throws MapMissingException {
-    final File dir = subdir == null ? this.dir.toFile() : this.dir.resolve(subdir).toFile();
+    final File dir =
+        subdir == null ? getAbsoluteDir().toFile() : getAbsoluteDir().resolve(subdir).toFile();
 
     if (!dir.exists()) {
       throw new MapMissingException(dir.getPath(), "Unable to find map folder (was it moved?)");
@@ -49,7 +53,7 @@ class SystemMapSource implements MapSource {
   }
 
   private File getFile() throws MapMissingException {
-    final File file = dir.resolve(MapSource.FILE).toFile();
+    final File file = getAbsoluteXml().toFile();
 
     if (!file.exists()) {
       throw new MapMissingException(file.getPath(), "Unable to find map document (was it moved?)");
@@ -69,7 +73,7 @@ class SystemMapSource implements MapSource {
 
   @Override
   public String getId() {
-    return dir.toString();
+    return "<" + root.getDisplayName() + ">/" + dir.toString();
   }
 
   @Override
@@ -116,7 +120,7 @@ class SystemMapSource implements MapSource {
   @Override
   public MapSource asVariant(String variant) {
     if (Objects.equals(variant, this.variant)) return this;
-    return new SystemMapSource(dir, variant);
+    return new SystemMapSource(root, dir, variant);
   }
 
   @Override
@@ -146,5 +150,15 @@ class SystemMapSource implements MapSource {
   public void setIncludes(Collection<MapInclude> includes) {
     this.storedIncludes.clear();
     this.storedIncludes.addAll(includes);
+  }
+
+  @Override
+  public MapRoot getRoot() {
+    return root;
+  }
+
+  @Override
+  public Path getRelativeDir() {
+    return dir;
   }
 }
