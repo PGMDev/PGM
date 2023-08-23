@@ -63,13 +63,20 @@ public final class XMLUtils {
       int minChildDepth) {
     // Walk the tree in-order to preserve the child ordering
     List<Element> result = Lists.newArrayList();
-    for (Element child : root.getChildren()) {
+
+    InheritingElement el = (InheritingElement) root;
+
+    for (Element child :
+        minChildDepth > 0
+            ? el.getChildren(parentTagNames)
+            : childTagNames == null
+                ? root.getChildren()
+                : el.getChildren(Sets.union(parentTagNames, childTagNames))) {
       if (parentTagNames.contains(child.getName())) {
         result.addAll(
             flattenElements(
                 new InheritingElement(child), parentTagNames, childTagNames, minChildDepth - 1));
-      } else if (minChildDepth <= 0
-          && (childTagNames == null || childTagNames.contains(child.getName()))) {
+      } else {
         result.add(new InheritingElement(child));
       }
     }
@@ -1179,7 +1186,7 @@ public final class XMLUtils {
       throw new InvalidXMLException("No value provided for color", node);
     String rawColor = node.getValue();
     if (!rawColor.matches("[a-fA-F0-9]{6}")) {
-      throw new InvalidXMLException("Invalid color format", rawColor);
+      throw new InvalidXMLException("Invalid color format '" + rawColor + "'", node);
     }
     return Color.fromRGB(Integer.parseInt(rawColor, 16));
   }

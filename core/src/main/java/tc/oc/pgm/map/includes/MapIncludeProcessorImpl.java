@@ -92,10 +92,9 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
       if (deletedIncludes.remove(id)) continue;
 
       try {
-        this.includes.put(id, new MapIncludeImpl(file));
+        this.includes.put(id, new MapIncludeImpl(id, file));
       } catch (MapMissingException | JDOMException | IOException error) {
         logger.log(Level.WARNING, "Failed to load " + filename + " include document", error);
-        error.printStackTrace();
       }
     }
 

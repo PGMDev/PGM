@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 import tc.oc.pgm.api.Modules;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -33,7 +35,9 @@ import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.xml.DocumentWrapper;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?>>
@@ -106,6 +110,15 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     for (MapModule<?> module : getModules()) {
       module.postParse(this, logger, document);
     }
+
+    if (PGM.get().getConfiguration().showUnusedXml()) {
+      ((DocumentWrapper) document).checkUnvisited(this::printUnvisitedNode);
+    }
+  }
+
+  private void printUnvisitedNode(Node node) {
+    InvalidXMLException ex = new InvalidXMLException("Unused node, maybe a typo?", node);
+    logger.log(Level.WARNING, ex.getMessage(), ex);
   }
 
   @Override

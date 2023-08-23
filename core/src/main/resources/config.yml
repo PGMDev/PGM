@@ -35,6 +35,10 @@ map:
   # A path to the includes folder, or empty to disable map includes.
   includes: "includes"
 
+  # Show unused XML nodes as map errors. Helps with finding typos in xml.
+  show-unused-xml: true
+
+
 # Sets the duration of various countdowns.
 #
 #  "30s"  = 30 seconds

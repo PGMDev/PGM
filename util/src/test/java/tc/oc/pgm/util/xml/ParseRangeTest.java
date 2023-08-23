@@ -5,6 +5,7 @@ import com.google.common.collect.Range;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.jdom2.Attribute;
+import org.jdom2.Document;
 import org.jdom2.Namespace;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -13,7 +14,12 @@ import tc.oc.pgm.util.Pair;
 public final class ParseRangeTest {
 
   private static Node dummyNode(String value) {
-    return new Node(new Attribute("range", value, Namespace.NO_NAMESPACE));
+    Document doc = new Document();
+    InheritingElement el = new InheritingElement("a");
+    Attribute attr = new Attribute("range", value, Namespace.NO_NAMESPACE);
+    el.setAttribute(attr);
+    doc.setRootElement(el);
+    return new Node(attr);
   }
 
   @Test
