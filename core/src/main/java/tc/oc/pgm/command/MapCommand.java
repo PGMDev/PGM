@@ -360,31 +360,53 @@ public final class MapCommand {
     Builder xmlText =
         text()
             .append(mapInfoLabel("map.info.xml"))
-            .append(
-                text(root.getDisplayName(), NamedTextColor.YELLOW)
-                    .hoverEvent(showText(text("Repository", NamedTextColor.YELLOW))))
+            .append(getRepository(root))
             .append(space())
             .append(
                 text("/" + source.getRelativeDir().toString(), NamedTextColor.GOLD)
-                    .hoverEvent(showText(text("Relative directory", NamedTextColor.GOLD))));
+                    .hoverEvent(showText(translatable("map.info.xml.path", NamedTextColor.GOLD))));
 
     if (root.getBaseUrl() != null && root.getRemoteHost() != null) {
       String mapPath = root.getBaseUrl() + UriEncoder.encode(source.getRelativeXml().toString());
       xmlText.append(
-          text(" [Open]", NamedTextColor.GREEN, TextDecoration.BOLD)
+          text()
+              .color(NamedTextColor.GREEN)
+              .decorate(TextDecoration.BOLD)
+              .append(text(" ["))
+              .append(translatable("map.info.xml.view"))
+              .append(text("]"))
               .clickEvent(openUrl(mapPath))
-              .hoverEvent(
-                  showText(
-                      text("Click to open XML in " + root.getRemoteHost(), NamedTextColor.GREEN))));
+              .hoverEvent(showText(translatable("map.info.xml.tip", NamedTextColor.GREEN))));
     }
 
     if (ShowXmlCommand.isEnabledFor(sender)) {
       xmlText.append(
-          text(" [Editor]", NamedTextColor.AQUA, TextDecoration.BOLD)
+          text()
+              .color(NamedTextColor.AQUA)
+              .decorate(TextDecoration.BOLD)
+              .append(text(" ["))
+              .append(translatable("map.info.xml.edit"))
+              .append(text("]"))
               .clickEvent(runCommand("/showxml " + map.getId()))
-              .hoverEvent(
-                  showText(text("Click to open XML in a local file editor", NamedTextColor.AQUA))));
+              .hoverEvent(showText(translatable("map.info.xml.edit.tip", NamedTextColor.AQUA))));
     }
     return xmlText;
+  }
+
+  private ComponentLike getRepository(MapRoot root) {
+    String repoUrl =
+        root.getRemoteHost() != null ? root.getRemoteHost() + "/" + root.getDisplayName() : null;
+
+    Component hover =
+        repoUrl == null
+            ? translatable("map.info.xml.repository.local", NamedTextColor.YELLOW)
+            : translatable(
+                "map.info.xml.repository.remote",
+                NamedTextColor.YELLOW,
+                text(repoUrl, NamedTextColor.GREEN));
+
+    return text(root.getDisplayName(), NamedTextColor.YELLOW)
+        .hoverEvent(showText(hover))
+        .clickEvent(root.getBaseUrl() == null ? null : openUrl(root.getBaseUrl()));
   }
 }
