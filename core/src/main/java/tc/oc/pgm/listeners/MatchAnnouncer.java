@@ -64,8 +64,7 @@ public class MatchAnnouncer implements Listener {
     match.sendMessage(translatable("broadcast.matchStart", NamedTextColor.GREEN));
 
     Component go = translatable("broadcast.go", NamedTextColor.GREEN);
-    match.showTitle(
-        title(go, empty(), Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(15))));
+    match.showTitle(title(go, empty(), Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
 
     match.playSound(SOUND_MATCH_START);
   }
