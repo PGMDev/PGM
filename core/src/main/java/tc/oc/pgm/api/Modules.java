@@ -52,6 +52,7 @@ import tc.oc.pgm.flag.LegacyFlagBeamMatchModule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.goals.GoalMatchModule;
+import tc.oc.pgm.hologram.HologramMatchModule;
 import tc.oc.pgm.hunger.HungerMatchModule;
 import tc.oc.pgm.hunger.HungerModule;
 import tc.oc.pgm.inventory.ViewInventoryMatchModule;
@@ -315,5 +316,6 @@ public final class Modules {
 
     // MatchModules only used if required as a dependency by other modules
     registerDependencyOnly(SnapshotMatchModule.class, new SnapshotMatchModule.Factory());
+    registerDependencyOnly(HologramMatchModule.class, HologramMatchModule::new);
   }
 }

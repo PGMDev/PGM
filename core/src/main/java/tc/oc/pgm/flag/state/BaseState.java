@@ -11,7 +11,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -207,6 +206,4 @@ public abstract class BaseState implements Runnable, State {
   public void onEvent(ParticipantDespawnEvent event) {}
 
   public void onEvent(InventoryClickEvent event) {}
-
-  public void onEvent(EntityDamageEvent event) {}
 }

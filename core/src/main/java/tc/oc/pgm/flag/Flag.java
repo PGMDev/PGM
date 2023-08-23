@@ -23,7 +23,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -525,11 +524,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onInventoryClick(InventoryClickEvent event) {
-    this.state.onEvent(event);
-  }
-
-  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-  public void onProjectileHit(EntityDamageEvent event) {
     this.state.onEvent(event);
   }
 }

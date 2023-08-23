@@ -37,15 +37,15 @@ public final class Assert {
    *
    * @param <V> the value type
    * @param value the value
-   * @param conditon the condition to test the value
+   * @param condition the condition to test the value
    * @param description the description of the condition
    * @return the value
    */
   public static <V> @NotNull V assertTrue(
       final @Nullable V value,
-      final @NotNull Function<V, Boolean> conditon,
+      final @NotNull Function<V, Boolean> condition,
       final @NotNull String description) {
-    if (!conditon.apply(assertNotNull(value, description))) {
+    if (!condition.apply(assertNotNull(value, description))) {
       throw new IllegalArgumentException(description);
     }
     return value;
@@ -54,7 +54,7 @@ public final class Assert {
   /**
    * Asserts that a condition returns true.
    *
-   * @param conditon the condition
+   * @param condition the condition
    * @param description the description of the condition
    */
   public static void assertTrue(final boolean condition, final @NotNull String description) {
@@ -66,7 +66,7 @@ public final class Assert {
   /**
    * Asserts that a condition returns true.
    *
-   * @param conditon the condition
+   * @param condition the condition
    */
   public static void assertTrue(final boolean condition) {
     assertTrue(condition, "condition did not return true");
