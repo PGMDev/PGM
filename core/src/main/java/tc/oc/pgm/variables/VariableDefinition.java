@@ -8,11 +8,13 @@ public class VariableDefinition<T extends Filterable<?>> extends SelfIdentifying
 
   private final Class<T> scope;
   private final double def;
+  private final VariableType variableType;
 
-  public VariableDefinition(String id, Class<T> scope, double def) {
+  public VariableDefinition(String id, Class<T> scope, double def, VariableType variableType) {
     super(id);
     this.scope = scope;
     this.def = def;
+    this.variableType = variableType;
   }
 
   public Class<T> getScope() {
@@ -21,6 +23,14 @@ public class VariableDefinition<T extends Filterable<?>> extends SelfIdentifying
 
   public double getDefault() {
     return def;
+  }
+
+  public Variable<?> buildInstance() {
+    return getVariableType().buildInstance(this);
+  }
+
+  public VariableType getVariableType() {
+    return variableType;
   }
 
   @SuppressWarnings("unchecked")

@@ -41,4 +41,10 @@ public class LifeManager {
 
     return lives;
   }
+
+  public void setLives(UUID player, int lives) {
+    assertNotNull(player, "player id");
+
+    this.livesLeft.put(player, Math.max(0, lives));
+  }
 }
