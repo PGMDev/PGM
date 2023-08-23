@@ -1,7 +1,6 @@
 package tc.oc.pgm.stats;
 
-import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.api.player.MatchPlayer;
+import java.util.Collection;
 
 // Holds calculated total stats for a single team
 public class TeamStats {
@@ -15,13 +14,12 @@ public class TeamStats {
   private int shotsTaken = 0;
   private int shotsHit = 0;
 
-  private double teamKD;
-  private double teamBowAcc;
+  private final double teamKD;
+  private final double teamBowAcc;
 
-  public TeamStats(Competitor team, StatsMatchModule statsModule) {
+  public TeamStats(Collection<PlayerStats> playerStats) {
 
-    for (MatchPlayer teamPlayer : team.getPlayers()) {
-      PlayerStats stats = statsModule.getPlayerStat(teamPlayer.getId());
+    for (PlayerStats stats : playerStats) {
       teamKills += stats.getKills();
       teamDeaths += stats.getDeaths();
       damageDone += stats.getDamageDone();

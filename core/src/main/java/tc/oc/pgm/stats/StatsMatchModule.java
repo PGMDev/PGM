@@ -6,7 +6,10 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Table;
+import com.google.common.collect.Tables;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -20,7 +23,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -41,38 +43,49 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.event.MatchStatsEvent;
 import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.core.CoreLeakEvent;
+import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.destroyable.DestroyableHealthChange;
 import tc.oc.pgm.destroyable.DestroyableHealthChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.events.PlayerLeavePartyEvent;
+import tc.oc.pgm.events.PlayerParticipationStopEvent;
+import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
-import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
+import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.stats.menu.StatsMainMenu;
 import tc.oc.pgm.stats.menu.items.PlayerStatsMenuItem;
 import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.wool.MonumentWool;
+import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.LOADED)
 public class StatsMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
+  private final Table<Team, UUID, PlayerStats> stats = HashBasedTable.create();
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
   private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
@@ -99,6 +112,46 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   public Map<UUID, PlayerStats> getStats() {
     return Collections.unmodifiableMap(allPlayerStats);
+  }
+
+  public Table<Team, UUID, PlayerStats> getParticipationStats() {
+    return Tables.unmodifiableTable(stats);
+  }
+
+  @EventHandler
+  public void onMatchStart(final MatchStartEvent event) {
+    event
+        .getMatch()
+        .getParticipants()
+        .forEach(player -> getPlayerStat(player).startParticipation());
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST)
+  public void onMatchFinish(final MatchFinishEvent event) {
+    event.getMatch().getParticipants().forEach(player -> getPlayerStat(player).endParticipation());
+  }
+
+  @EventHandler
+  public void onPlayerJoinMatch(final PlayerJoinPartyEvent event) {
+    // Only modify trackers when match is running
+    if (!event.getMatch().isRunning()) return;
+
+    // End time tracking for old party
+    if (event.getOldParty() instanceof Competitor) {
+      computeTeamStatsIfAbsent(event.getPlayer().getId(), event.getOldParty()).endParticipation();
+    }
+
+    // When joining a party that's playing, start time tracking
+    if (event.getNewParty() instanceof Competitor) {
+      computeTeamStatsIfAbsent(event.getPlayer().getId(), event.getNewParty()).startParticipation();
+    }
+  }
+
+  @EventHandler
+  public void onPlayerLeaveMatch(final PlayerLeavePartyEvent event) {
+    if (event.getMatch().isRunning() && event.getParty() instanceof Competitor) {
+      getPlayerStat(event.getPlayer()).endParticipation();
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -138,13 +191,56 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onFlagCapture(FlagCaptureEvent event) {
-    getPlayerStat(event.getCarrier()).onFlagCapture();
+  public void onMonumentDestroy(DestroyableDestroyedEvent event) {
+    event
+        .getDestroyable()
+        .getContributions()
+        .forEach(
+            destroyer -> {
+              if (destroyer.getPlayerState() != null) {
+                getPlayerStat(destroyer.getPlayerState()).onMonumentDestroyed();
+              }
+            });
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  public void onFlagHold(FlagPickupEvent event) {
-    getPlayerStat(event.getCarrier()).onFlagPickup();
+  public void onCoreLeak(CoreLeakEvent event) {
+    event
+        .getCore()
+        .getContributions()
+        .forEach(
+            leaker -> {
+              if (leaker.getPlayerState() != null) {
+                getPlayerStat(leaker.getPlayerState()).onCoreLeak();
+              }
+            });
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onGoalTouch(GoalTouchEvent event) {
+    if (event.getPlayer() == null) return;
+
+    if (event.getGoal() instanceof MonumentWool) {
+      if (event.isFirstForPlayer()) {
+        getPlayerStat(event.getPlayer()).onWoolTouch();
+      }
+    }
+
+    if (event.getGoal() instanceof Flag) {
+      getPlayerStat(event.getPlayer()).onFlagPickup(event.isFirstForPlayer());
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onWoolCapture(PlayerWoolPlaceEvent event) {
+    if (event.getPlayer() != null) {
+      getPlayerStat(event.getPlayer()).onWoolCapture();
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onFlagCapture(FlagCaptureEvent event) {
+    getPlayerStat(event.getCarrier()).onFlagCapture();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -185,6 +281,11 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       sendPlayerStats(murderer, murdererStats);
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onParticipationStop(PlayerParticipationStopEvent event) {
+    getPlayerStat(event.getPlayer()).onTeamSwitch();
   }
 
   private void sendPlayerStats(MatchPlayer player, PlayerStats stats) {
@@ -235,19 +336,17 @@ public class StatsMatchModule implements MatchModule, Listener {
     Map<UUID, Integer> allKills = new HashMap<>();
     Map<UUID, Integer> allStreaks = new HashMap<>();
     Map<UUID, Integer> allDeaths = new HashMap<>();
-    Map<UUID, Integer> allBowshots = new HashMap<>();
+    Map<UUID, Integer> allBowShots = new HashMap<>();
     Map<UUID, Double> allDamage = new HashMap<>();
 
     for (Map.Entry<UUID, PlayerStats> mapEntry : allPlayerStats.entrySet()) {
       UUID playerUUID = mapEntry.getKey();
       PlayerStats playerStats = mapEntry.getValue();
 
-      getPlayerStat(playerUUID);
-
       allKills.put(playerUUID, playerStats.getKills());
       allStreaks.put(playerUUID, playerStats.getMaxKillstreak());
       allDeaths.put(playerUUID, playerStats.getDeaths());
-      allBowshots.put(playerUUID, playerStats.getLongestBowKill());
+      allBowShots.put(playerUUID, playerStats.getLongestBowKill());
       allDamage.put(playerUUID, playerStats.getDamageDone());
     }
 
@@ -257,7 +356,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       best.add(getMessage("match.stats.killstreak", sortStats(allStreaks), NamedTextColor.GREEN));
       best.add(getMessage("match.stats.deaths", sortStats(allDeaths), NamedTextColor.RED));
 
-      Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowshots);
+      Map.Entry<UUID, Integer> bestBowshot = sortStats(allBowShots);
       if (bestBowshot.getValue() > 1)
         best.add(getMessage("match.stats.bowshot", bestBowshot, NamedTextColor.YELLOW));
 
@@ -282,7 +381,8 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       best.forEach(viewer::sendMessage);
 
-      PlayerStats stats = allPlayerStats.get(viewer.getId());
+      PlayerStats stats = getPlayerStat(viewer);
+
       if (event.isShowOwn() && stats != null) {
         Component ksHover =
             translatable(
@@ -321,10 +421,8 @@ public class StatsMatchModule implements MatchModule, Listener {
   public PlayerStatsMenuItem getPlayerStatsItem(MatchPlayer player) {
     return new PlayerStatsMenuItem(
         player.getId(),
-        this.getPlayerStat(player),
-        NMSHacks.getPlayerSkin(player.getBukkit()),
-        player.getNameLegacy(),
-        player.getParty().getName().color());
+        this.getGlobalPlayerStat(player),
+        NMSHacks.getPlayerSkin(player.getBukkit()));
   }
 
   private List<TeamStatsMenuItem> teams;
@@ -337,21 +435,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     if (teams == null) {
       teams = Lists.newArrayList();
-      TeamMatchModule tmm = match.needModule(TeamMatchModule.class);
-      Collection<MatchPlayer> observers = match.getObservers();
-
       for (Competitor competitor : competitors) {
-        Collection<MatchPlayer> relevantObservers =
-            observers.stream()
-                .filter(o -> tmm.getLastTeam(o.getId()) == competitor)
-                .collect(Collectors.toSet());
-
-        Collection<UUID> relevantOfflinePlayers =
-            this.getOfflinePlayersWithStats()
-                .filter(id -> tmm.getLastTeam(id) == competitor)
-                .collect(Collectors.toSet());
-        teams.add(
-            new TeamStatsMenuItem(match, competitor, relevantObservers, relevantOfflinePlayers));
+        Map<UUID, PlayerStats> playerStats = stats.row((Team) competitor);
+        teams.add(new TeamStatsMenuItem(match, competitor, playerStats));
       }
     }
 
@@ -389,29 +475,87 @@ public class StatsMatchModule implements MatchModule, Listener {
     return allPlayerStats.keySet().stream().filter(id -> match.getPlayer(id) == null);
   }
 
-  // Creates a new PlayerStat if the player does not have one yet
+  @Deprecated
   public final PlayerStats getPlayerStat(UUID uuid) {
-    if (hasNoStats(uuid)) putNewPlayer(uuid);
-    return allPlayerStats.get(uuid);
+    return getGlobalPlayerStat(uuid);
   }
 
   private void putNewPlayer(UUID player) {
     allPlayerStats.put(player, new PlayerStats());
   }
 
+  private PlayerStats computeTeamStatsIfAbsent(UUID id, Party party) {
+    // Only players on a team have team specific stats
+    PlayerStats globalStats = getGlobalPlayerStat(id);
+    if (!(party instanceof Team)) return globalStats;
+
+    Team team = (Team) party;
+    PlayerStats playerStats = stats.get(team, id);
+    if (playerStats != null) return playerStats;
+
+    MatchPlayer player = team.getPlayer(id);
+    if (player == null) return globalStats;
+
+    // Create player team stats with reference to global stats
+    playerStats = new PlayerStats(globalStats, player.getName());
+    stats.put(team, id, playerStats);
+
+    return playerStats;
+  }
+
   public boolean hasNoStats(UUID player) {
     return allPlayerStats.get(player) == null;
   }
 
+  public final PlayerStats getGlobalPlayerStat(MatchPlayer player) {
+    return getGlobalPlayerStat(player.getId());
+  }
+
+  // Creates a new PlayerStat if the player does not have one yet
+  public final PlayerStats getGlobalPlayerStat(UUID uuid) {
+    if (hasNoStats(uuid)) putNewPlayer(uuid);
+    return allPlayerStats.get(uuid);
+  }
+
   public final PlayerStats getPlayerStat(ParticipantState player) {
-    return getPlayerStat(player.getId());
+    return computeTeamStatsIfAbsent(player.getId(), player.getParty());
   }
 
   public final PlayerStats getPlayerStat(MatchPlayer player) {
-    return getPlayerStat(player.getId());
+    return computeTeamStatsIfAbsent(player.getId(), player.getParty());
+  }
+
+  private PlayerStats getPlayerStat(MatchPlayerState playerState) {
+    return computeTeamStatsIfAbsent(playerState.getId(), playerState.getParty());
   }
 
   public Component getBasicStatsMessage(UUID player) {
-    return getPlayerStat(player).getBasicStatsMessage();
+    return getGlobalPlayerStat(player).getBasicStatsMessage();
+  }
+
+  /**
+   * Retrieves the team the player has spent the most time in, may include/exclude observing time.
+   *
+   * @param uuid The UUID of the player.
+   * @param includeObservers Should observers be considered for the primary team
+   * @return Primary team of the player, null if no team found or observer time exceeds playtime
+   */
+  public Team getPrimaryTeam(UUID uuid, boolean includeObservers) {
+    Map.Entry<Team, PlayerStats> primaryTeam =
+        stats.column(uuid).entrySet().stream()
+            .max(Comparator.comparing(entry -> entry.getValue().getTimePlayed()))
+            .orElse(null);
+
+    if (primaryTeam == null) return null;
+
+    if (includeObservers) {
+      // If the player has spent more time in observers than teams return null
+      Duration obsTime = match.getDuration().minus(getGlobalPlayerStat(uuid).getTimePlayed());
+      return (obsTime.compareTo(primaryTeam.getValue().getTimePlayed()) > 0)
+          ? null
+          : primaryTeam.getKey();
+    }
+
+    return primaryTeam.getKey();
   }
 }

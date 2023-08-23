@@ -700,18 +700,7 @@ public final class XMLUtils {
       throws InvalidXMLException {
     if (node == null) return def;
 
-    String[] components = node.getValue().trim().split("\\s*,\\s*");
-    if (components.length != 3) {
-      throw new InvalidXMLException("Invalid block location", node);
-    }
-    try {
-      return new BlockVector(
-          Integer.parseInt(components[0]),
-          Integer.parseInt(components[1]),
-          Integer.parseInt(components[2]));
-    } catch (NumberFormatException e) {
-      throw new InvalidXMLException("Invalid block location", node);
-    }
+    return parseVector(node).toBlockVector();
   }
 
   public static BlockVector parseBlockVector(Node node) throws InvalidXMLException {

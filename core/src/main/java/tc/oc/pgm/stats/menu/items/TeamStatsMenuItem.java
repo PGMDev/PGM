@@ -3,14 +3,14 @@ package tc.oc.pgm.stats.menu.items;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import com.google.common.collect.Lists;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -24,10 +24,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.MenuItem;
-import tc.oc.pgm.stats.StatsMatchModule;
+import tc.oc.pgm.stats.PlayerStats;
 import tc.oc.pgm.stats.TeamStats;
 import tc.oc.pgm.stats.menu.TeamStatsMenu;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a team with same color & lore. Clicking will open {@link TeamStatsMenu} * */
@@ -40,43 +41,28 @@ public class TeamStatsMenuItem implements MenuItem {
 
   private final NamedTextColor RESET = NamedTextColor.GRAY;
 
-  public TeamStatsMenuItem(
-      Match match,
-      Competitor team,
-      Collection<MatchPlayer> relevantObservers,
-      Collection<UUID> relevantOfflinePlayers) {
-    StatsMatchModule smm = match.needModule(StatsMatchModule.class);
+  public TeamStatsMenuItem(Match match, Competitor team, Map<UUID, PlayerStats> playerStats) {
 
     this.team = team;
     this.members = Lists.newArrayList();
-    this.stats = new TeamStats(team, smm);
-
-    Collection<MatchPlayer> players = team.getPlayers();
-
-    members.addAll(
-        Stream.concat(players.stream(), relevantObservers.stream())
-            .map(
-                p ->
-                    new PlayerStatsMenuItem(
-                        p.getId(),
-                        smm.getPlayerStat(p),
-                        NMSHacks.getPlayerSkin(p.getBukkit()),
-                        p.getNameLegacy(),
-                        p.getParty().getName().color()))
-            .collect(Collectors.toList()));
+    this.stats = new TeamStats(playerStats.values());
 
     Datastore datastore = PGM.get().getDatastore();
-    members.addAll(
-        relevantOfflinePlayers.stream()
+
+    this.members =
+        playerStats.entrySet().stream()
             .map(
-                id ->
-                    new PlayerStatsMenuItem(
-                        id,
-                        smm.getPlayerStat(id),
-                        datastore.getSkin(id),
-                        datastore.getUsername(id).getNameLegacy(),
-                        NamedTextColor.DARK_AQUA))
-            .collect(Collectors.toSet()));
+                entry -> {
+                  UUID uuid = entry.getKey();
+                  PlayerStats stats = entry.getValue();
+
+                  MatchPlayer p = match.getPlayer(uuid);
+                  Skin skin =
+                      (p != null) ? NMSHacks.getPlayerSkin(p.getBukkit()) : datastore.getSkin(uuid);
+
+                  return new PlayerStatsMenuItem(uuid, stats, skin);
+                })
+            .collect(Collectors.toList());
 
     this.match = match;
   }
