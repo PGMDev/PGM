@@ -11,8 +11,12 @@ public enum SoundType {
   OBJECTIVE_GOOD("portal.travel", 0.7f, 2f),
   OBJECTIVE_BAD("mob.blaze.death", 0.8f, 0.8f),
   OBJECTIVE_MODE("mob.zombie.remedy", 0.15f, 1.2f),
+  OBJECTIVE_GOOD_BEDWARS("mob.enderdragon.growl", 1f, 1f);
+  OBJECTIVE_BAD_BEDWARS("mob.wither.death", 1f, 1f);
   DEATH_OWN("mob.irongolem.death", 1f, 1f),
   DEATH_OTHER("mob.irongolem.hit", 1f, 1f);
+  THUNDER("ambient.weather.thunder", 1f, 1f);
+  LIGHTNING("random.explode", 1f, 1f);
 
   private final String resource;
   private final float volume;
