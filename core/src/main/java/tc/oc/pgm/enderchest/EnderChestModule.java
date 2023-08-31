@@ -51,7 +51,6 @@ public class EnderChestModule implements MapModule<EnderChestMatchModule> {
             XMLUtils.parseEnum(
                 Node.fromAttr(enderchestEl, "fallback"),
                 DropoffFallback.class,
-                "fallback",
                 DropoffFallback.AUTO);
         enabled = true;
       }

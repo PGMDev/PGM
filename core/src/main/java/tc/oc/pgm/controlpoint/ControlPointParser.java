@@ -142,7 +142,6 @@ public abstract class ControlPointParser {
         XMLUtils.parseEnum(
             Node.fromAttr(el, "capture-rule"),
             ControlPointDefinition.CaptureCondition.class,
-            "capture rule",
             ControlPointDefinition.CaptureCondition.EXCLUSIVE);
 
     if (pd) {

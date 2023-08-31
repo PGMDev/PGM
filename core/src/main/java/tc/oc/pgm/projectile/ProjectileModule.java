@@ -62,10 +62,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
                 Node.fromChildOrAttr(projectileElement, "velocity"), Double.class, 1.0);
         ClickAction clickAction =
             XMLUtils.parseEnum(
-                Node.fromAttr(projectileElement, "click"),
-                ClickAction.class,
-                "click action",
-                ClickAction.BOTH);
+                Node.fromAttr(projectileElement, "click"), ClickAction.class, ClickAction.BOTH);
         Class<? extends Entity> entity =
             XMLUtils.parseEntityTypeAttribute(projectileElement, "projectile", Arrow.class);
         List<PotionEffect> potionKit = kitParser.parsePotions(projectileElement);

@@ -34,7 +34,6 @@ public class WorldInfoImpl implements WorldInfo {
         XMLUtils.parseEnum(
                 Node.fromLastChildOrAttr(element, "environment"),
                 World.Environment.class,
-                "environment",
                 World.Environment.NORMAL)
             .ordinal());
   }

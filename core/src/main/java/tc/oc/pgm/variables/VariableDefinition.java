@@ -1,5 +1,6 @@
 package tc.oc.pgm.variables;
 
+import java.util.function.Function;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.Filterable;
@@ -7,30 +8,30 @@ import tc.oc.pgm.filters.Filterable;
 public class VariableDefinition<T extends Filterable<?>> extends SelfIdentifyingFeatureDefinition {
 
   private final Class<T> scope;
-  private final double def;
-  private final VariableType variableType;
+  private final boolean isDynamic;
+  private final Function<VariableDefinition<T>, Variable<T>> builder;
 
-  public VariableDefinition(String id, Class<T> scope, double def, VariableType variableType) {
+  public VariableDefinition(
+      String id,
+      Class<T> scope,
+      boolean isDynamic,
+      Function<VariableDefinition<T>, Variable<T>> builder) {
     super(id);
     this.scope = scope;
-    this.def = def;
-    this.variableType = variableType;
+    this.isDynamic = isDynamic;
+    this.builder = builder;
   }
 
   public Class<T> getScope() {
     return scope;
   }
 
-  public double getDefault() {
-    return def;
+  public boolean isDynamic() {
+    return isDynamic;
   }
 
-  public Variable<?> buildInstance() {
-    return getVariableType().buildInstance(this);
-  }
-
-  public VariableType getVariableType() {
-    return variableType;
+  public Variable<T> buildInstance() {
+    return builder.apply(this);
   }
 
   @SuppressWarnings("unchecked")

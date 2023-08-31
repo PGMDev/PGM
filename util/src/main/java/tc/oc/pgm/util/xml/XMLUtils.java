@@ -894,8 +894,8 @@ public final class XMLUtils {
     return createPotionEffect(type, duration, amplifier, ambient);
   }
 
-  public static <T extends Enum<T>> T parseEnum(
-      Node node, String text, Class<T> type, String readableType) throws InvalidXMLException {
+  public static <T extends Enum<T>> T parseEnum(Node node, String text, Class<T> type)
+      throws InvalidXMLException {
     try {
       return TextParser.parseEnum(text, type);
     } catch (TextException e) {
@@ -903,35 +903,29 @@ public final class XMLUtils {
     }
   }
 
-  public static <T extends Enum<T>> T parseEnum(
-      @Nullable Node node, Class<T> type, String readableType, @Nullable T def)
+  public static <T extends Enum<T>> T parseEnum(@Nullable Node node, Class<T> type, @Nullable T def)
       throws InvalidXMLException {
     if (node == null) return def;
-    return parseEnum(node, node.getValueNormalize(), type, readableType);
+    return parseEnum(node, node.getValueNormalize(), type);
   }
 
-  public static <T extends Enum<T>> T parseEnum(
-      @Nullable Node node, Class<T> type, String readableType) throws InvalidXMLException {
-    return parseEnum(node, type, readableType, null);
+  public static <T extends Enum<T>> T parseEnum(@Nullable Node node, Class<T> type)
+      throws InvalidXMLException {
+    return parseEnum(node, type, null);
   }
 
   public static <T extends Enum<T>> T parseEnum(Element el, Class<T> type)
       throws InvalidXMLException {
-    return parseEnum(new Node(el), type, type.getSimpleName());
+    return parseEnum(new Node(el), type);
   }
 
-  public static <T extends Enum<T>> T parseEnum(Element el, Class<T> type, String readableType)
+  public static <T extends Enum<T>> T parseEnum(Attribute attr, Class<T> type)
       throws InvalidXMLException {
-    return parseEnum(new Node(el), type, readableType);
-  }
-
-  public static <T extends Enum<T>> T parseEnum(Attribute attr, Class<T> type, String readableType)
-      throws InvalidXMLException {
-    return parseEnum(new Node(attr), type, readableType);
+    return parseEnum(new Node(attr), type);
   }
 
   public static ChatColor parseChatColor(@Nullable Node node) throws InvalidXMLException {
-    return parseEnum(node, ChatColor.class, "color");
+    return parseEnum(node, ChatColor.class);
   }
 
   public static ChatColor parseChatColor(@Nullable Node node, ChatColor def)
