@@ -8,6 +8,7 @@ import java.util.Collection;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
+import tc.oc.pgm.map.source.MapRoot;
 
 /** A source where {@link MapInfo} documents and files are downloaded. */
 public interface MapSource {
@@ -67,4 +68,20 @@ public interface MapSource {
    * @param include The {@link MapInclude}
    */
   void setIncludes(Collection<MapInclude> include);
+
+  MapRoot getRoot();
+
+  Path getRelativeDir();
+
+  default Path getRelativeXml() {
+    return getRelativeDir().resolve(FILE);
+  }
+
+  default Path getAbsoluteDir() {
+    return getRoot().getBase().resolve(getRelativeDir());
+  }
+
+  default Path getAbsoluteXml() {
+    return getAbsoluteDir().resolve(FILE);
+  }
 }
