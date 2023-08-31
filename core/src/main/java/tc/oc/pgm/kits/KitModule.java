@@ -2,10 +2,13 @@ package tc.oc.pgm.kits;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Logger;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -14,6 +17,7 @@ import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -29,10 +33,17 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class KitModule implements MapModule<KitMatchModule> {
 
-  protected final Set<KitRule> kitRules;
+  private static final MapTag TNT = new MapTag("tnt", "TNT");
+  private final Set<KitRule> kitRules;
+  private boolean hasTnt;
 
   public KitModule(Set<KitRule> kitRules) {
     this.kitRules = ImmutableSet.copyOf(kitRules);
+  }
+
+  @Override
+  public Collection<MapTag> getTags() {
+    return hasTnt ? ImmutableList.of(TNT) : Collections.emptyList();
   }
 
   @Nullable
@@ -97,13 +108,20 @@ public class KitModule implements MapModule<KitMatchModule> {
       }
 
       // Apply any item-mods rules to item kits
-      if (imm != null) {
-        if (kit instanceof ItemKit) {
-          for (ItemStack stack : ((ItemKit) kit).getSlotItems().values()) {
-            imm.applyRules(stack);
+      if (kit instanceof ItemKit) {
+        ItemKit itKit = (ItemKit) kit;
+        for (ItemStack is : Iterables.concat(itKit.getSlotItems().values(), itKit.getFreeItems())) {
+          if (!hasTnt && is.getType() == Material.TNT && is.getAmount() >= 16) {
+            hasTnt = true;
+            if (imm == null) break;
+          }
+          if (imm != null) {
+            imm.applyRules(is);
           }
         }
+      }
 
+      if (imm != null) {
         if (kit instanceof ArmorKit) {
           for (ArmorKit.ArmorItem armor : ((ArmorKit) kit).getArmor().values()) {
             imm.applyRules(armor.stack);
