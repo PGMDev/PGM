@@ -31,7 +31,7 @@ public class MapRoot {
       @Nullable String displayName,
       @Nullable String baseUrl,
       boolean isPrivate) {
-    this.base = assertNotNull(base);
+    this.base = assertNotNull(base).toAbsolutePath();
     this.remoteHost = remoteHost;
     this.displayName = displayName == null ? base.getFileName().toString() : displayName;
     this.baseUrl = baseUrl;
