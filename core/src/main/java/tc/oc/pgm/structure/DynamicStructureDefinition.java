@@ -67,7 +67,8 @@ public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition
    * @return The offset to use when placing/clearing the structure
    */
   public BlockVector getOffset() {
-    if (position != null) return position.subtract(this.structure.getOrigin()).toBlockVector();
-    return offset;
+    if (position != null)
+      return position.clone().subtract(this.structure.getOrigin()).toBlockVector();
+    return offset.clone();
   }
 }
