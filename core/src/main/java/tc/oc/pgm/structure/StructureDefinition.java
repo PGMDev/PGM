@@ -45,7 +45,7 @@ public class StructureDefinition extends SelfIdentifyingFeatureDefinition {
     if (origin == null) {
       this.origin = getBounds().getMin();
     }
-    return this.origin;
+    return this.origin.clone();
   }
 
   public Bounds getBounds() {
