@@ -93,7 +93,11 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     } catch (ModuleLoadException e) {
       throw new MapException(source, info, e.getFullMessage(), e);
     } catch (JDOMParseException e) {
-      final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
+      // Set base uri so when error is displayed it shows what XML caused the issue
+      Document d = e.getPartialDocument();
+      if (d != null) d.setBaseURI(source.getId());
+
+      final InvalidXMLException cause = InvalidXMLException.fromJDOM(e);
       throw new MapException(source, info, cause.getMessage(), cause);
     } catch (Throwable t) {
       throw new MapException(source, info, "Unhandled " + t.getClass().getName(), t);
