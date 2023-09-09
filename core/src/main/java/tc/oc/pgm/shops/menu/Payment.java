@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.material.Materials;
 
 public class Payment {
 
@@ -43,6 +44,8 @@ public class Payment {
   }
 
   public boolean matches(ItemStack item) {
-    return this.item != null ? item.isSimilar(this.item, true) : item.getType() == currency;
+    return this.item != null
+        ? Materials.itemsSimilar(item, this.item, true, false)
+        : item.getType() == currency;
   }
 }
