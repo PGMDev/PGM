@@ -11,6 +11,7 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
   protected @Nullable String name;
   protected @Nullable Double damage;
+  protected @Nullable Float power;
   protected double velocity;
   protected ClickAction clickAction;
   protected Class<? extends Entity> projectile;
@@ -24,6 +25,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
       @Nullable String id,
       @Nullable String name,
       @Nullable Double damage,
+      @Nullable Float power,
       double velocity,
       ClickAction clickAction,
       Class<? extends Entity> entity,
@@ -35,6 +37,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
     super(id);
     this.name = name;
     this.damage = damage;
+    this.power = power;
     this.velocity = velocity;
     this.clickAction = clickAction;
     this.projectile = entity;
