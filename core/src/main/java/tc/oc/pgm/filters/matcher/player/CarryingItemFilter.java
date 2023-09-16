@@ -7,7 +7,11 @@ import java.util.stream.Stream;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -26,7 +30,11 @@ public class CarryingItemFilter extends ParticipantItemFilter {
         PlayerItemTransferEvent.class,
         ApplyKitEvent.class,
         PlayerItemBreakEvent.class,
-        EntityShootBowEvent.class);
+        EntityShootBowEvent.class,
+        PlayerBucketFillEvent.class,
+        PlayerBucketEmptyEvent.class,
+        PlayerItemConsumeEvent.class,
+        PlayerEditBookEvent.class);
   }
 
   @Override
