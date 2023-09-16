@@ -73,7 +73,8 @@ class SystemMapSource implements MapSource {
 
   @Override
   public String getId() {
-    return "<" + root.getDisplayName() + ">/" + dir.toString();
+    String suffix = (variant != null ? "[" + variant + "]" : "");
+    return "<" + root.getDisplayName() + ">/" + dir.toString() + suffix;
   }
 
   @Override

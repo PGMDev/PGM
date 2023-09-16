@@ -67,7 +67,7 @@ public class InvalidXMLException extends Exception {
     this(message, attribute, null);
   }
 
-  public static InvalidXMLException fromJDOM(JDOMParseException e, String documentPath) {
+  public static InvalidXMLException fromJDOM(JDOMParseException e) {
     return new InvalidXMLException(
         e.getMessage(),
         null,
