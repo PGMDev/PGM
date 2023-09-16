@@ -8,6 +8,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Explosive;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -104,6 +105,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
           projectile =
               player.getWorld().spawn(player.getEyeLocation(), projectileDefinition.projectile);
           projectile.setVelocity(velocity);
+        }
+        if (projectileDefinition.power != null && projectile instanceof Explosive) {
+          ((Explosive) projectile).setYield(projectileDefinition.power);
         }
         projectile.setMetadata(
             "projectileDefinition", new FixedMetadataValue(PGM.get(), projectileDefinition));

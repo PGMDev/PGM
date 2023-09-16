@@ -65,6 +65,9 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
                 Node.fromAttr(projectileElement, "click"), ClickAction.class, ClickAction.BOTH);
         Class<? extends Entity> entity =
             XMLUtils.parseEntityTypeAttribute(projectileElement, "projectile", Arrow.class);
+        Float power =
+            XMLUtils.parseNumber(
+                Node.fromChildOrAttr(projectileElement, "power"), Float.class, (Float) null);
         List<PotionEffect> potionKit = kitParser.parsePotions(projectileElement);
         Filter destroyFilter =
             filterParser.parseFilterProperty(projectileElement, "destroy-filter");
@@ -78,6 +81,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
                 id,
                 name,
                 damage,
+                power,
                 velocity,
                 clickAction,
                 entity,
