@@ -6,6 +6,7 @@ import java.lang.invoke.MethodType;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -31,10 +32,15 @@ public final class MethodHandleUtils {
   // #getPlayer covers events which does not provide Entity
   // as the lower boundary
   private static final String[] entityGetterNames =
-      new String[] {"getPlayer", "getActor", "getActor"};
+      new String[] {"getPlayer", "getActor", "getActor", "getEntity"};
   private static final MethodType playerMethodType = MethodType.methodType(Player.class);
   private static final MethodType[] entityMethodTypes =
-      new MethodType[] {playerMethodType, playerMethodType, MethodType.methodType(Entity.class)};
+      new MethodType[] {
+        playerMethodType,
+        playerMethodType,
+        MethodType.methodType(Entity.class),
+        MethodType.methodType(LivingEntity.class)
+      };
 
   public static MethodHandle getHandle(Class<? extends Event> event)
       throws NoSuchMethodException, IllegalAccessException {

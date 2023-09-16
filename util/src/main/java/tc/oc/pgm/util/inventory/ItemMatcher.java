@@ -3,6 +3,7 @@ package tc.oc.pgm.util.inventory;
 import com.google.common.collect.Range;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import tc.oc.pgm.util.material.Materials;
 
 public class ItemMatcher {
 
@@ -48,7 +49,7 @@ public class ItemMatcher {
   }
 
   public boolean matches(ItemStack query) {
-    return base.isSimilar(stripMeta(query), ignoreDurability, ignoreName)
+    return Materials.itemsSimilar(base, stripMeta(query), ignoreDurability, ignoreName)
         && amount.contains(query.getAmount());
   }
 }

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.points.PointProvider;
+import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShopKeeper {
@@ -60,7 +61,7 @@ public class ShopKeeper {
   }
 
   public static String getKeeperId(Entity entity) {
-    MetadataValue meta = entity.getMetadata(ShopKeeper.METADATA_KEY, PGM.get());
+    MetadataValue meta = MetadataUtils.getMetadata(entity, ShopKeeper.METADATA_KEY, PGM.get());
     if (meta.asString() != null) {
       return meta.asString();
     }

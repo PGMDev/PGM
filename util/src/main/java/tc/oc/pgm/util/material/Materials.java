@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.block.BlockFaces;
 
@@ -85,6 +86,51 @@ public interface Materials {
 
       default:
         return material.isSolid();
+    }
+  }
+
+  static boolean itemsSimilar(
+      ItemStack first, ItemStack second, boolean skipDur, boolean skipCheckingName) {
+    if (first == second) {
+      return true;
+    }
+    if (second == null
+        || first == null
+        || !first.getType().equals(second.getType())
+        || (!skipDur && first.getDurability() != second.getDurability())) {
+      return false;
+    }
+    final boolean hasMeta1 = first.hasItemMeta();
+    final boolean hasMeta2 = second.hasItemMeta();
+    if (!hasMeta1 && !hasMeta2) {
+      return true;
+    }
+
+    final ItemMeta meta1 = hasMeta1 ? first.getItemMeta() : null;
+    final ItemMeta meta2 = hasMeta2 ? second.getItemMeta() : null;
+
+    final String prevName1 = meta1 != null ? meta1.getDisplayName() : null;
+    final String prevName2 = meta2 != null ? meta2.getDisplayName() : null;
+    if (skipCheckingName) {
+      if (meta1 != null) {
+        meta1.setDisplayName(null);
+      }
+      if (meta2 != null) {
+        meta2.setDisplayName(null);
+      }
+    }
+
+    try {
+      return Bukkit.getItemFactory().equals(meta1, meta2);
+    } finally {
+      if (skipCheckingName) {
+        if (meta1 != null) {
+          meta1.setDisplayName(prevName1);
+        }
+        if (meta2 != null) {
+          meta2.setDisplayName(prevName2);
+        }
+      }
     }
   }
 
