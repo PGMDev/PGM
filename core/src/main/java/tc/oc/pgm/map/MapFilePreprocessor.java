@@ -37,7 +37,7 @@ public class MapFilePreprocessor {
             return builder;
           });
 
-  private static final Pattern CONSTANT_PATTERN = Pattern.compile("\\$\\{(.+)}");
+  private static final Pattern CONSTANT_PATTERN = Pattern.compile("\\$\\{(.+?)}");
 
   private final MapIncludeProcessor includeProcessor;
   private final MapSource source;
