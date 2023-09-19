@@ -12,7 +12,7 @@ import org.jdom2.Namespace;
 
 public class DocumentWrapper extends Document {
 
-  private static final Set<String> IGNORED = Sets.newHashSet("variant", "tutorial");
+  private static final Set<String> IGNORED = Sets.newHashSet("variant", "tutorial", "edition");
 
   private boolean visitingAllowed = true;
 
