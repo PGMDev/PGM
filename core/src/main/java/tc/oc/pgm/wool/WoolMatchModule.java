@@ -23,6 +23,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -205,7 +206,10 @@ public class WoolMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void handleWoolCrafting(PrepareItemCraftEvent event) {
-    ItemStack result = event.getRecipe().getResult();
+    Recipe recipe = event.getRecipe();
+    if (recipe == null) return;
+
+    ItemStack result = recipe.getResult();
     InventoryHolder holder = event.getInventory().getHolder();
 
     if (holder instanceof Player) {

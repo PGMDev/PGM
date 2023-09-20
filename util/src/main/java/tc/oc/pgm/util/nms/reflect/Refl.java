@@ -1,10 +1,12 @@
 package tc.oc.pgm.util.nms.reflect;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +23,39 @@ public interface Refl {
 
   @Reflect.CB("entity.CraftPlayer.getHandle()")
   Object getPlayerHandle(Player player);
+
+  @Reflect.CB("entity.CraftEntity.getHandle()")
+  Object getEntityHandle(Entity entity);
+
+  @Reflect.NMS("EntityFireball.dirX")
+  void setFireballDirX(Object fireball, double amount);
+
+  @Reflect.NMS("EntityFireball.dirY")
+  void setFireballDirY(Object fireball, double amount);
+
+  @Reflect.NMS("EntityFireball.dirZ")
+  void setFireballDirZ(Object fireball, double amount);
+
+  @Reflect.NMS("Entity.getWorld()")
+  Object getNmsWorldFromEntity(Object handle);
+
+  @Reflect.NMS("Entity.getId()")
+  int getEntityId(Object handle);
+
+  @Reflect.NMS("WorldServer.getTracker()")
+  Object getEntityTracker(Object worldServer);
+
+  @Reflect.NMS("EntityTracker.trackedEntities")
+  Object getTrackedEntities(Object entityTracker);
+
+  @Reflect.NMS(value = "IntHashMap.get()", parameters = int.class)
+  Object getIntHashMapMethod(Object intHashMap, int id);
+
+  @Reflect.NMS("EntityTrackerEntry.trackedPlayers")
+  Set getTrackedPlayers(Object trackerEntry);
+
+  @Reflect.NMS("EntityPlayer.getBukkitEntity()")
+  Player getBukkitPlayer(Object nmsHandle);
 
   @Reflect.NMS("EntityPlayer.ping")
   int getPlayerPing(Object handle);
@@ -52,7 +87,7 @@ public interface Refl {
   @Reflect.NMS(value = "Item.canDestroySpecialBlock()", parameters = IBlockData.class)
   boolean canDestroySpecialBlock(Object nmsItem, Object blockData);
 
-  @Reflect.NMS("Material.isAlwaysDestroyable")
+  @Reflect.NMS("Material.isAlwaysDestroyable()")
   boolean isAlwaysDestroyable(Object material);
 
   @Reflect.CB("inventory.CraftItemStack")
@@ -71,6 +106,7 @@ public interface Refl {
     Object build(String string);
 
     @Reflect.Method("a_")
+    @Reflect.Method("c_")
     String getString(Object item);
   };
 
@@ -156,10 +192,13 @@ public interface Refl {
     @Reflect.Method("getBlockData")
     Object getBlockData(Object self);
 
-    @Reflect.Method("q")
-    Object getMaterial(Object self);
+    @Reflect.Method(value = "q", parameters = IBlockData.class)
+    Object getMaterial(Object self, Object blockData);
   }
 
   @Reflect.NMS("IBlockData")
-  interface IBlockData {}
+  interface IBlockData {
+    @Reflect.Method("getMaterial")
+    Object getMaterial(Object self);
+  }
 }

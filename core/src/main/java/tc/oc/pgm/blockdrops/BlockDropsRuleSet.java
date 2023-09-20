@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -96,12 +99,16 @@ public class BlockDropsRuleSet {
     boolean custom = false;
     block = BlockStates.cloneWithMaterial(block.getBlock(), material);
 
-    boolean rightToolUsed;
-    if (event instanceof BlockBreakEvent) {
+    boolean rightToolUsed = true;
+    if (event instanceof BlockTransformEvent) {
+      BlockTransformEvent blockTransformEvent = (BlockTransformEvent) event;
+      Entity actor = blockTransformEvent.getActor();
+      if (actor instanceof Player) {
+        rightToolUsed = NMSHacks.canMineBlock(material, ((Player) actor).getItemInHand());
+      }
+    } else if (event instanceof BlockBreakEvent) {
       rightToolUsed =
           NMSHacks.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
-    } else {
-      rightToolUsed = true;
     }
 
     for (BlockDropsRule rule : this.rules) {

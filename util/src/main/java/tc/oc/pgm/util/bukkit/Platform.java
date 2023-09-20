@@ -2,32 +2,29 @@ package tc.oc.pgm.util.bukkit;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Supplier;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.nms.NMSHacksNoOp;
 import tc.oc.pgm.util.nms.NMSHacksPlatform;
+import tc.oc.pgm.util.nms.v1_10_12.NMSHacks1_10_12;
+import tc.oc.pgm.util.nms.v1_8.NMSHacks1_8;
 import tc.oc.pgm.util.nms.v1_8.NMSHacksSportPaper;
 import tc.oc.pgm.util.nms.v1_9.NMSHacks1_9;
-import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public enum Platform {
-  UNKNOWN("UNKNOWN", "UNKNOWN", NMSHacksNoOp.class, false),
-  SPORTPAPER_1_8("SportPaper", "1.8", NMSHacksSportPaper.class, false),
-  SPIGOT_1_8(
-      "Spigot",
-      "1.8", // NMSHacks1_8 causes issues with other versions, get it dynamically
-      (Class<? extends NMSHacksPlatform>)
-          ReflectionUtils.getClassFromName("tc.oc.pgm.util.nms.v1_8.NMSHacks1_8"),
-      false),
-  PAPER_1_8(
-      "Paper",
-      "1.8", // NMSHacks1_8 causes issues with other versions, get it dynamically
-      (Class<? extends NMSHacksPlatform>)
-          ReflectionUtils.getClassFromName("tc.oc.pgm.util.nms.v1_8.NMSHacks1_8"),
-      false),
-  SPIGOT_1_9("Spigot", "1.9", NMSHacks1_9.class, true),
-  PAPER_1_9("Paper", "1.9", NMSHacks1_9.class, true);
+  UNKNOWN("UNKNOWN", "UNKNOWN", "UNKNOWN", () -> NMSHacksNoOp.class, false),
+  SPORTPAPER_1_8("SportPaper", "1.8", "1.8", () -> NMSHacksSportPaper.class, false),
+  SPIGOT_1_8("Spigot", "1.8", "1.8", () -> NMSHacks1_8.class, false),
+  PAPER_1_8("Paper", "1.8", "1.8", () -> NMSHacks1_8.class, false),
+  SPIGOT_1_9("Spigot", "1.9", "1.9", () -> NMSHacks1_9.class, true),
+  PAPER_1_9("Paper", "1.9", "1.9", () -> NMSHacks1_9.class, true),
+  SPIGOT_1_10_12("Spigot", "1.10", "1.12", () -> NMSHacks1_10_12.class, true),
+  PAPER_1_10_12("Paper", "1.10", "1.12", () -> NMSHacks1_10_12.class, true);
 
   private static ClassLogger logger = ClassLogger.get(Platform.class);;
   public static Platform SERVER_PLATFORM = computeServerPlatform();
@@ -36,28 +33,47 @@ public enum Platform {
     Server sv = Bukkit.getServer();
     String versionString = sv == null ? "" : sv.getVersion();
     for (Platform platform : Platform.values()) {
-      if (versionString.contains(platform.variant)
-          && versionString.contains("MC: " + platform.majorVersion)) {
-        return platform;
+      for (String supportedMajorVersion : platform.getSupportedMajorVersions()) {
+        if (versionString.contains(platform.variant)
+            && versionString.contains("MC: " + supportedMajorVersion)) {
+          return platform;
+        }
       }
     }
     return UNKNOWN;
   }
 
   private final String variant;
-  private final String majorVersion;
-  private final Class<? extends NMSHacksPlatform> nmsHacksClass;
+  private final String majorVersionFirst, majorVersionLast;
+  private final Supplier<Class<? extends NMSHacksPlatform>> nmsHacksSupplier;
   private final boolean requiresProtocolLib;
 
   Platform(
       String variant,
-      String majorVersion,
-      Class<? extends NMSHacksPlatform> nmsHacksClass,
+      String majorVersionFirst,
+      String majorVersionLast,
+      Supplier<Class<? extends NMSHacksPlatform>> nmsHacksSupplier,
       boolean requiresProtocolLib) {
     this.variant = variant;
-    this.majorVersion = majorVersion;
-    this.nmsHacksClass = nmsHacksClass;
+    this.majorVersionFirst = majorVersionFirst;
+    this.majorVersionLast = majorVersionLast;
+    this.nmsHacksSupplier = nmsHacksSupplier;
     this.requiresProtocolLib = requiresProtocolLib;
+  }
+
+  private Set<String> getSupportedMajorVersions() {
+    if (majorVersionFirst.equals(majorVersionLast))
+      return new HashSet<>(Collections.singleton(majorVersionFirst));
+
+    Set<String> versions = new HashSet<>();
+
+    int min = Integer.parseInt(majorVersionFirst.split("\\.")[1]);
+    int max = Integer.parseInt(majorVersionLast.split("\\.")[1]);
+
+    for (int i = min; i <= max; i++) {
+      versions.add("1." + i);
+    }
+    return versions;
   }
 
   public NMSHacksPlatform getNMSHacks() {
@@ -74,7 +90,8 @@ public enum Platform {
     if (this == SERVER_PLATFORM) {
       try {
         logger.info("Detected server: " + this.toString());
-        Constructor<? extends NMSHacksPlatform> constructor = nmsHacksClass.getConstructor();
+        Constructor<? extends NMSHacksPlatform> constructor =
+            nmsHacksSupplier.get().getConstructor();
         constructor.setAccessible(true);
         return constructor.newInstance();
       } catch (InvocationTargetException
@@ -92,6 +109,11 @@ public enum Platform {
 
   @Override
   public String toString() {
-    return this.variant + " (" + this.majorVersion + ")";
+    return this.variant
+        + " ("
+        + (this.majorVersionFirst.equals(this.majorVersionLast)
+            ? this.majorVersionFirst
+            : this.majorVersionFirst + "-" + this.majorVersionLast)
+        + ")";
   }
 }

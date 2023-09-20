@@ -30,7 +30,9 @@ public interface AttributeUtilBukkit {
       }
     }
 
-    return EnumSet.copyOf(missingAttributes);
+    return missingAttributes.isEmpty()
+        ? EnumSet.noneOf(Attribute.class)
+        : EnumSet.copyOf(missingAttributes);
   }
 
   static org.bukkit.attribute.Attribute convertAttribute(Attribute attribute) {
