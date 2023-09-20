@@ -1,5 +1,6 @@
 package tc.oc.pgm.variables;
 
+import com.google.common.collect.Range;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -57,7 +58,10 @@ public class VariableParser {
   public VariableDefinition<?> parseDummy(Element el, String id) throws InvalidXMLException {
     Class<? extends Filterable<?>> scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     double def = XMLUtils.parseNumber(Node.fromAttr(el, "default"), Double.class, 0d);
-    return new VariableDefinition<>(id, scope, true, vd -> new DummyVariable<>(vd, def));
+    Integer excl =
+        XMLUtils.parseNumberInRange(
+            Node.fromAttr(el, "exclusive"), Integer.class, Range.closed(1, 50), null);
+    return new VariableDefinition<>(id, scope, true, vd -> new DummyVariable<>(vd, def, excl));
   }
 
   @MethodParser("lives")
