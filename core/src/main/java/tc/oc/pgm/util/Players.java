@@ -2,6 +2,7 @@ package tc.oc.pgm.util;
 
 import cloud.commandframework.context.CommandContext;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -34,11 +35,22 @@ public class Players {
   }
 
   public static List<String> getPlayerNames(CommandSender sender, String query) {
-    return Bukkit.getOnlinePlayers().stream()
-        .filter(p -> Players.isVisible(sender, p))
-        .map(p -> Players.getVisibleName(sender, p))
-        .filter(n -> LiquidMetal.match(n, query))
-        .collect(Collectors.toList());
+    String lowerCaseQuery = query.toLowerCase(Locale.ROOT);
+    List<String> playerSuggestions =
+        Bukkit.getOnlinePlayers().stream()
+            .filter(p -> Players.isVisible(sender, p))
+            .map(p -> Players.getVisibleName(sender, p))
+            .filter(n -> LiquidMetal.match(n, query))
+            .collect(Collectors.toList());
+    List<String> prefixMatched =
+        playerSuggestions.stream()
+            .filter((suggestion) -> suggestion.toLowerCase(Locale.ROOT).startsWith(lowerCaseQuery))
+            .collect(Collectors.toList());
+    if (!prefixMatched.isEmpty()) {
+      return prefixMatched;
+    } else {
+      return playerSuggestions;
+    }
   }
 
   public static Player getPlayer(CommandSender sender, String query) {

@@ -47,7 +47,6 @@ import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
-import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -83,14 +82,20 @@ public final class MapCommand {
       search = search.filter(map -> matchesTags(map, tagSet.get(false), tagSet.get(true)));
     }
 
-    if (author != null) {
-      String query = StringUtils.normalize(author);
-      search = search.filter(map -> matchesAuthor(map, query));
-    }
-
     // FIXME: change when cloud gets support for default flag values
     final Phase finalPhase = phase == null ? Phase.PRODUCTION : phase;
     search = search.filter(map -> map.getPhase() == finalPhase);
+
+    if (author != null) {
+      String query = author;
+
+      List<MapInfo> collect = search.collect(Collectors.toList());
+      boolean exactMatch =
+          collect.stream().anyMatch((suggestion) -> matchesAuthor(suggestion, query, true));
+      search =
+          collect.stream()
+              .filter((mapSuggestion -> matchesAuthor(mapSuggestion, query, exactMatch)));
+    }
 
     Set<MapInfo> maps = search.collect(Collectors.toCollection(TreeSet::new));
     int resultsPerPage = 8;
@@ -154,9 +159,12 @@ public final class MapCommand {
     return posTags == null || matches == posTags.size();
   }
 
-  private static boolean matchesAuthor(MapInfo map, String query) {
+  private static boolean matchesAuthor(MapInfo map, String query, boolean exact) {
+    String lowerCaseQuery = query.toLowerCase(Locale.ROOT);
     for (Contributor contributor : map.getAuthors()) {
-      if (StringUtils.normalize(contributor.getNameLegacy()).contains(query)) {
+      String name = contributor.getNameLegacy();
+      if ((exact && lowerCaseQuery.equalsIgnoreCase(name))
+          || (!exact && name != null && name.toLowerCase(Locale.ROOT).contains(lowerCaseQuery))) {
         return true;
       }
     }
