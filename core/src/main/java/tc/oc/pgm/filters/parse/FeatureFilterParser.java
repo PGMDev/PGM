@@ -91,7 +91,7 @@ public class FeatureFilterParser extends FilterParser {
               + VariablesModule.Factory.VARIABLE_ID.pattern()
               + ")\\s*=\\s*("
               + XMLUtils.RANGE_DOTTED.pattern()
-              + ")");
+              + "|-?\\d*\\.?\\d+)");
 
   private @Nullable Filter parseInlineFilter(Node node, String text) throws InvalidXMLException {
     // Parse variable filter
