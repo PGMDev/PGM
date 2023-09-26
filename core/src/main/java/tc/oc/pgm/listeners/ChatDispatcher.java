@@ -420,6 +420,7 @@ public class ChatDispatcher implements Listener {
   public static void playSound(MatchPlayer player, Sound sound) {
     SettingValue value = player.getSettings().getValue(SettingKey.SOUNDS);
     if (value.equals(SettingValue.SOUNDS_ALL)
+        || value.equals(SettingValue.SOUNDS_CHAT)
         || (sound.equals(DM_SOUND) && value.equals(SettingValue.SOUNDS_DM))) {
       player.playSound(sound);
     }

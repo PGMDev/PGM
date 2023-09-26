@@ -36,7 +36,8 @@ public enum SettingKey implements Aliased {
       Material.LEATHER_HELMET,
       PICKER_AUTO,
       PICKER_ON,
-      PICKER_OFF), // Changes when the picker is displayed
+      PICKER_OFF,
+      PICKER_MANUAL), // Changes when the picker is displayed
   JOIN(
       Arrays.asList("join", "jms"),
       Material.WOOD_DOOR,
@@ -64,6 +65,7 @@ public enum SettingKey implements Aliased {
       "sounds",
       Material.NOTE_BLOCK,
       SOUNDS_ALL,
+      SOUNDS_CHAT,
       SOUNDS_DM,
       SOUNDS_NONE), // Changes when sounds are played
   VOTE(
