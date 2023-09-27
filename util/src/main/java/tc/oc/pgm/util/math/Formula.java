@@ -29,6 +29,22 @@ public interface Formula<T> extends ToDoubleFunction<T> {
         }
       };
 
+  Function MAX =
+      new Function("max", 2) {
+        @Override
+        public double apply(double... doubles) {
+          return Math.max(doubles[0], doubles[1]);
+        }
+      };
+
+  Function MIN =
+      new Function("min", 2) {
+        @Override
+        public double apply(double... doubles) {
+          return Math.min(doubles[0], doubles[1]);
+        }
+      };
+
   static <T extends Supplier<Map<String, Double>>> Formula<T> of(
       String expression, Set<String> variables, Formula<T> fallback)
       throws IllegalArgumentException {
@@ -41,7 +57,10 @@ public interface Formula<T> extends ToDoubleFunction<T> {
       throws IllegalArgumentException {
 
     Expression exp =
-        new ExpressionBuilder(expression).variables(variables).functions(BOUND, RANDOM).build();
+        new ExpressionBuilder(expression)
+            .variables(variables)
+            .functions(BOUND, RANDOM, MAX, MIN)
+            .build();
 
     return new ExpFormula<>(exp, context);
   }
