@@ -19,7 +19,7 @@ public enum SettingValue {
   DEATH_FRIENDS(
       "death", "friends", DyeColor.GREEN), // Only send death messages involving yourself or friends
 
-  PICKER_AUTO("picker", "auto", DyeColor.ORANGE), // Display after cycle, or with permissions.
+  PICKER_AUTO("picker", "auto", DyeColor.ORANGE), // Display after cycle, or with permissions
   PICKER_ON("picker", "on", DyeColor.GREEN), // Display the picker GUI always
   PICKER_OFF("picker", "off", DyeColor.RED), // Never display the picker GUI
 
@@ -36,7 +36,7 @@ public enum SettingValue {
   OBSERVERS_OFF("observers", "none", DyeColor.RED), // Hide observers
 
   SOUNDS_ALL("sounds", "all", DyeColor.GREEN), // Play all sounds
-  SOUNDS_DM("sounds", "messages", DyeColor.ORANGE), // Only play DM sounds
+  SOUNDS_DM("sounds", "messages", DyeColor.YELLOW), // Only play DM sounds
   SOUNDS_NONE("sounds", "none", DyeColor.RED), // Never play sounds
 
   VOTE_ON("vote", "on", DyeColor.GREEN), // Show the vote book on cycle
@@ -50,7 +50,10 @@ public enum SettingValue {
 
   TIME_AUTO("time", "auto", DyeColor.ORANGE), // Player time is in sync
   TIME_DARK("time", "dark", DyeColor.GRAY), // Player time is always set to midday
-  TIME_LIGHT("time", "light", DyeColor.WHITE); // Player time is always set to midnight
+  TIME_LIGHT("time", "light", DyeColor.WHITE), // Player time is always set to midnight
+
+  PICKER_MANUAL("picker", "manual", DyeColor.WHITE), // Only display the picker GUI if right clicked
+  SOUNDS_CHAT("sounds", "chat", DyeColor.ORANGE); // Only play DM and admin sounds
 
   private final String key;
   private final String name;

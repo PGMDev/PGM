@@ -132,6 +132,8 @@ public class PickerMatchModule implements MatchModule, Listener {
         return false;
       case PICKER_ON: // When on always show the GUI
         return true;
+      case PICKER_MANUAL: // Only show the GUI when right clicked
+        return playerTriggered;
       default: // Display after map cycle, but check perms when clicking button.
         return !playerTriggered || hasPermission || hasClasses;
     }
