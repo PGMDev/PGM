@@ -54,7 +54,7 @@ public class MapFilePreprocessor {
   private MapFilePreprocessor(MapSource source, MapIncludeProcessor includeProcessor) {
     this.source = source;
     this.includeProcessor = includeProcessor;
-    this.variant = source.getVariant() == null ? "default" : source.getVariant();
+    this.variant = source.getVariantId();
     this.includes = new ArrayList<>();
     this.constants = new HashMap<>();
   }

@@ -114,8 +114,8 @@ class SystemMapSource implements MapSource {
   }
 
   @Override
-  public String getVariant() {
-    return variant;
+  public String getVariantId() {
+    return variant == null ? DEFAULT_VARIANT : variant;
   }
 
   @Override

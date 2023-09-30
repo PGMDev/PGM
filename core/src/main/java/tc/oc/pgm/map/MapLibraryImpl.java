@@ -1,5 +1,6 @@
 package tc.oc.pgm.map;
 
+import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collections;
@@ -202,7 +203,7 @@ public class MapLibraryImpl implements MapLibrary {
       context = factory.load();
 
       // We're not loading a specific map id, and we're not on a variant, load variants
-      if (mapId == null && source.getVariant() == null) {
+      if (mapId == null && DEFAULT_VARIANT.equals(source.getVariantId())) {
         for (String variant : factory.getVariants()) {
           loadMapSafe(source.asVariant(variant), null);
         }

@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 import tc.oc.pgm.map.source.MapRoot;
@@ -13,6 +12,7 @@ import tc.oc.pgm.map.source.MapRoot;
 /** A source where {@link MapInfo} documents and files are downloaded. */
 public interface MapSource {
   Path FILE = Paths.get("map.xml");
+  String DEFAULT_VARIANT = "default";
 
   /**
    * Get a unique identifier for the source, should be human-readable.
@@ -24,10 +24,9 @@ public interface MapSource {
   /**
    * The variant of the map this is for
    *
-   * @return the variant the source, null for the parent source
+   * @return the variant the source, DEFAULT_VARIANT for the parent source
    */
-  @Nullable
-  String getVariant();
+  String getVariantId();
 
   /**
    * A copy of the map source, tailored to a specific variant

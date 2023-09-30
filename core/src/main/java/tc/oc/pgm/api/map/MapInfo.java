@@ -2,6 +2,7 @@ package tc.oc.pgm.api.map;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
@@ -24,8 +25,14 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    *
    * @return A variant for the map, if any.
    */
-  @Nullable
-  String getVariant();
+  String getVariantId();
+
+  /**
+   * Get all the variants available for the map
+   *
+   * @return a map of variants by their variant id
+   */
+  Map<String, VariantInfo> getVariants();
 
   /** @return the subfolder in which the world is in, or null for the parent folder */
   @Nullable
@@ -186,5 +193,15 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   @Override
   default int compareTo(MapInfo o) {
     return getId().compareTo(o.getId());
+  }
+
+  interface VariantInfo {
+    String getVariantId();
+
+    String getMapId();
+
+    String getMapName();
+
+    String getWorld();
   }
 }
