@@ -1,13 +1,17 @@
 package tc.oc.pgm.map;
 
+import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jdom2.Attribute;
@@ -45,6 +49,7 @@ public class MapFilePreprocessor {
   private final List<MapInclude> includes;
 
   private final Map<String, String> constants;
+  private final Set<String> variantIds;
 
   public static Document getDocument(MapSource source, MapIncludeProcessor includes)
       throws MapMissingException, IOException, JDOMException, InvalidXMLException {
@@ -57,6 +62,7 @@ public class MapFilePreprocessor {
     this.variant = source.getVariantId();
     this.includes = new ArrayList<>();
     this.constants = new HashMap<>();
+    this.variantIds = new HashSet<>();
   }
 
   public Document getDocument()
@@ -65,6 +71,11 @@ public class MapFilePreprocessor {
     try (final InputStream stream = source.getDocument()) {
       document = (DocumentWrapper) DOCUMENT_FACTORY.get().build(stream);
       document.setBaseURI(source.getId());
+    }
+
+    variantIds.add(DEFAULT_VARIANT);
+    for (Element variant : document.getRootElement().getChildren("variant")) {
+      variantIds.add(XMLUtils.parseRequiredId(variant));
     }
 
     document.runWithoutVisitation(
@@ -133,9 +144,14 @@ public class MapFilePreprocessor {
 
   private List<Content> processConditional(Element el, boolean shouldContain)
       throws InvalidXMLException {
+
+    Node node = Node.fromRequiredAttr(el, "variant", "has-variant");
+    List<String> filter = Arrays.asList(node.getValue().split("[\\s,]+"));
+
     boolean contains =
-        Arrays.asList(Node.fromRequiredAttr(el, "variant").getValue().split("[\\s,]+"))
-            .contains(variant);
+        "variant".equals(node.getName())
+            ? filter.contains(this.variant)
+            : filter.stream().anyMatch(variantIds::contains);
 
     return contains == shouldContain ? el.cloneContent() : Collections.emptyList();
   }
