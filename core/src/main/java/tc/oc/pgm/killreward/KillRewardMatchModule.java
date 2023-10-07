@@ -1,11 +1,9 @@
 package tc.oc.pgm.killreward;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -53,13 +51,7 @@ public class KillRewardMatchModule implements MatchModule, Listener {
       @Nullable Event event, ParticipantState victim, DamageInfo damageInfo) {
     final DamageQuery query = DamageQuery.attackerDefault(event, victim, damageInfo);
     return Collections2.filter(
-        killRewards,
-        new Predicate<KillReward>() {
-          @Override
-          public boolean apply(KillReward killReward) {
-            return killReward.filter.query(query).isAllowed();
-          }
-        });
+        killRewards, killReward -> killReward.filter.query(query).isAllowed());
   }
 
   private Collection<KillReward> getRewards(MatchPlayerDeathEvent event) {
@@ -68,12 +60,10 @@ public class KillRewardMatchModule implements MatchModule, Listener {
 
   private void giveRewards(MatchPlayer killer, Collection<KillReward> rewards) {
     for (KillReward reward : rewards) {
-      List<ItemStack> items = new ArrayList<>(reward.items);
+      // Apply action/kit first, so it can not override reward items
+      reward.action.trigger(killer);
 
-      // Apply kit first so it can not override reward items
-      reward.kit.apply(killer, false, items);
-
-      for (ItemStack stack : items) {
+      for (ItemStack stack : reward.items) {
         ItemStack clone = stack.clone();
         ItemModifier.apply(clone, killer);
         PlayerItemTransferEvent event =
@@ -110,19 +100,21 @@ public class KillRewardMatchModule implements MatchModule, Listener {
     }
 
     if (!event.isChallengeKill() || killer == null) return;
+    Collection<KillReward> rewards = getRewards(event);
+
+    // Always apply victim rewards
+    rewards.forEach(r -> r.victimAction.trigger(victim));
+
+    // Apply kill rewards only if killer didn't leave
     MatchPlayer onlineKiller = killer.getPlayer().orElse(null);
     if (onlineKiller == null) return;
 
-    Collection<KillReward> rewards = getRewards(event);
-
     if (onlineKiller.isDead()) {
       // If a player earns a KW while dead, give it to them when they respawn. Rationale: If they
-      // click respawn
-      // fast enough, they will get the reward anyway, and we can't prevent it in that case, so we
-      // might as well
-      // just give it to them always. Also, if the KW is in itemkeep, they should definitely get it
-      // while dead,
-      // and this is a relatively simple way to handle that case.
+      // click respawn fast enough, they will get the reward anyway, and we can't prevent it in that
+      // case, so we might as well just give it to them always. Also, if the KW is in itemkeep, they
+      // should definitely get it while dead, and this is a relatively simple way to handle that
+      // case.
       deadPlayerRewards.putAll(onlineKiller.getId(), rewards);
     } else {
       giveRewards(onlineKiller, rewards);

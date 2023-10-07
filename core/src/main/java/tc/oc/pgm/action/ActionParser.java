@@ -117,6 +117,11 @@ public class ActionParser {
   }
 
   public <B extends Filterable<?>> Action<? super B> parseProperty(
+      @Nullable Node node, Class<B> bound, Action<? super B> def) throws InvalidXMLException {
+    return node == null ? def : parseProperty(node, bound);
+  }
+
+  public <B extends Filterable<?>> Action<? super B> parseProperty(
       @NotNull Node node, Class<B> bound) throws InvalidXMLException {
     if (node.isAttribute()) return this.parseReference(node, bound);
 

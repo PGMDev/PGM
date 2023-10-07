@@ -355,10 +355,10 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     List<ItemStack> displacedItems = new ArrayList<>();
     kit.apply(this, force, displacedItems);
 
-    if (displacedItems.size() > 0) {
+    if (!displacedItems.isEmpty()) {
       Collection<ItemStack> leftover =
           getInventory().addItem(displacedItems.toArray(new ItemStack[0])).values();
-      if (leftover.size() > 0) {
+      if (!leftover.isEmpty()) {
         kit.applyLeftover(this, new ArrayList<>(leftover));
       }
     }
