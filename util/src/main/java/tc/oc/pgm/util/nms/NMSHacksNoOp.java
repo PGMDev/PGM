@@ -9,6 +9,9 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -301,5 +304,88 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     // runs the task on the next tick, not a perfect replacement
     plugin.getServer().getScheduler().runTask(plugin, task);
+  }
+
+  float rgbToParticle(int rgb) {
+    return (float) Math.max(0.001, rgb / 255.0);
+  }
+
+  @Override
+  public void showPayloadParticles(World world, Location loc, Color color) {
+    world
+        .spigot()
+        .playEffect(
+            loc,
+            Effect.COLOURED_DUST,
+            0,
+            (byte) 0,
+            rgbToParticle(color.getRed()),
+            rgbToParticle(color.getGreen()),
+            rgbToParticle(color.getBlue()),
+            1,
+            0,
+            50);
+  }
+
+  @Override
+  public void playBreakEffect(Location location, MaterialData material) {
+    location
+        .getWorld()
+        .playEffect(
+            location, Effect.STEP_SOUND, material.getItemTypeId() + (material.getData() << 12));
+  }
+
+  @Override
+  public void showSpawnedFlagParticles(Player player, Location location, DyeColor flagDyeColor) {
+    player
+        .spigot()
+        .playEffect(
+            location.clone().add(0, 56, 0),
+            Effect.TILE_DUST,
+            Material.WOOL.getId(),
+            flagDyeColor.getWoolData(),
+            0.15f, // radius on each axis of the particle ball
+            24f,
+            0.15f,
+            0f, // initial horizontal velocity
+            40, // number of particles
+            200); // radius in blocks to show particles
+  }
+
+  @Override
+  public void showBlitzSmoke(World world, Location base, int j) {
+    world.playEffect(base, Effect.SMOKE, j);
+  }
+
+  @Override
+  public void showCriticalArrowParticles(Player player, Location projectileLocation) {
+    player.spigot().playEffect(projectileLocation, Effect.CRIT, 0, 0, 0, 0, 0, 1, 0, 50);
+  }
+
+  @Override
+  public void showColoredArrowParticles(Player player, Location projectileLocation, Color color) {
+    player
+        .spigot()
+        .playEffect(
+            projectileLocation,
+            Effect.COLOURED_DUST,
+            0,
+            0,
+            rgbToParticle(color.getRed()),
+            rgbToParticle(color.getGreen()),
+            rgbToParticle(color.getBlue()),
+            1,
+            0,
+            50);
+  }
+
+  @Override
+  public void showSpawnerFlameParticles(World world, Location location) {
+    world.spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
+  }
+
+  @Override
+  public void showHugeExplosionParticle(Player player, Location explosion) {
+    player.spigot().playEffect(explosion, Effect.EXPLOSION_HUGE, 0, 0, 0f, 0f, 0f, 1f, 1, 256);
   }
 }
