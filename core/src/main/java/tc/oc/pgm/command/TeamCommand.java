@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import cloud.commandframework.annotations.Argument;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -24,9 +26,9 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
+import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -37,7 +39,7 @@ public final class TeamCommand {
   @CommandDescription("Force a player onto a team")
   @CommandPermission(Permissions.JOIN_FORCE)
   public void force(
-      MatchPlayer sender,
+      CommandSender sender,
       JoinMatchModule join,
       @Argument("player") MatchPlayer joiner,
       @Argument("team") Party team) {
@@ -49,21 +51,25 @@ public final class TeamCommand {
     } else {
       join.forceJoin(joiner, (Competitor) team);
     }
-
-    sender.sendMessage(
+    ChatDispatcher.broadcastAdminChatMessage(
         translatable(
-            "join.ok.force",
-            NamedTextColor.GRAY,
+            "join.ok.force.announce",
+            player(sender, NameStyle.FANCY),
             joiner.getName(NameStyle.FANCY),
             joiner.getParty().getName(),
-            oldParty.getName()));
+            oldParty.getName()),
+        joiner.getMatch());
   }
 
   @CommandMethod("shuffle")
   @CommandDescription("Shuffle players among the teams")
   @CommandPermission(Permissions.JOIN_FORCE)
   public void shuffle(
-      Match match, TeamMatchModule teams, @Flag("a") boolean all, @Flag("f") boolean force) {
+      Match match,
+      CommandSender sender,
+      TeamMatchModule teams,
+      @Flag("a") boolean all,
+      @Flag("f") boolean force) {
     if (match.isRunning() && !force) {
       throw exception("match.shuffle.err");
     }
@@ -74,7 +80,8 @@ public final class TeamCommand {
       teams.forceJoin(player, null);
     }
 
-    match.sendMessage(translatable("match.shuffle.ok", NamedTextColor.GREEN));
+    ChatDispatcher.broadcastAdminChatMessage(
+        translatable("match.shuffle.announce.ok", player(sender, NameStyle.FANCY)), match);
   }
 
   @CommandMethod("alias <team> <name>")
@@ -82,6 +89,7 @@ public final class TeamCommand {
   @CommandPermission(Permissions.GAMEPLAY)
   public void alias(
       Match match,
+      CommandSender sender,
       TeamMatchModule teams,
       @Argument("team") Team team,
       @Argument("name") @Greedy String name) {
@@ -98,14 +106,41 @@ public final class TeamCommand {
     final Component oldName = team.getName().color(NamedTextColor.GRAY);
     team.setName(name);
 
-    match.sendMessage(translatable("match.alias.ok", oldName, team.getName()));
+    ChatDispatcher.broadcastAdminChatMessage(
+        translatable(
+            "match.alias.announce.ok", player(sender, NameStyle.FANCY), oldName, team.getName()),
+        match);
+  }
+
+  @CommandMethod("scale <teams> <factor>")
+  @CommandDescription("Resizes all teams by a given factor")
+  @CommandPermission(Permissions.RESIZE)
+  public void scale(
+      CommandSender sender,
+      Match match,
+      @Argument("teams") Collection<Team> teams,
+      @Argument("factor") double scale) {
+    for (Team team : teams) {
+      int maxOverfill = (int) (team.getMaxOverfill() * scale);
+      int maxSize = (int) (team.getMaxPlayers() * scale);
+      team.setMaxSize(maxSize, maxOverfill);
+
+      ChatDispatcher.broadcastAdminChatMessage(
+          translatable(
+              "match.resize.announce.max",
+              player(sender, NameStyle.FANCY),
+              team.getName(),
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
+          match);
+    }
   }
 
   @CommandMethod("size <teams> <max-players> [max-overfill]")
   @CommandDescription("Set the max players on a team")
   @CommandPermission(Permissions.RESIZE)
   public void max(
-      Audience audience,
+      CommandSender sender,
+      Match match,
       @Argument("teams") Collection<Team> teams,
       @Argument("max-players") int maxPlayers,
       @Argument("max-overfill") Integer maxOverfill) {
@@ -116,21 +151,29 @@ public final class TeamCommand {
       else TextParser.assertInRange(maxOverfill, Range.atLeast(maxPlayers));
 
       team.setMaxSize(maxPlayers, maxOverfill);
-      audience.sendMessage(
+      ChatDispatcher.broadcastAdminChatMessage(
           translatable(
-              "match.resize.max", team.getName(), text(team.getMaxPlayers(), NamedTextColor.AQUA)));
+              "match.resize.announce.max",
+              player(sender, NameStyle.FANCY),
+              team.getName(),
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
+          match);
     }
   }
 
   @CommandMethod("size <teams> reset")
   @CommandDescription("Reset the max players on a team")
   @CommandPermission(Permissions.RESIZE)
-  public void max(Audience audience, @Argument("teams") Collection<Team> teams) {
+  public void max(CommandSender sender, Match match, @Argument("teams") Collection<Team> teams) {
     for (Team team : teams) {
       team.resetMaxSize();
-      audience.sendMessage(
+      ChatDispatcher.broadcastAdminChatMessage(
           translatable(
-              "match.resize.max", team.getName(), text(team.getMaxPlayers(), NamedTextColor.AQUA)));
+              "match.resize.announce.max",
+              player(sender, NameStyle.FANCY),
+              team.getName(),
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
+          match);
     }
   }
 
@@ -138,27 +181,36 @@ public final class TeamCommand {
   @CommandDescription("Set the min players on a team")
   @CommandPermission(Permissions.RESIZE)
   public void min(
-      Audience audience,
+      CommandSender sender,
+      Match match,
       @Argument("teams") Collection<Team> teams,
       @Argument("min-players") int minPlayers) {
     TextParser.assertInRange(minPlayers, Range.atLeast(0));
     for (Team team : teams) {
       team.setMinSize(minPlayers);
-      audience.sendMessage(
+      ChatDispatcher.broadcastAdminChatMessage(
           translatable(
-              "match.resize.min", team.getName(), text(team.getMinPlayers(), NamedTextColor.AQUA)));
+              "match.resize.announce.min",
+              player(sender, NameStyle.FANCY),
+              team.getName(),
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
+          match);
     }
   }
 
   @CommandMethod("min <teams> reset")
   @CommandDescription("Reset the min players on a team")
   @CommandPermission(Permissions.RESIZE)
-  public void min(Audience audience, @Argument("teams") Collection<Team> teams) {
+  public void min(CommandSender sender, Match match, @Argument("teams") Collection<Team> teams) {
     for (Team team : teams) {
       team.resetMinSize();
-      audience.sendMessage(
+      ChatDispatcher.broadcastAdminChatMessage(
           translatable(
-              "match.resize.min", team.getName(), text(team.getMinPlayers(), NamedTextColor.AQUA)));
+              "match.resize.announce.min",
+              player(sender, NameStyle.FANCY),
+              team.getName(),
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
+          match);
     }
   }
 }
