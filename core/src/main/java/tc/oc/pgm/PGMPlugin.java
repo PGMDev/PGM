@@ -222,13 +222,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
+    }
 
-      if (config.resizeTabList()) {
-        if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
-          TablistResizer.registerAdapter(this);
-        } else {
-          logger.warning("ProtocolLib is required when 'ui.resize' is enabled");
-        }
+    if (config.resizeTabList()) {
+      if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+        TablistResizer.registerAdapter(this);
+      } else {
+        logger.warning("ProtocolLib is required when 'ui.resize' is enabled");
       }
     }
 
