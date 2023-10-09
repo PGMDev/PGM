@@ -9,20 +9,23 @@ import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
-import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class KillRewardModule implements MapModule<KillRewardMatchModule> {
@@ -55,6 +58,8 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
       final Optional<ItemModifyModule> itemModifier =
           Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
+      final ActionParser actions = new ActionParser(factory);
+
       // Must allow top-level children for legacy support
       for (Element elKillReward :
           XMLUtils.flattenElements(
@@ -71,9 +76,26 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
 
         Filter filter =
             factory.getFilters().parseFilterProperty(elKillReward, "filter", StaticFilter.ALLOW);
-        Kit kit = factory.getKits().parseKitProperty(elKillReward, "kit", KitNode.EMPTY);
 
-        rewards.add(new KillReward(items.build(), filter, kit));
+        Action<? super MatchPlayer> kit =
+            factory.getKits().parseKitProperty(elKillReward, "kit", null);
+
+        Node actionNode = Node.fromChildOrAttr(elKillReward, "action");
+        if (kit != null && actionNode != null)
+          throw new InvalidXMLException("cannot have both 'kit' and 'action'", actionNode);
+
+        if (kit == null)
+          kit =
+              actions.parseProperty(
+                  Node.fromChildOrAttr(elKillReward, "action"), MatchPlayer.class, KitNode.EMPTY);
+
+        Action<? super MatchPlayer> victimAction =
+            actions.parseProperty(
+                Node.fromChildOrAttr(elKillReward, "victim-action"),
+                MatchPlayer.class,
+                KitNode.EMPTY);
+
+        rewards.add(new KillReward(items.build(), filter, kit, victimAction));
       }
 
       ImmutableList<KillReward> list = rewards.build();

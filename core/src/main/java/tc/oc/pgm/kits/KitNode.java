@@ -70,5 +70,5 @@ public class KitNode extends AbstractKit {
   }
 
   public static final KitNode EMPTY =
-      new KitNode(Collections.<Kit>emptyList(), StaticFilter.ALLOW, null, null);
+      new KitNode(Collections.emptyList(), StaticFilter.ALLOW, null, null);
 }
