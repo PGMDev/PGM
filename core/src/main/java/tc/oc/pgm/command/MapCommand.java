@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -277,6 +278,10 @@ public final class MapCommand {
       }
     }
 
+    if (map.getVariants().size() > 1) {
+      audience.sendMessage(formatVariants(map));
+    }
+
     if (!map.getSource().getRoot().isPrivate() || sender.hasPermission(Permissions.DEBUG)) {
       audience.sendMessage(formatMapSource(sender, map));
     }
@@ -356,8 +361,35 @@ public final class MapCommand {
   private Component mapInfoLabel(String key) {
     return text()
         .append(translatable(key, NamedTextColor.DARK_PURPLE, TextDecoration.BOLD))
-        .append(text(": "))
+        .append(text(": ", NamedTextColor.WHITE))
         .build();
+  }
+
+  private ComponentLike formatVariants(MapInfo map) {
+    TextComponent.Builder text =
+        text().append(mapInfoLabel("map.info.variants")).color(NamedTextColor.GOLD);
+
+    for (MapInfo.VariantInfo variant : map.getVariants().values()) {
+      TextComponent variantComp;
+      if (map.getVariantId().equals(variant.getVariantId())) {
+        variantComp =
+            text(variant.getVariantId(), null, TextDecoration.UNDERLINED)
+                .hoverEvent(
+                    showText(translatable("map.info.variants.current", NamedTextColor.GRAY)));
+      } else {
+        variantComp =
+            text(variant.getVariantId())
+                .hoverEvent(
+                    showText(
+                        translatable(
+                            "command.maps.hover",
+                            NamedTextColor.GRAY,
+                            text(variant.getMapName(), NamedTextColor.GOLD))))
+                .clickEvent(runCommand("/map " + variant.getMapName()));
+      }
+      text.append(variantComp).append(text(" "));
+    }
+    return text;
   }
 
   @NotNull

@@ -23,9 +23,12 @@ pools:
     dynamic: true
     players: 1
     
-    # How long should should a map cycle last?
+    # How long should a map cycle last?
     cycle-time: "15s"
 
+    # Map variants to use, in order, if they exist
+    variants:
+      - default
 
     # Voted pools support modifiers which come in the form of a formula (does not affect any other type of pool).
     #

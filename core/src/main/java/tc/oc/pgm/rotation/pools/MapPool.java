@@ -1,14 +1,17 @@
 package tc.oc.pgm.rotation.pools;
 
+import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.text.TextParser.parseDuration;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -35,7 +38,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
         section.getInt("players"),
         section.getBoolean("dynamic", true),
         parseDuration(section.getString("cycle-time", "-1s")),
-        buildMapList(section.getStringList("maps"), name));
+        buildMapList(section.getStringList("maps"), section.getStringList("variants"), name));
   }
 
   MapPool(
@@ -57,15 +60,22 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     this.maps = maps;
   }
 
-  private static List<MapInfo> buildMapList(List<String> mapNames, String poolName) {
+  private static List<MapInfo> buildMapList(
+      List<String> mapNames, List<String> variants, String poolName) {
     if (mapNames == null) return new ArrayList<>();
+    if (variants != null) {
+      int def = variants.indexOf(DEFAULT_VARIANT);
+      if (def >= 0) variants = variants.subList(0, def);
+      if (variants.isEmpty()) variants = null;
+    }
 
     List<MapInfo> mapList = new ArrayList<>(mapNames.size());
+    MapLibrary maps = PGM.get().getMapLibrary();
 
     for (String mapName : mapNames) {
-      MapInfo map = PGM.get().getMapLibrary().getMap(mapName);
+      MapInfo map = maps.getMap(mapName);
       if (map != null) {
-        mapList.add(map);
+        mapList.add(getVariant(maps, map, variants));
       } else {
         PGM.get()
             .getLogger()
@@ -75,6 +85,25 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     }
 
     return Collections.unmodifiableList(mapList);
+  }
+
+  private static MapInfo getVariant(MapLibrary maps, MapInfo map, List<String> variantIds) {
+    if (variantIds == null || !map.getVariantId().equals(DEFAULT_VARIANT)) return map;
+
+    Map<String, ? extends MapInfo.VariantInfo> variants = map.getVariants();
+    for (String varId : variantIds) {
+      MapInfo.VariantInfo variant = variants.get(varId);
+      if (variant == null) continue;
+      MapInfo variantMap = maps.getMap(variant.getMapId());
+      if (variantMap != null) {
+        return variantMap;
+      } else {
+        PGM.get()
+            .getLogger()
+            .warning("[MapPool] Failed to get map " + variant.getMapId() + ". Moving on...");
+      }
+    }
+    return map;
   }
 
   public MapPoolType getType() {

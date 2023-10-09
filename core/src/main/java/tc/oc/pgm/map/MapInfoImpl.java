@@ -2,9 +2,11 @@ package tc.oc.pgm.map;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import java.lang.ref.SoftReference;
@@ -50,7 +52,9 @@ public class MapInfoImpl implements MapInfo {
   private final MapSource source;
 
   private final String id;
-  private final String variant;
+  private final String variantId;
+  private final Map<String, VariantInfo> variants;
+
   private final String worldFolder;
   private final Version proto;
   private final Version version;
@@ -77,31 +81,18 @@ public class MapInfoImpl implements MapInfo {
 
   public MapInfoImpl(MapSource source, Element root) throws InvalidXMLException {
     this.source = source;
-    this.variant = source.getVariant();
+    this.variantId = source.getVariantId();
+    this.variants = createVariantMap(root);
 
-    String tmpName = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
-    String tmpWorld = null;
-    if (variant != null) {
-      Element variantEl =
-          root.getChildren("variant").stream()
-              .filter(el -> Objects.equals(variant, el.getAttributeValue("id")))
-              .findFirst()
-              .orElseThrow(
-                  () -> new InvalidXMLException("Could not find variant definition", root));
+    VariantInfo variant = variants.get(variantId);
+    if (variant == null) throw new InvalidXMLException("Could not find variant definition", root);
 
-      boolean override = XMLUtils.parseBoolean(Node.fromAttr(variantEl, "override"), false);
-      tmpName = (override ? "" : tmpName + ": ") + variantEl.getTextNormalize();
-      tmpWorld = variantEl.getAttributeValue("world");
-    }
-    this.worldFolder = tmpWorld;
+    this.worldFolder = variant.getWorld();
 
-    this.name = tmpName;
+    this.name = variant.getMapName();
     this.normalizedName = StringUtils.normalize(name);
 
-    String slug = assertNotNull(root).getChildTextNormalize("slug");
-    if (slug != null && variant != null) slug += "_" + variant;
-
-    this.id = assertNotNull(StringUtils.slugify(slug != null ? slug : name));
+    this.id = assertNotNull(variant.getMapId());
 
     this.proto = assertNotNull(XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")));
     this.version =
@@ -127,14 +118,31 @@ public class MapInfoImpl implements MapInfo {
             Node.fromLastChildOrAttr(root, "friendlyfire", "friendly-fire"), false);
   }
 
+  @NotNull
+  private static Map<String, VariantInfo> createVariantMap(Element root)
+      throws InvalidXMLException {
+    ImmutableMap.Builder<String, VariantInfo> variants = ImmutableMap.builder();
+    variants.put(DEFAULT_VARIANT, new VariantData(root, null));
+    for (Element el : root.getChildren("variant")) {
+      VariantData vd = new VariantData(root, el);
+      variants.put(vd.variantId, vd);
+    }
+    return variants.build();
+  }
+
   @Override
   public String getId() {
     return id;
   }
 
   @Override
-  public String getVariant() {
-    return variant;
+  public String getVariantId() {
+    return variantId;
+  }
+
+  @Override
+  public Map<String, VariantInfo> getVariants() {
+    return variants;
   }
 
   @Override
@@ -352,5 +360,53 @@ public class MapInfoImpl implements MapInfo {
       }
     }
     this.context = new SoftReference<>(context);
+  }
+
+  private static class VariantData implements VariantInfo {
+    private final String variantId;
+    private final String mapName;
+    private final String mapId;
+    private final String world;
+
+    public VariantData(Element root, @Nullable Element variantEl) throws InvalidXMLException {
+      String name = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
+      String slug = assertNotNull(root).getChildTextNormalize("slug");
+
+      if (variantEl == null) {
+        this.variantId = DEFAULT_VARIANT;
+        this.mapName = name;
+        this.world = null;
+      } else {
+        this.variantId = Node.fromRequiredAttr(variantEl, "id").getValue();
+        if (DEFAULT_VARIANT.equals(variantId)) {
+          throw new InvalidXMLException("Default variant is not allowed", variantEl);
+        }
+        boolean override = XMLUtils.parseBoolean(Node.fromAttr(variantEl, "override"), false);
+        this.mapName = (override ? "" : name + ": ") + variantEl.getTextNormalize();
+        this.world = variantEl.getAttributeValue("world");
+        if (slug != null) slug += "_" + variantId;
+      }
+      this.mapId = assertNotNull(StringUtils.slugify(slug != null ? slug : mapName));
+    }
+
+    @Override
+    public String getVariantId() {
+      return variantId;
+    }
+
+    @Override
+    public String getMapId() {
+      return mapId;
+    }
+
+    @Override
+    public String getMapName() {
+      return mapName;
+    }
+
+    @Override
+    public String getWorld() {
+      return world;
+    }
   }
 }
