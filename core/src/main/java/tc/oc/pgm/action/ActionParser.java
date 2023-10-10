@@ -300,8 +300,12 @@ public class ActionParser {
 
     boolean keepAmount = XMLUtils.parseBoolean(el.getAttribute("keep-amount"), false);
     boolean keepEnchants = XMLUtils.parseBoolean(el.getAttribute("keep-enchants"), false);
+    int add = XMLUtils.parseNumber(el.getAttribute("add"), Integer.class, 0);
+    if (add != 0 && !keepAmount) {
+      throw new InvalidXMLException("keep-amount must be enabled to use add", el);
+    }
 
-    return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants);
+    return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants, add);
   }
 
   @MethodParser("fill")

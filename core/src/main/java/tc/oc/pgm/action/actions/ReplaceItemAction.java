@@ -12,14 +12,16 @@ public class ReplaceItemAction extends AbstractAction<MatchPlayer> {
   private final ItemStack item;
   private final boolean keepAmount;
   private final boolean keepEnchants;
+  private final int add;
 
   public ReplaceItemAction(
-      ItemMatcher matcher, ItemStack item, boolean keepAmount, boolean keepEnchants) {
+      ItemMatcher matcher, ItemStack item, boolean keepAmount, boolean keepEnchants, int add) {
     super(MatchPlayer.class);
     this.matcher = matcher;
     this.item = item;
     this.keepAmount = keepAmount;
     this.keepEnchants = keepEnchants;
+    this.add = add;
   }
 
   @Override
@@ -45,6 +47,12 @@ public class ReplaceItemAction extends AbstractAction<MatchPlayer> {
     ItemStack newItem = item.clone();
     if (keepAmount) newItem.setAmount(current.getAmount());
     if (keepEnchants) newItem.addEnchantments(current.getEnchantments());
+    if (add != 0) {
+      newItem.setAmount(newItem.getAmount() + add);
+      if (newItem.getAmount() < 0) {
+        newItem.setAmount(0);
+      }
+    }
     ItemModifier.apply(newItem, player);
     return newItem;
   }
