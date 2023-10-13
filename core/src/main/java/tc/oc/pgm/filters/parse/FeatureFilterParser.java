@@ -1,6 +1,10 @@
 package tc.oc.pgm.filters.parse;
 
 import com.google.common.collect.Range;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureReference;
@@ -25,11 +29,6 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.VariableDefinition;
 import tc.oc.pgm.variables.VariablesModule;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FeatureFilterParser extends FilterParser {
 
@@ -126,14 +125,20 @@ public class FeatureFilterParser extends FilterParser {
   private Filter buildFilter(Node node, ParsingNode parsed) throws InvalidXMLException {
     if (parsed.getChildren() == null) return parseReference(node, parsed.getBase());
     switch (parsed.getBase()) {
-      case "all": return AllFilter.of(buildChildren(node, parsed));
-      case "any": return AnyFilter.of(buildChildren(node, parsed));
-      case "one": return OneFilter.of(buildChildren(node, parsed));
-      case "not": return new InverseFilter(buildChild(node, parsed));
-      case "deny": return new DenyFilter(buildChild(node, parsed));
-      case "allow": return new AllowFilter(buildChild(node, parsed));
+      case "all":
+        return AllFilter.of(buildChildren(node, parsed));
+      case "any":
+        return AnyFilter.of(buildChildren(node, parsed));
+      case "one":
+        return OneFilter.of(buildChildren(node, parsed));
+      case "not":
+        return new InverseFilter(buildChild(node, parsed));
+      case "deny":
+        return new DenyFilter(buildChild(node, parsed));
+      case "allow":
+        return new AllowFilter(buildChild(node, parsed));
       default:
-        throw new InvalidXMLException("Unknown inline filter type " + parsed.getBase(), node);
+        throw new SyntaxException("Unknown inline filter type " + parsed.getBase(), parsed);
     }
   }
 
@@ -145,8 +150,8 @@ public class FeatureFilterParser extends FilterParser {
 
   private Filter buildChild(Node node, ParsingNode parent) throws InvalidXMLException {
     if (parent.getChildrenCount() != 1)
-      throw new InvalidXMLException("Expected exactly one child but got " + parent.getChildrenCount(), node);
+      throw new SyntaxException(
+          "Expected exactly one child but got " + parent.getChildrenCount(), parent);
     return buildFilter(node, parent.getChildren().get(0));
   }
-
 }

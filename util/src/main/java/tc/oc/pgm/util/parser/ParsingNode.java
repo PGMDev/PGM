@@ -50,7 +50,8 @@ public class ParsingNode {
           if (str.pollIf(',')) continue;
           if (str.pollIf(')')) break;
 
-          throw new SyntaxException("Expected one of ')' or ',' but found '" + str.peekNext() + "'", str.getPosition());
+          throw new SyntaxException(
+              "Expected one of ')' or ',' but found '" + str.peekNext() + "'", str.getPosition());
         }
       }
     }
@@ -70,9 +71,12 @@ public class ParsingNode {
   }
 
   public String toString() {
-    return escape(base) + (children == null ? "" :
-        children.stream().map(ParsingNode::toString)
-            .collect(Collectors.joining(", ", "(", ")")));
+    return escape(base)
+        + (children == null
+            ? ""
+            : children.stream()
+                .map(ParsingNode::toString)
+                .collect(Collectors.joining(", ", "(", ")")));
   }
 
   public static String escape(String val) {
@@ -82,6 +86,4 @@ public class ParsingNode {
     }
     return val;
   }
-
 }
-
