@@ -21,6 +21,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Text;
 import org.jdom2.input.SAXBuilder;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
@@ -92,7 +93,12 @@ public class MapFilePreprocessor {
 
     for (Element constant :
         XMLUtils.flattenElements(document.getRootElement(), "constants", "constant", 0)) {
-      constants.put(XMLUtils.parseRequiredId(constant), constant.getText());
+      boolean isDelete = XMLUtils.parseBoolean(constant.getAttribute("delete"), false);
+      String text = constant.getText();
+      if ((text == null || text.isEmpty()) != isDelete)
+        throw new InvalidXMLException(
+            "Delete attribute cannot be combined with having an inner text", constant);
+      constants.put(XMLUtils.parseRequiredId(constant), isDelete ? null : constant.getText());
     }
 
     // If no constants are set, assume we can skip the step
@@ -158,7 +164,9 @@ public class MapFilePreprocessor {
 
   private void postprocessChildren(Element parent) throws InvalidXMLException {
     for (Attribute attribute : parent.getAttributes()) {
-      attribute.setValue(postprocessString(parent, attribute.getValue()));
+      String result = postprocessString(parent, attribute.getValue());
+      if (result == null) parent.removeAttribute(attribute);
+      else attribute.setValue(result);
     }
 
     for (int i = 0; i < parent.getContentSize(); i++) {
@@ -167,22 +175,29 @@ public class MapFilePreprocessor {
         postprocessChildren((Element) content);
       } else if (content instanceof Text) {
         Text text = (Text) content;
-        text.setText(postprocessString(parent, text.getText()));
+
+        String result = postprocessString(parent, text.getText());
+        if (result == null) parent.removeContent(text);
+        else text.setText(result);
       }
     }
   }
 
-  private String postprocessString(Element el, String text) throws InvalidXMLException {
+  private @Nullable String postprocessString(Element el, String text) throws InvalidXMLException {
     Matcher matcher = CONSTANT_PATTERN.matcher(text);
 
     StringBuffer result = new StringBuffer();
     while (matcher.find()) {
       String constant = matcher.group(1);
-      String replacement = constants.get(matcher.group(1));
-      if (replacement == null)
-        throw new InvalidXMLException(
-            "No constant '" + constant + "' is used but has not been defined", el);
-
+      String replacement = constants.get(constant);
+      if (replacement == null) {
+        if (!constants.containsKey(constant)) {
+          throw new InvalidXMLException(
+              "Constant '" + constant + "' is used but has not been defined", el);
+        } else {
+          return null;
+        }
+      }
       matcher.appendReplacement(result, replacement);
     }
     matcher.appendTail(result);
