@@ -148,6 +148,7 @@ public abstract class ControlPointParser {
       BlockVector location =
           BlockVectors.center(XMLUtils.parseVector(Node.fromRequiredAttr(el, "location")));
       double radius = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "radius"), Double.class);
+      boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
       Filter displayFilter =
           filterParser.parseFilterProperty(el, "display-filter", StaticFilter.ALLOW);
       return new PayloadDefinition(
@@ -178,6 +179,7 @@ public abstract class ControlPointParser {
           showProgress,
           location,
           radius,
+          showBeam,
           displayFilter);
     }
 
