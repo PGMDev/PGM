@@ -75,6 +75,7 @@ import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
 import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -414,12 +415,32 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
       Throwable cause = thrown.getCause();
       String message = thrown.getMessage();
+      String detail = null;
       if (textErr != null) {
         cause = null;
         message = textErr.getLocalizedMessage();
       } else if (xmlErr != null) {
         cause = xmlErr.getCause();
         message = xmlErr.getMessage();
+
+        if (cause instanceof SyntaxException && xmlErr.getNode() != null) {
+          String value = xmlErr.getNode().getValue();
+
+          SyntaxException se = (SyntaxException) cause;
+          int start = se.getStartIdx();
+          if (start == -1 || start > value.length()) start = value.length();
+          int end = se.getEndIdx();
+          if (end == -1 || end < start) end = value.length();
+
+          detail =
+              value.substring(0, start)
+                  + ChatColor.RED
+                  + ChatColor.UNDERLINE
+                  + value.substring(start, end)
+                  + ChatColor.RESET
+                  + ChatColor.RED
+                  + value.substring(end);
+        }
       } else if (mapErr != null) {
         cause = mapErr.getCause();
         message = mapErr.getMessage();
@@ -428,11 +449,14 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
         message = moduleErr.getMessage();
       }
 
-      return format(location, message, cause);
+      return format(location, message, detail, cause);
     }
 
     private String format(
-        @Nullable String location, @Nullable String message, @Nullable Throwable cause) {
+        @Nullable String location,
+        @Nullable String message,
+        @Nullable String detail,
+        @Nullable Throwable cause) {
       if (cause != null && Objects.equals(message, cause.getMessage())) cause = null;
       if (message == null) message = "<unknown message>";
       if (location == null) {
@@ -446,7 +470,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
           + ": "
           + ChatColor.RED
           + message
-          + (cause == null ? "" : ", caused by: " + cause.getMessage());
+          + (cause == null ? "" : ", caused by: " + cause.getMessage())
+          + (detail == null ? "" : ", detail: " + detail);
     }
 
     private @Nullable <E> E tryException(Class<E> type, @Nullable Throwable thrown) {
