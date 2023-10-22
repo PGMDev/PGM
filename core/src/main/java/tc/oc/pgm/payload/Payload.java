@@ -5,6 +5,7 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.material.Wool;
@@ -124,6 +125,24 @@ public class Payload extends ControlPoint {
               1,
               0,
               50);
+    }
+
+    if (definition.showBeam()) {
+      DyeColor dyeColor = display != null ? display.getDyeColor() : DyeColor.WHITE;
+      match
+          .getWorld()
+          .spigot()
+          .playEffect(
+              position.toLocation(match.getWorld()).clone().add(0, 56, 0),
+              Effect.TILE_DUST,
+              Material.WOOL.getId(),
+              dyeColor.getWoolData(),
+              0.15f, // radius on each axis of the particle ball
+              24f,
+              0.15f,
+              0f, // initial horizontal velocity
+              40, // number of particles
+              200); // radius in blocks to show particles
     }
   }
 
