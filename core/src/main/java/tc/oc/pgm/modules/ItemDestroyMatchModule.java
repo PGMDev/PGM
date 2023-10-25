@@ -6,26 +6,26 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.filters.query.MaterialQuery;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ItemDestroyMatchModule implements MatchModule, Listener {
-  protected final Set<BlockFilter> itemsToRemove;
+  protected final Set<Filter> itemsToRemove;
 
-  public ItemDestroyMatchModule(Match match, Set<BlockFilter> itemsToRemove) {
+  public ItemDestroyMatchModule(Match match, Set<Filter> itemsToRemove) {
     this.itemsToRemove = itemsToRemove;
   }
 
-  @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void processItemRemoval(ItemSpawnEvent event) {
     ItemStack item = event.getEntity().getItemStack();
-    for (BlockFilter filter : this.itemsToRemove) {
-      if (filter.matches(item.getType(), item.getData().getData())) {
+    for (Filter filter : this.itemsToRemove) {
+      if (filter.response(MaterialQuery.get(item.getData()))) {
         event.setCancelled(true);
       }
     }

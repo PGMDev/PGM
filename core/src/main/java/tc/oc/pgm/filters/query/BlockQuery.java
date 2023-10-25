@@ -50,6 +50,11 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
     this(event, block.getWorld(), block.getX(), block.getY(), block.getZ());
   }
 
+  public BlockQuery(@Nullable Event event, Location loc) {
+    this(event, loc.getBlock());
+    this.location = loc;
+  }
+
   public BlockQuery(Block block) {
     this(null, block);
   }

@@ -4,19 +4,20 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ItemDestroyModule implements MapModule<ItemDestroyMatchModule> {
-  protected final Set<BlockFilter> itemsToRemove;
+  protected final Set<Filter> itemsToRemove;
 
-  public ItemDestroyModule(Set<BlockFilter> itemsToRemove) {
+  public ItemDestroyModule(Set<Filter> itemsToRemove) {
     this.itemsToRemove = itemsToRemove;
   }
 
@@ -29,14 +30,14 @@ public class ItemDestroyModule implements MapModule<ItemDestroyMatchModule> {
     @Override
     public ItemDestroyModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Set<BlockFilter> itemsToRemove = Sets.newHashSet();
+      Set<Filter> itemsToRemove = Sets.newHashSet();
       for (Node itemRemoveNode :
           Node.fromChildren(doc.getRootElement(), "item-remove", "itemremove")) {
         for (Node itemNode : Node.fromChildren(itemRemoveNode.getElement(), "item")) {
-          itemsToRemove.add(new BlockFilter(XMLUtils.parseMaterialPattern(itemNode)));
+          itemsToRemove.add(new MaterialFilter(XMLUtils.parseMaterialPattern(itemNode)));
         }
       }
-      if (itemsToRemove.size() == 0) {
+      if (itemsToRemove.isEmpty()) {
         return null;
       } else {
         return new ItemDestroyModule(itemsToRemove);

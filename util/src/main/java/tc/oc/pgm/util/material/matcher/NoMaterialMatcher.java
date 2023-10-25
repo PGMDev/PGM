@@ -32,4 +32,9 @@ public class NoMaterialMatcher implements MaterialMatcher {
   public Collection<Material> getMaterials() {
     return Collections.emptySet();
   }
+
+  @Override
+  public String toString() {
+    return "NoMaterialMatcher{}";
+  }
 }

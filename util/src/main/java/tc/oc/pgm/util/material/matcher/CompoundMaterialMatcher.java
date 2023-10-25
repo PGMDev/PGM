@@ -1,8 +1,11 @@
 package tc.oc.pgm.util.material.matcher;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -11,10 +14,10 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class CompoundMaterialMatcher implements MaterialMatcher {
 
-  private final Collection<MaterialMatcher> children;
+  private final Collection<? extends MaterialMatcher> children;
   private @Nullable Collection<Material> materials;
 
-  public CompoundMaterialMatcher(Collection<MaterialMatcher> children) {
+  public CompoundMaterialMatcher(Collection<? extends MaterialMatcher> children) {
     this.children = children;
   }
 
@@ -54,7 +57,7 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
     return materials;
   }
 
-  public static MaterialMatcher of(Collection<MaterialMatcher> matchers) {
+  public static MaterialMatcher of(Collection<? extends MaterialMatcher> matchers) {
     if (matchers.isEmpty()) {
       return NoMaterialMatcher.INSTANCE;
     } else if (matchers.size() == 1) {
@@ -62,5 +65,19 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
     } else {
       return new CompoundMaterialMatcher(matchers);
     }
+  }
+
+  public static <T> MaterialMatcher of(
+      Function<T, MaterialMatcher> mapper, Collection<T> materials) {
+    List<MaterialMatcher> matchers = new ArrayList<>(materials.size());
+    for (T material : materials) {
+      matchers.add(mapper.apply(material));
+    }
+    return of(matchers);
+  }
+
+  @Override
+  public String toString() {
+    return "CompoundMaterialMatcher{" + "children=" + children + '}';
   }
 }

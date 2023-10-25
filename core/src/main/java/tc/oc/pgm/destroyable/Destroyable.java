@@ -56,6 +56,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -117,7 +118,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
         FiniteBlockRegion.fromWorld(
             definition.getRegion(),
             match.getWorld(),
-            this.materialPatterns,
+            CompoundMaterialMatcher.of(this.materialPatterns),
             match.getMap().getProto());
     if (this.blockRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());

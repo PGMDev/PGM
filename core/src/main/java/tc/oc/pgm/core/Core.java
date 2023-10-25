@@ -36,12 +36,15 @@ import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 
 // TODO: Consider making Core extend Destroyable
 public class Core extends TouchableGoal<CoreFactory>
     implements IncrementalGoal<CoreFactory>, ModeChangeGoal<CoreFactory> {
+
+  private static final MaterialMatcher LAVA_BLOCKS =
+      MaterialMatcher.of(Material.LAVA, Material.STATIONARY_LAVA);
 
   protected final FiniteBlockRegion casingRegion;
   protected final FiniteBlockRegion lavaRegion;
@@ -63,10 +66,7 @@ public class Core extends TouchableGoal<CoreFactory>
 
     this.casingRegion =
         FiniteBlockRegion.fromWorld(
-            region,
-            match.getWorld(),
-            match.getMap().getProto(),
-            new SingleMaterialMatcher(this.material));
+            region, match.getWorld(), MaterialMatcher.of(this.material), match.getMap().getProto());
     if (this.casingRegion.getBlockVolume() == 0) {
       match
           .getLogger()
@@ -75,11 +75,7 @@ public class Core extends TouchableGoal<CoreFactory>
 
     this.lavaRegion =
         FiniteBlockRegion.fromWorld(
-            region,
-            match.getWorld(),
-            match.getMap().getProto(),
-            new SingleMaterialMatcher(Material.LAVA, (byte) 0),
-            new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
+            region, match.getWorld(), LAVA_BLOCKS, match.getMap().getProto());
     if (this.lavaRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }

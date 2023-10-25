@@ -12,7 +12,8 @@ public class MaterialQuery extends Query implements tc.oc.pgm.api.filter.query.M
 
   private final MaterialData material;
 
-  public MaterialQuery(@Nullable Event event, MaterialData material) {
+  // Use MaterialQuery#get for a cached instance
+  private MaterialQuery(@Nullable Event event, MaterialData material) {
     super(event);
     this.material = assertNotNull(material);
   }
