@@ -7,7 +7,7 @@ import tc.oc.pgm.api.filter.query.PlayerQuery;
 public class PlayerQueryModifier extends QueryModifier<PlayerQuery, PlayerQuery> {
 
   public PlayerQueryModifier(Filter filter) {
-    super(filter, PlayerQuery.class);
+    super(filter, PlayerQuery.class, PlayerQuery.class);
   }
 
   @Nullable
@@ -16,10 +16,5 @@ public class PlayerQueryModifier extends QueryModifier<PlayerQuery, PlayerQuery>
     // Intentionally drop all query information (eg:what block was affected) and keep just the
     // player.
     return query.getPlayer();
-  }
-
-  @Override
-  public Class<? extends PlayerQuery> queryType() {
-    return PlayerQuery.class;
   }
 }

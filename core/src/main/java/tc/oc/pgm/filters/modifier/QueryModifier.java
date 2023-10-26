@@ -22,11 +22,13 @@ import tc.oc.pgm.filters.matcher.WeakTypedFilter;
 public abstract class QueryModifier<Q extends Query, R extends Query>
     implements WeakTypedFilter<Q> {
 
-  private final Filter filter;
-  private final Class<R> innerQueryType;
+  protected final Filter filter;
+  protected final Class<Q> outerQueryType;
+  protected final Class<R> innerQueryType;
 
-  protected QueryModifier(Filter filter, Class<R> innerQueryType) {
+  protected QueryModifier(Filter filter, Class<Q> outerQueryType, Class<R> innerQueryType) {
     this.filter = assertNotNull(filter, "filter may not be null");
+    this.outerQueryType = outerQueryType;
     this.innerQueryType = innerQueryType;
   }
 
@@ -35,7 +37,10 @@ public abstract class QueryModifier<Q extends Query, R extends Query>
     return queryType().isAssignableFrom(queryType) && filter.respondsTo(innerQueryType);
   }
 
-  public abstract Class<? extends Q> queryType();
+  @Override
+  public Class<? extends Q> queryType() {
+    return outerQueryType;
+  }
 
   public QueryResponse queryTyped(Q query) {
     Query modifiedQuery = transformQuery(query);

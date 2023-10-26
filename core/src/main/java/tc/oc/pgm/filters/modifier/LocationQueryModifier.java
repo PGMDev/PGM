@@ -9,12 +9,7 @@ import tc.oc.pgm.api.filter.query.LocationQuery;
 public abstract class LocationQueryModifier extends QueryModifier<LocationQuery, BlockQuery> {
 
   LocationQueryModifier(Filter filter) {
-    super(filter, BlockQuery.class);
-  }
-
-  @Override
-  public Class<? extends LocationQuery> queryType() {
-    return LocationQuery.class;
+    super(filter, LocationQuery.class, BlockQuery.class);
   }
 
   /** Uses world coordinates (x, y, z) in either absolute or relative form */
