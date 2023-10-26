@@ -1,6 +1,5 @@
 package tc.oc.pgm.modules;
 
-import java.util.Set;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,19 +14,17 @@ import tc.oc.pgm.filters.query.MaterialQuery;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ItemDestroyMatchModule implements MatchModule, Listener {
-  protected final Set<Filter> itemsToRemove;
+  protected final Filter itemsToRemove;
 
-  public ItemDestroyMatchModule(Match match, Set<Filter> itemsToRemove) {
+  public ItemDestroyMatchModule(Match match, Filter itemsToRemove) {
     this.itemsToRemove = itemsToRemove;
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void processItemRemoval(ItemSpawnEvent event) {
     ItemStack item = event.getEntity().getItemStack();
-    for (Filter filter : this.itemsToRemove) {
-      if (filter.response(MaterialQuery.get(item.getData()))) {
-        event.setCancelled(true);
-      }
+    if (itemsToRemove.query(MaterialQuery.get(item.getData())).isAllowed()) {
+      event.setCancelled(true);
     }
   }
 }

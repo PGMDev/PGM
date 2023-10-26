@@ -1,7 +1,7 @@
 package tc.oc.pgm.modules;
 
-import com.google.common.collect.Sets;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import tc.oc.pgm.api.filter.Filter;
@@ -10,14 +10,16 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
+import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ItemDestroyModule implements MapModule<ItemDestroyMatchModule> {
-  protected final Set<Filter> itemsToRemove;
+  protected final Filter itemsToRemove;
 
-  public ItemDestroyModule(Set<Filter> itemsToRemove) {
+  public ItemDestroyModule(Filter itemsToRemove) {
     this.itemsToRemove = itemsToRemove;
   }
 
@@ -30,17 +32,17 @@ public class ItemDestroyModule implements MapModule<ItemDestroyMatchModule> {
     @Override
     public ItemDestroyModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Set<Filter> itemsToRemove = Sets.newHashSet();
+      List<SingleMaterialMatcher> itemsToRemove = new ArrayList<>();
       for (Node itemRemoveNode :
           Node.fromChildren(doc.getRootElement(), "item-remove", "itemremove")) {
         for (Node itemNode : Node.fromChildren(itemRemoveNode.getElement(), "item")) {
-          itemsToRemove.add(new MaterialFilter(XMLUtils.parseMaterialPattern(itemNode)));
+          itemsToRemove.add(XMLUtils.parseMaterialPattern(itemNode));
         }
       }
       if (itemsToRemove.isEmpty()) {
         return null;
       } else {
-        return new ItemDestroyModule(itemsToRemove);
+        return new ItemDestroyModule(new MaterialFilter(CompoundMaterialMatcher.of(itemsToRemove)));
       }
     }
   }

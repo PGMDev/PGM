@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.material.matcher;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -14,10 +15,10 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class CompoundMaterialMatcher implements MaterialMatcher {
 
-  private final Collection<? extends MaterialMatcher> children;
+  private final List<MaterialMatcher> children;
   private @Nullable Collection<Material> materials;
 
-  public CompoundMaterialMatcher(Collection<? extends MaterialMatcher> children) {
+  private CompoundMaterialMatcher(List<MaterialMatcher> children) {
     this.children = children;
   }
 
@@ -63,7 +64,7 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
     } else if (matchers.size() == 1) {
       return matchers.iterator().next();
     } else {
-      return new CompoundMaterialMatcher(matchers);
+      return new CompoundMaterialMatcher(ImmutableList.copyOf(matchers));
     }
   }
 
