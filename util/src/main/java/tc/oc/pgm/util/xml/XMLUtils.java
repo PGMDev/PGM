@@ -34,6 +34,7 @@ import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.math.OffsetVector;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.skin.Skin;
@@ -649,6 +650,21 @@ public final class XMLUtils {
     } catch (ClassNotFoundException | ClassCastException e) {
       throw new InvalidXMLException("Invalid entity type '" + value + "'", node);
     }
+  }
+
+  public static OffsetVector parseOffsetVector(Node node) throws InvalidXMLException {
+    String value = node.getValueNormalize();
+    String[] coords = value.split("\\s*,\\s*");
+    Vector vector = parseVector(node, value.replaceAll("[\\^~]", ""));
+
+    boolean local = value.startsWith("^");
+    boolean[] relative = new boolean[3];
+    for (int i = 0; i < coords.length; i++) {
+      relative[i] = coords[i].startsWith("~");
+      if (coords[i].startsWith("^") != local)
+        throw new InvalidXMLException("Cannot mix world & local coordinates", node);
+    }
+    return OffsetVector.of(vector, relative, local);
   }
 
   public static Vector parseVector(Node node, String value) throws InvalidXMLException {
