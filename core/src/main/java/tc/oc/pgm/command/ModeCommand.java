@@ -30,7 +30,7 @@ import tc.oc.pgm.util.text.TextFormatter;
 @CommandMethod("mode|modes")
 public final class ModeCommand {
 
-  @CommandMethod("next")
+  @CommandMethod("mode|modes next")
   @CommandDescription("Show the next objective mode")
   public void next(Audience audience, ObjectiveModesMatchModule modes) {
     List<ModeChangeCountdown> countdowns = modes.getActiveCountdowns();
@@ -64,6 +64,15 @@ public final class ModeCommand {
     audience.sendMessage(builder.build());
   }
 
+  @CommandMethod("[page]")
+  @CommandDescription("List all objective modes")
+  public void fallback(
+      Audience audience,
+      ObjectiveModesMatchModule modes,
+      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page) {
+    list(audience, modes, page);
+  }
+
   @CommandMethod("list|page [page]")
   @CommandDescription("List all objective modes")
   public void list(
@@ -85,7 +94,7 @@ public final class ModeCommand {
     new ModesPaginatedResult(header, resultsPerPage, modes).display(audience, modeList, page);
   }
 
-  @CommandMethod("push <time>")
+  @CommandMethod("mode|modes push <time>")
   @CommandDescription("Reschedule all objective modes with active countdowns")
   @CommandPermission(Permissions.GAMEPLAY)
   public void push(
@@ -124,7 +133,7 @@ public final class ModeCommand {
     audience.sendMessage(builder);
   }
 
-  @CommandMethod("start <mode> [time]")
+  @CommandMethod("mode|modes start <mode> [time]")
   @CommandDescription("Starts an objective mode")
   @CommandPermission(Permissions.GAMEPLAY)
   public void start(

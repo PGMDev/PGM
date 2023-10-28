@@ -68,6 +68,25 @@ public class MapDevCommand {
             text().append(text(v.getId() + ": ", NamedTextColor.AQUA), text(v.getValue(target))));
   }
 
+  @CommandMethod("variable set <variable> <value> [target]")
+  @CommandDescription("Inspect variables for a player")
+  @CommandPermission(Permissions.DEBUG)
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  public void setVariable(
+      Audience audience,
+      @Argument("variable") Variable variable,
+      @Argument("value") double value,
+      @Argument(value = "target", defaultValue = CURRENT) MatchPlayer target) {
+    variable.setValue(target, value);
+    audience.sendMessage(
+        text("Variable ", NamedTextColor.YELLOW)
+            .append(text(variable.getId(), NamedTextColor.AQUA))
+            .append(text(" set to ", NamedTextColor.YELLOW))
+            .append(text(value + "", NamedTextColor.AQUA))
+            .append(text(" for ", NamedTextColor.YELLOW))
+            .append(target.getName()));
+  }
+
   @CommandMethod("filter <filter> [target]")
   @CommandDescription("Match a filter against a player")
   @CommandPermission(Permissions.DEBUG)

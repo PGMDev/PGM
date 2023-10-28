@@ -13,8 +13,12 @@ public class VariablesMatchModule implements MatchModule, Listener {
     this.match = match;
   }
 
+  public Iterable<Variable> getVariables() {
+    return match.getFeatureContext().getAll(Variable.class);
+  }
+
   @Override
   public void load() throws ModuleLoadException {
-    match.getFeatureContext().getAll(Variable.class).forEach(v -> v.postLoad(match));
+    getVariables().forEach(v -> v.postLoad(match));
   }
 }

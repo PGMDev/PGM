@@ -79,6 +79,7 @@ import tc.oc.pgm.command.parsers.RotationParser;
 import tc.oc.pgm.command.parsers.SettingValueParser;
 import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
+import tc.oc.pgm.command.parsers.VariableParser;
 import tc.oc.pgm.command.parsers.VictoryConditionParser;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.modes.Mode;
@@ -91,6 +92,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.Players;
+import tc.oc.pgm.variables.Variable;
 
 public class PGMCommandGraph extends CommandGraph<PGM> {
 
@@ -211,6 +213,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     registerParser(TypeFactory.parameterizedClass(Collection.class, Team.class), TeamsParser::new);
     registerParser(PlayerClass.class, PlayerClassParser::new);
     registerParser(Mode.class, ModeParser::new);
+    registerParser(Variable.class, VariableParser::new);
     registerParser(ExposedAction.class, ExposedActionParser::new);
     registerParser(
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
