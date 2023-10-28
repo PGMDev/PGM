@@ -16,6 +16,7 @@ import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.matcher.block.MaxBuildFilter;
 import tc.oc.pgm.filters.matcher.party.TeamFilter;
 import tc.oc.pgm.filters.operator.DenyFilter;
 import tc.oc.pgm.filters.operator.FilterNode;
@@ -31,10 +32,10 @@ public class RegionFilterApplicationParser {
   private final MapFactory factory;
   private final FilterParser filterParser;
   private final RegionParser regionParser;
-  private final RFAContext rfaContext;
+  private final RFAContext.Builder rfaContext;
   private final Version proto;
 
-  public RegionFilterApplicationParser(MapFactory factory, RFAContext rfaContext) {
+  public RegionFilterApplicationParser(MapFactory factory, RFAContext.Builder rfaContext) {
     this.factory = factory;
     this.rfaContext = rfaContext;
 
@@ -84,15 +85,18 @@ public class RegionFilterApplicationParser {
             RFAScope.BLOCK_PLACE, new NegativeRegion(region), filter, message, false));
   }
 
-  public void parseMaxBuildHeight(Element el) throws InvalidXMLException {
-    final Region region =
-        new HalfspaceRegion(
-            new Vector(0, XMLUtils.parseNumber(el, Integer.class), 0), new Vector(0, 1, 0));
-    final Component message = translatable("match.maxBuildHeight");
+  public Integer parseMaxBuildHeight(Element el) throws InvalidXMLException {
+    // Always add the filter, will be no-op as long as the value stays null
+    prepend(
+        el,
+        new RegionFilterApplication(
+            RFAScope.BLOCK_PLACE,
+            EverywhereRegion.INSTANCE,
+            MaxBuildFilter.INSTANCE,
+            translatable("match.maxBuildHeight"),
+            false));
 
-    for (RFAScope scope : Lists.newArrayList(RFAScope.BLOCK_PLACE)) {
-      prepend(el, new RegionFilterApplication(scope, region, StaticFilter.DENY, message, false));
-    }
+    return el == null ? null : XMLUtils.parseNumber(el, Integer.class);
   }
 
   public void parsePlayable(Element el) throws InvalidXMLException {

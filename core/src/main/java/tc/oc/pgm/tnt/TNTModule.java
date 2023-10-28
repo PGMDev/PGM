@@ -108,7 +108,7 @@ public class TNTModule implements MapModule<TNTMatchModule> {
       if (!blockDamage) {
         factory
             .needModule(RegionModule.class)
-            .getRFAContext()
+            .getRFAContextBuilder()
             .prepend(
                 new RegionFilterApplication(
                     RFAScope.BLOCK_BREAK,

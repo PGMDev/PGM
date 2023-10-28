@@ -20,6 +20,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.BlitzVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
+import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
 
@@ -92,5 +93,10 @@ public class VariableParser {
 
     return new VariableDefinition<>(
         id, Match.class, var.isDynamic(), vd -> new TeamVariableAdapter(vd, var, team));
+  }
+
+  @MethodParser("maxbuildheight")
+  public VariableDefinition<Match> parseMaxBuild(Element el, String id) throws InvalidXMLException {
+    return new VariableDefinition<>(id, Match.class, false, MaxBuildVariable::new);
   }
 }

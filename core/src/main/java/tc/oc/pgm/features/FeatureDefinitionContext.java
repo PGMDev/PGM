@@ -26,7 +26,7 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
   private final List<PendingValidation<?>> validations = new ArrayList<>();
 
   public static String parseId(Element node) {
-    return node.getAttributeValue("id");
+    return node == null ? null : node.getAttributeValue("id");
   }
 
   /** Return the XML element associated with the given feature */
