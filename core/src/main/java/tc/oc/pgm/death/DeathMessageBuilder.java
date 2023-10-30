@@ -184,7 +184,7 @@ public class DeathMessageBuilder {
   }
 
   boolean potion(PotionInfo potionInfo) {
-    if (option("potion")) {
+    if (potionInfo.getPotionEffect() != null && option("potion")) {
       weapon = potionInfo.getName();
       return true;
     }
