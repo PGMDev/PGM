@@ -36,4 +36,9 @@ public class BlockMaterialMatcher implements MaterialMatcher {
   public Collection<Material> getMaterials() {
     return BLOCKS;
   }
+
+  @Override
+  public String toString() {
+    return "BlockMaterialMatcher{}";
+  }
 }

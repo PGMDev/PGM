@@ -8,16 +8,18 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ItemKeepModule implements MapModule<ItemKeepMatchModule> {
-  protected final Set<BlockFilter> itemsToKeep;
-  protected final Set<BlockFilter> armorToKeep;
+  protected final MaterialMatcher itemsToKeep;
+  protected final MaterialMatcher armorToKeep;
 
-  public ItemKeepModule(Set<BlockFilter> itemsToKeep, Set<BlockFilter> armorToKeep) {
+  public ItemKeepModule(MaterialMatcher itemsToKeep, MaterialMatcher armorToKeep) {
     this.itemsToKeep = itemsToKeep;
     this.armorToKeep = armorToKeep;
   }
@@ -31,24 +33,25 @@ public class ItemKeepModule implements MapModule<ItemKeepMatchModule> {
     @Override
     public ItemKeepModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Set<BlockFilter> itemsToKeep = Sets.newHashSet();
+      Set<SingleMaterialMatcher> itemsToKeep = Sets.newHashSet();
       for (Node elItemKeep : Node.fromChildren(doc.getRootElement(), "item-keep", "itemkeep")) {
         for (Node elItem : Node.fromChildren(elItemKeep.getElement(), "item")) {
-          itemsToKeep.add(new BlockFilter(XMLUtils.parseMaterialPattern(elItem)));
+          itemsToKeep.add(XMLUtils.parseMaterialPattern(elItem));
         }
       }
 
-      Set<BlockFilter> armorToKeep = Sets.newHashSet();
+      Set<SingleMaterialMatcher> armorToKeep = Sets.newHashSet();
       for (Node elArmorKeep : Node.fromChildren(doc.getRootElement(), "armor-keep", "armorkeep")) {
         for (Node elItem : Node.fromChildren(elArmorKeep.getElement(), "item")) {
-          armorToKeep.add(new BlockFilter(XMLUtils.parseMaterialPattern(elItem)));
+          armorToKeep.add(XMLUtils.parseMaterialPattern(elItem));
         }
       }
 
       if (itemsToKeep.isEmpty() && armorToKeep.isEmpty()) {
         return null;
       } else {
-        return new ItemKeepModule(itemsToKeep, armorToKeep);
+        return new ItemKeepModule(
+            CompoundMaterialMatcher.of(itemsToKeep), CompoundMaterialMatcher.of(armorToKeep));
       }
     }
   }

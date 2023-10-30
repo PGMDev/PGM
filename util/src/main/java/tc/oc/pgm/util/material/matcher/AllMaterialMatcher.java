@@ -33,4 +33,9 @@ public class AllMaterialMatcher implements MaterialMatcher {
   public Collection<Material> getMaterials() {
     return EnumSet.allOf(Material.class);
   }
+
+  @Override
+  public String toString() {
+    return "AllMaterialMatcher{}";
+  }
 }

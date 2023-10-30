@@ -12,7 +12,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.StaticFilter;
-import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.goals.ShowOptions;
@@ -31,7 +31,9 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public abstract class ControlPointParser {
   private static final Filter VISUAL_MATERIALS =
       AnyFilter.of(
-          ItemModifier.COLOR_AFFECTED.stream().map(BlockFilter::new).collect(Collectors.toList()));
+          ItemModifier.COLOR_AFFECTED.stream()
+              .map(MaterialFilter::new)
+              .collect(Collectors.toList()));
 
   public enum Type {
     HILL,

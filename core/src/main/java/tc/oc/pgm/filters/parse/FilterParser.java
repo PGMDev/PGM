@@ -65,7 +65,7 @@ import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerStateFilter;
 import tc.oc.pgm.filters.matcher.player.WearingItemFilter;
 import tc.oc.pgm.filters.modifier.LocationQueryModifier;
-import tc.oc.pgm.filters.modifier.PlayerBlockQueryModifier;
+import tc.oc.pgm.filters.modifier.PlayerQueryModifier;
 import tc.oc.pgm.filters.modifier.SameTeamQueryModifier;
 import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
@@ -638,8 +638,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   @MethodParser("player")
-  public PlayerBlockQueryModifier parsePlayerFilter(Element el) throws InvalidXMLException {
-    return new PlayerBlockQueryModifier(parseChild(el));
+  public PlayerQueryModifier parsePlayerFilter(Element el) throws InvalidXMLException {
+    return new PlayerQueryModifier(parseChild(el));
   }
 
   @MethodParser("players")

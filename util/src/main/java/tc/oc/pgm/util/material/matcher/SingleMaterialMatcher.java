@@ -99,4 +99,13 @@ public class SingleMaterialMatcher implements MaterialMatcher {
       return new SingleMaterialMatcher(material);
     }
   }
+
+  @Override
+  public String toString() {
+    return "SingleMaterialMatcher{"
+        + "material="
+        + material
+        + (dataMatters ? ", data=" + data : "")
+        + '}';
+  }
 }
