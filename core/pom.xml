@@ -43,7 +43,7 @@
                         <path>
                             <groupId>cloud.commandframework</groupId>
                             <artifactId>cloud-annotations</artifactId>
-                            <version>1.8.2</version>
+                            <version>1.8.4</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

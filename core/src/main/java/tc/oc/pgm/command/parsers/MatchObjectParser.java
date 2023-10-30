@@ -10,7 +10,6 @@ import cloud.commandframework.arguments.parser.ArgumentParseResult;
 import cloud.commandframework.arguments.parser.ParserParameters;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.paper.PaperCommandManager;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -90,7 +89,7 @@ public abstract class MatchObjectParser<T, IT, M extends MatchModule>
         .collect(Collectors.toList());
   }
 
-  protected abstract Collection<IT> objects(M module);
+  protected abstract Iterable<IT> objects(M module);
 
   protected abstract String getName(IT obj);
 

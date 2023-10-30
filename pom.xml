@@ -152,25 +152,25 @@
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-core</artifactId>
-            <version>1.8.2</version>
+            <version>1.8.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-annotations</artifactId>
-            <version>1.8.2</version>
+            <version>1.8.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-paper</artifactId>
-            <version>1.8.2</version>
+            <version>1.8.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>cloud.commandframework</groupId>
             <artifactId>cloud-minecraft-extras</artifactId>
-            <version>1.8.2</version>
+            <version>1.8.4</version>
             <scope>compile</scope>
         </dependency>
         <!-- Allows registering brigadier mappings -->
