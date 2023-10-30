@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
@@ -89,6 +88,7 @@ import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.XMLParser;
 import tc.oc.pgm.util.collection.ContextStore;
+import tc.oc.pgm.util.math.OffsetVector;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -604,37 +604,11 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   // Methods for parsing QueryModifiers
 
   @MethodParser("offset")
-  public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
-    String value = el.getAttributeValue("vector");
-    if (value == null) throw new InvalidXMLException("No vector provided", el);
-    // Check vector format
-    Vector vector = XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
+  public Filter parseOffsetFilter(Element el) throws InvalidXMLException {
+    OffsetVector vector = XMLUtils.parseOffsetVector(Node.fromRequiredAttr(el, "vector"));
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"));
 
-    String[] coords = value.split("\\s*,\\s*");
-
-    boolean[] relative = new boolean[3];
-
-    Boolean local = null;
-    for (int i = 0; i < coords.length; i++) {
-      String coord = coords[i];
-
-      if (local == null) {
-        local = coord.startsWith("^");
-      }
-
-      if (coord.startsWith("^") != local)
-        throw new InvalidXMLException("Cannot mix world & local coordinates", el);
-
-      relative[i] = coord.startsWith("~");
-    }
-
-    if (local == null) throw new InvalidXMLException("No coordinates provided", el);
-
-    if (local) {
-      return new LocationQueryModifier.Local(parseChild(el), vector);
-    } else {
-      return new LocationQueryModifier.World(parseChild(el), vector, relative);
-    }
+    return LocationQueryModifier.of(child, vector);
   }
 
   @MethodParser("player")

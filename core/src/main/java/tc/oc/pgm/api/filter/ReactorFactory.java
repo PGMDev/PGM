@@ -45,5 +45,9 @@ public interface ReactorFactory<R extends ReactorFactory.Reactor> extends Filter
     protected void invalidate(Filterable<?> filterable) {
       this.fmm.invalidate(filterable);
     }
+
+    protected void invalidate(Filter filter, Filterable<?> filterable) {
+      this.fmm.invalidate(filter, filterable);
+    }
   }
 }
