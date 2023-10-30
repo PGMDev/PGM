@@ -72,7 +72,7 @@ public class PortalModule implements MapModule<PortalMatchModule> {
         throws InvalidXMLException {
       Set<Portal> portals = Sets.newHashSet();
       RegionParser regionParser = factory.getRegions();
-      RFAContext rfaContext = factory.getModule(RegionModule.class).getRFAContext();
+      RFAContext.Builder rfaContext = factory.getModule(RegionModule.class).getRFAContextBuilder();
 
       for (Element portalEl : XMLUtils.flattenElements(doc.getRootElement(), "portals", "portal")) {
 
@@ -206,7 +206,7 @@ public class PortalModule implements MapModule<PortalMatchModule> {
      *
      * <p>The region is extended up by 2m to allow for the height of the player.
      */
-    private static void protectRegion(RFAContext rfaContext, Region region) {
+    private static void protectRegion(RFAContext.Builder rfaContext, Region region) {
       region =
           Union.of(
               region,

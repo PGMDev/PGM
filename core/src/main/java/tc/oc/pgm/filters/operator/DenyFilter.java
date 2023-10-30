@@ -11,6 +11,12 @@ public class DenyFilter extends SingleFilterFunction {
   }
 
   @Override
+  public boolean respondsTo(Class<? extends Query> queryType) {
+    // We can't ever guarantee a response
+    return false;
+  }
+
+  @Override
   public QueryResponse query(Query query) {
     switch (filter.query(query)) {
       case ALLOW:
