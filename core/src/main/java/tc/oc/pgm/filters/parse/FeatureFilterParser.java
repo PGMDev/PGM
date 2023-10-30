@@ -52,6 +52,9 @@ public class FeatureFilterParser extends FilterParser {
 
   @Override
   public Filter parseReference(Node node, String id) throws InvalidXMLException {
+    Filter resolved = features.get(id, Filter.class);
+    if (resolved != null) return resolved;
+
     Filter inline = parseInlineFilter(node, id);
     if (inline != null) return inline;
 
