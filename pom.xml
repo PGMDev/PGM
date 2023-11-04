@@ -214,9 +214,9 @@
 
         <!-- Simple mathematical expression evaluator library -->
         <dependency>
-            <groupId>net.objecthunter</groupId>
+            <groupId>com.github.Pablete1234</groupId>
             <artifactId>exp4j</artifactId>
-            <version>0.4.8</version>
+            <version>b561006eb0</version>
             <scope>compile</scope>
         </dependency>
 

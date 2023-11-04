@@ -30,18 +30,32 @@ public interface Formula<T> extends ToDoubleFunction<T> {
       };
 
   Function MAX =
-      new Function("max", 2) {
+      new Function("max") {
         @Override
         public double apply(double... doubles) {
-          return Math.max(doubles[0], doubles[1]);
+          double max = doubles[0];
+          for (int i = 1; i < doubles.length; i++) max = Math.max(max, doubles[i]);
+          return max;
+        }
+
+        @Override
+        public boolean isValidArgCount(int count) {
+          return count >= 1;
         }
       };
 
   Function MIN =
-      new Function("min", 2) {
+      new Function("min") {
         @Override
         public double apply(double... doubles) {
-          return Math.min(doubles[0], doubles[1]);
+          double min = doubles[0];
+          for (int i = 1; i < doubles.length; i++) min = Math.min(min, doubles[i]);
+          return min;
+        }
+
+        @Override
+        public boolean isValidArgCount(int count) {
+          return count >= 1;
         }
       };
 
