@@ -399,7 +399,7 @@ public class DeathMessageBuilder {
         player();
       }
     } else if (cause instanceof DamageInfo) {
-      damage((DamageInfo) cause);
+      damage((DamageInfo) cause, fall.getOrigin());
     } else if (fall.getTo() == FallInfo.To.GROUND) {
       setDistance(Trackers.distanceFromRanged(fall, victim.getBukkit().getLocation()));
 
@@ -421,13 +421,13 @@ public class DeathMessageBuilder {
     }
   }
 
-  void damage(DamageInfo info) throws NoMessage {
+  void damage(DamageInfo info, Location location) throws NoMessage {
     if (info instanceof MeleeInfo) {
       melee((MeleeInfo) info);
     } else if (info instanceof ProjectileInfo) {
-      projectile((ProjectileInfo) info, victim.getBukkit().getLocation());
+      projectile((ProjectileInfo) info, location);
     } else if (info instanceof ExplosionInfo) {
-      explosion((ExplosionInfo) info, victim.getBukkit().getLocation());
+      explosion((ExplosionInfo) info, location);
     } else if (info instanceof FireInfo) {
       fire((FireInfo) info);
     } else if (info instanceof PotionInfo) {
@@ -457,7 +457,7 @@ public class DeathMessageBuilder {
 
     try {
       key = "death";
-      damage(damageInfo);
+      damage(damageInfo, victim.getBukkit().getLocation());
       variant();
       finish();
     } catch (NoMessage ex) {
