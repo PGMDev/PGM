@@ -80,7 +80,9 @@ public class VotingPool extends MapPool {
   private void updateScores(Map<MapInfo, Set<UUID>> votes) {
     double voters = votes.values().stream().flatMap(Collection::stream).distinct().count();
     if (voters == 0) return; // Literally no one voted
-    votes.forEach((m, v) -> mapScores.put(m, Math.max(v.size() / voters, Double.MIN_VALUE)));
+    votes.forEach(
+        (m, v) ->
+            mapScores.computeIfPresent(m, (a, b) -> Math.max(v.size() / voters, Double.MIN_VALUE)));
   }
 
   @Override
