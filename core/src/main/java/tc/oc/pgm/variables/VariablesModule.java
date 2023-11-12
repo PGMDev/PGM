@@ -3,12 +3,15 @@ package tc.oc.pgm.variables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import net.objecthunter.exp4j.ExpressionContext;
+import net.objecthunter.exp4j.function.Function;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
@@ -23,21 +26,23 @@ import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.types.IndexedVariable;
 
 public class VariablesModule implements MapModule<VariablesMatchModule> {
 
   private final ImmutableList<VariableDefinition<?>> variables;
-  private final ImmutableMap<Class<? extends Filterable<?>>, VariableCache<?>> variablesByScope;
+  private final ImmutableMap<Class<? extends Filterable<?>>, Context<?>> variablesByScope;
 
   public VariablesModule(ImmutableList<VariableDefinition<?>> variables) {
     this.variables = variables;
 
-    ImmutableMap.Builder<Class<? extends Filterable<?>>, VariableCache<?>> varsBuilder =
+    ImmutableMap.Builder<Class<? extends Filterable<?>>, Context<?>> varsBuilder =
         ImmutableMap.builder();
     for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
-      varsBuilder.put(scope, VariableCache.of(scope, variables));
+      varsBuilder.put(scope, Context.of(scope, variables));
     }
 
     this.variablesByScope = varsBuilder.build();
@@ -48,34 +53,91 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     return ImmutableList.of(TeamMatchModule.class, BlitzMatchModule.class, ScoreMatchModule.class);
   }
 
-  public ImmutableSet<String> getVariableNames(Class<? extends Filterable<?>> scope) {
-    return variablesByScope.get(scope).names;
-  }
-
   @SuppressWarnings("unchecked")
-  public <T extends Filterable<?>> VariableContextBuilder<T> getContextBuilder(Class<T> scope) {
-    return (VariableContextBuilder<T>) variablesByScope.get(scope).context;
+  public <T extends Filterable<?>> Formula.ContextFactory<T> getContext(Class<T> scope) {
+    return (Formula.ContextFactory<T>) variablesByScope.get(scope);
   }
 
-  private static class VariableCache<T extends Filterable<?>> {
-    private final ImmutableSet<String> names;
-    private final VariableContextBuilder<T> context;
+  private static class Context<T extends Filterable<?>> implements Formula.ContextFactory<T> {
+    private final ImmutableSet<String> variables;
+    private final ImmutableSet<String> arrays;
+    private final Map<String, VariableDefinition<?>> vars;
 
-    public VariableCache(ImmutableSet<String> names, VariableContextBuilder<T> context) {
-      this.names = names;
-      this.context = context;
+    public Context(
+        ImmutableSet<String> variables,
+        ImmutableSet<String> arrays,
+        Map<String, VariableDefinition<?>> vars) {
+      this.variables = variables;
+      this.arrays = arrays;
+      this.vars = vars;
     }
 
-    public static <T extends Filterable<?>> VariableCache<T> of(
-        Class<T> scope, ImmutableList<VariableDefinition<?>> variables) {
-      List<VariableDefinition<?>> vars =
-          variables.stream()
-              .filter(v -> Filterables.isAssignable(scope, v.getScope()))
-              .collect(Collectors.toList());
+    public static <T extends Filterable<?>> Context<T> of(
+        Class<T> scope, List<VariableDefinition<?>> variables) {
+      ImmutableSet.Builder<String> variableNames = ImmutableSet.builder();
+      ImmutableSet.Builder<String> arrayNames = ImmutableSet.builder();
+      ImmutableMap.Builder<String, VariableDefinition<?>> variableMap = ImmutableMap.builder();
 
-      return new VariableCache<T>(
-          ImmutableSet.copyOf(Iterators.transform(vars.iterator(), VariableDefinition::getId)),
-          new VariableContextBuilder<>(ImmutableList.copyOf(vars)));
+      for (VariableDefinition<?> variable : variables) {
+        if (!Filterables.isAssignable(scope, variable.getScope())) continue;
+
+        (variable.isIndexed() ? arrayNames : variableNames).add(variable.getId());
+        variableMap.put(variable.getId(), variable);
+      }
+      return new Context<>(variableNames.build(), arrayNames.build(), variableMap.build());
+    }
+
+    @Override
+    public Set<String> getVariables() {
+      return variables;
+    }
+
+    @Override
+    public Set<String> getArrays() {
+      return arrays;
+    }
+
+    @Override
+    public ExpressionContext withContext(T scope) {
+      Match match = scope.getMatch();
+      Map<String, Double> variableCache = new HashMap<>();
+      Map<String, Function> arrayCache = new HashMap<>();
+
+      return new ExpressionContext() {
+        @Override
+        public Set<String> getVariables() {
+          return variables;
+        }
+
+        @Override
+        public Double getVariable(String id) {
+          return variableCache.computeIfAbsent(
+              id, key -> vars.get(key).getVariable(match).getValue(scope));
+        }
+
+        @Override
+        public Set<String> getFunctions() {
+          return arrays;
+        }
+
+        @Override
+        public Function getFunction(String id) {
+          return arrayCache.computeIfAbsent(
+              id,
+              key -> {
+                VariableDefinition<?> def = vars.get(key);
+                if (def == null) return null;
+
+                IndexedVariable<?> variable = (IndexedVariable<?>) def.getVariable(match);
+                return new Function(id, 1) {
+                  @Override
+                  public double apply(double... doubles) {
+                    return variable.getValue(scope, (int) doubles[0]);
+                  }
+                };
+              });
+        }
+      };
     }
   }
 

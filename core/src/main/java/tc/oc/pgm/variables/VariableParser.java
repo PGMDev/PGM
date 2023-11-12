@@ -18,6 +18,7 @@ import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.types.ArrayVariable;
 import tc.oc.pgm.variables.types.BlitzVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
@@ -62,18 +63,28 @@ public class VariableParser {
     Integer excl =
         XMLUtils.parseNumberInRange(
             Node.fromAttr(el, "exclusive"), Integer.class, Range.closed(1, 50), null);
-    return new VariableDefinition<>(id, scope, true, vd -> new DummyVariable<>(vd, def, excl));
+    return new VariableDefinition<>(
+        id, scope, true, false, vd -> new DummyVariable<>(vd, def, excl));
+  }
+
+  @MethodParser("array")
+  public VariableDefinition<?> parseArray(Element el, String id) throws InvalidXMLException {
+    Class<? extends Filterable<?>> scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
+    int size = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "size"), Integer.class);
+    double def = XMLUtils.parseNumber(Node.fromAttr(el, "default"), Double.class, 0d);
+    return new VariableDefinition<>(
+        id, scope, true, true, vd -> new ArrayVariable<>(vd, size, def));
   }
 
   @MethodParser("lives")
   public VariableDefinition<MatchPlayer> parseBlitzLives(Element el, String id)
       throws InvalidXMLException {
-    return new VariableDefinition<>(id, MatchPlayer.class, false, BlitzVariable::new);
+    return VariableDefinition.ofStatic(id, MatchPlayer.class, BlitzVariable::new);
   }
 
   @MethodParser("score")
   public VariableDefinition<Party> parseScore(Element el, String id) throws InvalidXMLException {
-    return new VariableDefinition<>(id, Party.class, false, ScoreVariable::new);
+    return VariableDefinition.ofStatic(id, Party.class, ScoreVariable::new);
   }
 
   @MethodParser("with-team")
@@ -92,11 +103,15 @@ public class VariableParser {
         factory.getFeatures().createReference(Node.fromRequiredAttr(el, "team"), TeamFactory.class);
 
     return new VariableDefinition<>(
-        id, Match.class, var.isDynamic(), vd -> new TeamVariableAdapter(vd, var, team));
+        id,
+        Match.class,
+        var.isDynamic(),
+        var.isIndexed(),
+        vd -> new TeamVariableAdapter(vd, var, team));
   }
 
   @MethodParser("maxbuildheight")
   public VariableDefinition<Match> parseMaxBuild(Element el, String id) throws InvalidXMLException {
-    return new VariableDefinition<>(id, Match.class, false, MaxBuildVariable::new);
+    return VariableDefinition.ofStatic(id, Match.class, MaxBuildVariable::new);
   }
 }

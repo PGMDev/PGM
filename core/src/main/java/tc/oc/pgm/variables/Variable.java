@@ -15,5 +15,9 @@ public interface Variable<T extends Filterable<?>> extends Feature<VariableDefin
 
   void setValue(Filterable<?> context, double value);
 
+  default boolean isIndexed() {
+    return getDefinition().isIndexed();
+  }
+
   default void postLoad(Match match) {}
 }

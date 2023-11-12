@@ -1,5 +1,6 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 
@@ -11,7 +12,10 @@ import cloud.commandframework.annotations.Flag;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
@@ -22,6 +26,7 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.variables.Variable;
+import tc.oc.pgm.variables.types.IndexedVariable;
 
 public class MapDevCommand {
 
@@ -64,8 +69,21 @@ public class MapDevCommand {
         page,
         resultsPerPage,
         header,
-        (v, i) ->
-            text().append(text(v.getId() + ": ", NamedTextColor.AQUA), text(v.getValue(target))));
+        (v, pageIndex) -> {
+          ComponentLike value;
+          if (v.isIndexed()) {
+            IndexedVariable<?> idx = (IndexedVariable<?>) v;
+            List<Component> values =
+                IntStream.range(0, idx.size())
+                    .mapToObj(i -> text(idx.getValue(target, i)))
+                    .collect(Collectors.toList());
+            value = join(JoinConfiguration.commas(true), values);
+          } else {
+            value = text(v.getValue(target));
+          }
+
+          return text().append(text(v.getId() + ": ", NamedTextColor.AQUA), value);
+        });
   }
 
   @CommandMethod("variable set <variable> <value> [target]")
