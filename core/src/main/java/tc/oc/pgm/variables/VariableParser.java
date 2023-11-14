@@ -70,7 +70,9 @@ public class VariableParser {
   @MethodParser("array")
   public VariableDefinition<?> parseArray(Element el, String id) throws InvalidXMLException {
     Class<? extends Filterable<?>> scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
-    int size = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "size"), Integer.class);
+    int size =
+        XMLUtils.parseNumberInRange(
+            Node.fromRequiredAttr(el, "size"), Integer.class, Range.atLeast(1));
     double def = XMLUtils.parseNumber(Node.fromAttr(el, "default"), Double.class, 0d);
     return new VariableDefinition<>(
         id, scope, true, true, vd -> new ArrayVariable<>(vd, size, def));

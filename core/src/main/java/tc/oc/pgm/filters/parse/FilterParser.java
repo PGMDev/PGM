@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.classes.ClassModule;
@@ -48,7 +47,6 @@ import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
 import tc.oc.pgm.filters.matcher.party.ScoreFilter;
 import tc.oc.pgm.filters.matcher.party.TeamFilter;
-import tc.oc.pgm.filters.matcher.party.TeamVariableFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingItemFilter;
@@ -633,11 +631,15 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   public Filter parseVariableFilter(Element el) throws InvalidXMLException {
     VariableDefinition<?> varDef =
         features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
+    Integer index = null;
+    if (varDef.isIndexed())
+      index = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "index"), Integer.class);
     Range<Double> range = XMLUtils.parseNumericRange(new Node(el), Double.class);
 
-    if (varDef.getScope() == Party.class)
-      return parseExplicitTeam(el, new TeamVariableFilter(varDef, range));
-    else return new VariableFilter(varDef, range);
+    VariableFilter<?> filter = VariableFilter.of(varDef, index, range, new Node(el));
+    return filter instanceof CompetitorFilter
+        ? parseExplicitTeam(el, (CompetitorFilter) filter)
+        : filter;
   }
 
   @MethodParser("blocks")
