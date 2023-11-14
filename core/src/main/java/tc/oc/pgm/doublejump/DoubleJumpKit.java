@@ -24,8 +24,7 @@ public class DoubleJumpKit extends AbstractKit {
 
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    DoubleJumpMatchModule djmm = player.getMatch().getModule(DoubleJumpMatchModule.class);
-    if (djmm != null) djmm.setKit(player.getBukkit(), this);
+    applyKit(player, this);
   }
 
   public float chargePerTick() {
@@ -34,5 +33,20 @@ public class DoubleJumpKit extends AbstractKit {
 
   public boolean needsRecharge() {
     return !Duration.ZERO.equals(this.rechargeTime);
+  }
+
+  @Override
+  public boolean isRemovable() {
+    return true;
+  }
+
+  @Override
+  public void remove(MatchPlayer player) {
+    applyKit(player, null);
+  }
+
+  private void applyKit(MatchPlayer player, DoubleJumpKit kit) {
+    DoubleJumpMatchModule djmm = player.getMatch().getModule(DoubleJumpMatchModule.class);
+    if (djmm != null) djmm.setKit(player.getBukkit(), kit);
   }
 }
