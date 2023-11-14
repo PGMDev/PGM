@@ -85,6 +85,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
       this.setCharge(jumper, 1f);
     } else {
       this.jumpers.remove(player);
+      this.removeCharge(player);
       this.refreshJump(player);
     }
   }
@@ -120,6 +121,10 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
         jumper.player.setExp(jumper.charge);
       }
     }
+  }
+
+  private void removeCharge(Player player) {
+    player.setExp(0f);
   }
 
   private void refreshJump(Player player) {
