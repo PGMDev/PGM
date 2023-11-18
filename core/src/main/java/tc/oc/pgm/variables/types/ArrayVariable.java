@@ -14,18 +14,20 @@ public class ArrayVariable<T extends Filterable<?>> extends AbstractVariable<T>
 
   private static final String OOB_ERR = "Index %d out of bounds for array '%s' (length %d)";
 
-  private final double[] def;
+  private final int size;
+  private final double def;
   private final Map<T, double[]> values;
 
   public ArrayVariable(VariableDefinition<T> definition, int size, double def) {
     super(definition);
-    Arrays.fill(this.def = new double[size], def);
+    this.size = size;
+    this.def = def;
     this.values = new HashMap<>();
   }
 
   public int checkBounds(int idx) {
-    if (idx < 0 || idx >= def.length) {
-      PGM.get().getGameLogger().log(Level.SEVERE, String.format(OOB_ERR, idx, getId(), def.length));
+    if (idx < 0 || idx >= size) {
+      PGM.get().getGameLogger().log(Level.SEVERE, String.format(OOB_ERR, idx, getId(), size));
       return 0;
     }
     return idx;
@@ -33,26 +35,36 @@ public class ArrayVariable<T extends Filterable<?>> extends AbstractVariable<T>
 
   @Override
   public int size() {
-    return def.length;
+    return size;
   }
 
   @Override
   public double getValue(Filterable<?> obj, int idx) {
-    return values.getOrDefault(getAncestor(obj), def)[checkBounds(idx)];
+    double[] val = values.get(getAncestor(obj));
+    return val == null ? def : val[checkBounds(idx)];
   }
 
   @Override
   public void setValue(Filterable<?> obj, int idx, double value) {
     values.compute(
         getAncestor(obj),
-        (k, v) -> {
-          if (v == null) v = Arrays.copyOf(def, def.length);
-          v[checkBounds(idx)] = value;
-          return v;
+        (k, arr) -> {
+          if (arr == null) {
+            if (value == def) return null;
+            arr = buildArray();
+          }
+          arr[checkBounds(idx)] = value;
+          return arr;
         });
 
     // For performance reasons, let's avoid launching an event for every variable change
     obj.moduleRequire(FilterMatchModule.class).invalidate(obj);
+  }
+
+  private double[] buildArray() {
+    double[] result = new double[size];
+    if (def != 0) Arrays.fill(result, def);
+    return result;
   }
 
   @Override

@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
@@ -29,6 +28,9 @@ import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.types.IndexedVariable;
 
 public class MapDevCommand {
+
+  // Avoid showing too many values. Messages that are too long kick the client.
+  private static final int ARRAY_CAP = 16;
 
   @CommandMethod("variables [target] [page]")
   @CommandDescription("Inspect variables for a player")
@@ -70,14 +72,16 @@ public class MapDevCommand {
         resultsPerPage,
         header,
         (v, pageIndex) -> {
-          ComponentLike value;
+          Component value;
           if (v.isIndexed()) {
             IndexedVariable<?> idx = (IndexedVariable<?>) v;
-            List<Component> values =
-                IntStream.range(0, idx.size())
-                    .mapToObj(i -> text(idx.getValue(target, i)))
-                    .collect(Collectors.toList());
-            value = join(JoinConfiguration.commas(true), values);
+            value =
+                join(
+                    JoinConfiguration.commas(true),
+                    IntStream.range(0, Math.min(ARRAY_CAP, idx.size()))
+                        .mapToObj(i -> text(idx.getValue(target, i)))
+                        .collect(Collectors.toList()));
+            if (idx.size() > ARRAY_CAP) value = value.append(text(" ..."));
           } else {
             value = text(v.getValue(target));
           }

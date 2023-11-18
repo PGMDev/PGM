@@ -72,7 +72,7 @@ public class VariableParser {
     Class<? extends Filterable<?>> scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     int size =
         XMLUtils.parseNumberInRange(
-            Node.fromRequiredAttr(el, "size"), Integer.class, Range.atLeast(1));
+            Node.fromRequiredAttr(el, "size"), Integer.class, Range.closed(1, 1024));
     double def = XMLUtils.parseNumber(Node.fromAttr(el, "default"), Double.class, 0d);
     return new VariableDefinition<>(
         id, scope, true, true, vd -> new ArrayVariable<>(vd, size, def));
