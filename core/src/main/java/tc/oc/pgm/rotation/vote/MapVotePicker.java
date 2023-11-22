@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 import org.bukkit.configuration.ConfigurationSection;
@@ -20,6 +19,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.math.VariableExpressionContext;
 
 /**
  * Responsible for picking the set of maps that will be on the vote. It's able to apply any
@@ -35,7 +35,7 @@ public class MapVotePicker {
   // with larger numbers.
   private static final double MINIMUM_WEIGHT = 0.00000001;
 
-  private static final Formula<Context> DEFAULT_MODIFIER = c -> Math.pow(c.score, 2);
+  private static final Formula<Context> DEFAULT_MODIFIER = c -> Math.pow(c.getVariable("score"), 2);
 
   private final MapPoolManager manager;
   private final Formula<Context> modifier;
@@ -46,7 +46,11 @@ public class MapVotePicker {
 
     Formula<Context> formula = DEFAULT_MODIFIER;
     try {
-      formula = Formula.of(config.getString("modifier"), Context.getKeys(), DEFAULT_MODIFIER);
+      formula =
+          Formula.of(
+              config.getString("modifier"),
+              Formula.ContextFactory.ofStatic(new Context().getVariables()),
+              DEFAULT_MODIFIER);
     } catch (IllegalArgumentException e) {
       PGM.get()
           .getLogger()
@@ -131,32 +135,30 @@ public class MapVotePicker {
     return selected.stream().filter(s -> !Collections.disjoint(gamemodes, s.getTags())).count();
   }
 
-  private static final class Context implements Supplier<Map<String, Double>> {
-    private double score;
-    private double sameGamemode;
-    private double mapsize;
-    private double players;
+  private static final class Context implements VariableExpressionContext {
+    private final ImmutableMap<String, Double> values;
 
     public Context(double score, double sameGamemode, double mapsize, double players) {
-      this.score = score;
-      this.sameGamemode = sameGamemode;
-      this.mapsize = mapsize;
-      this.players = players;
+      this.values =
+          ImmutableMap.of(
+              "score", score,
+              "same_gamemode", sameGamemode,
+              "mapsize", mapsize,
+              "players", players);
     }
 
-    private Context() {}
-
-    public static Set<String> getKeys() {
-      return new Context().get().keySet();
+    private Context() {
+      this(0, 0, 0, 0);
     }
 
     @Override
-    public Map<String, Double> get() {
-      return ImmutableMap.of(
-          "score", score,
-          "same_gamemode", sameGamemode,
-          "mapsize", mapsize,
-          "players", players);
+    public Set<String> getVariables() {
+      return values.keySet();
+    }
+
+    @Override
+    public Double getVariable(String s) {
+      return values.get(s);
     }
   }
 }

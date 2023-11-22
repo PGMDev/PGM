@@ -284,10 +284,14 @@ public class ActionParser {
               + scope.getSimpleName(),
           el);
 
-    String expression = Node.fromRequiredAttr(el, "value").getValue();
     Formula<T> formula =
-        Formula.of(
-            expression, variables.getVariableNames(scope), variables.getContextBuilder(scope));
+        Formula.of(Node.fromRequiredAttr(el, "value").getValue(), variables.getContext(scope));
+
+    if (var.isIndexed()) {
+      Formula<T> idx =
+          Formula.of(Node.fromRequiredAttr(el, "index").getValue(), variables.getContext(scope));
+      return new SetVariableAction.Indexed<>(scope, var, idx, formula);
+    }
 
     return new SetVariableAction<>(scope, var, formula);
   }

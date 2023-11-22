@@ -97,11 +97,10 @@ public class FeatureFilterParser extends FilterParser {
 
   private static final Pattern INLINE_VARIABLE =
       Pattern.compile(
-          "("
-              + VariablesModule.Factory.VARIABLE_ID.pattern()
-              + ")\\s*=\\s*("
-              + XMLUtils.RANGE_DOTTED.pattern()
-              + "|-?\\d*\\.?\\d+)");
+          "(%VAR%)(?:\\[(\\d+)])?\\s*=\\s*(%RANGE%|%NUM%)"
+              .replace("%VAR%", VariablesModule.Factory.VARIABLE_ID.pattern())
+              .replace("%RANGE%", XMLUtils.RANGE_DOTTED.pattern())
+              .replace("%NUM%", "-?\\d*\\.?\\d+"));
 
   private @Nullable Filter parseInlineFilter(Node node, String text) throws InvalidXMLException {
     // Formula-style inline filter
@@ -114,12 +113,14 @@ public class FeatureFilterParser extends FilterParser {
     }
 
     // Parse variable filter
-    Matcher varMatch = INLINE_VARIABLE.matcher(text);
-    if (varMatch.matches()) {
+    Matcher match = INLINE_VARIABLE.matcher(text);
+    if (match.matches()) {
       VariableDefinition<?> variable =
-          features.resolve(node, varMatch.group(1), VariableDefinition.class);
-      Range<Double> range = XMLUtils.parseNumericRange(node, varMatch.group(2), Double.class);
-      return new VariableFilter(variable, range);
+          features.resolve(node, match.group(1), VariableDefinition.class);
+      Integer index =
+          match.group(2) == null ? null : XMLUtils.parseNumber(node, match.group(2), Integer.class);
+      Range<Double> range = XMLUtils.parseNumericRange(node, match.group(3), Double.class);
+      return VariableFilter.of(variable, index, range, node);
     }
 
     return null;

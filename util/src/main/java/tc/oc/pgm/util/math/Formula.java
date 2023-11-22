@@ -1,11 +1,12 @@
 package tc.oc.pgm.util.math;
 
-import java.util.Map;
+import java.util.Collections;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
+import java.util.stream.Collectors;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
 
 public interface Formula<T> extends ToDoubleFunction<T> {
@@ -59,21 +60,31 @@ public interface Formula<T> extends ToDoubleFunction<T> {
         }
       };
 
-  static <T extends Supplier<Map<String, Double>>> Formula<T> of(
-      String expression, Set<String> variables, Formula<T> fallback)
+  static <T> Formula<T> of(String expression, ContextFactory<T> context, Formula<T> fallback)
       throws IllegalArgumentException {
     if (expression == null) return fallback;
 
-    return Formula.of(expression, variables, T::get);
+    return Formula.of(expression, context);
   }
 
-  static <T> Formula<T> of(String expression, Set<String> variables, ContextBuilder<T> context)
+  static <T> Formula<T> of(String expression, ContextFactory<T> context)
       throws IllegalArgumentException {
-
     Expression exp =
         new ExpressionBuilder(expression)
-            .variables(variables)
+            .variables(context.getVariables())
             .functions(BOUND, RANDOM, MAX, MIN)
+            .functions(
+                context.getArrays().stream()
+                    .map(
+                        str ->
+                            new Function(str, 1) {
+                              @Override
+                              public double apply(double... doubles) {
+                                throw new UnsupportedOperationException(
+                                    "Cannot get array value without replacement!");
+                              }
+                            })
+                    .collect(Collectors.toList()))
             .build();
 
     return new ExpFormula<>(exp, context);
@@ -81,21 +92,50 @@ public interface Formula<T> extends ToDoubleFunction<T> {
 
   class ExpFormula<T> implements Formula<T> {
     private final Expression expression;
-    private final ContextBuilder<T> context;
+    private final ContextFactory<T> context;
 
-    private ExpFormula(Expression expression, ContextBuilder<T> context) {
+    private ExpFormula(Expression expression, ContextFactory<T> context) {
       this.expression = expression;
       this.context = context;
     }
 
     @Override
     public double applyAsDouble(T value) {
-      return expression.setVariables(context.getVariables(value)).evaluate();
+      return expression.setExpressionContext(context.withContext(value)).evaluate();
     }
   }
 
-  @FunctionalInterface
-  interface ContextBuilder<T> {
-    Map<String, Double> getVariables(T t);
+  interface ContextFactory<T> {
+    Set<String> getVariables();
+
+    Set<String> getArrays();
+
+    ExpressionContext withContext(T t);
+
+    static <T extends ExpressionContext> ContextFactory<T> ofStatic(Set<String> variables) {
+      return of(variables, Collections.emptySet(), t -> t);
+    }
+
+    static <T> ContextFactory<T> of(
+        Set<String> variables,
+        Set<String> arrays,
+        java.util.function.Function<T, ExpressionContext> builder) {
+      return new ContextFactory<T>() {
+        @Override
+        public ExpressionContext withContext(T t) {
+          return builder.apply(t);
+        }
+
+        @Override
+        public Set<String> getVariables() {
+          return variables;
+        }
+
+        @Override
+        public Set<String> getArrays() {
+          return arrays;
+        }
+      };
+    }
   }
 }

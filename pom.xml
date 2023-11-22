@@ -216,7 +216,7 @@
         <dependency>
             <groupId>com.github.Pablete1234</groupId>
             <artifactId>exp4j</artifactId>
-            <version>b561006eb0</version>
+            <version>0431d412ec</version>
             <scope>compile</scope>
         </dependency>
 

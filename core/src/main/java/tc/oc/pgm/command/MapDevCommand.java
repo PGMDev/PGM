@@ -1,5 +1,6 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 
@@ -11,7 +12,9 @@ import cloud.commandframework.annotations.Flag;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
@@ -22,8 +25,12 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.variables.Variable;
+import tc.oc.pgm.variables.types.IndexedVariable;
 
 public class MapDevCommand {
+
+  // Avoid showing too many values. Messages that are too long kick the client.
+  private static final int ARRAY_CAP = 16;
 
   @CommandMethod("variables [target] [page]")
   @CommandDescription("Inspect variables for a player")
@@ -64,8 +71,23 @@ public class MapDevCommand {
         page,
         resultsPerPage,
         header,
-        (v, i) ->
-            text().append(text(v.getId() + ": ", NamedTextColor.AQUA), text(v.getValue(target))));
+        (v, pageIndex) -> {
+          Component value;
+          if (v.isIndexed()) {
+            IndexedVariable<?> idx = (IndexedVariable<?>) v;
+            value =
+                join(
+                    JoinConfiguration.commas(true),
+                    IntStream.range(0, Math.min(ARRAY_CAP, idx.size()))
+                        .mapToObj(i -> text(idx.getValue(target, i)))
+                        .collect(Collectors.toList()));
+            if (idx.size() > ARRAY_CAP) value = value.append(text(" ..."));
+          } else {
+            value = text(v.getValue(target));
+          }
+
+          return text().append(text(v.getId() + ": ", NamedTextColor.AQUA), value);
+        });
   }
 
   @CommandMethod("variable set <variable> <value> [target]")

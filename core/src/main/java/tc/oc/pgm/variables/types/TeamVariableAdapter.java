@@ -3,13 +3,14 @@ package tc.oc.pgm.variables.types;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariableDefinition;
 
-public class TeamVariableAdapter extends AbstractVariable<Match> {
+public class TeamVariableAdapter extends AbstractVariable<Match> implements IndexedVariable<Match> {
 
   private final VariableDefinition<Party> childRef;
   private final FeatureReference<TeamFactory> teamRef;
@@ -39,5 +40,20 @@ public class TeamVariableAdapter extends AbstractVariable<Match> {
   @Override
   protected void setValueImpl(Match match, double value) {
     child.setValue(team, value);
+  }
+
+  @Override
+  public double getValue(Filterable<?> context, int idx) {
+    return ((IndexedVariable<Party>) child).getValue(team, idx);
+  }
+
+  @Override
+  public void setValue(Filterable<?> context, int idx, double value) {
+    ((IndexedVariable<Party>) child).setValue(team, idx, value);
+  }
+
+  @Override
+  public int size() {
+    return ((IndexedVariable<Party>) child).size();
   }
 }
