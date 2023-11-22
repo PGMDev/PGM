@@ -14,18 +14,20 @@ public class MaxBuildVariable extends AbstractVariable<Match> {
 
   @Override
   public void postLoad(Match match) {
-    rmm = match.moduleRequire(RegionMatchModule.class);
+    rmm = match.getModule(RegionMatchModule.class);
   }
 
   @Override
   protected double getValueImpl(Match player) {
-    Integer val = rmm.getMaxBuildHeight();
+    Integer val = rmm != null ? rmm.getMaxBuildHeight() : null;
     return val == null ? -1 : val;
   }
 
   @Override
   protected void setValueImpl(Match player, double value) {
     int val = (int) value;
-    rmm.setMaxBuildHeight(val <= -1 ? null : val);
+    if (rmm != null) {
+      rmm.setMaxBuildHeight(val <= -1 ? null : val);
+    }
   }
 }
