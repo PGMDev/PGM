@@ -4,7 +4,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,7 +60,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
 
   protected void unloadAll() {
     if (loaded.compareAndSet(true, false)) {
-      modules = new HashMap<>(factories.size());
+      modules = new LinkedHashMap<>(factories.size());
     }
   }
 
