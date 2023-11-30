@@ -3,9 +3,14 @@ package tc.oc.pgm.action;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.List;
 import java.util.Map;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -37,6 +42,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -48,6 +54,8 @@ import tc.oc.pgm.variables.VariableDefinition;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class ActionParser {
+
+  private static final NumberFormat DEFAULT_FORMAT = NumberFormat.getIntegerInstance();
 
   private final MapFactory factory;
   private final FeatureDefinitionContext features;
@@ -227,7 +235,8 @@ public class ActionParser {
   }
 
   @MethodParser("message")
-  public MessageAction parseChatMessage(Element el, Class<?> scope) throws InvalidXMLException {
+  public <T extends Filterable<?>> MessageAction<?> parseChatMessage(Element el, Class<T> scope)
+      throws InvalidXMLException {
     Component text = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "text"));
     Component actionbar = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "actionbar"));
 
@@ -245,7 +254,36 @@ public class ActionParser {
       throw new InvalidXMLException(
           "Expected at least one of text, title, subtitle or actionbar", el);
 
-    return new MessageAction(text, actionbar, title);
+    List<Element> replacements = XMLUtils.flattenElements(el, "replacements");
+    if (replacements.isEmpty()) {
+      return new MessageAction<>(Audience.class, text, actionbar, title, null);
+    }
+
+    scope = parseScope(el, scope);
+
+    ImmutableMap.Builder<String, MessageAction.Replacement<T>> replacementMap =
+        ImmutableMap.builder();
+    for (Element replacement : XMLUtils.flattenElements(el, "replacements")) {
+      replacementMap.put(
+          XMLUtils.parseRequiredId(replacement), parseReplacement(replacement, scope));
+    }
+    return new MessageAction<>(scope, text, actionbar, title, replacementMap.build());
+  }
+
+  private <T extends Filterable<?>> MessageAction.Replacement<T> parseReplacement(
+      Element el, Class<T> scope) throws InvalidXMLException {
+    // TODO: Support alternative replacement types (eg: player(s), team(s), or durations)
+    switch (el.getName()) {
+      case "decimal":
+        Formula<T> formula =
+            Formula.of(Node.fromRequiredAttr(el, "value").getValue(), variables.getContext(scope));
+        Node formatNode = Node.fromAttr(el, "format");
+        NumberFormat format =
+            formatNode != null ? new DecimalFormat(formatNode.getValue()) : DEFAULT_FORMAT;
+        return (T filterable) -> text(format.format(formula.applyAsDouble(filterable)));
+      default:
+        throw new InvalidXMLException("Unknown replacement type", el);
+    }
   }
 
   @MethodParser("sound")
