@@ -8,6 +8,7 @@ import static tc.oc.pgm.util.text.TextTranslations.translate;
 
 import com.google.common.collect.Range;
 import java.util.Locale;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -48,7 +49,7 @@ public class TextException extends RuntimeException
 
   @Override
   public String getLocalizedMessage() {
-    final Component localized = translate(message);
+    final Component localized = translate(message, Audience.empty());
     return PlainTextComponentSerializer.plainText().serialize(localized);
   }
 

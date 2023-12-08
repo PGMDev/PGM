@@ -24,6 +24,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.regions.RegionMatchModule;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.math.Formula;
@@ -50,7 +51,11 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
   @Override
   public @Nullable Collection<Class<? extends MatchModule>> getWeakDependencies() {
-    return ImmutableList.of(TeamMatchModule.class, BlitzMatchModule.class, ScoreMatchModule.class);
+    return ImmutableList.of(
+        TeamMatchModule.class,
+        BlitzMatchModule.class,
+        ScoreMatchModule.class,
+        RegionMatchModule.class);
   }
 
   @SuppressWarnings("unchecked")
