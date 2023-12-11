@@ -163,10 +163,16 @@ public class MapFilePreprocessor {
   }
 
   private void postprocessChildren(Element parent) throws InvalidXMLException {
-    for (Attribute attribute : parent.getAttributes()) {
+    List<Attribute> attributes = parent.getAttributes();
+    for (int i = 0; i < attributes.size(); i++) {
+      Attribute attribute = attributes.get(i);
       String result = postprocessString(parent, attribute.getValue());
-      if (result == null) parent.removeAttribute(attribute);
-      else attribute.setValue(result);
+      if (result == null) {
+        parent.removeAttribute(attribute);
+        i--;
+      } else {
+        attribute.setValue(result);
+      }
     }
 
     for (int i = 0; i < parent.getContentSize(); i++) {
@@ -177,8 +183,12 @@ public class MapFilePreprocessor {
         Text text = (Text) content;
 
         String result = postprocessString(parent, text.getText());
-        if (result == null) parent.removeContent(text);
-        else text.setText(result);
+        if (result == null) {
+          parent.removeContent(text);
+          i--;
+        } else {
+          text.setText(result);
+        }
       }
     }
   }
