@@ -457,24 +457,25 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         } catch (Exception e) {
           match
               .getLogger()
-              .severe("Unable to get MethodHandle extracting Filterable or Player for " + event);
-          e.printStackTrace();
+              .log(Level.SEVERE, "No getter for Filterable or Player found in " + event, e);
           continue;
         }
         result =
             (l, e) -> {
               try {
                 final Object o = handle.invoke(e);
-                if (o instanceof Filterable) this.invalidate((Filterable<?>) o);
-                else if (o instanceof Player) this.invalidate(this.match.getPlayer((Player) o));
-                else
+                if (o instanceof Player) {
+                  MatchPlayer mp = this.match.getPlayer((Player) o);
+                  if (mp != null) invalidate(mp);
+                  else match.getLogger().warning("MatchPlayer not found for player " + o);
+                } else if (o instanceof Filterable) {
+                  this.invalidate((Filterable<?>) o);
+                } else {
                   throw new IllegalStateException(
                       "A cached MethodHandle returned a non-expected type. Was: " + o.getClass());
+                }
               } catch (Throwable t) {
-                match
-                    .getLogger()
-                    .severe("Unable to invoke cached MethodHandle extracting Filterable for " + e);
-                t.printStackTrace();
+                match.getLogger().log(Level.SEVERE, "Error extracting Filterable for " + e, t);
               }
             };
       }
