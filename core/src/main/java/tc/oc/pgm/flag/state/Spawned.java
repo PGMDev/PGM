@@ -73,5 +73,17 @@ public abstract class Spawned extends BaseState {
         }
       }
     }
+
+    if (this.flag.getDefinition().getCompassFilter() != null) {
+      this.flag
+          .getMatch()
+          .getParticipants()
+          .forEach(
+              p -> {
+                if (this.flag.getDefinition().getCompassFilter().query(p).isAllowed()) {
+                  p.getBukkit().setCompassTarget(this.getLocation());
+                }
+              });
+    }
   }
 }
