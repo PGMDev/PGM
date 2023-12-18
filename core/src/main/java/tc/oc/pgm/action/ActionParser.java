@@ -32,7 +32,6 @@ import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
@@ -87,16 +86,10 @@ public class ActionParser {
     if (bound != null) validate(result, ActionScopeValidation.of(bound), node);
     if (result instanceof ActionDefinition) {
       if (XMLUtils.parseBoolean(Node.fromAttr(el, "expose"), false)) {
-
         if (id == null)
           throw new InvalidXMLException("Attribute 'id' is required for exposed actions", el);
 
-        if (!result.getScope().isAssignableFrom(Match.class))
-          throw new InvalidXMLException("Match scope is required for exposed actions", el);
-
-        result =
-            (ActionDefinition<? super B>)
-                new ExposedAction(id, (ActionDefinition<? super Match>) result);
+        result = new ExposedAction(id, (ActionDefinition<Filterable<?>>) result);
       }
 
       features.addFeature(el, (ActionDefinition<? super B>) result);

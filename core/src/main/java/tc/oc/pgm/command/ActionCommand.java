@@ -1,6 +1,7 @@
 package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
@@ -17,7 +18,8 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -25,10 +27,23 @@ import tc.oc.pgm.util.text.TextFormatter;
 @CommandMethod("action|actions")
 public class ActionCommand {
 
-  @CommandMethod("list|page [page]")
-  @CommandDescription("Inspect variables for a player")
+  @CommandMethod("[page]")
+  @CommandDescription("List available exposed actions")
   @CommandPermission(Permissions.GAMEPLAY)
-  public void showActions(
+  public void fallback(
+      Audience audience,
+      CommandSender sender,
+      ActionMatchModule amm,
+      @Argument(value = "page", defaultValue = "1") int page,
+      @Flag(value = "query", aliases = "q") String query,
+      @Flag(value = "all", aliases = "a") boolean all) {
+    list(audience, sender, amm, page, query, all);
+  }
+
+  @CommandMethod("list|page [page]")
+  @CommandDescription("List available exposed actions")
+  @CommandPermission(Permissions.GAMEPLAY)
+  public void list(
       Audience audience,
       CommandSender sender,
       ActionMatchModule amm,
@@ -59,21 +74,25 @@ public class ActionCommand {
         (v, i) -> text((i + 1) + ". ").append(text(v.getId(), NamedTextColor.AQUA)));
   }
 
-  @CommandMethod("trigger [action]")
+  @CommandMethod("trigger <action> [target]")
   @CommandDescription("Trigger a specific action")
   @CommandPermission(Permissions.GAMEPLAY)
-  public void triggerAction(
-      Audience audience, Match match, @Argument("action") @Greedy ExposedAction action) {
-    action.trigger(match);
+  public <T extends Filterable<?>> void triggerAction(
+      Audience audience,
+      @Argument("action") @Greedy ExposedAction action,
+      @Argument(value = "target", defaultValue = CURRENT) MatchPlayer target) {
+    action.trigger(target);
     audience.sendMessage(text("Triggered " + action.getId()));
   }
 
-  @CommandMethod("untrigger [action]")
+  @CommandMethod("untrigger <action> [target]")
   @CommandDescription("Untrigger a specific action")
   @CommandPermission(Permissions.GAMEPLAY)
-  public void untriggerAction(
-      Audience audience, Match match, @Argument("action") @Greedy ExposedAction action) {
-    action.untrigger(match);
+  public <T extends Filterable<?>> void untriggerAction(
+      Audience audience,
+      @Argument("action") @Greedy ExposedAction action,
+      @Argument(value = "target", defaultValue = CURRENT) MatchPlayer target) {
+    action.untrigger(target);
     audience.sendMessage(text("Untriggered " + action.getId()));
   }
 }
