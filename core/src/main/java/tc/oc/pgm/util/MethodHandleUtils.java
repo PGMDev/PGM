@@ -1,9 +1,11 @@
 package tc.oc.pgm.util;
 
+import com.google.common.collect.ImmutableList;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -16,73 +18,53 @@ import tc.oc.pgm.api.player.MatchPlayer;
 
 public final class MethodHandleUtils {
 
-  private static final MethodHandles.Lookup lookup = MethodHandles.lookup();
-  private static final Map<Class<? extends Event>, MethodHandle> cachedHandles = new HashMap<>();
+  private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+  private static final Map<Class<? extends Event>, MethodHandle> CACHED_HANDLES = new HashMap<>();
 
-  private static final String[] filterableGetterNames =
-      new String[] {"getPlayer", "getParty", "getMatch"};
-  private static final MethodType[] filterableMethodTypes =
-      new MethodType[] {
-        MethodType.methodType(MatchPlayer.class),
-        MethodType.methodType(Party.class),
-        MethodType.methodType(Match.class)
-      };
+  private static final List<HandleFinder> FILTERABLE_GETTERS =
+      ImmutableList.of(
+          new HandleFinder(MatchPlayer.class, "getPlayer"),
+          new HandleFinder(Party.class, "getParty"),
+          new HandleFinder(Match.class, "getMatch"),
+          new HandleFinder(Player.class, "getPlayer"),
+          new HandleFinder(Player.class, "getActor"),
+          new HandleFinder(Entity.class, "getActor"),
+          new HandleFinder(LivingEntity.class, "getEntity"));
 
-  // #getActor is mostly for SportPaper (PlayerAction).
-  // #getPlayer covers events which does not provide Entity
-  // as the lower boundary
-  private static final String[] entityGetterNames =
-      new String[] {"getPlayer", "getActor", "getActor", "getEntity"};
-  private static final MethodType playerMethodType = MethodType.methodType(Player.class);
-  private static final MethodType[] entityMethodTypes =
-      new MethodType[] {
-        playerMethodType,
-        playerMethodType,
-        MethodType.methodType(Entity.class),
-        MethodType.methodType(LivingEntity.class)
-      };
+  public static MethodHandle getHandle(Class<? extends Event> event) throws NoSuchMethodException {
+    MethodHandle handle = CACHED_HANDLES.computeIfAbsent(event, MethodHandleUtils::findHandle);
 
-  public static MethodHandle getHandle(Class<? extends Event> event)
-      throws NoSuchMethodException, IllegalAccessException {
-    MethodHandle handle = cachedHandles.get(event);
+    if (handle == null)
+      throw new NoSuchMethodException(
+          "No method to extract a Filterable or Player found on " + event);
 
-    if (handle == null) {
-      createExtractingMethodHandle(event);
-
-      handle = cachedHandles.get(event);
-      if (handle == null)
-        throw new IllegalStateException(
-            "Newly created MethodHandle for " + event + "not found in the cache");
-    }
     return handle;
   }
 
-  private static void createExtractingMethodHandle(Class<? extends Event> event)
-      throws NoSuchMethodException, IllegalAccessException {
-    MethodHandle result = null;
-
-    for (int i = 0; result == null && i < filterableGetterNames.length; i++) {
-      result = findMethod(event, filterableGetterNames[i], filterableMethodTypes[i]);
-    }
-
-    for (int i = 0; result == null && i < entityGetterNames.length; i++) {
-      result = findMethod(event, entityGetterNames[i], entityMethodTypes[i]);
-    }
-
-    if (result == null)
-      throw new NoSuchMethodException(
-          "No method to extract a Filterable or Entity(Player) found on " + event);
-
-    cachedHandles.put(event, result);
-  }
-
-  private static @Nullable MethodHandle findMethod(Class<?> clazz, String name, MethodType type)
-      throws IllegalAccessException {
-    try {
-      return lookup.findVirtual(clazz, name, type);
-    } catch (NoSuchMethodException e) {
-      // No-Op
+  private static MethodHandle findHandle(Class<? extends Event> event) {
+    for (HandleFinder finder : FILTERABLE_GETTERS) {
+      MethodHandle handle = finder.find(event);
+      if (handle != null) return handle;
     }
     return null;
+  }
+
+  private static class HandleFinder {
+    private final MethodType type;
+    private final String name;
+
+    private HandleFinder(Class<?> returnType, String name) {
+      this.type = MethodType.methodType(returnType);
+      this.name = name;
+    }
+
+    private @Nullable MethodHandle find(Class<?> clazz) {
+      try {
+        return LOOKUP.findVirtual(clazz, this.name, this.type);
+      } catch (NoSuchMethodException | IllegalAccessException e) {
+        // No-Op
+      }
+      return null;
+    }
   }
 }
