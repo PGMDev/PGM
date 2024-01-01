@@ -837,12 +837,12 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
             || (nmsTool != null && nmsTool.canDestroySpecialBlock(nmsBlock)));
   }
 
-  Field worldServerField = ReflectionUtils.getField(CraftWorld.class, "world");
-  Field dimensionField = ReflectionUtils.getField(WorldServer.class, "dimension");
-  Field modifiersField = ReflectionUtils.getField(Field.class, "modifiers");
-
   @Override
   public void resetDimension(World world) {
+    Field worldServerField = ReflectionUtils.getField(CraftWorld.class, "world");
+    Field dimensionField = ReflectionUtils.getField(WorldServer.class, "dimension");
+    Field modifiersField = ReflectionUtils.getField(Field.class, "modifiers");
+
     try {
       modifiersField.setInt(dimensionField, dimensionField.getModifiers() & ~Modifier.FINAL);
 
