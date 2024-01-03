@@ -64,15 +64,17 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     if (aStaff && !bStaff) return -1;
     else if (bStaff && !aStaff) return 1;
 
-    // Compare the nicknames of 'a' and 'b' if both are nicked, skip group permission check
+    // Compare the nicknames of 'a' and 'b'. If both are nicked, skip group permission check
     if (aNick != null && bNick != null) return aNick.compareToIgnoreCase(bNick);
 
     // If players have different permissions, the player with the highest ranked perm
-    // that the other one does't have is first. Disguised players effectively have no perms.
+    // that the other one doesn't have is first. Disguised players effectively have no perms.
     for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
+      if (group.getId().equalsIgnoreCase("default")) continue;
+
       Permission permission = group.getPermission();
-      boolean aPerm = a.hasPermission(permission);
-      boolean bPerm = b.hasPermission(permission);
+      boolean aPerm = a.hasPermission(permission) && aNick == null;
+      boolean bPerm = b.hasPermission(permission) && bNick == null;
 
       if (aPerm && !bPerm) {
         return -1;
@@ -82,6 +84,7 @@ public class PlayerOrder implements Comparator<MatchPlayer> {
     }
 
     // All else equal, order the players alphabetically
-    return a.getName().compareToIgnoreCase(b.getName());
+    return (aNick == null ? a.getName() : aNick)
+        .compareToIgnoreCase(bNick == null ? b.getName() : bNick);
   }
 }
