@@ -3,6 +3,7 @@ package tc.oc.pgm.tracker.trackers;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
@@ -10,9 +11,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.TNTInfo;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 /** Updates the state of owned TNT blocks and entities */
 public class TNTTracker extends AbstractTracker<TNTInfo> {
@@ -70,12 +73,25 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onDispense(BlockDispenseEntityEvent event) {
-    if (event.getEntity() instanceof TNTPrimed) {
+    if ((event.getEntity() instanceof TNTPrimed)
+        || (event.getEntity() instanceof ExplosiveMinecart)) {
       ParticipantState owner = blocks().getOwner(event.getBlock());
       if (owner != null) {
         entities()
-            .trackEntity(event.getEntity(), new TNTInfo(owner, event.getEntity().getLocation()));
+            .trackEntity(
+                event.getEntity(),
+                (event.getEntity() instanceof TNTPrimed)
+                    ? new TNTInfo(owner, event.getEntity().getLocation())
+                    : new EntityInfo(event.getEntity(), owner));
       }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onSpawn(PlayerSpawnEntityEvent event) {
+    ParticipantState owner = match.getParticipantState(event.getPlayer());
+    if (event.getEntity() instanceof ExplosiveMinecart && owner != null) {
+      entities().trackEntity(event.getEntity(), new EntityInfo(event.getEntity(), owner));
     }
   }
 }

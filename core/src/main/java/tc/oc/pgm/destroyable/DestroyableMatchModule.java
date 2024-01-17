@@ -4,14 +4,12 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
 import org.bukkit.block.Block;
-import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -57,11 +55,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
       return;
     }
 
-    // This is a temp fix until there is a tracker for placed minecarts (only dispensed are tracked
-    // right now)
-    if ((event.getCause() instanceof EntityExplodeEvent
-            && ((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart)
-        || event.getCause() instanceof BlockPistonExtendEvent
+    if (event.getCause() instanceof BlockPistonExtendEvent
         || event.getCause() instanceof BlockPistonRetractEvent) {
 
       event.setCancelled(true);

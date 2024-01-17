@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -15,7 +14,6 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -107,12 +105,6 @@ public class CoreMatchModule implements MatchModule, Listener {
               if (!core.isCompleted(team) && !core.hasTouched(team)) {
                 this.match.callEvent(new GoalStatusChangeEvent(this.match, core));
               }
-            }
-          } else if (event.getCause() instanceof EntityExplodeEvent) {
-            // this is a temp fix until there is a tracker for placed minecarts (only dispensed are
-            // tracked right now)
-            if (((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
-              event.setCancelled(true);
             }
           } else if (event.getCause() instanceof BlockPistonRetractEvent) {
             event.setCancelled(true);
