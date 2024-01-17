@@ -14,6 +14,7 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -28,6 +29,7 @@ import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
+import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.util.block.BlockVectors;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -105,6 +107,17 @@ public class CoreMatchModule implements MatchModule, Listener {
               if (!core.isCompleted(team) && !core.hasTouched(team)) {
                 this.match.callEvent(new GoalStatusChangeEvent(this.match, core));
               }
+            }
+          } else if (event.getCause() instanceof EntityExplodeEvent) {
+            // If the platform doesn't provide enough data to tell
+            // who owns the entity that blew up the core, cancel the
+            // event to prevent possible team griefing
+            TrackerMatchModule tmm = match.needModule(TrackerMatchModule.class);
+            ParticipantState owner =
+                tmm.getOwner(((EntityExplodeEvent) event.getCause()).getEntity());
+
+            if (owner == null) {
+              event.setCancelled(true);
             }
           } else if (event.getCause() instanceof BlockPistonRetractEvent) {
             event.setCancelled(true);

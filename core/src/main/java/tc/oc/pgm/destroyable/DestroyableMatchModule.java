@@ -10,16 +10,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
+import tc.oc.pgm.tracker.TrackerMatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DestroyableMatchModule implements MatchModule, Listener {
@@ -55,7 +58,18 @@ public class DestroyableMatchModule implements MatchModule, Listener {
       return;
     }
 
-    if (event.getCause() instanceof BlockPistonExtendEvent
+    if (event.getCause() instanceof EntityExplodeEvent) {
+      // If the platform doesn't provide enough data to tell
+      // who owns the entity that blew up the destroyable,
+      // cancel the event to prevent possible team griefing
+      TrackerMatchModule tmm = match.needModule(TrackerMatchModule.class);
+      ParticipantState owner = tmm.getOwner(((EntityExplodeEvent) event.getCause()).getEntity());
+
+      if (owner == null) {
+        event.setCancelled(true);
+        return;
+      }
+    } else if (event.getCause() instanceof BlockPistonExtendEvent
         || event.getCause() instanceof BlockPistonRetractEvent) {
 
       event.setCancelled(true);
