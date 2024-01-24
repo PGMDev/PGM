@@ -253,7 +253,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     if (!result.isSuccess()) return false;
 
-    if (!match.setParty(joining, getTribute(joining))) {
+    if (!match.setParty(joining, getTribute(joining), request)) {
       return false;
     }
 
