@@ -336,7 +336,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   @Override
   public JoinResult queryJoin(MatchPlayer joining, JoinRequest request) {
     if (request.has(JoinRequest.Flag.FORCE)) {
-      return new TeamJoinResult(JoinResultOption.JOINED, request.getTeam(), false);
+      return new TeamJoinResult(
+          JoinResultOption.JOINED,
+          request.getTeam() == null ? getEmptiestTeam() : request.getTeam(),
+          false);
     }
 
     final Team lastTeam = getLastTeam(joining.getId());
