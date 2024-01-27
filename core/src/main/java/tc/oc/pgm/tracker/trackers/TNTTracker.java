@@ -1,5 +1,6 @@
 package tc.oc.pgm.tracker.trackers;
 
+import java.lang.ref.WeakReference;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
@@ -7,6 +8,9 @@ import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.vehicle.VehicleCreateEvent;
+import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
@@ -15,10 +19,10 @@ import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.TNTInfo;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
-import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 /** Updates the state of owned TNT blocks and entities */
 public class TNTTracker extends AbstractTracker<TNTInfo> {
+  private WeakReference<ParticipantState> lastPlacer = null;
 
   public TNTTracker(TrackerMatchModule tmm, Match match) {
     super(TNTInfo.class, tmm, match);
@@ -88,10 +92,33 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onInteraction(PlayerInteractEvent event) {
+    ItemStack stack = event.getItem();
+    if (stack != null && stack.getType() == Material.EXPLOSIVE_MINECART) {
+      ParticipantState placerState = match.getParticipantState(event.getPlayer());
+      if (placerState != null) {
+        lastPlacer = new WeakReference<>(placerState);
+      }
+    }
+  }
+
+  @EventHandler
+  public void onVehicleCreate(VehicleCreateEvent event) {
+    if (lastPlacer != null) {
+      ParticipantState owner = lastPlacer.get();
+      if (event.getVehicle() instanceof ExplosiveMinecart && owner != null) {
+        entities().trackEntity(event.getVehicle(), new EntityInfo(event.getVehicle(), owner));
+      }
+    }
+
+    lastPlacer = null;
+  }
+
+  /*@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onSpawn(PlayerSpawnEntityEvent event) {
     ParticipantState owner = match.getParticipantState(event.getPlayer());
     if (event.getEntity() instanceof ExplosiveMinecart && owner != null) {
       entities().trackEntity(event.getEntity(), new EntityInfo(event.getEntity(), owner));
     }
-  }
+  }*/
 }
