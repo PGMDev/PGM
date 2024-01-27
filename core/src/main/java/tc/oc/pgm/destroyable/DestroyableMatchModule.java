@@ -22,7 +22,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
-import tc.oc.pgm.tracker.TrackerMatchModule;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DestroyableMatchModule implements MatchModule, Listener {
@@ -58,14 +57,13 @@ public class DestroyableMatchModule implements MatchModule, Listener {
       return;
     }
 
+    ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
+
     if (event.getCause() instanceof EntityExplodeEvent) {
       // If the platform doesn't provide enough data to tell
       // who owns the entity that blew up the destroyable,
       // cancel the event to prevent possible team griefing
-      TrackerMatchModule tmm = match.needModule(TrackerMatchModule.class);
-      ParticipantState owner = tmm.getOwner(((EntityExplodeEvent) event.getCause()).getEntity());
-
-      if (owner == null) {
+      if (player == null) {
         event.setCancelled(true);
         return;
       }
@@ -78,10 +76,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
     for (Destroyable destroyable : this.destroyables) {
       String reasonKey =
-          destroyable.testBlockChange(
-              event.getOldState(),
-              event.getNewState(),
-              ParticipantBlockTransformEvent.getPlayerState(event));
+          destroyable.testBlockChange(event.getOldState(), event.getNewState(), player);
       if (reasonKey != null) {
         event.setCancelled(translatable(reasonKey, destroyable.getComponentName()));
         return;

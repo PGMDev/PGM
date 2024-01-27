@@ -29,7 +29,6 @@ import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
-import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.util.block.BlockVectors;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -112,13 +111,7 @@ public class CoreMatchModule implements MatchModule, Listener {
             // If the platform doesn't provide enough data to tell
             // who owns the entity that blew up the core, cancel the
             // event to prevent possible team griefing
-            TrackerMatchModule tmm = match.needModule(TrackerMatchModule.class);
-            ParticipantState owner =
-                tmm.getOwner(((EntityExplodeEvent) event.getCause()).getEntity());
-
-            if (owner == null) {
-              event.setCancelled(true);
-            }
+            event.setCancelled(true);
           } else if (event.getCause() instanceof BlockPistonRetractEvent) {
             event.setCancelled(true);
           }
