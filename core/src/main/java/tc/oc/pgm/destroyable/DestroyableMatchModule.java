@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
 import org.bukkit.block.Block;
+import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -59,9 +60,10 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
 
-    if (event.getCause() instanceof EntityExplodeEvent) {
+    if (event.getCause() instanceof EntityExplodeEvent
+        && ((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
       // If the platform doesn't provide enough data to tell
-      // who owns the entity that blew up the destroyable,
+      // who owns the TNT minecart that blew up the destroyable,
       // cancel the event to prevent possible team griefing
       if (player == null) {
         event.setCancelled(true);

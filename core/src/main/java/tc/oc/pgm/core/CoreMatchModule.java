@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -109,9 +110,11 @@ public class CoreMatchModule implements MatchModule, Listener {
             }
           } else if (event.getCause() instanceof EntityExplodeEvent) {
             // If the platform doesn't provide enough data to tell
-            // who owns the entity that blew up the core, cancel the
+            // who owns the TNT minecart that blew up the core, cancel the
             // event to prevent possible team griefing
-            event.setCancelled(true);
+            if (((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
+              event.setCancelled(true);
+            }
           } else if (event.getCause() instanceof BlockPistonRetractEvent) {
             event.setCancelled(true);
           }
