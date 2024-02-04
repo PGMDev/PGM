@@ -105,7 +105,10 @@ public class LootableMatchModule implements MatchModule, Listener {
     if (filterPredicate == null) return;
 
     logger.fine(
-        () -> opener.getName() + " opened a " + inventory.getHolder().getClass().getSimpleName());
+        () ->
+            opener.getNameLegacy()
+                + " opened a "
+                + inventory.getHolder().getClass().getSimpleName());
 
     // Find all Fillers that apply to the holder of the opened inventory
     final List<FillerDefinition> fillers =
