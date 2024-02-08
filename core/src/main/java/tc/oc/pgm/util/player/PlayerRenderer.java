@@ -26,8 +26,6 @@ import tc.oc.pgm.util.named.NameStyle;
 @SuppressWarnings("UnstableApiUsage")
 public class PlayerRenderer {
   private static final TextColor DEAD_COLOR = NamedTextColor.DARK_GRAY;
-  private static final Style NICK_STYLE =
-      Style.style(TextDecoration.ITALIC).decoration(TextDecoration.STRIKETHROUGH, false);
 
   private final LoadingCache<PlayerCacheKey, Component> nameCache;
 
@@ -96,7 +94,11 @@ public class PlayerRenderer {
       name.decoration(TextDecoration.STRIKETHROUGH, true);
 
       if (data.nick != null && data.style.has(NameStyle.Flag.NICKNAME)) {
-        name.append(text(" " + data.nick, NICK_STYLE));
+        name.append(
+            text(
+                " " + data.nick,
+                Style.style(TextDecoration.ITALIC)
+                    .decoration(TextDecoration.STRIKETHROUGH, data.vanish)));
       }
     }
 
