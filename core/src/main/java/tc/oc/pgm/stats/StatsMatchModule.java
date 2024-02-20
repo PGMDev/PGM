@@ -365,7 +365,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         best.add(
             translatable(
                 "match.stats.damage",
-                player(bestDamage.getKey(), NameStyle.FANCY),
+                player(bestDamage.getKey(), NameStyle.VERBOSE),
                 damageComponent(bestDamage.getValue(), NamedTextColor.GREEN)));
       }
     }
@@ -462,7 +462,9 @@ public class StatsMatchModule implements MatchModule, Listener {
   Component getMessage(
       String messageKey, Map.Entry<UUID, ? extends Number> mapEntry, TextColor color) {
     return translatable(
-        messageKey, player(mapEntry.getKey(), NameStyle.FANCY), number(mapEntry.getValue(), color));
+        messageKey,
+        player(mapEntry.getKey(), NameStyle.VERBOSE),
+        number(mapEntry.getValue(), color));
   }
 
   /** Formats raw damage to damage relative to the amount of hearths the player would have broken */
