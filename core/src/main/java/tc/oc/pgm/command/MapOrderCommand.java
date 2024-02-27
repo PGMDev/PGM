@@ -2,6 +2,7 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import cloud.commandframework.annotations.Argument;
@@ -13,6 +14,7 @@ import cloud.commandframework.annotations.specifier.FlagYielding;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -49,7 +51,7 @@ public final class MapOrderCommand {
       Match match,
       @Flag(value = "force", aliases = "f") boolean force,
       @Flag(value = "reset", aliases = "r") boolean reset,
-      @Argument("map") @FlagYielding MapInfo map) {
+      @Argument(value = "map", defaultValue = CURRENT) @FlagYielding MapInfo map) {
     if (RestartManager.isQueued() && !force) {
       throw exception("map.setNext.confirm");
     }
@@ -78,6 +80,10 @@ public final class MapOrderCommand {
       viewer.sendWarning(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.GREEN));
     }
 
+    sendSetNextMessage(map, sender, match);
+  }
+
+  public static void sendSetNextMessage(@NotNull MapInfo map, CommandSender sender, Match match) {
     Component mapName = text(map.getName(), NamedTextColor.GOLD);
     Component successful =
         translatable(

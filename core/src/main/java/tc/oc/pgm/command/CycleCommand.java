@@ -9,6 +9,7 @@ import cloud.commandframework.annotations.CommandPermission;
 import cloud.commandframework.annotations.Flag;
 import cloud.commandframework.annotations.specifier.FlagYielding;
 import java.time.Duration;
+import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -21,6 +22,7 @@ public final class CycleCommand {
   @CommandDescription("Cycle to the next match")
   @CommandPermission(Permissions.START)
   public void cycle(
+      CommandSender sender,
       Match match,
       MapOrder mapOrder,
       @Argument("duration") Duration duration,
@@ -32,6 +34,7 @@ public final class CycleCommand {
 
     if (map != null && mapOrder.getNextMap() != map) {
       mapOrder.setNextMap(map);
+      MapOrderCommand.sendSetNextMessage(map, sender, match);
     }
 
     match.needModule(CycleMatchModule.class).startCountdown(duration);
@@ -41,10 +44,11 @@ public final class CycleCommand {
   @CommandDescription("Reload (cycle to) the current map")
   @CommandPermission(Permissions.START)
   public void recycle(
+      CommandSender sender,
       Match match,
       MapOrder mapOrder,
       @Argument("duration") Duration duration,
       @Flag(value = "force", aliases = "f") boolean force) {
-    cycle(match, mapOrder, duration, match.getMap(), force);
+    cycle(sender, match, mapOrder, duration, match.getMap(), force);
   }
 }
