@@ -18,7 +18,7 @@ class SettingsImpl implements Settings {
   }
 
   public static long bitSettings(SettingValue value) {
-    return 1 << (assertNotNull(value, "setting value is null").ordinal() + 1);
+    return 1L << (assertNotNull(value, "setting value is null").ordinal() + 1);
   }
 
   protected final long getBit() {
