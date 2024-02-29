@@ -22,11 +22,11 @@ public class ActionScopeValidation implements FeatureValidation<ActionDefinition
 
   @Override
   public void validate(ActionDefinition<?> definition, Node node) throws InvalidXMLException {
-    Class<?> scope = definition.getScope();
-    if (!scope.isAssignableFrom(this.scope))
+    Class<?> definitionScope = definition.getScope();
+    if (!definitionScope.isAssignableFrom(scope))
       throw new InvalidXMLException(
           "Wrong action scope, got "
-              + scope.getSimpleName()
+              + definitionScope.getSimpleName()
               + " but expected "
               + scope.getSimpleName(),
           node);
