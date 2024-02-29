@@ -28,7 +28,7 @@ public class ActionScopeValidation implements FeatureValidation<ActionDefinition
           "Wrong action scope, got "
               + scope.getSimpleName()
               + " but expected "
-              + scope.getSimpleName(),
+              + this.scope.getSimpleName(),
           node);
   }
 }
