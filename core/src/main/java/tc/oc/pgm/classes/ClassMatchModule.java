@@ -1,15 +1,21 @@
 package tc.oc.pgm.classes;
 
+import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -28,17 +34,20 @@ public class ClassMatchModule implements MatchModule, Listener {
   private final String family;
   private final Map<String, PlayerClass> classes;
   private final Set<PlayerClass> classesByName;
-  private final PlayerClass defaultClass;
+  private final List<PlayerClass> defaultClasses;
 
   private final Map<UUID, PlayerClass> selectedClasses = Maps.newHashMap();
   private final Map<UUID, PlayerClass> lastPlayedClass = Maps.newHashMap();
 
   public ClassMatchModule(
-      Match match, String family, Map<String, PlayerClass> classes, PlayerClass defaultClass) {
+      Match match,
+      String family,
+      Map<String, PlayerClass> classes,
+      List<PlayerClass> defaultClasses) {
     this.match = match;
     this.family = assertNotNull(family, "family");
     this.classes = assertNotNull(classes, "classes");
-    this.defaultClass = assertNotNull(defaultClass, "default class");
+    this.defaultClasses = assertNotNull(defaultClasses, "default classes");
 
     this.classesByName =
         Sets.newTreeSet(
@@ -73,8 +82,8 @@ public class ClassMatchModule implements MatchModule, Listener {
    *
    * @return default class
    */
-  public PlayerClass getDefaultClass() {
-    return this.defaultClass;
+  public List<PlayerClass> getDefaultClasses() {
+    return this.defaultClasses;
   }
 
   /**
@@ -96,6 +105,26 @@ public class ClassMatchModule implements MatchModule, Listener {
     return this.classes.get(search);
   }
 
+  public PlayerClass chooseDefaultClass(MatchPlayer player) {
+    if (defaultClasses.size() == 1) {
+      return defaultClasses.get(0);
+    } else {
+      PlayerClass fallback = null;
+      List<PlayerClass> shuffledClasses = new ArrayList<>(defaultClasses);
+      Collections.shuffle(shuffledClasses, match.getRandom());
+      for (PlayerClass cls : shuffledClasses) {
+        if (cls.canUse(player)) {
+          return cls;
+        }
+        fallback = cls;
+      }
+      if (!player.isObserving()) {
+        match.getLogger().warning("No suitable class found! Using fallback " + fallback.getName());
+      }
+      return fallback;
+    }
+  }
+
   /**
    * Gets the class that the given player has chosen to be on next respawn, which is not necessarily
    * the class that they are currently playing as.
@@ -105,13 +134,14 @@ public class ClassMatchModule implements MatchModule, Listener {
    */
   public PlayerClass getSelectedClass(UUID userId) {
     PlayerClass cls = this.selectedClasses.get(userId);
-    return cls != null ? cls : this.defaultClass;
+    MatchPlayer player = match.getPlayer(userId);
+    return cls != null && cls.canUse(player) ? cls : this.chooseDefaultClass(player);
   }
 
   /** Get the last class that the given player spawned as. */
   public PlayerClass getLastPlayedClass(UUID userId) {
     PlayerClass cls = this.lastPlayedClass.get(userId);
-    return cls != null ? cls : this.defaultClass;
+    return cls != null ? cls : this.chooseDefaultClass(match.getPlayer(userId));
   }
 
   /** Get the class that given player is spawned as or will spawn as next */
@@ -170,10 +200,21 @@ public class ClassMatchModule implements MatchModule, Listener {
       throw exception("match.class.sticky");
     }
 
-    PlayerClass oldClass = this.selectedClasses.put(userId, cls);
-    if (oldClass == null) oldClass = this.defaultClass;
-
     MatchPlayer matchPlayer = this.match.getPlayer(userId);
+
+    if (!cls.canUse(matchPlayer)) {
+      if (cls.getDenyMessage() == null) {
+        throw exception(
+            "match.class.filtered",
+            text(cls.getName(), NamedTextColor.RED, TextDecoration.UNDERLINED));
+      } else {
+        throw exception("match.class.filtered.message", text(cls.getDenyMessage()));
+      }
+    }
+
+    PlayerClass oldClass = this.selectedClasses.put(userId, cls);
+    if (oldClass == null) oldClass = this.chooseDefaultClass(matchPlayer);
+
     if (matchPlayer != null) {
       this.match.callEvent(new PlayerClassChangeEvent(matchPlayer, this.family, oldClass, cls));
     }
