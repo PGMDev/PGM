@@ -18,6 +18,7 @@ import org.bukkit.entity.Player;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.channels.Channel;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
@@ -81,7 +82,6 @@ import tc.oc.pgm.command.parsers.TeamParser;
 import tc.oc.pgm.command.parsers.TeamsParser;
 import tc.oc.pgm.command.parsers.VariableParser;
 import tc.oc.pgm.command.parsers.VictoryConditionParser;
-import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
@@ -150,8 +150,6 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     if (ShowXmlCommand.isEnabled()) register(ShowXmlCommand.getInstance());
     if (PGM.get().getConfiguration().isVanishEnabled()) register(new VanishCommand());
 
-    register(ChatDispatcher.get());
-
     manager.command(
         manager
             .commandBuilder("pgm")
@@ -168,6 +166,9 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
                 context ->
                     minecraftHelp.queryCommands(
                         context.<String>getOptional("query").orElse(""), context.getSender())));
+
+    for (Channel<?> channel : PGM.get().getChannelManager().getChannels())
+      channel.registerCommand(manager);
   }
 
   // Injectors

@@ -10,7 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.channels.ChannelManager;
 import tc.oc.pgm.restart.CancelRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.start.StartMatchModule;
@@ -39,7 +39,7 @@ public final class CancelCommand {
 
     match.getCountdown().cancelAll();
     match.needModule(StartMatchModule.class).setAutoStart(false);
-    ChatDispatcher.broadcastAdminChatMessage(
-        translatable("admin.cancelCountdowns.announce", player(sender, NameStyle.FANCY)), match);
+    ChannelManager.broadcastAdminMessage(
+        translatable("admin.cancelCountdowns.announce", player(sender, NameStyle.FANCY)));
   }
 }

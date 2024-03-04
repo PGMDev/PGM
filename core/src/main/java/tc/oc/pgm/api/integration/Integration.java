@@ -3,10 +3,14 @@ package tc.oc.pgm.api.integration;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.channels.Channel;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 public final class Integration {
@@ -23,6 +27,7 @@ public final class Integration {
       new AtomicReference<VanishIntegration>(new NoopVanishIntegration());
   private static final AtomicReference<SquadIntegration> SQUAD =
       new AtomicReference<>(new NoopSquadIntegration());
+  private static Set<Channel<?>> CHANNELS = new HashSet<Channel<?>>();
 
   public static void setFriendIntegration(FriendIntegration integration) {
     FRIENDS.set(assertNotNull(integration));
@@ -42,6 +47,13 @@ public final class Integration {
 
   public static void setSquadIntegration(SquadIntegration integration) {
     SQUAD.set(assertNotNull(integration));
+  }
+
+  public static void registerChannel(Channel<?> channel) {
+    if (CHANNELS == null)
+      throw new IllegalStateException(
+          "New channels cannot be registered after ChannelManager has been initialised!");
+    CHANNELS.add(assertNotNull(channel));
   }
 
   public static boolean isFriend(Player a, Player b) {
@@ -77,6 +89,14 @@ public final class Integration {
 
   public static boolean setVanished(MatchPlayer player, boolean vanish, boolean quiet) {
     return VANISH.get().setVanished(player, vanish, quiet);
+  }
+
+  public static Set<Channel<?>> getRegisteredChannels() {
+    return Collections.unmodifiableSet(CHANNELS);
+  }
+
+  public static void finishRegisteringChannels() {
+    CHANNELS = null;
   }
 
   // No-op Implementations

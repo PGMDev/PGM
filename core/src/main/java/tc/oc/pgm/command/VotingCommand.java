@@ -21,7 +21,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.channels.ChannelManager;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.VotingPool;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
@@ -58,7 +58,7 @@ public class VotingCommand {
     }
 
     if (vote.addMap(map)) {
-      ChatDispatcher.broadcastAdminChatMessage(addMessage, match);
+      ChannelManager.broadcastAdminMessage(addMessage);
     } else {
       viewer.sendWarning(translatable("vote.limit", NamedTextColor.RED));
     }
@@ -75,13 +75,12 @@ public class VotingCommand {
       @Argument("map") @Greedy MapInfo map) {
     VotePoolOptions vote = getVoteOptions(mapOrder);
     if (vote.removeMap(map)) {
-      ChatDispatcher.broadcastAdminChatMessage(
+      ChannelManager.broadcastAdminMessage(
           translatable(
               "vote.remove",
               NamedTextColor.GRAY,
               UsernameFormatUtils.formatStaffName(sender, match),
-              map.getStyledName(MapNameStyle.COLOR)),
-          match);
+              map.getStyledName(MapNameStyle.COLOR)));
     } else {
       viewer.sendWarning(translatable("map.notFound"));
     }
@@ -96,13 +95,12 @@ public class VotingCommand {
         translatable(
             vote.toggleMode() ? "vote.mode.replace" : "vote.mode.create",
             NamedTextColor.LIGHT_PURPLE);
-    ChatDispatcher.broadcastAdminChatMessage(
+    ChannelManager.broadcastAdminMessage(
         translatable(
             "vote.toggle",
             NamedTextColor.GRAY,
             UsernameFormatUtils.formatStaffName(sender, match),
-            voteModeName),
-        match);
+            voteModeName));
   }
 
   @CommandMethod("clear")
@@ -127,7 +125,7 @@ public class VotingCommand {
     if (maps.isEmpty()) {
       viewer.sendWarning(translatable("vote.noMapsFound"));
     } else {
-      ChatDispatcher.broadcastAdminChatMessage(clearedMsg, match);
+      ChannelManager.broadcastAdminMessage(clearedMsg);
     }
   }
 

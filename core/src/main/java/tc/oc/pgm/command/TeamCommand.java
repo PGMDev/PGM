@@ -24,9 +24,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.channels.ChannelManager;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
-import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.named.NameStyle;
@@ -51,14 +51,13 @@ public final class TeamCommand {
     } else {
       join.forceJoin(joiner, (Competitor) team);
     }
-    ChatDispatcher.broadcastAdminChatMessage(
+    ChannelManager.broadcastAdminMessage(
         translatable(
             "join.ok.force.announce",
             player(sender, NameStyle.FANCY),
             joiner.getName(NameStyle.FANCY),
             joiner.getParty().getName(),
-            oldParty.getName()),
-        joiner.getMatch());
+            oldParty.getName()));
   }
 
   @CommandMethod("shuffle")
@@ -80,8 +79,8 @@ public final class TeamCommand {
       teams.forceJoin(player, null);
     }
 
-    ChatDispatcher.broadcastAdminChatMessage(
-        translatable("match.shuffle.announce.ok", player(sender, NameStyle.FANCY)), match);
+    ChannelManager.broadcastAdminMessage(
+        translatable("match.shuffle.announce.ok", player(sender, NameStyle.FANCY)));
   }
 
   @CommandMethod("alias <team> <name>")
@@ -106,10 +105,9 @@ public final class TeamCommand {
     final Component oldName = team.getName().color(NamedTextColor.GRAY);
     team.setName(name);
 
-    ChatDispatcher.broadcastAdminChatMessage(
+    ChannelManager.broadcastAdminMessage(
         translatable(
-            "match.alias.announce.ok", player(sender, NameStyle.FANCY), oldName, team.getName()),
-        match);
+            "match.alias.announce.ok", player(sender, NameStyle.FANCY), oldName, team.getName()));
   }
 
   @CommandMethod("scale <teams> <factor>")
@@ -125,13 +123,12 @@ public final class TeamCommand {
       int maxSize = (int) (team.getMaxPlayers() * scale);
       team.setMaxSize(maxSize, maxOverfill);
 
-      ChatDispatcher.broadcastAdminChatMessage(
+      ChannelManager.broadcastAdminMessage(
           translatable(
               "match.resize.announce.max",
               player(sender, NameStyle.FANCY),
               team.getName(),
-              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
-          match);
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 
@@ -151,13 +148,12 @@ public final class TeamCommand {
       else TextParser.assertInRange(maxOverfill, Range.atLeast(maxPlayers));
 
       team.setMaxSize(maxPlayers, maxOverfill);
-      ChatDispatcher.broadcastAdminChatMessage(
+      ChannelManager.broadcastAdminMessage(
           translatable(
               "match.resize.announce.max",
               player(sender, NameStyle.FANCY),
               team.getName(),
-              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
-          match);
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 
@@ -167,13 +163,12 @@ public final class TeamCommand {
   public void max(CommandSender sender, Match match, @Argument("teams") Collection<Team> teams) {
     for (Team team : teams) {
       team.resetMaxSize();
-      ChatDispatcher.broadcastAdminChatMessage(
+      ChannelManager.broadcastAdminMessage(
           translatable(
               "match.resize.announce.max",
               player(sender, NameStyle.FANCY),
               team.getName(),
-              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
-          match);
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 
@@ -188,13 +183,12 @@ public final class TeamCommand {
     TextParser.assertInRange(minPlayers, Range.atLeast(0));
     for (Team team : teams) {
       team.setMinSize(minPlayers);
-      ChatDispatcher.broadcastAdminChatMessage(
+      ChannelManager.broadcastAdminMessage(
           translatable(
               "match.resize.announce.min",
               player(sender, NameStyle.FANCY),
               team.getName(),
-              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
-          match);
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 
@@ -204,13 +198,12 @@ public final class TeamCommand {
   public void min(CommandSender sender, Match match, @Argument("teams") Collection<Team> teams) {
     for (Team team : teams) {
       team.resetMinSize();
-      ChatDispatcher.broadcastAdminChatMessage(
+      ChannelManager.broadcastAdminMessage(
           translatable(
               "match.resize.announce.min",
               player(sender, NameStyle.FANCY),
               team.getName(),
-              text(team.getMaxPlayers(), NamedTextColor.AQUA)),
-          match);
+              text(team.getMaxPlayers(), NamedTextColor.AQUA)));
     }
   }
 }
