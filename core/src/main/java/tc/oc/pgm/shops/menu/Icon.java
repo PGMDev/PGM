@@ -7,7 +7,7 @@ import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 
-public class Icon {
+public class Icon implements Payable {
 
   private final ImmutableList<Payment> payments;
   private final ItemStack item;
@@ -20,10 +20,6 @@ public class Icon {
     this.item = item;
     this.filter = filter;
     this.action = action;
-  }
-
-  public boolean isFree() {
-    return payments.isEmpty() || payments.stream().anyMatch(p -> p.getPrice() < 1);
   }
 
   public List<Payment> getPayments() {
