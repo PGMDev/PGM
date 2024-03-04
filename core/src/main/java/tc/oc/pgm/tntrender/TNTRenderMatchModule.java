@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.TNTPrimed;
@@ -53,10 +52,7 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
     Location explosion = event.getLocation();
     for (MatchPlayer player : match.getPlayers()) {
       if (explosion.distanceSquared(player.getBukkit().getLocation()) >= MAX_DISTANCE)
-        player
-            .getBukkit()
-            .spigot()
-            .playEffect(explosion, Effect.EXPLOSION_HUGE, 0, 0, 0f, 0f, 0f, 1f, 1, 256);
+        NMSHacks.showHugeExplosionParticle(player.getBukkit(), explosion);
     }
   }
 

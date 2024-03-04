@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -51,8 +53,8 @@ public interface NMSHacks {
     return ENTITY_IDS.decrementAndGet();
   }
 
-  static void sendPacket(Player bukkitPlayer, Object packet) {
-    INSTANCE.sendPacket(bukkitPlayer, packet);
+  static void sendPacket(Player player, Object packet) {
+    INSTANCE.sendPacket(player, packet);
   }
 
   static void playDeathAnimation(Player player) {
@@ -438,5 +440,37 @@ public interface NMSHacks {
 
   static void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     INSTANCE.postToMainThread(plugin, priority, task);
+  }
+
+  static void showPayloadParticles(World world, Location loc, Color color) {
+    INSTANCE.showPayloadParticles(world, loc, color);
+  }
+
+  static void playBreakEffect(Location location, MaterialData material) {
+    INSTANCE.playBreakEffect(location, material);
+  }
+
+  static void showSpawnedFlagParticles(Player player, Location location, DyeColor flagDyeColor) {
+    INSTANCE.showSpawnedFlagParticles(player, location, flagDyeColor);
+  }
+
+  static void showBlitzSmoke(World world, Location base, int j) {
+    INSTANCE.showBlitzSmoke(world, base, j);
+  }
+
+  static void showCriticalArrowParticles(Player player, Location projectileLocation) {
+    INSTANCE.showCriticalArrowParticles(player, projectileLocation);
+  }
+
+  static void showColoredArrowParticles(Player player, Location projectileLocation, Color color) {
+    INSTANCE.showColoredArrowParticles(player, projectileLocation, color);
+  }
+
+  static void showSpawnerFlameParticles(World world, Location location) {
+    INSTANCE.showSpawnerFlameParticles(world, location);
+  }
+
+  static void showHugeExplosionParticle(Player player, Location explosion) {
+    INSTANCE.showHugeExplosionParticle(player, explosion);
   }
 }

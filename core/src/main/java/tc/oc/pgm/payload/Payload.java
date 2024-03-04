@@ -3,7 +3,6 @@ package tc.oc.pgm.payload;
 import java.time.Duration;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -17,6 +16,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.ControlPoint;
 import tc.oc.pgm.payload.track.Track;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Payload extends ControlPoint {
 
@@ -111,20 +111,7 @@ public class Payload extends ControlPoint {
           height,
           definition.getRadius() * Math.sin(angle));
       loc.add(position);
-      match
-          .getWorld()
-          .spigot()
-          .playEffect(
-              loc,
-              Effect.COLOURED_DUST,
-              0,
-              (byte) 0,
-              rgbToParticle(color.getRed()),
-              rgbToParticle(color.getGreen()),
-              rgbToParticle(color.getBlue()),
-              1,
-              0,
-              50);
+      NMSHacks.showPayloadParticles(match.getWorld(), loc, color);
     }
 
     if (definition.showBeam()) {
@@ -144,10 +131,6 @@ public class Payload extends ControlPoint {
               40, // number of particles
               200); // radius in blocks to show particles
     }
-  }
-
-  private float rgbToParticle(int rgb) {
-    return (float) Math.max(0.001, rgb / 255.0);
   }
 
   private void tickMinecart() {

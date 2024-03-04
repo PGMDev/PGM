@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.UUID;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,7 +41,7 @@ import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacksPlatform {
 
-  void sendPacket(Player bukkitPlayer, Object packet);
+  void sendPacket(Player player, Object packet);
 
   void sendPacketToViewers(Entity entity, Object packet, boolean excludeSpectators);
 
@@ -208,4 +210,20 @@ public interface NMSHacksPlatform {
   AttributeMap buildAttributeMap(Player player);
 
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);
+
+  void showPayloadParticles(World world, Location loc, Color color);
+
+  void playBreakEffect(Location location, MaterialData material);
+
+  void showSpawnedFlagParticles(Player player, Location location, DyeColor flagDyeColor);
+
+  void showBlitzSmoke(World world, Location base, int j);
+
+  void showCriticalArrowParticles(Player player, Location projectileLocation);
+
+  void showColoredArrowParticles(Player player, Location projectileLocation, Color color);
+
+  void showSpawnerFlameParticles(World world, Location location);
+
+  void showHugeExplosionParticle(Player player, Location explosion);
 }

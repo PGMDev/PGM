@@ -29,7 +29,6 @@ import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.MaterialCounter;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Renewable implements Listener, Tickable {
@@ -276,7 +275,7 @@ public class Renewable implements Listener, Tickable {
     newState.update(true, true);
 
     if (definition.particles || definition.sound) {
-      Materials.playBreakEffect(location, material);
+      NMSHacks.playBreakEffect(location, material);
     }
 
     return true;

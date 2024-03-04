@@ -36,7 +36,6 @@ import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -265,7 +264,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     replaceBlock(drops, hit.getBlock(), player);
     Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
 
-    Materials.playBreakEffect(location, oldMaterial);
+    NMSHacks.playBreakEffect(location, oldMaterial);
     dropObjects(drops, player, location, 1d, false);
   }
 

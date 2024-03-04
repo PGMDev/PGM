@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.UUID;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -34,6 +33,7 @@ import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class BlitzMatchModule implements MatchModule, Listener {
@@ -165,7 +165,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
       Location base =
           death.clone().add(new Vector(radius * Math.cos(angle), 0, radius * Math.sin(angle)));
       for (int j = 0; j <= 8; j++) {
-        world.playEffect(base, Effect.SMOKE, j);
+        NMSHacks.showBlitzSmoke(world, base, j);
       }
     }
   }
