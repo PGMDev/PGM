@@ -38,6 +38,16 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
     this.show = show;
   }
 
+  public TimeLimit(TimeLimit timeLimit, Duration duration) {
+    super(timeLimit.getId());
+    this.duration = assertNotNull(duration);
+    this.overtime = timeLimit.getOvertime();
+    this.maxOvertime = timeLimit.getMaxOvertime();
+    this.endOvertime = timeLimit.getEndOvertime();
+    this.result = timeLimit.getResult();
+    this.show = timeLimit.getShow();
+  }
+
   public Duration getDuration() {
     return duration;
   }
