@@ -136,7 +136,7 @@ public final class StringUtils {
     return text == null
         ? ""
         : Normalizer.normalize(text, Normalizer.Form.NFD)
-            .replaceAll("[^A-Za-z0-9 ]", "")
+            .replaceAll("[^A-Za-z0-9_ ]", "")
             .toLowerCase(Locale.ROOT);
   }
 
