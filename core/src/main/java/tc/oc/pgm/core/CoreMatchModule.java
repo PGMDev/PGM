@@ -109,8 +109,9 @@ public class CoreMatchModule implements MatchModule, Listener {
               }
             }
           } else if (event.getCause() instanceof EntityExplodeEvent) {
-            // this is a temp fix until there is a tracker for placed minecarts (only dispensed are
-            // tracked right now)
+            // If the platform doesn't provide enough data to tell
+            // who owns the TNT minecart that blew up the core, cancel the
+            // event to prevent possible team griefing
             if (((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
               event.setCancelled(true);
             }

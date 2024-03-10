@@ -74,6 +74,7 @@ import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
+import tc.oc.pgm.util.listener.TNTMinecartPlacementListener;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.tablist.TablistResizer;
@@ -359,6 +360,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new PlayerBlockListener());
     registerEvents(new PlayerMoveListener());
     registerEvents(new ItemTransferListener());
+    registerEvents(new TNTMinecartPlacementListener());
     new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
     if (matchTabManager != null) registerEvents(matchTabManager);

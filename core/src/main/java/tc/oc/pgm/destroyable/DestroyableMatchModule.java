@@ -18,6 +18,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.ShowOption;
@@ -57,11 +58,18 @@ public class DestroyableMatchModule implements MatchModule, Listener {
       return;
     }
 
-    // This is a temp fix until there is a tracker for placed minecarts (only dispensed are tracked
-    // right now)
-    if ((event.getCause() instanceof EntityExplodeEvent
-            && ((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart)
-        || event.getCause() instanceof BlockPistonExtendEvent
+    ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
+
+    if (event.getCause() instanceof EntityExplodeEvent
+        && ((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
+      // If the platform doesn't provide enough data to tell
+      // who owns the TNT minecart that blew up the destroyable,
+      // cancel the event to prevent possible team griefing
+      if (player == null) {
+        event.setCancelled(true);
+        return;
+      }
+    } else if (event.getCause() instanceof BlockPistonExtendEvent
         || event.getCause() instanceof BlockPistonRetractEvent) {
 
       event.setCancelled(true);
@@ -70,10 +78,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
     for (Destroyable destroyable : this.destroyables) {
       String reasonKey =
-          destroyable.testBlockChange(
-              event.getOldState(),
-              event.getNewState(),
-              ParticipantBlockTransformEvent.getPlayerState(event));
+          destroyable.testBlockChange(event.getOldState(), event.getNewState(), player);
       if (reasonKey != null) {
         event.setCancelled(translatable(reasonKey, destroyable.getComponentName()));
         return;
