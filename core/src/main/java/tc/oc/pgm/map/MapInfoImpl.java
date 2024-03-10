@@ -386,7 +386,7 @@ public class MapInfoImpl implements MapInfo {
         this.world = variantEl.getAttributeValue("world");
         if (slug != null) slug += "_" + variantId;
       }
-      this.mapId = assertNotNull(StringUtils.slugify(slug != null ? slug : mapName));
+      this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
     }
 
     @Override
