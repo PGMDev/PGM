@@ -112,7 +112,7 @@ public abstract class Spawning extends Participating {
   }
 
   public void updateTitle() {
-    Title.Times times = Title.Times.of(Duration.ZERO, fromTicks(3), fromTicks(3));
+    Title.Times times = Title.Times.times(Duration.ZERO, fromTicks(3), fromTicks(3));
 
     player.showTitle(title(getTitle(false), getSubtitle(false), times));
 

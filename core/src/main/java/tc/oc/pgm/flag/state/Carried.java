@@ -199,7 +199,7 @@ public class Carried extends Spawned implements Missing {
     if (!message.equals(this.lastMessage)) {
       this.lastMessage = message;
       this.carrier.showTitle(
-          title(empty(), message, Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(35))));
+          title(empty(), message, Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(35))));
     }
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
