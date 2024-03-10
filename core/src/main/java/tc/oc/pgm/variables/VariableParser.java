@@ -24,6 +24,7 @@ import tc.oc.pgm.variables.types.DummyVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
+import tc.oc.pgm.variables.types.TimeLimitVariable;
 
 public class VariableParser {
   // The limitation is due to them being used in exp4j formulas for.
@@ -87,6 +88,12 @@ public class VariableParser {
   @MethodParser("score")
   public VariableDefinition<Party> parseScore(Element el, String id) throws InvalidXMLException {
     return VariableDefinition.ofStatic(id, Party.class, ScoreVariable::new);
+  }
+
+  @MethodParser("timelimit")
+  public VariableDefinition<Match> parseTimeLimit(Element el, String id)
+      throws InvalidXMLException {
+    return VariableDefinition.ofStatic(id, Match.class, TimeLimitVariable::new);
   }
 
   @MethodParser("with-team")
