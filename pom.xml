@@ -50,6 +50,9 @@
         <repository>
             <id>sportpaper-github</id>
             <url>https://maven.pkg.github.com/Electroid/SportPaper</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>jitpack-io</id>
