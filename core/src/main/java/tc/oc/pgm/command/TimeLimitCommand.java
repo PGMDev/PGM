@@ -16,7 +16,7 @@ import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
-import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.channels.ChannelManager;
 import tc.oc.pgm.timelimit.TimeLimit;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.named.NameStyle;
@@ -48,12 +48,11 @@ public final class TimeLimitCommand {
             true));
     time.start();
 
-    ChatDispatcher.broadcastAdminChatMessage(
+    ChannelManager.broadcastAdminMessage(
         translatable(
             "match.timeLimit.announce.commandOutput",
             player(sender, NameStyle.FANCY),
             clock(duration).color(NamedTextColor.AQUA),
-            result.map(r -> r.getDescription(match)).orElse(translatable("misc.unknown"))),
-        match);
+            result.map(r -> r.getDescription(match)).orElse(translatable("misc.unknown"))));
   }
 }

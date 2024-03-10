@@ -14,7 +14,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.listeners.ChatDispatcher;
+import tc.oc.pgm.channels.ChannelManager;
 import tc.oc.pgm.start.StartCountdown;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
@@ -48,11 +48,10 @@ public final class StartCommand {
 
     match.getCountdown().cancelAll(StartCountdown.class);
     start.forceStartCountdown(duration, null);
-    ChatDispatcher.broadcastAdminChatMessage(
+    ChannelManager.broadcastAdminMessage(
         translatable(
             "admin.start.announce",
             player(sender, NameStyle.FANCY),
-            duration(duration, NamedTextColor.AQUA)),
-        match);
+            duration(duration, NamedTextColor.AQUA)));
   }
 }
