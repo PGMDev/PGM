@@ -98,7 +98,7 @@ public class ShopModule implements MapModule<ShopMatchModule> {
         for (Element category : XMLUtils.getChildren(shop, "category")) {
           Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
           ItemStack categoryIcon = applyItemFlags(kitParser.parseItem(category, false));
-          List<Icon> icons = parseIcons(category, kitParser, actionParser, filterParser, logger);
+          List<Icon> icons = parseIcons(category, kitParser, actionParser, filterParser);
           Filter filter = filterParser.parseFilterProperty(category, "filter", StaticFilter.ALLOW);
 
           categories.add(new Category(categoryId.getValue(), categoryIcon, filter, icons));
@@ -138,11 +138,11 @@ public class ShopModule implements MapModule<ShopMatchModule> {
   }
 
   private static List<Icon> parseIcons(
-      Element category, KitParser kits, ActionParser actions, FilterParser filters, Logger logger)
+      Element category, KitParser kits, ActionParser actions, FilterParser filters)
       throws InvalidXMLException {
     List<Icon> icons = Lists.newArrayList();
     for (Element icon : XMLUtils.getChildren(category, "item")) {
-      icons.add(parseIcon(icon, kits, actions, filters, logger));
+      icons.add(parseIcon(icon, kits, actions, filters));
     }
 
     if (icons.size() > Category.MAX_ICONS) {
@@ -158,22 +158,10 @@ public class ShopModule implements MapModule<ShopMatchModule> {
   }
 
   private static Icon parseIcon(
-      Element icon, KitParser kits, ActionParser actions, FilterParser filters, Logger logger)
+      Element icon, KitParser kits, ActionParser actions, FilterParser filters)
       throws InvalidXMLException {
 
-    List<Payment> payments = Lists.newArrayList();
-
-    for (Element payment : XMLUtils.getChildren(icon, "payment")) {
-      payments.add(parsePayment(payment, kits));
-    }
-
-    if (payments.isEmpty()) {
-      payments.add(parsePayment(icon, kits));
-    }
-
-    if (payments.size() != payments.stream().map(Payment::getCurrency).distinct().count()) {
-      throw new InvalidXMLException("Payment materials must be unique within an icon", icon);
-    }
+    List<Payment> payments = parsePayments(icon, kits);
 
     ItemStack item = kits.parseItem(icon, false);
     Filter filter = filters.parseFilterProperty(icon, "filter", StaticFilter.ALLOW);
@@ -192,7 +180,23 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     return new Icon(payments, item, filter, action);
   }
 
-  private static Payment parsePayment(Element element, KitParser kits) throws InvalidXMLException {
+  public static List<Payment> parsePayments(Element parent, KitParser kits)
+      throws InvalidXMLException {
+    List<Payment> payments = Lists.newArrayList();
+    for (Element payment : XMLUtils.getChildren(parent, "payment")) {
+      payments.add(parsePayment(payment, kits));
+    }
+    if (payments.isEmpty()) {
+      payments.add(ShopModule.parsePayment(parent, kits));
+    }
+    if (payments.size() != payments.stream().map(Payment::getCurrency).distinct().count()) {
+      throw new InvalidXMLException(
+          "Payment materials must be unique within a purchasable", parent);
+    }
+    return payments;
+  }
+
+  public static Payment parsePayment(Element element, KitParser kits) throws InvalidXMLException {
     Node priceAttr = Node.fromAttr(element, "price");
     Node currencyAttr = Node.fromAttr(element, "currency");
     Node colorAttr = Node.fromAttr(element, "color");

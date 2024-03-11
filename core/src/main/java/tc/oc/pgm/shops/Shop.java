@@ -8,13 +8,10 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.sound.Sound;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
-import tc.oc.pgm.shops.menu.Payment;
 
 public class Shop extends SelfIdentifyingFeatureDefinition {
 
@@ -43,50 +40,15 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
         .collect(Collectors.toList());
   }
 
-  public boolean canPurchase(Icon icon, MatchPlayer buyer) {
-    if (!buyer.getMatch().isRunning() || !buyer.isParticipating()) return false;
-    if (icon.isFree()) return true;
-
-    return icon.getPayments().stream().allMatch(p -> p.hasPayment(buyer.getInventory()));
-  }
-
-  public boolean purchase(Icon icon, MatchPlayer buyer) {
-    if (!canPurchase(icon, buyer)) {
-      if (!buyer.getMatch().isRunning()) {
-        buyer.sendWarning(translatable("match.error.noMatch"));
-      } else {
-        buyer.sendWarning(translatable("shop.currency.insufficient"));
-      }
-      return false;
+  public void purchase(Icon icon, MatchPlayer buyer) {
+    if (icon.takePayment(buyer)) {
+      icon.getAction().trigger(buyer);
+      buyer.getBukkit().updateInventory();
+      buyer.playSound(PURCHASE_SOUND);
+    } else if (!buyer.getMatch().isRunning()) {
+      buyer.sendWarning(translatable("match.error.noMatch"));
+    } else {
+      buyer.sendWarning(translatable("shop.currency.insufficient"));
     }
-
-    if (!icon.isFree()) {
-      PlayerInventory inventory = buyer.getInventory();
-      for (Payment payment : icon.getPayments()) {
-        int remaining = payment.getPrice();
-        for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
-          ItemStack item = inventory.getItem(slot);
-          if (item == null || !payment.matches(item)) continue;
-          if (item.getAmount() > remaining) {
-            item.setAmount(item.getAmount() - remaining);
-            inventory.setItem(slot, item);
-            remaining = 0;
-          } else {
-            inventory.setItem(slot, null);
-            remaining -= item.getAmount();
-          }
-        }
-
-        // Should never happen, canPurchase checks for payment being available in the inventory
-        if (remaining > 0) {
-          throw new IllegalStateException("Player couldn't pay for their purchase.");
-        }
-      }
-    }
-
-    buyer.getBukkit().updateInventory();
-    icon.getAction().trigger(buyer);
-    buyer.playSound(PURCHASE_SOUND);
-    return true;
   }
 }

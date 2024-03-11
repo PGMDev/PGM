@@ -173,7 +173,7 @@ public class ShopMenu extends InventoryMenu {
   }
 
   private ClickableItem getPurchasableItem(Icon icon) {
-    boolean canPurchase = shop.canPurchase(icon, getViewer());
+    boolean canPurchase = icon.canPurchase(getViewer());
     NamedTextColor purchaseColor = canPurchase ? NamedTextColor.GREEN : NamedTextColor.RED;
 
     List<Component> price = Lists.newArrayList();
@@ -255,12 +255,7 @@ public class ShopMenu extends InventoryMenu {
     meta.addItemFlags(ItemFlag.values());
     item.setItemMeta(meta);
 
-    return ClickableItem.of(
-        item,
-        c -> {
-          shop.purchase(icon, getViewer());
-          getViewer().getBukkit().updateInventory();
-        });
+    return ClickableItem.of(item, c -> shop.purchase(icon, getViewer()));
   }
 
   private ClickableItem getPageItem(Player player, int page, boolean next) {
