@@ -29,6 +29,7 @@ import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.kyori.adventure.text.Component;
@@ -90,7 +91,10 @@ public abstract class CommandGraph<P extends Plugin> {
     manager.commandSuggestionProcessor(
         new FilteringCommandSuggestionProcessor<>(
             FilteringCommandSuggestionProcessor.Filter.Simple.contextFree(
-                (s, i) -> i.isEmpty() || s.startsWith("-") == s.startsWith(i))));
+                (s, i) ->
+                    i.isEmpty()
+                        || !s.startsWith("-")
+                        || s.toLowerCase(Locale.ROOT).startsWith(i.toLowerCase(Locale.ROOT)))));
 
     return manager;
   }
