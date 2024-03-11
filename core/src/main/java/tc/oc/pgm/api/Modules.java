@@ -20,6 +20,8 @@ import tc.oc.pgm.broadcast.BroadcastMatchModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.ClassModule;
+import tc.oc.pgm.compass.CompassMatchModule;
+import tc.oc.pgm.compass.CompassModule;
 import tc.oc.pgm.consumable.ConsumableMatchModule;
 import tc.oc.pgm.consumable.ConsumableModule;
 import tc.oc.pgm.controlpoint.ControlPointMatchModule;
@@ -247,6 +249,7 @@ public final class Modules {
     register(ScoreModule.class, ScoreMatchModule.class, new ScoreModule.Factory());
     register(KitModule.class, KitMatchModule.class, new KitModule.Factory());
     register(ActionModule.class, ActionMatchModule.class, new ActionModule.Factory());
+    register(CompassModule.class, CompassMatchModule.class, new CompassModule.Factory());
     register(
         ItemDestroyModule.class, ItemDestroyMatchModule.class, new ItemDestroyModule.Factory());
     register(ToolRepairModule.class, ToolRepairMatchModule.class, new ToolRepairModule.Factory());
