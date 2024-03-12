@@ -39,6 +39,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private final Filter pickupFilter; // Filter players who can pickup this flag
   private final Filter captureFilter; // Filter players who can capture this flag
   private final Filter dropFilter; // Filter players who can drop the flag
+  private final @Nullable Filter
+      compassFilter; // Filter for players who have their compass set to this flag
   private final @Nullable Kit pickupKit; // Kit to give on flag pickup
   private final @Nullable Kit dropKit; // Kit to give carrier when they drop the flag
   private final @Nullable Kit carryKit; // Kit to give to/take from the flag carrier
@@ -62,6 +64,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
       Filter pickupFilter,
       Filter captureFilter,
       Filter dropFilter,
+      @Nullable Filter compassFilter,
       @Nullable Kit pickupKit,
       @Nullable Kit dropKit,
       @Nullable Kit carryKit,
@@ -92,6 +95,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
     this.pickupFilter = pickupFilter;
     this.captureFilter = captureFilter;
     this.dropFilter = dropFilter;
+    this.compassFilter = compassFilter;
     this.pickupKit = pickupKit;
     this.dropKit = dropKit;
     this.carryKit = carryKit;
@@ -149,6 +153,10 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public Filter getCaptureFilter() {
     return captureFilter;
+  }
+
+  public @Nullable Filter getCompassFilter() {
+    return compassFilter;
   }
 
   public @Nullable Kit getPickupKit() {
