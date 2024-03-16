@@ -45,6 +45,9 @@ public final class TextParser {
   private static final Pattern INF = Pattern.compile("^((\\+|-)?oo)$", Pattern.CASE_INSENSITIVE);
   private static final Pattern DOT = Pattern.compile("\\s*\\.\\s*");
   private static final Pattern COMMA = Pattern.compile("\\s*,\\s*");
+  // [{ "prop" : ... }], {prop: ...} or ['prop': ...}, looks like json, but could be invalid
+  private static final Pattern PROBABLY_JSON =
+      Pattern.compile("[\\[{][ \\[{]*\\s*([\"']?)\\w+\\1\\s*:.*[\\[}]+", Pattern.CASE_INSENSITIVE);
   private static final Range<Integer> NONNEG = Range.atLeast(0);
 
   /**
@@ -413,7 +416,7 @@ public final class TextParser {
   public static Component parseComponent(String text) throws TextException {
     assertNotNull(text, "cannot parse component from null");
 
-    if (text.startsWith("{\"") && text.endsWith("\"}")) {
+    if (PROBABLY_JSON.matcher(text).matches()) {
       try {
         return GsonComponentSerializer.gson().deserialize(text);
       } catch (JsonSyntaxException e) {
@@ -444,7 +447,7 @@ public final class TextParser {
   public static Component parseComponentSection(String text) {
     assertNotNull(text, "cannot parse component from null");
 
-    if (text.startsWith("{\"") && text.endsWith("\"}")) {
+    if (PROBABLY_JSON.matcher(text).matches()) {
       try {
         return GsonComponentSerializer.gson().deserialize(text);
       } catch (Throwable t) {
