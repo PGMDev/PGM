@@ -313,11 +313,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     // Try to ensure that usernames for all relevant offline players will be loaded in the cache
     // when the inventory GUI is created. If usernames needs to be resolved using the mojang api
-    // (UsernameResolver)
-    // it can take some time, and we cant really know how long.
-    this.getOfflinePlayersWithStats()
-        .forEach(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy());
-    CompletableFuture.runAsync(UsernameResolver::resolveAll);
+    // (UsernameResolver) it can take some time, and we cant really know how long.
+    this.getOfflinePlayersWithStats().forEach(id -> PGM.get().getDatastore().getUsername(id));
+    UsernameResolver.resolveAll();
 
     // Schedule displaying stats after match end
     match

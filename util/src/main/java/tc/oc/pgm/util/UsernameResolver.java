@@ -38,7 +38,7 @@ public final class UsernameResolver {
   private static final Gson GSON = new Gson();
   private static final Semaphore LOCK = new Semaphore(1);
   private static final Map<UUID, Consumer<String>> QUEUE = new ConcurrentHashMap<>();
-  private static final double MAX_SEQUENTIAL_FAILURES = 5;
+  private static final int MAX_SEQUENTIAL_FAILURES = 5;
   private static String userAgent = "PGM";
 
   static {
@@ -112,7 +112,7 @@ public final class UsernameResolver {
     if (!errors.isEmpty()) {
       Bukkit.getLogger()
           .log(
-              Level.FINEST,
+              Level.WARNING,
               "Could not resolve " + errors.size() + " usernames",
               errors.values().iterator().next());
     }
@@ -122,9 +122,7 @@ public final class UsernameResolver {
 
   private static String resolveSync(UUID id) throws IOException {
     final HttpURLConnection url =
-        (HttpURLConnection)
-            new URL("https://api.ashcon.app/mojang/v2/user/" + assertNotNull(id).toString())
-                .openConnection();
+        (HttpURLConnection) new URL("https://api.ashcon.app/mojang/v2/user/" + assertNotNull(id)).openConnection();
     url.setRequestMethod("GET");
     url.setRequestProperty("User-Agent", userAgent);
     url.setRequestProperty("Accept", "application/json");
@@ -132,15 +130,8 @@ public final class UsernameResolver {
     url.setConnectTimeout(10000);
     url.setReadTimeout(10000);
 
-    final StringBuilder response = new StringBuilder();
-    try (final BufferedReader br =
-        new BufferedReader(new InputStreamReader(url.getInputStream(), StandardCharsets.UTF_8))) {
-      String line;
-      while ((line = br.readLine()) != null) {
-        response.append(line.trim());
-      }
+    try (final BufferedReader br = new BufferedReader(new InputStreamReader(url.getInputStream(), StandardCharsets.UTF_8))) {
+      return GSON.fromJson(br, JsonObject.class).get("username").getAsString();
     }
-
-    return GSON.fromJson(response.toString(), JsonObject.class).get("username").getAsString();
   }
 }
