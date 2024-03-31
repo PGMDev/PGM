@@ -1,5 +1,7 @@
 package tc.oc.pgm.api.player;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.GameMode;
@@ -8,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
@@ -20,6 +23,7 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.listener.AfkTracker;
 import tc.oc.pgm.util.named.Named;
 
 /**
@@ -143,6 +147,32 @@ public interface MatchPlayer
   default boolean isLegacy() {
     return getProtocolVersion() <= ViaUtils.VERSION_1_7;
   }
+
+  /**
+   * Get when the {@link MatchPlayer} was last active in the game
+   *
+   * @return the last time player was not afk
+   */
+  default Instant getLastActive() {
+    return getActivity().getLastActive();
+  }
+
+  /**
+   * Get whether the {@link MatchPlayer} is actively moving, or afk
+   *
+   * @param duration How much time until the player is considered inactive
+   * @return true if the player moved within {@param duration}, false if the player has been afk that long
+   */
+  default boolean isActive(Duration duration) {
+    return getActivity().isActive(duration);
+  }
+
+  /**
+   * Get the AFK activity tracker for the {@link MatchPlayer}
+   *
+   * @return the afk activity tracker
+   */
+  AfkTracker.Activity getActivity();
 
   /**
    * Get whether the {@link MatchPlayer} can interact with things in the {@link Match}.

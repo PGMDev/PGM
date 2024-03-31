@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,11 +60,11 @@ public class GoalMatchModule implements MatchModule, Listener {
   }
 
   public Collection<Goal> getGoals() {
-    return goals;
+    return Collections.unmodifiableCollection(goals);
   }
 
   public Collection<Goal> getGoals(Competitor competitor) {
-    return goalsByCompetitor.get(competitor);
+    return Collections.unmodifiableCollection(goalsByCompetitor.get(competitor));
   }
 
   public Collection<Competitor> getCompetitors(Goal goal) {

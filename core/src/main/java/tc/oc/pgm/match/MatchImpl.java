@@ -407,7 +407,7 @@ public class MatchImpl implements Match {
 
   @Override
   public Collection<MatchPlayer> getPlayers() {
-    return ImmutableList.copyOf(players.values());
+    return Collections.unmodifiableCollection(players.values());
   }
 
   @Override
@@ -937,17 +937,15 @@ public class MatchImpl implements Match {
   @Override
   @SuppressWarnings("unchecked")
   public <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(Class<R> type) {
-    final Collection<R> result = new LinkedList<>();
+    Collection<R> result = new ArrayList<>();
     if (type.isAssignableFrom(Match.class)) {
       result.add((R) this);
     }
-    if (Party.class.isAssignableFrom(type)) {
-      result.addAll(
-          (List<R>)
-              this.getParties().stream().filter(type::isInstance).collect(Collectors.toList()));
+    if (type.isAssignableFrom(Party.class)) {
+      result.addAll((Collection<? extends R>) getParties());
     }
     if (type.isAssignableFrom(MatchPlayer.class)) {
-      result.addAll((List<R>) this.getPlayers());
+      result.addAll((Collection<? extends R>) getPlayers());
     }
     return result;
   }

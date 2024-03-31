@@ -1,5 +1,6 @@
 package tc.oc.pgm.tntrender;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.ExplosionPrimeEvent;
@@ -18,11 +20,12 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(value = MatchScope.LOADED)
 public class TNTRenderMatchModule implements MatchModule, Listener {
-
+  private static final Duration AFK_TIME = Duration.ofSeconds(30);
   private static final double MAX_DISTANCE = Math.pow(64d, 2);
 
   private final Match match;
@@ -41,13 +44,19 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
             () -> entities.removeIf(PrimedTnt::update), 0, 50, TimeUnit.MILLISECONDS);
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onTntSpawn(ExplosionPrimeEvent event) {
     if (event.getEntity() instanceof TNTPrimed)
       entities.add(new PrimedTnt((TNTPrimed) event.getEntity()));
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onDispense(BlockDispenseEntityEvent event) {
+    if (event.getEntity() instanceof TNTPrimed)
+      entities.add(new PrimedTnt((TNTPrimed) event.getEntity()));
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onTntExplode(EntityExplodeEvent event) {
     if (!(event.getEntity() instanceof TNTPrimed)) return;
     Location explosion = event.getLocation();
@@ -90,7 +99,7 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
     }
 
     private void updatePlayer(MatchPlayer player) {
-      if (currentLocation.distanceSquared(player.getBukkit().getLocation()) >= MAX_DISTANCE) {
+      if (currentLocation.distanceSquared(player.getLocation()) >= MAX_DISTANCE && player.isActive(AFK_TIME)) {
         if (viewers.add(player)) {
           NMSHacks.sendBlockChange(currentLocation, player.getBukkit(), Material.TNT);
         } else if (moved) {
