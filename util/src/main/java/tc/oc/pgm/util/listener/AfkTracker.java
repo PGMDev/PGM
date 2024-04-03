@@ -1,5 +1,8 @@
 package tc.oc.pgm.util.listener;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,10 +18,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Map;
 
 public class AfkTracker implements Listener {
 
@@ -47,11 +46,12 @@ public class AfkTracker implements Listener {
 
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event) {
-    if (event.getFrom().getYaw() != event.getTo().getYaw() &&
-        event.getFrom().getPitch() != event.getTo().getPitch()) {
+    if (event.getFrom().getYaw() != event.getTo().getYaw()
+        && event.getFrom().getPitch() != event.getTo().getPitch()) {
       track(event.getPlayer());
     }
   }
+
   @EventHandler
   public void onPlayerChat(AsyncPlayerChatEvent event) {
     track(event.getPlayer());
@@ -69,20 +69,17 @@ public class AfkTracker implements Listener {
 
   @EventHandler
   public void onInventoryOpen(InventoryOpenEvent event) {
-    if (event.getPlayer() instanceof Player)
-      track((Player) event.getPlayer());
+    if (event.getPlayer() instanceof Player) track((Player) event.getPlayer());
   }
 
   @EventHandler
   public void onInventoryClick(InventoryClickEvent event) {
-    if (event.getWhoClicked() instanceof Player)
-      track((Player) event.getWhoClicked());
+    if (event.getWhoClicked() instanceof Player) track((Player) event.getWhoClicked());
   }
 
   @EventHandler
   public void onInventoryClose(InventoryCloseEvent event) {
-    if (event.getPlayer() instanceof Player)
-      track((Player) event.getPlayer());
+    if (event.getPlayer() instanceof Player) track((Player) event.getPlayer());
   }
 
   public class Activity {
@@ -104,5 +101,4 @@ public class AfkTracker implements Listener {
       return getAfkDuration().compareTo(duration) < 0;
     }
   }
-
 }

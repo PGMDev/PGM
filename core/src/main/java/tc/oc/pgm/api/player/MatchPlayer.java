@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
@@ -161,7 +160,8 @@ public interface MatchPlayer
    * Get whether the {@link MatchPlayer} is actively moving, or afk
    *
    * @param duration How much time until the player is considered inactive
-   * @return true if the player moved within {@param duration}, false if the player has been afk that long
+   * @return true if the player moved within {@param duration}, false if the player has been afk
+   *     that long
    */
   default boolean isActive(Duration duration) {
     return getActivity().isActive(duration);

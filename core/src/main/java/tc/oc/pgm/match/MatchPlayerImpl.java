@@ -4,13 +4,10 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
