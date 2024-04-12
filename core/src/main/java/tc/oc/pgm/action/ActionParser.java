@@ -28,10 +28,12 @@ import tc.oc.pgm.action.actions.ReplaceItemAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.action.actions.SoundAction;
+import tc.oc.pgm.action.actions.TakePaymentAction;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
@@ -41,6 +43,8 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.shops.ShopModule;
+import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -351,5 +355,16 @@ public class ActionParser {
         XMLUtils.parseMaterialData(Node.fromRequiredAttr(el, "material")),
         filters.parseProperty(Node.fromAttr(el, "filter")),
         XMLUtils.parseBoolean(el.getAttribute("events"), false));
+  }
+
+  @MethodParser("take-payment")
+  public Action<? super MatchPlayer> parseTakePayment(Element el, Class<?> scope)
+      throws InvalidXMLException {
+    Payable payable = Payable.of(ShopModule.parsePayments(el, factory.getKits()));
+    if (payable.isFree()) throw new InvalidXMLException("Payment has not been defined", el);
+    return new TakePaymentAction(
+        payable,
+        parseProperty(Node.fromChildOrAttr(el, "success-action"), MatchPlayer.class, null),
+        parseProperty(Node.fromChildOrAttr(el, "fail-action"), MatchPlayer.class, null));
   }
 }
