@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.party;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
@@ -156,6 +157,20 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
   @Override
   default Collection<? extends Filterable<? extends PlayerQuery>> getFilterableChildren() {
     return this.getPlayers();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  default <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(
+      Class<R> type) {
+    Collection<R> result = new ArrayList<>();
+    if (type.isAssignableFrom(Party.class)) {
+      result.add((R) this);
+    }
+    if (type.isAssignableFrom(MatchPlayer.class)) {
+      result.addAll((Collection<? extends R>) getPlayers());
+    }
+    return result;
   }
 
   @Override

@@ -56,6 +56,7 @@ import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.listener.AfkTracker;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -79,6 +80,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
   private final AttributeMap attributeMap;
+  private final AfkTracker.Activity activity;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger =
@@ -95,6 +97,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
     this.attributeMap = NMSHacks.buildAttributeMap(player);
+    this.activity = PGM.get().getAfkTracker().getActivity(player);
   }
 
   @Override
@@ -188,6 +191,11 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   @Override
   public boolean isFrozen() {
     return frozen.get();
+  }
+
+  @Override
+  public AfkTracker.Activity getActivity() {
+    return activity;
   }
 
   @Override
@@ -468,6 +476,15 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public Collection<? extends Filterable<? extends PlayerQuery>> getFilterableChildren() {
+    return Collections.emptyList();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(Class<R> type) {
+    if (type.isAssignableFrom(getClass())) {
+      return Collections.singleton((R) this);
+    }
     return Collections.emptyList();
   }
 
