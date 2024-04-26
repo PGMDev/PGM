@@ -44,6 +44,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.command.util.PGMCommandGraph;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
+import tc.oc.pgm.db.SqlUsernameResolver;
 import tc.oc.pgm.integrations.SimpleVanishIntegration;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
@@ -80,6 +81,9 @@ import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.usernames.ApiUsernameResolver;
+import tc.oc.pgm.util.usernames.BukkitUsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
@@ -159,6 +163,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       getServer().getPluginManager().disablePlugin(this);
       return;
     }
+
+    UsernameResolvers.setResolvers(
+        new BukkitUsernameResolver(),
+        new SqlUsernameResolver((SQLDatastore) datastore),
+        new ApiUsernameResolver());
 
     datastore = new CacheDatastore(datastore);
 

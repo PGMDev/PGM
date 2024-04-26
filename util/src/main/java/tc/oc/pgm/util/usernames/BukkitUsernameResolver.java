@@ -1,0 +1,40 @@
+package tc.oc.pgm.util.usernames;
+
+import java.time.Instant;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+
+public final class BukkitUsernameResolver extends AbstractUsernameResolver {
+  private static final SyncExecutor EXECUTOR = new SyncExecutor();
+  private static final Plugin PGM = BukkitUtils.getPlugin();
+
+  @Override
+  protected Executor getExecutor() {
+    return EXECUTOR;
+  }
+
+  @Override
+  protected void process(UUID uuid, CompletableFuture<UsernameResponse> future) {
+    OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+    future.complete(
+        UsernameResponse.of(
+            player.getName(),
+            Instant.ofEpochMilli(player.getLastPlayed()),
+            BukkitUsernameResolver.class));
+  }
+
+  private static class SyncExecutor implements Executor {
+
+    @Override
+    public void execute(@NotNull Runnable command) {
+      if (Bukkit.isPrimaryThread()) command.run();
+      else Bukkit.runOnMainThread(PGM, false, command);
+    }
+  }
+}

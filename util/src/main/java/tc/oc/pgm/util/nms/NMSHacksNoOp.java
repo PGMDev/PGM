@@ -223,6 +223,11 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   }
 
   @Override
+  public String getPlayerName(UUID uuid) {
+    return Bukkit.getOfflinePlayer(uuid).getName();
+  }
+
+  @Override
   public Set<MaterialData> getBlockStates(Material material) {
     // TODO: MaterialData is not version compatible
     Set<MaterialData> materialDataSet = new HashSet<>();

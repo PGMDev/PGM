@@ -1,15 +1,17 @@
 package tc.oc.pgm.db;
 
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
@@ -17,14 +19,13 @@ import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
-import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.concurrent.ThreadSafeConnection;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextParser;
-
-import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.player.PlayerComponent.player;
+import tc.oc.pgm.util.usernames.UsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolvers;
 
 public class SQLDatastore extends ThreadSafeConnection implements Datastore {
 
@@ -41,22 +42,18 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
   }
 
   private class SQLUsername implements Username {
-    private final long WEEK_MILLIS = Duration.ofDays(7).toMillis();
+    private final Duration ONE_WEEK = Duration.ofDays(7);
 
     private final UUID id;
     private String name;
-    private long validUntil;
-    private volatile boolean queried;
+    private Instant validUntil;
 
     SQLUsername(UUID id) {
       this.id = assertNotNull(id, "username id is null");
-      // Attempt sync resolution using bukkit's data
-      if (!Bukkit.getServer().getWorlds().isEmpty()) {
-        OfflinePlayer pl = Bukkit.getOfflinePlayer(id);
-        setName(pl.getName(), pl.getLastPlayed() + WEEK_MILLIS);
-      } else {
-        resolveNameAsync();
-      }
+      // It's better than no name at all until we resolve to something better
+      // Note: it appears like offline uuid -> name does nothing in sportpaper
+      if (Bukkit.isPrimaryThread()) name = NMSHacks.getPlayerName(id);
+      UsernameResolvers.resolve(id).thenAccept(this::setName);
     }
 
     @Override
@@ -74,49 +71,17 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
       return player(Bukkit.getPlayer(id), name, style);
     }
 
-    protected void setName(@Nullable String name, long validUntil) {
+    protected void setName(UsernameResolver.UsernameResponse response) {
       // A name is provided and either we know no name, or it's more recent
-      if (name != null && (this.name == null || validUntil > this.validUntil)) {
-        this.name = name;
-        this.validUntil = validUntil;
+      if (response.getUsername() != null
+          && (this.name == null || response.getValidUntil().isAfter(this.validUntil))) {
+        this.name = response.getUsername();
+        this.validUntil = response.getValidUntil();
 
-        // Only update names with over a week of validity
-        if (validUntil > System.currentTimeMillis() + WEEK_MILLIS) {
+        // Only update names with about over a week of validity
+        if (response.getSource() != SqlUsernameResolver.class
+            && validUntil.isAfter(Instant.now().plus(ONE_WEEK))) {
           submitQuery(new UpdateQuery());
-        }
-      }
-
-      // We have no name, or it has expired, try to get a better one
-      if (this.name == null || this.validUntil < System.currentTimeMillis()) {
-        resolveNameAsync();
-      }
-    }
-
-    protected void resolveNameAsync() {
-      if (name == null && !queried) {
-        queried = true;
-        submitQuery(new SelectQuery());
-        return;
-      }
-      // No name known in DB, or it has expired
-      if (name == null || validUntil < System.currentTimeMillis()) {
-        UsernameResolver.resolve(id, n -> setName(n, Duration.ofDays(7 + (int) (Math.random() * 7)).toMillis()));
-      }
-    }
-
-    private class SelectQuery implements Query {
-      @Override
-      public String getFormat() {
-        return "SELECT name, expires FROM usernames WHERE id = ? LIMIT 1";
-      }
-
-      @Override
-      public void query(PreparedStatement statement) throws SQLException {
-        statement.setString(1, getId().toString());
-
-        try (final ResultSet result = statement.executeQuery()) {
-          boolean exists = result.next();
-          setName(exists ? result.getString(1) : null, exists ? result.getLong(2) : 0);
         }
       }
     }
@@ -131,7 +96,7 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
       public void query(PreparedStatement statement) throws SQLException {
         statement.setString(1, id.toString());
         statement.setString(2, name);
-        statement.setLong(3, validUntil);
+        statement.setLong(3, validUntil.toEpochMilli());
         statement.executeUpdate();
       }
     }

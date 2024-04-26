@@ -283,6 +283,10 @@ public interface NMSHacks {
     return INSTANCE.getPlayerSkinForViewer(player, viewer);
   }
 
+  static String getPlayerName(UUID uuid) {
+    return INSTANCE.getPlayerName(uuid);
+  }
+
   static void updateVelocity(Player player) {
     INSTANCE.updateVelocity(player);
   }

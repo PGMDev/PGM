@@ -22,5 +22,4 @@ public interface Username extends Named {
   @Override
   @Nullable
   String getNameLegacy();
-
 }
