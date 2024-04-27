@@ -22,25 +22,23 @@ import tc.oc.pgm.util.text.RenderableComponent;
 /** PlayerComponent is used to format player names in a consistent manner with optional styling */
 public final class PlayerComponent implements RenderableComponent {
 
-  public static final TextColor OFFLINE_COLOR = NamedTextColor.DARK_AQUA;
-
   public static final Component UNKNOWN =
-      translatable("misc.unknown", OFFLINE_COLOR, TextDecoration.ITALIC);
-  public static final Component CONSOLE = translatable("misc.console", OFFLINE_COLOR);
+      translatable("misc.unknown", PlayerRenderer.OFFLINE_COLOR, TextDecoration.ITALIC);
+  public static final Component CONSOLE = translatable("misc.console", PlayerRenderer.OFFLINE_COLOR);
   public static final PlayerComponent UNKNOWN_PLAYER =
-      new PlayerComponent(null, new PlayerData(null, null, NameStyle.PLAIN));
+      new PlayerComponent(null, new PlayerData(null, null, NameStyle.SIMPLE_COLOR), Style.empty());
 
   public static final PlayerRenderer RENDERER = new PlayerRenderer();
 
   // The data for player being rendered.
   private final @Nullable Player player;
   private final @NotNull PlayerData data;
+  private final Style style;
 
-  private Style style = Style.empty();
-
-  private PlayerComponent(@Nullable Player player, @NotNull PlayerData data) {
+  private PlayerComponent(@Nullable Player player, @NotNull PlayerData data, Style style) {
     this.player = player;
     this.data = data;
+    this.style = style;
   }
 
   public static Component player(@Nullable UUID playerId, @NotNull NameStyle style) {
@@ -59,24 +57,24 @@ public final class PlayerComponent implements RenderableComponent {
 
   public static PlayerComponent player(Player player, @NotNull NameStyle style) {
     if (player == null) return UNKNOWN_PLAYER;
-    return new PlayerComponent(player, new PlayerData(player, style));
+    return new PlayerComponent(player, new PlayerData(player, style), Style.empty());
   }
 
   public static Component player(
       @Nullable Player player, @Nullable String username, @NotNull NameStyle style) {
     if (player == null && username == null) return UNKNOWN_PLAYER;
-    return new PlayerComponent(player, new PlayerData(player, username, style));
+    return new PlayerComponent(player, new PlayerData(player, username, style), Style.empty());
   }
 
   public static PlayerComponent player(
       @Nullable MatchPlayerState player, @NotNull NameStyle style) {
     if (player == null) return UNKNOWN_PLAYER;
-    return new PlayerComponent(Bukkit.getPlayer(player.getId()), new PlayerData(player, style));
+    return new PlayerComponent(Bukkit.getPlayer(player.getId()), new PlayerData(player, style), Style.empty());
   }
 
   public static PlayerComponent player(@Nullable MatchPlayer player, @NotNull NameStyle style) {
     if (player == null) return UNKNOWN_PLAYER;
-    return new PlayerComponent(player.getBukkit(), new PlayerData(player, style));
+    return new PlayerComponent(player.getBukkit(), new PlayerData(player, style), Style.empty());
   }
 
   public Component render(CommandSender viewer) {
@@ -90,8 +88,7 @@ public final class PlayerComponent implements RenderableComponent {
 
   @Override
   public @NotNull RenderableComponent style(@NotNull Style style) {
-    this.style = style;
-    return this;
+    return new PlayerComponent(player, data, style);
   }
 
   @Override
@@ -101,7 +98,7 @@ public final class PlayerComponent implements RenderableComponent {
 
   @Override
   public @NotNull RenderableComponent colorIfAbsent(@Nullable TextColor color) {
-    if (!data.style.has(NameStyle.Flag.COLOR)) style = style.colorIfAbsent(color);
-    return this;
+    if (data.style.has(NameStyle.Flag.COLOR) || style.color() != null) return this;
+    return new PlayerComponent(player, data, style.colorIfAbsent(color));
   }
 }

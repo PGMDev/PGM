@@ -25,7 +25,8 @@ import tc.oc.pgm.util.named.NameStyle;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PlayerRenderer {
-  private static final TextColor DEAD_COLOR = NamedTextColor.DARK_GRAY;
+  public static final TextColor DEAD_COLOR = NamedTextColor.DARK_GRAY;
+  public static final TextColor OFFLINE_COLOR = NamedTextColor.DARK_AQUA;
   private static final Style NICK_STYLE =
       Style.style(TextDecoration.ITALIC).decoration(TextDecoration.STRIKETHROUGH, false);
 
@@ -44,7 +45,7 @@ public class PlayerRenderer {
                 });
   }
 
-  public Component render(PlayerData data, PlayerRelationship relation) {
+  Component render(PlayerData data, PlayerRelationship relation) {
     return nameCache.getUnchecked(new PlayerCacheKey(data, relation));
   }
 
@@ -70,7 +71,7 @@ public class PlayerRenderer {
     boolean disguised = (data.nick != null || data.vanish);
 
     if (!data.online || (data.conceal && disguised && !relation.reveal)) {
-      return text(data.name, PlayerComponent.OFFLINE_COLOR);
+      return text(data.name, OFFLINE_COLOR);
     }
 
     String plName = relation.reveal || data.nick == null ? data.name : data.nick;
