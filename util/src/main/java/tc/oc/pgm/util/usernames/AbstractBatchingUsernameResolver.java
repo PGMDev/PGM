@@ -9,13 +9,12 @@ import org.bukkit.Bukkit;
 public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameResolver
     implements UsernameResolver {
 
-  private final String prefix = "[" + getClass().getSimpleName() + "] ";
   protected List<UUID> currentBatch = null;
 
   @Override
   public synchronized CompletableFuture<UsernameResponse> resolve(UUID uuid) {
     CompletableFuture<UsernameResponse> response =
-        futureCache.computeIfAbsent(
+        futures.computeIfAbsent(
             uuid,
             key -> {
               if (currentBatch != null) currentBatch.add(uuid);
@@ -37,12 +36,12 @@ public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameR
     List<UUID> batch = currentBatch;
     currentBatch = null;
     if (batch != null && !batch.isEmpty()) {
-      Bukkit.getLogger().info(prefix + "Batch resolving " + batch.size() + " uuids");
+      Bukkit.getLogger().info(LOG_PREFIX + "Batch resolving " + batch.size() + " uuids");
 
       return CompletableFuture.runAsync(
           () -> {
             process(batch);
-            Bukkit.getLogger().info(prefix + "Done resolving " + batch.size() + " uuids");
+            Bukkit.getLogger().info(LOG_PREFIX + "Done resolving " + batch.size() + " uuids");
           },
           getExecutor());
     } else {

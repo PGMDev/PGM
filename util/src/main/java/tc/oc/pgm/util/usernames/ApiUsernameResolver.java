@@ -63,7 +63,14 @@ public final class ApiUsernameResolver extends AbstractBatchingUsernameResolver 
     Instant now = Instant.now();
 
     int fails = 0;
+    boolean stopped = false;
     for (UUID id : uuids) {
+      // Even if there's an issue, we need to complete the futures.
+      if (stopped) {
+        complete(id, UsernameResponse.empty());
+        continue;
+      }
+
       String name = null;
       try {
         name = resolveSync(id);
@@ -72,9 +79,11 @@ public final class ApiUsernameResolver extends AbstractBatchingUsernameResolver 
         errors.put(id, t);
         if (++fails > MAX_SEQUENTIAL_FAILURES
             || t instanceof UnknownHostException
-            || t instanceof NoRouteToHostException) break;
+            || t instanceof NoRouteToHostException) {
+          stopped = true;
+        }
       } finally {
-        getFuture(id).complete(UsernameResponse.of(name, now, ApiUsernameResolver.class));
+        complete(id, UsernameResponse.of(name, now, ApiUsernameResolver.class));
       }
     }
 
@@ -82,7 +91,7 @@ public final class ApiUsernameResolver extends AbstractBatchingUsernameResolver 
       Bukkit.getLogger()
           .log(
               Level.WARNING,
-              "Could not resolve " + errors.size() + " usernames",
+              LOG_PREFIX + "Could not resolve " + errors.size() + " usernames",
               errors.values().iterator().next());
     }
   }

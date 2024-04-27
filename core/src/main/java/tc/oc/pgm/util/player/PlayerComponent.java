@@ -4,7 +4,6 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -24,7 +23,8 @@ public final class PlayerComponent implements RenderableComponent {
 
   public static final Component UNKNOWN =
       translatable("misc.unknown", PlayerRenderer.OFFLINE_COLOR, TextDecoration.ITALIC);
-  public static final Component CONSOLE = translatable("misc.console", PlayerRenderer.OFFLINE_COLOR);
+  public static final Component CONSOLE =
+      translatable("misc.console", PlayerRenderer.OFFLINE_COLOR);
   public static final PlayerComponent UNKNOWN_PLAYER =
       new PlayerComponent(null, new PlayerData(null, null, NameStyle.SIMPLE_COLOR), Style.empty());
 
@@ -69,7 +69,8 @@ public final class PlayerComponent implements RenderableComponent {
   public static PlayerComponent player(
       @Nullable MatchPlayerState player, @NotNull NameStyle style) {
     if (player == null) return UNKNOWN_PLAYER;
-    return new PlayerComponent(Bukkit.getPlayer(player.getId()), new PlayerData(player, style), Style.empty());
+    return new PlayerComponent(
+        Bukkit.getPlayer(player.getId()), new PlayerData(player, style), Style.empty());
   }
 
   public static PlayerComponent player(@Nullable MatchPlayer player, @NotNull NameStyle style) {

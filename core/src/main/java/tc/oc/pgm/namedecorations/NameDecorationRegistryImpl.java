@@ -31,7 +31,6 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.player.PlayerComponent;
-import tc.oc.pgm.util.player.PlayerRenderer;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @SuppressWarnings("UnstableApiUsage")

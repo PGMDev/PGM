@@ -21,7 +21,6 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.concurrent.ThreadSafeConnection;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.usernames.UsernameResolver;
@@ -50,9 +49,6 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
 
     SQLUsername(UUID id) {
       this.id = assertNotNull(id, "username id is null");
-      // It's better than no name at all until we resolve to something better
-      // Note: it appears like offline uuid -> name does nothing in sportpaper
-      if (Bukkit.isPrimaryThread()) name = NMSHacks.getPlayerName(id);
       UsernameResolvers.resolve(id).thenAccept(this::setName);
     }
 

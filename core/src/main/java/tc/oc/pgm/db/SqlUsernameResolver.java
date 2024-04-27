@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import tc.oc.pgm.util.concurrent.ThreadSafeConnection;
@@ -25,7 +25,7 @@ public class SqlUsernameResolver extends AbstractBatchingUsernameResolver {
   }
 
   protected void process(UUID uuid, CompletableFuture<UsernameResponse> future) {
-    datastore.submitQuery(new SingleSelect(uuid, future));
+    datastore.submitQuery(new SingleSelect(uuid, future)).join();
   }
 
   @Override
@@ -33,7 +33,7 @@ public class SqlUsernameResolver extends AbstractBatchingUsernameResolver {
     List<List<UUID>> partitions = Lists.partition(uuids, BATCH_SIZE);
     CompletableFuture<?>[] futures = new CompletableFuture[partitions.size()];
     for (int i = 0; i < partitions.size(); i++) {
-      futures[i] = datastore.submitQuery(new BatchSelect(partitions.get(i), this::getFuture));
+      futures[i] = datastore.submitQuery(new BatchSelect(partitions.get(i), this::complete));
     }
     CompletableFuture.allOf(futures).join();
   }
@@ -71,12 +71,11 @@ public class SqlUsernameResolver extends AbstractBatchingUsernameResolver {
 
   private static class BatchSelect implements ThreadSafeConnection.Query {
     private final List<UUID> uuids;
-    private final Function<UUID, CompletableFuture<UsernameResponse>> futures;
+    private final BiConsumer<UUID, UsernameResponse> completion;
 
-    public BatchSelect(
-        List<UUID> uuids, Function<UUID, CompletableFuture<UsernameResponse>> futures) {
+    public BatchSelect(List<UUID> uuids, BiConsumer<UUID, UsernameResponse> completion) {
       this.uuids = uuids;
-      this.futures = futures;
+      this.completion = completion;
     }
 
     @Override
@@ -98,17 +97,16 @@ public class SqlUsernameResolver extends AbstractBatchingUsernameResolver {
           UUID uuid = UUID.fromString(result.getString(1));
           leftover.remove(uuid);
 
-          futures
-              .apply(uuid)
-              .complete(
-                  UsernameResponse.of(
-                      result.getString(2),
-                      null,
-                      Instant.ofEpochMilli(result.getLong(3)),
-                      SqlUsernameResolver.class));
+          completion.accept(
+              uuid,
+              UsernameResponse.of(
+                  result.getString(2),
+                  null,
+                  Instant.ofEpochMilli(result.getLong(3)),
+                  SqlUsernameResolver.class));
         }
 
-        leftover.forEach(uuid -> futures.apply(uuid).complete(UsernameResponse.empty()));
+        leftover.forEach(uuid -> completion.accept(uuid, UsernameResponse.empty()));
       }
     }
   }

@@ -9,6 +9,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public final class BukkitUsernameResolver extends AbstractUsernameResolver {
   private static final SyncExecutor EXECUTOR = new SyncExecutor();
@@ -21,12 +22,25 @@ public final class BukkitUsernameResolver extends AbstractUsernameResolver {
 
   @Override
   protected void process(UUID uuid, CompletableFuture<UsernameResponse> future) {
-    OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-    future.complete(
-        UsernameResponse.of(
-            player.getName(),
-            Instant.ofEpochMilli(player.getLastPlayed()),
-            BukkitUsernameResolver.class));
+    future.complete(resolveUser(uuid));
+  }
+
+  private UsernameResponse resolveUser(UUID uuid) {
+    OfflinePlayer pl = Bukkit.getOfflinePlayer(uuid);
+    if (pl.getName() != null) {
+      long lastPlayed = pl.getLastPlayed();
+      return UsernameResponse.of(
+          pl.getName(),
+          lastPlayed > 0 ? Instant.ofEpochMilli(lastPlayed) : Instant.now(),
+          BukkitUsernameResolver.class);
+    }
+
+    // Does vanilla user cache hold this player?
+    String name = NMSHacks.getPlayerName(uuid);
+    if (name != null) {
+      return UsernameResponse.of(name, Instant.now(), BukkitUsernameResolver.class);
+    }
+    return UsernameResponse.empty();
   }
 
   private static class SyncExecutor implements Executor {

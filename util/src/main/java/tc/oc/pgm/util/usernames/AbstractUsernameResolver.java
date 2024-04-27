@@ -9,7 +9,8 @@ import java.util.concurrent.ForkJoinPool;
 
 public abstract class AbstractUsernameResolver implements UsernameResolver {
 
-  protected final Map<UUID, CompletableFuture<UsernameResponse>> futureCache =
+  protected final String LOG_PREFIX = "[" + getClass().getSimpleName() + "] ";
+  protected final Map<UUID, CompletableFuture<UsernameResponse>> futures =
       new ConcurrentHashMap<>();
 
   protected Executor getExecutor() {
@@ -19,7 +20,7 @@ public abstract class AbstractUsernameResolver implements UsernameResolver {
   @Override
   public synchronized CompletableFuture<UsernameResponse> resolve(UUID uuid) {
     CompletableFuture<UsernameResponse> response =
-        futureCache.computeIfAbsent(uuid, this::createFuture);
+        futures.computeIfAbsent(uuid, this::createFuture);
     getExecutor().execute(() -> process(uuid, response));
     return response;
   }
@@ -29,16 +30,18 @@ public abstract class AbstractUsernameResolver implements UsernameResolver {
 
   @Override
   public synchronized CompletableFuture<Void> endBatch() {
-    return CompletableFuture.allOf(futureCache.values().toArray(new CompletableFuture[0]));
+    return CompletableFuture.allOf(futures.values().toArray(new CompletableFuture[0]));
   }
 
   protected CompletableFuture<UsernameResponse> createFuture(UUID uuid) {
-    return new CompletableFuture<UsernameResponse>()
-        .whenComplete((o, t) -> futureCache.remove(uuid));
+    CompletableFuture<UsernameResponse> future = new CompletableFuture<>();
+    future.whenComplete((o, t) -> futures.remove(uuid));
+    return future;
   }
 
-  protected CompletableFuture<UsernameResponse> getFuture(UUID uuid) {
-    return futureCache.computeIfAbsent(uuid, this::createFuture);
+  protected void complete(UUID uuid, UsernameResponse response) {
+    CompletableFuture<UsernameResponse> future = futures.get(uuid);
+    if (future != null) future.complete(response);
   }
 
   protected abstract void process(UUID uuid, CompletableFuture<UsernameResponse> future);

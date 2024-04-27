@@ -19,9 +19,9 @@ public class ChainedUsernameResolver implements UsernameResolver {
     if (future.isDone() && future.getNow(UsernameResponse.empty()).isAcceptable()) {
       return future;
     }
+
     for (int i = 1; i < resolvers.length; i++) {
       UsernameResolver nextResolver = resolvers[i];
-
       future =
           future.thenCompose(
               first -> {

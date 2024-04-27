@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.player;
 
+import static tc.oc.pgm.util.player.PlayerRenderer.OFFLINE_COLOR;
+
 import java.util.Objects;
 import java.util.UUID;
 import net.kyori.adventure.text.format.TextColor;
@@ -11,8 +13,6 @@ import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.util.named.NameStyle;
-
-import static tc.oc.pgm.util.player.PlayerRenderer.OFFLINE_COLOR;
 
 class PlayerData {
   public final @Nullable UUID uuid;
@@ -44,8 +44,7 @@ class PlayerData {
 
     this.name = mp.getNameLegacy();
     this.nick = Integration.getNick(mp.getBukkit());
-    this.teamColor =
-        mp.getParty() == null ? OFFLINE_COLOR : mp.getParty().getTextColor();
+    this.teamColor = mp.getParty() == null ? OFFLINE_COLOR : mp.getParty().getTextColor();
     this.dead = mp.isDead();
     this.vanish = Integration.isVanished(mp.getBukkit());
     this.online = mp.getBukkit().isOnline();
