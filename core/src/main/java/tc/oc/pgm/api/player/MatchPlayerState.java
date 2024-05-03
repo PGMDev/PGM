@@ -76,4 +76,9 @@ public interface MatchPlayerState extends Audience, Named {
   default boolean isPlayer(MatchPlayer player) {
     return getPlayer().map(player::equals).orElse(false);
   }
+
+  /** @return if the player can interact */
+  default boolean canInteract() {
+    return getPlayer().map(MatchPlayer::canInteract).orElse(false);
+  }
 }
