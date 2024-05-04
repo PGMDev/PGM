@@ -48,7 +48,7 @@ public final class BukkitUsernameResolver extends AbstractUsernameResolver {
     @Override
     public void execute(@NotNull Runnable command) {
       if (Bukkit.isPrimaryThread()) command.run();
-      else Bukkit.runOnMainThread(PGM, false, command);
+      else NMSHacks.postToMainThread(PGM, false, command);
     }
   }
 }
