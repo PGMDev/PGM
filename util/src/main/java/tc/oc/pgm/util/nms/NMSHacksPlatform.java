@@ -208,4 +208,6 @@ public interface NMSHacksPlatform {
   AttributeMap buildAttributeMap(Player player);
 
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);
+
+  int getMaxWorldSize(World world);
 }

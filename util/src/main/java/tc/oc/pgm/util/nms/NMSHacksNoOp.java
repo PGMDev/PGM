@@ -302,4 +302,9 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
     // runs the task on the next tick, not a perfect replacement
     plugin.getServer().getScheduler().runTask(plugin, task);
   }
+
+  @Override
+  public int getMaxWorldSize(World world) {
+    return 29999984; // Vanilla's default
+  }
 }
