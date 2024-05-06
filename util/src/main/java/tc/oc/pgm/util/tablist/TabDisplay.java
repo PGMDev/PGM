@@ -2,22 +2,15 @@ package tc.oc.pgm.util.tablist;
 
 import static net.kyori.adventure.text.Component.text;
 
-import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.text.TextTranslations;
 
 /**
  * Render arbitrary strings to the TAB list AKA player list. Before this is used with a player,
@@ -38,9 +31,6 @@ public class TabDisplay {
 
   // Maximum number of columns that the player list will show
   public static final int MAX_WIDTH = 10;
-
-  // A no-space character for 1.7 clients
-  private static final String NO_SPACE = "\u1FFF";
 
   // Width and total size of the list
   private final int width, slots;
@@ -69,10 +59,10 @@ public class TabDisplay {
     this.listAddPacket = NMSHacks.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
     this.listRemovePacket = NMSHacks.createPlayerInfoPacket(EnumPlayerInfoAction.REMOVE_PLAYER);
 
+    SlotBuilder slots = new SlotBuilder();
     for (int slot = 0; slot < this.slots; ++slot) {
-      Component playerName = this.slotName(slot);
-      String name = LegacyComponentSerializer.legacySection().serialize(playerName);
-      String renderedPlayerName = TextTranslations.toMinecraftGson(playerName, viewer);
+      String name = slots.getPlayerName(slot);
+      String renderedPlayerName = "{\"text\":\"" + name + "\"}";
 
       String teamName = this.slotTeamName(slot);
       this.teamCreatePackets[slot] =
@@ -82,35 +72,13 @@ public class TabDisplay {
       UUID uuid = UUID.randomUUID();
 
       NMSHacks.addPlayerInfoToPacket(
-          listAddPacket, uuid, name, GameMode.SURVIVAL, 9999, null, renderedPlayerName);
+          listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, renderedPlayerName);
       NMSHacks.addPlayerInfoToPacket(listRemovePacket, uuid, renderedPlayerName);
     }
   }
 
   private int slotIndex(int x, int y) {
     return y * this.width + x;
-  }
-
-  private static final List<NamedTextColor> COLORS =
-      Lists.newArrayList(NamedTextColor.NAMES.values());
-
-  /**
-   * Creates an unique, invisible name for the slot. Uses a combination of color-codes and an
-   * invisible character for 1.7 clients, in a hex-like conversion. If _ is the empty char, Slot 3
-   * (0x3) becomes §0_§3_, while Slot 25 (0x19) becomes §0_§9_§1_
-   *
-   * @param slot The slot to create a unique player name for
-   * @return The base component array of invisible characters
-   */
-  private Component slotName(int slot) {
-    TextComponent.Builder builder = text();
-    builder.append(text(NO_SPACE, NamedTextColor.BLACK)); // Avoid collision by adding a §0 on front
-
-    do {
-      builder.append(text(NO_SPACE, COLORS.get(slot % COLORS.size())));
-      slot /= COLORS.size();
-    } while (slot > 0);
-    return builder.build();
   }
 
   private String slotTeamName(int slot) {
@@ -151,5 +119,31 @@ public class TabDisplay {
       NMSHacks.sendPacket(viewer, this.teamRemovePackets[slot]);
     }
     NMSHacks.sendPacket(viewer, this.listRemovePacket);
+  }
+
+  private static class SlotBuilder {
+    private static final char COLOR_CODE = '§';
+    // A no-space character for 1.7 clients
+    private static final char NO_SPACE = '\u1FFF';
+    // Chat color amount
+    private static final int COLORS = 16;
+
+    private final char[] builder =
+        new char[] {COLOR_CODE, '0', NO_SPACE, COLOR_CODE, '0', NO_SPACE};
+
+    /**
+     * Creates an unique, invisible name for the slot. Uses a combination of color-codes and an
+     * invisible character for 1.7 clients, in a hex-like conversion. If _ is the empty char, Slot 3
+     * (0x03) becomes §0_§3_, while Slot 25 (0x19) becomes §1_§9_
+     *
+     * @param slot The slot to create a unique player name for
+     * @return The base component array of invisible characters
+     */
+    public String getPlayerName(int slot) {
+      assert slot < 0xFF; // Numbers higher than this are not supported.
+      builder[4] = Character.forDigit(slot % COLORS, COLORS);
+      builder[1] = Character.forDigit((slot / COLORS) % COLORS, COLORS);
+      return new String(builder);
+    }
   }
 }
