@@ -972,6 +972,11 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
     return 20.0;
   }
 
+  @Override
+  public int getMaxWorldSize(World world) {
+    return ((CraftWorld) world).getHandle().getWorldBorder().l();
+  }
+
   enum TeamPacketFields {
     a,
     b,

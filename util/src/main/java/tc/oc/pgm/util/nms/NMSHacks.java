@@ -443,4 +443,8 @@ public interface NMSHacks {
   static void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     INSTANCE.postToMainThread(plugin, priority, task);
   }
+
+  static int getMaxWorldSize(World world) {
+    return INSTANCE.getMaxWorldSize(world);
+  }
 }
