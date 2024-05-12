@@ -145,6 +145,8 @@ public interface NMSHacksPlatform {
 
   Skin getPlayerSkinForViewer(Player player, Player viewer);
 
+  String getPlayerName(UUID uuid);
+
   void updateVelocity(Player player);
 
   boolean teleportRelative(
