@@ -65,6 +65,7 @@ import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
+import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.material.Materials;
@@ -120,9 +121,9 @@ public class BlockTransformListener implements Listener {
                               try {
                                 method.invoke(listener, event);
                               } catch (InvocationTargetException ex) {
-                                throw new EventException(ex.getCause(), event);
+                                throw MiscUtils.INSTANCE.createEventException(ex.getCause(), event);
                               } catch (Throwable t) {
-                                throw new EventException(t, event);
+                                throw MiscUtils.INSTANCE.createEventException(t, event);
                               }
                             }
                           }

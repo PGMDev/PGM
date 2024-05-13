@@ -46,7 +46,7 @@ public class FallingBlockTracker extends AbstractTracker<BlockInfo> implements D
       blocks()
           .trackBlockState(
               event.getNewState(),
-              new BlockInfo(event.getNewState().getMaterialData(), event.getPlayerState()));
+              new BlockInfo(event.getNewState().getData(), event.getPlayerState()));
     }
   }
 

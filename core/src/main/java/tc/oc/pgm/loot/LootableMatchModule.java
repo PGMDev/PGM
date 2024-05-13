@@ -97,7 +97,7 @@ public class LootableMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onInventoryOpen(InventoryOpenEvent event) {
-    final MatchPlayer opener = this.match.getParticipant(event.getActor());
+    final MatchPlayer opener = this.match.getParticipant(event.getPlayer());
     if (opener == null) return;
 
     final Inventory inventory = event.getInventory();

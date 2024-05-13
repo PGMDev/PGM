@@ -106,10 +106,9 @@ public class Payload extends ControlPoint {
       // Height between 0.2 and 0.8
       double height = 0.5d + 0.3d * Math.sin(0.1d * tick + 0.5d * i);
 
-      loc.set(
-          definition.getRadius() * Math.cos(angle),
-          height,
-          definition.getRadius() * Math.sin(angle));
+      loc.setX(definition.getRadius() * Math.cos(angle));
+      loc.setY(height);
+      loc.setZ(definition.getRadius() * Math.sin(angle));
       loc.add(position);
       match
           .getWorld()

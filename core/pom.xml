@@ -24,6 +24,13 @@
             <artifactId>util</artifactId>
             <version>0.16-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>tc.oc.pgm</groupId>
+            <artifactId>platform-all</artifactId>
+            <version>0.16-SNAPSHOT</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
     <build>
         <finalName>PGM-${project.version}-${git.commit.id.abbrev}</finalName>
@@ -58,7 +65,7 @@
                     <minimizeJar>true</minimizeJar>
                     <artifactSet>
                         <includes>
-                            <include>tc.oc.pgm:*:*</include>
+                            <include>tc.oc.*:*:*</include>
                             <include>org.jdom:jdom2:*</include>
                             <include>net.kyori:*:*</include>
                             <include>org.incendo:cloud-*:*</include>
@@ -70,6 +77,8 @@
                             <include>fr.minuskube.inv:smart-invs</include>
                             <include>net.objecthunter:exp4j:*</include>
                             <include>io.github.bananapuncher714:nbteditor:*</include>
+                            <include>org.reflections:reflections:*</include>
+                            <include>org.javassist:javassist:*</include>
                         </includes>
                     </artifactSet>
                     <filters>
@@ -77,6 +86,23 @@
                             <artifact>*:*</artifact>
                             <excludes>
                                 <exclude>META-INF/**</exclude>
+                            </excludes>
+                        </filter>
+                        <filter>
+                            <artifact>tc.oc.pgm:platform-all:*</artifact>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </filter>
+                        <filter>
+                            <artifact>org.javassist:javassist:*</artifact>
+                            <excludes>
+                                <!-- Trim known not to be used parts of javassist -->
+                                <exclude>**/*.java~</exclude>
+                                <exclude>**/*.html</exclude>
+                                <exclude>javassist/compiler/**</exclude>
+                                <exclude>javassist/bytecode/analysis/**</exclude>
+                                <exclude>javassist/bytecode/stackmap/**</exclude>
                             </excludes>
                         </filter>
                     </filters>

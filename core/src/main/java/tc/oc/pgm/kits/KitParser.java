@@ -161,7 +161,6 @@ public abstract class KitParser {
   }
 
   public KnockbackReductionKit parseKnockbackReductionKit(Element el) throws InvalidXMLException {
-    if (!BukkitUtils.isSportPaper()) return null;
     Element child = el.getChild("knockback-reduction");
     if (child == null) {
       return null;

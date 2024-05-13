@@ -48,7 +48,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.util.MapUtils;
 import tc.oc.pgm.util.MethodHandleUtils;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -545,9 +545,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
                 }
               });
 
-      if (BukkitUtils.isSportPaper()) {
-        event.yield();
-
+      if (MiscUtils.INSTANCE.yield(event)) {
         // Wait until after the event to remove them, in case they get invalidated during the event.
         dirtySet.remove(event.getPlayer());
         this.lastResponses.columnKeySet().remove(event.getPlayer());

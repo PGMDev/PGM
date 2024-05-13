@@ -28,15 +28,13 @@ public class MultiTradeMatchModule implements MatchModule, Listener {
   public void onInteract(PlayerInteractEntityEvent event) {
     if (event.getRightClicked() instanceof Villager) {
       // Fallback to once-at-a-time trading if multi trade does not work
-      if (ok) {
-        event.setCancelled(true);
-      } else {
-        return;
-      }
+      if (!ok) return;
 
+      event.setCancelled(true);
       try {
-        InventoryUtils.openVillager((Villager) event.getRightClicked(), event.getPlayer());
-      } catch (NoSuchMethodError e) {
+        if (InventoryUtils.openVillager((Villager) event.getRightClicked(), event.getPlayer()))
+          return;
+
         logger.log(Level.WARNING, "<multitrade/> is not compatible with your server version");
         ok = false;
       } catch (Throwable t) {
