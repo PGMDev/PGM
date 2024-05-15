@@ -6,14 +6,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
-import cloud.commandframework.annotations.injection.RawArgs;
-import cloud.commandframework.annotations.specifier.FlagYielding;
-import cloud.commandframework.annotations.specifier.Range;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.Comparator;
@@ -28,6 +20,15 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotation.specifier.FlagYielding;
+import org.incendo.cloud.annotation.specifier.Range;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.Permission;
+import org.incendo.cloud.annotations.injection.RawArgs;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -49,13 +50,13 @@ public final class MapPoolCommand {
 
   private static final DecimalFormat SCORE_FORMAT = new DecimalFormat("00.00%");
 
-  @CommandMethod("pool [page]")
+  @Command("pool [page]")
   @CommandDescription("List the maps in the map pool")
   public void pool(
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
+      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "type", aliases = "t") MapPoolType type,
       @Flag(value = "pool", aliases = "p") MapPool mapPool,
       @Flag(value = "score", aliases = "s") boolean scores,
@@ -133,13 +134,13 @@ public final class MapPoolCommand {
     }.display(sender, maps, page);
   }
 
-  @CommandMethod("pools [page]")
+  @Command("pools [page]")
   @CommandDescription("List all the map pools")
   public void pools(
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
+      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "type", aliases = "t") MapPoolType type,
       @Flag(value = "dynamic", aliases = "d") boolean dynamicOnly) {
 
@@ -205,9 +206,9 @@ public final class MapPoolCommand {
     }.display(sender, mapPools, page);
   }
 
-  @CommandMethod("setpool <pool>")
+  @Command("setpool <pool>")
   @CommandDescription("Change the map pool")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void setPool(
       Audience sender,
       CommandSender source,
@@ -234,9 +235,9 @@ public final class MapPoolCommand {
         newPool, match, true, source, timeLimit, matchLimit != null ? matchLimit : 0);
   }
 
-  @CommandMethod("setpool reset")
+  @Command("setpool reset")
   @CommandDescription("Reset the pool back to appropriate default dynamic pool")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void resetPool(
       Audience sender,
       CommandSender source,
@@ -254,13 +255,13 @@ public final class MapPoolCommand {
         matchLimit);
   }
 
-  @CommandMethod("skip [positions]")
+  @Command("skip [positions]")
   @CommandDescription("Skip the next map")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void skip(
       Audience sender,
       MapPoolManager poolManager,
-      @Argument(value = "positions", defaultValue = "1") @Range(min = "1") int positions) {
+      @Argument(value = "positions") @Default("1") @Range(min = "1") int positions) {
 
     MapPool pool = poolManager.getActiveMapPool();
     if (!(pool instanceof Rotation)) throw exception("pool.noRotation");
@@ -282,7 +283,7 @@ public final class MapPoolCommand {
     sender.sendMessage(message);
   }
 
-  @CommandMethod("votenext [map]")
+  @Command("votenext [map]")
   @CommandDescription("Vote for the next map")
   public void voteNext(
       MatchPlayer player,
@@ -299,7 +300,7 @@ public final class MapPoolCommand {
     poll.sendBook(player, forceOpen);
   }
 
-  @CommandMethod("votebook")
+  @Command("votebook")
   @CommandDescription("Spawn a vote book")
   public void voteBook(MatchPlayer player, MapPoll poll) {
     poll.sendBook(player, false);
@@ -307,14 +308,14 @@ public final class MapPoolCommand {
 
   // Legacy rotation command aliases
 
-  @CommandMethod("rot [page]")
+  @Command("rot [page]")
   @CommandDescription("List the maps in the rotation. Use /pool to see unfiltered results.")
   @RawArgs
   public void rot(
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
+      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "all", aliases = "a") boolean all,
       String[] rawArgs) {
     wrapLegacy(
@@ -339,23 +340,23 @@ public final class MapPoolCommand {
         });
   }
 
-  @CommandMethod("rots [page]")
+  @Command("rots [page]")
   @CommandDescription("List all the rotations. Use /pools to see unfiltered results.")
   @RawArgs
   public void rots(
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
+      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
       String[] rawArgs) {
     pools(sender, source, poolManager, page, MapPoolType.ORDERED, false);
     // Always follow-up, as they're filtered results that may not error out
     sender.sendMessage(alternativeUsage(rawArgs, "pools"));
   }
 
-  @CommandMethod("setrot <rotation>")
+  @Command("setrot <rotation>")
   @CommandDescription("Set a rotation as current pool. Use /setpool to set other types of pools.")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   @RawArgs
   public void setRot(
       Audience sender,
@@ -373,10 +374,10 @@ public final class MapPoolCommand {
         () -> setPool(sender, source, match, poolManager, rotation, timeLimit, matchLimit));
   }
 
-  @CommandMethod("setrot reset")
+  @Command("setrot reset")
   @CommandDescription(
       "Reset the rotation to default. Use /setpool to reset to other types of pools.")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   @RawArgs
   public void resetRot(
       Audience sender,

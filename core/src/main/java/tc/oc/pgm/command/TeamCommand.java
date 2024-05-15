@@ -5,12 +5,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
-import cloud.commandframework.annotations.specifier.Greedy;
 import com.google.common.collect.Range;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +13,12 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotation.specifier.Greedy;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -32,12 +32,12 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
-@CommandMethod("team")
+@Command("team")
 public final class TeamCommand {
 
-  @CommandMethod("force <player> [team]")
+  @Command("force <player> [team]")
   @CommandDescription("Force a player onto a team")
-  @CommandPermission(Permissions.JOIN_FORCE)
+  @Permission(Permissions.JOIN_FORCE)
   public void force(
       CommandSender sender,
       JoinMatchModule join,
@@ -61,9 +61,9 @@ public final class TeamCommand {
         joiner.getMatch());
   }
 
-  @CommandMethod("shuffle")
+  @Command("shuffle")
   @CommandDescription("Shuffle players among the teams")
-  @CommandPermission(Permissions.JOIN_FORCE)
+  @Permission(Permissions.JOIN_FORCE)
   public void shuffle(
       Match match,
       CommandSender sender,
@@ -84,9 +84,9 @@ public final class TeamCommand {
         translatable("match.shuffle.announce.ok", player(sender, NameStyle.FANCY)), match);
   }
 
-  @CommandMethod("alias <team> <name>")
+  @Command("alias <team> <name>")
   @CommandDescription("Rename a team")
-  @CommandPermission(Permissions.GAMEPLAY)
+  @Permission(Permissions.GAMEPLAY)
   public void alias(
       Match match,
       CommandSender sender,
@@ -112,9 +112,9 @@ public final class TeamCommand {
         match);
   }
 
-  @CommandMethod("scale <teams> <factor>")
+  @Command("scale <teams> <factor>")
   @CommandDescription("Resizes all teams by a given factor")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void scale(
       CommandSender sender,
       Match match,
@@ -135,9 +135,9 @@ public final class TeamCommand {
     }
   }
 
-  @CommandMethod("size <teams> <max-players> [max-overfill]")
+  @Command("size <teams> <max-players> [max-overfill]")
   @CommandDescription("Set the max players on a team")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void max(
       CommandSender sender,
       Match match,
@@ -161,9 +161,9 @@ public final class TeamCommand {
     }
   }
 
-  @CommandMethod("size <teams> reset")
+  @Command("size <teams> reset")
   @CommandDescription("Reset the max players on a team")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void max(CommandSender sender, Match match, @Argument("teams") Collection<Team> teams) {
     for (Team team : teams) {
       team.resetMaxSize();
@@ -177,9 +177,9 @@ public final class TeamCommand {
     }
   }
 
-  @CommandMethod("min <teams> <min-players>")
+  @Command("min <teams> <min-players>")
   @CommandDescription("Set the min players on a team")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void min(
       CommandSender sender,
       Match match,
@@ -198,9 +198,9 @@ public final class TeamCommand {
     }
   }
 
-  @CommandMethod("min <teams> reset")
+  @Command("min <teams> reset")
   @CommandDescription("Reset the min players on a team")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void min(CommandSender sender, Match match, @Argument("teams") Collection<Team> teams) {
     for (Team team : teams) {
       team.resetMinSize();

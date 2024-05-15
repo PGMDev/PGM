@@ -41,9 +41,9 @@
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
-                            <groupId>cloud.commandframework</groupId>
+                            <groupId>org.incendo</groupId>
                             <artifactId>cloud-annotations</artifactId>
-                            <version>1.8.4</version>
+                            <version>2.0.0-rc.1</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>
@@ -61,7 +61,7 @@
                             <include>tc.oc.pgm:*:*</include>
                             <include>org.jdom:jdom2:*</include>
                             <include>net.kyori:*:*</include>
-                            <include>cloud.commandframework:cloud-*:*</include>
+                            <include>org.incendo:cloud-*:*</include>
                             <include>io.leangen.geantyref:*:*</include>
                             <include>me.lucko:commodore</include>
                             <include>fr.mrmicky:*:*</include>
@@ -82,8 +82,8 @@
                     </filters>
                     <relocations combine.children="append">
                         <relocation>
-                            <pattern>cloud.commandframework</pattern>
-                            <shadedPattern>tc.oc.pgm.lib.cloud.commandframework</shadedPattern>
+                            <pattern>org.incendo.cloud</pattern>
+                            <shadedPattern>tc.oc.pgm.lib.org.incendo.cloud</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>io.leangen.geantyref</pattern>

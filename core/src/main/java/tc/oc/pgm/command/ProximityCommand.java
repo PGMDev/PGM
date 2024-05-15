@@ -4,11 +4,11 @@ import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.text.TextException.exception;
 import static tc.oc.pgm.util.text.TextException.noPermission;
 
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.ChatColor;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
@@ -23,7 +23,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 // TODO: make the output nicer and translate
 public final class ProximityCommand {
 
-  @CommandMethod("proximity|prox")
+  @Command("proximity|prox")
   @CommandDescription("Show the progress of each objective")
   public void proximity(MatchPlayer player, TeamMatchModule tmm, GoalMatchModule gmm) {
     if (player != null && player.isParticipating()) {

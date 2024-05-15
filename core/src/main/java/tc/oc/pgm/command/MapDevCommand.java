@@ -4,11 +4,6 @@ import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +12,12 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -32,15 +33,15 @@ public class MapDevCommand {
   // Avoid showing too many values. Messages that are too long kick the client.
   private static final int ARRAY_CAP = 16;
 
-  @CommandMethod("variables [target] [page]")
+  @Command("variables [target] [page]")
   @CommandDescription("Inspect variables for a player")
-  @CommandPermission(Permissions.DEBUG)
+  @Permission(Permissions.DEBUG)
   public void showVariables(
       Audience audience,
       CommandSender sender,
       Match match,
-      @Argument(value = "target", defaultValue = CURRENT) MatchPlayer target,
-      @Argument(value = "page", defaultValue = "1") int page,
+      @Argument(value = "target") @Default(CURRENT) MatchPlayer target,
+      @Argument(value = "page") @Default("1") int page,
       @Flag(value = "query", aliases = "q") String query,
       @Flag(value = "all", aliases = "a") boolean all) {
 
@@ -90,15 +91,15 @@ public class MapDevCommand {
         });
   }
 
-  @CommandMethod("variable set <variable> <value> [target]")
+  @Command("variable set <variable> <value> [target]")
   @CommandDescription("Inspect variables for a player")
-  @CommandPermission(Permissions.DEBUG)
+  @Permission(Permissions.DEBUG)
   @SuppressWarnings({"rawtypes", "unchecked"})
   public void setVariable(
       Audience audience,
       @Argument("variable") Variable variable,
       @Argument("value") double value,
-      @Argument(value = "target", defaultValue = CURRENT) MatchPlayer target) {
+      @Argument(value = "target") @Default(CURRENT) MatchPlayer target) {
     variable.setValue(target, value);
     audience.sendMessage(
         text("Variable ", NamedTextColor.YELLOW)
@@ -109,13 +110,13 @@ public class MapDevCommand {
             .append(target.getName()));
   }
 
-  @CommandMethod("filter <filter> [target]")
+  @Command("filter <filter> [target]")
   @CommandDescription("Match a filter against a player")
-  @CommandPermission(Permissions.DEBUG)
+  @Permission(Permissions.DEBUG)
   public void evaluateFilter(
       Audience audience,
       @Argument("filter") Filter filter,
-      @Argument(value = "target", defaultValue = CURRENT) MatchPlayer target) {
+      @Argument(value = "target") @Default(CURRENT) MatchPlayer target) {
     audience.sendMessage(
         text("Filter responded with ", NamedTextColor.YELLOW)
             .append(text(filter.query(target) + "", NamedTextColor.AQUA))

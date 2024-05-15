@@ -1,16 +1,16 @@
 package tc.oc.pgm.command.parsers;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.arguments.parser.ArgumentParseResult;
-import cloud.commandframework.arguments.parser.ArgumentParser;
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.context.CommandContext;
 import io.leangen.geantyref.TypeToken;
-import java.util.Queue;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.context.CommandInput;
+import org.incendo.cloud.parser.ArgumentParseResult;
+import org.incendo.cloud.parser.ArgumentParser;
+import org.incendo.cloud.parser.ParserParameters;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.StringUtils;
 
-public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T> {
+public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T>, ParseUtils {
 
   private final ArgumentParser<S, String> stringParser;
   protected final ParserParameters options;
@@ -26,10 +26,10 @@ public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T> {
 
   @Override
   public @NotNull ArgumentParseResult<T> parse(
-      @NotNull CommandContext<S> context, @NotNull Queue<String> args) {
-    return stringParser
-        .parse(context, args)
-        .flatMapParsedValue(text -> parse(context, StringUtils.suggestionToText(text)));
+      @NotNull CommandContext<S> context, @NotNull CommandInput args) {
+    return flatMap(
+        stringParser.parse(context, args),
+        text -> parse(context, StringUtils.suggestionToText(text)));
   }
 
   public abstract ArgumentParseResult<T> parse(

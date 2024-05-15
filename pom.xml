@@ -146,27 +146,27 @@
 
         <!-- Framework for defining and parsing commands -->
         <dependency>
-            <groupId>cloud.commandframework</groupId>
+            <groupId>org.incendo</groupId>
             <artifactId>cloud-core</artifactId>
-            <version>1.8.4</version>
+            <version>2.0.0-rc.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>cloud.commandframework</groupId>
+            <groupId>org.incendo</groupId>
             <artifactId>cloud-annotations</artifactId>
-            <version>1.8.4</version>
+            <version>2.0.0-rc.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>cloud.commandframework</groupId>
+            <groupId>org.incendo</groupId>
             <artifactId>cloud-paper</artifactId>
-            <version>1.8.4</version>
+            <version>2.0.0-beta.7</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>cloud.commandframework</groupId>
+            <groupId>org.incendo</groupId>
             <artifactId>cloud-minecraft-extras</artifactId>
-            <version>1.8.4</version>
+            <version>2.0.0-beta.7</version>
             <scope>compile</scope>
         </dependency>
         <!-- Allows registering brigadier mappings -->

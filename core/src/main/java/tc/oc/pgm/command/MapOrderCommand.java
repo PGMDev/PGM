@@ -5,15 +5,16 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
-import cloud.commandframework.annotations.specifier.FlagYielding;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotation.specifier.FlagYielding;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.Permission;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
@@ -27,7 +28,7 @@ import tc.oc.pgm.util.named.MapNameStyle;
 
 public final class MapOrderCommand {
 
-  @CommandMethod("nextmap|mn|mapnext|nm|next")
+  @Command("nextmap|mn|mapnext|nm|next")
   @CommandDescription("Show which map is playing next")
   public void nextmap(Audience audience, MapOrder mapOrder) {
     final MapInfo next = mapOrder.getNextMap();
@@ -41,9 +42,9 @@ public final class MapOrderCommand {
             next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 
-  @CommandMethod("setnext|sn [map]")
+  @Command("setnext|sn [map]")
   @CommandDescription("Change the next map")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void setNext(
       Audience viewer,
       CommandSender sender,
@@ -51,7 +52,7 @@ public final class MapOrderCommand {
       Match match,
       @Flag(value = "force", aliases = "f") boolean force,
       @Flag(value = "reset", aliases = "r") boolean reset,
-      @Argument(value = "map", defaultValue = CURRENT) @FlagYielding MapInfo map) {
+      @Argument(value = "map") @Default(CURRENT) @FlagYielding MapInfo map) {
     if (RestartManager.isQueued() && !force) {
       throw exception("map.setNext.confirm");
     }

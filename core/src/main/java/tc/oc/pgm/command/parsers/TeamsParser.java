@@ -1,19 +1,21 @@
 package tc.oc.pgm.command.parsers;
 
-import static cloud.commandframework.arguments.parser.ArgumentParseResult.failure;
-import static cloud.commandframework.arguments.parser.ArgumentParseResult.success;
+import static org.incendo.cloud.parser.ArgumentParseResult.failure;
+import static org.incendo.cloud.parser.ArgumentParseResult.success;
 import static tc.oc.pgm.util.text.TextException.exception;
 import static tc.oc.pgm.util.text.TextException.playerOnly;
 
-import cloud.commandframework.arguments.parser.ArgumentParseResult;
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.context.CommandContext;
-import cloud.commandframework.paper.PaperCommandManager;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.context.CommandInput;
+import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.parser.ArgumentParseResult;
+import org.incendo.cloud.parser.ParserParameters;
+import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.command.util.CommandUtils;
@@ -21,7 +23,8 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 
 /** Parses teams, supporting * for all teams */
-public final class TeamsParser extends StringLikeParser<CommandSender, Collection<Team>> {
+public final class TeamsParser extends StringLikeParser<CommandSender, Collection<Team>>
+    implements BlockingSuggestionProvider.Strings<CommandSender> {
 
   private final TeamParser teamParser;
 
@@ -42,14 +45,15 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
       return success(teams.getTeams());
     }
 
-    return teamParser.parse(context, text).mapParsedValue(Collections::singleton);
+    return map(teamParser.parse(context, text), Collections::singleton);
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
-    List<String> teams = teamParser.suggestions(context, input);
-    if ("*".startsWith(input)) teams.add("*");
+  public @NonNull List<@NonNull String> stringSuggestions(
+      @NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {
+    final String next = input.peekString();
+    List<String> teams = teamParser.stringSuggestions(context, input);
+    if ("*".startsWith(next)) teams.add("*");
     return teams;
   }
 }

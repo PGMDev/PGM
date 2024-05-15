@@ -10,14 +10,6 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.Flag;
-import cloud.commandframework.annotations.specifier.Greedy;
-import cloud.commandframework.annotations.specifier.Range;
-import cloud.commandframework.annotations.suggestions.Suggestions;
-import cloud.commandframework.context.CommandContext;
 import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.time.LocalDate;
@@ -33,6 +25,15 @@ import net.kyori.adventure.text.TextComponent.Builder;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotation.specifier.Greedy;
+import org.incendo.cloud.annotation.specifier.Range;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.suggestion.Suggestions;
+import org.incendo.cloud.context.CommandContext;
 import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.util.UriEncoder;
 import tc.oc.pgm.api.PGM;
@@ -56,13 +57,13 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public final class MapCommand {
 
-  @CommandMethod("maps|maplist|ml [page]")
+  @Command("maps|maplist|ml [page]")
   @CommandDescription("List all maps loaded")
   public void maps(
       Audience audience,
       CommandSender sender,
       MapLibrary library,
-      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page,
+      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "tags", aliases = "t", repeatable = true, suggestions = "maptags")
           List<String> tags,
       @Flag(value = "author", aliases = "a") String author,
@@ -173,12 +174,12 @@ public final class MapCommand {
     return false;
   }
 
-  @CommandMethod("map|mapinfo [map]")
+  @Command("map|mapinfo [map]")
   @CommandDescription("Show info about a map")
   public void map(
       Audience audience,
       CommandSender sender,
-      @Argument(value = "map", defaultValue = CURRENT) @Greedy MapInfo map) {
+      @Argument(value = "map") @Default(CURRENT) @Greedy MapInfo map) {
     audience.sendMessage(
         TextFormatter.horizontalLineHeading(
             sender,

@@ -1,12 +1,12 @@
 package tc.oc.pgm.command.parsers;
 
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.paper.PaperCommandManager;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.parser.ParserParameters;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.FilterMatchModule;
 

@@ -4,13 +4,13 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
 import com.google.common.collect.Range;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
@@ -18,12 +18,12 @@ import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
-@CommandMethod("ffa|players")
+@Command("ffa|players")
 public final class FreeForAllCommand {
 
-  @CommandMethod("min <min-players>")
+  @Command("min <min-players>")
   @CommandDescription("Set the min players")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void min(
       Match match,
       CommandSender sender,
@@ -35,17 +35,17 @@ public final class FreeForAllCommand {
     sendResizedMessage(match, sender, "min", ffa.getMinPlayers());
   }
 
-  @CommandMethod("min reset")
+  @Command("min reset")
   @CommandDescription("Reset the min players")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void min(Match match, CommandSender sender, FreeForAllMatchModule ffa) {
     ffa.setMinPlayers(null);
     sendResizedMessage(match, sender, "min", ffa.getMinPlayers());
   }
 
-  @CommandMethod("scale <factor>")
+  @Command("scale <factor>")
   @CommandDescription("Scale the max players by a given factor")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void max(
       Match match,
       CommandSender sender,
@@ -58,9 +58,9 @@ public final class FreeForAllCommand {
     sendResizedMessage(match, sender, "max", ffa.getMaxPlayers());
   }
 
-  @CommandMethod("max <max-players> [max-overfill]")
+  @Command("max <max-players> [max-overfill]")
   @CommandDescription("Set the max players")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void max(
       Match match,
       CommandSender sender,
@@ -77,9 +77,9 @@ public final class FreeForAllCommand {
     sendResizedMessage(match, sender, "max", ffa.getMaxPlayers());
   }
 
-  @CommandMethod("max reset")
+  @Command("max reset")
   @CommandDescription("Reset the max players")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void max(Match match, CommandSender sender, FreeForAllMatchModule ffa) {
     ffa.setMaxPlayers(null, null);
     sendResizedMessage(match, sender, "max", ffa.getMaxPlayers());

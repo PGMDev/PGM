@@ -2,10 +2,10 @@ package tc.oc.pgm.command.parsers;
 
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.paper.PaperCommandManager;
 import java.util.Collection;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.parser.ParserParameters;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.text.TextException;

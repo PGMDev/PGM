@@ -1,9 +1,9 @@
 package tc.oc.pgm.command.parsers;
 
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.paper.PaperCommandManager;
 import java.util.Collection;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.parser.ParserParameters;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 

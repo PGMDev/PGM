@@ -1,8 +1,8 @@
 package tc.oc.pgm.command.parsers;
 
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.paper.PaperCommandManager;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.parser.ParserParameters;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariablesMatchModule;
 

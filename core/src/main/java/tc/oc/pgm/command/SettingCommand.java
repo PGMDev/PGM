@@ -4,12 +4,12 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -29,13 +29,13 @@ public final class SettingCommand {
 
   private SettingCommand() {}
 
-  @CommandMethod("settings")
+  @Command("settings")
   @CommandDescription("Open the settings menu")
   public void settings(MatchPlayer player) {
     new SettingsMenu(player);
   }
 
-  @CommandMethod("tools|observertools|ot")
+  @Command("tools|observertools|ot")
   @CommandDescription("Open the observer tools menu")
   public void observerTools(MatchPlayer player, ObserverToolsMatchModule tools) {
     if (player.isObserving()) {
@@ -46,7 +46,7 @@ public final class SettingCommand {
     }
   }
 
-  @CommandMethod("setting <setting>")
+  @Command("setting <setting>")
   @CommandDescription("Get the value of a setting")
   public void setting(MatchPlayer player, @Argument("setting") SettingKey key) {
     final SettingValue value = player.getSettings().getValue(key);
@@ -62,7 +62,7 @@ public final class SettingCommand {
                 NamedTextColor.WHITE)));
   }
 
-  @CommandMethod("toggle|set <setting> [value]")
+  @Command("toggle|set <setting> [value]")
   @CommandDescription("Toggle or set the value of a setting")
   public void toggle(
       MatchPlayer player,
