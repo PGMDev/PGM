@@ -63,7 +63,7 @@ public final class MapCommand {
       Audience audience,
       CommandSender sender,
       MapLibrary library,
-      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
+      @Argument("page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "tags", aliases = "t", repeatable = true, suggestions = "maptags")
           List<String> tags,
       @Flag(value = "author", aliases = "a") String author,
@@ -179,7 +179,7 @@ public final class MapCommand {
   public void map(
       Audience audience,
       CommandSender sender,
-      @Argument(value = "map") @Default(CURRENT) @Greedy MapInfo map) {
+      @Argument("map") @Default(CURRENT) @Greedy MapInfo map) {
     audience.sendMessage(
         TextFormatter.horizontalLineHeading(
             sender,

@@ -48,7 +48,7 @@ public class ActionCommand {
       Audience audience,
       CommandSender sender,
       ActionMatchModule amm,
-      @Argument(value = "page") @Default("1") int page,
+      @Argument("page") @Default("1") int page,
       @Flag(value = "query", aliases = "q") String query,
       @Flag(value = "all", aliases = "a") boolean all) {
 
@@ -81,7 +81,7 @@ public class ActionCommand {
   public <T extends Filterable<?>> void triggerAction(
       Audience audience,
       @Argument("action") @Greedy ExposedAction action,
-      @Argument(value = "target") @Default(CURRENT) MatchPlayer target) {
+      @Argument("target") @Default(CURRENT) MatchPlayer target) {
     action.trigger(target);
     audience.sendMessage(text("Triggered " + action.getId()));
   }
@@ -92,7 +92,7 @@ public class ActionCommand {
   public <T extends Filterable<?>> void untriggerAction(
       Audience audience,
       @Argument("action") @Greedy ExposedAction action,
-      @Argument(value = "target") @Default(CURRENT) MatchPlayer target) {
+      @Argument("target") @Default(CURRENT) MatchPlayer target) {
     action.untrigger(target);
     audience.sendMessage(text("Untriggered " + action.getId()));
   }

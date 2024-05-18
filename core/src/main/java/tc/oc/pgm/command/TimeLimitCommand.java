@@ -33,7 +33,7 @@ public final class TimeLimitCommand {
       Match match,
       TimeLimitMatchModule time,
       @Argument("duration") Duration duration,
-      @Argument(value = "result") @Default(CURRENT) Optional<VictoryCondition> result,
+      @Argument("result") @Default(CURRENT) Optional<VictoryCondition> result,
       @Argument("overtime") Duration overtime,
       @Argument("max-overtime") Duration maxOvertime,
       @Argument("end-overtime") Duration endOvertime) {

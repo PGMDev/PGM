@@ -56,7 +56,7 @@ public final class MapPoolCommand {
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
+      @Argument("page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "type", aliases = "t") MapPoolType type,
       @Flag(value = "pool", aliases = "p") MapPool mapPool,
       @Flag(value = "score", aliases = "s") boolean scores,
@@ -140,7 +140,7 @@ public final class MapPoolCommand {
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
+      @Argument("page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "type", aliases = "t") MapPoolType type,
       @Flag(value = "dynamic", aliases = "d") boolean dynamicOnly) {
 
@@ -261,7 +261,7 @@ public final class MapPoolCommand {
   public void skip(
       Audience sender,
       MapPoolManager poolManager,
-      @Argument(value = "positions") @Default("1") @Range(min = "1") int positions) {
+      @Argument("positions") @Default("1") @Range(min = "1") int positions) {
 
     MapPool pool = poolManager.getActiveMapPool();
     if (!(pool instanceof Rotation)) throw exception("pool.noRotation");
@@ -315,7 +315,7 @@ public final class MapPoolCommand {
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
+      @Argument("page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "all", aliases = "a") boolean all,
       String[] rawArgs) {
     wrapLegacy(
@@ -347,7 +347,7 @@ public final class MapPoolCommand {
       Audience sender,
       CommandSender source,
       MapPoolManager poolManager,
-      @Argument(value = "page") @Default("1") @Range(min = "1") int page,
+      @Argument("page") @Default("1") @Range(min = "1") int page,
       String[] rawArgs) {
     pools(sender, source, poolManager, page, MapPoolType.ORDERED, false);
     // Always follow-up, as they're filtered results that may not error out

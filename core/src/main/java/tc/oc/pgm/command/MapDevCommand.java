@@ -40,8 +40,8 @@ public class MapDevCommand {
       Audience audience,
       CommandSender sender,
       Match match,
-      @Argument(value = "target") @Default(CURRENT) MatchPlayer target,
-      @Argument(value = "page") @Default("1") int page,
+      @Argument("target") @Default(CURRENT) MatchPlayer target,
+      @Argument("page") @Default("1") int page,
       @Flag(value = "query", aliases = "q") String query,
       @Flag(value = "all", aliases = "a") boolean all) {
 
@@ -99,7 +99,7 @@ public class MapDevCommand {
       Audience audience,
       @Argument("variable") Variable variable,
       @Argument("value") double value,
-      @Argument(value = "target") @Default(CURRENT) MatchPlayer target) {
+      @Argument("target") @Default(CURRENT) MatchPlayer target) {
     variable.setValue(target, value);
     audience.sendMessage(
         text("Variable ", NamedTextColor.YELLOW)
@@ -116,7 +116,7 @@ public class MapDevCommand {
   public void evaluateFilter(
       Audience audience,
       @Argument("filter") Filter filter,
-      @Argument(value = "target") @Default(CURRENT) MatchPlayer target) {
+      @Argument("target") @Default(CURRENT) MatchPlayer target) {
     audience.sendMessage(
         text("Filter responded with ", NamedTextColor.YELLOW)
             .append(text(filter.query(target) + "", NamedTextColor.AQUA))

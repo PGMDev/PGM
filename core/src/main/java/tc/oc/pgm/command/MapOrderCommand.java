@@ -52,7 +52,7 @@ public final class MapOrderCommand {
       Match match,
       @Flag(value = "force", aliases = "f") boolean force,
       @Flag(value = "reset", aliases = "r") boolean reset,
-      @Argument(value = "map") @Default(CURRENT) @FlagYielding MapInfo map) {
+      @Argument("map") @Default(CURRENT) @FlagYielding MapInfo map) {
     if (RestartManager.isQueued() && !force) {
       throw exception("map.setNext.confirm");
     }

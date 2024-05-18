@@ -70,7 +70,7 @@ public final class ModeCommand {
   public void fallback(
       Audience audience,
       ObjectiveModesMatchModule modes,
-      @Argument(value = "page") @Default("1") @Range(min = "1") int page) {
+      @Argument("page") @Default("1") @Range(min = "1") int page) {
     list(audience, modes, page);
   }
 
@@ -79,7 +79,7 @@ public final class ModeCommand {
   public void list(
       Audience audience,
       ObjectiveModesMatchModule modes,
-      @Argument(value = "page") @Default("1") @Range(min = "1") int page) {
+      @Argument("page") @Default("1") @Range(min = "1") int page) {
     List<ModeChangeCountdown> modeList = modes.getSortedCountdowns(true);
     int resultsPerPage = 8;
     int pages = (modeList.size() + resultsPerPage - 1) / resultsPerPage;
@@ -142,7 +142,7 @@ public final class ModeCommand {
       Match match,
       ObjectiveModesMatchModule modes,
       @Argument("mode") Mode mode,
-      @Argument(value = "time") @Default("0s") Duration time) {
+      @Argument("time") @Default("0s") Duration time) {
     if (!match.isRunning()) throwMatchNotStarted();
     if (time.isNegative()) throwInvalidNumber(time.toString());
 
