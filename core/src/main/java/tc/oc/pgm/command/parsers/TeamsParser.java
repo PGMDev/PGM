@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.command.util.CommandUtils;
@@ -46,8 +45,8 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull String input) {
     List<String> teams = teamParser.suggestions(context, input);
     if ("*".startsWith(input)) teams.add("*");
     return teams;

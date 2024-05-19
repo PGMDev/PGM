@@ -14,7 +14,7 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.command.util.CommandKeys;
@@ -27,9 +27,9 @@ import tc.oc.pgm.util.StringUtils;
 public final class MapPoolParser implements ArgumentParser<CommandSender, MapPool> {
 
   @Override
-  public @NonNull ArgumentParseResult<MapPool> parse(
-      final @NonNull CommandContext<CommandSender> context,
-      final @NonNull Queue<String> inputQueue) {
+  public @NotNull ArgumentParseResult<MapPool> parse(
+      final @NotNull CommandContext<CommandSender> context,
+      final @NotNull Queue<String> inputQueue) {
     MapOrder mapOrder = PGM.get().getMapOrder();
     if (!(mapOrder instanceof MapPoolManager)) return failure(exception("pool.mapPoolsDisabled"));
 
@@ -44,8 +44,8 @@ public final class MapPoolParser implements ArgumentParser<CommandSender, MapPoo
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      final @NonNull CommandContext<CommandSender> context, final @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      final @NotNull CommandContext<CommandSender> context, final @NotNull String input) {
     MapOrder mapOrder = PGM.get().getMapOrder();
     if (!(mapOrder instanceof MapPoolManager)) return Collections.emptyList();
 

@@ -10,7 +10,6 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.paper.PaperCommandManager;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -39,8 +38,8 @@ public final class PartyParser extends StringLikeParser<CommandSender, Party> {
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull String input) {
     List<String> teams = teamParser.suggestions(context, input);
     if (LiquidMetal.match("obs", input)) teams.add("obs");
     return teams;

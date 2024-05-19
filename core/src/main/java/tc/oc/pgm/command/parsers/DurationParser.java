@@ -16,16 +16,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
 public final class DurationParser implements ArgumentParser<CommandSender, Duration> {
 
   @Override
-  public @NonNull ArgumentParseResult<Duration> parse(
-      final @NonNull CommandContext<CommandSender> context,
-      final @NonNull Queue<String> inputQueue) {
+  public @NotNull ArgumentParseResult<Duration> parse(
+      final @NotNull CommandContext<CommandSender> context,
+      final @NotNull Queue<String> inputQueue) {
     final String input = inputQueue.peek();
     if (input == null) {
       return failure(new NoInputProvidedException(DurationParser.class, context));
@@ -40,8 +40,8 @@ public final class DurationParser implements ArgumentParser<CommandSender, Durat
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      final @NonNull CommandContext<CommandSender> commandContext, final @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      final @NotNull CommandContext<CommandSender> commandContext, final @NotNull String input) {
     char[] chars = input.toLowerCase(Locale.ROOT).toCharArray();
 
     if (chars.length == 0) {

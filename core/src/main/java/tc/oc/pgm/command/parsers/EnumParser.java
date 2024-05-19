@@ -15,8 +15,8 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.Aliased;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StreamUtils;
@@ -45,9 +45,9 @@ public class EnumParser<E extends Enum<E>> implements ArgumentParser<CommandSend
   }
 
   @Override
-  public @NonNull ArgumentParseResult<E> parse(
-      final @NonNull CommandContext<CommandSender> context,
-      final @NonNull Queue<String> inputQueue) {
+  public @NotNull ArgumentParseResult<E> parse(
+      final @NotNull CommandContext<CommandSender> context,
+      final @NotNull Queue<String> inputQueue) {
     final String input = inputQueue.peek();
     if (input == null) {
       return failure(new NoInputProvidedException(EnumParser.class, context));
@@ -70,8 +70,8 @@ public class EnumParser<E extends Enum<E>> implements ArgumentParser<CommandSend
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      final @NonNull CommandContext<CommandSender> context, final @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      final @NotNull CommandContext<CommandSender> context, final @NotNull String input) {
     return filteredOptions(context, input).collect(Collectors.toList());
   }
 

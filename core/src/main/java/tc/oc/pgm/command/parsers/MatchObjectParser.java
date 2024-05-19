@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -70,8 +69,8 @@ public abstract class MatchObjectParser<T, IT, M extends MatchModule>
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull String input) {
     Match match = CommandUtils.getMatch(context);
     if (match == null) return Collections.emptyList();
 

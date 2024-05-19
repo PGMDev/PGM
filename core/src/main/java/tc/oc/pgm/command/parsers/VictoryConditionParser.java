@@ -16,7 +16,7 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.command.util.CommandUtils;
@@ -32,9 +32,9 @@ public final class VictoryConditionParser
     implements ArgumentParser<CommandSender, Optional<VictoryCondition>> {
 
   @Override
-  public @NonNull ArgumentParseResult<@NonNull Optional<VictoryCondition>> parse(
-      @NonNull CommandContext<@NonNull CommandSender> context,
-      @NonNull Queue<@NonNull String> inputQueue) {
+  public @NotNull ArgumentParseResult<@NotNull Optional<VictoryCondition>> parse(
+      @NotNull CommandContext<@NotNull CommandSender> context,
+      @NotNull Queue<@NotNull String> inputQueue) {
     final String input = inputQueue.poll();
     if (input == null) {
       return failure(new NoInputProvidedException(VictoryConditionParser.class, context));
@@ -61,8 +61,8 @@ public final class VictoryConditionParser
       Arrays.asList("default", "tie", "objectives", "score");
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull String input) {
     final Match match = CommandUtils.getMatch(context);
     if (match == null) return BASE_SUGGESTIONS;
 

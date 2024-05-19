@@ -10,8 +10,8 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.exceptions.CommandExecutionException;
 import cloud.commandframework.types.tuples.Triplet;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.command.util.CommandUtils;
@@ -20,7 +20,7 @@ public class MatchModuleInjectionService implements InjectionService<CommandSend
 
   @Override
   public @Nullable Object handle(
-      @NonNull Triplet<CommandContext<CommandSender>, Class<?>, AnnotationAccessor> param)
+      @NotNull Triplet<CommandContext<CommandSender>, Class<?>, AnnotationAccessor> param)
       throws Exception {
     // Not a match module? we do not handle that.
     Class<?> cls = param.getSecond();

@@ -10,7 +10,6 @@ import cloud.commandframework.paper.PaperCommandManager;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -47,8 +46,8 @@ public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
+  public @NotNull List<@NotNull String> suggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull String input) {
     List<String> inputQueue = context.get(CommandKeys.INPUT_QUEUE);
 
     // Words to keep, as they cannot be replaced (they're not the last arg)
