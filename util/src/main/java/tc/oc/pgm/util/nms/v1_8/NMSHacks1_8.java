@@ -660,6 +660,12 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
   }
 
   @Override
+  public String getPlayerName(UUID uuid) {
+    GameProfile profile = MinecraftServer.getServer().getUserCache().getProfile(uuid);
+    return profile == null ? null : profile.getName();
+  }
+
+  @Override
   public void updateVelocity(Player player) {
     EntityPlayer handle = ((CraftPlayer) player).getHandle();
     handle.velocityChanged = false;
@@ -964,6 +970,11 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
   @Override
   public double getTPS() {
     return 20.0;
+  }
+
+  @Override
+  public int getMaxWorldSize(World world) {
+    return ((CraftWorld) world).getHandle().getWorldBorder().l();
   }
 
   enum TeamPacketFields {

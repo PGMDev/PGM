@@ -29,7 +29,7 @@ import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.UsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolvers;
 
 public class MapLibraryImpl implements MapLibrary {
 
@@ -129,7 +129,8 @@ public class MapLibraryImpl implements MapLibrary {
     final int oldFail = failed.size();
     final int oldOk = reset ? 0 : maps.size();
 
-    return CompletableFuture.runAsync(
+    return CompletableFuture.runAsync(UsernameResolvers::startBatch)
+        .thenRunAsync(
             () -> {
               // First ensure loadNewSources is called for all factories, this may take some time
               // (eg: Git pull)
@@ -168,7 +169,7 @@ public class MapLibraryImpl implements MapLibrary {
               }
             })
         .thenRunAsync(() -> logMapSuccess(oldFail, oldOk))
-        .thenRunAsync(UsernameResolver::resolveAll);
+        .thenRunAsync(UsernameResolvers::endBatch);
   }
 
   @Override

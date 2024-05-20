@@ -1,6 +1,7 @@
 package tc.oc.pgm.namedecorations;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.player.PlayerRenderer.OFFLINE_COLOR;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -124,7 +125,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   public TextColor getColor(UUID uuid) {
     MatchPlayer player = PGM.get().getMatchManager().getPlayer(uuid);
-    if (player == null) return PlayerComponent.OFFLINE_COLOR;
+    if (player == null) return OFFLINE_COLOR;
     return TextFormatter.convert(player.getParty().getColor());
   }
 

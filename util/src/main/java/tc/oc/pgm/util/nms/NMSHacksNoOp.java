@@ -223,6 +223,11 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   }
 
   @Override
+  public String getPlayerName(UUID uuid) {
+    return Bukkit.getOfflinePlayer(uuid).getName();
+  }
+
+  @Override
   public Set<MaterialData> getBlockStates(Material material) {
     // TODO: MaterialData is not version compatible
     Set<MaterialData> materialDataSet = new HashSet<>();
@@ -301,5 +306,10 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     // runs the task on the next tick, not a perfect replacement
     plugin.getServer().getScheduler().runTask(plugin, task);
+  }
+
+  @Override
+  public int getMaxWorldSize(World world) {
+    return 29999984; // Vanilla's default
   }
 }
