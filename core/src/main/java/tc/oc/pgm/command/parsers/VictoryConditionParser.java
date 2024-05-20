@@ -11,12 +11,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.command.util.CommandUtils;
@@ -33,8 +33,8 @@ public final class VictoryConditionParser
         BlockingSuggestionProvider.Strings<CommandSender> {
 
   @Override
-  public @NonNull ArgumentParseResult<@NonNull Optional<VictoryCondition>> parse(
-      @NonNull CommandContext<@NonNull CommandSender> context, @NonNull CommandInput inputQueue) {
+  public @NotNull ArgumentParseResult<@NotNull Optional<VictoryCondition>> parse(
+      @NotNull CommandContext<@NotNull CommandSender> context, @NotNull CommandInput inputQueue) {
     final String input = inputQueue.readString();
 
     final Match match = CommandUtils.getMatch(context);
@@ -58,8 +58,8 @@ public final class VictoryConditionParser
       Arrays.asList("default", "tie", "objectives", "score");
 
   @Override
-  public @NonNull List<@NonNull String> stringSuggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {
+  public @NotNull List<@NotNull String> stringSuggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull CommandInput input) {
     final String next = input.readString();
     final Match match = CommandUtils.getMatch(context);
     if (match == null) return BASE_SUGGESTIONS;

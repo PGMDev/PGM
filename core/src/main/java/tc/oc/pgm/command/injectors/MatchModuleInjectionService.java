@@ -5,11 +5,11 @@ import static tc.oc.pgm.util.text.TextException.exception;
 import static tc.oc.pgm.util.text.TextException.playerOnly;
 
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.incendo.cloud.exception.CommandExecutionException;
 import org.incendo.cloud.injection.InjectionRequest;
 import org.incendo.cloud.injection.InjectionService;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.command.util.CommandUtils;
@@ -17,7 +17,7 @@ import tc.oc.pgm.command.util.CommandUtils;
 public class MatchModuleInjectionService implements InjectionService<CommandSender> {
 
   @Override
-  public @Nullable Object handle(@NonNull InjectionRequest<CommandSender> param) throws Exception {
+  public @Nullable Object handle(@NotNull InjectionRequest<CommandSender> param) throws Exception {
     // Not a match module? we do not handle that.
     Class<?> cls = param.injectedClass();
     if (!MatchModule.class.isAssignableFrom(cls)) return null;

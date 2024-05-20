@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -25,9 +25,9 @@ public final class DurationParser
         BlockingSuggestionProvider.Strings<CommandSender> {
 
   @Override
-  public @NonNull ArgumentParseResult<Duration> parse(
-      final @NonNull CommandContext<CommandSender> context,
-      final @NonNull CommandInput inputQueue) {
+  public @NotNull ArgumentParseResult<Duration> parse(
+      final @NotNull CommandContext<CommandSender> context,
+      final @NotNull CommandInput inputQueue) {
     final String input = inputQueue.peekString();
     try {
       Duration result = TextParser.parseDuration(input);
@@ -39,9 +39,9 @@ public final class DurationParser
   }
 
   @Override
-  public @NonNull List<@NonNull String> stringSuggestions(
-      final @NonNull CommandContext<CommandSender> commandContext,
-      final @NonNull CommandInput input) {
+  public @NotNull List<@NotNull String> stringSuggestions(
+      final @NotNull CommandContext<CommandSender> commandContext,
+      final @NotNull CommandInput input) {
     final String next = input.readString();
     char[] chars = next.toLowerCase(Locale.ROOT).toCharArray();
 

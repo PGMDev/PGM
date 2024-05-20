@@ -10,12 +10,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.command.util.CommandKeys;
@@ -30,9 +30,9 @@ public final class MapPoolParser
         BlockingSuggestionProvider.Strings<CommandSender> {
 
   @Override
-  public @NonNull ArgumentParseResult<MapPool> parse(
-      final @NonNull CommandContext<CommandSender> context,
-      final @NonNull CommandInput inputQueue) {
+  public @NotNull ArgumentParseResult<MapPool> parse(
+      final @NotNull CommandContext<CommandSender> context,
+      final @NotNull CommandInput inputQueue) {
     MapOrder mapOrder = PGM.get().getMapOrder();
     if (!(mapOrder instanceof MapPoolManager)) return failure(exception("pool.mapPoolsDisabled"));
 
@@ -47,8 +47,8 @@ public final class MapPoolParser
   }
 
   @Override
-  public @NonNull List<@NonNull String> stringSuggestions(
-      final @NonNull CommandContext<CommandSender> context, final @NonNull CommandInput input) {
+  public @NotNull List<@NotNull String> stringSuggestions(
+      final @NotNull CommandContext<CommandSender> context, final @NotNull CommandInput input) {
     final String next = input.readString();
     MapOrder mapOrder = PGM.get().getMapOrder();
     if (!(mapOrder instanceof MapPoolManager)) return Collections.emptyList();

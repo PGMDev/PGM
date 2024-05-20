@@ -9,7 +9,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.paper.PaperCommandManager;
@@ -49,8 +48,8 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
   }
 
   @Override
-  public @NonNull List<@NonNull String> stringSuggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {
+  public @NotNull List<@NotNull String> stringSuggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull CommandInput input) {
     final String next = input.peekString();
     List<String> teams = teamParser.stringSuggestions(context, input);
     if ("*".startsWith(next)) teams.add("*");

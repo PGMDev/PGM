@@ -6,7 +6,6 @@ import static tc.oc.pgm.util.text.TextException.exception;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.paper.PaperCommandManager;
@@ -49,8 +48,8 @@ public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo
   }
 
   @Override
-  public @NonNull List<@NonNull String> stringSuggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {
+  public @NotNull List<@NotNull String> stringSuggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull CommandInput input) {
 
     // Words to keep, as they cannot be replaced (they're not the last arg)
     String keep = StringUtils.getMustKeepText(input);

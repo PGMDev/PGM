@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.key.CloudKey;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.Aliased;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StreamUtils;
@@ -46,9 +46,9 @@ public class EnumParser<E extends Enum<E>>
   }
 
   @Override
-  public @NonNull ArgumentParseResult<E> parse(
-      final @NonNull CommandContext<CommandSender> context,
-      final @NonNull CommandInput inputQueue) {
+  public @NotNull ArgumentParseResult<E> parse(
+      final @NotNull CommandContext<CommandSender> context,
+      final @NotNull CommandInput inputQueue) {
     final String input = inputQueue.peekString();
 
     E bestMatch = bestMatch(context, input);
@@ -68,8 +68,8 @@ public class EnumParser<E extends Enum<E>>
   }
 
   @Override
-  public @NonNull List<@NonNull String> stringSuggestions(
-      final @NonNull CommandContext<CommandSender> context, final @NonNull CommandInput input) {
+  public @NotNull List<@NotNull String> stringSuggestions(
+      final @NotNull CommandContext<CommandSender> context, final @NotNull CommandInput input) {
     return filteredOptions(context, input.readString()).collect(Collectors.toList());
   }
 
