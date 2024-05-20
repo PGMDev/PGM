@@ -42,9 +42,8 @@ public final class PlayerParser
   @Override
   public @NotNull List<@NotNull String> stringSuggestions(
       @NotNull CommandContext<CommandSender> context, @NotNull CommandInput input) {
-    final String next = input.readString();
     CommandSender sender = context.sender();
 
-    return Players.getPlayerNames(sender, next);
+    return Players.getPlayerNames(sender, input.readString());
   }
 }

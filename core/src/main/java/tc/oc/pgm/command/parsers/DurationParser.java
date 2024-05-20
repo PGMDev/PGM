@@ -28,9 +28,8 @@ public final class DurationParser
   public @NotNull ArgumentParseResult<Duration> parse(
       final @NotNull CommandContext<CommandSender> context,
       final @NotNull CommandInput inputQueue) {
-    final String input = inputQueue.peekString();
     try {
-      Duration result = TextParser.parseDuration(input);
+      Duration result = TextParser.parseDuration(inputQueue.peekString());
       inputQueue.readString();
       return success(result);
     } catch (TextException e) {
