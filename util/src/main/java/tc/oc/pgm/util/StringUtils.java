@@ -108,7 +108,7 @@ public final class StringUtils {
       suggestion = suggestion.substring(matchIdx + 1);
     }
 
-    return textToSuggestion(suggestion);
+    return mustKeep + textToSuggestion(suggestion);
   }
 
   public static String textToSuggestion(String text) {

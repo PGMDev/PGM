@@ -7,10 +7,11 @@ import org.incendo.cloud.context.CommandInput;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.parser.ParserParameters;
+import org.incendo.cloud.parser.standard.StringParser;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.StringUtils;
 
-public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T>, ParseUtils {
+public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T> {
 
   private final ArgumentParser<S, String> stringParser;
   protected final ParserParameters options;
@@ -27,8 +28,7 @@ public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T>, Pa
   @Override
   public @NotNull ArgumentParseResult<T> parse(
       @NotNull CommandContext<S> context, @NotNull CommandInput args) {
-    return flatMap(
-        stringParser.parse(context, args),
+    return stringParser.parse(context, args).flatMapParsedValue(
         text -> parse(context, StringUtils.suggestionToText(text)));
   }
 

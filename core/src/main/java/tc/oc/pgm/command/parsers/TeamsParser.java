@@ -45,7 +45,7 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
       return success(teams.getTeams());
     }
 
-    return map(teamParser.parse(context, text), Collections::singleton);
+    return teamParser.parse(context, text).mapParsedValue(Collections::singleton);
   }
 
   @Override

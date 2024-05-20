@@ -38,7 +38,7 @@ public final class PartyParser extends StringLikeParser<CommandSender, Party>
 
     if (text.equalsIgnoreCase("obs")) return success(match.getDefaultParty());
 
-    return map(teamParser.parse(context, text), team -> team);
+    return teamParser.parse(context, text).mapParsedValue(team -> team);
   }
 
   @Override

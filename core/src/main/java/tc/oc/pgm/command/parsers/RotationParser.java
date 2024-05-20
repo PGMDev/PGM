@@ -14,8 +14,7 @@ import tc.oc.pgm.rotation.pools.Rotation;
 
 public final class RotationParser
     implements ArgumentParser<CommandSender, Rotation>,
-        BlockingSuggestionProvider.Strings<CommandSender>,
-        ParseUtils {
+        BlockingSuggestionProvider.Strings<CommandSender> {
 
   private final MapPoolParser POOL_PARSER = new MapPoolParser();
 
@@ -24,7 +23,7 @@ public final class RotationParser
       final @NonNull CommandContext<CommandSender> context,
       final @NonNull CommandInput inputQueue) {
     context.set(CommandKeys.POOL_TYPE, MapPoolType.ORDERED);
-    return map(POOL_PARSER.parse(context, inputQueue), p -> (Rotation) p);
+    return POOL_PARSER.parse(context, inputQueue).mapParsedValue(p -> (Rotation) p);
   }
 
   @Override

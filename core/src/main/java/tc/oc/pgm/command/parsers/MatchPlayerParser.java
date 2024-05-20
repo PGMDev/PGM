@@ -13,15 +13,14 @@ import tc.oc.pgm.api.player.MatchPlayer;
 
 public final class MatchPlayerParser
     implements ArgumentParser<CommandSender, MatchPlayer>,
-        BlockingSuggestionProvider.Strings<CommandSender>,
-        ParseUtils {
+        BlockingSuggestionProvider.Strings<CommandSender> {
 
   private final PlayerParser parser = new PlayerParser();
 
   @Override
   public @NotNull ArgumentParseResult<@NotNull MatchPlayer> parse(
       @NotNull CommandContext<@NotNull CommandSender> context, @NotNull CommandInput inputQueue) {
-    return map(parser.parse(context, inputQueue), PGM.get().getMatchManager()::getPlayer);
+    return parser.parse(context, inputQueue).mapParsedValue(PGM.get().getMatchManager()::getPlayer);
   }
 
   @Override
