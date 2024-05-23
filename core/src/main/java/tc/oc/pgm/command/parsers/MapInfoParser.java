@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import org.bukkit.command.CommandSender;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
-import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ParserParameters;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
@@ -25,7 +25,7 @@ public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo
 
   private final MapLibrary library;
 
-  public MapInfoParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
+  public MapInfoParser(LegacyPaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options);
     this.library = PGM.get().getMapLibrary();
   }

@@ -2,14 +2,14 @@ package tc.oc.pgm.command.parsers;
 
 import java.util.Collection;
 import org.bukkit.command.CommandSender;
-import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.parser.ParserParameters;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 
 public class ModeParser extends MatchObjectParser.Simple<Mode, ObjectiveModesMatchModule> {
 
-  public ModeParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
+  public ModeParser(LegacyPaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options, Mode.class, ObjectiveModesMatchModule.class, "modes");
   }
 

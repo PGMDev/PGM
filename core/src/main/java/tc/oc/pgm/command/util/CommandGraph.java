@@ -29,7 +29,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator;
 import org.incendo.cloud.injection.ParameterInjector;
 import org.incendo.cloud.injection.ParameterInjectorRegistry;
 import org.incendo.cloud.minecraft.extras.MinecraftHelp;
-import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.parser.ArgumentParser;
 import org.incendo.cloud.parser.ParserRegistry;
 import org.incendo.cloud.setting.ManagerSetting;
@@ -40,7 +40,7 @@ import tc.oc.pgm.util.Audience;
 public abstract class CommandGraph<P extends Plugin> {
 
   protected P plugin;
-  protected PaperCommandManager<CommandSender> manager;
+  protected LegacyPaperCommandManager<CommandSender> manager;
   protected MinecraftHelp<CommandSender> minecraftHelp;
   protected AnnotationParser<CommandSender> annotationParser;
 
@@ -64,9 +64,9 @@ public abstract class CommandGraph<P extends Plugin> {
     registerCommands();
   }
 
-  protected PaperCommandManager<CommandSender> createCommandManager() throws Exception {
-    PaperCommandManager<CommandSender> manager =
-        PaperCommandManager.createNative(plugin, ExecutionCoordinator.simpleCoordinator());
+  protected LegacyPaperCommandManager<CommandSender> createCommandManager() throws Exception {
+    LegacyPaperCommandManager<CommandSender> manager =
+        LegacyPaperCommandManager.createNative(plugin, ExecutionCoordinator.simpleCoordinator());
 
     manager.settings().set(ManagerSetting.LIBERAL_FLAG_PARSING, true);
 

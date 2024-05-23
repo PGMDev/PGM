@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.bukkit.command.CommandSender;
-import org.incendo.cloud.paper.PaperCommandManager;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.parser.ParserParameters;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.FilterMatchModule;
@@ -14,7 +14,7 @@ public final class FilterArgumentParser
     extends MatchObjectParser<Filter, Map.Entry<String, Filter>, FilterMatchModule> {
 
   public FilterArgumentParser(
-      PaperCommandManager<CommandSender> manager, ParserParameters options) {
+      LegacyPaperCommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options, Filter.class, FilterMatchModule.class, "filters");
   }
 
