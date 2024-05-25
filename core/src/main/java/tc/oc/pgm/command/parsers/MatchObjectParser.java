@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
-import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ParserParameters;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
@@ -44,7 +44,7 @@ public abstract class MatchObjectParser<T, IT, M extends MatchModule>
   private final String moduleName;
 
   public MatchObjectParser(
-      LegacyPaperCommandManager<CommandSender> manager,
+      CommandManager<CommandSender> manager,
       ParserParameters options,
       Class<T> objType,
       Class<M> moduleType,
@@ -101,7 +101,7 @@ public abstract class MatchObjectParser<T, IT, M extends MatchModule>
 
   public abstract static class Simple<T, M extends MatchModule> extends MatchObjectParser<T, T, M> {
     public Simple(
-        LegacyPaperCommandManager<CommandSender> manager,
+        CommandManager<CommandSender> manager,
         ParserParameters options,
         Class<T> objType,
         Class<M> moduleType,

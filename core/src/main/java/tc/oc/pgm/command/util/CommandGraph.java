@@ -16,6 +16,7 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
 import org.incendo.cloud.bukkit.CloudBukkitCapabilities;
 import org.incendo.cloud.exception.ArgumentParseException;
@@ -40,7 +41,7 @@ import tc.oc.pgm.util.Audience;
 public abstract class CommandGraph<P extends Plugin> {
 
   protected P plugin;
-  protected LegacyPaperCommandManager<CommandSender> manager;
+  protected CommandManager<CommandSender> manager;
   protected MinecraftHelp<CommandSender> minecraftHelp;
   protected AnnotationParser<CommandSender> annotationParser;
 
@@ -64,7 +65,7 @@ public abstract class CommandGraph<P extends Plugin> {
     registerCommands();
   }
 
-  protected LegacyPaperCommandManager<CommandSender> createCommandManager() throws Exception {
+  protected CommandManager<CommandSender> createCommandManager() {
     LegacyPaperCommandManager<CommandSender> manager =
         LegacyPaperCommandManager.createNative(plugin, ExecutionCoordinator.simpleCoordinator());
 

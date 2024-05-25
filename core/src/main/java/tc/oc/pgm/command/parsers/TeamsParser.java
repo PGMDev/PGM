@@ -9,9 +9,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.context.CommandContext;
 import org.incendo.cloud.context.CommandInput;
-import org.incendo.cloud.paper.LegacyPaperCommandManager;
 import org.incendo.cloud.parser.ArgumentParseResult;
 import org.incendo.cloud.parser.ParserParameters;
 import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
@@ -27,7 +27,7 @@ public final class TeamsParser extends StringLikeParser<CommandSender, Collectio
 
   private final TeamParser teamParser;
 
-  public TeamsParser(LegacyPaperCommandManager<CommandSender> manager, ParserParameters options) {
+  public TeamsParser(CommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options);
     this.teamParser = new TeamParser(manager, options);
   }
