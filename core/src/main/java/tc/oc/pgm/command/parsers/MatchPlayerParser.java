@@ -20,7 +20,7 @@ public final class MatchPlayerParser
   @Override
   public @NotNull ArgumentParseResult<@NotNull MatchPlayer> parse(
       @NotNull CommandContext<@NotNull CommandSender> context, @NotNull CommandInput inputQueue) {
-    return parser.parse(context, inputQueue).mapParsedValue(PGM.get().getMatchManager()::getPlayer);
+    return parser.parse(context, inputQueue).mapSuccess(PGM.get().getMatchManager()::getPlayer);
   }
 
   @Override

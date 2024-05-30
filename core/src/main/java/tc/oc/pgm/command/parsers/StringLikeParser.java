@@ -29,7 +29,7 @@ public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T> {
       @NotNull CommandContext<S> context, @NotNull CommandInput args) {
     return stringParser
         .parse(context, args)
-        .flatMapParsedValue(text -> parse(context, StringUtils.suggestionToText(text)));
+        .flatMapSuccess(text -> parse(context, StringUtils.suggestionToText(text)));
   }
 
   public abstract ArgumentParseResult<T> parse(

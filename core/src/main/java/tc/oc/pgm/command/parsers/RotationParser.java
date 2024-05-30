@@ -23,7 +23,7 @@ public final class RotationParser
       final @NotNull CommandContext<CommandSender> context,
       final @NotNull CommandInput inputQueue) {
     context.set(CommandKeys.POOL_TYPE, MapPoolType.ORDERED);
-    return POOL_PARSER.parse(context, inputQueue).mapParsedValue(p -> (Rotation) p);
+    return POOL_PARSER.parse(context, inputQueue).mapSuccess(p -> (Rotation) p);
   }
 
   @Override
