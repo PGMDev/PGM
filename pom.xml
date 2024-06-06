@@ -259,6 +259,7 @@
                 <configuration>
                     <ratchetFrom>origin/dev</ratchetFrom>
                     <java>
+                        <removeUnusedImports/>
                         <palantirJavaFormat>
                             <style>GOOGLE</style>
                             <formatJavadoc>true</formatJavadoc>
