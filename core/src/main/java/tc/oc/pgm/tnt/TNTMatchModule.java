@@ -1,5 +1,7 @@
 package tc.oc.pgm.tnt;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -69,16 +71,7 @@ public class TNTMatchModule implements MatchModule, Listener {
     }
   }
 
-  private static Sound FUSE_SOUND = chooseFuseSound();
-
-  private static Sound chooseFuseSound() {
-    try {
-      return Sound.FUSE;
-    } catch (NoSuchFieldError error) {
-      // TODO: make or use a 1.8 -> 1.9+ sound conversion api
-      return Sound.valueOf("ENTITY_TNT_PRIMED");
-    }
-  }
+  private static final Sound FUSE_SOUND = parse(Sound::valueOf, "FUSE", "ENTITY_TNT_PRIMED");
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleInstantActivation(BlockPlaceEvent event) {

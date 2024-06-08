@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,6 +35,7 @@ import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
 import tc.oc.pgm.flag.state.Spawned;
 import tc.oc.pgm.util.inventory.ItemBuilder;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 
@@ -142,7 +142,7 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     Beam(Flag flag) {
       this.flag = flag;
 
-      ItemStack wool = new ItemBuilder().material(Material.WOOL).color(flag.getDyeColor()).build();
+      ItemStack wool = new ItemBuilder().material(Materials.WOOL).color(flag.getDyeColor()).build();
       this.base = NMSHacks.fakeArmorStand(match.getWorld(), wool);
       this.legacyBase = NMSHacks.fakeWitherSkull(match.getWorld());
       this.segments =

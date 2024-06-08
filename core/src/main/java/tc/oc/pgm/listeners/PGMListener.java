@@ -53,6 +53,7 @@ import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
@@ -162,7 +163,7 @@ public class PGMListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void protect36(final PlayerInteractEvent event) {
     if (event.getClickedBlock() != null) {
-      if (event.getClickedBlock().getType() == Material.PISTON_MOVING_PIECE) {
+      if (event.getClickedBlock().getType() == Materials.MOVING_PISTON) {
         event.setCancelled(true);
       }
     }
@@ -287,8 +288,8 @@ public class PGMListener implements Listener {
   public void nerfFishing(PlayerFishEvent event) {
     if (event.getCaught() instanceof Item) {
       Item caught = (Item) event.getCaught();
-      if (caught.getItemStack().getType() != Material.RAW_FISH) {
-        caught.setItemStack(new ItemStack(Material.RAW_FISH));
+      if (caught.getItemStack().getType() != Materials.RAW_FISH) {
+        caught.setItemStack(new ItemStack(Materials.RAW_FISH));
       }
     }
   }

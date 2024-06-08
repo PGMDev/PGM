@@ -1,12 +1,12 @@
-package tc.oc.pgm.util;
+package tc.oc.pgm.util.block;
 
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
+import tc.oc.pgm.util.material.MaterialData;
 
 /** Util class to reference a {@link MaterialData} and location of a block. */
-public interface BlockData {
+public interface BlockData extends MaterialData {
 
   /**
    * Get the material data for this block. Be aware this causes an allocation, so avoid it when
@@ -14,23 +14,7 @@ public interface BlockData {
    *
    * @return a new material data with proper material type and metadata
    */
-  default MaterialData getMaterialData() {
-    return new MaterialData(getTypeId(), (byte) getData());
-  }
-
-  /**
-   * Get the material type id.
-   *
-   * @return the material type id for this block data.
-   */
-  int getTypeId();
-
-  /**
-   * Get the metadata.
-   *
-   * @return the metadata for the block data.
-   */
-  int getData();
+  org.bukkit.material.MaterialData getBukkit();
 
   /**
    * Get the current position.
@@ -47,9 +31,14 @@ public interface BlockData {
    * @return the block at the current position with the added offset
    */
   default Block getBlock(World world, BlockVector offset) {
-    return world.getBlockAt(
-        getBlockVector().getBlockX() + offset.getBlockX(),
-        getBlockVector().getBlockY() + offset.getBlockY(),
-        getBlockVector().getBlockZ() + offset.getBlockZ());
+    if (offset == null) {
+      return world.getBlockAt(
+          getBlockVector().getBlockX(), getBlockVector().getBlockY(), getBlockVector().getBlockZ());
+    } else {
+      return world.getBlockAt(
+          getBlockVector().getBlockX() + offset.getBlockX(),
+          getBlockVector().getBlockY() + offset.getBlockY(),
+          getBlockVector().getBlockZ() + offset.getBlockZ());
+    }
   }
 }

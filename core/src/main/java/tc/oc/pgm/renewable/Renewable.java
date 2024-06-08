@@ -1,5 +1,7 @@
 package tc.oc.pgm.renewable;
 
+import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+
 import com.google.common.collect.ImmutableRangeMap;
 import com.google.common.collect.Range;
 import com.google.common.collect.RangeMap;
@@ -14,7 +16,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
@@ -29,8 +30,7 @@ import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.MaterialCounter;
-import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.MaterialData;
 
 public class Renewable implements Listener, Tickable {
 
@@ -161,7 +161,7 @@ public class Renewable implements Listener, Tickable {
     if (!isOriginalRenewable(pos)) return true;
 
     // If original and current world are both shuffleable, block is new
-    MaterialData currentMaterial = currentState.getData();
+    MaterialData currentMaterial = MaterialData.from(currentState);
     if (isOriginalShuffleable(pos)
         && definition.shuffleableBlocks.query(new BlockQuery(currentState)).isAllowed())
       return true;
@@ -219,7 +219,7 @@ public class Renewable implements Listener, Tickable {
                   pos.getBlockY() + random.nextInt(diameter) - range,
                   pos.getBlockZ() + random.nextInt(diameter) - range);
       if (definition.shuffleableBlocks.query(new BlockQuery(block)).isAllowed())
-        return block.getData();
+        return MaterialData.from(block);
     }
     return null;
   }
@@ -267,7 +267,7 @@ public class Renewable implements Listener, Tickable {
     Location location = pos.toLocation(match.getWorld());
     Block block = location.getBlock();
     BlockState newState = location.getBlock().getState();
-    NMSHacks.setBlockStateData(newState, material);
+    material.applyTo(newState);
 
     BlockRenewEvent event = new BlockRenewEvent(block, newState, this);
     match.callEvent(event); // Our own handler will get this and remove the block from the pool
@@ -276,7 +276,7 @@ public class Renewable implements Listener, Tickable {
     newState.update(true, true);
 
     if (definition.particles || definition.sound) {
-      Materials.playBreakEffect(location, material);
+      EFFECTS.blockBreak(location, material);
     }
 
     return true;

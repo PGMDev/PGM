@@ -4,9 +4,9 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import net.kyori.adventure.sound.Sound;
@@ -28,7 +28,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -61,8 +60,10 @@ import tc.oc.pgm.regions.PointRegion;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.ItemBuilder;
+import tc.oc.pgm.util.material.ColorUtils;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -91,7 +92,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   private final ImmutableSet<NetDefinition> nets;
   private final Location bannerLocation;
-  private final BannerMeta bannerMeta;
+  private final ColorUtils.BannerData bannerData;
   private final ItemStack bannerItem;
   private final ItemStack legacyBannerItem;
   private final AngleProvider bannerYawProvider;
@@ -166,17 +167,15 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
           "Flag '" + getName() + "' must have a banner at its default post");
     }
 
-    this.bannerLocation = Materials.getLocationWithYaw(banner);
+    this.bannerLocation = getLocationWithYaw(banner);
     this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());
 
-    this.bannerMeta = Materials.getItemMeta(banner);
-    this.bannerMeta.setDisplayName(getColoredName());
-    this.bannerItem = new ItemStack(Material.BANNER);
-    this.bannerItem.setItemMeta(this.getBannerMeta());
+    this.bannerData = COLOR_UTILS.createBanner(banner, getColoredName());
+    this.bannerItem = this.getBannerData().createItem();
 
     this.legacyBannerItem =
         new ItemBuilder()
-            .material(Material.WOOL)
+            .material(Materials.WOOL)
             .color(getDyeColor())
             .name(getColoredName())
             .build();
@@ -195,7 +194,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public DyeColor getDyeColor() {
     DyeColor color = this.getDefinition().getColor();
-    if (color == null) color = this.bannerMeta.getBaseColor();
+    if (color == null) color = bannerData.getBaseColor();
     return color;
   }
 
@@ -220,8 +219,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return nets;
   }
 
-  public BannerMeta getBannerMeta() {
-    return bannerMeta;
+  public ColorUtils.BannerData getBannerData() {
+    return bannerData;
   }
 
   public ItemStack getBannerItem() {
@@ -271,14 +270,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     Block below = block.getRelative(BlockFace.DOWN);
     if (!canDropOn(below.getState())) return false;
     if (block.getRelative(BlockFace.UP).getType() != Material.AIR) return false;
-
-    switch (block.getType()) {
-      case AIR:
-      case LONG_GRASS:
-        return true;
-      default:
-        return false;
-    }
+    return block.getType() == Material.AIR || block.getType() == Materials.SHORT_GRASS;
   }
 
   public Post getPost(PostDefinition post) {
@@ -331,6 +323,13 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     this.state =
         new Returned(this, fmm.getPost(this.getDefinition().getDefaultPost()), this.bannerLocation);
     this.state.enterState();
+  }
+
+  static Location getLocationWithYaw(Banner block) {
+    Location location = block.getLocation();
+    location.setYaw(
+        BlockFaces.faceToYaw(((org.bukkit.material.Banner) block.getData()).getFacing()));
+    return location;
   }
 
   /**
@@ -480,9 +479,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
-    for (Iterator<ItemStack> iterator = event.getDrops().iterator(); iterator.hasNext(); ) {
-      if (iterator.next().isSimilar(this.getBannerItem())) iterator.remove();
-    }
+    event.getDrops().removeIf(itemStack -> itemStack.isSimilar(this.getBannerItem()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

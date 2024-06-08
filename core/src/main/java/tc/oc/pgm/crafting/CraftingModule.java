@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.ShapedRecipe;
@@ -72,10 +71,10 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
           customRecipes.add(recipe);
           if (XMLUtils.parseBoolean(elRecipe.getAttribute("override"), false)) {
             // Disable specific world + data
-            disabledRecipes.add(new SingleMaterialMatcher(recipe.getResult().getData()));
+            disabledRecipes.add(SingleMaterialMatcher.of(recipe.getResult().getData()));
           } else if (XMLUtils.parseBoolean(elRecipe.getAttribute("override-all"), false)) {
             // Disable all of this world
-            disabledRecipes.add(new SingleMaterialMatcher(recipe.getResult().getType()));
+            disabledRecipes.add(SingleMaterialMatcher.of(recipe.getResult().getType()));
           }
         }
       }
@@ -99,11 +98,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
       for (Element elIngredient : XMLUtils.getChildren(elRecipe, "ingredient", "i")) {
         SingleMaterialMatcher item = XMLUtils.parseMaterialPattern(elIngredient);
         int count = XMLUtils.parseNumber(elIngredient.getAttribute("amount"), Integer.class, 1);
-        if (item.dataMatters()) {
-          recipe.addIngredient(count, item.getMaterialData());
-        } else {
-          recipe.addIngredient(count, item.getMaterial());
-        }
+        item.addIngredient(recipe, count);
       }
 
       if (recipe.getIngredientList().isEmpty()) {
@@ -166,12 +161,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
           throw new InvalidXMLException(
               "Ingredient key '" + key + "' does not appear in the recipe shape", attrSymbol);
         }
-
-        if (item.dataMatters()) {
-          recipe.setIngredient(key, item.getMaterialData());
-        } else {
-          recipe.setIngredient(key, item.getMaterial());
-        }
+        item.setIngredient(recipe, key);
       }
 
       if (recipe.getIngredientMap().isEmpty()) {
@@ -188,11 +178,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
           XMLUtils.parseMaterialPattern(
               XMLUtils.getRequiredUniqueChild(elRecipe, "ingredient", "i"));
       ItemStack result = parseRecipeResult(factory, elRecipe);
-      if (ingredient.dataMatters()) {
-        return new FurnaceRecipe(result, ingredient.getMaterialData());
-      } else {
-        return new FurnaceRecipe(result, ingredient.getMaterial());
-      }
+      return ingredient.createFurnaceRecipe(result);
     }
   }
 }

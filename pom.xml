@@ -49,13 +49,6 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
         </repository>
         <repository>
-            <id>sportpaper-github</id>
-            <url>https://maven.pkg.github.com/Electroid/SportPaper</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>jitpack-io</id>
             <url>https://jitpack.io/</url>
         </repository>
@@ -85,12 +78,20 @@
     </distributionManagement>
 
     <dependencies>
+        <!-- For running tests, use a non-broken jar -->
+        <dependency>
+            <groupId>org.spigotmc.</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.8.8-R0.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Depend on the lowest common denominator -->
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>1.8.8_1.20.6-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Bundled in minecraft/craftbukkit implementation -->
@@ -218,7 +219,7 @@
                     <artifactId>spigot-api</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>	
+        </dependency>
 
         <!-- Git library for cloning and pulling repositories -->
         <dependency>

@@ -1,7 +1,6 @@
 package tc.oc.pgm.renewable;
 
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.query.BlockQuery;
@@ -32,8 +31,8 @@ public class RenewableDefinition {
     BlockQuery originalQuery = new BlockQuery(original);
     if (!renewableBlocks.query(originalQuery).isAllowed()) return false;
 
-    MaterialData originalMaterial = original.getData();
-    MaterialData currentMaterial = current.getData();
+    org.bukkit.material.MaterialData originalMaterial = original.getData();
+    org.bukkit.material.MaterialData currentMaterial = current.getData();
 
     // If current world matches the original, block is already renewed
     if (originalMaterial.equals(currentMaterial)) return false;

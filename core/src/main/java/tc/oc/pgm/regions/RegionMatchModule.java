@@ -51,6 +51,7 @@ import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
@@ -415,7 +416,7 @@ public class RegionMatchModule implements MatchModule, Listener {
     } else if (hanging instanceof ItemFrame) {
       return Material.ITEM_FRAME;
     } else if (hanging instanceof LeashHitch) {
-      return Material.LEASH;
+      return Materials.LEASH;
     } else {
       return null;
     }

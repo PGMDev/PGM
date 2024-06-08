@@ -98,7 +98,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -115,6 +114,7 @@ import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
@@ -223,7 +223,8 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
   public void skipFireworksLaunch(Firework firework) {
     EntityFireworks entityFirework = ((CraftFirework) firework).getHandle();
     entityFirework.expectedLifespan = 2;
-    entityFirework.ticksFlown = 2;
+    entityFirework.inactiveTick(); // Increase ticks-flown by 2
+    entityFirework.inactiveTick();
     sendPacketToViewers(
         firework, entityMetadataPacket(firework.getEntityId(), firework, false), false);
   }
@@ -643,7 +644,7 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
     if (states != null) {
       for (IBlockData state : states) {
         int data = nmsBlock.toLegacyData(state);
-        materials.add(material.getNewData((byte) data));
+        materials.add(MaterialData.from(material.getNewData((byte) data)));
       }
     }
     return materials.build();
@@ -657,7 +658,7 @@ public class NMSHacks1_8 extends NMSHacksNoOp {
 
   @Override
   public String getPlayerName(UUID uuid) {
-    GameProfile profile = MinecraftServer.getServer().getUserCache().getProfile(uuid);
+    GameProfile profile = MinecraftServer.getServer().getUserCache().a(uuid);
     return profile == null ? null : profile.getName();
   }
 

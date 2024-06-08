@@ -18,6 +18,7 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class WorldProblemListener implements Listener {
@@ -63,15 +64,15 @@ public class WorldProblemListener implements Listener {
   public void repairChunk(ChunkLoadEvent event) {
     if (this.repairedChunks.put(event.getWorld(), event.getChunk())) {
       // Replace formerly invisible half-iron-door blocks with barriers
-      for (Block ironDoor : NMSHacks.getBlocks(event.getChunk(), Material.IRON_DOOR_BLOCK)) {
+      for (Block ironDoor : NMSHacks.getBlocks(event.getChunk(), Materials.IRON_DOOR)) {
         BlockFace half = (ironDoor.getData() & 8) == 0 ? BlockFace.DOWN : BlockFace.UP;
-        if (ironDoor.getRelative(half.getOppositeFace()).getType() != Material.IRON_DOOR_BLOCK) {
+        if (ironDoor.getRelative(half.getOppositeFace()).getType() != Materials.IRON_DOOR) {
           ironDoor.setType(Material.BARRIER, false);
         }
       }
 
       // Remove all block 36 and remember the ones at y=0 so VoidFilter can check them
-      for (Block block36 : NMSHacks.getBlocks(event.getChunk(), Material.PISTON_MOVING_PIECE)) {
+      for (Block block36 : NMSHacks.getBlocks(event.getChunk(), Materials.MOVING_PISTON)) {
         if (block36.getY() == 0) {
           block36Locations
               .get(event.getWorld())

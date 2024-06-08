@@ -31,6 +31,8 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
 public class CoreMatchModule implements MatchModule, Listener {
@@ -61,7 +63,7 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void leakCheck(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    if (event.getNewState().getType() == Material.STATIONARY_LAVA) {
+    if (Materials.isLava(event.getNewState().getType())) {
       Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
       // Vector ensuring it's inside leak region if it's above
       Vector minVector = blockVector.clone().setY(0.5);
@@ -99,7 +101,7 @@ public class CoreMatchModule implements MatchModule, Listener {
 
             if (team == core.getOwner()) {
               event.setCancelled(translatable("objective.damageOwn", core.getComponentName()));
-            } else if (event.getOldState().getData().equals(core.getMaterial())) {
+            } else if (core.isCoreMaterial(MaterialData.from(event.getOldState()))) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
 

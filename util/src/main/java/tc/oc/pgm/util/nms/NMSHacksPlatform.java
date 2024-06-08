@@ -12,21 +12,18 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -35,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.skin.Skin;
@@ -140,9 +138,6 @@ public interface NMSHacksPlatform {
   @Deprecated
   Set<MaterialData> getBlockStates(Material material);
 
-  // TODO: Material api
-  void setBlockStateData(BlockState state, MaterialData materialData);
-
   Skin getPlayerSkin(Player player);
 
   Skin getPlayerSkinForViewer(Player player, Player viewer);
@@ -214,8 +209,6 @@ public interface NMSHacksPlatform {
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);
 
   int getMaxWorldSize(World world);
-
-  boolean openVillager(Villager villager, Player viewer);
 
   void addRecipe(World world, Recipe recipe);
 

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class NoMaterialMatcher implements MaterialMatcher {
@@ -15,6 +15,11 @@ public class NoMaterialMatcher implements MaterialMatcher {
 
   @Override
   public boolean matches(Material material) {
+    return false;
+  }
+
+  @Override
+  public boolean matches(org.bukkit.material.MaterialData materialData) {
     return false;
   }
 

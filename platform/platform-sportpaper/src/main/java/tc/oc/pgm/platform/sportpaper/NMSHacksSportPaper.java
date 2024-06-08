@@ -25,12 +25,10 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
@@ -45,11 +43,6 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
   @Override
   public void updateChunkSnapshot(ChunkSnapshot snapshot, BlockState blockState) {
     snapshot.updateBlock(blockState);
-  }
-
-  @Override
-  public void setBlockStateData(BlockState state, MaterialData materialData) {
-    state.setMaterialData(materialData);
   }
 
   @Override
@@ -288,12 +281,6 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
   @Override
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     Bukkit.getServer().postToMainThread(plugin, true, task);
-  }
-
-  @Override
-  public boolean openVillager(Villager villager, Player viewer) {
-    viewer.openMerchantCopy(villager);
-    return true;
   }
 
   @Override

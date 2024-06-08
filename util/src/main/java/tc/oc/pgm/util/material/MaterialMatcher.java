@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
@@ -12,6 +11,8 @@ import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 public interface MaterialMatcher {
 
   boolean matches(Material material);
+
+  boolean matches(org.bukkit.material.MaterialData materialData);
 
   boolean matches(MaterialData materialData);
 
@@ -24,14 +25,14 @@ public interface MaterialMatcher {
   Collection<Material> getMaterials();
 
   static MaterialMatcher of(Material... materials) {
-    return CompoundMaterialMatcher.of(SingleMaterialMatcher::new, Arrays.asList(materials));
+    return CompoundMaterialMatcher.of(SingleMaterialMatcher::of, Arrays.asList(materials));
   }
 
   static MaterialMatcher of(Collection<Material> materials) {
-    return CompoundMaterialMatcher.of(SingleMaterialMatcher::new, materials);
+    return CompoundMaterialMatcher.of(SingleMaterialMatcher::of, materials);
   }
 
   static MaterialMatcher of(MaterialData... materials) {
-    return CompoundMaterialMatcher.of(SingleMaterialMatcher::new, Arrays.asList(materials));
+    return CompoundMaterialMatcher.of(SingleMaterialMatcher::of, Arrays.asList(materials));
   }
 }

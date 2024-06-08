@@ -1,5 +1,7 @@
 package tc.oc.pgm.controlpoint;
 
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
+
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -17,7 +19,8 @@ import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.regions.SectorRegion;
-import tc.oc.pgm.renewable.BlockImage;
+import tc.oc.pgm.snapshot.SnapshotMatchModule;
+import tc.oc.pgm.snapshot.WorldSnapshot;
 import tc.oc.pgm.util.block.BlockVectors;
 
 /** Displays the status of a ControlPoint by coloring blocks in specified regions */
@@ -26,15 +29,15 @@ public class ControlPointBlockDisplay implements Listener {
   protected final ControlPoint controlPoint;
 
   protected final FiniteBlockRegion progressDisplayRegion;
-  protected final BlockImage progressDisplayImage;
   protected final FiniteBlockRegion controllerDisplayRegion;
-  protected final BlockImage controllerDisplayImage;
+  protected final WorldSnapshot snapshot;
 
   protected Competitor controllingTeam;
 
   public ControlPointBlockDisplay(Match match, ControlPoint controlPoint) {
     this.match = match;
     this.controlPoint = controlPoint;
+    this.snapshot = match.moduleRequire(SnapshotMatchModule.class).getOriginalSnapshot();
 
     Filter visualMaterials = controlPoint.getDefinition().getVisualMaterials();
     Region progressDisplayRegion = controlPoint.getDefinition().getProgressDisplayRegion();
@@ -42,19 +45,15 @@ public class ControlPointBlockDisplay implements Listener {
 
     if (progressDisplayRegion == null) {
       this.progressDisplayRegion = null;
-      this.progressDisplayImage = null;
     } else {
       this.progressDisplayRegion =
           FiniteBlockRegion.fromWorld(
               progressDisplayRegion, match.getWorld(), visualMaterials, match.getMap().getProto());
-      this.progressDisplayImage =
-          new BlockImage(match.getWorld(), this.progressDisplayRegion.getBounds());
-      this.progressDisplayImage.save();
+      snapshot.saveRegion(progressDisplayRegion);
     }
 
     if (controllerDisplayRegion == null) {
       this.controllerDisplayRegion = null;
-      this.controllerDisplayImage = null;
     } else {
       Filter controllerDisplayFilter =
           this.progressDisplayRegion == null
@@ -67,33 +66,27 @@ public class ControlPointBlockDisplay implements Listener {
               match.getWorld(),
               controllerDisplayFilter,
               match.getMap().getProto());
-      this.controllerDisplayImage =
-          new BlockImage(match.getWorld(), this.controllerDisplayRegion.getBounds());
-      this.controllerDisplayImage.save();
+      snapshot.saveRegion(controllerDisplayRegion);
     }
   }
 
   /**
    * Change the controller display to the given team's color, or reset the display if team is null
    */
-  @SuppressWarnings("deprecation")
   public void setController(Competitor controllingTeam) {
     if (this.controllingTeam != controllingTeam && this.controllerDisplayRegion != null) {
       if (controllingTeam == null) {
-        for (BlockVector block : this.controllerDisplayRegion.getBlockVectors()) {
-          this.controllerDisplayImage.restore(block);
-        }
+        snapshot.placeBlocks(this.controllerDisplayRegion, null);
       } else {
-        byte blockData = controllingTeam.getDyeColor().getWoolData();
-        for (BlockVector pos : this.controllerDisplayRegion.getBlockVectors()) {
-          BlockVectors.blockAt(match.getWorld(), pos).setData(blockData);
-        }
+        COLOR_UTILS.setColor(
+            match.getWorld(),
+            this.controllerDisplayRegion.getBlockVectors(),
+            controllingTeam.getDyeColor());
       }
       this.controllingTeam = controllingTeam;
     }
   }
 
-  @SuppressWarnings("deprecation")
   private void setBlock(BlockVector pos, Competitor team) {
     final Block block = BlockVectors.blockAt(match.getWorld(), pos);
     if (this.controlPoint
@@ -102,9 +95,9 @@ public class ControlPointBlockDisplay implements Listener {
         .query(new BlockQuery(block))
         .isAllowed()) {
       if (team != null) {
-        block.setData(team.getDyeColor().getWoolData());
+        COLOR_UTILS.setColor(block, team.getDyeColor());
       } else {
-        this.progressDisplayImage.restore(block);
+        snapshot.getOriginalMaterial(pos).applyTo(block, true);
       }
     }
   }

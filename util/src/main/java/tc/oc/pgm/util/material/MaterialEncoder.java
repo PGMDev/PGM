@@ -4,11 +4,9 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Collection;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 
 public interface MaterialEncoder {
@@ -22,21 +20,15 @@ public interface MaterialEncoder {
    * <p>typeId + metadata << 12
    */
   static int encodeMaterial(MaterialData material) {
-    return material == null
-        ? ENCODED_NULL_MATERIAL
-        : encodeMaterial(material.getItemTypeId(), material.getData());
-  }
-
-  static int encodeMaterial(int typeId, byte metadata) {
-    return typeId + (((int) metadata) << 12);
+    return material == null ? ENCODED_NULL_MATERIAL : material.encoded();
   }
 
   static int encodeMaterial(Block block) {
-    return encodeMaterial(block.getTypeId(), block.getData());
+    return MaterialData.from(block).encoded();
   }
 
   static int encodeMaterial(BlockState block) {
-    return encodeMaterial(block.getTypeId(), block.getRawData());
+    return MaterialData.from(block).encoded();
   }
 
   static int encodeMaterial(Location location) {
@@ -55,27 +47,5 @@ public interface MaterialEncoder {
       }
     }
     return set;
-  }
-
-  static int decodeTypeId(int encoded) {
-    return encoded & 0xfff;
-  }
-
-  static byte decodeMetadata(int encoded) {
-    return (byte) (encoded >> 12);
-  }
-
-  static Material decodeType(int encoded) {
-    return Material.getMaterial(decodeTypeId(encoded));
-  }
-
-  static MaterialData decodeMaterial(int encoded) {
-    if (encoded == ENCODED_NULL_MATERIAL) return null;
-    Material material = decodeType(encoded);
-    if (material.getData() == MaterialData.class) {
-      return new MaterialData(material, decodeMetadata(encoded));
-    } else {
-      return material.getNewData(decodeMetadata(encoded));
-    }
   }
 }

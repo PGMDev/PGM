@@ -17,13 +17,12 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
@@ -107,13 +106,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     super();
   }
 
+  // Used by RuntimePluginLoader in PGMServer
   public PGMPlugin(
-      PluginLoader loader,
-      Server server,
-      PluginDescriptionFile description,
-      File dataFolder,
-      File file) {
-    super(loader, server, description, dataFolder, file);
+      JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+    super(loader, description, dataFolder, file);
   }
 
   @Override

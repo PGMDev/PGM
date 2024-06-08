@@ -14,7 +14,7 @@ public class MaterialFilter extends TypedFilter.Impl<MaterialQuery> {
   private final MaterialMatcher pattern;
 
   public MaterialFilter(Material material) {
-    this(new SingleMaterialMatcher(material));
+    this(SingleMaterialMatcher.of(material));
   }
 
   public MaterialFilter(MaterialMatcher pattern) {

@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.listener;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -18,6 +20,9 @@ import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 
 /** A listener that calls {@link ItemTransferEvent} and {@link PlayerItemTransferEvent}. */
 public class ItemTransferListener implements Listener {
+  private static final Sound ITEM_PICKUP =
+      parse(Sound::valueOf, "ITEM_PICKUP", "ENTITY_ITEM_PICKUP");
+
   // Track players dropping an item stack from within an inventory GUI
   private boolean ignoreNextDropEvent;
   private boolean collectToCursor;
@@ -57,7 +62,7 @@ public class ItemTransferListener implements Listener {
         stack = stack.clone();
         stack.setAmount(quantity);
         event.getPlayer().getInventory().addItem(stack);
-        event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ITEM_PICKUP, 1, 1);
+        event.getPlayer().playSound(event.getPlayer().getLocation(), ITEM_PICKUP, 1, 1);
       }
     }
   }

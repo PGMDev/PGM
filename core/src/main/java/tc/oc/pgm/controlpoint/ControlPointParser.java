@@ -1,9 +1,13 @@
 package tc.oc.pgm.controlpoint;
 
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
+
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
@@ -16,7 +20,6 @@ import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.goals.ShowOptions;
-import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.payload.PayloadDefinition;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.EverywhereRegion;
@@ -31,7 +34,8 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public abstract class ControlPointParser {
   private static final Filter VISUAL_MATERIALS =
       AnyFilter.of(
-          ItemModifier.COLOR_AFFECTED.stream()
+          Arrays.stream(Material.values())
+              .filter(COLOR_UTILS::isColorAffected)
               .map(MaterialFilter::new)
               .collect(Collectors.toList()));
 

@@ -19,7 +19,6 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,7 +30,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -63,6 +61,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.bukkit.Enchantments;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -107,7 +106,7 @@ public class PickerMatchModule implements MatchModule, Listener {
       this.material = material;
     }
 
-    public boolean matches(MaterialData material) {
+    public boolean matches(org.bukkit.material.MaterialData material) {
       return this.material.equals(material.getItemType());
     }
   }
@@ -576,13 +575,13 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private ItemStack createClassButton(MatchPlayer viewer, PlayerClass cls) {
-    ItemStack item = cls.getIcon().toItemStack(1);
+    ItemStack item = cls.getIcon().getBukkit().toItemStack(1);
     ItemMeta meta = item.getItemMeta();
 
     meta.setDisplayName(
         (cls.canUse(viewer.getBukkit()) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
     if (match.getModule(ClassMatchModule.class).getSelectedClass(viewer.getId()).equals(cls)) {
-      meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+      meta.addEnchant(Enchantments.INFINITY, 1, true);
     }
 
     List<String> lore = Lists.newArrayList();
@@ -680,7 +679,9 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private void handleInventoryClick(
-      final MatchPlayer player, final String name, final MaterialData material) {
+      final MatchPlayer player,
+      final String name,
+      final org.bukkit.material.MaterialData material) {
     player.playSound(sound(key("random.click"), Sound.Source.MASTER, 1, 2));
 
     if (hasClasses) {

@@ -1,5 +1,7 @@
 package tc.oc.pgm.kits;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -56,6 +58,7 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -395,7 +398,7 @@ public abstract class KitParser {
   }
 
   public ItemStack parseHead(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.SKULL_ITEM, (short) 3);
+    ItemStack itemStack = parseItem(el, Materials.PLAYER_HEAD, (short) 3);
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
     NMSHacks.setSkullMetaOwner(
         meta,
@@ -407,7 +410,7 @@ public abstract class KitParser {
   }
 
   public ItemStack parseFirework(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.FIREWORK);
+    ItemStack itemStack = parseItem(el, Materials.FIREWORK);
     FireworkMeta meta = (FireworkMeta) itemStack.getItemMeta();
     int power = XMLUtils.parseNumber(Node.fromAttr(el, "power"), Integer.class, false, 1);
     meta.setPower(power);
@@ -581,7 +584,7 @@ public abstract class KitParser {
     }
 
     if (XMLUtils.parseBoolean(el.getAttribute("unbreakable"), false)) {
-      meta.spigot().setUnbreakable(true);
+      INVENTORY_UTILS.setUnbreakable(meta, true);
     }
 
     Element elCanDestroy = el.getChild("can-destroy");
@@ -607,8 +610,8 @@ public abstract class KitParser {
         return "can-destroy";
       case HIDE_PLACED_ON:
         return "can-place-on";
-      case HIDE_POTION_EFFECTS:
-        return "other";
+      default:
+        if (flag == InventoryUtils.HIDE_ADDITIONAL_FLAG) return "other";
     }
     throw new IllegalStateException("Unknown item flag " + flag);
   }

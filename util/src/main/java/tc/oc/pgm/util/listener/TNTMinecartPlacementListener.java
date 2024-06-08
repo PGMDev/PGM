@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.listener;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,6 +29,8 @@ import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
  * EntityPlaceEvent.
  */
 public class TNTMinecartPlacementListener implements Listener {
+  private static final Material TNT_MINECART =
+      parse(Material::valueOf, "EXPLOSIVE_MINECART", "TNT_MINECART");
   private Player lastPlacer;
   private ItemStack placingStack;
   private Location railLocation;
@@ -44,7 +48,7 @@ public class TNTMinecartPlacementListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onInteraction(PlayerInteractEvent event) {
     ItemStack stack = event.getItem();
-    if (stack != null && stack.getType() == Material.EXPLOSIVE_MINECART) {
+    if (stack != null && stack.getType() == TNT_MINECART) {
       lastPlacer = event.getPlayer();
       placingStack = stack.clone();
       railLocation = event.getClickedBlock().getLocation();

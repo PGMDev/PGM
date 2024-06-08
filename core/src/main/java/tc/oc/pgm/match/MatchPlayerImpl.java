@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
@@ -230,7 +231,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
     // This is only possible in sportpaper
     NMSHacks.setAffectsSpawning(player, interact);
-    player.spigot().setCollidesWithEntities(interact);
+    MISC_UTILS.setCollidesWithEntities(player, interact);
   }
 
   @Override

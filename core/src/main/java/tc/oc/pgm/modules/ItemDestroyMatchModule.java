@@ -11,6 +11,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.MaterialQuery;
+import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ItemDestroyMatchModule implements MatchModule, Listener {
@@ -23,7 +24,7 @@ public class ItemDestroyMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void processItemRemoval(ItemSpawnEvent event) {
     ItemStack item = event.getEntity().getItemStack();
-    if (itemsToRemove.query(MaterialQuery.get(item.getData())).isAllowed()) {
+    if (itemsToRemove.query(MaterialQuery.get(MaterialData.from(item.getData()))).isAllowed()) {
       event.setCancelled(true);
     }
   }

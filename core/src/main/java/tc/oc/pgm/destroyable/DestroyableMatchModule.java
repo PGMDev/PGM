@@ -12,7 +12,6 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -23,6 +22,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
+import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DestroyableMatchModule implements MatchModule, Listener {
@@ -109,7 +109,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     if (this.match.getWorld() != event.getBlock().getWorld()) return;
 
     Block block = event.getBlock();
-    MaterialData material = block.getState().getData();
+    MaterialData material = MaterialData.from(block.getState());
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
 
     for (Destroyable destroyable : this.destroyables) {

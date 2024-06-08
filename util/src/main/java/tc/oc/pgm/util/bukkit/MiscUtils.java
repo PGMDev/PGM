@@ -1,22 +1,28 @@
 package tc.oc.pgm.util.bukkit;
 
 import com.google.gson.JsonObject;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
 public interface MiscUtils {
-  MiscUtils INSTANCE = Platform.requireInstance(MiscUtils.class);
+  MiscUtils MISC_UTILS = Platform.requireInstance(MiscUtils.class);
 
   default boolean yield(Event event) {
     return false;
@@ -27,6 +33,8 @@ public interface MiscUtils {
   default float getKnockbackReduction(Player player) {
     return 0;
   }
+
+  default void setCollidesWithEntities(Player player, boolean collides) {}
 
   default void removeDrankPotion(PlayerItemConsumeEvent event, ScheduledExecutorService ex) {
     int itemSlot = event.getPlayer().getInventory().getHeldItemSlot();
@@ -55,5 +63,18 @@ public interface MiscUtils {
   default void createExplosion(Entity source, float power, boolean fire, boolean destroy) {
     Location loc = source.getLocation();
     source.getWorld().createExplosion(loc.getX(), loc.getY(), loc.getZ(), power, fire, destroy);
+  }
+
+  default PlayerDeathEvent createDeathEvent(Player player, List<ItemStack> drops, String msg) {
+    throw new UnsupportedOperationException();
+  }
+
+  default EntityChangeBlockEvent createEntityChangeBlockEvent(
+      Player player, Block block, MaterialData md) {
+    throw new UnsupportedOperationException();
+  }
+
+  default double getArrowDamage(Arrow arrow) {
+    return 2d;
   }
 }

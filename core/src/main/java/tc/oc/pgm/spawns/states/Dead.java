@@ -10,7 +10,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -19,6 +18,7 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -27,11 +27,11 @@ public class Dead extends Spawning {
   private static final long CORPSE_ROT_TICKS = 20;
 
   private static final PotionEffect CONFUSION =
-      new PotionEffect(PotionEffectType.CONFUSION, 100, 0, true, false);
+      new PotionEffect(PotionEffects.NAUSEA, 100, 0, true, false);
   private static final PotionEffect BLINDNESS_SHORT =
-      new PotionEffect(PotionEffectType.BLINDNESS, 21, 0, true, false);
+      new PotionEffect(PotionEffects.BLINDNESS, 21, 0, true, false);
   private static final PotionEffect BLINDNESS_LONG =
-      new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0, true, false);
+      new PotionEffect(PotionEffects.BLINDNESS, Integer.MAX_VALUE, 0, true, false);
 
   private boolean kitted, rotted;
 
@@ -73,8 +73,8 @@ public class Dead extends Spawning {
 
     NMSHacks.showBorderWarning(bukkit, false);
 
-    bukkit.removePotionEffect(PotionEffectType.BLINDNESS);
-    bukkit.removePotionEffect(PotionEffectType.CONFUSION);
+    bukkit.removePotionEffect(PotionEffects.BLINDNESS);
+    bukkit.removePotionEffect(PotionEffects.NAUSEA);
 
     // If regular rotting didn't end, force-finish it to avoid client-side
     endRotting();

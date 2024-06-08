@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.material;
 
-import static tc.oc.pgm.util.material.MaterialEncoder.decodeMaterial;
 import static tc.oc.pgm.util.material.MaterialEncoder.encodeMaterial;
 
 import gnu.trove.impl.Constants;
@@ -13,7 +12,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 
 /** Efficiently counts distinct {@link MaterialData}s */
@@ -36,10 +34,6 @@ public class MaterialCounter {
     return counts.containsKey(encodedMaterial);
   }
 
-  public boolean contains(int typeId, byte metadata) {
-    return contains(encodeMaterial(typeId, metadata));
-  }
-
   public boolean contains(MaterialData material) {
     return contains(encodeMaterial(material));
   }
@@ -48,20 +42,12 @@ public class MaterialCounter {
     return counts.get(encodedMaterial);
   }
 
-  public int get(int typeId, byte metadata) {
-    return get(encodeMaterial(typeId, metadata));
-  }
-
   public int get(MaterialData material) {
     return get(encodeMaterial(material));
   }
 
   public int increment(int encodedMaterial, int count) {
     return counts.adjustOrPutValue(encodedMaterial, count, count);
-  }
-
-  public int increment(int typeId, byte metadata, int count) {
-    return increment(encodeMaterial(typeId, metadata), count);
   }
 
   public int increment(MaterialData material, int count) {
@@ -119,7 +105,7 @@ public class MaterialCounter {
 
           @Override
           public MaterialData next() {
-            return decodeMaterial(iter.next());
+            return MaterialData.decode(iter.next());
           }
 
           @Override

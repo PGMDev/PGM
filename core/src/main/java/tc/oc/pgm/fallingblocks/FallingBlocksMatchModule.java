@@ -32,6 +32,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.util.collection.LongDeque;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -195,13 +196,13 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
     BlockState state = null;
     if (block.getType() != Material.AIR) {
       state = block.getState();
-      block.setTypeIdAndData(0, (byte) 0, false);
+      MaterialData.from(Material.AIR).applyTo(block, false);
     }
 
     int count = countUnsupportedNeighbors(encodePos(block), limit);
 
     if (state != null) {
-      block.setTypeIdAndData(state.getTypeId(), state.getRawData(), false);
+      MaterialData.from(state).applyTo(block, false);
     }
 
     return count;

@@ -24,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.PlayerStats;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
@@ -123,7 +124,7 @@ public class PlayerStatsMenuItem implements MenuItem {
 
   @Override
   public Material getMaterial(Player player) {
-    return Material.SKULL_ITEM;
+    return Materials.PLAYER_HEAD;
   }
 
   @Override

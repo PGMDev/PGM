@@ -2,6 +2,7 @@ package tc.oc.pgm.fireworks;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
@@ -42,6 +43,7 @@ import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.regions.Bounds;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.LOADED)
@@ -55,6 +57,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
   private static final int ITERATION_COUNT = 5; // Amount of times rockets are launched
   private static final int ROCKET_POWER =
       2; // Power applied to rockets (how high they go), 1 = low, 2 = medium, 3 = high
+
+  private static final EntityType FIREWORK_ENTITY =
+      parse(EntityType::valueOf, "FIREWORK", "FIREWORK_ROCKET");
 
   public static List<FireworkEffect.Type> FIREWORK_TYPES =
       ImmutableList.<FireworkEffect.Type>builder()
@@ -242,11 +247,11 @@ public class FireworkMatchModule implements MatchModule, Listener {
     assertNotNull(effect, "firework effect");
     assertTrue(power >= 0, "power must be positive");
 
-    FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK);
+    FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Materials.FIREWORK);
     meta.setPower(power);
     meta.addEffect(effect);
 
-    Firework firework = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+    Firework firework = (Firework) location.getWorld().spawnEntity(location, FIREWORK_ENTITY);
     firework.setFireworkMeta(meta);
 
     return firework;

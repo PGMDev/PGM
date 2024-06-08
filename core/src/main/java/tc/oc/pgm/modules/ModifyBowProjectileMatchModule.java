@@ -2,6 +2,7 @@ package tc.oc.pgm.modules;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.Set;
 import net.kyori.adventure.sound.Sound;
@@ -93,7 +94,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
         newProjectile.setMetadata(
             "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
         newProjectile.setMetadata(
-            "damage", new FixedMetadataValue(plugin, arrow.spigot().getDamage()));
+            "damage", new FixedMetadataValue(plugin, MISC_UTILS.getArrowDamage(arrow)));
       }
     }
 

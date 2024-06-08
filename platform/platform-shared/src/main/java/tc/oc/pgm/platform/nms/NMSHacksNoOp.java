@@ -14,13 +14,11 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
@@ -28,7 +26,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -38,6 +35,7 @@ import tc.oc.pgm.platform.entity.fake.FakeEntityNoOp;
 import tc.oc.pgm.platform.entity.potion.EntityPotionBukkit;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.nms.NMSHacksPlatform;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
@@ -235,7 +233,7 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
     // TODO: MaterialData is not version compatible
     Set<MaterialData> materialDataSet = new HashSet<>();
     for (byte i = 0; i < 16; i++) {
-      materialDataSet.add(new MaterialData(material, i));
+      materialDataSet.add(MaterialData.from(new org.bukkit.material.MaterialData(material, i)));
     }
     return materialDataSet;
   }
@@ -283,12 +281,6 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   }
 
   @Override
-  public void setBlockStateData(BlockState state, MaterialData materialData) {
-    state.setType(materialData.getItemType());
-    state.setData(materialData);
-  }
-
-  @Override
   public double getTPS() {
     return 20.0;
   }
@@ -314,11 +306,6 @@ public abstract class NMSHacksNoOp implements NMSHacksPlatform {
   @Override
   public int getMaxWorldSize(World world) {
     return 29999984; // Vanilla's default
-  }
-
-  @Override
-  public boolean openVillager(Villager villager, Player viewer) {
-    return false;
   }
 
   @Override

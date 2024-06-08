@@ -1,5 +1,7 @@
 package tc.oc.pgm.itemmeta;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+
 import java.util.EnumSet;
 import java.util.Set;
 import org.bukkit.Material;
@@ -52,7 +54,7 @@ public class ItemRule {
       if (!canDestroy.isEmpty()) NMSHacks.setCanDestroy(meta, canDestroy);
       if (!canPlaceOn.isEmpty()) NMSHacks.setCanPlaceOn(meta, canPlaceOn);
 
-      if (this.meta.spigot().isUnbreakable()) meta.spigot().setUnbreakable(true);
+      if (INVENTORY_UTILS.isUnbreakable(this.meta)) INVENTORY_UTILS.setUnbreakable(meta, true);
 
       stack.setItemMeta(meta);
     }

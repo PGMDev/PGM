@@ -13,16 +13,24 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.platform.Platform;
 
 public final class InventoryUtils {
+  public static final InventoryUtilsPlatform INVENTORY_UTILS =
+      Platform.requireInstance(InventoryUtilsPlatform.class);
+
+  public static final ItemFlag HIDE_ADDITIONAL_FLAG =
+      BukkitUtils.parse(ItemFlag::valueOf, "HIDE_POTION_EFFECTS", "HIDE_ADDITIONAL_TOOLTIP");
+
   private InventoryUtils() {}
 
   public static boolean isNothing(ItemStack stack) {
@@ -41,7 +49,7 @@ public final class InventoryUtils {
     if (stack.getType() != Material.POTION || newEffects.isEmpty()) return;
     PotionMeta meta = (PotionMeta) stack.getItemMeta();
 
-    Set<PotionEffect> defaultEffects = new HashSet<>(Potion.fromItemStack(stack).getEffects());
+    Set<PotionEffect> defaultEffects = new HashSet<>(INVENTORY_UTILS.getPotionEffects(stack));
     Collection<PotionEffect> existingEffects;
 
     if (meta.hasCustomEffects()) {
@@ -83,7 +91,7 @@ public final class InventoryUtils {
       if (meta.hasCustomEffects()) {
         return meta.getCustomEffects();
       } else if (potion.getType() == Material.POTION) { // Sanity check, SpawnablePotionBukkit
-        return Potion.fromItemStack(potion).getEffects();
+        return INVENTORY_UTILS.getPotionEffects(potion);
       }
     }
     return Collections.emptyList();
@@ -144,18 +152,32 @@ public final class InventoryUtils {
     return stack;
   }
 
-  public static boolean openVillager(Villager villager, Player viewer) throws Throwable {
-    // An exception can be thrown if the Villager's NBT is invalid
-    // TODO: Newer versions of Bukkit can use HumanEntity#openMerchant(Merchant, boolean)
-    return NMSHacks.INSTANCE.openVillager(villager, viewer);
-  }
-
   public static void consumeItem(Player player) {
-    ItemStack itemInHand = player.getItemInHand();
+    PlayerInventory inv = player.getInventory();
+    int heldSlot = inv.getHeldItemSlot();
+    ItemStack itemInHand = inv.getItem(heldSlot);
     if (itemInHand.getAmount() > 1) {
       itemInHand.setAmount(itemInHand.getAmount() - 1);
     } else {
-      player.setItemInHand(null);
+      inv.setItem(heldSlot, null);
     }
+  }
+
+  public interface InventoryUtilsPlatform {
+    Collection<PotionEffect> getPotionEffects(ItemStack item);
+
+    default boolean isUnbreakable(ItemStack item) {
+      return isUnbreakable(item.getItemMeta());
+    }
+
+    boolean isUnbreakable(ItemMeta item);
+
+    default void setUnbreakable(ItemStack item, boolean unbreakable) {
+      setUnbreakable(item.getItemMeta(), unbreakable);
+    }
+
+    void setUnbreakable(ItemMeta meta, boolean unbreakable);
+
+    boolean openVillager(Villager villager, Player viewer);
   }
 }

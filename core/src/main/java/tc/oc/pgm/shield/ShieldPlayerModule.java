@@ -1,5 +1,7 @@
 package tc.oc.pgm.shield;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
 import java.util.logging.Logger;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -56,15 +58,7 @@ public class ShieldPlayerModule implements Tickable {
     addAbsorption(-shieldHealth);
   }
 
-  static Sound RECHARGE_SOUND = resolveRechaseSound();
-
-  static Sound resolveRechaseSound() {
-    try {
-      return Sound.ORB_PICKUP;
-    } catch (Throwable t) {
-      return Sound.valueOf("ENTITY_EXPERIENCE_ORB_PICKUP");
-    }
-  }
+  static Sound RECHARGE_SOUND = parse(Sound::valueOf, "ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP");
 
   /**
    * Recharge the shield to its maximum health. If the player has more absorption than the current

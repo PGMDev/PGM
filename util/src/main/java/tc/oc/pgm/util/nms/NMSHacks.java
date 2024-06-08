@@ -15,7 +15,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
@@ -27,7 +26,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -36,6 +34,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 import tc.oc.pgm.util.platform.Platform;
@@ -269,10 +268,6 @@ public interface NMSHacks {
   @Deprecated
   static Set<MaterialData> getBlockStates(Material material) {
     return INSTANCE.getBlockStates(material);
-  }
-
-  static void setBlockStateData(BlockState state, MaterialData materialData) {
-    INSTANCE.setBlockStateData(state, materialData);
   }
 
   static Skin getPlayerSkin(Player player) {

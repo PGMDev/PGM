@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class BlockMaterialMatcher implements MaterialMatcher {
@@ -20,6 +20,11 @@ public class BlockMaterialMatcher implements MaterialMatcher {
   @Override
   public boolean matches(Material material) {
     return material.isBlock();
+  }
+
+  @Override
+  public boolean matches(org.bukkit.material.MaterialData materialData) {
+    return materialData.getItemType().isBlock();
   }
 
   @Override

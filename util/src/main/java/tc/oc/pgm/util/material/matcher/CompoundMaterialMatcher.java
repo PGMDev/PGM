@@ -9,14 +9,15 @@ import java.util.Set;
 import java.util.function.Function;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class CompoundMaterialMatcher implements MaterialMatcher {
 
   private final List<MaterialMatcher> children;
   private @Nullable Collection<Material> materials;
+  private @Nullable Collection<MaterialData> blockStates;
 
   private CompoundMaterialMatcher(List<MaterialMatcher> children) {
     this.children = children;
@@ -26,6 +27,14 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
   public boolean matches(Material material) {
     for (MaterialMatcher child : children) {
       if (child.matches(material)) return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean matches(org.bukkit.material.MaterialData materialData) {
+    for (MaterialMatcher child : children) {
+      if (child.matches(materialData)) return true;
     }
     return false;
   }

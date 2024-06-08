@@ -39,6 +39,7 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -79,7 +80,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private boolean isObjectiveWool(ItemStack stack) {
-    if (stack.getType() == Material.WOOL) {
+    if (stack.getType() == Materials.WOOL) {
       for (MonumentWool wool : this.wools.values()) {
         if (wool.getDefinition().isObjectiveWool(stack)) return true;
       }
@@ -215,7 +216,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (holder instanceof Player) {
       MatchPlayer playerHolder = this.match.getPlayer((Player) holder);
 
-      if (playerHolder != null && result != null && result.getType() == Material.WOOL) {
+      if (playerHolder != null && result != null && result.getType() == Materials.WOOL) {
         for (MonumentWool wool : this.wools.values()) {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
@@ -240,6 +241,6 @@ public class WoolMatchModule implements MatchModule, Listener {
 
   @SuppressWarnings("deprecation")
   private static boolean isValidWool(DyeColor expectedColor, BlockState state) {
-    return state.getType() == Material.WOOL && expectedColor.getWoolData() == state.getRawData();
+    return state.getType() == Materials.WOOL && expectedColor.getWoolData() == state.getRawData();
   }
 }

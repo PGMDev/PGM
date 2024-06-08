@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 /** Matches all world */
@@ -16,6 +16,11 @@ public class AllMaterialMatcher implements MaterialMatcher {
 
   @Override
   public boolean matches(Material material) {
+    return true;
+  }
+
+  @Override
+  public boolean matches(org.bukkit.material.MaterialData materialData) {
     return true;
   }
 
