@@ -34,6 +34,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -74,7 +75,8 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
   protected void updatePartyScoreboardTeam(Party party, Team team, boolean forObservers) {
     match.getLogger().fine("Updating scoreboard team " + toString(team) + " for party " + party);
 
-    team.setDisplayName(TextTranslations.translateLegacy(party.getName()));
+    team.setDisplayName(
+        StringUtils.truncate(TextTranslations.translateLegacy(party.getName(NameStyle.FANCY)), 32));
     team.setPrefix(party.getColor().toString());
     team.setSuffix(ChatColor.WHITE.toString());
 

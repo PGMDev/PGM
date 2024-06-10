@@ -173,23 +173,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     datastore = new CacheDatastore(datastore);
 
-    try {
-      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
-    } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      e.printStackTrace();
-    }
-
-    if (!mapLibrary.getMaps().hasNext()) {
+    if (!loadInitialMaps()) {
+      logger.warning("No maps found, adding default repository as a fallback.");
       PGMConfig.registerRemoteMapSource(mapSourceFactories, PGMConfig.DEFAULT_REMOTE_REPO);
-      try {
-        mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
-      } catch (ExecutionException | InterruptedException | TimeoutException e) {
-        e.printStackTrace();
-      } finally {
-        if (!mapLibrary.getMaps().hasNext()) {
-          getServer().getPluginManager().disablePlugin(this);
-          return;
-        }
+      if (!loadInitialMaps()) {
+        logger.severe("No maps were loaded in time, PGM will be disabled");
+        getServer().getPluginManager().disablePlugin(this);
+        return;
       }
     }
 
@@ -392,6 +382,17 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new MotdListener());
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
     registerEvents(new JoinLeaveAnnouncer(matchManager));
+  }
+
+  private boolean loadInitialMaps() {
+    try {
+      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
+    } catch (TimeoutException e) {
+      getLogger().warning("Loading all maps took >30s, other maps will keep loading async.");
+    } catch (ExecutionException | InterruptedException e) {
+      getLogger().log(Level.WARNING, "Exception loading maps", e);
+    }
+    return mapLibrary.getMaps().hasNext();
   }
 
   private class InGameHandler extends Handler {
