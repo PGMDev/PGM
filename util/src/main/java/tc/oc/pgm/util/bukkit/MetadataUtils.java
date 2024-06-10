@@ -1,22 +1,43 @@
 package tc.oc.pgm.util.bukkit;
 
-import java.util.Optional;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.MetadataValueAdapter;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.UnknownNullability;
 
 public interface MetadataUtils {
-  static MetadataValue getMetadata(Metadatable metadatable, String key, Plugin plugin) {
+
+  @SuppressWarnings("unchecked")
+  static <T> @UnknownNullability T getMetadataValue(
+      Metadatable metadatable, String key, Plugin plugin) {
     for (MetadataValue mv : metadatable.getMetadata(key)) {
       if (mv.getOwningPlugin().equals(plugin)) {
-        return mv;
+        return (T) mv.value();
       }
     }
     return null;
   }
 
-  static Optional<MetadataValue> getOptionalMetadata(
-      Metadatable metadatable, String key, Plugin plugin) {
-    return Optional.ofNullable(getMetadata(metadatable, key, plugin));
+  /** Create an immutable metadata value. Has less overhead than bukkit's FixedMetadataValue. */
+  static MetadataValue createMetadataValue(Plugin plugin, Object value) {
+    class ImmutableMetadataValue extends MetadataValueAdapter {
+      private final Object value;
+
+      public ImmutableMetadataValue(Plugin owningPlugin, Object value) {
+        super(owningPlugin);
+        this.value = value;
+      }
+
+      @Override
+      public Object value() {
+        return value;
+      }
+
+      @Override
+      public void invalidate() {}
+    }
+
+    return new ImmutableMetadataValue(plugin, value);
   }
 }

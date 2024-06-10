@@ -19,6 +19,7 @@ import cloud.commandframework.annotations.specifier.Range;
 import cloud.commandframework.annotations.suggestions.Suggestions;
 import cloud.commandframework.context.CommandContext;
 import com.google.common.collect.ImmutableList;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -407,7 +408,8 @@ public final class MapCommand {
                     .hoverEvent(showText(translatable("map.info.xml.path", NamedTextColor.GOLD))));
 
     if (root.getBaseUrl() != null && root.getRemoteHost() != null) {
-      String mapPath = root.getBaseUrl() + UriEncoder.encode(source.getRelativeXml().toString());
+      String relativeUrl = source.getRelativeXml().toString().replace(File.separatorChar, '/');
+      String mapPath = root.getBaseUrl() + UriEncoder.encode(relativeUrl);
       xmlText.append(
           text()
               .color(NamedTextColor.GREEN)

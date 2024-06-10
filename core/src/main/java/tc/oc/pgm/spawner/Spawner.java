@@ -87,10 +87,10 @@ public class Spawner implements Listener, Tickable {
     if (!entityTracked && !targetTracked) return; // None affected
     if (entityTracked && targetTracked) {
       String entitySpawnerId =
-          MetadataUtils.getMetadata(event.getEntity(), METADATA_KEY, PGM.get()).asString();
+          MetadataUtils.getMetadataValue(event.getEntity(), METADATA_KEY, PGM.get());
       String targetSpawnerId =
-          MetadataUtils.getMetadata(event.getTarget(), METADATA_KEY, PGM.get()).asString();
-      if (entitySpawnerId.equals(targetSpawnerId)) return; // Same spawner, allow merge
+          MetadataUtils.getMetadataValue(event.getTarget(), METADATA_KEY, PGM.get());
+      if (Objects.equals(entitySpawnerId, targetSpawnerId)) return; // Same spawner, allow merge
     }
     event.setCancelled(true);
   }
@@ -98,7 +98,7 @@ public class Spawner implements Listener, Tickable {
   private void handleEntityRemoveEvent(Metadatable metadatable, int amount) {
     if (metadatable.hasMetadata(METADATA_KEY)) {
       if (Objects.equals(
-          MetadataUtils.getMetadata(metadatable, METADATA_KEY, PGM.get()).asString(),
+          MetadataUtils.getMetadataValue(metadatable, METADATA_KEY, PGM.get()),
           definition.getId())) {
         spawnedEntities -= amount;
         spawnedEntities = Math.max(0, spawnedEntities);

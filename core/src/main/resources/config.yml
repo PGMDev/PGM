@@ -27,7 +27,7 @@ map:
     #
     # To enable the default maps, uncomment the repository below.
     # - uri: "https://github.com/PGMDev/Maps"
-    #  path: "maps-default"
+    #  path: "default-maps"
 
   # A path to a map pools file, or empty to disable map pools.
   pools: "map-pools.yml"
@@ -73,6 +73,7 @@ join:
 gameplay:
   refill-wool: true # Should wool in wool rooms be automatically refilled?
   grief-score: -10 # Score under which players should be kept out of the match
+  assist-percent: 0.3 # What percent of the damage is required for an assist 0.3 = 30% of max hp
 
 # Toggles various user interfaces.
 ui:
