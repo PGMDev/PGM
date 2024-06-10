@@ -295,6 +295,13 @@ public interface Config {
   int getGriefScore();
 
   /**
+   * Gets the percentage of damage needed on a player to get an assist
+   *
+   * @return The percentage of damage required
+   */
+  float getAssistPercent();
+
+  /**
    * Gets a group of players, used for prefixes and player sorting.
    *
    * @return A list of groups.
