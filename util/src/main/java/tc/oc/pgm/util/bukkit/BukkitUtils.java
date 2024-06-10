@@ -7,12 +7,12 @@ import org.bukkit.*;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public interface BukkitUtils {
 
   AtomicReference<Plugin> PLUGIN = new AtomicReference<>();
 
-  @Deprecated
   static Plugin getPlugin() {
     // HACK: Sometimes util code needs to access a Plugin,
     // we assume it to be PGM for now, but there should be a formal
@@ -23,26 +23,12 @@ public interface BukkitUtils {
     return PLUGIN.get();
   }
 
-  Boolean isSportPaper = Platform.SERVER_PLATFORM == Platform.SPORTPAPER_1_8;
-
-  static boolean isSportPaper() {
-    return isSportPaper;
-  }
-
   static void addRecipe(World world, Recipe recipe) {
-    if (BukkitUtils.isSportPaper()) {
-      world.addRecipe(recipe);
-    } else {
-      Bukkit.addRecipe(recipe);
-    }
+    NMSHacks.INSTANCE.addRecipe(world, recipe);
   }
 
   static void resetRecipes(World world) {
-    if (BukkitUtils.isSportPaper()) {
-      world.resetRecipes();
-    } else {
-      Bukkit.resetRecipes();
-    }
+    NMSHacks.INSTANCE.resetRecipes(world);
   }
 
   /** Makes strings have pretty colors */

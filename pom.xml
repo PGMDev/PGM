@@ -36,6 +36,7 @@
         <module>util</module>
         <module>core</module>
         <module>server</module>
+        <module>platform</module>
     </modules>
 
     <repositories>
@@ -84,13 +85,26 @@
     </distributionManagement>
 
     <dependencies>
-        <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
-        <!-- TODO: support non-1.8 Bukkit servers -->
+        <!-- Depend on the lowest common denominator -->
         <dependency>
-            <groupId>app.ashcon</groupId>
-            <artifactId>sportpaper</artifactId>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
             <version>1.8.8-R0.1-SNAPSHOT</version>
-            <scope>compile</scope> <!-- Remember to exclude in shading -->
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- Bundled in minecraft/craftbukkit implementation -->
+        <dependency>
+            <groupId>it.unimi.dsi</groupId>
+            <artifactId>fastutil</artifactId>
+            <version>8.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>3.0.3</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Multi-protocol library for future Minecraft versions -->
@@ -198,13 +212,19 @@
             <artifactId>smart-invs</artifactId>
             <version>1.2.7</version>
             <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>spigot-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>	
 
         <!-- Git library for cloning and pulling repositories -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>5.13.1.202206130422-r</version>
+            <version>6.7.0.202309050840-r</version>
             <scope>compile</scope>
         </dependency>
 
@@ -215,6 +235,13 @@
             <artifactId>exp4j</artifactId>
             <version>0.4.9-pgm</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- Reflection utility library -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.10.2</version>
         </dependency>
 
         <dependency>

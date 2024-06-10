@@ -36,14 +36,14 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.block.RayBlockIntersection;
-import tc.oc.pgm.util.bukkit.Platform;
 import tc.oc.pgm.util.nms.entity.fake.FakeEntity;
 import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacks {
 
-  NMSHacksPlatform INSTANCE = Platform.SERVER_PLATFORM.getNMSHacks();
+  NMSHacksPlatform INSTANCE = Platform.requireInstance(NMSHacksPlatform.class);
 
   AtomicInteger ENTITY_IDS = new AtomicInteger(Integer.MAX_VALUE);
 

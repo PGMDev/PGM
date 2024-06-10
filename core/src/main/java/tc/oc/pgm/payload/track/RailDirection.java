@@ -43,7 +43,7 @@ public enum RailDirection {
   }
 
   public static @Nullable RailDirection getRail(Block block) {
-    MaterialData md = block.getState().getMaterialData();
+    MaterialData md = block.getState().getData();
     if (!(md instanceof Rails)) return null;
 
     byte data = md.getData();

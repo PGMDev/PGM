@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.GameMode;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
@@ -265,6 +266,8 @@ public interface MatchPlayer
 
   @Override
   PlayerInventory getInventory();
+
+  World getWorld();
 
   /**
    * Get the current spectator target of the {@link MatchPlayer} if any

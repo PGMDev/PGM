@@ -20,6 +20,7 @@ import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public final class InventoryUtils {
   private InventoryUtils() {}
@@ -143,11 +144,10 @@ public final class InventoryUtils {
     return stack;
   }
 
-  public static void openVillager(Villager villager, Player viewer) throws Throwable {
+  public static boolean openVillager(Villager villager, Player viewer) throws Throwable {
     // An exception can be thrown if the Villager's NBT is invalid
-    // or if the server does not support for this patch.
     // TODO: Newer versions of Bukkit can use HumanEntity#openMerchant(Merchant, boolean)
-    viewer.openMerchantCopy(villager);
+    return NMSHacks.INSTANCE.openVillager(villager, viewer);
   }
 
   public static void consumeItem(Player player) {

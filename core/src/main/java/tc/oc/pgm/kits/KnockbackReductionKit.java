@@ -3,6 +3,7 @@ package tc.oc.pgm.kits;
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.bukkit.MiscUtils;
 
 public class KnockbackReductionKit extends AbstractKit {
   private final float knockbackReduction;
@@ -13,7 +14,7 @@ public class KnockbackReductionKit extends AbstractKit {
 
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    player.getBukkit().setKnockbackReduction(this.knockbackReduction);
+    MiscUtils.INSTANCE.setKnockbackReduction(player.getBukkit(), this.knockbackReduction);
   }
 
   @Override
@@ -23,6 +24,6 @@ public class KnockbackReductionKit extends AbstractKit {
 
   @Override
   public void remove(MatchPlayer player) {
-    player.getBukkit().setKnockbackReduction(0);
+    MiscUtils.INSTANCE.setKnockbackReduction(player.getBukkit(), 0);
   }
 }

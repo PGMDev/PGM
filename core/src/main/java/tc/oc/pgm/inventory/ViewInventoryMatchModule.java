@@ -53,6 +53,7 @@ import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -130,7 +131,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       event.setCancelled(true);
 
       if (event.getClickedEntity() instanceof Villager) {
-        event.getPlayer().getBukkit().openMerchantCopy((Villager) event.getClickedEntity());
+        NMSHacks.INSTANCE.openVillager(
+            (Villager) event.getClickedEntity(), event.getPlayer().getBukkit());
         return;
       }
 
@@ -352,16 +354,14 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         }
       }
 
-      if (BukkitUtils.isSportPaper()) {
-        double knockbackReduction = holder.getKnockbackReduction();
-        if (knockbackReduction > 0) {
-          specialLore.add(
-              ChatColor.LIGHT_PURPLE
-                  + TextTranslations.translate(
-                      "preview.knockbackReduction",
-                      viewer,
-                      (int) Math.ceil(knockbackReduction * 100)));
-        }
+      double knockbackReduction = MiscUtils.INSTANCE.getKnockbackReduction(holder);
+      if (knockbackReduction > 0) {
+        specialLore.add(
+            ChatColor.LIGHT_PURPLE
+                + TextTranslations.translate(
+                    "preview.knockbackReduction",
+                    viewer,
+                    (int) Math.ceil(knockbackReduction * 100)));
       }
 
       double walkSpeed = holder.getWalkSpeed();

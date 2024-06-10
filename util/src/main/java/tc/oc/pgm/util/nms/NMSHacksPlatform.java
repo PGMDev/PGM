@@ -19,9 +19,11 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.MaterialData;
@@ -212,4 +214,10 @@ public interface NMSHacksPlatform {
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);
 
   int getMaxWorldSize(World world);
+
+  boolean openVillager(Villager villager, Player viewer);
+
+  void addRecipe(World world, Recipe recipe);
+
+  void resetRecipes(World world);
 }
