@@ -1,16 +1,17 @@
 package tc.oc.pgm.command.parsers;
 
-import static cloud.commandframework.arguments.parser.ArgumentParseResult.failure;
-import static cloud.commandframework.arguments.parser.ArgumentParseResult.success;
+import static org.incendo.cloud.parser.ArgumentParseResult.failure;
+import static org.incendo.cloud.parser.ArgumentParseResult.success;
 import static tc.oc.pgm.util.text.TextException.playerOnly;
 
-import cloud.commandframework.arguments.parser.ArgumentParseResult;
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.context.CommandContext;
-import cloud.commandframework.paper.PaperCommandManager;
 import java.util.List;
 import org.bukkit.command.CommandSender;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.context.CommandInput;
+import org.incendo.cloud.parser.ArgumentParseResult;
+import org.incendo.cloud.parser.ParserParameters;
+import org.incendo.cloud.suggestion.BlockingSuggestionProvider;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -18,11 +19,12 @@ import tc.oc.pgm.command.util.CommandUtils;
 import tc.oc.pgm.util.LiquidMetal;
 
 /** Parses parties, ie: teams, plus the obs keyword for the observer party */
-public final class PartyParser extends StringLikeParser<CommandSender, Party> {
+public final class PartyParser extends StringLikeParser<CommandSender, Party>
+    implements BlockingSuggestionProvider.Strings<CommandSender> {
 
   private final TeamParser teamParser;
 
-  public PartyParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
+  public PartyParser(CommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options);
     this.teamParser = new TeamParser(manager, options);
   }
@@ -35,14 +37,15 @@ public final class PartyParser extends StringLikeParser<CommandSender, Party> {
 
     if (text.equalsIgnoreCase("obs")) return success(match.getDefaultParty());
 
-    return teamParser.parse(context, text).mapParsedValue(team -> team);
+    return teamParser.parse(context, text).mapSuccess(team -> team);
   }
 
   @Override
-  public @NonNull List<@NonNull String> suggestions(
-      @NonNull CommandContext<CommandSender> context, @NonNull String input) {
-    List<String> teams = teamParser.suggestions(context, input);
-    if (LiquidMetal.match("obs", input)) teams.add("obs");
+  public @NotNull List<@NotNull String> stringSuggestions(
+      @NotNull CommandContext<CommandSender> context, @NotNull CommandInput input) {
+    final String next = input.peekString();
+    List<String> teams = teamParser.stringSuggestions(context, input);
+    if (LiquidMetal.match("obs", next)) teams.add("obs");
     return teams;
   }
 }

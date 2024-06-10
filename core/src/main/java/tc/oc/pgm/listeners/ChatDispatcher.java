@@ -8,11 +8,6 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.specifier.Greedy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Collection;
@@ -35,6 +30,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.incendo.cloud.annotation.specifier.Greedy;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
@@ -102,7 +102,7 @@ public class ChatDispatcher implements Listener {
     return player != null && Integration.isMuted(player.getBukkit());
   }
 
-  @CommandMethod("g|all [message]")
+  @Command("g|all [message]")
   @CommandDescription("Send a message to everyone")
   public void sendGlobal(
       Match match,
@@ -126,7 +126,7 @@ public class ChatDispatcher implements Listener {
         Channel.GLOBAL);
   }
 
-  @CommandMethod("t [message]")
+  @Command("t [message]")
   @CommandDescription("Send a message to your team")
   public void sendTeam(
       Match match,
@@ -161,9 +161,9 @@ public class ChatDispatcher implements Listener {
         Channel.TEAM);
   }
 
-  @CommandMethod("a [message]")
+  @Command("a [message]")
   @CommandDescription("Send a message to operators")
-  @CommandPermission(Permissions.ADMINCHAT)
+  @Permission(Permissions.ADMINCHAT)
   public void sendAdmin(
       Match match,
       @NotNull MatchPlayer sender,
@@ -196,7 +196,7 @@ public class ChatDispatcher implements Listener {
     }
   }
 
-  @CommandMethod("msg|tell|pm|dm <player> <message>")
+  @Command("msg|tell|pm|dm <player> <message>")
   @CommandDescription("Send a direct message to a player")
   public void sendDirect(
       Match match,
@@ -267,7 +267,7 @@ public class ChatDispatcher implements Listener {
     return TextTranslations.translateLegacy(action, viewer) + " " + PREFIX_FORMAT;
   }
 
-  @CommandMethod("reply|r <message>")
+  @Command("reply|r <message>")
   @CommandDescription("Reply to a direct message")
   public void sendReply(
       Match match,

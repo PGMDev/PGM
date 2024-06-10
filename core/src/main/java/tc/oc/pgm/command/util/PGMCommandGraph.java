@@ -1,20 +1,16 @@
 package tc.oc.pgm.command.util;
 
-import static net.kyori.adventure.text.Component.text;
-
-import cloud.commandframework.arguments.standard.StringArgument;
-import cloud.commandframework.extra.confirmation.CommandConfirmationManager;
-import cloud.commandframework.meta.CommandMeta;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import io.leangen.geantyref.TypeFactory;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.parser.standard.StringParser;
+import org.incendo.cloud.suggestion.SuggestionProvider;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
@@ -56,6 +52,7 @@ import tc.oc.pgm.command.TeamCommand;
 import tc.oc.pgm.command.TimeLimitCommand;
 import tc.oc.pgm.command.VanishCommand;
 import tc.oc.pgm.command.VotingCommand;
+import tc.oc.pgm.command.injectors.AudienceProvider;
 import tc.oc.pgm.command.injectors.MapPollProvider;
 import tc.oc.pgm.command.injectors.MapPoolManagerProvider;
 import tc.oc.pgm.command.injectors.MatchModuleInjectionService;
@@ -102,22 +99,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
 
   protected MinecraftHelp<CommandSender> createHelp() {
     // Create the Minecraft help menu system
-    return new MinecraftHelp<>("/pgm help", Audience::get, manager);
-  }
-
-  protected CommandConfirmationManager<CommandSender> createConfirmationManager() {
-    CommandConfirmationManager<CommandSender> ccm =
-        new CommandConfirmationManager<>(
-            30L,
-            TimeUnit.SECONDS,
-            // TODO: clickable & translatable
-            context ->
-                Audience.get(context.getCommandContext().getSender())
-                    .sendWarning(text("Confirmation required. Confirm using /pgm confirm.")),
-            sender ->
-                Audience.get(sender).sendWarning(text("You don't have any pending commands.")));
-    ccm.registerConfirmationProcessor(this.manager);
-    return ccm;
+    return MinecraftHelp.create("/pgm help", manager, Audience::get);
   }
 
   // Commands
@@ -155,19 +137,12 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     manager.command(
         manager
             .commandBuilder("pgm")
-            .literal("confirm")
-            .meta(CommandMeta.DESCRIPTION, "Confirm a pending command")
-            .handler(this.confirmationManager.createConfirmationExecutionHandler()));
-
-    manager.command(
-        manager
-            .commandBuilder("pgm")
             .literal("help")
-            .argument(StringArgument.optional("query", StringArgument.StringMode.GREEDY))
+            .optional("query", StringParser.greedyStringParser())
             .handler(
                 context ->
                     minecraftHelp.queryCommands(
-                        context.<String>getOptional("query").orElse(""), context.getSender())));
+                        context.<String>optional("query").orElse(""), context.sender())));
   }
 
   // Injectors
@@ -181,7 +156,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     // NOTE: order is important. Audience must be first, otherwise a Match or MatchPlayer (which
     // implement Audience) would be used, causing everyone to get all command feedback (Match), or
     // console being unable to use commands (MatchPlayer).
-    registerInjector(Audience.class, (c, s) -> Audience.get(c.getSender()));
+    registerInjector(Audience.class, new AudienceProvider());
     registerInjector(Match.class, new MatchProvider());
     registerInjector(MatchPlayer.class, new MatchPlayerProvider());
     registerInjector(TeamMatchModule.class, new TeamMatchModuleProvider());
@@ -222,6 +197,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
 
-    parsers.registerSuggestionProvider("players", Players::suggestPlayers);
+    parsers.registerSuggestionProvider(
+        "players", SuggestionProvider.blockingStrings(Players::suggestPlayers));
   }
 }

@@ -6,17 +6,17 @@ import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.specifier.Greedy;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotation.specifier.Greedy;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -31,12 +31,12 @@ import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
-@CommandMethod("vote|votes")
+@Command("vote|votes")
 public class VotingCommand {
 
-  @CommandMethod("add [map]")
+  @Command("add [map]")
   @CommandDescription("Add a custom map to the next vote")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void addMap(
       Audience viewer,
       CommandSender sender,
@@ -64,9 +64,9 @@ public class VotingCommand {
     }
   }
 
-  @CommandMethod("remove|rm [map]")
+  @Command("remove|rm [map]")
   @CommandDescription("Remove a custom map from the next vote")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void removeMap(
       Audience viewer,
       CommandSender sender,
@@ -87,9 +87,9 @@ public class VotingCommand {
     }
   }
 
-  @CommandMethod("mode")
+  @Command("mode")
   @CommandDescription("Toggle the voting mode between replace and override")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void mode(CommandSender sender, MapOrder mapOrder, Match match) {
     VotePoolOptions vote = getVoteOptions(mapOrder);
     Component voteModeName =
@@ -105,9 +105,9 @@ public class VotingCommand {
         match);
   }
 
-  @CommandMethod("clear")
+  @Command("clear")
   @CommandDescription("Clear all custom map selections from the next vote")
-  @CommandPermission(Permissions.SETNEXT)
+  @Permission(Permissions.SETNEXT)
   public void clearMaps(Audience viewer, CommandSender sender, Match match, MapOrder mapOrder) {
     VotePoolOptions vote = getVoteOptions(mapOrder);
 
@@ -131,7 +131,7 @@ public class VotingCommand {
     }
   }
 
-  @CommandMethod("list|ls")
+  @Command("list|ls")
   @CommandDescription("View a list of maps that have been selected for the next vote")
   public void listMaps(Audience viewer, MapOrder mapOrder) {
     VotePoolOptions vote = getVoteOptions(mapOrder);
