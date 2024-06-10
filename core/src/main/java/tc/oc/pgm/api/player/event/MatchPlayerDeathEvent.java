@@ -16,13 +16,19 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
   private final PlayerDeathEvent parent;
   private final DamageInfo damageInfo;
   private final boolean predicted;
+  private @Nullable final ParticipantState assister;
 
   public MatchPlayerDeathEvent(
-      PlayerDeathEvent parent, MatchPlayer victim, DamageInfo damageInfo, boolean predicted) {
+      PlayerDeathEvent parent,
+      MatchPlayer victim,
+      DamageInfo damageInfo,
+      boolean predicted,
+      @Nullable ParticipantState assister) {
     super(assertNotNull(victim));
     this.parent = assertNotNull(parent);
     this.damageInfo = assertNotNull(damageInfo);
     this.predicted = predicted;
+    this.assister = assister;
   }
 
   /**
@@ -68,6 +74,15 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
    */
   public final boolean isPredicted() {
     return predicted;
+  }
+
+  /**
+   * Get the {@link ParticipantState} of the assisting killer.
+   *
+   * @return The assister {@link ParticipantState}, or {@code null} if no killer.
+   */
+  public @Nullable ParticipantState getAssister() {
+    return assister;
   }
 
   /**
