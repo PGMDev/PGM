@@ -109,7 +109,7 @@ public class MapInfoImpl implements MapInfo {
                 Node.fromLastChildOrAttr(root, "difficulty"), Difficulty.class, Difficulty.NORMAL)
             .ordinal();
     this.world = parseWorld(root);
-    this.gamemode = XMLUtils.parseFormattedText(root, "game");
+    this.gamemode = XMLUtils.parseFormattedText(Node.fromLastChildOrAttr(root, "game"));
     this.gamemodes = parseGamemodes(root);
     this.phase =
         XMLUtils.parseEnum(Node.fromLastChildOrAttr(root, "phase"), Phase.class, Phase.PRODUCTION);

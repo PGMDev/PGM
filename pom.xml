@@ -209,10 +209,11 @@
         </dependency>
 
         <!-- Simple mathematical expression evaluator library -->
+        <!-- Uses version from https://github.com/Pablete1234/exp4j/commits/master/ -->
         <dependency>
-            <groupId>com.github.Pablete1234</groupId>
+            <groupId>net.objecthunter</groupId>
             <artifactId>exp4j</artifactId>
-            <version>0431d412ec</version>
+            <version>0.4.9-pgm</version>
             <scope>compile</scope>
         </dependency>
 

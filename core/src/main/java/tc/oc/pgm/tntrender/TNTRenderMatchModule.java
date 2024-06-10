@@ -61,6 +61,7 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
     if (!(event.getEntity() instanceof TNTPrimed)) return;
     Location explosion = event.getLocation();
     for (MatchPlayer player : match.getPlayers()) {
+      if (player.getWorld() != event.getEntity().getWorld()) continue;
       if (explosion.distanceSquared(player.getBukkit().getLocation()) >= MAX_DISTANCE)
         player
             .getBukkit()
@@ -93,6 +94,7 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
       this.moved = !currentLocation.equals(lastLocation);
 
       for (MatchPlayer player : match.getPlayers()) {
+        if (player.getWorld() != entity.getWorld()) continue;
         updatePlayer(player);
       }
       return false;
