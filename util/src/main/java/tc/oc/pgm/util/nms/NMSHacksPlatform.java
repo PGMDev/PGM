@@ -145,6 +145,8 @@ public interface NMSHacksPlatform {
 
   Skin getPlayerSkinForViewer(Player player, Player viewer);
 
+  String getPlayerName(UUID uuid);
+
   void updateVelocity(Player player);
 
   boolean teleportRelative(
@@ -208,4 +210,6 @@ public interface NMSHacksPlatform {
   AttributeMap buildAttributeMap(Player player);
 
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);
+
+  int getMaxWorldSize(World world);
 }

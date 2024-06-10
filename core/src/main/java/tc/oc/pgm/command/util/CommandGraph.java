@@ -22,12 +22,14 @@ import cloud.commandframework.exceptions.InvalidSyntaxException;
 import cloud.commandframework.exceptions.NoPermissionException;
 import cloud.commandframework.exceptions.parsing.ParserException;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.execution.FilteringCommandSuggestionProcessor;
 import cloud.commandframework.extra.confirmation.CommandConfirmationManager;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.kyori.adventure.text.Component;
@@ -85,9 +87,14 @@ public abstract class CommandGraph<P extends Plugin> {
         context ->
             context.getCommandContext().store(CommandKeys.INPUT_QUEUE, context.getInputQueue()));
 
-    // By default, suggestions run by a filtered processor.
-    // By default, it prevents suggestions like "s" -> "Something" or "someh" -> "Something"
-    manager.commandSuggestionProcessor((cpc, strings) -> strings);
+    // Basic suggestion filtering processor which avoids suggesting flags when not applicable
+    manager.commandSuggestionProcessor(
+        new FilteringCommandSuggestionProcessor<>(
+            FilteringCommandSuggestionProcessor.Filter.Simple.contextFree(
+                (s, i) ->
+                    i.isEmpty()
+                        || !s.startsWith("-")
+                        || s.toLowerCase(Locale.ROOT).startsWith(i.toLowerCase(Locale.ROOT)))));
 
     return manager;
   }

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -73,10 +72,10 @@ import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.pgm.util.UsernameResolver;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.wool.MonumentWool;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
@@ -313,11 +312,10 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     // Try to ensure that usernames for all relevant offline players will be loaded in the cache
     // when the inventory GUI is created. If usernames needs to be resolved using the mojang api
-    // (UsernameResolver)
-    // it can take some time, and we cant really know how long.
-    this.getOfflinePlayersWithStats()
-        .forEach(id -> PGM.get().getDatastore().getUsername(id).getNameLegacy());
-    CompletableFuture.runAsync(UsernameResolver::resolveAll);
+    // (UsernameResolver) it can take some time, and we cant really know how long.
+    UsernameResolvers.startBatch();
+    this.getOfflinePlayersWithStats().forEach(id -> PGM.get().getDatastore().getUsername(id));
+    UsernameResolvers.endBatch();
 
     // Schedule displaying stats after match end
     match
@@ -365,7 +363,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         best.add(
             translatable(
                 "match.stats.damage",
-                player(bestDamage.getKey(), NameStyle.FANCY),
+                player(bestDamage.getKey(), NameStyle.VERBOSE),
                 damageComponent(bestDamage.getValue(), NamedTextColor.GREEN)));
       }
     }
@@ -462,7 +460,9 @@ public class StatsMatchModule implements MatchModule, Listener {
   Component getMessage(
       String messageKey, Map.Entry<UUID, ? extends Number> mapEntry, TextColor color) {
     return translatable(
-        messageKey, player(mapEntry.getKey(), NameStyle.FANCY), number(mapEntry.getValue(), color));
+        messageKey,
+        player(mapEntry.getKey(), NameStyle.VERBOSE),
+        number(mapEntry.getValue(), color));
   }
 
   /** Formats raw damage to damage relative to the amount of hearths the player would have broken */

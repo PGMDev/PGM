@@ -16,7 +16,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.entity.EntityType;
@@ -183,6 +185,15 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
     return player.hasFakeSkin(viewer)
         ? new Skin(player.getFakeSkin(viewer).getData(), player.getFakeSkin(viewer).getSignature())
         : getPlayerSkin(player);
+  }
+
+  @Override
+  public void resetDimension(World world) {
+    try {
+      ((CraftWorld) world).getHandle().dimension = 11;
+    } catch (IllegalAccessError e) {
+      super.resetDimension(world);
+    }
   }
 
   @Override

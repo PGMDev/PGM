@@ -1,11 +1,17 @@
 package tc.oc.pgm.db;
 
+import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
@@ -14,8 +20,11 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.api.setting.Settings;
 import tc.oc.pgm.util.concurrent.ThreadSafeConnection;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.usernames.UsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolvers;
 
 public class SQLDatastore extends ThreadSafeConnection implements Datastore {
 
@@ -31,54 +40,44 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
             "CREATE TABLE IF NOT EXISTS pools (name VARCHAR(255) PRIMARY KEY, next_map VARCHAR(255), last_active BOOLEAN)");
   }
 
-  private class SQLUsername extends UsernameImpl {
+  private class SQLUsername implements Username {
+    private final Duration ONE_WEEK = Duration.ofDays(7);
 
-    private volatile boolean queried;
+    private final UUID id;
+    private String name;
+    private Instant validUntil;
 
-    SQLUsername(UUID id, @Nullable String name) {
-      super(id, name);
+    SQLUsername(UUID id) {
+      this.id = assertNotNull(id, "username id is null");
+      UsernameResolvers.resolve(id).thenAccept(this::setName);
+    }
+
+    @Override
+    public UUID getId() {
+      return id;
     }
 
     @Override
     public String getNameLegacy() {
-      String name = super.getNameLegacy();
-
-      // Since there can be hundreds of names, only query when requested.
-      if (!queried && name == null) {
-        queried = true;
-        submitQuery(new SelectQuery());
-      }
-
       return name;
     }
 
     @Override
-    public void setName(@Nullable String name) {
-      super.setName(name);
-
-      if (name != null) {
-        submitQuery(new UpdateQuery());
-      }
+    public Component getName(NameStyle style) {
+      return player(Bukkit.getPlayer(id), name, style);
     }
 
-    private class SelectQuery implements Query {
-      @Override
-      public String getFormat() {
-        return "SELECT name, expires FROM usernames WHERE id = ? LIMIT 1";
-      }
+    protected void setName(UsernameResolver.UsernameResponse response) {
+      // A name is provided and either we know no name, or it's more recent
+      if (response.getUsername() != null
+          && (this.name == null || response.getValidUntil().isAfter(this.validUntil))) {
+        this.name = response.getUsername();
+        this.validUntil = response.getValidUntil();
 
-      @Override
-      public void query(PreparedStatement statement) throws SQLException {
-        statement.setString(1, getId().toString());
-
-        try (final ResultSet result = statement.executeQuery()) {
-          if (!result.next()) return;
-
-          setName(result.getString(1));
-
-          if (result.getLong(2) < System.currentTimeMillis()) {
-            setName(null);
-          }
+        // Only update names with about over a week of validity
+        if (response.getSource() != SqlUsernameResolver.class
+            && validUntil.isAfter(Instant.now().plus(ONE_WEEK))) {
+          submitQuery(new UpdateQuery());
         }
       }
     }
@@ -91,14 +90,9 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
 
       @Override
       public void query(PreparedStatement statement) throws SQLException {
-        statement.setString(1, getId().toString());
-        statement.setString(2, getNameLegacy());
-
-        // Pick a random expiration time between 1 and 2 weeks
-        statement.setLong(
-            3,
-            System.currentTimeMillis() + Duration.ofDays(7 + (int) (Math.random() * 7)).toMillis());
-
+        statement.setString(1, id.toString());
+        statement.setString(2, name);
+        statement.setLong(3, validUntil.toEpochMilli());
         statement.executeUpdate();
       }
     }
@@ -106,7 +100,7 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
 
   @Override
   public Username getUsername(UUID id) {
-    return new SQLUsername(id, null);
+    return new SQLUsername(id);
   }
 
   private class SQLSettings extends SettingsImpl {

@@ -9,9 +9,9 @@ import java.time.Duration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -65,8 +65,8 @@ public class ThreadSafeConnection implements Closeable {
    * @param query A query.
    * @return A future when the query is complete.
    */
-  public Future<?> submitQuery(Query query) {
-    return executorService.submit(
+  public CompletableFuture<Void> submitQuery(Query query) {
+    return CompletableFuture.runAsync(
         () -> {
           try {
             final Connection connection = acquireConnection();
@@ -74,13 +74,16 @@ public class ThreadSafeConnection implements Closeable {
             try (final PreparedStatement statement =
                 connection.prepareStatement(query.getFormat())) {
               query.query(statement);
+            } catch (Throwable t) {
+              t.printStackTrace();
             }
 
             releaseConnection(connection);
           } catch (SQLException e) {
             e.printStackTrace();
           }
-        });
+        },
+        executorService);
   }
 
   /**

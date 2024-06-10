@@ -44,6 +44,7 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.command.util.PGMCommandGraph;
 import tc.oc.pgm.db.CacheDatastore;
 import tc.oc.pgm.db.SQLDatastore;
+import tc.oc.pgm.db.SqlUsernameResolver;
 import tc.oc.pgm.integrations.SimpleVanishIntegration;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
@@ -71,14 +72,19 @@ import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.compatability.SportPaperListener;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
+import tc.oc.pgm.util.listener.AfkTracker;
 import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
+import tc.oc.pgm.util.listener.TNTMinecartPlacementListener;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.usernames.ApiUsernameResolver;
+import tc.oc.pgm.util.usernames.BukkitUsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class PGMPlugin extends JavaPlugin implements PGM, Listener {
@@ -96,6 +102,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ScheduledExecutorService executorService;
   private ScheduledExecutorService asyncExecutorService;
   private InventoryManager inventoryManager;
+  private AfkTracker afkTracker;
 
   public PGMPlugin() {
     super();
@@ -159,25 +166,20 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       return;
     }
 
+    UsernameResolvers.setResolvers(
+        new BukkitUsernameResolver(),
+        new SqlUsernameResolver((SQLDatastore) datastore),
+        new ApiUsernameResolver());
+
     datastore = new CacheDatastore(datastore);
 
-    try {
-      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
-    } catch (ExecutionException | InterruptedException | TimeoutException e) {
-      e.printStackTrace();
-    }
-
-    if (!mapLibrary.getMaps().hasNext()) {
+    if (!loadInitialMaps()) {
+      logger.warning("No maps found, adding default repository as a fallback.");
       PGMConfig.registerRemoteMapSource(mapSourceFactories, PGMConfig.DEFAULT_REMOTE_REPO);
-      try {
-        mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
-      } catch (ExecutionException | InterruptedException | TimeoutException e) {
-        e.printStackTrace();
-      } finally {
-        if (!mapLibrary.getMaps().hasNext()) {
-          getServer().getPluginManager().disablePlugin(this);
-          return;
-        }
+      if (!loadInitialMaps()) {
+        logger.severe("No maps were loaded in time, PGM will be disabled");
+        getServer().getPluginManager().disablePlugin(this);
+        return;
       }
     }
 
@@ -219,7 +221,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       Integration.setVanishIntegration(new SimpleVanishIntegration(matchManager, executorService));
 
     inventoryManager = new InventoryManager(this);
-    inventoryManager.init();
+    afkTracker = new AfkTracker(this);
 
     if (config.showTabList()) {
       matchTabManager = new MatchTabManager(this);
@@ -338,6 +340,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     return inventoryManager;
   }
 
+  @Override
+  public AfkTracker getAfkTracker() {
+    return afkTracker;
+  }
+
   private void registerCommands() {
     try {
       new PGMCommandGraph(this);
@@ -359,8 +366,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new PlayerBlockListener());
     registerEvents(new PlayerMoveListener());
     registerEvents(new ItemTransferListener());
+    registerEvents(new TNTMinecartPlacementListener());
     new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
+    inventoryManager.init();
+    registerEvents(afkTracker);
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(nameDecorationRegistry);
     registerEvents(new PGMListener(this, matchManager));
@@ -372,6 +382,17 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new MotdListener());
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
     registerEvents(new JoinLeaveAnnouncer(matchManager));
+  }
+
+  private boolean loadInitialMaps() {
+    try {
+      mapLibrary.loadNewMaps(false).get(30, TimeUnit.SECONDS);
+    } catch (TimeoutException e) {
+      getLogger().warning("Loading all maps took >30s, other maps will keep loading async.");
+    } catch (ExecutionException | InterruptedException e) {
+      getLogger().log(Level.WARNING, "Exception loading maps", e);
+    }
+    return mapLibrary.getMaps().hasNext();
   }
 
   private class InGameHandler extends Handler {

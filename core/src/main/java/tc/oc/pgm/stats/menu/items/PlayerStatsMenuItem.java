@@ -153,7 +153,7 @@ public class PlayerStatsMenuItem implements MenuItem {
     Component playerComponent =
         stats.getPlayerComponent() != null
             ? stats.getPlayerComponent()
-            : player(uuid, NameStyle.FANCY);
+            : player(uuid, NameStyle.VERBOSE);
 
     meta.setDisplayName(
         TextTranslations.translateLegacy(

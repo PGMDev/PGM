@@ -283,6 +283,10 @@ public interface NMSHacks {
     return INSTANCE.getPlayerSkinForViewer(player, viewer);
   }
 
+  static String getPlayerName(UUID uuid) {
+    return INSTANCE.getPlayerName(uuid);
+  }
+
   static void updateVelocity(Player player) {
     INSTANCE.updateVelocity(player);
   }
@@ -438,5 +442,9 @@ public interface NMSHacks {
 
   static void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     INSTANCE.postToMainThread(plugin, priority, task);
+  }
+
+  static int getMaxWorldSize(World world) {
+    return INSTANCE.getMaxWorldSize(world);
   }
 }

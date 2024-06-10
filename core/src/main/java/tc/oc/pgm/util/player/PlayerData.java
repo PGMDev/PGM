@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.player;
 
+import static tc.oc.pgm.util.player.PlayerRenderer.OFFLINE_COLOR;
+
 import java.util.Objects;
 import java.util.UUID;
 import net.kyori.adventure.text.format.TextColor;
@@ -29,7 +31,7 @@ class PlayerData {
     this.name = player.getName();
     this.nick = Integration.getNick(player);
     MatchPlayer mp = PGM.get().getMatchManager().getPlayer(player);
-    this.teamColor = mp == null ? PlayerComponent.OFFLINE_COLOR : mp.getParty().getTextColor();
+    this.teamColor = mp == null ? OFFLINE_COLOR : mp.getParty().getTextColor();
     this.dead = mp != null && mp.isDead();
     this.vanish = Integration.isVanished(player);
     this.online = player.isOnline();
@@ -42,8 +44,7 @@ class PlayerData {
 
     this.name = mp.getNameLegacy();
     this.nick = Integration.getNick(mp.getBukkit());
-    this.teamColor =
-        mp.getParty() == null ? PlayerComponent.OFFLINE_COLOR : mp.getParty().getTextColor();
+    this.teamColor = mp.getParty() == null ? OFFLINE_COLOR : mp.getParty().getTextColor();
     this.dead = mp.isDead();
     this.vanish = Integration.isVanished(mp.getBukkit());
     this.online = mp.getBukkit().isOnline();
@@ -71,7 +72,7 @@ class PlayerData {
     this.nick = player != null ? Integration.getNick(player) : null;
     // Null-check is relevant as MatchManager will be null when loading author names.
     MatchPlayer mp = player != null ? PGM.get().getMatchManager().getPlayer(player) : null;
-    this.teamColor = mp == null ? PlayerComponent.OFFLINE_COLOR : mp.getParty().getTextColor();
+    this.teamColor = mp == null ? OFFLINE_COLOR : mp.getParty().getTextColor();
     this.dead = mp != null && mp.isDead();
     this.vanish = mp != null && Integration.isVanished(mp.getBukkit());
     this.online = player != null && player.isOnline();

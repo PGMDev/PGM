@@ -50,6 +50,9 @@
         <repository>
             <id>sportpaper-github</id>
             <url>https://maven.pkg.github.com/Electroid/SportPaper</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
         <repository>
             <id>jitpack-io</id>
@@ -93,24 +96,17 @@
         <!-- Multi-protocol library for future Minecraft versions -->
         <dependency>
             <groupId>com.viaversion</groupId>
-            <artifactId>viaversion</artifactId>
-            <version>4.5.1</version>
+            <artifactId>viaversion-api</artifactId>
+            <version>4.9.2</version>
             <scope>provided</scope>
             <optional>true</optional>
-            <!-- Fix transitive dependency breaking builds -->
-            <exclusions>
-                <exclusion>
-                    <groupId>net.md-5</groupId>
-                    <artifactId>bungeecord-chat</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- Send packets to players -->
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>5.0.0</version>
+            <version>5.1.0</version>
         </dependency>
 
         <!-- XML parsing library used for all "map.xml" configuration loading -->
@@ -125,19 +121,19 @@
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-api</artifactId>
-            <version>4.12.0</version>
+            <version>4.15.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-text-serializer-plain</artifactId>
-            <version>4.12.0</version>
+            <version>4.15.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.kyori</groupId>
             <artifactId>adventure-platform-bukkit</artifactId>
-            <version>4.2.0</version>
+            <version>4.3.2</version>
             <scope>compile</scope>
             <!-- Exclude Spigot APIs since we already provide Bukkit -->
             <exclusions>
@@ -185,7 +181,7 @@
         <dependency>
             <groupId>fr.mrmicky</groupId>
             <artifactId>FastBoard</artifactId>
-            <version>1.2.1</version>
+            <version>2.0.2</version>
             <scope>compile</scope>
         </dependency>
 
@@ -213,10 +209,11 @@
         </dependency>
 
         <!-- Simple mathematical expression evaluator library -->
+        <!-- Uses version from https://github.com/Pablete1234/exp4j/commits/master/ -->
         <dependency>
-            <groupId>com.github.Pablete1234</groupId>
+            <groupId>net.objecthunter</groupId>
             <artifactId>exp4j</artifactId>
-            <version>0431d412ec</version>
+            <version>0.4.9-pgm</version>
             <scope>compile</scope>
         </dependency>
 

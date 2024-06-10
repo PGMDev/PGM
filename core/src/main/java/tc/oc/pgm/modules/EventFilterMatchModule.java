@@ -115,8 +115,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
   }
 
   boolean cancelUnlessInteracting(Cancellable event, MatchPlayerState player) {
-    return cancel(
-        event, !player.getParty().isParticipating(), player.getMatch().getWorld(), null, null);
+    return cancel(event, !player.canInteract(), player.getMatch().getWorld(), null, null);
   }
 
   ClickType convertClick(ClickType clickType, Player player) {

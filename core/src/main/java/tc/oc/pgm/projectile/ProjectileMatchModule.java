@@ -3,8 +3,8 @@ package tc.oc.pgm.projectile;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -39,6 +39,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
@@ -58,7 +59,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final ImmutableSet<ProjectileDefinition> projectileDefinitions;
-  private final Set<ProjectileCooldown> projectileCooldowns = new HashSet<>();
+  private final HashMap<UUID, ProjectileCooldowns> projectileCooldowns = new HashMap<>();
 
   private static final String DEFINITION_KEY = "projectileDefinition";
 
@@ -73,7 +74,6 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     if (event.getAction() == Action.PHYSICAL) return;
 
     Player player = event.getPlayer();
-    MatchPlayer matchPlayer = match.getPlayer(player);
     ParticipantState playerState = match.getParticipantState(player);
     if (playerState == null) return;
 
@@ -85,7 +85,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       // Prevent the original projectile from being fired
       event.setCancelled(true);
 
-      if (this.isCooldownActive(matchPlayer, projectileDefinition)) return;
+      if (this.isCooldownActive(player, projectileDefinition)) return;
 
       boolean realProjectile = Projectile.class.isAssignableFrom(projectileDefinition.projectile);
       Vector velocity =
@@ -132,7 +132,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       }
 
       if (projectileDefinition.coolDown != null) {
-        startCooldown(matchPlayer, projectileDefinition);
+        startCooldown(player, projectileDefinition);
       }
     }
   }
@@ -217,12 +217,17 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onPlayerPickupProjectileEvent(PlayerPickupItemEvent event) {
     ItemStack itemStack = event.getItem().getItemStack();
-    ProjectileCooldown projectileCooldown =
-        this.getProjectileCooldown(
-            this.match.getPlayer(event.getPlayer()), getProjectileDefinition(itemStack));
-    if (projectileCooldown != null && projectileCooldown.isActive()) {
-      projectileCooldown.setItemCoutdownName(itemStack);
+    ProjectileDefinition definition = getProjectileDefinition(itemStack);
+    ProjectileCooldowns cooldowns = projectileCooldowns.get(event.getPlayer().getUniqueId());
+
+    if (cooldowns != null && cooldowns.isActive(definition)) {
+      cooldowns.setItemCountdownName(itemStack, definition);
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onParticipationStop(PlayerParticipationStopEvent event) {
+    projectileCooldowns.remove(event.getPlayer().getId());
   }
 
   public void resetItemName(ItemStack item) {
@@ -234,10 +239,14 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     }
   }
 
-  private ProjectileDefinition getProjectileDefinition(ItemStack item) {
+  public ProjectileDefinition getProjectileDefinition(ItemStack item) {
+    return getProjectileDefinition(ItemTags.PROJECTILE.get(item));
+  }
+
+  public ProjectileDefinition getProjectileDefinition(String projectileId) {
+    if (projectileId == null) return null;
     for (ProjectileDefinition projectileDefinition : projectileDefinitions) {
-      String projectileId = ItemTags.PROJECTILE.get(item);
-      if (projectileId != null && projectileId.equals(projectileDefinition.getId())) {
+      if (projectileId.equals(projectileDefinition.getId())) {
         return projectileDefinition;
       }
     }
@@ -247,8 +256,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
 
   public static @Nullable ProjectileDefinition getProjectileDefinition(Entity entity) {
     if (entity.hasMetadata(DEFINITION_KEY)) {
-      return (ProjectileDefinition)
-          MetadataUtils.getMetadata(entity, DEFINITION_KEY, PGM.get()).value();
+      return MetadataUtils.getMetadataValue(entity, DEFINITION_KEY, PGM.get());
     }
     return launchingDefinition.get();
   }
@@ -265,29 +273,18 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     return false;
   }
 
-  private void startCooldown(MatchPlayer player, ProjectileDefinition definition) {
-    ProjectileCooldown projectileCooldown = getProjectileCooldown(player, definition);
-    if (projectileCooldown == null) {
-      projectileCooldown = new ProjectileCooldown(player, definition);
-      projectileCooldowns.add(projectileCooldown);
-    }
-    projectileCooldown.start();
-  }
-
-  public @Nullable ProjectileCooldown getProjectileCooldown(
-      MatchPlayer player, ProjectileDefinition definition) {
-    for (ProjectileCooldown projectileCooldown : this.projectileCooldowns) {
-      if (projectileCooldown.getMatchPlayer() == player
-          && projectileCooldown.getProjectileDefinition() == definition) {
-        return projectileCooldown;
-      }
+  private void startCooldown(Player player, ProjectileDefinition definition) {
+    ProjectileCooldowns playerCooldowns = projectileCooldowns.get(player.getUniqueId());
+    if (playerCooldowns == null) {
+      playerCooldowns = new ProjectileCooldowns(this, match.getPlayer(player));
+      projectileCooldowns.put(player.getUniqueId(), playerCooldowns);
     }
 
-    return null;
+    playerCooldowns.start(definition);
   }
 
-  public boolean isCooldownActive(MatchPlayer player, ProjectileDefinition definition) {
-    ProjectileCooldown projectileCooldown = getProjectileCooldown(player, definition);
-    return projectileCooldown != null && projectileCooldown.isActive();
+  public boolean isCooldownActive(Player player, ProjectileDefinition definition) {
+    ProjectileCooldowns playerCooldowns = projectileCooldowns.get(player.getUniqueId());
+    return (playerCooldowns != null && playerCooldowns.isActive(definition));
   }
 }

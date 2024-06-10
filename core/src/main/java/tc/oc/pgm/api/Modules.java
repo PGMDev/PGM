@@ -33,6 +33,7 @@ import tc.oc.pgm.damage.DamageMatchModule;
 import tc.oc.pgm.damage.DamageModule;
 import tc.oc.pgm.damage.DisableDamageMatchModule;
 import tc.oc.pgm.damage.DisableDamageModule;
+import tc.oc.pgm.damagehistory.DamageHistoryMatchModule;
 import tc.oc.pgm.death.DeathMessageMatchModule;
 import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.destroyable.DestroyableModule;
@@ -86,6 +87,7 @@ import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
 import tc.oc.pgm.modules.PlayerTimeMatchModule;
+import tc.oc.pgm.modules.ProjectileTrailMatchModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
@@ -220,9 +222,9 @@ public final class Modules {
     register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
     register(PlayerTimeMatchModule.class, PlayerTimeMatchModule::new);
     register(SpectateMatchModule.class, SpectateMatchModule::new);
+    register(DamageHistoryMatchModule.class, DamageHistoryMatchModule::new);
 
-    // FIXME: Disabled due to lag - look into future optimization
-    // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
+    register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
     // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
