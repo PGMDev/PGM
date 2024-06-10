@@ -86,6 +86,7 @@ import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
 import tc.oc.pgm.modules.PlayerTimeMatchModule;
+import tc.oc.pgm.modules.ProjectileTrailMatchModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
@@ -221,8 +222,7 @@ public final class Modules {
     register(PlayerTimeMatchModule.class, PlayerTimeMatchModule::new);
     register(SpectateMatchModule.class, SpectateMatchModule::new);
 
-    // FIXME: Disabled due to lag - look into future optimization
-    // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
+    register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
     // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
