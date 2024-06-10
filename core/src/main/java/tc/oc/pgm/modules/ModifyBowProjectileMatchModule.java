@@ -110,9 +110,9 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
       // If the custom projectile replaced an arrow, recreate some effects specific to arrows
       if (projectile.hasMetadata("damage")) {
-        boolean critical = MetadataUtils.getMetadata(projectile, "critical", PGM.get()).asBoolean();
-        int knockback = MetadataUtils.getMetadata(projectile, "knockback", PGM.get()).asInt();
-        double damage = MetadataUtils.getMetadata(projectile, "damage", PGM.get()).asDouble();
+        boolean critical = MetadataUtils.getMetadataValue(projectile, "critical", PGM.get());
+        int knockback = MetadataUtils.getMetadataValue(projectile, "knockback", PGM.get());
+        double damage = MetadataUtils.getMetadataValue(projectile, "damage", PGM.get());
         double speed = projectile.getVelocity().length();
 
         // Reproduce the damage calculation from nms.EntityArrow with the addition of our modifier

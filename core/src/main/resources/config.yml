@@ -27,7 +27,7 @@ map:
     #
     # To enable the default maps, uncomment the repository below.
     # - uri: "https://github.com/PGMDev/Maps"
-    #  path: "maps-default"
+    #  path: "default-maps"
 
   # A path to a map pools file, or empty to disable map pools.
   pools: "map-pools.yml"

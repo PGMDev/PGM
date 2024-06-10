@@ -6,7 +6,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -61,10 +60,6 @@ public class ShopKeeper {
   }
 
   public static String getKeeperId(Entity entity) {
-    MetadataValue meta = MetadataUtils.getMetadata(entity, ShopKeeper.METADATA_KEY, PGM.get());
-    if (meta.asString() != null) {
-      return meta.asString();
-    }
-    return null;
+    return MetadataUtils.getMetadataValue(entity, ShopKeeper.METADATA_KEY, PGM.get());
   }
 }
