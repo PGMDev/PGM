@@ -3,9 +3,7 @@ package tc.oc.pgm.util.material;
 import static org.bukkit.Material.*;
 import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Map;
 import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,15 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Materials {
-  Map<Integer, Material> BY_ID =
-      new ImmutableMap.Builder<Integer, Material>() {
-        {
-          for (Material value : Material.values()) {
-            put(value.getId(), value);
-          }
-        }
-      }.build();
-
   // Weapons
   Material WOODEN_SWORD = parse("WOOD_SWORD", "WOODEN_SWORD");
   Material GOLDEN_SWORD = parse("GOLD_SWORD", "GOLDEN_SWORD");
@@ -53,9 +42,6 @@ public interface Materials {
   Material BANNER = parse("BANNER", "LEGACY_BANNER");
   Material STANDING_BANNER = parse("STANDING_BANNER", "LEGACY_STANDING_BANNER");
   Material WOOL = parse("WOOL", "LEGACY_WOOL");
-  Material CARPET = parse("CARPET", "LEGACY_CARPET");
-  Material STAINED_CLAY = parse("STAINED_CLAY", "LEGACY_STAINED_CLAY");
-  Material STAINED_GLASS = parse("STAINED_GLASS", "LEGACY_STAINED_GLASS");
   Material STAINED_GLASS_PANE = parse("STAINED_GLASS_PANE", "LEGACY_STAINED_GLASS_PANE");
   Material SHORT_GRASS = parse("LONG_GRASS", "SHORT_GRASS");
 

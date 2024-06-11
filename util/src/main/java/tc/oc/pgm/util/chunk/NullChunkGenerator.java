@@ -8,11 +8,14 @@ import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
+import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.platform.Platform;
 
 /** A chunk generator that creates empty chunks. */
 public class NullChunkGenerator extends ChunkGenerator {
-  // TODO: PLATFORM DEPENDANT? it could fail in newer versions, but may be fine
   public static final NullChunkGenerator INSTANCE = new NullChunkGenerator();
+  private static final boolean SKIP_BIOMES =
+      Platform.MINECRAFT_VERSION.isOlderThan(new Version(1, 13, 0));
   private static final byte[] CHUNK = new byte[0];
 
   private NullChunkGenerator() {}
@@ -29,6 +32,10 @@ public class NullChunkGenerator extends ChunkGenerator {
   @Override
   public ChunkData generateChunkData(
       World world, Random random, int chunkX, int chunkZ, BiomeGrid biome) {
+    if (SKIP_BIOMES) {
+      return super.generateChunkData(world, random, chunkX, chunkZ, biome);
+    }
+
     ChunkData chunkData = super.createChunkData(world);
 
     // For everyblock in the chunk set the biome to plains
@@ -37,7 +44,6 @@ public class NullChunkGenerator extends ChunkGenerator {
         biome.setBiome(x, z, Biome.PLAINS);
       }
     }
-
     return chunkData;
   }
 

@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.material.Dye;
@@ -53,6 +54,11 @@ public class SportPaperColorUtils implements ColorUtils {
   @Override
   public void setColor(Block block, DyeColor color) {
     block.setData(color.getWoolData());
+  }
+
+  @Override
+  public DyeColor getColor(BlockState block) {
+    return DyeColor.getByWoolData(block.getRawData());
   }
 
   public void setColor(World world, Iterable<BlockVector> positions, DyeColor color) {

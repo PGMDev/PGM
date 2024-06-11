@@ -22,6 +22,8 @@ public interface ColorUtils {
 
   void setColor(Block block, DyeColor color);
 
+  DyeColor getColor(BlockState block);
+
   default void setColor(World world, Iterable<BlockVector> positions, DyeColor color) {
     for (BlockVector pos : positions) {
       setColor(world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()), color);

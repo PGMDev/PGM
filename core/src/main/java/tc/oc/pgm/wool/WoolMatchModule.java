@@ -1,6 +1,7 @@
 package tc.oc.pgm.wool;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -40,6 +41,7 @@ import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -59,6 +61,8 @@ public class WoolMatchModule implements MatchModule, Listener {
   // the exact
   // layout of the wools in the inventory. This is used to refill the container with wools.
   private final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
+
+  private static final SingleMaterialMatcher WOOL = SingleMaterialMatcher.of(Materials.WOOL);
 
   private static final int REFILL_INTERVAL = 30; // seconds
 
@@ -80,7 +84,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private boolean isObjectiveWool(ItemStack stack) {
-    if (stack.getType() == Materials.WOOL) {
+    if (WOOL.matches(stack.getType())) {
       for (MonumentWool wool : this.wools.values()) {
         if (wool.getDefinition().isObjectiveWool(stack)) return true;
       }
@@ -216,7 +220,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (holder instanceof Player) {
       MatchPlayer playerHolder = this.match.getPlayer((Player) holder);
 
-      if (playerHolder != null && result != null && result.getType() == Materials.WOOL) {
+      if (playerHolder != null && result != null && WOOL.matches(result.getType())) {
         for (MonumentWool wool : this.wools.values()) {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
@@ -239,8 +243,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     return null;
   }
 
-  @SuppressWarnings("deprecation")
   private static boolean isValidWool(DyeColor expectedColor, BlockState state) {
-    return state.getType() == Materials.WOOL && expectedColor.getWoolData() == state.getRawData();
+    return WOOL.matches(state.getType()) && COLOR_UTILS.getColor(state) == expectedColor;
   }
 }
