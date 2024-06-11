@@ -2,6 +2,8 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.api.Permissions.DEV;
+import static tc.oc.pgm.api.map.Phase.DEVELOPMENT;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.text.TextException.exception;
 
@@ -16,6 +18,7 @@ import org.incendo.cloud.annotations.Default;
 import org.incendo.cloud.annotations.Flag;
 import org.incendo.cloud.annotations.Permission;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -35,11 +38,10 @@ public final class MapOrderCommand {
 
     if (next == null) throw exception("map.noNextMap");
 
-    audience.sendMessage(
-        translatable(
-            "map.nextMap",
-            NamedTextColor.DARK_PURPLE,
-            next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
+    audience.sendMessage(translatable(
+        "map.nextMap",
+        NamedTextColor.DARK_PURPLE,
+        next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 
   @Command("setnext|sn [map]")
@@ -55,6 +57,12 @@ public final class MapOrderCommand {
       @Argument("map") @Default(CURRENT) @FlagYielding MapInfo map) {
     if (RestartManager.isQueued() && !force) {
       throw exception("map.setNext.confirm");
+    }
+
+    if (PGM.get().getConfiguration().enforceDevPhase()
+        && DEVELOPMENT.equals(map.getPhase())
+        && !sender.hasPermission(DEV)) {
+      throw exception("map.setNext.notDev");
     }
 
     if (reset) {
@@ -86,12 +94,11 @@ public final class MapOrderCommand {
 
   public static void sendSetNextMessage(@NotNull MapInfo map, CommandSender sender, Match match) {
     Component mapName = text(map.getName(), NamedTextColor.GOLD);
-    Component successful =
-        translatable(
-            "map.setNext",
-            NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
-            mapName);
+    Component successful = translatable(
+        "map.setNext",
+        NamedTextColor.GRAY,
+        UsernameFormatUtils.formatStaffName(sender, match),
+        mapName);
     ChatDispatcher.broadcastAdminChatMessage(successful, match);
   }
 }

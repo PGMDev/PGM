@@ -43,72 +43,69 @@ public interface Permissions {
 
   String MAPMAKER = GROUP + ".mapmaker"; // Permission group for mapmakers, defined in config.yml
 
+  String DEV = ROOT + ".dev";
+
   // Role-specific permission nodes
-  Permission DEFAULT =
-      new Permission(
-          "pgm.default",
-          PermissionDefault.TRUE,
-          new ImmutableMap.Builder<String, Boolean>()
-              .put(JOIN, true)
-              .put(LEAVE, true)
-              .put(VIEW_INVENTORY, true)
-              .build());
+  Permission DEFAULT = new Permission(
+      "pgm.default",
+      PermissionDefault.TRUE,
+      new ImmutableMap.Builder<String, Boolean>()
+          .put(JOIN, true)
+          .put(LEAVE, true)
+          .put(VIEW_INVENTORY, true)
+          .build());
 
-  Permission PREMIUM =
-      new Permission(
-          "pgm.premium",
-          PermissionDefault.FALSE,
-          new ImmutableMap.Builder<String, Boolean>()
-              .putAll(DEFAULT.getChildren())
-              .put(DEFAULT.getName(), true)
-              .put(JOIN_CHOOSE, true)
-              .put(JOIN_FULL, true)
-              .put(EXTRA_VOTE, true)
-              .build());
+  Permission PREMIUM = new Permission(
+      "pgm.premium",
+      PermissionDefault.FALSE,
+      new ImmutableMap.Builder<String, Boolean>()
+          .putAll(DEFAULT.getChildren())
+          .put(DEFAULT.getName(), true)
+          .put(JOIN_CHOOSE, true)
+          .put(JOIN_FULL, true)
+          .put(EXTRA_VOTE, true)
+          .build());
 
-  Permission MODERATOR =
-      new Permission(
-          "pgm.mod",
-          PermissionDefault.FALSE,
-          new ImmutableMap.Builder<String, Boolean>()
-              .putAll(PREMIUM.getChildren())
-              .put(PREMIUM.getName(), true)
-              .put(START, true)
-              .put(STOP, true)
-              .put(SETNEXT, true)
-              .put(ADMINCHAT, true)
-              .put(RESIZE, true)
-              .put(JOIN_FORCE, true)
-              .put(DEFUSE, true)
-              .put(STAFF, true)
-              .put(KICK, true)
-              .put(WARN, true)
-              .put(MUTE, true)
-              .put(BAN, true)
-              .put(FREEZE, true)
-              .put(VANISH, true)
-              .build());
+  Permission MODERATOR = new Permission(
+      "pgm.mod",
+      PermissionDefault.FALSE,
+      new ImmutableMap.Builder<String, Boolean>()
+          .putAll(PREMIUM.getChildren())
+          .put(PREMIUM.getName(), true)
+          .put(START, true)
+          .put(STOP, true)
+          .put(SETNEXT, true)
+          .put(ADMINCHAT, true)
+          .put(RESIZE, true)
+          .put(JOIN_FORCE, true)
+          .put(DEFUSE, true)
+          .put(STAFF, true)
+          .put(KICK, true)
+          .put(WARN, true)
+          .put(MUTE, true)
+          .put(BAN, true)
+          .put(FREEZE, true)
+          .put(VANISH, true)
+          .build());
 
-  Permission DEVELOPER =
-      new Permission(
-          "pgm.dev",
-          PermissionDefault.FALSE,
-          new ImmutableMap.Builder<String, Boolean>()
-              .putAll(MODERATOR.getChildren())
-              .put(MODERATOR.getName(), true)
-              .put(GAMEPLAY, true)
-              .put(DEBUG, true)
-              .put(RELOAD, true)
-              .build());
+  Permission DEVELOPER = new Permission(
+      DEV,
+      PermissionDefault.FALSE,
+      new ImmutableMap.Builder<String, Boolean>()
+          .putAll(MODERATOR.getChildren())
+          .put(MODERATOR.getName(), true)
+          .put(GAMEPLAY, true)
+          .put(DEBUG, true)
+          .put(RELOAD, true)
+          .build());
 
-  Permission ALL =
-      new Permission(
-          "pgm.*",
-          PermissionDefault.OP,
-          new ImmutableMap.Builder<String, Boolean>()
-              .putAll(DEVELOPER.getChildren())
-              .put(DEVELOPER.getName(), true)
-              .build());
+  Permission ALL = new Permission(
+      "pgm.*",
+      PermissionDefault.OP,
+      new ImmutableMap.Builder<String, Boolean>()
+          .putAll(DEVELOPER.getChildren())
+          .put(DEVELOPER.getName(), true)
+          .build());
 
   static void registerAll() {
     Stream.of(DEFAULT, PREMIUM, MODERATOR, DEVELOPER, ALL).forEachOrdered(Permissions::register);

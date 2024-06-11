@@ -18,6 +18,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
+import tc.oc.pgm.api.map.Phase;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
@@ -70,6 +71,7 @@ import tc.oc.pgm.command.parsers.MatchPlayerParser;
 import tc.oc.pgm.command.parsers.ModeParser;
 import tc.oc.pgm.command.parsers.OfflinePlayerParser;
 import tc.oc.pgm.command.parsers.PartyParser;
+import tc.oc.pgm.command.parsers.PhasesParser;
 import tc.oc.pgm.command.parsers.PlayerClassParser;
 import tc.oc.pgm.command.parsers.PlayerParser;
 import tc.oc.pgm.command.parsers.RotationParser;
@@ -134,15 +136,12 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
 
     register(ChatDispatcher.get());
 
-    manager.command(
-        manager
-            .commandBuilder("pgm")
-            .literal("help")
-            .optional("query", StringParser.greedyStringParser())
-            .handler(
-                context ->
-                    minecraftHelp.queryCommands(
-                        context.<String>optional("query").orElse(""), context.sender())));
+    manager.command(manager
+        .commandBuilder("pgm")
+        .literal("help")
+        .optional("query", StringParser.greedyStringParser())
+        .handler(context -> minecraftHelp.queryCommands(
+            context.<String>optional("query").orElse(""), context.sender())));
   }
 
   // Injectors
@@ -196,6 +195,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     registerParser(Filter.class, FilterArgumentParser::new);
     registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
+    registerParser(Phase.Phases.class, PhasesParser::new);
 
     parsers.registerSuggestionProvider(
         "players", SuggestionProvider.blockingStrings(Players::suggestPlayers));

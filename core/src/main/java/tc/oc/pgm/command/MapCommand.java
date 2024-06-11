@@ -69,7 +69,7 @@ public final class MapCommand {
           List<String> tags,
       @Flag(value = "author", aliases = "a") String author,
       @Flag(value = "name", aliases = "n") String name,
-      @Flag(value = "phase", aliases = "p") Phase phase) {
+      @Flag(value = "phase", aliases = "p", repeatable = true) List<Phase.Phases> phases) {
     Stream<MapInfo> search = library.getMaps(name);
     if (!tags.isEmpty()) {
       final Map<Boolean, Set<String>> tagSet = tags.stream()
@@ -83,9 +83,8 @@ public final class MapCommand {
       search = search.filter(map -> matchesTags(map, tagSet.get(false), tagSet.get(true)));
     }
 
-    // FIXME: change when cloud gets support for default flag values
-    final Phase finalPhase = phase == null ? Phase.PRODUCTION : phase;
-    search = search.filter(map -> map.getPhase() == finalPhase);
+    Phase.Phases chosenPhases = Phase.Phases.parse(sender, phases);
+    search = search.filter(map -> chosenPhases.contains(map.getPhase()));
 
     if (author != null) {
       String query = author;
@@ -246,7 +245,9 @@ public final class MapCommand {
           .append(mapInfoLabel("map.info.proto"))
           .append(text(map.getProto().toString(), NamedTextColor.GOLD))
           .build());
+    }
 
+    if (sender.hasPermission(Permissions.DEBUG) || !Phase.PRODUCTION.equals(map.getPhase())) {
       audience.sendMessage(text()
           .append(mapInfoLabel("map.info.phase"))
           .append(map.getPhase().toComponent().color(NamedTextColor.GOLD))

@@ -38,6 +38,9 @@ map:
   # Show unused XML nodes as map errors. Helps with finding typos in xml.
   show-unused-xml: true
 
+  # Only allow devs to set dev phase maps
+  enforce-dev-phase: false
+
 
 # Sets the duration of various countdowns.
 #

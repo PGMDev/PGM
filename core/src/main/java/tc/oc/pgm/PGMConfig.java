@@ -65,6 +65,7 @@ public final class PGMConfig implements Config {
   private final Path mapPoolFile;
   private final Path includesDirectory;
   private final boolean showUnusedXml;
+  private final boolean enforceDevPhase;
 
   // countdown.*
   private final Duration startTime;
@@ -127,20 +128,18 @@ public final class PGMConfig implements Config {
     this.logLevel = parseLogLevel(config.getString("log-level", "info"));
 
     final String databaseUri = config.getString("database-uri");
-    this.databaseUri =
-        databaseUri == null || databaseUri.isEmpty()
-            ? new File(dataFolder, "pgm.db")
-                .getAbsoluteFile()
-                .toURI()
-                .toString()
-                .replaceFirst("^file", "sqlite")
-            : databaseUri;
-    this.databaseMaxConnections =
-        this.databaseUri.startsWith("sqlite:")
-            ? 1 // SQLite is single threaded by nature
-            : Math.min(
-                config.getInt("database-max-connections", 5),
-                Runtime.getRuntime().availableProcessors());
+    this.databaseUri = databaseUri == null || databaseUri.isEmpty()
+        ? new File(dataFolder, "pgm.db")
+            .getAbsoluteFile()
+            .toURI()
+            .toString()
+            .replaceFirst("^file", "sqlite")
+        : databaseUri;
+    this.databaseMaxConnections = this.databaseUri.startsWith("sqlite:")
+        ? 1 // SQLite is single threaded by nature
+        : Math.min(
+            config.getInt("database-max-connections", 5),
+            Runtime.getRuntime().availableProcessors());
 
     final String motd = config.getString("motd");
     this.motd = motd == null || motd.isEmpty() ? null : parseComponentLegacy(motd);
@@ -165,6 +164,7 @@ public final class PGMConfig implements Config {
     this.mapPoolFile = getPath(dataFolder.toPath(), config.getString("map.pools"));
     this.includesDirectory = getPath(dataFolder.toPath(), config.getString("map.includes"));
     this.showUnusedXml = parseBoolean(config.getString("map.show-unused-xml", "true"));
+    this.enforceDevPhase = parseBoolean(config.getString("map.enforce-dev-phase", "false"));
 
     this.startTime = parseDuration(config.getString("countdown.start", "30s"));
     this.huddleTime = parseDuration(config.getString("countdown.huddle", "0s"));
@@ -247,10 +247,10 @@ public final class PGMConfig implements Config {
 
     String path = String.valueOf(repository.get("path"));
     if (path.isEmpty() || path.equals("null")) {
-      String normalizedPath =
-          Normalizer.normalize(uri.getHost() + uri.getPath(), Normalizer.Form.NFD)
-              .replaceAll("[^A-Za-z0-9_]", "-")
-              .toLowerCase(Locale.ROOT);
+      String normalizedPath = Normalizer.normalize(
+              uri.getHost() + uri.getPath(), Normalizer.Form.NFD)
+          .replaceAll("[^A-Za-z0-9_]", "-")
+          .toLowerCase(Locale.ROOT);
       path = "maps" + File.separator + normalizedPath;
     }
 
@@ -260,9 +260,8 @@ public final class PGMConfig implements Config {
     List<Path> children = null;
     final Object subFolders = repository.get("folders");
     if (subFolders instanceof List) {
-      children =
-          ((List<?>) subFolders)
-              .stream().map(Object::toString).map(Paths::get).collect(Collectors.toList());
+      children = ((List<?>) subFolders)
+          .stream().map(Object::toString).map(Paths::get).collect(Collectors.toList());
     }
 
     mapSources.add(new GitMapSourceFactory(base, children, uri, branch));
@@ -342,14 +341,13 @@ public final class PGMConfig implements Config {
     config.set("player-list", null);
 
     if (config.getBoolean("motd.enabled", true)) {
-      final String format =
-          config
-              .getString("motd.format", "")
-              .replace("{state.color}", "{2}")
-              .replace("{map.name}", "{1}")
-              .replace("{map.version}", "1.0.0")
-              .replace("{state.name}", "Idle")
-              .replace("{state.name-lower}", "idle");
+      final String format = config
+          .getString("motd.format", "")
+          .replace("{state.color}", "{2}")
+          .replace("{map.name}", "{1}")
+          .replace("{map.version}", "1.0.0")
+          .replace("{state.name}", "Idle")
+          .replace("{state.name-lower}", "idle");
       config.set("motd", format);
     } else {
       config.set("motd", "");
@@ -365,10 +363,10 @@ public final class PGMConfig implements Config {
         final int priority = section.getInt(key + ".priority", Integer.MAX_VALUE);
         String prefix = null;
         try {
-          prefix =
-              "&"
-                  + parseEnum(section.getString(key + ".prefix.color"), ChatColor.class).getChar()
-                  + section.getString(key + ".prefix.symbol");
+          prefix = "&"
+              + parseEnum(section.getString(key + ".prefix.color"), ChatColor.class)
+                  .getChar()
+              + section.getString(key + ".prefix.symbol");
         } catch (TextException | NullPointerException e) {
           // No-op
         }
@@ -378,18 +376,16 @@ public final class PGMConfig implements Config {
     }
 
     // Will be sorted based on priority, in ascending order
-    Collections.sort(
-        groups,
-        new Comparator<String>() {
-          @Override
-          public int compare(String o1, String o2) {
-            try {
-              return Integer.parseInt(o1.split("\\|")[0]) - Integer.parseInt(o2.split("\\|")[0]);
-            } catch (Throwable t) {
-              return 0;
-            }
-          }
-        });
+    Collections.sort(groups, new Comparator<String>() {
+      @Override
+      public int compare(String o1, String o2) {
+        try {
+          return Integer.parseInt(o1.split("\\|")[0]) - Integer.parseInt(o2.split("\\|")[0]);
+        } catch (Throwable t) {
+          return 0;
+        }
+      }
+    });
 
     final Map<String, Map<String, Object>> data = new LinkedHashMap<>();
     for (String group : groups) {
@@ -484,6 +480,11 @@ public final class PGMConfig implements Config {
   @Override
   public boolean showUnusedXml() {
     return showUnusedXml;
+  }
+
+  @Override
+  public boolean enforceDevPhase() {
+    return enforceDevPhase;
   }
 
   @Override
@@ -675,10 +676,9 @@ public final class PGMConfig implements Config {
     public Group(ConfigurationSection config) throws TextException {
       this.id = config.getName();
       this.flair = new Flair(config);
-      final PermissionDefault def =
-          id.equalsIgnoreCase("op")
-              ? PermissionDefault.OP
-              : id.equalsIgnoreCase("default") ? PermissionDefault.TRUE : PermissionDefault.FALSE;
+      final PermissionDefault def = id.equalsIgnoreCase("op")
+          ? PermissionDefault.OP
+          : id.equalsIgnoreCase("default") ? PermissionDefault.TRUE : PermissionDefault.FALSE;
       this.permission = getPermission(config, id, def, "permissions");
       this.observerPermission =
           getPermission(config, id, PermissionDefault.FALSE, "observer-permissions");
@@ -700,11 +700,10 @@ public final class PGMConfig implements Config {
         }
       }
 
-      final String node =
-          Permissions.GROUP
-              + "."
-              + id
-              + (realm.contains("-") ? "-" + realm.substring(0, realm.indexOf('-')) : "");
+      final String node = Permissions.GROUP
+          + "."
+          + id
+          + (realm.contains("-") ? "-" + realm.substring(0, realm.indexOf('-')) : "");
 
       return Permissions.register(new Permission(node, def, permissions));
     }

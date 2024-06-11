@@ -1,5 +1,7 @@
 package tc.oc.pgm.command;
 
+import static tc.oc.pgm.api.Permissions.DEV;
+import static tc.oc.pgm.api.map.Phase.DEVELOPMENT;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import java.time.Duration;
@@ -10,6 +12,7 @@ import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.CommandDescription;
 import org.incendo.cloud.annotations.Flag;
 import org.incendo.cloud.annotations.Permission;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -33,6 +36,11 @@ public final class CycleCommand {
     }
 
     if (map != null && mapOrder.getNextMap() != map) {
+      if (PGM.get().getConfiguration().enforceDevPhase()
+          && DEVELOPMENT.equals(map.getPhase())
+          && !sender.hasPermission(DEV)) {
+        throw exception("map.setNext.notDev");
+      }
       mapOrder.setNextMap(map);
       MapOrderCommand.sendSetNextMessage(map, sender, match);
     }
