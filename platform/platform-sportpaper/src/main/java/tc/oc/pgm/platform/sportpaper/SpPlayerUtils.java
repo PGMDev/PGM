@@ -18,8 +18,12 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.nms.PlayerUtils;
+import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
+import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
+
+@Supports(SPORTPAPER)
 public class SpPlayerUtils implements PlayerUtils {
 
   @Override
