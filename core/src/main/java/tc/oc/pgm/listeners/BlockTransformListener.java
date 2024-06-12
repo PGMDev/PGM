@@ -1,5 +1,7 @@
 package tc.oc.pgm.listeners;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import java.lang.annotation.Retention;
@@ -45,7 +47,6 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.material.Door;
-import org.bukkit.material.MaterialData;
 import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
@@ -67,8 +68,8 @@ import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class BlockTransformListener implements Listener {
   private static final BlockFace[] NEIGHBORS = {
@@ -120,9 +121,9 @@ public class BlockTransformListener implements Listener {
                               try {
                                 method.invoke(listener, event);
                               } catch (InvocationTargetException ex) {
-                                throw new EventException(ex.getCause(), event);
+                                throw MISC_UTILS.createEventException(ex.getCause(), event);
                               } catch (Throwable t) {
-                                throw new EventException(t, event);
+                                throw MISC_UTILS.createEventException(t, event);
                               }
                             }
                           }
@@ -192,8 +193,8 @@ public class BlockTransformListener implements Listener {
 
   private void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
-      MaterialData oldData = event.getOldState().getData();
-      MaterialData newData = event.getNewState().getData();
+      org.bukkit.material.MaterialData oldData = event.getOldState().getData();
+      org.bukkit.material.MaterialData newData = event.getNewState().getData();
       if (oldData instanceof Door) {
         handleDoor(event, (Door) oldData);
       }
@@ -247,7 +248,6 @@ public class BlockTransformListener implements Listener {
     }
   }
 
-  @SuppressWarnings("deprecation")
   @EventWrapper
   public void onPlayerBucketEmpty(final PlayerBucketEmptyEvent event) {
     Block block = event.getBlockClicked().getRelative(event.getBlockFace());
@@ -301,14 +301,14 @@ public class BlockTransformListener implements Listener {
 
       // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
       // When lava flows into water, it creates stone or cobblestone
-      if (isWater(oldState.getType()) && isLava(newState.getType())) {
+      if (Materials.isWater(oldState.getType()) && Materials.isLava(newState.getType())) {
         newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
         newState.setRawData((byte) 0);
       }
 
       // For some reason, the newState has the data value of the old source.
       // This corrects for that manually.
-      if (isWater(newState.getType()) || isLava(newState.getType())) {
+      if (Materials.isWater(newState.getType()) || Materials.isLava(newState.getType())) {
         byte oldData = newState.getRawData();
         if (event.getFace() == BlockFace.DOWN) {
           // A data value of 8 (or higher) represents water flowing down
@@ -326,14 +326,6 @@ public class BlockTransformListener implements Listener {
       // Check for lava ownership
       this.callEvent(event, oldState, newState, Trackers.getOwner(event.getBlock()));
     }
-  }
-
-  private boolean isWater(Material material) {
-    return material == Material.WATER || material == Material.STATIONARY_WATER;
-  }
-
-  private boolean isLava(Material material) {
-    return material == Material.LAVA || material == Material.STATIONARY_LAVA;
   }
 
   @EventWrapper
@@ -452,7 +444,7 @@ public class BlockTransformListener implements Listener {
     // Add the pushed blocks at their destination
     for (Block block : blocks) {
       Block dest = block.getRelative(event.getDirection());
-      newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState().getData()));
+      newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState()));
     }
 
     // Add air blocks where a block is leaving, and no other block is replacing it
@@ -485,11 +477,10 @@ public class BlockTransformListener implements Listener {
     Map<Block, BlockState> newStates = new HashMap<>();
 
     // Add the arm of the piston, which will extend into the adjacent block.
-    PistonExtensionMaterial pistonExtension =
-        new PistonExtensionMaterial(Material.PISTON_EXTENSION);
+    PistonExtensionMaterial pistonExtension = new PistonExtensionMaterial(Materials.PISTON_HEAD);
     pistonExtension.setFacingDirection(event.getDirection());
     BlockState pistonExtensionState = event.getBlock().getRelative(event.getDirection()).getState();
-    NMSHacks.setBlockStateData(pistonExtensionState, pistonExtension);
+    MaterialData.from(pistonExtension).applyTo(pistonExtensionState);
     newStates.put(event.getBlock(), pistonExtensionState);
 
     this.onPistonMove(event, event.getBlocks(), newStates);
@@ -508,7 +499,8 @@ public class BlockTransformListener implements Listener {
     callEvent(
         event,
         event.getBlock().getState(),
-        BlockStates.cloneWithMaterial(event.getBlock(), event.getTo(), event.getData()),
+        BlockStates.cloneWithMaterial(
+            event.getBlock(), MaterialData.MATERIAL_DATA_FACTORY.getTo(event)),
         Trackers.getOwner(event.getEntity()));
   }
 
@@ -554,12 +546,8 @@ public class BlockTransformListener implements Listener {
   }
 
   private static Material getTrampledType(Material newType) {
-    switch (newType) {
-      case SOIL:
-        return Material.DIRT;
-      default:
-        return null;
-    }
+    if (newType == Materials.SOIL) return Material.DIRT;
+    return null;
   }
 
   // --------------------------

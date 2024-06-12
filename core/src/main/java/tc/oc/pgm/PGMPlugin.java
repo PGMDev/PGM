@@ -17,13 +17,12 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.JavaPluginLoader;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
@@ -67,10 +66,8 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
-import tc.oc.pgm.util.compatability.SportPaperListener;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.AfkTracker;
 import tc.oc.pgm.util.listener.ItemTransferListener;
@@ -79,6 +76,7 @@ import tc.oc.pgm.util.listener.PlayerMoveListener;
 import tc.oc.pgm.util.listener.TNTMinecartPlacementListener;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.parser.SyntaxException;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -108,13 +106,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     super();
   }
 
+  // Used by RuntimePluginLoader in PGMServer
   public PGMPlugin(
-      PluginLoader loader,
-      Server server,
-      PluginDescriptionFile description,
-      File dataFolder,
-      File file) {
-    super(loader, server, description, dataFolder, file);
+      JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
+    super(loader, description, dataFolder, file);
   }
 
   @Override
@@ -126,7 +121,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     // Sanity test PGM is running on a supported version before doing any work
-    NMSHacks.allocateEntityId();
+    NMSHacks.NMS_HACKS.getTPS();
     // Fix before any audiences have the chance of creating
     ViaUtils.removeViaChatFacet();
 
@@ -360,9 +355,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   }
 
   private void registerListeners() {
-    if (BukkitUtils.isSportPaper()) {
-      registerEvents(new SportPaperListener());
-    }
+    Platform.MANIFEST.onEnable(this);
+
     registerEvents(new PlayerBlockListener());
     registerEvents(new PlayerMoveListener());
     registerEvents(new ItemTransferListener());

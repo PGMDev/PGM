@@ -1,16 +1,16 @@
 package tc.oc.pgm.command.parsers;
 
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.paper.PaperCommandManager;
 import java.util.Collection;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.parser.ParserParameters;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.actions.ExposedAction;
 
 public class ExposedActionParser
     extends MatchObjectParser.Simple<ExposedAction, ActionMatchModule> {
 
-  public ExposedActionParser(PaperCommandManager<CommandSender> manager, ParserParameters options) {
+  public ExposedActionParser(CommandManager<CommandSender> manager, ParserParameters options) {
     super(manager, options, ExposedAction.class, ActionMatchModule.class, "actions");
   }
 

@@ -3,6 +3,8 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -53,7 +55,7 @@ import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -89,7 +91,7 @@ public class PGMListener implements Listener {
     // Create the match when the first player joins
     if (lock.writeLock().tryLock()) {
       // If the server is suspended, need to release so match can be created
-      NMSHacks.resumeServer();
+      NMS_HACKS.resumeServer();
 
       try {
         mm.createMatch(null).get();
@@ -162,7 +164,7 @@ public class PGMListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void protect36(final PlayerInteractEvent event) {
     if (event.getClickedBlock() != null) {
-      if (event.getClickedBlock().getType() == Material.PISTON_MOVING_PIECE) {
+      if (event.getClickedBlock().getType() == Materials.MOVING_PISTON) {
         event.setCancelled(true);
       }
     }
@@ -171,7 +173,7 @@ public class PGMListener implements Listener {
   // sometimes arrows stuck in players persist through deaths
   @EventHandler
   public void fixStuckArrows(final PlayerRespawnEvent event) {
-    NMSHacks.clearArrowsInPlayer(event.getPlayer());
+    PLAYER_UTILS.clearArrowsInPlayer(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -287,8 +289,8 @@ public class PGMListener implements Listener {
   public void nerfFishing(PlayerFishEvent event) {
     if (event.getCaught() instanceof Item) {
       Item caught = (Item) event.getCaught();
-      if (caught.getItemStack().getType() != Material.RAW_FISH) {
-        caught.setItemStack(new ItemStack(Material.RAW_FISH));
+      if (caught.getItemStack().getType() != Materials.RAW_FISH) {
+        caught.setItemStack(new ItemStack(Materials.RAW_FISH));
       }
     }
   }
@@ -370,7 +372,7 @@ public class PGMListener implements Listener {
   @EventHandler // We only need to store skins for the post match stats
   public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
     final MatchPlayer player = event.getPlayer();
-    Skin playerSkin = NMSHacks.getPlayerSkin(player.getBukkit());
+    Skin playerSkin = PLAYER_UTILS.getPlayerSkin(player.getBukkit());
     if (playerSkin != null) {
       PGM.get().getDatastore().setSkin(player.getId(), playerSkin);
     }

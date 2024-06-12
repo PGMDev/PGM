@@ -1,6 +1,7 @@
 package tc.oc.pgm.kits;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.Set;
 import org.bukkit.Material;
@@ -147,15 +148,7 @@ public class KitMatchModule implements MatchModule, Listener {
     if (event.getEntity().getShooter() instanceof Player) {
       Grenade grenade = Grenade.get(event.getEntity());
       if (grenade != null) {
-        event
-            .getEntity()
-            .getWorld()
-            .createExplosion(
-                event.getEntity(),
-                event.getEntity().getLocation(),
-                grenade.power,
-                grenade.fire,
-                grenade.destroy);
+        MISC_UTILS.createExplosion(event.getEntity(), grenade.power, grenade.fire, grenade.destroy);
         event.getEntity().remove();
       }
     }

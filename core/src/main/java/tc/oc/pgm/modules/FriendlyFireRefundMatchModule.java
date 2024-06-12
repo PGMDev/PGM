@@ -1,7 +1,6 @@
 package tc.oc.pgm.modules;
 
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -20,6 +19,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.bukkit.Enchantments;
 
 /** Gives a shooter their arrow back if the projectile was cancelled (eg. shooting a teammate). */
 @ListenerScope(MatchScope.RUNNING)
@@ -36,7 +36,7 @@ public class FriendlyFireRefundMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onShoot(EntityShootBowEvent event) {
-    if (event.getBow().getEnchantmentLevel(Enchantment.ARROW_INFINITE) > 0) return;
+    if (event.getBow().getEnchantmentLevel(Enchantments.INFINITY) > 0) return;
 
     final MatchPlayer shooter = match.getParticipant(event.getEntity());
     if (shooter == null) return;

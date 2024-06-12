@@ -1,8 +1,12 @@
 package tc.oc.pgm.util.block;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
+import com.google.common.collect.ImmutableSet;
 import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import java.util.Collection;
+import java.util.Set;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -11,8 +15,23 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.material.Materials;
 
 public interface BlockVectors {
+
+  // Names removed/renamed in higher versions
+  Set<Material> SUPPORTIVE_BLOCKS =
+      ImmutableSet.of(
+          parse(Material::valueOf, "ENCHANTMENT_TABLE", "ENCHANTING_TABLE"),
+          parse(Material::valueOf, "DAYLIGHT_DETECTOR_INVERTED", "DAYLIGHT_DETECTOR"),
+          // TODO: PLATFORM DEPENDANT, new versions should use a longer list of blocks
+          parse(Material::valueOf, "LEAVES", "LEGACY_LEAVES"),
+          parse(Material::valueOf, "LEAVES_2", "LEGACY_LEAVES_2"),
+          parse(Material::valueOf, "PISTON_BASE", "PISTON"),
+          parse(Material::valueOf, "PISTON_STICKY_BASE", "STICKY_PISTON"),
+          parse(Material::valueOf, "SOIL", "FARMLAND"),
+          Materials.LILY_PAD,
+          parse(Material::valueOf, "CAKE_BLOCK", "CAKE"));
 
   static BlockVector position(BlockState block) {
     return new BlockVector(block.getX(), block.getY(), block.getZ());
@@ -127,6 +146,7 @@ public interface BlockVectors {
         (int) unpack(encoded, SHIFT + SHIFT));
   }
 
+  // TODO: PLATFORM DEPENDANT, could optimize all the "endsWith" by using diff paths
   /** Block world that a player can stand on */
   static boolean isSupportive(Material type) {
     if (type.isOccluding()) {
@@ -137,6 +157,12 @@ public interface BlockVectors {
     if (type.isBlock()) {
       if (type.name().endsWith("STAIRS")) return true;
       if (type.name().endsWith("STEP")) return true;
+      if (type.name().endsWith("STAINED_GLASS")) return true;
+      if (type.name().endsWith("CARPET")) return true;
+      if (type.name().endsWith("LEAVES")) return true;
+
+      // Names removed/renamed in higher versions
+      if (SUPPORTIVE_BLOCKS.contains(type)) return true;
 
       switch (type) {
         case CHEST:
@@ -145,25 +171,14 @@ public interface BlockVectors {
         case HOPPER:
         case ANVIL:
         case BEACON:
-        case ENCHANTMENT_TABLE:
         case CAULDRON:
         case DAYLIGHT_DETECTOR:
-        case DAYLIGHT_DETECTOR_INVERTED:
         case GLASS:
-        case STAINED_GLASS:
         case GLOWSTONE:
         case ICE:
-        case LEAVES:
-        case LEAVES_2:
-        case PISTON_BASE:
-        case PISTON_STICKY_BASE:
         case REDSTONE_BLOCK:
-        case SOIL:
         case TNT:
         case BARRIER:
-        case CARPET:
-        case WATER_LILY:
-        case CAKE_BLOCK:
         case SLIME_BLOCK:
           return true;
       }

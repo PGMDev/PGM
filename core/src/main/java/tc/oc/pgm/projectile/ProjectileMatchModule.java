@@ -99,7 +99,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
               player.launchProjectile(
                   projectileDefinition.projectile.asSubclass(Projectile.class), velocity);
           if (projectile instanceof Fireball && projectileDefinition.precise) {
-            NMSHacks.setFireballDirection((Fireball) projectile, velocity);
+            NMSHacks.NMS_HACKS.setFireballDirection((Fireball) projectile, velocity);
           }
         } else {
           projectile =
@@ -256,8 +256,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
 
   public static @Nullable ProjectileDefinition getProjectileDefinition(Entity entity) {
     if (entity.hasMetadata(DEFINITION_KEY)) {
-      return (ProjectileDefinition)
-          MetadataUtils.getMetadata(entity, DEFINITION_KEY, PGM.get()).value();
+      return MetadataUtils.getMetadataValue(entity, DEFINITION_KEY, PGM.get());
     }
     return launchingDefinition.get();
   }

@@ -15,7 +15,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +35,10 @@ import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 
 // TODO: Consider making Core extend Destroyable
@@ -44,7 +46,7 @@ public class Core extends TouchableGoal<CoreFactory>
     implements IncrementalGoal<CoreFactory>, ModeChangeGoal<CoreFactory> {
 
   private static final MaterialMatcher LAVA_BLOCKS =
-      MaterialMatcher.of(Material.LAVA, Material.STATIONARY_LAVA);
+      MaterialMatcher.of(Material.LAVA, Materials.STILL_LAVA);
 
   protected final FiniteBlockRegion casingRegion;
   protected final FiniteBlockRegion lavaRegion;
@@ -52,7 +54,7 @@ public class Core extends TouchableGoal<CoreFactory>
   protected final int leakRequired;
   protected final boolean isShared;
 
-  protected MaterialData material;
+  protected MaterialMatcher material;
   protected int leak = 0;
   protected boolean leaked = false;
   protected Iterable<Location> proximityLocations;
@@ -60,13 +62,13 @@ public class Core extends TouchableGoal<CoreFactory>
   public Core(CoreFactory definition, Match match) {
     super(definition, match);
 
-    this.material = definition.getMaterial();
+    this.material = SingleMaterialMatcher.of(definition.getMaterial());
 
     Region region = definition.getRegion();
 
     this.casingRegion =
         FiniteBlockRegion.fromWorld(
-            region, match.getWorld(), MaterialMatcher.of(this.material), match.getMap().getProto());
+            region, match.getWorld(), this.material, match.getMap().getProto());
     if (this.casingRegion.getBlockVolume() == 0) {
       match
           .getLogger()
@@ -137,8 +139,8 @@ public class Core extends TouchableGoal<CoreFactory>
     return this.definition.getModes();
   }
 
-  public MaterialData getMaterial() {
-    return this.material;
+  public boolean isCoreMaterial(MaterialData material) {
+    return this.material.matches(material);
   }
 
   public FiniteBlockRegion getCasingRegion() {
@@ -228,21 +230,18 @@ public class Core extends TouchableGoal<CoreFactory>
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void replaceBlocks(MaterialData newMaterial) {
     for (Block block : this.getCasingRegion().getBlocks(match.getWorld())) {
       if (this.isObjectiveMaterial(block)) {
-        block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
+        newMaterial.applyTo(block, true);
       }
     }
-    this.material = newMaterial;
+    this.material = MaterialMatcher.of(newMaterial);
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public boolean isObjectiveMaterial(Block block) {
-    return block.getType() == this.material.getItemType()
-        && block.getData() == this.material.getData();
+    return material.matches(block.getState().getData());
   }
 
   public String getModeChangeMessage(Material material) {

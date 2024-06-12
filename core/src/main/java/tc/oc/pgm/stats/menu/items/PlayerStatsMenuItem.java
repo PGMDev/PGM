@@ -3,6 +3,8 @@ package tc.oc.pgm.stats.menu.items;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
@@ -24,8 +26,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.PlayerStats;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -123,7 +125,7 @@ public class PlayerStatsMenuItem implements MenuItem {
 
   @Override
   public Material getMaterial(Player player) {
-    return Material.SKULL_ITEM;
+    return Materials.PLAYER_HEAD;
   }
 
   @Override
@@ -137,10 +139,10 @@ public class PlayerStatsMenuItem implements MenuItem {
     // Fetch fake skin if using one
     Player bukkitPlayer = Bukkit.getPlayer(uuid);
     if (bukkitPlayer != null) {
-      playerSkin = NMSHacks.getPlayerSkin(bukkitPlayer);
+      playerSkin = PLAYER_UTILS.getPlayerSkin(bukkitPlayer);
     }
 
-    NMSHacks.setSkullMetaOwner(skullMeta, "name", uuid, playerSkin);
+    NMS_HACKS.setSkullMetaOwner(skullMeta, "name", uuid, playerSkin);
 
     return skullMeta;
   }

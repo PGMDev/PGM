@@ -3,11 +3,6 @@ package tc.oc.pgm.command;
 import static tc.oc.pgm.util.text.TextException.exception;
 import static tc.oc.pgm.util.text.TextException.noPermission;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.specifier.Greedy;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -27,6 +22,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.messaging.Messenger;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.incendo.cloud.annotation.specifier.Greedy;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 
@@ -62,9 +62,9 @@ public final class ShowXmlCommand {
     return INSTANCE.canUseCommand(sender);
   }
 
-  @CommandMethod("showxml <map>")
+  @Command("showxml <map>")
   @CommandDescription("Show info about a map")
-  @CommandPermission("*")
+  @Permission("*")
   public void openXml(CommandSender sender, @Argument("map") @Greedy MapInfo map) {
     if (!canUseCommand(sender)) throw noPermission();
 

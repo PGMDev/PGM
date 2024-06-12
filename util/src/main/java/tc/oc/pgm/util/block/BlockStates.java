@@ -4,9 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.MaterialData;
 
 public interface BlockStates {
 
@@ -32,13 +31,23 @@ public interface BlockStates {
     return state;
   }
 
+  static BlockState cloneWithMaterial(Block block, BlockState blockState) {
+    return cloneWithMaterial(block, MaterialData.from(blockState));
+  }
+
+  static BlockState cloneWithMaterial(Block block, org.bukkit.material.MaterialData materialData) {
+    return cloneWithMaterial(block, MaterialData.from(materialData));
+  }
+
   static BlockState cloneWithMaterial(Block block, MaterialData materialData) {
-    return cloneWithMaterial(block, materialData.getItemType(), materialData.getData());
+    BlockState state = block.getState();
+    materialData.applyTo(state);
+    return state;
   }
 
   static BlockState create(World world, BlockVector pos, MaterialData materialData) {
     BlockState state = pos.toLocation(world).getBlock().getState();
-    NMSHacks.setBlockStateData(state, materialData);
+    materialData.applyTo(state);
     return state;
   }
 

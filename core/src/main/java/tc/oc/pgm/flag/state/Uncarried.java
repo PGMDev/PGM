@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -45,7 +46,7 @@ public abstract class Uncarried extends Spawned {
             location.getPitch());
 
     Block block = this.location.getBlock();
-    if (block.getType() == Material.STANDING_BANNER) {
+    if (block.getState() instanceof Banner) {
       // Banner may already be here at match start
       this.oldBlock = BlockStates.cloneWithMaterial(block, Material.AIR);
     } else {
@@ -70,7 +71,7 @@ public abstract class Uncarried extends Spawned {
       oldBase.getBlock().setType(Material.ICE, false);
     }
 
-    if (!Materials.placeStanding(this.location, this.flag.getBannerMeta())) {
+    if (!flag.getBannerData().placeStanding(this.location)) {
       PGM.get().getGameLogger().severe("Failed to place banner at " + this.location);
     }
 

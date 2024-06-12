@@ -11,7 +11,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -21,6 +20,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.ItemBuilder;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class SettingsMenu extends InventoryMenu {
@@ -98,7 +98,7 @@ public class SettingsMenu extends InventoryMenu {
     Component toggle = translatable("settings.menu.toggle", NamedTextColor.GRAY);
 
     return new ItemBuilder()
-        .material(Material.INK_SACK)
+        .material(Materials.DYE)
         .color(value.getColor())
         .name(ChatColor.YELLOW + ChatColor.BOLD.toString() + WordUtils.capitalize(key.getName()))
         .lore(

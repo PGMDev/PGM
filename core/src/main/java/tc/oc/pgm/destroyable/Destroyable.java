@@ -7,6 +7,7 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -28,7 +29,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Firework;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -56,10 +56,10 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
-import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {
@@ -68,8 +68,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   protected BlockDropsRuleSet blockDropsRuleSet;
 
   protected final FiniteBlockRegion blockRegion;
-  protected final Set<SingleMaterialMatcher> materialPatterns = new HashSet<>();
-  protected final Set<MaterialData> materials = new HashSet<>();
+  protected MaterialMatcher materialPattern;
+  protected Set<MaterialData> materials;
   protected final boolean isShared;
 
   // The percentage of blocks that must be broken for the entire Destroyable to be destroyed.
@@ -108,17 +108,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   public Destroyable(DestroyableFactory definition, Match match) {
     super(definition, match);
 
-    for (SingleMaterialMatcher pattern : definition.getMaterials()) {
-      addMaterials(pattern);
-    }
-
+    setMaterials(definition.getMaterials());
     this.destructionRequired = definition.getDestructionRequired();
 
     this.blockRegion =
         FiniteBlockRegion.fromWorld(
             definition.getRegion(),
             match.getWorld(),
-            CompoundMaterialMatcher.of(this.materialPatterns),
+            this.materialPattern,
             match.getMap().getProto());
     if (this.blockRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());
@@ -183,14 +180,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.definition.getModes();
   }
 
-  void addMaterials(SingleMaterialMatcher pattern) {
-    materialPatterns.add(pattern);
-    if (pattern.dataMatters()) {
-      materials.add(pattern.getMaterialData());
-    } else {
-      // Hacky, but there is no other simple way to deal with block replacement
-      materials.addAll(NMSHacks.getBlockStates(pattern.getMaterial()));
-    }
+  void setMaterials(MaterialMatcher pattern) {
+    materialPattern = pattern;
+    materials = pattern.getMaterialData();
   }
 
   /** Calculate maximum/current health */
@@ -205,7 +197,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       this.maxHealth = this.blockRegion.getBlockVolume();
       this.health = 0;
       for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
-        if (this.hasMaterial(block.getState().getData())) {
+        if (this.hasMaterial(MaterialData.from(block.getState()))) {
           this.health++;
         }
       }
@@ -307,14 +299,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     }
 
     if (this.blockMaterialHealth == null) {
-      return this.hasMaterial(blockState.getData()) ? 1 : 0;
+      return this.hasMaterial(MaterialData.from(blockState)) ? 1 : 0;
     } else {
       Map<MaterialData, Integer> materialHealthMap =
           this.blockMaterialHealth.get(blockState.getLocation().toVector().toBlockVector());
       if (materialHealthMap == null) {
         return 0;
       }
-      Integer health = materialHealthMap.get(blockState.getData());
+      Integer health = materialHealthMap.get(MaterialData.from(blockState));
       return health == null ? 0 : health;
     }
   }
@@ -374,7 +366,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
                         .build(),
                     0);
 
-            NMSHacks.skipFireworksLaunch(firework);
+            NMS_HACKS.skipFireworksLaunch(firework);
           }
 
           // Players more than 64m away will not see or hear the fireworks, so just play the sound
@@ -446,10 +438,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   public boolean hasMaterial(MaterialData data) {
-    for (SingleMaterialMatcher material : materialPatterns) {
-      if (material.matches(data)) return true;
-    }
-    return false;
+    return materialPattern.matches(data);
   }
 
   public void addHealth(int delta) {
@@ -602,7 +591,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return contributions;
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public void replaceBlocks(MaterialData newMaterial) {
     // Calling this method causes all non-destroyed blocks to be replaced, and the world
@@ -619,14 +607,12 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       int oldHealth = this.getBlockHealth(oldState);
 
       if (oldHealth > 0) {
-        block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
+        newMaterial.applyTo(block, true);
       }
     }
 
     // Update the world list on switch
-    this.materialPatterns.clear();
-    this.materials.clear();
-    addMaterials(new SingleMaterialMatcher(newMaterial));
+    setMaterials(SingleMaterialMatcher.of(newMaterial));
 
     // If there is a block health map, get rid of it, since there is now only one world in the list
     this.blockMaterialHealth = null;
@@ -636,7 +622,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   @Override
   public boolean isObjectiveMaterial(Block block) {
-    return this.hasMaterial(block.getState().getData());
+    return this.hasMaterial(MaterialData.from(block));
   }
 
   public String getModeChangeMessage(Material material) {

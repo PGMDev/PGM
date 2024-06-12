@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 
 public enum Phase {
   PRODUCTION,
+  STAGING,
   DEVELOPMENT;
 
   public Component toComponent() {

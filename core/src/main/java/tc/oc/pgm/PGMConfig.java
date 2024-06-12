@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.text.TextParser.parseComponent;
 import static tc.oc.pgm.util.text.TextParser.parseComponentLegacy;
 import static tc.oc.pgm.util.text.TextParser.parseDuration;
 import static tc.oc.pgm.util.text.TextParser.parseEnum;
+import static tc.oc.pgm.util.text.TextParser.parseFloat;
 import static tc.oc.pgm.util.text.TextParser.parseInteger;
 import static tc.oc.pgm.util.text.TextParser.parseLogLevel;
 import static tc.oc.pgm.util.text.TextParser.parseUri;
@@ -78,6 +79,7 @@ public final class PGMConfig implements Config {
   // gameplay.*
   private final boolean woolRefill;
   private final int griefScore;
+  private final float assistPercent;
 
   // join.*
   private final long minPlayers;
@@ -175,6 +177,8 @@ public final class PGMConfig implements Config {
     this.woolRefill = parseBoolean(config.getString("gameplay.refill-wool", "true"));
     this.griefScore =
         parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
+    this.assistPercent =
+        parseFloat(config.getString("gameplay.assist-percent", "0.3"), Range.openClosed(0f, 1f));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
@@ -550,6 +554,11 @@ public final class PGMConfig implements Config {
   @Override
   public int getGriefScore() {
     return griefScore;
+  }
+
+  @Override
+  public float getAssistPercent() {
+    return assistPercent;
   }
 
   @Override

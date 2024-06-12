@@ -35,6 +35,7 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.MinecraftComponent;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -78,8 +79,7 @@ public class AntiGriefListener implements Listener {
 
     // check water
     Block block = entity.getLocation().getBlock();
-    if (block != null
-        && (block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER)) {
+    if (block != null && Materials.isWater(block.getType())) {
       clicker.sendMessage(translatable("moderation.defuse.water", NamedTextColor.RED));
       return;
     }
@@ -218,7 +218,7 @@ public class AntiGriefListener implements Listener {
             == InventoryType.CRAFTING /* nothing open */) {
       Block block = event.getClickedBlock();
       if (block != null
-          && block.getType() == Material.WORKBENCH
+          && block.getType() == Materials.WORKBENCH
           && !event.getPlayer().isSneaking()) {
         // create the window ourself
         event.setCancelled(true);

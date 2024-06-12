@@ -1,17 +1,17 @@
 package tc.oc.pgm.util;
 
-import cloud.commandframework.context.CommandContext;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.context.CommandInput;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.command.util.CommandKeys;
 
 public class Players {
 
@@ -68,9 +68,8 @@ public class Players {
     return viewer instanceof Player && Integration.isFriend((Player) viewer, other);
   }
 
-  public static List<String> suggestPlayers(CommandContext<CommandSender> context, String input) {
-    List<String> queue = context.get(CommandKeys.INPUT_QUEUE);
-
-    return getPlayerNames(context.getSender(), queue.isEmpty() ? "" : queue.get(queue.size() - 1));
+  public static List<String> suggestPlayers(
+      CommandContext<CommandSender> context, CommandInput input) {
+    return getPlayerNames(context.sender(), input.lastRemainingToken());
   }
 }

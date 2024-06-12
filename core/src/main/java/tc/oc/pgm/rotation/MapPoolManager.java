@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
@@ -14,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -75,7 +75,7 @@ public class MapPoolManager implements MapOrder {
 
     if (!mapPoolsFile.exists()) {
       try {
-        FileUtils.copyInputStreamToFile(PGM.get().getResource("map-pools.yml"), mapPoolsFile);
+        Files.copy(PGM.get().getResource("map-pools.yml"), mapPoolsFile.toPath());
       } catch (IOException e) {
         logger.log(Level.SEVERE, "Failed to create the map-pools.yml file", e);
         return;

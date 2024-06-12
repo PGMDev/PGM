@@ -1,18 +1,17 @@
 package tc.oc.pgm.shops;
 
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShopKeeper {
 
@@ -53,7 +52,7 @@ public class ShopKeeper {
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
     keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));
-    NMSHacks.freezeEntity(keeper);
+    NMS_HACKS.freezeEntity(keeper);
   }
 
   public static boolean isKeeper(Entity entity) {
@@ -61,10 +60,6 @@ public class ShopKeeper {
   }
 
   public static String getKeeperId(Entity entity) {
-    MetadataValue meta = MetadataUtils.getMetadata(entity, ShopKeeper.METADATA_KEY, PGM.get());
-    if (meta.asString() != null) {
-      return meta.asString();
-    }
-    return null;
+    return MetadataUtils.getMetadataValue(entity, ShopKeeper.METADATA_KEY, PGM.get());
   }
 }

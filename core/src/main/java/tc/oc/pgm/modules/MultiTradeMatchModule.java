@@ -1,5 +1,7 @@
 package tc.oc.pgm.modules;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Villager;
@@ -12,7 +14,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.inventory.InventoryUtils;
 
 @ListenerScope(MatchScope.LOADED)
 public class MultiTradeMatchModule implements MatchModule, Listener {
@@ -28,15 +29,13 @@ public class MultiTradeMatchModule implements MatchModule, Listener {
   public void onInteract(PlayerInteractEntityEvent event) {
     if (event.getRightClicked() instanceof Villager) {
       // Fallback to once-at-a-time trading if multi trade does not work
-      if (ok) {
-        event.setCancelled(true);
-      } else {
-        return;
-      }
+      if (!ok) return;
 
+      event.setCancelled(true);
       try {
-        InventoryUtils.openVillager((Villager) event.getRightClicked(), event.getPlayer());
-      } catch (NoSuchMethodError e) {
+        if (INVENTORY_UTILS.openVillager((Villager) event.getRightClicked(), event.getPlayer()))
+          return;
+
         logger.log(Level.WARNING, "<multitrade/> is not compatible with your server version");
         ok = false;
       } catch (Throwable t) {

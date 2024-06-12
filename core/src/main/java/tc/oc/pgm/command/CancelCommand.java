@@ -3,11 +3,11 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.listeners.ChatDispatcher;
@@ -21,9 +21,9 @@ import tc.oc.pgm.util.named.NameStyle;
 
 public final class CancelCommand {
 
-  @CommandMethod("cancel|cancelrestart|cr")
+  @Command("cancel|cancelrestart|cr")
   @CommandDescription("Cancels all countdowns")
-  @CommandPermission(Permissions.STOP)
+  @Permission(Permissions.STOP)
   public void cancel(CommandSender sender, Audience audience, Match match) {
     if (RestartManager.isQueued()) {
       match.callEvent(new CancelRestartEvent());

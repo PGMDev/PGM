@@ -2,9 +2,9 @@ package tc.oc.pgm.util.material;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
@@ -12,6 +12,8 @@ import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 public interface MaterialMatcher {
 
   boolean matches(Material material);
+
+  boolean matches(org.bukkit.material.MaterialData materialData);
 
   boolean matches(MaterialData materialData);
 
@@ -21,17 +23,19 @@ public interface MaterialMatcher {
    * Iterates over ALL matching {@link Material}s. This can be a long list if the matching criteria
    * is very broad.
    */
-  Collection<Material> getMaterials();
+  Set<Material> getMaterials();
+
+  Set<MaterialData> getMaterialData();
 
   static MaterialMatcher of(Material... materials) {
-    return CompoundMaterialMatcher.of(SingleMaterialMatcher::new, Arrays.asList(materials));
+    return CompoundMaterialMatcher.of(SingleMaterialMatcher::of, Arrays.asList(materials));
   }
 
   static MaterialMatcher of(Collection<Material> materials) {
-    return CompoundMaterialMatcher.of(SingleMaterialMatcher::new, materials);
+    return CompoundMaterialMatcher.of(SingleMaterialMatcher::of, materials);
   }
 
   static MaterialMatcher of(MaterialData... materials) {
-    return CompoundMaterialMatcher.of(SingleMaterialMatcher::new, Arrays.asList(materials));
+    return CompoundMaterialMatcher.of(SingleMaterialMatcher::of, Arrays.asList(materials));
   }
 }

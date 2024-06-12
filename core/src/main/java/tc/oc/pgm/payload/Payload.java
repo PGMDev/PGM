@@ -1,11 +1,11 @@
 package tc.oc.pgm.payload;
 
+import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+
 import java.time.Duration;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
 import org.bukkit.material.Wool;
@@ -106,48 +106,17 @@ public class Payload extends ControlPoint {
       // Height between 0.2 and 0.8
       double height = 0.5d + 0.3d * Math.sin(0.1d * tick + 0.5d * i);
 
-      loc.set(
-          definition.getRadius() * Math.cos(angle),
-          height,
-          definition.getRadius() * Math.sin(angle));
+      loc.setX(definition.getRadius() * Math.cos(angle));
+      loc.setY(height);
+      loc.setZ(definition.getRadius() * Math.sin(angle));
       loc.add(position);
-      match
-          .getWorld()
-          .spigot()
-          .playEffect(
-              loc,
-              Effect.COLOURED_DUST,
-              0,
-              (byte) 0,
-              rgbToParticle(color.getRed()),
-              rgbToParticle(color.getGreen()),
-              rgbToParticle(color.getBlue()),
-              1,
-              0,
-              50);
+      EFFECTS.coloredDust(match.getWorld(), loc, color);
     }
 
     if (definition.showBeam()) {
       DyeColor dyeColor = display != null ? display.getDyeColor() : DyeColor.WHITE;
-      match
-          .getWorld()
-          .spigot()
-          .playEffect(
-              position.toLocation(match.getWorld()).clone().add(0, 56, 0),
-              Effect.TILE_DUST,
-              Material.WOOL.getId(),
-              dyeColor.getWoolData(),
-              0.15f, // radius on each axis of the particle ball
-              24f,
-              0.15f,
-              0f, // initial horizontal velocity
-              40, // number of particles
-              200); // radius in blocks to show particles
+      EFFECTS.beam(match.getWorld(), loc, dyeColor);
     }
-  }
-
-  private float rgbToParticle(int rgb) {
-    return (float) Math.max(0.001, rgb / 255.0);
   }
 
   private void tickMinecart() {

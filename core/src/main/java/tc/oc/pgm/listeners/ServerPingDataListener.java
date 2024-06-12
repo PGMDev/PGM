@@ -1,6 +1,7 @@
 package tc.oc.pgm.listeners;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -79,7 +80,7 @@ public class ServerPingDataListener implements Listener {
     }
 
     try {
-      JsonObject root = event.getOrCreateExtra(PGM.get());
+      JsonObject root = MISC_UTILS.getServerListExtra(event, PGM.get());
       this.matchManager
           .getMatches()
           .forEachRemaining(

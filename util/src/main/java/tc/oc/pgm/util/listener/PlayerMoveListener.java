@@ -141,13 +141,9 @@ public class PlayerMoveListener implements Listener {
     } else {
       newLoc = BlockVectors.center(event.getFrom()).subtract(new Vector(0, 0.5, 0));
       if (newLoc.getBlock() != null) {
-        switch (newLoc.getBlock().getType()) {
-          case STEP:
-          case WOOD_STEP:
-            newLoc.add(new Vector(0, 0.5, 0));
-            break;
-          default:
-            break;
+        String name = newLoc.getBlock().getType().name();
+        if (name.endsWith("SLAB") || name.endsWith("STEP")) {
+          newLoc.add(new Vector(0, 0.5, 0));
         }
       }
     }

@@ -6,8 +6,6 @@ import static tc.oc.pgm.util.text.TextParser.*;
 import com.google.common.collect.Range;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -231,18 +229,6 @@ public final class TextParserTest {
     assertEquals(
         "error.invalidFormat",
         assertThrows(TextException.class, () -> parseUri(text)).getMessage());
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {"sqlite::memory:"})
-  void testParseSqlConnection(String text) throws SQLException {
-    final Connection connection = parseSqlConnection(text);
-
-    assertNotNull(connection);
-    assertFalse(connection.isClosed());
-
-    connection.close();
-    assertTrue(connection.isClosed());
   }
 
   @ParameterizedTest

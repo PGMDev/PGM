@@ -1,12 +1,13 @@
 package tc.oc.pgm.loot;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import org.bukkit.World;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.collection.InstantMap;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /**
  * Quantizes time to the ticks of the given World. Guaranteed to return the same time over the
@@ -44,7 +45,7 @@ public class WorldTickClock extends Clock {
   }
 
   private Tick now() {
-    long tick = NMSHacks.getMonotonicTime(this.world);
+    long tick = NMS_HACKS.getMonotonicTime(this.world);
     if (this.tick == null || tick != this.tick.tick) {
       this.tick = new Tick(tick, Instant.now());
     }

@@ -1,10 +1,11 @@
 package tc.oc.pgm.util.bukkit;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldBorder;
 import org.bukkit.util.NumberConversions;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class WorldBorders {
 
@@ -49,7 +50,7 @@ public class WorldBorders {
       WorldBorder border = world.getWorldBorder();
       Location center = border.getCenter();
       double radius = border.getSize() / 2d;
-      int maxWorldSize = NMSHacks.getMaxWorldSize(world);
+      int maxWorldSize = NMS_HACKS.getMaxWorldSize(world);
 
       xMin = Math.max(NumberConversions.floor(center.getX() - radius), -maxWorldSize);
       xMax = Math.min(NumberConversions.ceil(center.getX() + radius), maxWorldSize);

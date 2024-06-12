@@ -22,6 +22,7 @@ import tc.oc.pgm.controlpoint.ControlPointParser.Type;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.regions.RegionModule;
+import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -38,6 +39,11 @@ public class ControlPointModule implements MapModule<ControlPointMatchModule> {
   public ControlPointModule(List<ControlPointDefinition> definitions, Collection<MapTag> tags) {
     this.definitions = definitions;
     this.tags = tags;
+  }
+
+  @Override
+  public Collection<Class<? extends MatchModule>> getHardDependencies() {
+    return ImmutableList.of(SnapshotMatchModule.class);
   }
 
   @Override

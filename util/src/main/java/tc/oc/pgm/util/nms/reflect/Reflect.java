@@ -46,6 +46,19 @@ public @interface Reflect {
   }
 
   @Retention(RetentionPolicy.RUNTIME)
+  @Repeatable(Direct.List.class)
+  @interface Direct {
+    String value();
+
+    Class<?>[] parameters() default {};
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface List {
+      Direct[] value();
+    }
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
   @Repeatable(StaticMethod.List.class)
   @interface StaticMethod {
     String value();

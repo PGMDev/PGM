@@ -1,7 +1,6 @@
 package tc.oc.pgm.destroyable;
 
 import com.google.common.collect.ImmutableSet;
-import java.util.Set;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
@@ -10,12 +9,12 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 @FeatureInfo(name = "destroyable")
 public class DestroyableFactory extends ProximityGoalDefinition {
   protected final Region region;
-  protected final Set<SingleMaterialMatcher> materials;
+  protected final MaterialMatcher materials;
   protected final double destructionRequired;
   protected final ImmutableSet<Mode> modeList;
   protected final boolean showProgress;
@@ -30,7 +29,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       TeamFactory owner,
       ProximityMetric proximityMetric,
       Region region,
-      Set<SingleMaterialMatcher> materials,
+      MaterialMatcher materials,
       double destructionRequired,
       @Nullable ImmutableSet<Mode> modeList,
       boolean showProgress,
@@ -50,7 +49,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     return this.region;
   }
 
-  public Set<SingleMaterialMatcher> getMaterials() {
+  public MaterialMatcher getMaterials() {
     return this.materials;
   }
 

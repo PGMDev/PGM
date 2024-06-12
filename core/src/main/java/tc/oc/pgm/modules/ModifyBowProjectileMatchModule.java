@@ -2,6 +2,8 @@ package tc.oc.pgm.modules;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import java.util.Set;
 import net.kyori.adventure.sound.Sound;
@@ -30,7 +32,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
@@ -93,7 +94,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
         newProjectile.setMetadata(
             "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
         newProjectile.setMetadata(
-            "damage", new FixedMetadataValue(plugin, arrow.spigot().getDamage()));
+            "damage", new FixedMetadataValue(plugin, MISC_UTILS.getArrowDamage(arrow)));
       }
     }
 
@@ -110,9 +111,9 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
       // If the custom projectile replaced an arrow, recreate some effects specific to arrows
       if (projectile.hasMetadata("damage")) {
-        boolean critical = MetadataUtils.getMetadata(projectile, "critical", PGM.get()).asBoolean();
-        int knockback = MetadataUtils.getMetadata(projectile, "knockback", PGM.get()).asInt();
-        double damage = MetadataUtils.getMetadata(projectile, "damage", PGM.get()).asDouble();
+        boolean critical = MetadataUtils.getMetadataValue(projectile, "critical", PGM.get());
+        int knockback = MetadataUtils.getMetadataValue(projectile, "knockback", PGM.get());
+        double damage = MetadataUtils.getMetadataValue(projectile, "damage", PGM.get());
         double speed = projectile.getVelocity().length();
 
         // Reproduce the damage calculation from nms.EntityArrow with the addition of our modifier
@@ -168,7 +169,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void preventArrowPickup(PlayerPickupItemEvent event) {
-    if (!NMSHacks.isCraftItemArrowEntity(event.getItem())) {
+    if (!NMS_HACKS.isCraftItemArrowEntity(event.getItem())) {
       return;
     }
     Filter.QueryResponse response =

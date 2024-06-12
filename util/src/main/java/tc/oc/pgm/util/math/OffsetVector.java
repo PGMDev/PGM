@@ -41,7 +41,7 @@ public abstract class OffsetVector {
     }
 
     public Location applyOffset(Location origin) {
-      return origin.clone().set(vector.getX(), vector.getY(), vector.getZ());
+      return copy(origin, vector.getX(), vector.getY(), vector.getZ());
     }
   }
 
@@ -64,12 +64,11 @@ public abstract class OffsetVector {
     }
 
     public Location applyOffset(Location origin) {
-      return origin
-          .clone()
-          .set(
-              (relative[0] ? origin.getX() : 0) + vector.getX(),
-              (relative[1] ? origin.getY() : 0) + vector.getY(),
-              (relative[2] ? origin.getZ() : 0) + vector.getZ());
+      return copy(
+          origin,
+          (relative[0] ? origin.getX() : 0) + vector.getX(),
+          (relative[1] ? origin.getY() : 0) + vector.getY(),
+          (relative[2] ? origin.getZ() : 0) + vector.getZ());
     }
   }
 
@@ -94,5 +93,9 @@ public abstract class OffsetVector {
 
       return newLoc.add(sway).add(heave).add(surge);
     }
+  }
+
+  private static Location copy(Location origin, double x, double y, double z) {
+    return new Location(origin.getWorld(), x, y, z, origin.getYaw(), origin.getPitch());
   }
 }

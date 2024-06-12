@@ -309,7 +309,16 @@ public class ReflectionProxy implements InvocationHandler {
   }
 
   private static Class<?> getAnnotatedClass(Class<?> declaringClass) {
-    if (declaringClass.isAnnotationPresent(Reflect.NMS.class)) {
+    if (declaringClass.isAnnotationPresent(Reflect.Direct.class)) {
+      for (Reflect.Direct direct :
+          declaringClass.getDeclaredAnnotationsByType(Reflect.Direct.class)) {
+        Class<?> parentClass = ReflectionUtils.getClassFromName(direct.value());
+        if (parentClass != null) {
+          return parentClass;
+        }
+      }
+      throw new RuntimeException("Class not found for " + declaringClass);
+    } else if (declaringClass.isAnnotationPresent(Reflect.NMS.class)) {
       for (Reflect.NMS nms : declaringClass.getDeclaredAnnotationsByType(Reflect.NMS.class)) {
         Class<?> parentClass = findNMSClass(nms.value());
         if (parentClass != null) {

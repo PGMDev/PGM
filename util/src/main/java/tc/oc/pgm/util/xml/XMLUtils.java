@@ -13,7 +13,6 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
-import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -28,6 +27,9 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.Enchantments;
+import tc.oc.pgm.util.bukkit.PotionEffects;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
@@ -35,7 +37,6 @@ import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.math.OffsetVector;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
@@ -764,7 +765,7 @@ public final class XMLUtils {
     } else {
       data = 0;
     }
-    return material.getNewData(data);
+    return MaterialData.from(material.getNewData(data));
   }
 
   public static MaterialData parseMaterialData(Node node, MaterialData def)
@@ -823,13 +824,12 @@ public final class XMLUtils {
     return parseMaterialPattern(new Node(attr));
   }
 
-  public static ImmutableSet<SingleMaterialMatcher> parseMaterialPatternSet(Node node)
-      throws InvalidXMLException {
+  public static MaterialMatcher parseMultiMaterialPattern(Node node) throws InvalidXMLException {
     ImmutableSet.Builder<SingleMaterialMatcher> patterns = ImmutableSet.builder();
     for (String value : Splitter.on(";").split(node.getValue())) {
       patterns.add(parseMaterialPattern(node, value));
     }
-    return patterns.build();
+    return CompoundMaterialMatcher.of(patterns.build());
   }
 
   public static MaterialMatcher parseMaterialMatcher(Element el) throws InvalidXMLException {
@@ -864,8 +864,7 @@ public final class XMLUtils {
 
   public static PotionEffectType parsePotionEffectType(Node node, String text)
       throws InvalidXMLException {
-    PotionEffectType type = PotionEffectType.getByName(text.toUpperCase().replace(" ", "_"));
-    if (type == null) type = NMSHacks.getPotionEffectType(text);
+    PotionEffectType type = PotionEffects.getByName(text);
     if (type == null) {
       throw new InvalidXMLException("Unknown potion type '" + node.getValue() + "'", node);
     }
@@ -1069,9 +1068,7 @@ public final class XMLUtils {
   }
 
   public static Enchantment parseEnchantment(Node node, String text) throws InvalidXMLException {
-    Enchantment enchantment = Enchantment.getByName(text.toUpperCase().replace(" ", "_"));
-    if (enchantment == null) enchantment = NMSHacks.getEnchantment(text);
-
+    Enchantment enchantment = Enchantments.getByName(text);
     if (enchantment == null) {
       throw new InvalidXMLException("Unknown enchantment '" + text + "'", node);
     }

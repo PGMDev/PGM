@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import org.bukkit.ChatColor;
+import org.incendo.cloud.context.CommandInput;
 
 public final class StringUtils {
   public static final String FAKE_SPACE = "┈", SPACE = " ";
@@ -107,7 +108,7 @@ public final class StringUtils {
       suggestion = suggestion.substring(matchIdx + 1);
     }
 
-    return textToSuggestion(suggestion);
+    return mustKeep + textToSuggestion(suggestion);
   }
 
   public static String textToSuggestion(String text) {
@@ -118,14 +119,19 @@ public final class StringUtils {
     return text.replace(FAKE_SPACE, SPACE);
   }
 
-  public static String getText(List<String> inputQueue) {
+  public static String getText(CommandInput inputQueue) {
     if (inputQueue.isEmpty()) return "";
-    return suggestionToText(String.join(SPACE, inputQueue));
+    return suggestionToText(inputQueue.remainingInput());
   }
 
-  public static String getMustKeepText(List<String> inputQueue) {
+  public static String getMustKeepText(CommandInput inputQueue) {
     if (inputQueue.isEmpty()) return "";
-    return suggestionToText(String.join(SPACE, inputQueue.subList(0, inputQueue.size() - 1))) + " ";
+    String next = inputQueue.remainingInput();
+    int index = next.lastIndexOf(' ');
+    if (index != -1) {
+      next = next.substring(0, index);
+    }
+    return suggestionToText(next) + " ";
   }
 
   public static String truncate(String text, int length) {
@@ -146,6 +152,10 @@ public final class StringUtils {
 
   public static String substring(String text, int begin, int end) {
     return text.substring(Math.min(text.length(), begin), Math.min(text.length(), end));
+  }
+
+  public static String simplify(String string) {
+    return string.toLowerCase().replace(" ", "").replace("_", "");
   }
 
   public static List<String> complete(String prefix, Iterable<String> options) {

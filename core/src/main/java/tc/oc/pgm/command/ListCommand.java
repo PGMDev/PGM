@@ -5,14 +5,14 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.api.integration.Integration.isVanished;
 
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -24,7 +24,7 @@ import tc.oc.pgm.util.text.TextFormatter;
 
 public final class ListCommand {
 
-  @CommandMethod("list|who|online|ls")
+  @Command("list|who|online|ls")
   @CommandDescription("View a list of online players")
   public void list(CommandSender sender, Audience viewer, Match match) {
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
