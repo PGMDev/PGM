@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.tablist;
 
-import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +10,8 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.packets.Packet;
+import tc.oc.pgm.util.nms.packets.TabPackets;
 
 /**
  * Render arbitrary strings to the TAB list AKA player list. Before this is used with a player,
@@ -39,11 +40,11 @@ public class TabDisplay {
   private final String[] rendered;
 
   // Cached packets used to setup and tear down the player list
-  private final Object[] teamCreatePackets;
-  private final Object[] teamRemovePackets;
+  private final Packet[] teamCreatePackets;
+  private final Packet[] teamRemovePackets;
 
-  private final Object listAddPacket;
-  private final Object listRemovePacket;
+  private final TabPackets.PlayerInfo listAddPacket;
+  private final TabPackets.PlayerInfo listRemovePacket;
 
   public TabDisplay(Player viewer, int width) {
     // Number of columns is maxPlayers/rows rounded up
@@ -53,11 +54,11 @@ public class TabDisplay {
     this.viewer = viewer;
     this.rendered = new String[this.slots];
 
-    this.teamCreatePackets = new Object[this.slots];
-    this.teamRemovePackets = new Object[this.slots];
+    this.teamCreatePackets = new Packet[this.slots];
+    this.teamRemovePackets = new Packet[this.slots];
 
-    this.listAddPacket = NMSHacks.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
-    this.listRemovePacket = NMSHacks.createPlayerInfoPacket(EnumPlayerInfoAction.REMOVE_PLAYER);
+    this.listAddPacket = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
+    this.listRemovePacket = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.REMOVE_PLAYER);
 
     SlotBuilder slots = new SlotBuilder();
     for (int slot = 0; slot < this.slots; ++slot) {
@@ -66,14 +67,13 @@ public class TabDisplay {
 
       String teamName = this.slotTeamName(slot);
       this.teamCreatePackets[slot] =
-          NMSHacks.teamCreatePacket(
+          TAB_PACKETS.teamCreatePacket(
               teamName, teamName, "", "", false, false, Collections.singleton(name));
-      this.teamRemovePackets[slot] = NMSHacks.teamRemovePacket(teamName);
+      this.teamRemovePackets[slot] = TAB_PACKETS.teamRemovePacket(teamName);
       UUID uuid = UUID.randomUUID();
 
-      NMSHacks.addPlayerInfoToPacket(
-          listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, renderedPlayerName);
-      NMSHacks.addPlayerInfoToPacket(listRemovePacket, uuid, renderedPlayerName);
+      listAddPacket.addPlayerInfo(uuid, name, GameMode.SURVIVAL, PING, null, renderedPlayerName);
+      listRemovePacket.addPlayerInfo(uuid, renderedPlayerName);
     }
   }
 
@@ -91,8 +91,7 @@ public class TabDisplay {
 
       String[] split = StringUtils.splitIntoTeamPrefixAndSuffix(text);
       String name = this.slotTeamName(slot);
-      NMSHacks.sendPacket(
-          viewer, NMSHacks.teamUpdatePacket(name, name, split[0], split[1], false, false));
+      TAB_PACKETS.teamUpdatePacket(name, name, split[0], split[1], false, false).send(viewer);
     }
   }
 
@@ -102,23 +101,23 @@ public class TabDisplay {
   }
 
   public void setup() {
-    NMSHacks.sendPacket(viewer, this.listAddPacket);
+    this.listAddPacket.send(this.viewer);
     for (int slot = 0; slot < this.slots; ++slot) {
-      NMSHacks.sendPacket(viewer, this.teamCreatePackets[slot]);
+      this.teamCreatePackets[slot].send(viewer);
     }
 
     Arrays.fill(rendered, "");
 
     // Force removing and re-adding all players, because tab list is FIFO in 1.7, re-adding
     // players makes them append at the end
-    NMSHacks.removeAndAddAllTabPlayers(viewer);
+    TAB_PACKETS.removeAndAddAllTabPlayers(viewer);
   }
 
   public void tearDown() {
     for (int slot = 0; slot < this.slots; ++slot) {
-      NMSHacks.sendPacket(viewer, this.teamRemovePackets[slot]);
+      this.teamRemovePackets[slot].send(viewer);
     }
-    NMSHacks.sendPacket(viewer, this.listRemovePacket);
+    this.listRemovePacket.send(viewer);
   }
 
   private static class SlotBuilder {

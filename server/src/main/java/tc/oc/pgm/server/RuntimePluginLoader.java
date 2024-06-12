@@ -2,6 +2,7 @@ package tc.oc.pgm.server;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.reflect.ReflectionUtils.readField;
+import static tc.oc.pgm.util.reflect.ReflectionUtils.setField;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -34,7 +35,7 @@ import org.bukkit.plugin.java.JavaPluginLoader;
 public class RuntimePluginLoader implements PluginLoader {
 
   private final Server server;
-  private final PluginLoader loader;
+  private final JavaPluginLoader loader;
 
   public RuntimePluginLoader(Server server) {
     this.server = assertNotNull(server);
@@ -47,14 +48,13 @@ public class RuntimePluginLoader implements PluginLoader {
     try {
       final File file = new File("plugins", plugin.getName());
       final Class[] init =
-          new Class[] {
-            PluginLoader.class, Server.class, PluginDescriptionFile.class, File.class, File.class
-          };
+          new Class[] {JavaPluginLoader.class, PluginDescriptionFile.class, File.class, File.class};
       final JavaPlugin instance =
           (JavaPlugin)
               Class.forName(plugin.getMain())
                   .getConstructor(init)
-                  .newInstance(this, server, plugin, file, file);
+                  .newInstance(loader, plugin, file, file);
+      setField(instance, this, JavaPlugin.class.getDeclaredField("loader"));
 
       readField(SimplePluginManager.class, manager, List.class, "plugins").add(instance);
       readField(SimplePluginManager.class, manager, Map.class, "lookupNames")

@@ -8,7 +8,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
@@ -123,7 +122,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
     return stack != null && this.isObjectiveWool(stack.getData());
   }
 
-  public boolean isObjectiveWool(MaterialData material) {
+  public boolean isObjectiveWool(org.bukkit.material.MaterialData material) {
     return material instanceof Wool && ((Wool) material).getColor() == this.color;
   }
 

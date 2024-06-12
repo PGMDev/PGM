@@ -3,18 +3,17 @@ package tc.oc.pgm.snapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.util.BlockData;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.block.BlockData;
 
 /**
  * Utils to save, remove and paste blocks in some {@link Region} in some {@link Match} using the
  * {@link tc.oc.pgm.snapshot.SnapshotMatchModule} as memory.
  */
 class BudgetWorldEdit {
+  private static final BlockVector NO_OFFSET = new BlockVector(0, 0, 0);
 
   private final World world;
   private final WorldSnapshot snapshot;
@@ -31,11 +30,9 @@ class BudgetWorldEdit {
    * @param offset the offset to add when placing blocks
    */
   public void placeBlocks(Region region, BlockVector offset) {
+    if (offset == null) offset = NO_OFFSET;
     for (BlockData blockData : snapshot.getMaterials(region)) {
-
-      BlockState state = blockData.getBlock(world, offset).getState();
-      NMSHacks.setBlockStateData(state, blockData.getMaterialData());
-      state.update(true, true);
+      blockData.applyTo(blockData.getBlock(world, offset), true);
     }
   }
 
@@ -46,6 +43,7 @@ class BudgetWorldEdit {
    * @param offset an offset to add to the region coordinates if the blocks were offset when placed
    */
   public void removeBlocks(Region region, BlockVector offset) {
+    if (offset == null) offset = NO_OFFSET;
     for (BlockData blockData : snapshot.getMaterials(region)) {
       Block block = blockData.getBlock(world, offset);
       // Ignore if already air

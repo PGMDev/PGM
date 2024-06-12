@@ -5,8 +5,8 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.event.Event;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.material.MaterialData;
 
 public class MaterialQuery extends Query implements tc.oc.pgm.api.filter.query.MaterialQuery {
 

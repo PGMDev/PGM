@@ -36,8 +36,7 @@ public class CactiTracker extends AbstractTracker<BlockInfo> implements DamageRe
     if (event.getNewState().getType() == Material.CACTUS) {
       blocks()
           .trackBlockState(
-              event.getNewState(),
-              new BlockInfo(event.getNewState().getData(), event.getPlayerState()));
+              event.getNewState(), new BlockInfo(event.getNewState(), event.getPlayerState()));
     }
   }
 }

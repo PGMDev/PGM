@@ -1,5 +1,7 @@
 package tc.oc.pgm.damagehistory;
 
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -28,7 +30,6 @@ import tc.oc.pgm.kits.HealthKit;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DamageHistoryMatchModule implements MatchModule, Listener {
@@ -120,7 +121,7 @@ public class DamageHistoryMatchModule implements MatchModule, Listener {
     MatchPlayer victim = getVictim(event.getEntity());
     if (victim == null) return;
 
-    double currentHearts = NMSHacks.getAbsorption(event.getEntity());
+    double currentHearts = PLAYER_UTILS.getAbsorption(event.getEntity());
     double newHearts = (event.getEffect().getAmplifier() + 1) * 4;
 
     damageHistory.removeDamage(victim, Math.max(0, newHearts - currentHearts));

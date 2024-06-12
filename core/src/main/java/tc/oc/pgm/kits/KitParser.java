@@ -1,5 +1,8 @@
 package tc.oc.pgm.kits;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -56,9 +59,9 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -395,9 +398,9 @@ public abstract class KitParser {
   }
 
   public ItemStack parseHead(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.SKULL_ITEM, (short) 3);
+    ItemStack itemStack = parseItem(el, Materials.PLAYER_HEAD, (short) 3);
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-    NMSHacks.setSkullMetaOwner(
+    NMS_HACKS.setSkullMetaOwner(
         meta,
         XMLUtils.parseUsername(Node.fromChildOrAttr(el, "name")),
         XMLUtils.parseUuid(Node.fromRequiredChildOrAttr(el, "uuid")),
@@ -407,7 +410,7 @@ public abstract class KitParser {
   }
 
   public ItemStack parseFirework(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.FIREWORK);
+    ItemStack itemStack = parseItem(el, Materials.FIREWORK);
     FireworkMeta meta = (FireworkMeta) itemStack.getItemMeta();
     int power = XMLUtils.parseNumber(Node.fromAttr(el, "power"), Integer.class, false, 1);
     meta.setPower(power);
@@ -503,7 +506,7 @@ public abstract class KitParser {
     if (amount == Integer.MAX_VALUE) amount = -1;
 
     // must be CraftItemStack to keep track of NBT data
-    ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
+    ItemStack itemStack = INVENTORY_UTILS.craftItemCopy(new ItemStack(type, amount, damage));
 
     if (itemStack.getType() != type) {
       throw new InvalidXMLException("Invalid item/block", el);
@@ -550,7 +553,7 @@ public abstract class KitParser {
       }
     }
 
-    NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
+    INVENTORY_UTILS.applyAttributeModifiers(parseAttributeModifiers(el), meta);
 
     String customName = el.getAttributeValue("name");
     if (customName != null) {
@@ -581,17 +584,19 @@ public abstract class KitParser {
     }
 
     if (XMLUtils.parseBoolean(el.getAttribute("unbreakable"), false)) {
-      meta.spigot().setUnbreakable(true);
+      INVENTORY_UTILS.setUnbreakable(meta, true);
     }
 
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
-      NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
+      INVENTORY_UTILS.setCanDestroy(
+          meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
     }
 
     Element elCanPlaceOn = el.getChild("can-place-on");
     if (elCanPlaceOn != null) {
-      NMSHacks.setCanPlaceOn(meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
+      INVENTORY_UTILS.setCanPlaceOn(
+          meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
     }
   }
 
@@ -607,8 +612,8 @@ public abstract class KitParser {
         return "can-destroy";
       case HIDE_PLACED_ON:
         return "can-place-on";
-      case HIDE_POTION_EFFECTS:
-        return "other";
+      default:
+        if (flag == InventoryUtils.HIDE_ADDITIONAL_FLAG) return "other";
     }
     throw new IllegalStateException("Unknown item flag " + flag);
   }

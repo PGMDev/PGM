@@ -33,6 +33,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class SpawnerModule implements MapModule<SpawnerMatchModule> {
 
+  private static final PotionType[] POTION_TYPES = PotionType.values();
   private final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
 
   @Override
@@ -101,21 +102,25 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
           if (effects.isEmpty()) {
             throw new InvalidXMLException("Expected child effects, but found none", spawnerEl);
           }
-          int damageValue = 0;
+          PotionType baseType = null;
           if (potionEl.getAttribute("damage") != null) {
-            damageValue = XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0);
+            int potionId =
+                XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0) & 0x63;
+            if (potionId > 0 && potionId < POTION_TYPES.length) {
+              baseType = POTION_TYPES[potionId];
+            }
           } else {
             for (PotionEffect potionEffect : effects) {
               // PotionType lists "true" potions, PotionEffectType "potionEffect.getType()" lists
               // all possible status effects (ie wither, blindness, etc)
               // Use the first listed PotionType for potion color
               if (PotionType.getByEffect(potionEffect.getType()) != null) {
-                damageValue = PotionType.getByEffect(potionEffect.getType()).getDamageValue();
+                baseType = PotionType.getByEffect(potionEffect.getType());
                 break;
               }
             }
           }
-          objects.add(new SpawnablePotion(effects, damageValue, id));
+          objects.add(new SpawnablePotion(effects, baseType, id));
         }
 
         SpawnerDefinition spawnerDefinition =

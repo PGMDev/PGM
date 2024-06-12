@@ -3,13 +3,17 @@ package tc.oc.pgm.death;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -208,14 +212,15 @@ public class DeathMessageBuilder {
     return false;
   }
 
+  private static final Set<EntityType> IGNORED_ENTITIES =
+      ImmutableSet.of(
+          parse(EntityType::valueOf, "COMPLEX_PART", "UNKNOWN"),
+          parse(EntityType::valueOf, "ENDER_CRYSTAL", "END_CRYSTAL"),
+          EntityType.UNKNOWN);
+
   boolean entity(EntityInfo entityInfo) {
     // Skip for entities that are weird and have no translations
-    switch (entityInfo.getEntityType()) {
-      case UNKNOWN:
-      case COMPLEX_PART:
-      case ENDER_CRYSTAL:
-        return false;
-    }
+    if (IGNORED_ENTITIES.contains(entityInfo.getEntityType())) return false;
 
     if (option("entity")) {
       weapon = entityInfo.getName();

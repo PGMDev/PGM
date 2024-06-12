@@ -1,7 +1,8 @@
 package tc.oc.pgm.spawner;
 
+import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+
 import java.util.Objects;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -51,8 +52,8 @@ public class Spawner implements Listener, Tickable {
         final Location location =
             definition.spawnRegion.getRandom(match.getRandom()).toLocation(match.getWorld());
         spawnable.spawn(location, match);
-        match.getWorld().spigot().playEffect(location, Effect.FLAME, 0, 0, 0, 0.15f, 0, 0, 40, 64);
-        spawnedEntities = spawnedEntities + spawnable.getSpawnCount();
+        EFFECTS.spawnFlame(match.getWorld(), location);
+        spawnedEntities += spawnable.getSpawnCount();
       }
       calculateDelay();
     }

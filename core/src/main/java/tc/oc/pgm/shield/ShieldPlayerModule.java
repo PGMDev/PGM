@@ -1,5 +1,8 @@
 package tc.oc.pgm.shield;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.util.logging.Logger;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -12,7 +15,6 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShieldPlayerModule implements Tickable {
 
@@ -37,11 +39,11 @@ public class ShieldPlayerModule implements Tickable {
   }
 
   double getAbsorption() {
-    return NMSHacks.getAbsorption(bukkit);
+    return PLAYER_UTILS.getAbsorption(bukkit);
   }
 
   void setAbsorption(double absorption) {
-    NMSHacks.setAbsorption(bukkit, absorption);
+    PLAYER_UTILS.setAbsorption(bukkit, absorption);
   }
 
   void addAbsorption(double delta) {
@@ -56,15 +58,7 @@ public class ShieldPlayerModule implements Tickable {
     addAbsorption(-shieldHealth);
   }
 
-  static Sound RECHARGE_SOUND = resolveRechaseSound();
-
-  static Sound resolveRechaseSound() {
-    try {
-      return Sound.ORB_PICKUP;
-    } catch (Throwable t) {
-      return Sound.valueOf("ENTITY_EXPERIENCE_ORB_PICKUP");
-    }
-  }
+  static Sound RECHARGE_SOUND = parse(Sound::valueOf, "ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP");
 
   /**
    * Recharge the shield to its maximum health. If the player has more absorption than the current

@@ -3,6 +3,7 @@ package tc.oc.pgm.stats.menu.items;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
@@ -27,7 +28,6 @@ import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.PlayerStats;
 import tc.oc.pgm.stats.TeamStats;
 import tc.oc.pgm.stats.menu.TeamStatsMenu;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -58,7 +58,9 @@ public class TeamStatsMenuItem implements MenuItem {
 
                   MatchPlayer p = match.getPlayer(uuid);
                   Skin skin =
-                      (p != null) ? NMSHacks.getPlayerSkin(p.getBukkit()) : datastore.getSkin(uuid);
+                      (p != null)
+                          ? PLAYER_UTILS.getPlayerSkin(p.getBukkit())
+                          : datastore.getSkin(uuid);
 
                   return new PlayerStatsMenuItem(uuid, stats, skin);
                 })

@@ -1,5 +1,7 @@
 package tc.oc.pgm.modules;
 
+import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Color;
-import org.bukkit.Effect;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -68,36 +69,16 @@ public class ProjectileTrailMatchModule implements MatchModule, Listener {
       }
       Color color = MetadataUtils.getMetadataValue(projectile, TRAIL_KEY, PGM.get());
       for (MatchPlayer player : particleViewers) {
-        player
-            .getBukkit()
-            .spigot()
-            .playEffect(
-                projectile.getLocation(),
-                Effect.COLOURED_DUST,
-                0,
-                0,
-                rgbToParticle(color.getRed()),
-                rgbToParticle(color.getGreen()),
-                rgbToParticle(color.getBlue()),
-                1,
-                0,
-                50);
+        EFFECTS.coloredDust(player.getBukkit(), projectile.getLocation(), color);
       }
 
       // Play the critical effect to those who have effects off, to replicate original
       // arrow behavior
       if (!projectile.hasMetadata(CRITICAL_KEY)) continue;
       for (MatchPlayer player : noParticleViewers) {
-        player
-            .getBukkit()
-            .spigot()
-            .playEffect(projectile.getLocation(), Effect.CRIT, 0, 0, 0, 0, 0, 1, 0, 50);
+        EFFECTS.criticalArrow(player.getBukkit(), projectile.getLocation());
       }
     }
-  }
-
-  private float rgbToParticle(int rgb) {
-    return Math.max(0.001f, (rgb / 255.0f));
   }
 
   static Player getShooter(Projectile projectile) {

@@ -1,5 +1,8 @@
 package tc.oc.pgm.inventory;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import com.google.common.collect.Lists;
@@ -30,7 +33,6 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,10 +55,9 @@ import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -131,7 +132,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       event.setCancelled(true);
 
       if (event.getClickedEntity() instanceof Villager) {
-        NMSHacks.INSTANCE.openVillager(
+        INVENTORY_UTILS.openVillager(
             (Villager) event.getClickedEntity(), event.getPlayer().getBukkit());
         return;
       }
@@ -354,7 +355,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         }
       }
 
-      double knockbackReduction = MiscUtils.INSTANCE.getKnockbackReduction(holder);
+      double knockbackReduction = PLAYER_UTILS.getKnockbackReduction(holder);
       if (knockbackReduction > 0) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
@@ -418,7 +419,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
             + TextTranslations.translate("preview.hungerLevel", viewer));
-    hungerMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+    hungerMeta.addItemFlags(InventoryUtils.HIDE_ADDITIONAL_FLAG);
     hunger.setItemMeta(hungerMeta);
     preview.setItem(7, hunger);
 
@@ -428,7 +429,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         ChatColor.AQUA.toString()
             + ChatColor.ITALIC
             + TextTranslations.translate("preview.healthLevel", viewer));
-    healthMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+    healthMeta.addItemFlags(InventoryUtils.HIDE_ADDITIONAL_FLAG);
     health.setItemMeta(healthMeta);
     preview.setItem(8, health);
 
@@ -450,7 +451,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       previewPlayerInventory(viewer, (PlayerInventory) realInventory);
     } else {
       Inventory fakeInventory;
-      fakeInventory = NMSHacks.createFakeInventory(viewer, realInventory);
+      fakeInventory = NMS_HACKS.createFakeInventory(viewer, realInventory);
       fakeInventory.setContents(realInventory.getContents());
 
       this.showInventoryPreview(viewer, realInventory, fakeInventory);

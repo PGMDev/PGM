@@ -2,6 +2,7 @@ package tc.oc.pgm.portals;
 
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
@@ -13,7 +14,6 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.FilterMatchModule;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Portal implements FeatureDefinition {
 
@@ -95,7 +95,7 @@ public class Portal implements FeatureDefinition {
     if (delta == null) {
       bukkit.teleport(to, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
     } else {
-      NMSHacks.teleportRelative(
+      PLAYER_UTILS.teleportRelative(
           bukkit, delta, deltaYaw, deltaPitch, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
     }
 

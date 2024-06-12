@@ -1,8 +1,10 @@
 package tc.oc.pgm.util.bukkit;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.bukkit.*;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.Plugin;
@@ -24,11 +26,11 @@ public interface BukkitUtils {
   }
 
   static void addRecipe(World world, Recipe recipe) {
-    NMSHacks.INSTANCE.addRecipe(world, recipe);
+    NMSHacks.NMS_HACKS.addRecipe(world, recipe);
   }
 
   static void resetRecipes(World world) {
-    NMSHacks.INSTANCE.resetRecipes(world);
+    NMSHacks.NMS_HACKS.resetRecipes(world);
   }
 
   /** Makes strings have pretty colors */
@@ -64,7 +66,7 @@ public interface BukkitUtils {
           .put(DyeColor.RED, ChatColor.DARK_RED)
           .put(DyeColor.PURPLE, ChatColor.DARK_PURPLE)
           .put(DyeColor.ORANGE, ChatColor.GOLD)
-          .put(DyeColor.SILVER, ChatColor.GRAY)
+          .put(parse(DyeColor::valueOf, "SILVER", "LIGHT_GRAY"), ChatColor.GRAY)
           .put(DyeColor.GRAY, ChatColor.DARK_GRAY)
           .put(DyeColor.LIGHT_BLUE, ChatColor.BLUE)
           .put(DyeColor.LIME, ChatColor.GREEN)
@@ -87,7 +89,7 @@ public interface BukkitUtils {
           .put(ChatColor.DARK_PURPLE, DyeColor.PURPLE)
           .put(ChatColor.DARK_RED, DyeColor.RED)
           .put(ChatColor.GOLD, DyeColor.ORANGE)
-          .put(ChatColor.GRAY, DyeColor.SILVER)
+          .put(ChatColor.GRAY, parse(DyeColor::valueOf, "SILVER", "LIGHT_GRAY"))
           .put(ChatColor.GREEN, DyeColor.LIME)
           .put(ChatColor.LIGHT_PURPLE, DyeColor.MAGENTA)
           .put(ChatColor.RED, DyeColor.RED)
@@ -135,28 +137,40 @@ public interface BukkitUtils {
 
   Map<PotionEffectType, String> POTION_EFFECT_MAP =
       ImmutableMap.<PotionEffectType, String>builder()
-          .put(PotionEffectType.BLINDNESS, "Blindness")
-          .put(PotionEffectType.CONFUSION, "Nausea")
-          .put(PotionEffectType.DAMAGE_RESISTANCE, "Resistance")
-          .put(PotionEffectType.FAST_DIGGING, "Haste")
-          .put(PotionEffectType.FIRE_RESISTANCE, "Fire Resistance")
-          .put(PotionEffectType.HARM, "Instant Damage")
-          .put(PotionEffectType.HEAL, "Instant Health")
-          .put(PotionEffectType.HUNGER, "Hunger")
-          .put(PotionEffectType.INCREASE_DAMAGE, "Strength")
-          .put(PotionEffectType.INVISIBILITY, "Invisibility")
-          .put(PotionEffectType.JUMP, "Jump Boost")
-          .put(PotionEffectType.NIGHT_VISION, "Night Vision")
-          .put(PotionEffectType.POISON, "Poison")
-          .put(PotionEffectType.REGENERATION, "Regeneration")
-          .put(PotionEffectType.SLOW, "Slowness")
-          .put(PotionEffectType.SLOW_DIGGING, "Mining Fatigue")
-          .put(PotionEffectType.SPEED, "Speed")
-          .put(PotionEffectType.WATER_BREATHING, "Water Breathing")
-          .put(PotionEffectType.WEAKNESS, "Weakness")
-          .put(PotionEffectType.WITHER, "Wither")
-          .put(PotionEffectType.HEALTH_BOOST, "Health Boost")
-          .put(PotionEffectType.ABSORPTION, "Absorption")
-          .put(PotionEffectType.SATURATION, "Saturation")
+          .put(PotionEffects.BLINDNESS, "Blindness")
+          .put(PotionEffects.NAUSEA, "Nausea")
+          .put(PotionEffects.RESISTANCE, "Resistance")
+          .put(PotionEffects.HASTE, "Haste")
+          .put(PotionEffects.FIRE_RESISTANCE, "Fire Resistance")
+          .put(PotionEffects.INSTANT_DAMAGE, "Instant Damage")
+          .put(PotionEffects.INSTANT_HEALTH, "Instant Health")
+          .put(PotionEffects.HUNGER, "Hunger")
+          .put(PotionEffects.STRENGTH, "Strength")
+          .put(PotionEffects.INVISIBILITY, "Invisibility")
+          .put(PotionEffects.JUMP_BOOST, "Jump Boost")
+          .put(PotionEffects.NIGHT_VISION, "Night Vision")
+          .put(PotionEffects.POISON, "Poison")
+          .put(PotionEffects.REGENERATION, "Regeneration")
+          .put(PotionEffects.SLOWNESS, "Slowness")
+          .put(PotionEffects.MINING_FATIGUE, "Mining Fatigue")
+          .put(PotionEffects.SPEED, "Speed")
+          .put(PotionEffects.WATER_BREATHING, "Water Breathing")
+          .put(PotionEffects.WEAKNESS, "Weakness")
+          .put(PotionEffects.WITHER, "Wither")
+          .put(PotionEffects.HEALTH_BOOST, "Health Boost")
+          .put(PotionEffects.ABSORPTION, "Absorption")
+          .put(PotionEffects.SATURATION, "Saturation")
           .build();
+
+  static <T> T parse(Function<String, T> parser, String... names) {
+    for (String name : names) {
+      try {
+        T result = parser.apply(name);
+        if (result != null) return result;
+      } catch (Exception ignore) {
+      }
+    }
+    throw new IllegalArgumentException(
+        "Name not found while parsing one of " + Arrays.toString(names));
+  }
 }

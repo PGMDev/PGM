@@ -1,6 +1,9 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.Packets.ENTITIES;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.lang.ref.WeakReference;
@@ -58,12 +61,11 @@ import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.listener.AfkTracker;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   // TODO: Probably should be moved to a better location
-  private static final int FROZEN_VEHICLE_ENTITY_ID = NMSHacks.allocateEntityId();
+  private static final int FROZEN_VEHICLE_ENTITY_ID = ENTITIES.allocateEntityId();
 
   private static final String DEATH_KEY = "isDead";
   private static final MetadataValue DEATH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -96,7 +98,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.visible = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
-    this.attributeMap = NMSHacks.buildAttributeMap(player);
+    this.attributeMap = NMS_HACKS.buildAttributeMap(player);
     this.activity = PGM.get().getAfkTracker().getActivity(player);
   }
 
@@ -229,8 +231,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     if (!interact) player.leaveVehicle();
 
     // This is only possible in sportpaper
-    NMSHacks.setAffectsSpawning(player, interact);
-    player.spigot().setCollidesWithEntities(interact);
+    PLAYER_UTILS.setAffectsSpawning(player, interact);
+    PLAYER_UTILS.setCollidesWithEntities(player, interact);
   }
 
   @Override
@@ -244,7 +246,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     final Player bukkit = getBukkit();
     if (bukkit == null) return;
 
-    NMSHacks.showInvisibles(bukkit, isObserving());
+    PLAYER_UTILS.showInvisibles(bukkit, isObserving());
 
     for (MatchPlayer other : getMatch().getPlayers()) {
       if (canSee(other)) {
@@ -283,8 +285,8 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setSprinting(false);
     bukkit.setFlySpeed(0.1f);
     bukkit.setWalkSpeed(WalkSpeedKit.BUKKIT_DEFAULT);
-    NMSHacks.clearArrowsInPlayer(bukkit);
-    NMSHacks.setKnockbackReduction(bukkit, 0);
+    PLAYER_UTILS.clearArrowsInPlayer(bukkit);
+    PLAYER_UTILS.setKnockbackReduction(bukkit, 0);
     bukkit.setVelocity(new Vector());
 
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
@@ -302,7 +304,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       }
     }
 
-    NMSHacks.setAbsorption(bukkit, 0);
+    PLAYER_UTILS.setAbsorption(bukkit, 0);
 
     // we only reset bed spawn here so people don't have to see annoying messages when they respawn
     bukkit.setBedSpawnLocation(null);
@@ -333,10 +335,10 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       if (bukkit == null) return;
 
       if (yes) {
-        NMSHacks.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy());
-        NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
+        ENTITIES.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy()).send(bukkit);
+        ENTITIES.entityAttach(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false).send(bukkit);
       } else {
-        NMSHacks.sendPacket(bukkit, NMSHacks.destroyEntitiesPacket(FROZEN_VEHICLE_ENTITY_ID));
+        ENTITIES.destroyEntitiesPacket(FROZEN_VEHICLE_ENTITY_ID).send(bukkit);
       }
       resetInteraction();
     }
@@ -447,7 +449,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       // If the player right-clicks on another vehicle while frozen, the client will
       // eject them from the freeze entity unconditionally, so we have to spam them
       // with these packets to keep them on it.
-      NMSHacks.entityAttach(bukkit, bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false);
+      ENTITIES.entityAttach(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false).send(bukkit);
     }
   }
 

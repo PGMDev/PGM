@@ -28,6 +28,7 @@ import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.menu.InventoryMenu;
 import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.util.inventory.ItemBuilder;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -156,7 +157,7 @@ public class ShopMenu extends InventoryMenu {
   private ClickableItem getMenuSeperator(DyeColor color) {
     return ClickableItem.empty(
         new ItemBuilder()
-            .material(Material.STAINED_GLASS_PANE)
+            .material(Materials.STAINED_GLASS_PANE)
             .color(color)
             .name(" ")
             .flags(ItemFlag.values())

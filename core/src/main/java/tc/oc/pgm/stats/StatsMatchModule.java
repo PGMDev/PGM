@@ -3,6 +3,7 @@ package tc.oc.pgm.stats;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
@@ -73,7 +74,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.wool.MonumentWool;
@@ -420,7 +420,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     return new PlayerStatsMenuItem(
         player.getId(),
         this.getGlobalPlayerStat(player),
-        NMSHacks.getPlayerSkin(player.getBukkit()));
+        PLAYER_UTILS.getPlayerSkin(player.getBukkit()));
   }
 
   private List<TeamStatsMenuItem> teams;

@@ -14,12 +14,17 @@
   <packaging>jar</packaging>
 
   <dependencies>
-    <!-- TODO: stop depending on sportpaper for the generic stuff. We need a repo with plain craftbukkit 1.8 available -->
     <dependency>
-      <groupId>app.ashcon</groupId>
-      <artifactId>sportpaper</artifactId>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot</artifactId>
       <version>1.8.8-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
   </dependencies>
 
