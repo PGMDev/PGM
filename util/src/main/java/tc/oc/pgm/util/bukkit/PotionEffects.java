@@ -6,7 +6,8 @@ import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.util.StringUtils;
 
 public class PotionEffects {
-  private static final Map<String, PotionEffectType> byName = new HashMap<>(PotionEffectType.values().length);
+  private static final Map<String, PotionEffectType> byName =
+      new HashMap<>(PotionEffectType.values().length);
 
   static {
     for (PotionEffectType value : PotionEffectType.values()) {

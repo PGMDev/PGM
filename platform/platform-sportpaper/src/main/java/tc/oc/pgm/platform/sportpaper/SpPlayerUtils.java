@@ -1,5 +1,7 @@
 package tc.oc.pgm.platform.sportpaper;
 
+import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
+
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
@@ -20,8 +22,6 @@ import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
-
-import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 @Supports(SPORTPAPER)
 public class SpPlayerUtils implements PlayerUtils {
@@ -45,7 +45,8 @@ public class SpPlayerUtils implements PlayerUtils {
   @Override
   public Skin getPlayerSkinForViewer(Player player, Player viewer) {
     return player.hasFakeSkin(viewer)
-        ? new Skin(player.getFakeSkin(viewer).getData(), player.getFakeSkin(viewer).getSignature())
+        ? new Skin(
+            player.getFakeSkin(viewer).getData(), player.getFakeSkin(viewer).getSignature())
         : getPlayerSkin(player);
   }
 
@@ -110,20 +111,17 @@ public class SpPlayerUtils implements PlayerUtils {
     Location start = player.getEyeLocation();
     World world = player.getWorld();
     Vector startVector = start.toVector();
-    Vector end =
-        start
-            .toVector()
-            .add(
-                start.getDirection().multiply(player.getGameMode() == GameMode.CREATIVE ? 6 : 4.5));
-    MovingObjectPosition hit =
-        ((CraftWorld) world)
-            .getHandle()
-            .rayTrace(
-                new Vec3D(startVector.getX(), startVector.getY(), startVector.getZ()),
-                new Vec3D(end.getX(), end.getY(), end.getZ()),
-                false,
-                false,
-                false);
+    Vector end = start
+        .toVector()
+        .add(start.getDirection().multiply(player.getGameMode() == GameMode.CREATIVE ? 6 : 4.5));
+    MovingObjectPosition hit = ((CraftWorld) world)
+        .getHandle()
+        .rayTrace(
+            new Vec3D(startVector.getX(), startVector.getY(), startVector.getZ()),
+            new Vec3D(end.getX(), end.getY(), end.getZ()),
+            false,
+            false,
+            false);
     if (hit != null && hit.type == MovingObjectPosition.EnumMovingObjectType.BLOCK) {
       return new RayBlockIntersection(
           world.getBlockAt(hit.a().getX(), hit.a().getY(), hit.a().getZ()),
