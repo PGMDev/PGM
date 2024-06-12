@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import static tc.oc.pgm.api.map.MapProtos.REGION_PRIORITY_VERSION;
+import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -52,7 +53,6 @@ import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {
@@ -155,7 +155,7 @@ public class RegionMatchModule implements MatchModule, Listener {
         // Note: works on observers
         if (enters && rfa.velocity != null) {
           event.getPlayer().setVelocity(rfa.velocity);
-          NMSHacks.updateVelocity(event.getPlayer());
+          PLAYERS.updateVelocity(event.getPlayer());
         }
 
         if (rfa.kit != null && player.canInteract()) {

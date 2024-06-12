@@ -3,9 +3,11 @@ package tc.oc.pgm.util.material;
 import java.util.Iterator;
 import java.util.Map;
 import org.bukkit.ChunkSnapshot;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
@@ -55,6 +57,8 @@ public interface MaterialData {
   void applyTo(BlockState block);
 
   void applyTo(ItemStack item);
+
+  void sendBlockChange(Player player, Location location);
 
   int encoded();
 

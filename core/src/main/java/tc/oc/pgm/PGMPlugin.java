@@ -121,7 +121,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     // Sanity test PGM is running on a supported version before doing any work
-    NMSHacks.allocateEntityId();
+    NMSHacks.NMS_HACKS.getTPS();
     // Fix before any audiences have the chance of creating
     ViaUtils.removeViaChatFacet();
 

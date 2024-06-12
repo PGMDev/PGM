@@ -1,5 +1,8 @@
 package tc.oc.pgm.util.usernames;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -9,7 +12,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public final class BukkitUsernameResolver extends AbstractUsernameResolver {
   private static final SyncExecutor EXECUTOR = new SyncExecutor();
@@ -36,7 +38,7 @@ public final class BukkitUsernameResolver extends AbstractUsernameResolver {
     }
 
     // Does vanilla user cache hold this player?
-    String name = NMSHacks.getPlayerName(uuid);
+    String name = PLAYER_UTILS.getPlayerName(uuid);
     if (name != null) {
       return UsernameResponse.of(name, Instant.now(), BukkitUsernameResolver.class);
     }
@@ -48,7 +50,7 @@ public final class BukkitUsernameResolver extends AbstractUsernameResolver {
     @Override
     public void execute(@NotNull Runnable command) {
       if (Bukkit.isPrimaryThread()) command.run();
-      else NMSHacks.postToMainThread(PGM, false, command);
+      else NMS_HACKS.postToMainThread(PGM, false, command);
     }
   }
 }

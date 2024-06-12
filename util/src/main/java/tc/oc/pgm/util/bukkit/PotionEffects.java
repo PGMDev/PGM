@@ -1,8 +1,19 @@
 package tc.oc.pgm.util.bukkit;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.potion.PotionEffectType;
+import tc.oc.pgm.util.StringUtils;
 
 public class PotionEffects {
+  private static final Map<String, PotionEffectType> byName = new HashMap<>();
+
+  static {
+    for (PotionEffectType value : PotionEffectType.values()) {
+      byName.put(StringUtils.simplify(value.getName()), value);
+    }
+  }
+
   public static final PotionEffectType BLINDNESS = PotionEffectType.BLINDNESS;
   public static final PotionEffectType NAUSEA = parse("CONFUSION", "nausea");
   public static final PotionEffectType RESISTANCE = parse("DAMAGE_RESISTANCE", "resistance");
@@ -28,6 +39,14 @@ public class PotionEffects {
   public static final PotionEffectType SATURATION = PotionEffectType.SATURATION;
 
   private static PotionEffectType parse(String... names) {
-    return BukkitUtils.parse(PotionEffectType::getByName, names);
+    PotionEffectType type = BukkitUtils.parse(PotionEffectType::getByName, names);
+    for (String name : names) {
+      byName.put(StringUtils.simplify(name), type);
+    }
+    return type;
+  }
+
+  public static PotionEffectType getByName(String name) {
+    return byName.get(StringUtils.simplify(name));
   }
 }

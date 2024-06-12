@@ -1,6 +1,8 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
@@ -34,7 +36,6 @@ import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -42,6 +43,8 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();
   private static final Difficulty[] difficulties = Difficulty.values();
   private static final World.Environment[] environments = World.Environment.values();
+
+  private static final String DUMMY_TEAM = "dummy";
 
   private final Stack<Stage> stages;
   private final Future<Match> future;
@@ -262,7 +265,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getInfo().getWorld();
-      WorldCreator creator = NMSHacks.detectWorld(worldName);
+      WorldCreator creator = NMS_HACKS.detectWorld(worldName);
       if (creator == null) {
         creator = new WorldCreator(worldName);
       }
@@ -361,8 +364,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
           if (viewer.canSee(player) && viewer != player) players.add(player.getName());
         }
         String prefix = ChatColor.AQUA.toString();
-        NMSHacks.sendPacket(
-            viewer, NMSHacks.teamCreatePacket("dummy", "dummy", prefix, "", false, false, players));
+        TAB_PACKETS
+            .teamCreatePacket(DUMMY_TEAM, DUMMY_TEAM, prefix, "", false, false, players)
+            .send(viewer);
       }
 
       int tpPerSecond = Integer.MAX_VALUE;
@@ -399,7 +403,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       }
 
       // After all players have been teleported, remove the dummy team
-      NMSHacks.sendDestroyTeamDummyPacket();
+      TAB_PACKETS.teamRemovePacket(DUMMY_TEAM).broadcast();
 
       match.callEvent(new MatchAfterLoadEvent(match));
 

@@ -1,68 +1,101 @@
 package tc.oc.pgm.platform.sportpaper;
 
+import static tc.oc.pgm.util.nms.Packets.ENTITIES;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
-import com.google.common.collect.SetMultimap;
-import java.util.Collection;
-import java.util.Map;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.server.v1_8_R3.DataWatcher;
-import net.minecraft.server.v1_8_R3.PacketPlayOutAttachEntity;
-import net.minecraft.server.v1_8_R3.PacketPlayOutNamedEntitySpawn;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardTeam;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntity;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_8_R3.ChunkSection;
+import net.minecraft.server.v1_8_R3.EntityArrow;
+import net.minecraft.server.v1_8_R3.EntityFireball;
+import net.minecraft.server.v1_8_R3.EntityFireworks;
+import net.minecraft.server.v1_8_R3.IBlockData;
+import net.minecraft.server.v1_8_R3.IDataManager;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import net.minecraft.server.v1_8_R3.ServerNBTManager;
+import net.minecraft.server.v1_8_R3.WorldData;
+import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
-import org.bukkit.entity.EntityType;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftFireball;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftFirework;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Firework;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.platform.nms.v1_8.NMSHacks1_8;
-import tc.oc.pgm.util.attribute.AttributeModifier;
-import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
+import tc.oc.pgm.platform.sportpaper.attribute.SpAttributeMap;
+import tc.oc.pgm.util.attribute.AttributeMap;
+import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
+import tc.oc.pgm.util.reflect.ReflectionUtils;
 import tc.oc.pgm.util.skin.Skin;
 
 @Supports(SPORTPAPER)
-public class NMSHacksSportPaper extends NMSHacks1_8 {
+public class NMSHacksSportPaper implements NMSHacks {
+  @Override
+  public void skipFireworksLaunch(Firework firework) {
+    EntityFireworks entityFirework = ((CraftFirework) firework).getHandle();
+    entityFirework.expectedLifespan = 2;
+    entityFirework.ticksFlown = 2;
+    ENTITIES
+        .entityMetadataPacket(firework.getEntityId(), firework, false)
+        .sendToViewers(firework, false);
+  }
+
+  @Override
+  public boolean isCraftItemArrowEntity(Item item) {
+    return ((CraftItem) item).getHandle() instanceof EntityArrow;
+  }
+
+  @Override
+  public void freezeEntity(Entity entity) {
+    net.minecraft.server.v1_8_R3.Entity nmsEntity = ((CraftEntity) entity).getHandle();
+    NBTTagCompound tag = new NBTTagCompound();
+    nmsEntity.c(tag); // save to tag
+    tag.setBoolean("NoAI", true);
+    tag.setBoolean("NoGravity", true);
+    nmsEntity.f(tag); // load from tag
+  }
+
+  @Override
+  public void setFireballDirection(Fireball entity, Vector direction) {
+    EntityFireball fireball = ((CraftFireball) entity).getHandle();
+    fireball.dirX = direction.getX() * 0.1D;
+    fireball.dirY = direction.getY() * 0.1D;
+    fireball.dirZ = direction.getZ() * 0.1D;
+  }
+
+  @Override
+  public long getMonotonicTime(World world) {
+    return ((CraftWorld) world).getHandle().getTime();
+  }
+
   @Override
   public void updateChunkSnapshot(ChunkSnapshot snapshot, BlockState blockState) {
     snapshot.updateBlock(blockState);
-  }
-
-  @Override
-  public void setKnockbackReduction(Player player, float amount) {
-    player.setKnockbackReduction(amount);
-  }
-
-  @Override
-  public void showInvisibles(Player player, boolean showInvisibles) {
-    player.showInvisibles(showInvisibles);
-  }
-
-  @Override
-  public void setAffectsSpawning(Player player, boolean affectsSpawning) {
-    player.spigot().setAffectsSpawning(affectsSpawning);
-  }
-
-  @Override
-  public void entityAttach(Player player, int entityID, int vehicleID, boolean leash) {
-    sendPacket(player, new PacketPlayOutAttachEntity(entityID, vehicleID, leash));
   }
 
   @Override
@@ -84,107 +117,64 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
   }
 
   @Override
-  public Object spawnPlayerPacket(int entityId, UUID uuid, Location location, Player player) {
-    DataWatcher dataWatcher = NMSHacks1_8.copyDataWatcher(player);
-    return new PacketPlayOutNamedEntitySpawn(
-        entityId,
-        uuid,
-        location.getX(),
-        location.getY(),
-        location.getZ(),
-        (byte) location.getYaw(),
-        (byte) location.getPitch(),
-        CraftItemStack.asNMSCopy(null),
-        dataWatcher);
-  }
+  public Set<Block> getBlocks(Chunk bukkitChunk, Material material) {
+    CraftChunk craftChunk = (CraftChunk) bukkitChunk;
+    Set<Block> blocks = new HashSet<>();
 
-  @Override
-  public Object createPlayerInfoPacket(EnumPlayerInfoAction action) {
-    PacketPlayOutPlayerInfo packet = new PacketPlayOutPlayerInfo();
-    packet.a = NMSHacks1_8.convertEnumPlayerInfoAction(action);
-    return packet;
-  }
+    net.minecraft.server.v1_8_R3.Block nmsBlock = CraftMagicNumbers.getBlock(material);
+    net.minecraft.server.v1_8_R3.Chunk chunk = craftChunk.getHandle();
 
-  @Override
-  public void setPotionParticles(Player player, boolean enabled) {
-    player.setPotionParticles(enabled);
-  }
+    for (ChunkSection section : chunk.getSections()) {
+      if (section == null || section.a()) continue; // ChunkSection.a() -> true if section is empty
 
-  @Override
-  public boolean playerInfoDataListNotEmpty(Object packet) {
-    return !((PacketPlayOutPlayerInfo) packet).b.isEmpty();
-  }
-
-  @Override
-  public void addPlayerInfoToPacket(Object packet, Object playerInfoData) {
-    ((PacketPlayOutPlayerInfo) packet)
-        .b.add((PacketPlayOutPlayerInfo.PlayerInfoData) playerInfoData);
-  }
-
-  @Override
-  public void sendSpawnEntityPacket(
-      Player player, int entityId, Location location, Vector velocity) {
-    sendPacket(
-        player,
-        new PacketPlayOutSpawnEntity(
-            entityId,
-            location.getX(),
-            location.getY(),
-            location.getZ(),
-            (int) (velocity.getX() * 8000),
-            (int) (velocity.getY() * 8000),
-            (int) (velocity.getZ() * 8000),
-            (int) location.getPitch(),
-            (int) location.getYaw(),
-            66,
-            0));
-  }
-
-  @Override
-  public void spawnFreezeEntity(Player player, int entityId, boolean legacy) {
-    if (legacy) {
-      Location location = player.getLocation().add(0, 0.286, 0);
-      if (location.getY() < -64) {
-        location.setY(-64);
-        player.teleport(location);
+      char[] blockIds = section.getIdArray();
+      for (int i = 0; i < blockIds.length; i++) {
+        // This does a lookup in the block registry, but does not create any objects, so should be
+        // pretty efficient
+        IBlockData blockData = net.minecraft.server.v1_8_R3.Block.d.a(blockIds[i]);
+        if (blockData != null && blockData.getBlock() == nmsBlock) {
+          blocks.add(
+              bukkitChunk.getBlock(i & 0xf, section.getYPosition() | (i >> 8), (i >> 4) & 0xf));
+        }
       }
-
-      sendSpawnEntityPacket(player, entityId, location);
-    } else {
-      Location loc = player.getLocation().subtract(0, 1.1, 0);
-      Vector velocity = new Vector();
-      spawnFakeArmorStand(player, entityId, loc, velocity);
     }
+
+    return blocks;
   }
 
   @Override
-  public void spawnFakeArmorStand(Player player, int entityId, Location loc, Vector velocity) {
-    DataWatcher dataWatcher = new DataWatcher(null);
-    dataWatcher.a(0, (byte) 0x20);
-    dataWatcher.a(1, (short) 0);
-    dataWatcher.a(10, (byte) 0);
-    sendPacket(
-        player,
-        new PacketPlayOutSpawnEntityLiving(
-            entityId,
-            (byte) EntityType.ARMOR_STAND.getTypeId(),
-            loc.getX(),
-            loc.getY(),
-            loc.getZ(),
-            loc.getYaw(),
-            loc.getPitch(),
-            loc.getPitch(),
-            (int) (velocity.getX() * 8000),
-            (int) (velocity.getY() * 8000),
-            (int) (velocity.getZ() * 8000),
-            dataWatcher));
+  public void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin) {
+    meta.setOwner(name, uuid, new org.bukkit.Skin(skin.getData(), skin.getSignature()));
   }
 
   @Override
-  public Skin getPlayerSkinForViewer(Player player, Player viewer) {
-    return player.hasFakeSkin(viewer)
-        ? new Skin(player.getFakeSkin(viewer).getData(), player.getFakeSkin(viewer).getSignature())
-        : getPlayerSkin(player);
+  public WorldCreator detectWorld(String worldName) {
+    IDataManager sdm =
+        new ServerNBTManager(Bukkit.getServer().getWorldContainer(), worldName, true);
+    WorldData worldData = sdm.getWorldData();
+    if (worldData == null) return null;
+
+    return new WorldCreator(worldName)
+        .generateStructures(worldData.shouldGenerateMapFeatures())
+        .generatorSettings(worldData.getGeneratorOptions())
+        .seed(worldData.getSeed())
+        .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
+  }
+
+  @Override
+  public boolean canMineBlock(MaterialData blockMaterial, ItemStack tool) {
+    if (!blockMaterial.getItemType().isBlock()) {
+      throw new IllegalArgumentException("Material '" + blockMaterial + "' is not a block");
+    }
+
+    net.minecraft.server.v1_8_R3.Block nmsBlock =
+        CraftMagicNumbers.getBlock(blockMaterial.getItemType());
+    net.minecraft.server.v1_8_R3.Item nmsTool =
+        tool == null ? null : CraftMagicNumbers.getItem(tool.getType());
+
+    return nmsBlock != null
+        && (nmsBlock.getMaterial().isAlwaysDestroyable()
+            || (nmsTool != null && nmsTool.canDestroySpecialBlock(nmsBlock)));
   }
 
   @Override
@@ -192,53 +182,17 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
     try {
       ((CraftWorld) world).getHandle().dimension = 11;
     } catch (IllegalAccessError e) {
-      super.resetDimension(world);
-    }
-  }
 
-  @Override
-  public void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
-    itemMeta.setCanDestroy(materials);
-  }
+      Field worldServerField = ReflectionUtils.getField(CraftWorld.class, "world");
+      Field dimensionField = ReflectionUtils.getField(WorldServer.class, "dimension");
+      Field modifiersField = ReflectionUtils.getField(Field.class, "modifiers");
 
-  @Override
-  public Set<Material> getCanDestroy(ItemMeta itemMeta) {
-    return itemMeta.getCanDestroy();
-  }
-
-  @Override
-  public void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
-    itemMeta.setCanPlaceOn(materials);
-  }
-
-  @Override
-  public Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
-    return itemMeta.getCanPlaceOn();
-  }
-
-  @Override
-  public void copyAttributeModifiers(ItemMeta destination, ItemMeta source) {
-    for (String attribute : source.getModifiedAttributes()) {
-      for (org.bukkit.attribute.AttributeModifier modifier :
-          source.getAttributeModifiers(attribute)) {
-        destination.addAttributeModifier(attribute, modifier);
+      try {
+        modifiersField.setInt(dimensionField, dimensionField.getModifiers() & ~Modifier.FINAL);
+        dimensionField.set(worldServerField.get(world), 11);
+      } catch (IllegalAccessException ex) {
+        // No-op, newer version of Java have disabled modifying final fields
       }
-    }
-  }
-
-  @Override
-  public void applyAttributeModifiers(
-      SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta) {
-    for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
-      AttributeModifier attributeModifier = entry.getValue();
-      meta.addAttributeModifier(
-          entry.getKey(),
-          new org.bukkit.attribute.AttributeModifier(
-              attributeModifier.getUniqueId(),
-              attributeModifier.getName(),
-              attributeModifier.getAmount(),
-              org.bukkit.attribute.AttributeModifier.Operation.fromOpcode(
-                  attributeModifier.getOperation().ordinal())));
     }
   }
 
@@ -248,39 +202,18 @@ public class NMSHacksSportPaper extends NMSHacks1_8 {
   }
 
   @Override
-  public Object teamPacket(
-      int operation,
-      String name,
-      String displayName,
-      String prefix,
-      String suffix,
-      boolean friendlyFire,
-      boolean seeFriendlyInvisibles,
-      NameTagVisibility nameTagVisibility,
-      Collection<String> players) {
-    PacketPlayOutScoreboardTeam packet = new PacketPlayOutScoreboardTeam();
-
-    packet.a = name;
-    packet.b = displayName;
-    packet.c = prefix;
-    packet.d = suffix;
-    packet.e = nameTagVisibility == null ? null : CraftTeam.bukkitToNotch(nameTagVisibility).e;
-    // packet.f = color
-    packet.g = players;
-    packet.h = operation;
-    if (friendlyFire) {
-      packet.i |= 1;
-    }
-    if (seeFriendlyInvisibles) {
-      packet.i |= 2;
-    }
-
-    return packet;
+  public AttributeMap buildAttributeMap(Player player) {
+    return new SpAttributeMap(player);
   }
 
   @Override
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     Bukkit.getServer().postToMainThread(plugin, true, task);
+  }
+
+  @Override
+  public int getMaxWorldSize(World world) {
+    return ((CraftWorld) world).getHandle().getWorldBorder().l();
   }
 
   @Override

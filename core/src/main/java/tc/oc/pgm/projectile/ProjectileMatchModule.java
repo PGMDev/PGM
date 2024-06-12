@@ -99,7 +99,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
               player.launchProjectile(
                   projectileDefinition.projectile.asSubclass(Projectile.class), velocity);
           if (projectile instanceof Fireball && projectileDefinition.precise) {
-            NMSHacks.setFireballDirection((Fireball) projectile, velocity);
+            NMSHacks.NMS_HACKS.setFireballDirection((Fireball) projectile, velocity);
           }
         } else {
           projectile =

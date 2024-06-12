@@ -14,12 +14,6 @@
   <packaging>jar</packaging>
 
   <dependencies>
-    <dependency>
-      <groupId>tc.oc.pgm</groupId>
-      <artifactId>platform-shared</artifactId>
-      <version>0.16-SNAPSHOT</version>
-    </dependency>
-
     <!-- Fork of Spigot and SportBukkit running Minecraft 1.8 -->
     <dependency>
       <groupId>app.ashcon</groupId>

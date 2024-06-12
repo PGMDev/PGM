@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
+import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
@@ -49,7 +50,6 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** State of a flag when a player has picked it up and is wearing the banner on their head. */
 public class Carried extends Spawned implements Missing {
@@ -61,7 +61,7 @@ public class Carried extends Spawned implements Missing {
   protected @Nullable Component lastMessage;
 
   private static final int DROP_QUEUE_SIZE = 100;
-  private Deque<Location> dropLocations = new ArrayDeque<>(DROP_QUEUE_SIZE);
+  private final Deque<Location> dropLocations = new ArrayDeque<>(DROP_QUEUE_SIZE);
 
   public Carried(Flag flag, Post post, MatchPlayer carrier, Location dropLocation) {
     super(flag, post);
@@ -115,7 +115,7 @@ public class Carried extends Spawned implements Missing {
     PGM.get()
         .getExecutor()
         .schedule(
-            () -> NMSHacks.sendLegacyWearing(carrier.getBukkit(), 4, flag.getLegacyBannerItem()),
+            () -> PLAYERS.sendLegacyWearing(carrier.getBukkit(), 4, flag.getLegacyBannerItem()),
             50L,
             TimeUnit.MILLISECONDS);
 

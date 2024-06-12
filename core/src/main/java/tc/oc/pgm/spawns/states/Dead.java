@@ -1,6 +1,7 @@
 package tc.oc.pgm.spawns.states;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.List;
@@ -20,7 +21,6 @@ import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
 public class Dead extends Spawning {
@@ -45,12 +45,12 @@ public class Dead extends Spawning {
 
     player.resetInventory();
 
-    if (player.isVisible()) NMSHacks.playDeathAnimation(player.getBukkit());
+    if (player.isVisible()) PLAYERS.playDeathAnimation(player.getBukkit());
 
     if (!options.spectate) player.setFrozen(true);
 
     // Show red vignette
-    NMSHacks.showBorderWarning(player.getBukkit(), true);
+    PLAYERS.showBorderWarning(player.getBukkit(), true);
 
     // Flash/wobble the screen. If we don't delay this then the client glitches out
     // when the player dies from a potion effect. I have no idea why it happens,
@@ -71,7 +71,7 @@ public class Dead extends Spawning {
     player.setFrozen(false);
     player.setDead(false);
 
-    NMSHacks.showBorderWarning(bukkit, false);
+    PLAYERS.showBorderWarning(bukkit, false);
 
     bukkit.removePotionEffect(PotionEffects.BLINDNESS);
     bukkit.removePotionEffect(PotionEffects.NAUSEA);

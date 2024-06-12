@@ -22,12 +22,13 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(value = MatchScope.LOADED)
 public class TNTRenderMatchModule implements MatchModule, Listener {
   private static final Duration AFK_TIME = Duration.ofSeconds(30);
   private static final double MAX_DISTANCE = Math.pow(64d, 2);
+  private static final MaterialData TNT = MaterialData.from(Material.TNT);
 
   private final Match match;
   private final List<PrimedTnt> entities;
@@ -81,9 +82,10 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
     }
 
     public boolean update() {
+      MaterialData currentMaterial = MaterialData.from(currentLocation.getBlock());
       if (entity.isDead()) {
         for (MatchPlayer viewer : viewers) {
-          NMSHacks.sendBlockChange(currentLocation, viewer.getBukkit(), null);
+          currentMaterial.sendBlockChange(viewer.getBukkit(), currentLocation);
         }
         return true;
       }
@@ -94,22 +96,22 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
 
       for (MatchPlayer player : match.getPlayers()) {
         if (player.getWorld() != entity.getWorld()) continue;
-        updatePlayer(player);
+        updatePlayer(player, currentMaterial);
       }
       return false;
     }
 
-    private void updatePlayer(MatchPlayer player) {
+    private void updatePlayer(MatchPlayer player, MaterialData md) {
       if (currentLocation.distanceSquared(player.getLocation()) >= MAX_DISTANCE
           && player.isActive(AFK_TIME)) {
         if (viewers.add(player)) {
-          NMSHacks.sendBlockChange(currentLocation, player.getBukkit(), Material.TNT);
+          TNT.sendBlockChange(player.getBukkit(), currentLocation);
         } else if (moved) {
-          NMSHacks.sendBlockChange(lastLocation, player.getBukkit(), null);
-          NMSHacks.sendBlockChange(currentLocation, player.getBukkit(), Material.TNT);
+          md.sendBlockChange(player.getBukkit(), lastLocation);
+          TNT.sendBlockChange(player.getBukkit(), currentLocation);
         }
       } else if (viewers.remove(player)) {
-        NMSHacks.sendBlockChange(lastLocation, player.getBukkit(), null);
+        md.sendBlockChange(player.getBukkit(), lastLocation);
       }
     }
   }

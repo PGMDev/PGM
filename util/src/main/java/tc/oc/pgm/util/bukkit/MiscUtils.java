@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.bukkit;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
 import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -9,7 +11,9 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -24,17 +28,11 @@ import tc.oc.pgm.util.platform.Platform;
 public interface MiscUtils {
   MiscUtils MISC_UTILS = Platform.requireInstance(MiscUtils.class);
 
+  EntityType SPLASH_POTION = parse(EntityType::valueOf, "SPLASH_POTION", "POTION");
+
   default boolean yield(Event event) {
     return false;
   }
-
-  default void setKnockbackReduction(Player player, float reduction) {}
-
-  default float getKnockbackReduction(Player player) {
-    return 0;
-  }
-
-  default void setCollidesWithEntities(Player player, boolean collides) {}
 
   default void removeDrankPotion(PlayerItemConsumeEvent event, ScheduledExecutorService ex) {
     int itemSlot = event.getPlayer().getInventory().getHeldItemSlot();
@@ -72,6 +70,14 @@ public interface MiscUtils {
   default EntityChangeBlockEvent createEntityChangeBlockEvent(
       Player player, Block block, MaterialData md) {
     throw new UnsupportedOperationException();
+  }
+
+  default ThrownPotion spawnPotion(Location loc, ItemStack item) {
+    ThrownPotion potion = (ThrownPotion) loc.getWorld().spawnEntity(loc, SPLASH_POTION);
+    // Due to setting the item after, it causes not to show.
+    // Prefer native impl when available.
+    potion.setItem(item);
+    return potion;
   }
 
   default double getArrowDamage(Arrow arrow) {

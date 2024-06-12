@@ -1,6 +1,6 @@
 package tc.oc.pgm.kits;
 
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.List;
 import org.bukkit.inventory.ItemStack;
@@ -15,7 +15,7 @@ public class KnockbackReductionKit extends AbstractKit {
 
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    MISC_UTILS.setKnockbackReduction(player.getBukkit(), this.knockbackReduction);
+    PLAYER_UTILS.setKnockbackReduction(player.getBukkit(), this.knockbackReduction);
   }
 
   @Override
@@ -25,6 +25,6 @@ public class KnockbackReductionKit extends AbstractKit {
 
   @Override
   public void remove(MatchPlayer player) {
-    MISC_UTILS.setKnockbackReduction(player.getBukkit(), 0);
+    PLAYER_UTILS.setKnockbackReduction(player.getBukkit(), 0);
   }
 }

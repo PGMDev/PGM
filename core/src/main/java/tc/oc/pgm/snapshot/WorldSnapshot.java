@@ -1,5 +1,7 @@
 package tc.oc.pgm.snapshot;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.ChunkSnapshot;
@@ -13,7 +15,6 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.material.MaterialData;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class WorldSnapshot {
   private final World world;
@@ -65,7 +66,7 @@ public class WorldSnapshot {
 
       // ChunkSnapshot is very likely to have the post-event state already,
       // so we have to correct it
-      if (state != null) NMSHacks.updateChunkSnapshot(snapshot, state);
+      if (state != null) NMS_HACKS.updateChunkSnapshot(snapshot, state);
 
       chunkSnapshots.put(cv, snapshot);
     }

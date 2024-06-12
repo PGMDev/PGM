@@ -1,13 +1,14 @@
 package tc.oc.pgm.util.tablist;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.nms.Packets.ENTITIES;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.UUID;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 
 /**
@@ -51,7 +52,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   public PlayerTabEntry(Player player) {
     super(randomUUIDVersion2SameDefaultSkin(player.getUniqueId()));
     this.player = player;
-    this.spareEntityId = NMSHacks.allocateEntityId();
+    this.spareEntityId = ENTITIES.allocateEntityId();
   }
 
   @Override
@@ -75,14 +76,12 @@ public class PlayerTabEntry extends DynamicTabEntry {
     if (viewer == null) {
       return null;
     }
-
-    // TODO: find different solution for non-SportPaper servers
-    return NMSHacks.getPlayerSkinForViewer(player, viewer);
+    return PLAYER_UTILS.getPlayerSkinForViewer(player, viewer);
   }
 
   @Override
   public int getPing() {
-    if (showPing) return NMSHacks.getPing(this.player);
+    if (showPing) return PLAYER_UTILS.getPing(this.player);
     return super.getPing();
   }
 

@@ -1,8 +1,19 @@
 package tc.oc.pgm.util.bukkit;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.enchantments.Enchantment;
+import tc.oc.pgm.util.StringUtils;
 
 public class Enchantments {
+  private static final Map<String, Enchantment> byName = new HashMap<>();
+
+  static {
+    for (Enchantment value : Enchantment.values()) {
+      byName.put(StringUtils.simplify(value.getName()), value);
+    }
+  }
+
   public static final Enchantment PROTECTION = parse("PROTECTION_ENVIRONMENTAL", "protection");
   public static final Enchantment FIRE_PROTECTION = parse("PROTECTION_FIRE", "fire_protection");
   public static final Enchantment FEATHER_FALLING = parse("PROTECTION_FALL", "feather_falling");
@@ -32,7 +43,15 @@ public class Enchantments {
   public static final Enchantment LUCK_OF_THE_SEA = parse("LUCK", "luck_of_the_sea");
   public static final Enchantment LURE = Enchantment.LURE;
 
-  private static final Enchantment parse(String... names) {
-    return BukkitUtils.parse(Enchantment::getByName, names);
+  private static Enchantment parse(String... names) {
+    Enchantment type = BukkitUtils.parse(Enchantment::getByName, names);
+    for (String name : names) {
+      byName.put(StringUtils.simplify(name), type);
+    }
+    return type;
+  }
+
+  public static Enchantment getByName(String name) {
+    return byName.get(StringUtils.simplify(name));
   }
 }

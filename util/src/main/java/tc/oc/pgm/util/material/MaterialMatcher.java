@@ -2,6 +2,7 @@ package tc.oc.pgm.util.material;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
@@ -22,7 +23,9 @@ public interface MaterialMatcher {
    * Iterates over ALL matching {@link Material}s. This can be a long list if the matching criteria
    * is very broad.
    */
-  Collection<Material> getMaterials();
+  Set<Material> getMaterials();
+
+  Set<MaterialData> getMaterialData();
 
   static MaterialMatcher of(Material... materials) {
     return CompoundMaterialMatcher.of(SingleMaterialMatcher::of, Arrays.asList(materials));

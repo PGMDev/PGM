@@ -3,6 +3,7 @@ package tc.oc.pgm.proximity;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -17,7 +18,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.controlpoint.RegionPlayerTracker;
 import tc.oc.pgm.fireworks.FireworkMatchModule;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ProximityAlarm {
   private static final long MESSAGE_INTERVAL = 5000;
@@ -74,7 +74,7 @@ public class ProximityAlarm {
             location,
             FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(colors).build(),
             0);
-    NMSHacks.skipFireworksLaunch(firework);
+    NMS_HACKS.skipFireworksLaunch(firework);
   }
 
   private void showMessage() {

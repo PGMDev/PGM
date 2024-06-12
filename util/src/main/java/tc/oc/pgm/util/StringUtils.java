@@ -154,6 +154,10 @@ public final class StringUtils {
     return text.substring(Math.min(text.length(), begin), Math.min(text.length(), end));
   }
 
+  public static String simplify(String string) {
+    return string.toLowerCase().replace(" ", "").replace("_", "");
+  }
+
   public static List<String> complete(String prefix, Iterable<String> options) {
     final String prefixLower = prefix.toLowerCase();
     final int pos = prefixLower.lastIndexOf(' ');

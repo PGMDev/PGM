@@ -1,6 +1,7 @@
 package tc.oc.pgm.kits;
 
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
@@ -61,7 +62,6 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -400,7 +400,7 @@ public abstract class KitParser {
   public ItemStack parseHead(Element el) throws InvalidXMLException {
     ItemStack itemStack = parseItem(el, Materials.PLAYER_HEAD, (short) 3);
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-    NMSHacks.setSkullMetaOwner(
+    NMS_HACKS.setSkullMetaOwner(
         meta,
         XMLUtils.parseUsername(Node.fromChildOrAttr(el, "name")),
         XMLUtils.parseUuid(Node.fromRequiredChildOrAttr(el, "uuid")),
@@ -506,7 +506,7 @@ public abstract class KitParser {
     if (amount == Integer.MAX_VALUE) amount = -1;
 
     // must be CraftItemStack to keep track of NBT data
-    ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
+    ItemStack itemStack = INVENTORY_UTILS.craftItemCopy(new ItemStack(type, amount, damage));
 
     if (itemStack.getType() != type) {
       throw new InvalidXMLException("Invalid item/block", el);
@@ -553,7 +553,7 @@ public abstract class KitParser {
       }
     }
 
-    NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
+    INVENTORY_UTILS.applyAttributeModifiers(parseAttributeModifiers(el), meta);
 
     String customName = el.getAttributeValue("name");
     if (customName != null) {
@@ -589,12 +589,14 @@ public abstract class KitParser {
 
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
-      NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
+      INVENTORY_UTILS.setCanDestroy(
+          meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
     }
 
     Element elCanPlaceOn = el.getChild("can-place-on");
     if (elCanPlaceOn != null) {
-      NMSHacks.setCanPlaceOn(meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
+      INVENTORY_UTILS.setCanPlaceOn(
+          meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
     }
   }
 

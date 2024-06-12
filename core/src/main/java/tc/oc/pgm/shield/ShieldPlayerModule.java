@@ -1,6 +1,7 @@
 package tc.oc.pgm.shield;
 
 import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.logging.Logger;
 import org.bukkit.Sound;
@@ -14,7 +15,6 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ShieldPlayerModule implements Tickable {
 
@@ -39,11 +39,11 @@ public class ShieldPlayerModule implements Tickable {
   }
 
   double getAbsorption() {
-    return NMSHacks.getAbsorption(bukkit);
+    return PLAYER_UTILS.getAbsorption(bukkit);
   }
 
   void setAbsorption(double absorption) {
-    NMSHacks.setAbsorption(bukkit, absorption);
+    PLAYER_UTILS.setAbsorption(bukkit, absorption);
   }
 
   void addAbsorption(double delta) {

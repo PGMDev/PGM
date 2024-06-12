@@ -1,7 +1,8 @@
 package tc.oc.pgm.inventory;
 
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import com.google.common.collect.Lists;
@@ -57,7 +58,6 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -355,7 +355,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         }
       }
 
-      double knockbackReduction = MISC_UTILS.getKnockbackReduction(holder);
+      double knockbackReduction = PLAYER_UTILS.getKnockbackReduction(holder);
       if (knockbackReduction > 0) {
         specialLore.add(
             ChatColor.LIGHT_PURPLE
@@ -451,7 +451,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       previewPlayerInventory(viewer, (PlayerInventory) realInventory);
     } else {
       Inventory fakeInventory;
-      fakeInventory = NMSHacks.createFakeInventory(viewer, realInventory);
+      fakeInventory = NMS_HACKS.createFakeInventory(viewer, realInventory);
       fakeInventory.setContents(realInventory.getContents());
 
       this.showInventoryPreview(viewer, realInventory, fakeInventory);

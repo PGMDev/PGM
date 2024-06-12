@@ -30,8 +30,9 @@ class BudgetWorldEdit {
    * @param offset the offset to add when placing blocks
    */
   public void placeBlocks(Region region, BlockVector offset) {
+    if (offset == null) offset = NO_OFFSET;
     for (BlockData blockData : snapshot.getMaterials(region)) {
-      blockData.applyTo(blockData.getBlock(world, offset == null ? NO_OFFSET : offset), true);
+      blockData.applyTo(blockData.getBlock(world, offset), true);
     }
   }
 
@@ -42,8 +43,9 @@ class BudgetWorldEdit {
    * @param offset an offset to add to the region coordinates if the blocks were offset when placed
    */
   public void removeBlocks(Region region, BlockVector offset) {
+    if (offset == null) offset = NO_OFFSET;
     for (BlockData blockData : snapshot.getMaterials(region)) {
-      Block block = blockData.getBlock(world, offset == null ? NO_OFFSET : offset);
+      Block block = blockData.getBlock(world, offset);
       // Ignore if already air
       if (!block.getType().equals(Material.AIR)) block.setType(Material.AIR);
     }

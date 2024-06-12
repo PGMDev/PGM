@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.material.matcher;
 
-import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
@@ -42,8 +41,6 @@ public interface SingleMaterialMatcher extends MaterialMatcher {
   static SingleMaterialMatcher parse(String pattern) {
     return FACTORY.parse(pattern);
   }
-
-  Collection<MaterialData> getBlockStates();
 
   void addIngredient(ShapelessRecipe recipe, int count);
 

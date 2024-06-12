@@ -1,10 +1,12 @@
 package tc.oc.pgm.spawner.objects;
 
 import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -14,12 +16,11 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.spawner.Spawnable;
 import tc.oc.pgm.spawner.Spawner;
-import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.nms.entity.potion.EntityPotion;
 
 public class SpawnablePotion implements Spawnable {
   // Newer versions use SPLASH_POTION
   private static final Material SPLASH_POTION = parse(Material::valueOf, "SPLASH_POTION", "POTION");
+
   private static final int SPLASH_BIT = 0x4000;
 
   private final ItemStack potionItem;
@@ -39,11 +40,8 @@ public class SpawnablePotion implements Spawnable {
 
   @Override
   public void spawn(Location location, Match match) {
-    EntityPotion entityPotion = NMSHacks.entityPotion(location, potionItem);
-    entityPotion.spawn();
-    entityPotion
-        .getBukkitEntity()
-        .setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
+    ThrownPotion potion = MISC_UTILS.spawnPotion(location, potionItem);
+    potion.setMetadata(Spawner.METADATA_KEY, new FixedMetadataValue(PGM.get(), spawnerId));
   }
 
   @Override

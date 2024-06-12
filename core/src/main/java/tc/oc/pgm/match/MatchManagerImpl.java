@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
@@ -26,7 +27,6 @@ import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -103,7 +103,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
     final String name = world.getName();
     if (name.startsWith("match")) return;
 
-    NMSHacks.resetDimension(world);
+    NMS_HACKS.resetDimension(world);
 
     if (PGM.get().getServer().unloadWorld(name, false)) {
       logger.info("Unloaded non-match " + name);

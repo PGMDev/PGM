@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.material.matcher;
 
-import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.material.MaterialData;
@@ -35,8 +35,13 @@ public class AllMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Collection<Material> getMaterials() {
+  public Set<Material> getMaterials() {
     return EnumSet.allOf(Material.class);
+  }
+
+  @Override
+  public Set<MaterialData> getMaterialData() {
+    throw new UnsupportedOperationException("Cannot iterate material data for all materials");
   }
 
   @Override

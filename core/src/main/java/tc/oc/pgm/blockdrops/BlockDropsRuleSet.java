@@ -1,5 +1,7 @@
 package tc.oc.pgm.blockdrops;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -28,7 +30,6 @@ import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.material.MaterialData;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class BlockDropsRuleSet {
   private final ImmutableList<BlockDropsRule> rules;
@@ -104,11 +105,11 @@ public class BlockDropsRuleSet {
       BlockTransformEvent blockTransformEvent = (BlockTransformEvent) event;
       Entity actor = blockTransformEvent.getActor();
       if (actor instanceof Player) {
-        rightToolUsed = NMSHacks.canMineBlock(material, ((Player) actor).getItemInHand());
+        rightToolUsed = NMS_HACKS.canMineBlock(material, ((Player) actor).getItemInHand());
       }
     } else if (event instanceof BlockBreakEvent) {
       rightToolUsed =
-          NMSHacks.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
+          NMS_HACKS.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
     }
 
     for (BlockDropsRule rule : this.rules) {

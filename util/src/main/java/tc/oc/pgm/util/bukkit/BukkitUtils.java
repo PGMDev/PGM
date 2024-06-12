@@ -26,11 +26,11 @@ public interface BukkitUtils {
   }
 
   static void addRecipe(World world, Recipe recipe) {
-    NMSHacks.INSTANCE.addRecipe(world, recipe);
+    NMSHacks.NMS_HACKS.addRecipe(world, recipe);
   }
 
   static void resetRecipes(World world) {
-    NMSHacks.INSTANCE.resetRecipes(world);
+    NMSHacks.NMS_HACKS.resetRecipes(world);
   }
 
   /** Makes strings have pretty colors */

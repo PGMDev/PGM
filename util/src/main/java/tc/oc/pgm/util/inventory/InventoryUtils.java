@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.inventory;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.SetMultimap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.platform.Platform;
 
@@ -179,5 +181,20 @@ public final class InventoryUtils {
     void setUnbreakable(ItemMeta meta, boolean unbreakable);
 
     boolean openVillager(Villager villager, Player viewer);
+
+    ItemStack craftItemCopy(ItemStack item);
+
+    void copyAttributeModifiers(ItemMeta destination, ItemMeta source);
+
+    void applyAttributeModifiers(
+        SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta);
+
+    void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials);
+
+    Set<Material> getCanDestroy(ItemMeta itemMeta);
+
+    void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials);
+
+    Set<Material> getCanPlaceOn(ItemMeta itemMeta);
   }
 }

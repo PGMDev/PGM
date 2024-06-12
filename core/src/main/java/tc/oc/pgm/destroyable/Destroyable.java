@@ -7,6 +7,7 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -56,10 +57,9 @@ import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.material.MaterialData;
-import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {
@@ -68,8 +68,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   protected BlockDropsRuleSet blockDropsRuleSet;
 
   protected final FiniteBlockRegion blockRegion;
-  protected final Set<SingleMaterialMatcher> materialPatterns = new HashSet<>();
-  protected final Set<MaterialData> materials = new HashSet<>();
+  protected MaterialMatcher materialPattern;
+  protected Set<MaterialData> materials;
   protected final boolean isShared;
 
   // The percentage of blocks that must be broken for the entire Destroyable to be destroyed.
@@ -108,17 +108,14 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   public Destroyable(DestroyableFactory definition, Match match) {
     super(definition, match);
 
-    for (SingleMaterialMatcher pattern : definition.getMaterials()) {
-      addMaterials(pattern);
-    }
-
+    setMaterials(definition.getMaterials());
     this.destructionRequired = definition.getDestructionRequired();
 
     this.blockRegion =
         FiniteBlockRegion.fromWorld(
             definition.getRegion(),
             match.getWorld(),
-            CompoundMaterialMatcher.of(this.materialPatterns),
+            this.materialPattern,
             match.getMap().getProto());
     if (this.blockRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No destroyable blocks found in destroyable " + this.getName());
@@ -183,9 +180,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.definition.getModes();
   }
 
-  void addMaterials(SingleMaterialMatcher pattern) {
-    materialPatterns.add(pattern);
-    materials.addAll(pattern.getBlockStates());
+  void setMaterials(MaterialMatcher pattern) {
+    materialPattern = pattern;
+    materials = pattern.getMaterialData();
   }
 
   /** Calculate maximum/current health */
@@ -369,7 +366,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
                         .build(),
                     0);
 
-            NMSHacks.skipFireworksLaunch(firework);
+            NMS_HACKS.skipFireworksLaunch(firework);
           }
 
           // Players more than 64m away will not see or hear the fireworks, so just play the sound
@@ -441,10 +438,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   public boolean hasMaterial(MaterialData data) {
-    for (SingleMaterialMatcher material : materialPatterns) {
-      if (material.matches(data)) return true;
-    }
-    return false;
+    return materialPattern.matches(data);
   }
 
   public void addHealth(int delta) {
@@ -618,9 +612,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     }
 
     // Update the world list on switch
-    this.materialPatterns.clear();
-    this.materials.clear();
-    addMaterials(SingleMaterialMatcher.of(newMaterial));
+    setMaterials(SingleMaterialMatcher.of(newMaterial));
 
     // If there is a block health map, get rid of it, since there is now only one world in the list
     this.blockMaterialHealth = null;

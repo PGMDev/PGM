@@ -1,5 +1,7 @@
 package tc.oc.pgm.kits;
 
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.StaticFilter;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class KitNode extends AbstractKit {
   private final List<Kit> kits;
@@ -37,7 +38,7 @@ public class KitNode extends AbstractKit {
       }
 
       if (this.potionParticles != null) {
-        NMSHacks.setPotionParticles(player.getBukkit(), this.potionParticles);
+        PLAYER_UTILS.setPotionParticles(player.getBukkit(), this.potionParticles);
       }
     }
   }

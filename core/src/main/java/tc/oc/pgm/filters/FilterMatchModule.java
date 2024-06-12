@@ -2,6 +2,7 @@ package tc.oc.pgm.filters;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
@@ -51,7 +52,6 @@ import tc.oc.pgm.util.MapUtils;
 import tc.oc.pgm.util.MethodHandleUtils;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /**
  * Handler of dynamic filter magic.
@@ -498,7 +498,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
     if (player != null) {
       this.invalidate(player);
-      NMSHacks.postToMainThread(PGM.get(), true, this::tick);
+      NMS_HACKS.postToMainThread(PGM.get(), true, this::tick);
     }
   }
 

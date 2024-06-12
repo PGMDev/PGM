@@ -11,7 +11,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ItemRule {
   final MaterialMatcher items;
@@ -44,15 +43,17 @@ public class ItemRule {
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
-      NMSHacks.copyAttributeModifiers(meta, this.meta);
+      INVENTORY_UTILS.copyAttributeModifiers(meta, this.meta);
 
       Set<Material> canDestroy =
-          unionMaterials(NMSHacks.getCanDestroy(meta), NMSHacks.getCanDestroy(this.meta));
+          unionMaterials(
+              INVENTORY_UTILS.getCanDestroy(meta), INVENTORY_UTILS.getCanDestroy(this.meta));
       Set<Material> canPlaceOn =
-          unionMaterials(NMSHacks.getCanPlaceOn(meta), NMSHacks.getCanPlaceOn(this.meta));
+          unionMaterials(
+              INVENTORY_UTILS.getCanPlaceOn(meta), INVENTORY_UTILS.getCanPlaceOn(this.meta));
 
-      if (!canDestroy.isEmpty()) NMSHacks.setCanDestroy(meta, canDestroy);
-      if (!canPlaceOn.isEmpty()) NMSHacks.setCanPlaceOn(meta, canPlaceOn);
+      if (!canDestroy.isEmpty()) INVENTORY_UTILS.setCanDestroy(meta, canDestroy);
+      if (!canPlaceOn.isEmpty()) INVENTORY_UTILS.setCanPlaceOn(meta, canPlaceOn);
 
       if (INVENTORY_UTILS.isUnbreakable(this.meta)) INVENTORY_UTILS.setUnbreakable(meta, true);
 

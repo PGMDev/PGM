@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -30,7 +29,7 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -112,8 +111,8 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
         }
 
         String id = destroyableEl.getAttributeValue("id");
-        Set<SingleMaterialMatcher> materials =
-            XMLUtils.parseMaterialPatternSet(
+        MaterialMatcher materials =
+            XMLUtils.parseMultiMaterialPattern(
                 Node.fromRequiredAttr(destroyableEl, "materials", "material"));
 
         ImmutableSet<Mode> modeSet;
