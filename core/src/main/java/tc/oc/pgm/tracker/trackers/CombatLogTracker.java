@@ -160,16 +160,14 @@ public class CombatLogTracker implements Listener {
       // allowing the tracker to figure out the cause of death
       EntityDamageEvent damageEvent;
       if (imminentDeath.blockDamager != null) {
-        damageEvent =
-            new EntityDamageByBlockEvent(
-                imminentDeath.blockDamager,
-                player.getBukkit(),
-                imminentDeath.cause,
-                player.getBukkit().getHealth());
+        damageEvent = new EntityDamageByBlockEvent(
+            imminentDeath.blockDamager,
+            player.getBukkit(),
+            imminentDeath.cause,
+            player.getBukkit().getHealth());
       } else {
-        damageEvent =
-            new EntityDamageEvent(
-                player.getBukkit(), imminentDeath.cause, player.getBukkit().getHealth());
+        damageEvent = new EntityDamageEvent(
+            player.getBukkit(), imminentDeath.cause, player.getBukkit().getHealth());
       }
       match.callEvent(damageEvent);
 
@@ -190,11 +188,11 @@ public class CombatLogTracker implements Listener {
     }
 
     try {
-      currentDeathEvent =
-          MISC_UTILS.createDeathEvent(
-              player.getBukkit(),
-              drops,
-              player.getBukkit().getDisplayName() + " logged out to avoid death");
+      currentDeathEvent = MISC_UTILS.createDeathEvent(
+          player.getBukkit(),
+          imminentDeath.cause,
+          drops,
+          player.getBukkit().getDisplayName() + " logged out to avoid death");
       if (currentDeathEvent != null) match.callEvent(currentDeathEvent);
     } finally {
       currentDeathEvent = null;

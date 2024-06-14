@@ -5,11 +5,9 @@ import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.v1_8_R3.DataWatcher;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
@@ -45,17 +43,16 @@ public class SpTabPackets implements TabPackets, PacketSender {
   @Override
   public Packet spawnPlayerPacket(int entityId, UUID uuid, Location location, Player player) {
     DataWatcher dataWatcher = copyDataWatcher(player);
-    return new SpPacket<>(
-        new PacketPlayOutNamedEntitySpawn(
-            entityId,
-            uuid,
-            location.getX(),
-            location.getY(),
-            location.getZ(),
-            (byte) location.getYaw(),
-            (byte) location.getPitch(),
-            CraftItemStack.asNMSCopy(null),
-            dataWatcher));
+    return new SpPacket<>(new PacketPlayOutNamedEntitySpawn(
+        entityId,
+        uuid,
+        location.getX(),
+        location.getY(),
+        location.getZ(),
+        (byte) location.getYaw(),
+        (byte) location.getPitch(),
+        CraftItemStack.asNMSCopy(null),
+        dataWatcher));
   }
 
   @Override
@@ -142,19 +139,13 @@ public class SpTabPackets implements TabPackets, PacketSender {
         @Nullable Skin skin,
         @Nullable String renderedDisplayName) {
       GameProfile profile = new GameProfile(uuid, name);
-      if (skin != null) {
-        for (Map.Entry<String, Collection<Property>> entry :
-            Skins.toProperties(skin).asMap().entrySet()) {
-          profile.getProperties().putAll(entry.getKey(), entry.getValue());
-        }
-      }
+      if (skin != null) Skins.toProfile(profile, skin);
 
       WorldSettings.EnumGamemode enumGamemode =
           gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
-      IChatBaseComponent iChatBaseComponent =
-          renderedDisplayName == null
-              ? null
-              : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
+      IChatBaseComponent iChatBaseComponent = renderedDisplayName == null
+          ? null
+          : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
 
       packet.b.add(packet.new PlayerInfoData(profile, ping, enumGamemode, iChatBaseComponent));
     }

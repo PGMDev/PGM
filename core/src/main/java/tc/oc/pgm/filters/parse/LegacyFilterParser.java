@@ -12,10 +12,9 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.operator.FilterNode;
 import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
-import tc.oc.pgm.util.xml.XMLUtils;
 
 /** For proto < 1.4 */
 public class LegacyFilterParser extends FilterParser {
@@ -116,7 +115,7 @@ public class LegacyFilterParser extends FilterParser {
   // Removed in proto 1.4 to avoid conflict with <block> region
   @MethodParser("block")
   public Filter parseBlock(Element el) throws InvalidXMLException {
-    SingleMaterialMatcher pattern = XMLUtils.parseMaterialPattern(el);
+    MaterialMatcher pattern = MaterialMatcher.parse(el);
     if (!pattern.getMaterials().iterator().next().isBlock()) {
       throw new InvalidXMLException("Material is not a block", el);
     }

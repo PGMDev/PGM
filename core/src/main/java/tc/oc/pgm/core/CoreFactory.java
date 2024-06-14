@@ -9,12 +9,12 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 @FeatureInfo(name = "core")
 public class CoreFactory extends ProximityGoalDefinition {
   protected final Region region;
-  protected final MaterialData material;
+  protected final MaterialMatcher material;
   protected final int leakLevel;
   protected final ImmutableSet<Mode> modeList;
   protected final boolean showProgress;
@@ -27,7 +27,7 @@ public class CoreFactory extends ProximityGoalDefinition {
       TeamFactory owner,
       @Nullable ProximityMetric proximityMetric,
       Region region,
-      MaterialData material,
+      MaterialMatcher material,
       int leakLevel,
       @Nullable ImmutableSet<Mode> modeList,
       boolean showProgress) {
@@ -48,7 +48,7 @@ public class CoreFactory extends ProximityGoalDefinition {
     return this.modeList;
   }
 
-  public MaterialData getMaterial() {
+  public MaterialMatcher getMaterial() {
     return this.material;
   }
 

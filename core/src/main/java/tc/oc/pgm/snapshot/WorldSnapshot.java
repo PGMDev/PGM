@@ -1,11 +1,8 @@
 package tc.oc.pgm.snapshot;
 
-import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.ChunkSnapshot;
-import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
@@ -14,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
 public class WorldSnapshot {
@@ -26,19 +24,19 @@ public class WorldSnapshot {
     this.worldEdit = new BudgetWorldEdit(world, this);
   }
 
-  public MaterialData getOriginalMaterial(Vector vector) {
+  public BlockMaterialData getOriginalMaterial(Vector vector) {
     return getOriginalMaterial(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
   }
 
-  public MaterialData getOriginalMaterial(int x, int y, int z) {
-    if (y < 0 || y >= 256) return MaterialData.from(Material.AIR);
+  public BlockMaterialData getOriginalMaterial(int x, int y, int z) {
+    if (y < 0 || y >= 256) return MaterialData.AIR;
 
     ChunkVector chunkVector = ChunkVector.ofBlock(x, y, z);
     ChunkSnapshot chunkSnapshot = chunkSnapshots.get(chunkVector);
     if (chunkSnapshot != null) {
-      return MaterialData.from(chunkSnapshot, chunkVector.worldToChunk(x, y, z));
+      return MaterialData.block(chunkSnapshot, chunkVector.worldToChunk(x, y, z));
     } else {
-      return MaterialData.from(world.getBlockAt(x, y, z));
+      return MaterialData.block(world.getBlockAt(x, y, z));
     }
   }
 
@@ -49,7 +47,7 @@ public class WorldSnapshot {
     ChunkVector chunkVector = ChunkVector.ofBlock(x, y, z);
     ChunkSnapshot chunkSnapshot = chunkSnapshots.get(chunkVector);
     if (chunkSnapshot != null) {
-      MaterialData.from(chunkSnapshot, chunkVector.worldToChunk(x, y, z)).applyTo(state);
+      MaterialData.block(chunkSnapshot, chunkVector.worldToChunk(x, y, z)).applyTo(state);
     }
     return state;
   }
@@ -61,15 +59,19 @@ public class WorldSnapshot {
    * @param state optional block state to write on the snapshot
    */
   public void saveSnapshot(ChunkVector cv, @Nullable BlockState state) {
-    if (!chunkSnapshots.containsKey(cv)) {
-      ChunkSnapshot snapshot = cv.getChunk(world).getChunkSnapshot();
-
-      // ChunkSnapshot is very likely to have the post-event state already,
-      // so we have to correct it
-      if (state != null) NMS_HACKS.updateChunkSnapshot(snapshot, state);
-
-      chunkSnapshots.put(cv, snapshot);
-    }
+    chunkSnapshots.computeIfAbsent(cv, vec -> {
+      // ChunkSnapshot will have the post-event state unless we revert
+      BlockState newState = null;
+      try {
+        if (state != null) {
+          newState = state.getBlock().getState();
+          state.update(true, false);
+        }
+        return vec.getChunk(world).getChunkSnapshot(false, false, false);
+      } finally {
+        if (newState != null) state.update(true, false);
+      }
+    });
   }
 
   public void saveRegion(Region region) {

@@ -25,7 +25,7 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -176,7 +176,8 @@ public class ClassModule implements MapModule<ClassMatchModule> {
         kits.add(kit);
       }
 
-      MaterialData icon = XMLUtils.parseMaterialData(Node.fromRequiredAttr(classEl, "icon"));
+      ItemMaterialData icon =
+          XMLUtils.parseItemMaterialData(Node.fromRequiredAttr(classEl, "icon"));
 
       boolean restrict = XMLUtils.parseBoolean(classEl.getAttribute("restrict"), false);
 

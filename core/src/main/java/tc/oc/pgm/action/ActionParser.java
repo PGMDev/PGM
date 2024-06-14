@@ -241,11 +241,10 @@ public class ActionParser {
     Node subtitleNode = Node.fromChildOrAttr(el, "subtitle");
     Title title = null;
     if (titleNode != null || subtitleNode != null)
-      title =
-          Title.title(
-              XMLUtils.parseFormattedText(titleNode, empty()),
-              XMLUtils.parseFormattedText(subtitleNode, empty()),
-              XMLUtils.parseTitleTimes(el, Title.DEFAULT_TIMES));
+      title = Title.title(
+          XMLUtils.parseFormattedText(titleNode, empty()),
+          XMLUtils.parseFormattedText(subtitleNode, empty()),
+          XMLUtils.parseTitleTimes(el, Title.DEFAULT_TIMES));
 
     if (text == null && actionbar == null && title == null)
       throw new InvalidXMLException(
@@ -290,10 +289,8 @@ public class ActionParser {
     Node resourceNode = Node.fromAttr(el, "key");
     String resource = resourceNode == null ? soundType.getResource() : resourceNode.getValue();
 
-    float volume =
-        Math.min(
-            1f,
-            XMLUtils.parseNumber(Node.fromAttr(el, "volume"), Float.class, soundType.getVolume()));
+    float volume = Math.min(
+        1f, XMLUtils.parseNumber(Node.fromAttr(el, "volume"), Float.class, soundType.getVolume()));
     float pitch =
         XMLUtils.parseNumber(Node.fromAttr(el, "pitch"), Float.class, soundType.getPitch());
 
@@ -352,7 +349,7 @@ public class ActionParser {
   public FillAction parseFill(Element el, Class<?> scope) throws InvalidXMLException {
     return new FillAction(
         regions.parseProperty(Node.fromAttrOrSelf(el, "region"), BlockBoundedValidation.INSTANCE),
-        XMLUtils.parseMaterialData(Node.fromRequiredAttr(el, "material")),
+        XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(el, "material")),
         filters.parseProperty(Node.fromAttr(el, "filter")),
         XMLUtils.parseBoolean(el.getAttribute("events"), false));
   }

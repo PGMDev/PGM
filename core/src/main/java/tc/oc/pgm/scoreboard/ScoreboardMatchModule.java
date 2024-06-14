@@ -1,6 +1,7 @@
 package tc.oc.pgm.scoreboard;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -79,6 +80,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
         StringUtils.truncate(TextTranslations.translateLegacy(party.getName(NameStyle.FANCY)), 32));
     team.setPrefix(party.getColor().toString());
     team.setSuffix(ChatColor.WHITE.toString());
+    COLOR_UTILS.setColor(team, party.getColor());
 
     team.setCanSeeFriendlyInvisibles(true);
     team.setAllowFriendlyFire(match.getFriendlyFire());
@@ -151,11 +153,10 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
       if (team != null) {
         match
             .getLogger()
-            .fine(
-                "Unregistering team "
-                    + toString(team)
-                    + " from scoreboard "
-                    + toString(otherScoreboard));
+            .fine("Unregistering team "
+                + toString(team)
+                + " from scoreboard "
+                + toString(otherScoreboard));
         team.unregister();
       }
     }
@@ -170,25 +171,23 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
         Team team = scoreboard.getTeam(teamName);
         match
             .getLogger()
-            .fine(
-                "Adding player "
-                    + player
-                    + " to team "
-                    + toString(team)
-                    + " on scoreboard "
-                    + toString(scoreboard));
+            .fine("Adding player "
+                + player
+                + " to team "
+                + toString(team)
+                + " on scoreboard "
+                + toString(scoreboard));
         team.addEntry(player.getNameLegacy());
       } else if (oldParty != null) {
         Team team = scoreboard.getTeam(teamName);
         match
             .getLogger()
-            .fine(
-                "Removing player "
-                    + player
-                    + " from team "
-                    + toString(team)
-                    + " on scoreboard "
-                    + toString(scoreboard));
+            .fine("Removing player "
+                + player
+                + " from team "
+                + toString(team)
+                + " on scoreboard "
+                + toString(scoreboard));
         // FIXME: Removing this fixes white tab list entries when cycling
         // team.removePlayer(player.getBukkit());
       }

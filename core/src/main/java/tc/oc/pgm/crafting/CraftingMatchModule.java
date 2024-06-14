@@ -12,16 +12,16 @@ import org.bukkit.inventory.Recipe;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class CraftingMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Set<Recipe> customRecipes;
-  private final Set<SingleMaterialMatcher> disabledRecipes;
+  private final MaterialMatcher disabledRecipes;
 
   public CraftingMatchModule(
-      Match match, Set<Recipe> customRecipes, Set<SingleMaterialMatcher> disabledRecipes) {
+      Match match, Set<Recipe> customRecipes, MaterialMatcher disabledRecipes) {
     this.match = match;
     this.customRecipes = customRecipes;
     this.disabledRecipes = disabledRecipes;
@@ -51,11 +51,6 @@ public class CraftingMatchModule implements MatchModule, Listener {
       return;
     }
 
-    for (SingleMaterialMatcher disabled : disabledRecipes) {
-      if (disabled.matches(result)) {
-        crafting.setResult(null);
-        break;
-      }
-    }
+    if (disabledRecipes.matches(result)) crafting.setResult(null);
   }
 }

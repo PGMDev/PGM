@@ -31,7 +31,7 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -89,9 +89,11 @@ public class CoreModule implements MapModule<CoreMatchModule> {
       HashMap<TeamFactory, Integer> serialNumbers = new HashMap<>();
 
       for (Element coreEl : XMLUtils.flattenElements(doc.getRootElement(), "cores", "core")) {
-        MaterialData material =
-            XMLUtils.parseBlockMaterialData(
-                Node.fromAttr(coreEl, "material"), MaterialData.from(Material.OBSIDIAN));
+        var matNode = Node.fromAttr(coreEl, "material");
+
+        MaterialMatcher material = MaterialMatcher.builder()
+            .parse(Node.fromAttr(coreEl, "material"))
+            .ifEmpty(MaterialMatcher.of(Material.OBSIDIAN));
 
         int leakLevel = Integer.parseInt(coreEl.getAttributeValue("leak", "5"));
 
@@ -141,23 +143,21 @@ public class CoreModule implements MapModule<CoreMatchModule> {
         boolean showProgress = XMLUtils.parseBoolean(coreEl.getAttribute("show-progress"), false);
         ShowOptions options = ShowOptions.parse(context.getFilters(), coreEl);
         Boolean required = XMLUtils.parseBoolean(coreEl.getAttribute("required"), null);
-        ProximityMetric proximityMetric =
-            ProximityMetric.parse(
-                coreEl, new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
+        ProximityMetric proximityMetric = ProximityMetric.parse(
+            coreEl, new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
 
-        CoreFactory factory =
-            new CoreFactory(
-                id,
-                name,
-                required,
-                options,
-                owner,
-                proximityMetric,
-                region,
-                material,
-                leakLevel,
-                modeSet,
-                showProgress);
+        CoreFactory factory = new CoreFactory(
+            id,
+            name,
+            required,
+            options,
+            owner,
+            proximityMetric,
+            region,
+            material,
+            leakLevel,
+            modeSet,
+            showProgress);
         context.getFeatures().addFeature(coreEl, factory);
         coreFactories.add(factory);
       }

@@ -133,13 +133,12 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     match.getLogger().fine("Transitioning " + player + " from " + oldState + " to " + newState);
 
     if (transitioningPlayers.contains(player)) {
-      throw new IllegalStateException(
-          "Nested spawn state transition for player "
-              + player
-              + " oldState="
-              + oldState
-              + " newState="
-              + newState);
+      throw new IllegalStateException("Nested spawn state transition for player "
+          + player
+          + " oldState="
+          + oldState
+          + " newState="
+          + newState);
     }
 
     ArrayList<Event> events = new ArrayList<>();
@@ -170,9 +169,8 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     if (failed.add(spawn)) {
       // Note: PGM no longer keeps Document data after map parsing
       // Element elSpawn = match.getMap().getFeatures().getNode(spawn);
-      ModuleLoadException ex =
-          new ModuleLoadException(
-              "Failed to generate spawn location for " + player.getBukkit().getName());
+      ModuleLoadException ex = new ModuleLoadException(
+          "Failed to generate spawn location for " + player.getBukkit().getName());
       PGM.get().getGameLogger().log(Level.SEVERE, ex.getMessage(), ex);
     }
   }
@@ -201,9 +199,8 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
       // Party change during match
       State state = states.get(event.getPlayer());
       if (state != null)
-        state.onEvent(
-            (PlayerJoinPartyEvent)
-                event); // Should always be PlayerPartyJoinEvent if getNewParty() != null
+        state.onEvent((PlayerJoinPartyEvent)
+            event); // Should always be PlayerPartyJoinEvent if getNewParty() != null
     }
   }
 
@@ -293,9 +290,11 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
   public void teleportObservers(final EntityDamageEvent event) {
-    // when an observer begins to take fall damage, teleport them to their spawn
+    // When an observer begins to take fall damage, teleport them to their spawn
+    // Due to a bug causing infinite TP loop, only tp twice a second at most
     if (event.getEntity() instanceof Player
-        && event.getCause() == EntityDamageEvent.DamageCause.VOID) {
+        && event.getCause() == EntityDamageEvent.DamageCause.VOID
+        && (match.getTick().tick % 10) == 0) {
       MatchPlayer player = match.getPlayer(event.getEntity());
       if (player != null && player.isObserving()) {
         Spawn spawn = chooseSpawn(player);

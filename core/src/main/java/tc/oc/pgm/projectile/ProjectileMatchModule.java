@@ -95,11 +95,10 @@ public class ProjectileMatchModule implements MatchModule, Listener {
         assertTrue(launchingDefinition.get() == null, "nested projectile launch");
         launchingDefinition.set(projectileDefinition);
         if (realProjectile) {
-          projectile =
-              player.launchProjectile(
-                  projectileDefinition.projectile.asSubclass(Projectile.class), velocity);
-          if (projectile instanceof Fireball && projectileDefinition.precise) {
-            NMSHacks.NMS_HACKS.setFireballDirection((Fireball) projectile, velocity);
+          projectile = player.launchProjectile(
+              projectileDefinition.projectile.asSubclass(Projectile.class), velocity);
+          if (projectile instanceof Fireball fireball && projectileDefinition.precise) {
+            NMSHacks.NMS_HACKS.setFireballDirection(fireball, velocity);
           }
         } else {
           projectile =
@@ -164,13 +163,12 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     Filter filter = projectileDefinition.destroyFilter;
     if (filter == null) return;
 
-    BlockIterator it =
-        new BlockIterator(
-            projectile.getWorld(),
-            projectile.getLocation().toVector(),
-            projectile.getVelocity().normalize(),
-            0d,
-            2);
+    BlockIterator it = new BlockIterator(
+        projectile.getWorld(),
+        projectile.getLocation().toVector(),
+        projectile.getVelocity().normalize(),
+        0d,
+        2);
 
     Block hitBlock = null;
     while (it.hasNext()) {
@@ -182,14 +180,12 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     }
 
     if (hitBlock != null) {
-      MatchPlayer player =
-          projectile.getShooter() instanceof Player
-              ? match.getPlayer((Player) projectile.getShooter())
-              : null;
-      Query query =
-          player != null
-              ? new PlayerBlockQuery(event, player, hitBlock.getState())
-              : new BlockQuery(event, hitBlock);
+      MatchPlayer player = projectile.getShooter() instanceof Player
+          ? match.getPlayer((Player) projectile.getShooter())
+          : null;
+      Query query = player != null
+          ? new PlayerBlockQuery(event, player, hitBlock.getState())
+          : new BlockQuery(event, hitBlock);
 
       if (filter.query(query).isAllowed()) {
         BlockTransformEvent bte = new BlockTransformEvent(event, hitBlock, Material.AIR);

@@ -6,20 +6,20 @@ import com.google.common.collect.ImmutableMap;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class ScoreBoxFactory {
   private final Region region;
   private final int score;
   private final Filter filter;
-  private final ImmutableMap<SingleMaterialMatcher, Double> redeemables;
+  private final ImmutableMap<MaterialMatcher, Double> redeemables;
   private final boolean silent;
 
   public ScoreBoxFactory(
       Region region,
       int score,
       Filter filter,
-      ImmutableMap<SingleMaterialMatcher, Double> redeemables,
+      ImmutableMap<MaterialMatcher, Double> redeemables,
       boolean silent) {
     assertNotNull(region, "region");
     assertNotNull(filter, "filter");

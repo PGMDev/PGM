@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.tablist;
 
 import static net.kyori.adventure.text.Component.text;
-import static tc.oc.pgm.util.nms.Packets.ENTITIES;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.UUID;
@@ -40,9 +40,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
     long parity = original.hashCode() & 1L;
     long mask = ~((1L << 32) | 1L);
     UUID uuid = randomUUIDVersion2();
-    uuid =
-        new UUID(
-            uuid.getMostSignificantBits() & mask, (uuid.getLeastSignificantBits() & mask) | parity);
+    uuid = new UUID(
+        uuid.getMostSignificantBits() & mask, (uuid.getLeastSignificantBits() & mask) | parity);
     return uuid;
   }
 
@@ -52,7 +51,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   public PlayerTabEntry(Player player) {
     super(randomUUIDVersion2SameDefaultSkin(player.getUniqueId()));
     this.player = player;
-    this.spareEntityId = ENTITIES.allocateEntityId();
+    this.spareEntityId = NMS_HACKS.allocateEntityId();
   }
 
   @Override

@@ -2,6 +2,7 @@ package tc.oc.pgm.util.platform;
 
 import static org.reflections.scanners.Scanners.TypesAnnotated;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -19,14 +20,20 @@ import tc.oc.pgm.util.text.TextParser;
 
 @SuppressWarnings("unchecked")
 public abstract class Platform {
-  public static final String SERVER_VERSION =
-      Bukkit.getServer().getVersion().toLowerCase(Locale.ROOT);
   public static final Version MINECRAFT_VERSION =
       TextParser.parseVersion(Bukkit.getServer().getBukkitVersion().split("-")[0]);
 
-  private static final Reflections REFLECTIONS =
-      new Reflections(
-          new ConfigurationBuilder().forPackage("tc.oc.pgm.platform").setScanners(TypesAnnotated));
+  public static final Supports.Variant VARIANT = Arrays.stream(Supports.Variant.values())
+      .filter(v -> Bukkit.getServer().getName().toUpperCase(Locale.ROOT).equals(v.name())
+          || Bukkit.getServer()
+              .getVersion()
+              .toUpperCase(Locale.ROOT)
+              .contains("-" + v.name() + "-"))
+      .findFirst()
+      .orElse(null);
+
+  private static final Reflections REFLECTIONS = new Reflections(
+      new ConfigurationBuilder().forPackage("tc.oc.pgm.platform").setScanners(TypesAnnotated));
   private static final Map<Class<?>, Object> INSTANCES = new HashMap<>();
 
   public static final @NotNull Manifest MANIFEST = requireInstance(Manifest.class);
@@ -45,14 +52,13 @@ public abstract class Platform {
   }
 
   public static boolean isCurrentVariant(Supports.Variant variant) {
-    return SERVER_VERSION.contains(variant.name().toLowerCase(Locale.ROOT));
+    return VARIANT == variant;
   }
 
   private static <T> Iterable<Class<?>> getSupported(Class<T> parent) {
-    return REFLECTIONS.get(
-        TypesAnnotated.with(Supports.class, Supports.List.class)
-            .asClass()
-            .filter(parent::isAssignableFrom));
+    return REFLECTIONS.get(TypesAnnotated.with(Supports.class, Supports.List.class)
+        .asClass()
+        .filter(parent::isAssignableFrom));
   }
 
   @Contract(pure = true, value = "_, true -> !null")

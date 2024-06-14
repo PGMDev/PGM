@@ -24,15 +24,14 @@ import tc.oc.pgm.util.platform.Supports;
 @SuppressWarnings("deprecation")
 public class SpColorUtils implements ColorUtils {
 
-  public static final ImmutableSet<Material> COLOR_AFFECTED =
-      ImmutableSet.of(
-          Material.INK_SACK,
-          Material.WOOL,
-          Material.CARPET,
-          Material.STAINED_CLAY,
-          Material.STAINED_GLASS,
-          Material.STAINED_GLASS_PANE,
-          BANNER);
+  public static final ImmutableSet<Material> COLOR_AFFECTED = ImmutableSet.of(
+      Material.INK_SACK,
+      Material.WOOL,
+      Material.CARPET,
+      Material.STAINED_CLAY,
+      Material.STAINED_GLASS,
+      Material.STAINED_GLASS_PANE,
+      BANNER);
 
   @Override
   public boolean isColorAffected(Material material) {
@@ -53,13 +52,19 @@ public class SpColorUtils implements ColorUtils {
   }
 
   @Override
+  public Material setColor(Material material, DyeColor color) {
+    // This is a no-op because material never changes due to color in 1.8
+    return material;
+  }
+
+  @Override
   public void setColor(Block block, DyeColor color) {
     block.setData(color.getWoolData());
   }
 
   @Override
-  public DyeColor getColor(BlockState block) {
-    return DyeColor.getByWoolData(block.getRawData());
+  public boolean isColor(BlockState block, DyeColor color) {
+    return color.getWoolData() == block.getRawData();
   }
 
   public void setColor(World world, Iterable<BlockVector> positions, DyeColor color) {

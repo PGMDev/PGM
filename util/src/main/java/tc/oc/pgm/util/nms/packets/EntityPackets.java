@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.nms.packets;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -9,10 +10,9 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 public interface EntityPackets {
-  AtomicInteger ENTITY_IDS = new AtomicInteger(Integer.MAX_VALUE);
 
   default int allocateEntityId() {
-    return ENTITY_IDS.decrementAndGet();
+    return NMS_HACKS.allocateEntityId();
   }
 
   default FakeEntity fakeWitherSkull() {

@@ -92,7 +92,7 @@ public class ItemModifyMatchModule implements MatchModule, Listener {
   @EventHandler(ignoreCancelled = true)
   public void onItemPickup(PlayerPickupItemEvent event) {
     // Needed for players picking up arrows stuck in blocks
-    if (!NMS_HACKS.isCraftItemArrowEntity(event.getItem())) return;
+    if (!NMS_HACKS.isCraftItemArrowEntity(event)) return;
 
     final Item item = event.getItem();
     final ItemStack itemStack = item.getItemStack();

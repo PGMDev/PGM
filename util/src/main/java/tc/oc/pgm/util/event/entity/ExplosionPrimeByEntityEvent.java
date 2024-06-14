@@ -8,9 +8,11 @@ import org.bukkit.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.event.SportPaper;
 
 /**
- * Called when an entity has made another entity decide to explode, specifically when: - a player
- * activates a TNT block or Creeper with Flint & Steel - an entity's explosion chains to a TNT block
- * - a flaming arrow activates a TNT block - an entity damages an Ender Crystal
+ * Called when an entity has made another entity decide to explode, specifically when:<br>
+ * - a player activates a TNT block or Creeper with Flint & Steel <br>
+ * - an entity's explosion chains to a TNT block <br>
+ * - a flaming arrow activates a TNT block <br>
+ * - an entity damages an Ender Crystal
  */
 @SportPaper
 public class ExplosionPrimeByEntityEvent extends ExplosionPrimeEvent {

@@ -131,10 +131,8 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
         // Reproduce the knockback calculation for punch bows
         if (knockback > 0) {
           Vector projectileVelocity = projectile.getVelocity();
-          double horizontalSpeed =
-              Math.sqrt(
-                  projectileVelocity.getX() * projectileVelocity.getX()
-                      + projectileVelocity.getZ() * projectileVelocity.getZ());
+          double horizontalSpeed = Math.sqrt(projectileVelocity.getX() * projectileVelocity.getX()
+              + projectileVelocity.getZ() * projectileVelocity.getZ());
           Vector velocity = event.getEntity().getVelocity();
           velocity.setX(
               velocity.getX() + projectileVelocity.getX() * knockback * 0.6 / horizontalSpeed);
@@ -169,7 +167,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void preventArrowPickup(PlayerPickupItemEvent event) {
-    if (!NMS_HACKS.isCraftItemArrowEntity(event.getItem())) {
+    if (!NMS_HACKS.isCraftItemArrowEntity(event)) {
       return;
     }
     Filter.QueryResponse response =

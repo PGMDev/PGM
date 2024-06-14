@@ -19,25 +19,24 @@ public class CoreConvertMonitor implements Runnable {
   public void run() {
     if (this.nextMaterial != null) {
       for (Core core : this.parent.cores) {
-        core.replaceBlocks(MaterialData.from(this.nextMaterial));
+        core.replaceBlocks(MaterialData.block(this.nextMaterial));
       }
       String name = getName(this.nextMaterial);
       if (name == null) {
         name = this.nextMaterial.toString();
       }
-      this.parent.match.sendMessage(
-          text()
-              .append(text("> > > > ", NamedTextColor.DARK_AQUA))
-              .append(text(name + " CORE MODE", NamedTextColor.RED))
-              .append(text(" < < < <", NamedTextColor.DARK_AQUA))
-              .build());
+      this.parent.match.sendMessage(text()
+          .append(text("> > > > ", NamedTextColor.DARK_AQUA))
+          .append(text(name + " CORE MODE", NamedTextColor.RED))
+          .append(text(" < < < <", NamedTextColor.DARK_AQUA))
+          .build());
       this.nextMaterial = getNext(parent.cores.iterator().next());
     }
   }
 
   public static Material getNext(Core core) {
-    if (core.isCoreMaterial(MaterialData.from(Material.OBSIDIAN))) return Material.GOLD_BLOCK;
-    if (core.isCoreMaterial(MaterialData.from(Material.GOLD_BLOCK))) return Material.GLASS;
+    if (core.isCoreMaterial(MaterialData.of(Material.OBSIDIAN))) return Material.GOLD_BLOCK;
+    if (core.isCoreMaterial(MaterialData.of(Material.GOLD_BLOCK))) return Material.GLASS;
     return null;
   }
 

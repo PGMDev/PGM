@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>tc.oc.pgm</groupId>
-            <artifactId>platform-shared</artifactId>
+            <artifactId>platform-1_20_6</artifactId>
             <version>0.16-SNAPSHOT</version>
             <scope>runtime</scope>
         </dependency>

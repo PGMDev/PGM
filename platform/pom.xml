@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
   <modules>
     <module>platform-sportpaper</module>
-    <module>platform-shared</module>
+    <module>platform-1_20_6</module>
     <module>platform-all</module>
   </modules>
 

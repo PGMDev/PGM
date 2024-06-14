@@ -43,7 +43,7 @@ import tc.oc.pgm.ffa.FreeForAllMatchModule;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -109,48 +109,39 @@ public class ScoreMatchModule implements MatchModule, Listener {
     List<Component> scoreMessages = Lists.newArrayList();
     final FreeForAllMatchModule ffamm = match.getModule(FreeForAllMatchModule.class);
     if (ffamm != null) {
-      scoreMessages =
-          this.scores.entrySet().stream()
-              .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-              .limit(10)
-              .map(
-                  x ->
-                      text()
-                          .append(x.getKey().getName(NameStyle.VERBOSE))
-                          .append(text(": ", NamedTextColor.GRAY))
-                          .append(text((int) x.getValue().doubleValue()))
-                          .color(NamedTextColor.WHITE)
-                          .build())
-              .collect(Collectors.toList());
+      scoreMessages = this.scores.entrySet().stream()
+          .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+          .limit(10)
+          .map(x -> text()
+              .append(x.getKey().getName(NameStyle.VERBOSE))
+              .append(text(": ", NamedTextColor.GRAY))
+              .append(text((int) x.getValue().doubleValue()))
+              .color(NamedTextColor.WHITE)
+              .build())
+          .collect(Collectors.toList());
     } else {
 
       for (Entry<Competitor, Double> scorePair : this.scores.entrySet()) {
-        scoreMessages.add(
-            text(
-                ((int) scorePair.getValue().doubleValue()),
-                TextFormatter.convert(scorePair.getKey().getColor())));
+        scoreMessages.add(text(
+            ((int) scorePair.getValue().doubleValue()),
+            TextFormatter.convert(scorePair.getKey().getColor())));
       }
     }
-    TextComponent returnMessage =
-        text()
-            .append(translatable("match.info.score").color(NamedTextColor.DARK_AQUA))
-            .append(text(": ", NamedTextColor.DARK_AQUA))
-            .append(TextFormatter.list(scoreMessages, NamedTextColor.GRAY))
-            .build();
+    TextComponent returnMessage = text()
+        .append(translatable("match.info.score").color(NamedTextColor.DARK_AQUA))
+        .append(text(": ", NamedTextColor.DARK_AQUA))
+        .append(TextFormatter.list(scoreMessages, NamedTextColor.GRAY))
+        .build();
     if (matchPlayer != null && matchPlayer.getCompetitor() != null && ffamm != null) {
-      returnMessage =
-          returnMessage.append(
-              text()
-                  .color(NamedTextColor.GRAY)
-                  .append(text(" | ", NamedTextColor.GRAY))
-                  .append(translatable("match.info.you"))
-                  .append(text(": "))
-                  .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
-                  .append(
-                      text(
-                          (int) scores.get(matchPlayer.getCompetitor()).doubleValue(),
-                          NamedTextColor.WHITE))
-                  .build());
+      returnMessage = returnMessage.append(text()
+          .color(NamedTextColor.GRAY)
+          .append(text(" | ", NamedTextColor.GRAY))
+          .append(translatable("match.info.you"))
+          .append(text(": "))
+          .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
+          .append(text(
+              (int) scores.get(matchPlayer.getCompetitor()).doubleValue(), NamedTextColor.WHITE))
+          .build());
     }
     return returnMessage;
   }
@@ -182,8 +173,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
   private double redeemItems(ScoreBox box, ItemStack stack) {
     if (stack == null) return 0;
     double points = 0;
-    for (Entry<SingleMaterialMatcher, Double> entry : box.getRedeemables().entrySet()) {
-      if (entry.getKey().matches(stack.getData())) {
+    for (Entry<MaterialMatcher, Double> entry : box.getRedeemables().entrySet()) {
+      if (entry.getKey().matches(stack)) {
         points += entry.getValue() * stack.getAmount();
         stack.setAmount(0);
       }
@@ -229,13 +220,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
         if (box.isCoolingDown(playerState)) {
           match
               .getLogger()
-              .warning(
-                  playerState.getId()
-                      + " tried to score multiple times in one second (from="
-                      + from
-                      + " to="
-                      + to
-                      + ")");
+              .warning(playerState.getId()
+                  + " tried to score multiple times in one second (from="
+                  + from
+                  + " to="
+                  + to
+                  + ")");
         } else {
           this.playerScore(box, player, box.getScore() + redeemItems(box, player.getInventory()));
         }
@@ -253,15 +243,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
       if (!box.getRedeemables().isEmpty()
           && box.getRegion().contains(player.getBukkit())
           && box.canScore(player.getParticipantState())) {
-        match
-            .getExecutor(MatchScope.RUNNING)
-            .execute(
-                () -> {
-                  if (player.getBukkit().isOnline()) {
-                    double points = redeemItems(box, player.getInventory());
-                    ScoreMatchModule.this.playerScore(box, player, points);
-                  }
-                });
+        match.getExecutor(MatchScope.RUNNING).execute(() -> {
+          if (player.getBukkit().isOnline()) {
+            double points = redeemItems(box, player.getInventory());
+            ScoreMatchModule.this.playerScore(box, player, points);
+          }
+        });
       }
     }
   }
@@ -285,14 +272,13 @@ public class ScoreMatchModule implements MatchModule, Listener {
     int wholePoints = (int) points;
     if (wholePoints < 1 || box.isSilent()) return;
 
-    match.sendMessage(
+    match.sendMessage(translatable(
+        "scorebox.scored",
+        player.getName(NameStyle.COLOR),
         translatable(
-            "scorebox.scored",
-            player.getName(NameStyle.COLOR),
-            translatable(
-                wholePoints == 1 ? "misc.point" : "misc.points",
-                text(wholePoints, NamedTextColor.DARK_AQUA)),
-            player.getParty().getName()));
+            wholePoints == 1 ? "misc.point" : "misc.points",
+            text(wholePoints, NamedTextColor.DARK_AQUA)),
+        player.getParty().getName()));
     player.playSound(sound(key("random.levelup"), Sound.Source.MASTER, 1, 1));
   }
 
@@ -308,15 +294,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
       // wait until the next tick to do this so stat recording and other stuff works
-      match
-          .getExecutor(MatchScope.RUNNING)
-          .execute(
-              () -> {
-                if (mp.getParty() instanceof Competitor) {
-                  match.setParty(mp, match.getDefaultParty());
-                  mp.sendWarning(translatable("join.err.teamGrief", NamedTextColor.RED));
-                }
-              });
+      match.getExecutor(MatchScope.RUNNING).execute(() -> {
+        if (mp.getParty() instanceof Competitor) {
+          match.setParty(mp, match.getDefaultParty());
+          mp.sendWarning(translatable("join.err.teamGrief", NamedTextColor.RED));
+        }
+      });
     }
   }
 

@@ -35,10 +35,10 @@ import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 
 // TODO: Consider making Core extend Destroyable
@@ -62,22 +62,20 @@ public class Core extends TouchableGoal<CoreFactory>
   public Core(CoreFactory definition, Match match) {
     super(definition, match);
 
-    this.material = SingleMaterialMatcher.of(definition.getMaterial());
+    this.material = definition.getMaterial();
 
     Region region = definition.getRegion();
 
-    this.casingRegion =
-        FiniteBlockRegion.fromWorld(
-            region, match.getWorld(), this.material, match.getMap().getProto());
+    this.casingRegion = FiniteBlockRegion.fromWorld(
+        region, match.getWorld(), this.material, match.getMap().getProto());
     if (this.casingRegion.getBlockVolume() == 0) {
       match
           .getLogger()
           .warning("No casing world (" + this.material + ") found in core " + this.getName());
     }
 
-    this.lavaRegion =
-        FiniteBlockRegion.fromWorld(
-            region, match.getWorld(), LAVA_BLOCKS, match.getMap().getProto());
+    this.lavaRegion = FiniteBlockRegion.fromWorld(
+        region, match.getWorld(), LAVA_BLOCKS, match.getMap().getProto());
     if (this.lavaRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }
@@ -128,9 +126,8 @@ public class Core extends TouchableGoal<CoreFactory>
   @Override
   public Iterable<Location> getProximityLocations(ParticipantState player) {
     if (proximityLocations == null) {
-      proximityLocations =
-          Collections.singleton(
-              casingRegion.getBounds().getCenterPoint().toLocation(this.getMatch().getWorld()));
+      proximityLocations = Collections.singleton(
+          casingRegion.getBounds().getCenterPoint().toLocation(this.getMatch().getWorld()));
     }
     return proximityLocations;
   }
@@ -230,18 +227,18 @@ public class Core extends TouchableGoal<CoreFactory>
   }
 
   @Override
-  public void replaceBlocks(MaterialData newMaterial) {
+  public void replaceBlocks(BlockMaterialData newMaterial) {
     for (Block block : this.getCasingRegion().getBlocks(match.getWorld())) {
       if (this.isObjectiveMaterial(block)) {
         newMaterial.applyTo(block, true);
       }
     }
-    this.material = MaterialMatcher.of(newMaterial);
+    this.material = newMaterial.toMatcher();
   }
 
   @Override
   public boolean isObjectiveMaterial(Block block) {
-    return material.matches(block.getState().getData());
+    return material.matches(block.getState());
   }
 
   public String getModeChangeMessage(Material material) {

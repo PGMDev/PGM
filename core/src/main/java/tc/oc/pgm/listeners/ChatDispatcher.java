@@ -24,6 +24,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -70,12 +71,11 @@ public class ChatDispatcher implements Listener {
   private final MatchManager manager;
   private final OnlinePlayerMapAdapter<MessageSenderIdentity> lastMessagedBy;
 
-  public static final TextComponent ADMIN_CHAT_PREFIX =
-      text()
-          .append(text("[", NamedTextColor.WHITE))
-          .append(text("A", NamedTextColor.GOLD))
-          .append(text("] ", NamedTextColor.WHITE))
-          .build();
+  public static final TextComponent ADMIN_CHAT_PREFIX = text()
+      .append(text("[", NamedTextColor.WHITE))
+      .append(text("A", NamedTextColor.GOLD))
+      .append(text("] ", NamedTextColor.WHITE))
+      .build();
 
   private static final Sound DM_SOUND = sound(key("random.orb"), Sound.Source.MASTER, 1f, 1.2f);
   private static final Sound AC_SOUND = sound(key("random.orb"), Sound.Source.MASTER, 1f, 0.7f);
@@ -153,10 +153,8 @@ public class ChatDispatcher implements Listener {
         TextTranslations.translateLegacy(party.getChatPrefix()) + PREFIX_FORMAT,
         getChatFormat(party.getChatPrefix(), sender, message),
         match.getPlayers(),
-        viewer ->
-            party.equals(viewer.getParty())
-                || (viewer.isObserving()
-                    && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
+        viewer -> party.equals(viewer.getParty())
+            || (viewer.isObserving() && viewer.getBukkit().hasPermission(Permissions.ADMINCHAT)),
         SettingValue.CHAT_TEAM,
         Channel.TEAM);
   }
@@ -330,7 +328,10 @@ public class ChatDispatcher implements Listener {
   }
 
   private static final Cache<AsyncPlayerChatEvent, Boolean> CHAT_EVENT_CACHE =
-      CacheBuilder.newBuilder().weakKeys().expireAfterWrite(15, TimeUnit.SECONDS).build();
+      CacheBuilder.newBuilder()
+          .weakKeys()
+          .expireAfterWrite(15, TimeUnit.SECONDS)
+          .build();
 
   public void send(
       final @NotNull Match match,
@@ -349,19 +350,18 @@ public class ChatDispatcher implements Listener {
       return;
     }
 
-    final Set<Player> players =
-        matchPlayers.stream()
-            .filter(filter)
-            .map(MatchPlayer::getBukkit)
-            .collect(Collectors.toSet());
+    final Set<Player> players = matchPlayers.stream()
+        .filter(filter)
+        .map(MatchPlayer::getBukkit)
+        .collect(Collectors.toSet());
 
-    PGM.get()
-        .getAsyncExecutor()
-        .execute(
-            () -> asyncSendChat(match, sender, message, format, componentMsg, players, channel));
+    Runnable completion =
+        () -> syncSendChat(match, sender, message, format, componentMsg, players, channel);
+    if (Bukkit.isPrimaryThread()) completion.run();
+    else PGM.get().getExecutor().execute(completion);
   }
 
-  private void asyncSendChat(
+  private void syncSendChat(
       final @NotNull Match match,
       final @NotNull MatchPlayer sender,
       final @NotNull String message,
@@ -390,10 +390,9 @@ public class ChatDispatcher implements Listener {
       Optional<String> muteReason =
           Optional.ofNullable(Integration.getMuteReason(player.getBukkit()));
 
-      Component reason =
-          muteReason.isPresent()
-              ? text(muteReason.get())
-              : translatable("moderation.mute.noReason");
+      Component reason = muteReason.isPresent()
+          ? text(muteReason.get())
+          : translatable("moderation.mute.noReason");
 
       throw exception("moderation.mute.message", reason.color(NamedTextColor.AQUA));
     }
@@ -406,14 +405,11 @@ public class ChatDispatcher implements Listener {
   public static void broadcastAdminChatMessage(
       Component message, Match match, Optional<Sound> sound) {
     TextComponent formatted = ADMIN_CHAT_PREFIX.append(message);
-    match.getPlayers().stream()
-        .filter(AC_FILTER)
-        .forEach(
-            mp -> {
-              // If provided a sound, play if setting allows
-              sound.ifPresent(s -> playSound(mp, s));
-              mp.sendMessage(formatted);
-            });
+    match.getPlayers().stream().filter(AC_FILTER).forEach(mp -> {
+      // If provided a sound, play if setting allows
+      sound.ifPresent(s -> playSound(mp, s));
+      mp.sendMessage(formatted);
+    });
     Audience.console().sendMessage(formatted);
   }
 

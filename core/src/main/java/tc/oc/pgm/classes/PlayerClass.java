@@ -7,7 +7,7 @@ import java.util.Set;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.ItemMaterialData;
 
 public class PlayerClass {
   private final String name;
@@ -16,7 +16,7 @@ public class PlayerClass {
   private final @Nullable String longdescription;
   private final boolean sticky;
   private final Set<Kit> kits;
-  private final MaterialData icon;
+  private final ItemMaterialData icon;
   private final boolean restrict;
 
   public PlayerClass(
@@ -26,7 +26,7 @@ public class PlayerClass {
       @Nullable String longdescription,
       boolean sticky,
       Set<Kit> kits,
-      MaterialData icon,
+      ItemMaterialData icon,
       boolean restrict) {
     this.name = assertNotNull(name, "name");
     this.familyName = assertNotNull(familyName, "family name");
@@ -62,7 +62,7 @@ public class PlayerClass {
     return this.kits;
   }
 
-  public MaterialData getIcon() {
+  public ItemMaterialData getIcon() {
     return this.icon;
   }
 

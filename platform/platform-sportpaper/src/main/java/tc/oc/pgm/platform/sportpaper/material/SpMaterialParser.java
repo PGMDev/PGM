@@ -1,0 +1,78 @@
+package tc.oc.pgm.platform.sportpaper.material;
+
+import org.bukkit.Material;
+import org.bukkit.material.MaterialData;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLUtils;
+
+class SpMaterialParser {
+
+  public static MaterialData parseBukkit(Node node) throws InvalidXMLException {
+    return parse(node.getValueNormalize(), node, false, Adapter.BUKKIT);
+  }
+
+  public static SpMaterialData parsePgm(String text, Node node) throws InvalidXMLException {
+    return parse(text, node, false, Adapter.PGM);
+  }
+
+  public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
+    Material material = Material.matchMaterial(text);
+    if (material == null) {
+      throw new InvalidXMLException("Could not find material '" + text + "'.", node);
+    }
+    return material;
+  }
+
+  public static <T> T parse(String text, @Nullable Node node, boolean matOnly, Adapter<T> adapter)
+      throws InvalidXMLException {
+    if (matOnly) return adapter.visit(parseMaterial(text, node));
+
+    String[] pieces = text.split(":");
+    if (pieces.length > 2) {
+      throw new InvalidXMLException("Invalid material pattern '" + text + "'.", node);
+    }
+
+    Material material = parseMaterial(pieces[0], node);
+    if (pieces.length == 1) {
+      return adapter.visit(material);
+    } else {
+      try {
+        return adapter.visit(material, XMLUtils.parseNumber(node, pieces[1], Short.class));
+      } catch (NumberFormatException e) {
+        throw new InvalidXMLException("Invalid damage value: " + pieces[1], node, e);
+      }
+    }
+  }
+
+  public interface Adapter<T> {
+    Adapter<MaterialData> BUKKIT = new Adapter<>() {
+      @Override
+      public MaterialData visit(Material material) {
+        return new MaterialData(material);
+      }
+
+      @Override
+      public MaterialData visit(Material material, short data) {
+        return new MaterialData(material, (byte) data);
+      }
+    };
+
+    Adapter<SpMaterialData> PGM = new Adapter<>() {
+      @Override
+      public SpMaterialData visit(Material material) {
+        return new SpMaterialData(material, (short) 0);
+      }
+
+      @Override
+      public SpMaterialData visit(Material material, short data) {
+        return new SpMaterialData(material, data);
+      }
+    };
+
+    T visit(Material material);
+
+    T visit(Material material, short data);
+  }
+}

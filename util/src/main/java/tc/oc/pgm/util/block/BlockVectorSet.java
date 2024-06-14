@@ -1,10 +1,9 @@
 package tc.oc.pgm.util.block;
 
-import gnu.trove.TLongCollection;
-import gnu.trove.impl.Constants;
-import gnu.trove.iterator.TLongIterator;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
+import it.unimi.dsi.fastutil.longs.LongCollection;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Random;
@@ -17,14 +16,14 @@ import org.bukkit.util.BlockVector;
  */
 public class BlockVectorSet implements Set<BlockVector> {
 
-  private final TLongSet set;
+  private final LongSet set;
 
-  public BlockVectorSet(TLongSet set) {
+  public BlockVectorSet(LongSet set) {
     this.set = set;
   }
 
   public BlockVectorSet(int capacity) {
-    this(new TLongHashSet(capacity));
+    this(new LongOpenHashSet(capacity));
   }
 
   public BlockVectorSet(Collection<? extends BlockVector> that) {
@@ -33,7 +32,7 @@ public class BlockVectorSet implements Set<BlockVector> {
   }
 
   public BlockVectorSet() {
-    this(Constants.DEFAULT_CAPACITY);
+    this(LongOpenHashSet.DEFAULT_INITIAL_SIZE);
   }
 
   public static BlockVectorSet of(Collection<? extends BlockVector> that) {
@@ -52,9 +51,9 @@ public class BlockVectorSet implements Set<BlockVector> {
 
   @Override
   public Iterator<BlockVector> iterator() {
-    final TLongIterator iter = this.set.iterator();
+    final var iter = this.set.iterator();
 
-    return new Iterator<BlockVector>() {
+    return new Iterator<>() {
       @Override
       public boolean hasNext() {
         return iter.hasNext();
@@ -62,7 +61,7 @@ public class BlockVectorSet implements Set<BlockVector> {
 
       @Override
       public BlockVector next() {
-        return BlockVectors.decodePos(iter.next());
+        return BlockVectors.decodePos(iter.nextLong());
       }
 
       @Override
@@ -111,11 +110,7 @@ public class BlockVectorSet implements Set<BlockVector> {
     return o instanceof BlockVector && this.remove(BlockVectors.encodePos((BlockVector) o));
   }
 
-  public boolean containsAll(long[] encoded) {
-    return this.set.containsAll(encoded);
-  }
-
-  public boolean containsAll(TLongCollection encoded) {
+  public boolean containsAll(LongCollection encoded) {
     return this.set.containsAll(encoded);
   }
 
@@ -127,11 +122,7 @@ public class BlockVectorSet implements Set<BlockVector> {
     return true;
   }
 
-  public boolean addAll(long[] encoded) {
-    return this.set.addAll(encoded);
-  }
-
-  public boolean addAll(TLongCollection encoded) {
+  public boolean addAll(LongCollection encoded) {
     return this.set.addAll(encoded);
   }
 
@@ -143,11 +134,7 @@ public class BlockVectorSet implements Set<BlockVector> {
     return false;
   }
 
-  public boolean retainAll(long[] encoded) {
-    return this.set.retainAll(encoded);
-  }
-
-  public boolean retainAll(TLongCollection encoded) {
+  public boolean retainAll(LongCollection encoded) {
     return this.set.retainAll(encoded);
   }
 
@@ -156,11 +143,7 @@ public class BlockVectorSet implements Set<BlockVector> {
     return this.retainAll(BlockVectors.encodePosSet(vectors));
   }
 
-  public boolean removeAll(TLongCollection encoded) {
-    return set.removeAll(encoded);
-  }
-
-  public boolean removeAll(long[] encoded) {
+  public boolean removeAll(LongCollection encoded) {
     return set.removeAll(encoded);
   }
 
@@ -184,22 +167,10 @@ public class BlockVectorSet implements Set<BlockVector> {
     throw new UnsupportedOperationException();
   }
 
-  public long getEncodedAt(int n) {
-    return set.toArray()[n];
-  }
-
-  /**
-   * Get the element at position N for some arbitrary ordering. The order is constant as long as the
-   * state of the container does not change, but is otherwise undefined.
-   */
-  public BlockVector getAt(int n) {
-    return BlockVectors.decodePos(getEncodedAt(n));
-  }
-
   public BlockVector chooseRandom(Random random) {
     // The Trove set uses a sparse array, so there isn't really any
     // faster way to do this, not even by messing with Trove internals.
-    final TLongIterator iterator = set.iterator();
+    final LongIterator iterator = set.iterator();
     long encoded = 0;
     for (int n = random.nextInt(size()); n >= 0; n--) {
       encoded = iterator.next();

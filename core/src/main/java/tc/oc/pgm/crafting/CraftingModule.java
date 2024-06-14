@@ -1,5 +1,7 @@
 package tc.oc.pgm.crafting;
 
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,18 +20,19 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class CraftingModule implements MapModule<CraftingMatchModule> {
 
   private final Set<Recipe> customRecipes;
-  private final Set<SingleMaterialMatcher> disabledRecipes;
+  private final MaterialMatcher disabledRecipes;
 
-  public CraftingModule(Set<Recipe> customRecipes, Set<SingleMaterialMatcher> disabledRecipes) {
+  public CraftingModule(Set<Recipe> customRecipes, MaterialMatcher disabledRecipes) {
     this.customRecipes = ImmutableSet.copyOf(customRecipes);
-    this.disabledRecipes = ImmutableSet.copyOf(disabledRecipes);
+    this.disabledRecipes = disabledRecipes;
   }
 
   @Override
@@ -42,11 +45,11 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
     public @Nullable CraftingModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Set<Recipe> customRecipes = new HashSet<>();
-      Set<SingleMaterialMatcher> disabledRecipes = new HashSet<>();
+      MaterialMatcher.Builder disabledRecipes = MaterialMatcher.builder();
 
       for (Element elCrafting : doc.getRootElement().getChildren("crafting")) {
         for (Element elDisable : elCrafting.getChildren("disable")) {
-          disabledRecipes.add(XMLUtils.parseMaterialPattern(elDisable));
+          disabledRecipes.parse(elDisable);
         }
 
         for (Element elRecipe : XMLUtils.getChildren(elCrafting, "shapeless", "shaped", "smelt")) {
@@ -71,17 +74,17 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
           customRecipes.add(recipe);
           if (XMLUtils.parseBoolean(elRecipe.getAttribute("override"), false)) {
             // Disable specific world + data
-            disabledRecipes.add(SingleMaterialMatcher.of(recipe.getResult().getData()));
+            disabledRecipes.add(recipe.getResult(), false);
           } else if (XMLUtils.parseBoolean(elRecipe.getAttribute("override-all"), false)) {
             // Disable all of this world
-            disabledRecipes.add(SingleMaterialMatcher.of(recipe.getResult().getType()));
+            disabledRecipes.add(recipe.getResult().getType(), true);
           }
         }
       }
 
       return customRecipes.isEmpty() && disabledRecipes.isEmpty()
           ? null
-          : new CraftingModule(customRecipes, disabledRecipes);
+          : new CraftingModule(customRecipes, disabledRecipes.build());
     }
 
     private ItemStack parseRecipeResult(MapFactory factory, Element elRecipe)
@@ -96,9 +99,8 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
       ShapelessRecipe recipe = new ShapelessRecipe(parseRecipeResult(factory, elRecipe));
 
       for (Element elIngredient : XMLUtils.getChildren(elRecipe, "ingredient", "i")) {
-        SingleMaterialMatcher item = XMLUtils.parseMaterialPattern(elIngredient);
         int count = XMLUtils.parseNumber(elIngredient.getAttribute("amount"), Integer.class, 1);
-        item.addIngredient(recipe, count);
+        MATERIAL_UTILS.addIngredient(new Node(elIngredient), recipe, count);
       }
 
       if (recipe.getIngredientList().isEmpty()) {
@@ -141,13 +143,11 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
       }
 
       recipe.shape(rows.toArray(new String[rows.size()]));
-      Set<Character> keys =
-          recipe
-              .getIngredientMap()
-              .keySet(); // All shape symbols are present and mapped to null at this point
+      Set<Character> keys = recipe
+          .getIngredientMap()
+          .keySet(); // All shape symbols are present and mapped to null at this point
 
       for (Element elIngredient : elRecipe.getChildren("ingredient")) {
-        SingleMaterialMatcher item = XMLUtils.parseMaterialPattern(elIngredient);
         Attribute attrSymbol = XMLUtils.getRequiredAttribute(elIngredient, "symbol");
         String symbol = attrSymbol.getValue();
 
@@ -161,7 +161,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
           throw new InvalidXMLException(
               "Ingredient key '" + key + "' does not appear in the recipe shape", attrSymbol);
         }
-        item.setIngredient(recipe, key);
+        MATERIAL_UTILS.setIngredient(new Node(elIngredient), recipe, key);
       }
 
       if (recipe.getIngredientMap().isEmpty()) {
@@ -174,11 +174,9 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
 
     public Recipe parseSmeltingRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      SingleMaterialMatcher ingredient =
-          XMLUtils.parseMaterialPattern(
-              XMLUtils.getRequiredUniqueChild(elRecipe, "ingredient", "i"));
       ItemStack result = parseRecipeResult(factory, elRecipe);
-      return ingredient.createFurnaceRecipe(result);
+      return MATERIAL_UTILS.createFurnaceRecipe(
+          new Node(XMLUtils.getRequiredUniqueChild(elRecipe, "ingredient", "i")), result);
     }
   }
 }

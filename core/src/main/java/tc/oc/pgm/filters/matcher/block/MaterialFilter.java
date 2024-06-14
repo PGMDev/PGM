@@ -6,16 +6,12 @@ import tc.oc.pgm.api.filter.query.MaterialQuery;
 import tc.oc.pgm.filters.matcher.TypedFilter;
 import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 
 public class MaterialFilter extends TypedFilter.Impl<MaterialQuery> {
-  public static final Filter NOT_AIR = new InverseFilter(new MaterialFilter(Material.AIR));
+  public static final Filter NOT_AIR =
+      new InverseFilter(new MaterialFilter(MaterialMatcher.of(Material.AIR)));
 
   private final MaterialMatcher pattern;
-
-  public MaterialFilter(Material material) {
-    this(SingleMaterialMatcher.of(material));
-  }
 
   public MaterialFilter(MaterialMatcher pattern) {
     this.pattern = pattern;

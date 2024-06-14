@@ -1,7 +1,8 @@
 package tc.oc.pgm.util.xml;
 
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+
 import com.google.common.base.Predicate;
-import com.google.common.base.Splitter;
 import com.google.common.collect.*;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -29,13 +30,11 @@ import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.Enchantments;
 import tc.oc.pgm.util.bukkit.PotionEffects;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
-import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
 import tc.oc.pgm.util.math.OffsetVector;
 import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.skin.Skin;
@@ -68,16 +67,14 @@ public final class XMLUtils {
 
     InheritingElement el = (InheritingElement) root;
 
-    for (Element child :
-        minChildDepth > 0
-            ? el.getChildren(parentTagNames)
-            : childTagNames == null
-                ? root.getChildren()
-                : el.getChildren(Sets.union(parentTagNames, childTagNames))) {
+    for (Element child : minChildDepth > 0
+        ? el.getChildren(parentTagNames)
+        : childTagNames == null
+            ? root.getChildren()
+            : el.getChildren(Sets.union(parentTagNames, childTagNames))) {
       if (parentTagNames.contains(child.getName())) {
-        result.addAll(
-            flattenElements(
-                new InheritingElement(child), parentTagNames, childTagNames, minChildDepth - 1));
+        result.addAll(flattenElements(
+            new InheritingElement(child), parentTagNames, childTagNames, minChildDepth - 1));
       } else {
         result.add(new InheritingElement(child));
       }
@@ -114,26 +111,22 @@ public final class XMLUtils {
 
   public static Iterable<Element> getChildren(Element parent, String... names) {
     final Set<String> nameSet = new HashSet<>(Arrays.asList(names));
-    return Iterables.filter(
-        parent.getChildren(),
-        new Predicate<Element>() {
-          @Override
-          public boolean apply(Element child) {
-            return nameSet.contains(child.getName());
-          }
-        });
+    return Iterables.filter(parent.getChildren(), new Predicate<Element>() {
+      @Override
+      public boolean apply(Element child) {
+        return nameSet.contains(child.getName());
+      }
+    });
   }
 
   public static Iterable<Attribute> getAttributes(Element parent, String... names) {
     final Set<String> nameSet = new HashSet<>(Arrays.asList(names));
-    return Iterables.filter(
-        parent.getAttributes(),
-        new Predicate<Attribute>() {
-          @Override
-          public boolean apply(Attribute child) {
-            return nameSet.contains(child.getName());
-          }
-        });
+    return Iterables.filter(parent.getAttributes(), new Predicate<Attribute>() {
+      @Override
+      public boolean apply(Attribute child) {
+        return nameSet.contains(child.getName());
+      }
+    });
   }
 
   public static @Nullable Attribute getAttribute(Element parent, String... names) {
@@ -434,8 +427,8 @@ public final class XMLUtils {
    * <p>equal to [1, 5], (-oo, 5] and [1, oo)
    *
    * @implNote Since infinity and "infinity"({@link Double#POSITIVE_INFINITY} etc.) is handled
-   *     differently by the Google ranges we find the infinities and create Ranges using {@link
-   *     Range#upTo(Comparable, BoundType) Range.upTo} and {@link Range#downTo(Comparable,
+   *     differently by the Google ranges we find the infinities and create Ranges using
+   *     {@link Range#upTo(Comparable, BoundType) Range.upTo} and {@link Range#downTo(Comparable,
    *     BoundType) Range.downTo} instead of resolving to the max or min value of the range type.
    *     (Like {@link #parseNumber(String, Class, boolean)} does)
    */
@@ -745,95 +738,51 @@ public final class XMLUtils {
   }
 
   public static Material parseMaterial(Node node, String text) throws InvalidXMLException {
-    Material material = Materials.parseMaterial(text);
-    if (material == null) {
-      throw new InvalidXMLException("Unknown material '" + text + "'", node);
-    }
-    return material;
+    return MATERIAL_UTILS.parseMaterial(text, node);
   }
 
   public static Material parseMaterial(Node node) throws InvalidXMLException {
     return parseMaterial(node, node.getValueNormalize());
   }
 
-  public static MaterialData parseMaterialData(Node node, String text) throws InvalidXMLException {
-    String[] pieces = text.split(":");
-    Material material = parseMaterial(node, pieces[0]);
-    byte data;
-    if (pieces.length > 1) {
-      data = parseNumber(node, pieces[1], Byte.class);
-    } else {
-      data = 0;
-    }
-    return MaterialData.from(material.getNewData(data));
-  }
-
-  public static MaterialData parseMaterialData(Node node, MaterialData def)
-      throws InvalidXMLException {
-    return node == null ? def : parseMaterialData(node, node.getValueNormalize());
-  }
-
-  public static MaterialData parseMaterialData(Node node) throws InvalidXMLException {
-    return parseMaterialData(node, (MaterialData) null);
-  }
-
-  public static MaterialData parseBlockMaterialData(Node node, String text)
+  public static BlockMaterialData parseBlockMaterialData(Node node, String text)
       throws InvalidXMLException {
     if (node == null) return null;
-    MaterialData material = parseMaterialData(node, text);
-    if (!material.getItemType().isBlock()) {
-      throw new InvalidXMLException(
-          "Material " + material.getItemType().name() + " is not a block", node);
-    }
-    return material;
+    return MATERIAL_UTILS.parseBlockMaterialData(text, node);
   }
 
-  public static MaterialData parseBlockMaterialData(Node node, MaterialData def)
+  public static BlockMaterialData parseBlockMaterialData(Node node, BlockMaterialData def)
       throws InvalidXMLException {
     return node == null ? def : parseBlockMaterialData(node, node.getValueNormalize());
   }
 
-  public static MaterialData parseBlockMaterialData(Node node) throws InvalidXMLException {
-    return parseBlockMaterialData(node, (MaterialData) null);
+  public static BlockMaterialData parseBlockMaterialData(Node node) throws InvalidXMLException {
+    return parseBlockMaterialData(node, (BlockMaterialData) null);
   }
 
-  public static SingleMaterialMatcher parseMaterialPattern(Node node, String value)
+  public static ItemMaterialData parseItemMaterialData(Node node, String text)
       throws InvalidXMLException {
-    try {
-      return SingleMaterialMatcher.parse(value);
-    } catch (IllegalArgumentException e) {
-      throw new InvalidXMLException(e.getMessage(), node);
-    }
+    if (node == null) return null;
+    return MATERIAL_UTILS.parseItemMaterialData(text, node);
   }
 
-  public static SingleMaterialMatcher parseMaterialPattern(Node node) throws InvalidXMLException {
-    return parseMaterialPattern(node, node.getValue());
-  }
-
-  public static SingleMaterialMatcher parseMaterialPattern(Node node, SingleMaterialMatcher def)
+  public static ItemMaterialData parseItemMaterialData(Node node, String text, short dmg)
       throws InvalidXMLException {
-    return node == null ? def : parseMaterialPattern(node);
+    if (node == null) return null;
+    return MATERIAL_UTILS.parseItemMaterialData(text, dmg, node);
   }
 
-  public static SingleMaterialMatcher parseMaterialPattern(Element el) throws InvalidXMLException {
-    return parseMaterialPattern(new Node(el));
-  }
-
-  public static SingleMaterialMatcher parseMaterialPattern(Attribute attr)
+  public static ItemMaterialData parseItemMaterialData(Node node, ItemMaterialData def)
       throws InvalidXMLException {
-    return parseMaterialPattern(new Node(attr));
+    return node == null ? def : parseItemMaterialData(node, node.getValueNormalize());
   }
 
-  public static MaterialMatcher parseMultiMaterialPattern(Node node) throws InvalidXMLException {
-    ImmutableSet.Builder<SingleMaterialMatcher> patterns = ImmutableSet.builder();
-    for (String value : Splitter.on(";").split(node.getValue())) {
-      patterns.add(parseMaterialPattern(node, value));
-    }
-    return CompoundMaterialMatcher.of(patterns.build());
+  public static ItemMaterialData parseItemMaterialData(Node node) throws InvalidXMLException {
+    return parseItemMaterialData(node, (ItemMaterialData) null);
   }
 
   public static MaterialMatcher parseMaterialMatcher(Element el) throws InvalidXMLException {
-    Set<MaterialMatcher> matchers = new HashSet<>();
+    MaterialMatcher.Builder builder = MaterialMatcher.builder();
 
     for (Element elChild : el.getChildren()) {
       switch (elChild.getName()) {
@@ -842,12 +791,12 @@ public final class XMLUtils {
           return AllMaterialMatcher.INSTANCE;
 
         case "all-blocks":
-          matchers.add(BlockMaterialMatcher.INSTANCE);
+          builder.add(BlockMaterialMatcher.INSTANCE);
           break;
 
         case "material":
         case "item":
-          matchers.add(parseMaterialPattern(elChild));
+          builder.parse(new Node(elChild));
           break;
 
         default:
@@ -855,7 +804,7 @@ public final class XMLUtils {
       }
     }
 
-    return CompoundMaterialMatcher.of(matchers);
+    return builder.build();
   }
 
   public static PotionEffectType parsePotionEffectType(Node node) throws InvalidXMLException {
@@ -1135,9 +1084,8 @@ public final class XMLUtils {
       throws InvalidXMLException {
     String attribute = parseAttribute(new Node(el)).getName();
     double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
-    AttributeModifier.Operation operation =
-        parseAttributeOperation(
-            Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);
+    AttributeModifier.Operation operation = parseAttributeOperation(
+        Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);
 
     return new AbstractMap.SimpleImmutableEntry<>(
         attribute, new AttributeModifier("FromXML", amount, operation));

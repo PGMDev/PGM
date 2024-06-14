@@ -19,7 +19,7 @@ import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 
 /** Called when a {@link Block} transforms from one {@link BlockState} to another. */
 public class BlockTransformEvent extends GeneralizedEvent {
@@ -44,7 +44,7 @@ public class BlockTransformEvent extends GeneralizedEvent {
     this(cause, assertNotNull(oldState).getBlock(), oldState, newState);
   }
 
-  public BlockTransformEvent(Event cause, Block block, MaterialData newMaterial) {
+  public BlockTransformEvent(Event cause, Block block, BlockMaterialData newMaterial) {
     this(
         cause,
         block,

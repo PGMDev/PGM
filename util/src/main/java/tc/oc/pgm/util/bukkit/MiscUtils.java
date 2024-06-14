@@ -17,12 +17,13 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
 public interface MiscUtils {
@@ -63,12 +64,13 @@ public interface MiscUtils {
     source.getWorld().createExplosion(loc.getX(), loc.getY(), loc.getZ(), power, fire, destroy);
   }
 
-  default PlayerDeathEvent createDeathEvent(Player player, List<ItemStack> drops, String msg) {
+  default PlayerDeathEvent createDeathEvent(
+      Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg) {
     throw new UnsupportedOperationException();
   }
 
   default EntityChangeBlockEvent createEntityChangeBlockEvent(
-      Player player, Block block, MaterialData md) {
+      Player player, Block block, BlockMaterialData md) {
     throw new UnsupportedOperationException();
   }
 

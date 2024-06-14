@@ -21,8 +21,7 @@ public class ItemModifier {
 
     ItemMeta meta = item.getItemMeta();
 
-    if (meta instanceof LeatherArmorMeta) {
-      LeatherArmorMeta leather = (LeatherArmorMeta) meta;
+    if (meta instanceof LeatherArmorMeta leather) {
       leather.setColor(player.getParty().getFullColor());
       item.setItemMeta(meta);
     } else if (COLOR_UTILS.isColorAffected(item.getType())) {
