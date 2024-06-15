@@ -89,21 +89,13 @@ public class ModernMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData parseItemMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
-    var md = ModernMaterialParser.parseItem(text, node);
-    if (CraftMagicNumbers.getItem(md.getItemType()) == null) {
-      throw new InvalidXMLException("Invalid item/block", node);
-    }
-    return md;
+    return ModernMaterialParser.parseItem(text, node);
   }
 
   @Override
   public ItemMaterialData parseItemMaterialData(String text, short dmg, @Nullable Node node)
       throws InvalidXMLException {
-    var md = ModernMaterialParser.parseItem(text, dmg, node);
-    if (CraftMagicNumbers.getItem(md.getItemType()) == null) {
-      throw new InvalidXMLException("Invalid item/block", node);
-    }
-    return md;
+    return ModernMaterialParser.parseItem(text, dmg, node);
   }
 
   @Override

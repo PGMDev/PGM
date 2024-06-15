@@ -98,9 +98,7 @@ public class SpMaterialUtils implements MaterialUtils {
   public ItemMaterialData parseItemMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
     var md = SpMaterialParser.parsePgm(text, node);
-    if (CraftMagicNumbers.getItem(md.getItemType()) == null) {
-      throw new InvalidXMLException("Invalid item/block", node);
-    }
+    validateItem(md.getItemType(), node);
     return md;
   }
 
@@ -108,10 +106,14 @@ public class SpMaterialUtils implements MaterialUtils {
   public ItemMaterialData parseItemMaterialData(String text, short dmg, @Nullable Node node)
       throws InvalidXMLException {
     var md = new SpMaterialData(SpMaterialParser.parseMaterial(text, node), dmg);
-    if (CraftMagicNumbers.getItem(md.getItemType()) == null) {
-      throw new InvalidXMLException("Invalid item/block", node);
-    }
+    validateItem(md.getItemType(), node);
     return md;
+  }
+
+  static void validateItem(Material material, Node node) throws InvalidXMLException {
+    if (CraftMagicNumbers.getItem(material) == null) {
+      throw new InvalidXMLException("Invalid item/block " + material, node);
+    }
   }
 
   @Override

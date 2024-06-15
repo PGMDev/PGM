@@ -3,10 +3,12 @@ package tc.oc.pgm.platform.v1_20_6.material;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.UnsafeValues;
+import org.bukkit.craftbukkit.legacy.CraftLegacy;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
@@ -16,14 +18,15 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
+@SuppressWarnings({"deprecation", "UnstableApiUsage"})
 class ModernMaterialParser {
 
   private static final UnsafeValues UNSAFE = Bukkit.getUnsafe();
   private static final Int2ObjectMap<Material> BY_ID = new Int2ObjectOpenHashMap<>(400);
 
   static {
-    for (Material value : Material.values()) {
-      if (value.isLegacy()) BY_ID.put(value.getId(), value);
+    for (Material value : CraftLegacy.values()) {
+      BY_ID.put(value.getId(), value);
     }
   }
 
@@ -33,19 +36,25 @@ class ModernMaterialParser {
 
   public static ItemMaterialData parseItem(String text, Node node) throws InvalidXMLException {
     var res = parse(text, node, false, Adapter.PGM_ITEM);
-    if (CraftMagicNumbers.getItem(res.getItemType()) == null) {
-      throw new InvalidXMLException("Invalid item/block", node);
-    }
+    validateItem(res.getItemType(), node);
     return res;
   }
 
   public static ItemMaterialData parseItem(String text, short dmg, Node node)
       throws InvalidXMLException {
-    var res = Adapter.PGM_ITEM.visit(parseMaterial(text, node), dmg);
-    if (CraftMagicNumbers.getItem(res.getItemType()) == null) {
-      throw new InvalidXMLException("Invalid item/block", node);
-    }
+    var res = Adapter.PGM_ITEM.visit(parseLegacyMaterial(text, node), dmg);
+    validateItem(res.getItemType(), node);
     return res;
+  }
+
+  public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
+    return UNSAFE.fromLegacy(parseLegacyMaterial(text, node));
+  }
+
+  static void validateItem(Material material, Node node) throws InvalidXMLException {
+    if (CraftMagicNumbers.getItem(material) == null) {
+      throw new InvalidXMLException("Invalid item/block " + material, node);
+    }
   }
 
   public static ItemMaterialData parseItem(Material material, short dmg) {
@@ -89,19 +98,20 @@ class ModernMaterialParser {
     };
   }
 
-  public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
+  private static Material parseLegacyMaterial(String text, Node node) throws InvalidXMLException {
     int id = materialId(text);
-    Material legacy;
     if (id != -1) {
-      legacy = BY_ID.get(id);
-      if (legacy == null)
+      var byId = BY_ID.get(id);
+      if (byId == null)
         throw new InvalidXMLException("Could not find material with id '" + text + "'.", node);
-    } else {
-      legacy = Material.matchMaterial(text, true);
+      return byId;
     }
+    text = text.toUpperCase(Locale.ROOT).replaceAll("\\s+", "_").replaceAll("\\W", "");
+
+    var legacy = Material.getMaterial("LEGACY_" + text);
     if (legacy != null) return legacy;
 
-    Material modern = Material.matchMaterial(text);
+    Material modern = Material.getMaterial(text);
     if (modern == null) {
       throw new InvalidXMLException("Could not find material '" + text + "'.", node);
     }
@@ -110,14 +120,14 @@ class ModernMaterialParser {
 
   public static <T> T parse(String text, @Nullable Node node, boolean matOnly, Adapter<T> adapter)
       throws InvalidXMLException {
-    if (matOnly) return adapter.visit(parseMaterial(text, node));
+    if (matOnly) return adapter.visit(parseLegacyMaterial(text, node));
 
     String[] pieces = text.split(":");
     if (pieces.length > 2) {
       throw new InvalidXMLException("Invalid material pattern '" + text + "'.", node);
     }
 
-    Material material = parseMaterial(pieces[0], node);
+    Material material = parseLegacyMaterial(pieces[0], node);
     if (pieces.length == 1) {
       return adapter.visit(material);
     } else {
@@ -127,6 +137,15 @@ class ModernMaterialParser {
         throw new InvalidXMLException("Invalid damage value: " + pieces[1], node, e);
       }
     }
+  }
+
+  private static Material upgrade(Material material, short data) {
+    if (material.isLegacy()) {
+      var newMat = UNSAFE.fromLegacy(new MaterialData(material, (byte) data), true);
+      // If material+data is invalid, do fromLegacy with just material
+      return material.isAir() ? UNSAFE.fromLegacy(material) : newMat;
+    }
+    return material;
   }
 
   public interface Adapter<T> {
@@ -150,7 +169,8 @@ class ModernMaterialParser {
 
       @Override
       public ItemMaterialData visit(Material material, short data) {
-        return new ModernItemData(UNSAFE.fromLegacy(new MaterialData(material, (byte) data), true));
+        // TODO: handle potions differently, atm they just will strip data
+        return new ModernItemData(upgrade(material, data));
       }
     };
 
@@ -162,7 +182,7 @@ class ModernMaterialParser {
 
       @Override
       public Material[] visit(Material material, short data) {
-        return new Material[] {UNSAFE.fromLegacy(new MaterialData(material, (byte) data))};
+        return new Material[] {upgrade(material, data)};
       }
     };
 
