@@ -5,7 +5,6 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
 
@@ -15,10 +14,6 @@ public class ModernPlatform implements Platform.Manifest {
   public void onEnable(Plugin plugin) {
     Bukkit.getServer().getPluginManager().registerEvents(new ModernListener(), plugin);
 
-    MaterialMatcher matcher =
-        MaterialMatcher.builder().add(m -> m.name().endsWith("_SPAWN_EGG")).build();
-    Bukkit.getServer()
-        .getPluginManager()
-        .registerEvents(new PlayerPlaceEntityListener(matcher), plugin);
+    Bukkit.getServer().getPluginManager().registerEvents(new SpawnEggUseListener(), plugin);
   }
 }

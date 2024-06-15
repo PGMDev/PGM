@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -56,21 +57,25 @@ public class WorldSnapshot {
    * Manually save the initial state of a block to the snapshot.
    *
    * @param cv the chunk vector to save
-   * @param state optional block state to write on the snapshot
+   * @param oldState optional block state to write on the snapshot
    */
-  public void saveSnapshot(ChunkVector cv, @Nullable BlockState state) {
+  public void saveSnapshot(ChunkVector cv, @Nullable BlockState oldState) {
     chunkSnapshots.computeIfAbsent(cv, vec -> {
+      if (oldState == null) return vec.getChunk(world).getChunkSnapshot(false, false, false);
+
       // ChunkSnapshot will have the post-event state unless we revert
-      BlockState newState = null;
-      try {
-        if (state != null) {
-          newState = state.getBlock().getState();
-          state.update(true, false);
-        }
-        return vec.getChunk(world).getChunkSnapshot(false, false, false);
-      } finally {
-        if (newState != null) state.update(true, false);
-      }
+      Block block = oldState.getBlock();
+
+      BlockMaterialData old = MaterialData.block(oldState);
+      BlockMaterialData current = MaterialData.block(block);
+      boolean isModified = !old.equals(current);
+      if (isModified) old.applyTo(block, false);
+
+      var snap = vec.getChunk(world).getChunkSnapshot(false, false, false);
+
+      if (isModified) current.applyTo(block, false);
+
+      return snap;
     });
   }
 

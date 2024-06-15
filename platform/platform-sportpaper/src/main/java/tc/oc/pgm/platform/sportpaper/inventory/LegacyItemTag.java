@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.inventory.tag;
+package tc.oc.pgm.platform.sportpaper.inventory;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +14,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 /**
  * An item tag that encodes data in an item's lore.
@@ -100,9 +101,8 @@ final class LegacyItemTag implements ItemTag<String> {
   private static String encode(String decoded) {
     if (decoded.isEmpty()) return decoded;
     return SPLITTER
-        .matcher(
-            Hex.encodeHexString(
-                SEPARATOR.matcher(decoded).replaceAll(ESCAPE.pattern()).getBytes(CHARSET)))
+        .matcher(Hex.encodeHexString(
+            SEPARATOR.matcher(decoded).replaceAll(ESCAPE.pattern()).getBytes(CHARSET)))
         .replaceAll(SEPARATOR.pattern() + "$1");
   }
 
@@ -110,9 +110,8 @@ final class LegacyItemTag implements ItemTag<String> {
   private static String decode(String encoded) {
     try {
       return ESCAPE
-          .matcher(
-              new String(
-                  Hex.decodeHex(SEPARATOR.matcher(encoded).replaceAll("").toCharArray()), CHARSET))
+          .matcher(new String(
+              Hex.decodeHex(SEPARATOR.matcher(encoded).replaceAll("").toCharArray()), CHARSET))
           .replaceAll(SEPARATOR.pattern());
     } catch (DecoderException e) {
       return null; // Since items can have arbitrary lore, silence any errors.

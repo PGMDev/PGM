@@ -2,6 +2,7 @@ package tc.oc.pgm.platform.v1_20_6;
 
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
+import io.papermc.paper.event.player.PlayerFailMoveEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
@@ -105,5 +106,12 @@ public class ModernListener implements Listener {
   @EventHandler
   public void onMatchLoad(WorldLoadEvent event) {
     event.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+  }
+
+  @EventHandler
+  public void allowClipping(PlayerFailMoveEvent event) {
+    // 1.8 players will otherwise clip into blocks and be setback all the time
+    if (event.getFailReason() == PlayerFailMoveEvent.FailReason.CLIPPED_INTO_BLOCK)
+      event.setAllowed(true);
   }
 }

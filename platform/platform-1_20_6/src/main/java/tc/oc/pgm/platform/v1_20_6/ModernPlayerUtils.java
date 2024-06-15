@@ -76,6 +76,7 @@ public class ModernPlayerUtils implements PlayerUtils {
   @Override
   public void setCollidesWithEntities(Player player, boolean collides) {
     player.setCollidable(collides);
+    // player.setNoPhysics(true);
   }
 
   @Override

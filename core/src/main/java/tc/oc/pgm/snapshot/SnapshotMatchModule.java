@@ -75,8 +75,8 @@ public class SnapshotMatchModule implements MatchModule, Listener {
    * @param cv the chunk vector to save
    * @param state optional block state to write on the snapshot
    */
-  public void saveSnapshot(ChunkVector cv, @Nullable BlockState state) {
-    snapshot.saveSnapshot(cv, state);
+  public void saveSnapshot(ChunkVector cv, @Nullable BlockState oldState) {
+    snapshot.saveSnapshot(cv, oldState);
   }
 
   public WorldSnapshot getOriginalSnapshot() {

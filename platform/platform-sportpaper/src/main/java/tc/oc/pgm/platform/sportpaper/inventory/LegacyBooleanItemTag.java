@@ -1,13 +1,14 @@
-package tc.oc.pgm.util.inventory.tag;
+package tc.oc.pgm.platform.sportpaper.inventory;
 
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 /** An item tag that stores boolean values. */
-final class BooleanItemTag implements ItemTag<Boolean> {
+final class LegacyBooleanItemTag implements ItemTag<Boolean> {
 
   private final ItemTag<String> itemTag;
 
-  BooleanItemTag(ItemTag<String> itemTag) {
+  LegacyBooleanItemTag(ItemTag<String> itemTag) {
     this.itemTag = itemTag;
   }
 

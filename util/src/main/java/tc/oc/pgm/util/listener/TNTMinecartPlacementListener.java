@@ -11,6 +11,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleCreateEvent;
 import org.bukkit.inventory.ItemStack;
@@ -37,7 +38,9 @@ public class TNTMinecartPlacementListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onInteraction(PlayerInteractEvent event) {
     ItemStack stack = event.getItem();
-    if (stack != null && stack.getType() == TNT_MINECART) {
+    if (stack != null
+        && event.getAction() == Action.RIGHT_CLICK_BLOCK
+        && stack.getType() == TNT_MINECART) {
       lastPlacer = event.getPlayer();
       placingStack = stack.clone();
       railLocation = event.getClickedBlock().getLocation();
