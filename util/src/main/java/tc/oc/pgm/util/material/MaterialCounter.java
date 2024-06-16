@@ -1,7 +1,5 @@
 package tc.oc.pgm.util.material;
 
-import static tc.oc.pgm.util.material.MaterialEncoder.encodeMaterial;
-
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntIterator;
@@ -37,7 +35,7 @@ public class MaterialCounter {
   }
 
   public int increment(BlockState block, int count) {
-    return increment(encodeMaterial(block), count);
+    return increment(MaterialData.block(block).encoded(), count);
   }
 
   public void clear() {
@@ -45,7 +43,7 @@ public class MaterialCounter {
   }
 
   public Iterable<BlockMaterialData> materials() {
-    return () -> new Iterator<BlockMaterialData>() {
+    return () -> new Iterator<>() {
       final IntIterator iter = counts.keySet().iterator();
 
       @Override

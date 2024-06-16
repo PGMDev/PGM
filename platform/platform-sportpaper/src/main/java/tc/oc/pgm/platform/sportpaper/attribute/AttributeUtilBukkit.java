@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.v1_20_6.attribute;
+package tc.oc.pgm.platform.sportpaper.attribute;
 
 import java.util.EnumMap;
 import java.util.Map;

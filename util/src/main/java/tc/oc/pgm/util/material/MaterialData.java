@@ -17,7 +17,7 @@ public interface MaterialData {
   BlockMaterialData AIR = MaterialData.block(Material.AIR);
 
   static MaterialData of(Material material) {
-    return MATERIAL_UTILS.createBlockData(material);
+    return material.isBlock() ? block(material) : item(material, (short) 0);
   }
 
   static BlockMaterialData block(Material material) {

@@ -7,10 +7,7 @@ import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.block.BlockData;
@@ -57,10 +54,4 @@ public interface MaterialUtils {
   boolean hasBlockStates(Material material);
 
   MaterialMatcher.Builder matcherBuilder();
-
-  void addIngredient(Node node, ShapelessRecipe recipe, int count) throws InvalidXMLException;
-
-  void setIngredient(Node node, ShapedRecipe recipe, char key) throws InvalidXMLException;
-
-  FurnaceRecipe createFurnaceRecipe(Node node, ItemStack result) throws InvalidXMLException;
 }

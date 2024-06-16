@@ -17,7 +17,7 @@ public class AttributeInstanceBukkit implements AttributeInstance {
 
   @Override
   public Attribute getAttribute() {
-    return AttributeUtilBukkit.convertAttribute(bukkitAttributeInstance.getAttribute());
+    return AttributeUtilBukkit.fromBukkit(bukkitAttributeInstance.getAttribute());
   }
 
   @Override
@@ -33,25 +33,20 @@ public class AttributeInstanceBukkit implements AttributeInstance {
   @Override
   public Collection<AttributeModifier> getModifiers() {
     Collection<AttributeModifier> convertedModifiers = new ArrayList<>();
-
     for (org.bukkit.attribute.AttributeModifier modifier : bukkitAttributeInstance.getModifiers()) {
-
-      AttributeModifier attributeModifier = AttributeUtilBukkit.convertAttributeModifier(modifier);
-
-      convertedModifiers.add(attributeModifier);
+      convertedModifiers.add(AttributeUtilBukkit.fromBukkit(modifier));
     }
-
     return convertedModifiers;
   }
 
   @Override
   public void addModifier(AttributeModifier modifier) {
-    bukkitAttributeInstance.addModifier(AttributeUtilBukkit.convertAttributeModifier(modifier));
+    bukkitAttributeInstance.addModifier(AttributeUtilBukkit.toBukkit(modifier));
   }
 
   @Override
   public void removeModifier(AttributeModifier modifier) {
-    bukkitAttributeInstance.removeModifier(AttributeUtilBukkit.convertAttributeModifier(modifier));
+    bukkitAttributeInstance.removeModifier(AttributeUtilBukkit.toBukkit(modifier));
   }
 
   @Override

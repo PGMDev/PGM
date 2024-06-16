@@ -3,7 +3,6 @@ package tc.oc.pgm.death;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
@@ -31,6 +30,7 @@ import tc.oc.pgm.tracker.info.ItemInfo;
 import tc.oc.pgm.tracker.info.MobInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
+import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -166,7 +166,8 @@ public class DeathMessageBuilder {
 
   boolean variant() {
     int count = 0;
-    for (; getAllKeys().contains(key + "." + count); count++) ;
+    for (; getAllKeys().contains(key + "." + count); count++)
+      ;
 
     if (count == 0) return false;
 
@@ -213,10 +214,7 @@ public class DeathMessageBuilder {
   }
 
   private static final Set<EntityType> IGNORED_ENTITIES =
-      ImmutableSet.of(
-          parse(EntityType::valueOf, "COMPLEX_PART", "UNKNOWN"),
-          parse(EntityType::valueOf, "ENDER_CRYSTAL", "END_CRYSTAL"),
-          EntityType.UNKNOWN);
+      ImmutableSet.of(EntityTypes.COMPLEX_PART, EntityTypes.ENDER_CRYSTAL, EntityTypes.UNKNOWN);
 
   boolean entity(EntityInfo entityInfo) {
     // Skip for entities that are weird and have no translations

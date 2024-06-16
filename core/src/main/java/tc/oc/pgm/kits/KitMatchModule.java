@@ -57,16 +57,13 @@ public class KitMatchModule implements MatchModule, Listener {
           fmm.onRise(MatchPlayer.class, kitRule.getFilter(), kitRule.getKit()::remove);
           break;
         case LEND:
-          fmm.onChange(
-              MatchPlayer.class,
-              kitRule.getFilter(),
-              (player, response) -> {
-                if (response) {
-                  player.applyKit(kitRule.getKit(), true);
-                } else {
-                  kitRule.getKit().remove(player);
-                }
-              });
+          fmm.onChange(MatchPlayer.class, kitRule.getFilter(), (player, response) -> {
+            if (response) {
+              player.applyKit(kitRule.getKit(), true);
+            } else {
+              kitRule.getKit().remove(player);
+            }
+          });
           break;
       }
     }
@@ -181,7 +178,7 @@ public class KitMatchModule implements MatchModule, Listener {
     final ItemStack item = event.getPlayer().getItemInHand();
     if (ItemTags.INFINITE.has(item)) {
       // infinite block contains -1 items, giving -1 items sets the amount back to -1
-      item.setAmount(-1);
+      item.setAmount(ItemKit.INFINITE_STACK_SIZE);
     }
   }
 }

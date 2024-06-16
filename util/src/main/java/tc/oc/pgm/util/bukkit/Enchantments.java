@@ -6,11 +6,11 @@ import org.bukkit.enchantments.Enchantment;
 import tc.oc.pgm.util.StringUtils;
 
 public class Enchantments {
-  private static final Map<String, Enchantment> byName = new HashMap<>();
+  private static final Map<String, Enchantment> BY_NAME = new HashMap<>();
 
   static {
     for (Enchantment value : Enchantment.values()) {
-      byName.put(StringUtils.simplify(value.getName()), value);
+      BY_NAME.put(StringUtils.simplify(value.getName()), value);
     }
   }
 
@@ -46,12 +46,12 @@ public class Enchantments {
   private static Enchantment parse(String... names) {
     Enchantment type = BukkitUtils.parse(Enchantment::getByName, names);
     for (String name : names) {
-      byName.put(StringUtils.simplify(name), type);
+      BY_NAME.put(StringUtils.simplify(name), type);
     }
     return type;
   }
 
   public static Enchantment getByName(String name) {
-    return byName.get(StringUtils.simplify(name));
+    return BY_NAME.get(StringUtils.simplify(name));
   }
 }

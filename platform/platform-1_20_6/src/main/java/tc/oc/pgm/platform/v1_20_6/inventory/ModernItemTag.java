@@ -34,8 +34,10 @@ final class ModernItemTag<T> implements ItemTag<T> {
       // Create missing item meta if none is found
       itemMeta = Bukkit.getItemFactory().getItemMeta(item.getType());
     }
-    itemMeta.getPersistentDataContainer().set(key, type, value);
-    item.setItemMeta(itemMeta);
+    if (itemMeta != null) {
+      itemMeta.getPersistentDataContainer().set(key, type, value);
+      item.setItemMeta(itemMeta);
+    }
   }
 
   @Override

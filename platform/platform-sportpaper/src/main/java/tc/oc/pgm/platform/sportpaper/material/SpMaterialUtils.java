@@ -14,10 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.block.BlockData;
@@ -153,22 +150,6 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public MaterialMatcher.Builder matcherBuilder() {
     return new MaterialMatcherBuilderImpl();
-  }
-
-  @Override
-  public void addIngredient(Node node, ShapelessRecipe recipe, int count)
-      throws InvalidXMLException {
-    recipe.addIngredient(count, SpMaterialParser.parseBukkit(node));
-  }
-
-  @Override
-  public void setIngredient(Node node, ShapedRecipe recipe, char key) throws InvalidXMLException {
-    recipe.setIngredient(key, SpMaterialParser.parseBukkit(node));
-  }
-
-  @Override
-  public FurnaceRecipe createFurnaceRecipe(Node node, ItemStack result) throws InvalidXMLException {
-    return new FurnaceRecipe(result, SpMaterialParser.parseBukkit(node));
   }
 
   private static class MaterialMatcherBuilderImpl extends MaterialMatcher.BuilderImpl

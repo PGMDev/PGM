@@ -57,6 +57,7 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
@@ -343,26 +344,25 @@ public abstract class KitParser {
   }
 
   public AttributeKit parseAttributeKit(Element el) throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = parseAttributeModifiers(el);
+    SetMultimap<Attribute, AttributeModifier> modifiers = parseAttributeModifiers(el);
     attributeModifiers.addAll(modifiers.values());
     return modifiers.isEmpty() ? null : new AttributeKit(modifiers);
   }
 
-  public SetMultimap<String, AttributeModifier> parseAttributeModifiers(Element el)
+  public SetMultimap<Attribute, AttributeModifier> parseAttributeModifiers(Element el)
       throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = HashMultimap.create();
+    SetMultimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
 
     Node attr = Node.fromAttr(el, "attribute", "attributes");
     if (attr != null) {
       for (String modifierText : Splitter.on(";").split(attr.getValue())) {
-        Map.Entry<String, AttributeModifier> mod =
-            XMLUtils.parseCompactAttributeModifier(attr, modifierText);
+        var mod = XMLUtils.parseCompactAttributeModifier(attr, modifierText);
         modifiers.put(mod.getKey(), mod.getValue());
       }
     }
 
     for (Element elAttribute : el.getChildren("attribute")) {
-      Map.Entry<String, AttributeModifier> mod = XMLUtils.parseAttributeModifier(elAttribute);
+      var mod = XMLUtils.parseAttributeModifier(elAttribute);
       modifiers.put(mod.getKey(), mod.getValue());
     }
 
@@ -507,12 +507,13 @@ public abstract class KitParser {
     int amount = XMLUtils.parseNumber(Node.fromAttr(el, "amount"), Integer.class, true, 1);
 
     // amount returns max value of integer if "oo" is given as amount
-    if (amount == Integer.MAX_VALUE) amount = -1;
+    if (amount == Integer.MAX_VALUE) amount = ItemKit.INFINITE_STACK_SIZE;
 
     // must be CraftItemStack to keep track of NBT data
     ItemStack itemStack = INVENTORY_UTILS.craftItemCopy(material.toItemStack(amount));
 
-    if (amount == -1 && !itemStack.getType().isBlock()) {
+    // amount returns max value of integer if "oo" is given as amount
+    if (amount == ItemKit.INFINITE_STACK_SIZE && !itemStack.getType().isBlock()) {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }
 
@@ -635,7 +636,7 @@ public abstract class KitParser {
       ItemTags.LOCKED.set(itemStack, true);
     }
 
-    if (itemStack.getAmount() == -1) {
+    if (itemStack.getAmount() == ItemKit.INFINITE_STACK_SIZE) {
       ItemTags.INFINITE.set(itemStack, true);
     }
 

@@ -1,6 +1,6 @@
 package tc.oc.pgm.crafting;
 
-import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+import static tc.oc.pgm.util.bukkit.RecipeUtils.RECIPE_UTILS;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
@@ -96,11 +96,12 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
 
     public Recipe parseShapelessRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      ShapelessRecipe recipe = new ShapelessRecipe(parseRecipeResult(factory, elRecipe));
+      ShapelessRecipe recipe =
+          RECIPE_UTILS.createShapelessRecipe(parseRecipeResult(factory, elRecipe));
 
       for (Element elIngredient : XMLUtils.getChildren(elRecipe, "ingredient", "i")) {
         int count = XMLUtils.parseNumber(elIngredient.getAttribute("amount"), Integer.class, 1);
-        MATERIAL_UTILS.addIngredient(new Node(elIngredient), recipe, count);
+        RECIPE_UTILS.addIngredient(new Node(elIngredient), recipe, count);
       }
 
       if (recipe.getIngredientList().isEmpty()) {
@@ -113,7 +114,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
 
     public Recipe parseShapedRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
-      ShapedRecipe recipe = new ShapedRecipe(parseRecipeResult(factory, elRecipe));
+      ShapedRecipe recipe = RECIPE_UTILS.createShapedRecipe(parseRecipeResult(factory, elRecipe));
 
       Element elShape = XMLUtils.getRequiredUniqueChild(elRecipe, "shape");
       List<String> rows = new ArrayList<>(3);
@@ -161,7 +162,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
           throw new InvalidXMLException(
               "Ingredient key '" + key + "' does not appear in the recipe shape", attrSymbol);
         }
-        MATERIAL_UTILS.setIngredient(new Node(elIngredient), recipe, key);
+        RECIPE_UTILS.setIngredient(new Node(elIngredient), recipe, key);
       }
 
       if (recipe.getIngredientMap().isEmpty()) {
@@ -175,7 +176,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
     public Recipe parseSmeltingRecipe(MapFactory factory, Element elRecipe)
         throws InvalidXMLException {
       ItemStack result = parseRecipeResult(factory, elRecipe);
-      return MATERIAL_UTILS.createFurnaceRecipe(
+      return RECIPE_UTILS.createFurnaceRecipe(
           new Node(XMLUtils.getRequiredUniqueChild(elRecipe, "ingredient", "i")), result);
     }
   }

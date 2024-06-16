@@ -28,6 +28,7 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.DyeColors;
 import tc.oc.pgm.util.bukkit.Enchantments;
 import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -725,12 +726,10 @@ public final class XMLUtils {
   }
 
   public static DyeColor parseDyeColor(Attribute attr) throws InvalidXMLException {
-    String name = attr.getValue().replace(" ", "_").toUpperCase();
-    try {
-      return DyeColor.valueOf(name);
-    } catch (IllegalArgumentException e) {
+    DyeColor result = DyeColors.getByName(attr.getValue());
+    if (result == null)
       throw new InvalidXMLException("Invalid dye color '" + attr.getValue() + "'", attr);
-    }
+    return result;
   }
 
   public static DyeColor parseDyeColor(Attribute attr, DyeColor def) throws InvalidXMLException {
@@ -1064,25 +1063,25 @@ public final class XMLUtils {
     return node == null ? def : parseAttributeOperation(node);
   }
 
-  public static Map.Entry<String, AttributeModifier> parseCompactAttributeModifier(
-      Node node, String text) throws InvalidXMLException {
+  public static Map.Entry<tc.oc.pgm.util.attribute.Attribute, AttributeModifier>
+      parseCompactAttributeModifier(Node node, String text) throws InvalidXMLException {
     String[] parts = text.split(":");
 
     if (parts.length != 3) {
       throw new InvalidXMLException("Bad attribute modifier format", node);
     }
 
-    tc.oc.pgm.util.attribute.Attribute attribute = parseAttribute(node, parts[0]);
+    var attribute = parseAttribute(node, parts[0]);
     AttributeModifier.Operation operation = parseAttributeOperation(node, parts[1]);
     double amount = parseNumber(node, parts[2], Double.class);
 
     return new AbstractMap.SimpleImmutableEntry<>(
-        attribute.getName(), new AttributeModifier("FromXML", amount, operation));
+        attribute, new AttributeModifier("FromXML", amount, operation));
   }
 
-  public static Map.Entry<String, AttributeModifier> parseAttributeModifier(Element el)
-      throws InvalidXMLException {
-    String attribute = parseAttribute(new Node(el)).getName();
+  public static Map.Entry<tc.oc.pgm.util.attribute.Attribute, AttributeModifier>
+      parseAttributeModifier(Element el) throws InvalidXMLException {
+    var attribute = parseAttribute(new Node(el));
     double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
     AttributeModifier.Operation operation = parseAttributeOperation(
         Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);

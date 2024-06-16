@@ -32,7 +32,6 @@ import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -182,15 +181,5 @@ public class ModernNMSHacks implements NMSHacks {
   @Override
   public int allocateEntityId() {
     return Bukkit.getUnsafe().nextEntityId();
-  }
-
-  @Override
-  public void addRecipe(World world, Recipe recipe) {
-    Bukkit.addRecipe(recipe);
-  }
-
-  @Override
-  public void resetRecipes(World world) {
-    Bukkit.resetRecipes();
   }
 }

@@ -5,10 +5,8 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 import com.google.common.collect.SetMultimap;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -16,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.platform.v1_20_6.attribute.AttributeUtilBukkit;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.platform.Supports;
@@ -61,22 +60,12 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
 
   @Override
   public void applyAttributeModifiers(
-      SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta) {
-    for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
-      AttributeModifier attributeModifier = entry.getValue();
+      SetMultimap<tc.oc.pgm.util.attribute.Attribute, AttributeModifier> attributeModifiers,
+      ItemMeta meta) {
+    for (var entry : attributeModifiers.entries()) {
       meta.addAttributeModifier(
-          // TODO: PLATFORM 1.20 probably needs remapping of attribute keys
-          Attribute.valueOf(entry.getKey()),
-          new org.bukkit.attribute.AttributeModifier(
-              attributeModifier.getUniqueId(),
-              attributeModifier.getName(),
-              attributeModifier.getAmount(),
-              switch (attributeModifier.getOperation()) {
-                case ADD_NUMBER -> org.bukkit.attribute.AttributeModifier.Operation.ADD_NUMBER;
-                case ADD_SCALAR -> org.bukkit.attribute.AttributeModifier.Operation.ADD_SCALAR;
-                case MULTIPLY_SCALAR_1 -> org.bukkit.attribute.AttributeModifier.Operation
-                    .MULTIPLY_SCALAR_1;
-              }));
+          AttributeUtilBukkit.toBukkit(entry.getKey()),
+          AttributeUtilBukkit.toBukkit(entry.getValue()));
     }
   }
 

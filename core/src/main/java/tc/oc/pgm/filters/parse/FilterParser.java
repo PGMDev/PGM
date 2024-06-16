@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.jdom2.Attribute;
@@ -85,6 +84,7 @@ import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.XMLParser;
+import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.math.OffsetVector;
@@ -293,7 +293,11 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("entity")
   public EntityTypeFilter parseEntity(Element el) throws InvalidXMLException {
-    return new EntityTypeFilter(XMLUtils.parseEnum(el, EntityType.class));
+    var type = EntityTypes.getByName(el.getTextNormalize());
+    if (type == null)
+      throw new InvalidXMLException("Could not find entity type: " + el.getTextNormalize(), el);
+
+    return new EntityTypeFilter(type);
   }
 
   @MethodParser("mob")

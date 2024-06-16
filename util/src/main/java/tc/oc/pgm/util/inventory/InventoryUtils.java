@@ -22,6 +22,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.platform.Platform;
@@ -187,7 +188,7 @@ public final class InventoryUtils {
     void copyAttributeModifiers(ItemMeta destination, ItemMeta source);
 
     void applyAttributeModifiers(
-        SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta);
+        SetMultimap<Attribute, AttributeModifier> attributeModifiers, ItemMeta meta);
 
     void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials);
 

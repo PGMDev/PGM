@@ -39,7 +39,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -210,15 +209,5 @@ public class NMSHacksSportPaper implements NMSHacks {
   @Override
   public int allocateEntityId() {
     return Bukkit.allocateEntityId();
-  }
-
-  @Override
-  public void addRecipe(World world, Recipe recipe) {
-    world.addRecipe(recipe);
-  }
-
-  @Override
-  public void resetRecipes(World world) {
-    world.resetRecipes();
   }
 }

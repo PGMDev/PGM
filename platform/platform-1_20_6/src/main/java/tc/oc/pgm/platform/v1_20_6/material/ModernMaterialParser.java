@@ -67,14 +67,20 @@ class ModernMaterialParser {
 
   public static Material[] flatten(Material material) {
     if (!material.isLegacy()) return new Material[] {material};
+    var md = new org.bukkit.material.MaterialData(material, (byte) 0);
+    var main = UNSAFE.fromLegacy(md);
+    md.setData((byte) 1);
+    var alt = UNSAFE.fromLegacy(md);
+    if (main == alt || alt.isAir()) return new Material[] {main};
+
     Set<Material> materials = new HashSet<>(16);
-    materials.add(UNSAFE.fromLegacy(new org.bukkit.material.MaterialData(material, (byte) 0)));
-    materials.add(UNSAFE.fromLegacy(new org.bukkit.material.MaterialData(material, (byte) 1)));
-    if (materials.size() == 2) {
-      for (byte i = 2; i < 16; i++) {
-        materials.add(UNSAFE.fromLegacy(new org.bukkit.material.MaterialData(material, i)));
-      }
+    materials.add(main);
+    materials.add(alt);
+    for (byte i = 3; i < 16; i++) {
+      md.setData(i);
+      materials.add(UNSAFE.fromLegacy(md));
     }
+    materials.remove(Material.AIR);
     return materials.toArray(Material[]::new);
   }
 
@@ -92,8 +98,8 @@ class ModernMaterialParser {
         int a = Character.digit(text.charAt(0), 10);
         if (a == -1) yield -1;
         int b = Character.digit(text.charAt(1), 10);
-        int c = Character.digit(text.charAt(1), 10);
-        yield Math.min(b, c) == -1 ? -1 : ((a * 10) + b);
+        int c = Character.digit(text.charAt(2), 10);
+        yield Math.min(b, c) == -1 ? -1 : ((a * 10) + b) * 10 + c;
       }
     };
   }
@@ -143,7 +149,7 @@ class ModernMaterialParser {
     if (material.isLegacy()) {
       var newMat = UNSAFE.fromLegacy(new MaterialData(material, (byte) data), true);
       // If material+data is invalid, do fromLegacy with just material
-      return material.isAir() ? UNSAFE.fromLegacy(material) : newMat;
+      return newMat.isAir() ? UNSAFE.fromLegacy(material) : newMat;
     }
     return material;
   }
@@ -169,8 +175,10 @@ class ModernMaterialParser {
 
       @Override
       public ItemMaterialData visit(Material material, short data) {
-        // TODO: handle potions differently, atm they just will strip data
-        return new ModernItemData(upgrade(material, data));
+        return switch (material = upgrade(material, data)) {
+          case POTION, SPLASH_POTION -> new PotionMaterialData(data);
+          default -> new ModernItemData(material);
+        };
       }
     };
 

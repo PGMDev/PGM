@@ -14,8 +14,7 @@ public class AttributeMapBukkit implements AttributeMap {
 
   @Override
   public AttributeInstance getAttribute(Attribute attribute) {
-    org.bukkit.attribute.Attribute bukkitAttribute =
-        AttributeUtilBukkit.convertAttribute(attribute);
+    var bukkitAttribute = AttributeUtilBukkit.toBukkit(attribute);
     if (bukkitAttribute == null) return null;
     org.bukkit.attribute.AttributeInstance attributeInstance = player.getAttribute(bukkitAttribute);
     return attributeInstance == null ? null : new AttributeInstanceBukkit(attributeInstance);

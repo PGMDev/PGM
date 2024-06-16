@@ -13,7 +13,6 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -58,8 +57,4 @@ public interface NMSHacks {
   int getMaxWorldSize(World world);
 
   int allocateEntityId();
-
-  void addRecipe(World world, Recipe recipe);
-
-  void resetRecipes(World world);
 }

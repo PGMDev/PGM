@@ -9,16 +9,11 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
-import org.bukkit.inventory.FurnaceRecipe;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.chunk.ChunkVector;
@@ -135,28 +130,6 @@ public class ModernMaterialUtils implements MaterialUtils {
   @Override
   public MaterialMatcher.Builder matcherBuilder() {
     return new MaterialMatcherBuilderImpl();
-  }
-
-  @Override
-  public void addIngredient(Node node, ShapelessRecipe recipe, int count)
-      throws InvalidXMLException {
-    var materials = ModernMaterialParser.parseFlatten(node);
-    while (count-- > 0) {
-      recipe.addIngredient(new RecipeChoice.MaterialChoice(materials));
-    }
-  }
-
-  @Override
-  public void setIngredient(Node node, ShapedRecipe recipe, char key) throws InvalidXMLException {
-    var materials = ModernMaterialParser.parseFlatten(node);
-    recipe.setIngredient(key, new RecipeChoice.MaterialChoice(materials));
-  }
-
-  @Override
-  public FurnaceRecipe createFurnaceRecipe(Node node, ItemStack result) throws InvalidXMLException {
-    var materials = ModernMaterialParser.parseFlatten(node);
-    return new FurnaceRecipe(
-        NamespacedKey.randomKey(), result, new RecipeChoice.MaterialChoice(materials), 0, 200);
   }
 
   private static class MaterialMatcherBuilderImpl extends MaterialMatcher.BuilderImpl
