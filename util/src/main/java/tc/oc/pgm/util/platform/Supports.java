@@ -3,6 +3,8 @@ package tc.oc.pgm.util.platform;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.function.Predicate;
+import org.bukkit.Server;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(Supports.List.class)
@@ -16,9 +18,14 @@ public @interface Supports {
   Priority priority() default Priority.MEDIUM;
 
   enum Variant {
-    SPORTPAPER,
-    SPIGOT,
-    PAPER;
+    SPORTPAPER(sv -> sv.getVersion().contains("SportPaper")),
+    PAPER(sv -> sv.getName().equalsIgnoreCase("Paper"));
+
+    public final Predicate<Server> matcher;
+
+    Variant(Predicate<Server> matches) {
+      this.matcher = matches;
+    }
   }
 
   enum Priority {

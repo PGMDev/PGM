@@ -1,17 +1,15 @@
 package tc.oc.pgm.regions;
 
 import static tc.oc.pgm.api.map.MapProtos.REGION_PRIORITY_VERSION;
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
 import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Hanging;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LeashHitch;
-import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -52,7 +50,6 @@ import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.material.MaterialData;
-import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {
@@ -406,15 +403,7 @@ public class RegionMatchModule implements MatchModule, Listener {
   }
 
   private static MaterialData getHangingType(Hanging hanging) {
-    if (hanging instanceof Painting) {
-      return MaterialData.of(Material.PAINTING);
-    } else if (hanging instanceof ItemFrame) {
-      return MaterialData.of(Material.ITEM_FRAME);
-    } else if (hanging instanceof LeashHitch) {
-      return MaterialData.of(Materials.LEASH);
-    } else {
-      return null;
-    }
+    return MATERIAL_UTILS.createItemData(hanging);
   }
 
   /**

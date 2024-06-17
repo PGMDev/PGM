@@ -70,14 +70,6 @@ public abstract class CommandGraph<P extends Plugin> {
 
     manager.settings().set(ManagerSetting.LIBERAL_FLAG_PARSING, true);
 
-    // Register Brigadier mappings
-    // if (manager.hasCapability(CloudBukkitCapabilities.NATIVE_BRIGADIER))
-    // manager.registerBrigadier();
-
-    // Register asynchronous completions
-    // if (manager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
-    //  manager.registerAsynchronousCompletions();
-
     // Basic suggestion filtering processor which avoids suggesting flags when not applicable
     manager.suggestionProcessor(new FilteringSuggestionProcessor<>(
         FilteringSuggestionProcessor.Filter.Simple.contextFree((s, i) -> i.isEmpty()

@@ -20,9 +20,12 @@ class SpMaterialData implements LegacyMaterialData, ItemMaterialData, BlockMater
     this.damage = damage;
   }
 
+  public SpMaterialData(Material material) {
+    this(material, (short) 0);
+  }
+
   public SpMaterialData(org.bukkit.material.MaterialData md) {
-    this.material = md.getItemType();
-    this.damage = md.getData();
+    this(md.getItemType(), md.getData());
   }
 
   @Override

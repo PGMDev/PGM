@@ -13,6 +13,10 @@ import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LeashHitch;
+import org.bukkit.entity.Painting;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
@@ -63,6 +67,17 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData createItemData(Material material, short data) {
     return new SpMaterialData(material, data);
+  }
+
+  @Override
+  public ItemMaterialData createItemData(Hanging hanging) {
+    return new SpMaterialData(
+        switch (hanging) {
+          case Painting ignored -> Material.PAINTING;
+          case ItemFrame ignored -> Material.ITEM_FRAME;
+          case LeashHitch ignored -> Material.LEASH;
+          default -> null;
+        });
   }
 
   @Override

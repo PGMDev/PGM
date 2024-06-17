@@ -10,7 +10,7 @@ import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
 public interface Effects {
-  Effects EFFECTS = Platform.requireInstance(Effects.class);
+  Effects EFFECTS = Platform.get(Effects.class);
 
   void coloredDust(Player player, Location location, Color color);
 

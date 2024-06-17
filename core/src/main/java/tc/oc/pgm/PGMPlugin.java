@@ -74,7 +74,6 @@ import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
 import tc.oc.pgm.util.listener.TNTMinecartPlacementListener;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.tablist.TablistResizer;
@@ -121,7 +120,12 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     // Sanity test PGM is running on a supported version before doing any work
-    NMSHacks.NMS_HACKS.getTPS();
+    try {
+      Platform.init();
+    } catch (Throwable t) {
+      getLogger().log(Level.SEVERE, "Failed to initialize PGM platform", t);
+      getServer().getPluginManager().disablePlugin(this);
+    }
     // Fix before any audiences have the chance of creating
     ViaUtils.removeViaChatFacet();
 
@@ -196,9 +200,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       }
     }
 
-    nameDecorationRegistry =
-        new NameDecorationRegistryImpl(
-            config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
+    nameDecorationRegistry = new NameDecorationRegistryImpl(
+        config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
 
     // Sometimes match folders need to be cleaned up if the server previously crashed
     final File[] worldDirs = getServer().getWorldContainer().listFiles();
@@ -402,7 +405,10 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
       if (message == null || message.contains("Unhandled")) {
         getLogger()
-            .log(record.getLevel(), record.getThrown().getMessage(), record.getThrown().getCause());
+            .log(
+                record.getLevel(),
+                record.getThrown().getMessage(),
+                record.getThrown().getCause());
       }
     }
 
@@ -447,14 +453,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
           int end = se.getEndIdx();
           if (end == -1 || end < start) end = value.length();
 
-          detail =
-              value.substring(0, start)
-                  + ChatColor.RED
-                  + ChatColor.UNDERLINE
-                  + value.substring(start, end)
-                  + ChatColor.RESET
-                  + ChatColor.RED
-                  + value.substring(end);
+          detail = value.substring(0, start)
+              + ChatColor.RED
+              + ChatColor.UNDERLINE
+              + value.substring(start, end)
+              + ChatColor.RESET
+              + ChatColor.RED
+              + value.substring(end);
         }
       } else if (mapErr != null) {
         cause = mapErr.getCause();

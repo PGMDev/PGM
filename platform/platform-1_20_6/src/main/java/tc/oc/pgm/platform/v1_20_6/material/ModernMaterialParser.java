@@ -14,6 +14,7 @@ import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.ItemMaterialData;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -48,7 +49,7 @@ class ModernMaterialParser {
   }
 
   public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
-    return UNSAFE.fromLegacy(parseLegacyMaterial(text, node));
+    return upgrade(parseLegacyMaterial(text, node), (short) 0);
   }
 
   static void validateItem(Material material, Node node) throws InvalidXMLException {
@@ -84,28 +85,8 @@ class ModernMaterialParser {
     return materials.toArray(Material[]::new);
   }
 
-  private static int materialId(String text) {
-    return switch (text.length()) {
-      default -> -1;
-      case 1 -> Character.digit(text.charAt(0), 10);
-      case 2 -> {
-        int a = Character.digit(text.charAt(0), 10);
-        if (a == -1) yield -1;
-        int b = Character.digit(text.charAt(1), 10);
-        yield Math.min(a, b) == -1 ? -1 : ((a * 10) + b);
-      }
-      case 3 -> {
-        int a = Character.digit(text.charAt(0), 10);
-        if (a == -1) yield -1;
-        int b = Character.digit(text.charAt(1), 10);
-        int c = Character.digit(text.charAt(2), 10);
-        yield Math.min(b, c) == -1 ? -1 : ((a * 10) + b) * 10 + c;
-      }
-    };
-  }
-
   private static Material parseLegacyMaterial(String text, Node node) throws InvalidXMLException {
-    int id = materialId(text);
+    int id = Materials.materialId(text);
     if (id != -1) {
       var byId = BY_ID.get(id);
       if (byId == null)

@@ -102,13 +102,32 @@ public interface Materials {
   Set<Material> SOLID_EXCLUSIONS =
       ImmutableSet.of(SIGN_POST, WALL_SIGN, WOOD_PLATE, STONE_PLATE, IRON_PLATE, GOLD_PLATE);
 
-  static Material parseMaterial(String text) {
-    // Since Bukkit changed SNOW_BALL to SNOWBALL, support both
-    if (text.matches("(?)snow_?ball")) {
-      text = text.contains("_") ? "snowball" : "snow_ball";
-    }
-
-    return Material.matchMaterial(text);
+  /**
+   * Replacement for Integer#parseInt, but with key differences that tailor it to material parsing.
+   * Since text will be non-numbers, fail quickly to a -1 instead of a costly exception. Any string
+   * not sized 1, 2 or 3 chars, can safely be assumed not an id, and go straight to -1.
+   *
+   * @param text The possible material id to parse
+   * @return the material id as int, or -1 if not a numeric id
+   */
+  static int materialId(String text) {
+    return switch (text.length()) {
+      default -> -1;
+      case 1 -> Character.digit(text.charAt(0), 10);
+      case 2 -> {
+        int a = Character.digit(text.charAt(0), 10);
+        if (a == -1) yield -1;
+        int b = Character.digit(text.charAt(1), 10);
+        yield Math.min(a, b) == -1 ? -1 : ((a * 10) + b);
+      }
+      case 3 -> {
+        int a = Character.digit(text.charAt(0), 10);
+        if (a == -1) yield -1;
+        int b = Character.digit(text.charAt(1), 10);
+        int c = Character.digit(text.charAt(2), 10);
+        yield Math.min(b, c) == -1 ? -1 : ((a * 10) + b) * 10 + c;
+      }
+    };
   }
 
   static boolean isWeapon(Material material) {

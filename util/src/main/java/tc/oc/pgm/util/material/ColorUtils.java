@@ -17,7 +17,7 @@ import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.platform.Platform;
 
 public interface ColorUtils {
-  ColorUtils COLOR_UTILS = Platform.requireInstance(ColorUtils.class);
+  ColorUtils COLOR_UTILS = Platform.get(ColorUtils.class);
 
   boolean isColorAffected(Material material);
 

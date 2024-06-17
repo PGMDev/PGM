@@ -11,7 +11,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
 public interface RecipeUtils {
-  RecipeUtils RECIPE_UTILS = Platform.requireInstance(RecipeUtils.class);
+  RecipeUtils RECIPE_UTILS = Platform.get(RecipeUtils.class);
 
   ShapedRecipe createShapedRecipe(ItemStack result);
 

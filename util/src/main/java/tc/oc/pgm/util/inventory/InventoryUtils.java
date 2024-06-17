@@ -29,7 +29,7 @@ import tc.oc.pgm.util.platform.Platform;
 
 public final class InventoryUtils {
   public static final InventoryUtilsPlatform INVENTORY_UTILS =
-      Platform.requireInstance(InventoryUtilsPlatform.class);
+      Platform.get(InventoryUtilsPlatform.class);
 
   public static final ItemFlag HIDE_ADDITIONAL_FLAG =
       BukkitUtils.parse(ItemFlag::valueOf, "HIDE_POTION_EFFECTS", "HIDE_ADDITIONAL_TOOLTIP");

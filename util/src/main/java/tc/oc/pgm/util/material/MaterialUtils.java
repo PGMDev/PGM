@@ -6,6 +6,7 @@ import java.util.Set;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.Hanging;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
@@ -17,7 +18,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
 public interface MaterialUtils {
-  MaterialUtils MATERIAL_UTILS = Platform.requireInstance(MaterialUtils.class);
+  MaterialUtils MATERIAL_UTILS = Platform.get(MaterialUtils.class);
 
   BlockMaterialData createBlockData(Material material);
 
@@ -30,6 +31,8 @@ public interface MaterialUtils {
   ItemMaterialData createItemData(ItemStack item);
 
   ItemMaterialData createItemData(Material material, short data);
+
+  ItemMaterialData createItemData(Hanging hanging);
 
   BlockMaterialData decode(int encoded);
 

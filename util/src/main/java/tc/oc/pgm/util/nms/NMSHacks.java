@@ -22,7 +22,7 @@ import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface NMSHacks {
-  NMSHacks NMS_HACKS = Platform.requireInstance(NMSHacks.class);
+  NMSHacks NMS_HACKS = Platform.get(NMSHacks.class);
 
   void skipFireworksLaunch(Firework firework);
 

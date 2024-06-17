@@ -27,7 +27,7 @@ import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
 public interface MiscUtils {
-  MiscUtils MISC_UTILS = Platform.requireInstance(MiscUtils.class);
+  MiscUtils MISC_UTILS = Platform.get(MiscUtils.class);
 
   EntityType SPLASH_POTION = parse(EntityType::valueOf, "SPLASH_POTION", "POTION");
 

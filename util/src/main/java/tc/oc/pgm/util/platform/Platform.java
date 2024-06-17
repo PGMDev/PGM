@@ -1,58 +1,55 @@
 package tc.oc.pgm.util.platform;
 
 import static org.reflections.scanners.Scanners.TypesAnnotated;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.material.ColorUtils;
+import tc.oc.pgm.util.material.MaterialUtils;
+import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.platform.Supports.Variant;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 import tc.oc.pgm.util.text.TextParser;
 
 @SuppressWarnings("unchecked")
 public abstract class Platform {
-  public static final Version MINECRAFT_VERSION =
-      TextParser.parseVersion(Bukkit.getServer().getBukkitVersion().split("-")[0]);
-
-  public static final Supports.Variant VARIANT = Arrays.stream(Supports.Variant.values())
-      .filter(v -> Bukkit.getServer().getName().toUpperCase(Locale.ROOT).equals(v.name())
-          || Bukkit.getServer()
-              .getVersion()
-              .toUpperCase(Locale.ROOT)
-              .contains("-" + v.name() + "-"))
-      .findFirst()
-      .orElse(null);
-
   private static final Reflections REFLECTIONS = new Reflections(
       new ConfigurationBuilder().forPackage("tc.oc.pgm.platform").setScanners(TypesAnnotated));
-  private static final Map<Class<?>, Object> INSTANCES = new HashMap<>();
 
-  public static final @NotNull Manifest MANIFEST = requireInstance(Manifest.class);
+  public static final Version MINECRAFT_VERSION;
+  public static final Variant VARIANT;
 
-  public static <T> @NotNull T requireInstance(Class<T> clazz) {
-    return (T) INSTANCES.computeIfAbsent(clazz, cl -> getBestSupported(cl, true));
+  static {
+    var sv = Bukkit.getServer();
+    MINECRAFT_VERSION = TextParser.parseVersion(sv.getBukkitVersion().split("-")[0]);
+    VARIANT = Arrays.stream(Variant.values())
+        .filter(v -> v.matcher.test(sv))
+        .findFirst()
+        .orElse(null);
   }
 
-  public static @Nullable <T> T getInstance(Class<T> clazz) {
-    return (T) INSTANCES.computeIfAbsent(clazz, cl -> getBestSupported(cl, false));
+  public static final @NotNull Manifest MANIFEST = get(Manifest.class);
+
+  /**
+   * Do a minimum sanity-check of the platform's viability and early-load some codepaths
+   *
+   * @throws Throwable could throw even class not found issues if loading in the wrong version
+   */
+  public static void init() throws Throwable {
+    NMSHacks.NMS_HACKS.getTPS();
+
+    var item = MaterialUtils.MATERIAL_UTILS.parseItemMaterialData("35:1", null);
+    assertTrue(ColorUtils.COLOR_UTILS.isColorAffected(item.getItemType()));
   }
 
-  public static @Nullable <T> Optional<T> optionalInstance(Class<T> clazz) {
-    return Optional.ofNullable(
-        (T) INSTANCES.computeIfAbsent(clazz, cl -> getBestSupported(cl, false)));
-  }
-
-  public static boolean isCurrentVariant(Supports.Variant variant) {
-    return VARIANT == variant;
+  public static <T> @NotNull T get(Class<T> clazz) {
+    return (T) Platform.getBestSupported(clazz);
   }
 
   private static <T> Iterable<Class<?>> getSupported(Class<T> parent) {
@@ -61,14 +58,13 @@ public abstract class Platform {
         .filter(parent::isAssignableFrom));
   }
 
-  @Contract(pure = true, value = "_, true -> !null")
-  private static Object getBestSupported(Class<?> parent, boolean required) {
+  private static Object getBestSupported(Class<?> parent) {
     Class<?> result = null;
     Supports.Priority priority = null;
     for (Class<?> clazz : getSupported(parent)) {
       Supports[] supportList = clazz.getDeclaredAnnotationsByType(Supports.class);
       for (Supports sup : supportList) {
-        if (!isCurrentVariant(sup.value())) continue;
+        if (VARIANT != sup.value()) continue;
         if (!sup.minVersion().isEmpty()
             && MINECRAFT_VERSION.isOlderThan(TextParser.parseVersion(sup.minVersion()))) continue;
         if (!sup.maxVersion().isEmpty()
@@ -80,10 +76,9 @@ public abstract class Platform {
         }
       }
     }
-    if (result == null && required)
+    if (result == null)
       throw new UnsupportedOperationException(
           "Current server software platform does not have an impl for: " + parent.getSimpleName());
-    if (result == null) return null;
 
     return ReflectionUtils.callConstructor(ReflectionUtils.getConstructor(result));
   }

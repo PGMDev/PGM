@@ -7,7 +7,7 @@ import tc.oc.pgm.util.platform.Platform;
 /** A persistent data holder for {@link ItemStack}s. */
 public interface ItemTag<T> {
 
-  Factory FACTORY = Platform.requireInstance(Factory.class);
+  Factory FACTORY = Platform.get(Factory.class);
 
   /**
    * Gets the value, or null if not present.

@@ -10,7 +10,7 @@ import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.skin.Skin;
 
 public interface PlayerUtils {
-  PlayerUtils PLAYER_UTILS = Platform.requireInstance(PlayerUtils.class);
+  PlayerUtils PLAYER_UTILS = Platform.get(PlayerUtils.class);
 
   boolean teleportRelative(
       Player player,

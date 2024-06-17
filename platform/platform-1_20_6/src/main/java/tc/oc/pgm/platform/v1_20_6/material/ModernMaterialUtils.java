@@ -12,6 +12,11 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.entity.GlowItemFrame;
+import org.bukkit.entity.Hanging;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LeashHitch;
+import org.bukkit.entity.Painting;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
@@ -65,6 +70,18 @@ public class ModernMaterialUtils implements MaterialUtils {
   }
 
   @Override
+  public ItemMaterialData createItemData(Hanging hanging) {
+    return new ModernItemData(
+        switch (hanging) {
+          case Painting ignored -> Material.PAINTING;
+          case GlowItemFrame ignored -> Material.GLOW_ITEM_FRAME;
+          case ItemFrame ignored -> Material.ITEM_FRAME;
+          case LeashHitch ignored -> Material.LEAD;
+          default -> null;
+        });
+  }
+
+  @Override
   public BlockMaterialData decode(int encoded) {
     if (encoded == ENCODED_NULL_MATERIAL) return null;
     return new ModernBlockData(Material.values()[encoded].createBlockData());
@@ -78,7 +95,7 @@ public class ModernMaterialUtils implements MaterialUtils {
 
   @Override
   public Material parseMaterial(String text, @Nullable Node node) throws InvalidXMLException {
-    return Bukkit.getUnsafe().fromLegacy(ModernMaterialParser.parseMaterial(text, node));
+    return ModernMaterialParser.parseMaterial(text, node);
   }
 
   @Override
