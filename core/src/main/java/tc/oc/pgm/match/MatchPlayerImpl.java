@@ -334,9 +334,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
       if (yes) {
         ENTITIES.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy()).send(bukkit);
-        ENTITIES
-            .entityAttach(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false)
-            .send(bukkit);
+        ENTITIES.entityMount(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID).send(bukkit);
       } else {
         ENTITIES.destroyEntitiesPacket(FROZEN_VEHICLE_ENTITY_ID).send(bukkit);
       }
@@ -449,9 +447,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       // If the player right-clicks on another vehicle while frozen, the client will
       // eject them from the freeze entity unconditionally, so we have to spam them
       // with these packets to keep them on it.
-      ENTITIES
-          .entityAttach(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID, false)
-          .send(bukkit);
+      ENTITIES.entityMount(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID).send(bukkit);
     }
   }
 

@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.UUID;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
@@ -66,13 +65,12 @@ public class TabDisplay {
       String renderedPlayerName = "{\"text\":\"" + name + "\"}";
 
       String teamName = this.slotTeamName(slot);
-      this.teamCreatePackets[slot] =
-          TAB_PACKETS.teamCreatePacket(
-              teamName, teamName, "", "", false, false, Collections.singleton(name));
+      this.teamCreatePackets[slot] = TAB_PACKETS.teamCreatePacket(
+          teamName, teamName, "", "", false, false, Collections.singleton(name));
       this.teamRemovePackets[slot] = TAB_PACKETS.teamRemovePacket(teamName);
       UUID uuid = UUID.randomUUID();
 
-      listAddPacket.addPlayerInfo(uuid, name, GameMode.SURVIVAL, PING, null, renderedPlayerName);
+      listAddPacket.addPlayerInfo(uuid, name, PING, null, renderedPlayerName);
       listRemovePacket.addPlayerInfo(uuid, renderedPlayerName);
     }
   }

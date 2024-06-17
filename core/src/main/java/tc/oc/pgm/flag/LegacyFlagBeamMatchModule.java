@@ -142,15 +142,16 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     Beam(Flag flag) {
       this.flag = flag;
 
-      ItemStack wool = new ItemBuilder().material(Materials.WOOL).color(flag.getDyeColor()).build();
+      ItemStack wool =
+          new ItemBuilder().material(Materials.WOOL).color(flag.getDyeColor()).build();
       this.base = ENTITIES.fakeArmorStand(wool);
       this.legacyBase = ENTITIES.fakeWitherSkull();
-      this.segments =
-          range(0, 64) // ~100 blocks is the height which the particles appear to be reasonably
-              // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
-              // to reduce load on the client
-              .mapToObj(i -> ENTITIES.fakeArmorStand(wool))
-              .collect(Collectors.toList());
+      this.segments = range(
+              0, 64) // ~100 blocks is the height which the particles appear to be reasonably
+          // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
+          // to reduce load on the client
+          .mapToObj(i -> ENTITIES.fakeArmorStand(wool))
+          .collect(Collectors.toList());
     }
 
     Optional<MatchPlayer> carrier() {
@@ -197,7 +198,7 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     }
 
     private void spawn(Player player, FakeEntity entity) {
-      location().ifPresent(l -> entity.spawn(l).send(player));
+      location().ifPresent(l -> entity.spawn(l.add(0, 3, 0)).send(player));
     }
 
     public void update() {
@@ -205,8 +206,8 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     }
 
     public void update(MatchPlayer player) {
-      Location loc =
-          carrier().map(c -> c.getBukkit().getLocation()).orElseGet(() -> location().orElse(null));
+      Location loc = carrier().map(c -> c.getBukkit().getLocation()).orElseGet(() -> location()
+          .orElse(null));
       if (loc == null) return;
       loc = loc.clone().add(0, 2.75, 0);
       if (loc.getY() < -64) loc.setY(-64);

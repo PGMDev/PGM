@@ -52,7 +52,6 @@ public class TabRender {
     this.addPacket.addPlayerInfo(
         entry.getId(),
         entry.getName(this.view),
-        entry.getGamemode(),
         entry.getPing(),
         entry.getSkin(this.view),
         renderedDisplayName);
@@ -74,15 +73,13 @@ public class TabRender {
   }
 
   private void leaveSlot(TabEntry entry, int index) {
-    this.send(
-        TAB_PACKETS.teamLeavePacket(
-            this.teamName(index), Collections.singleton(entry.getName(this.view))));
+    this.send(TAB_PACKETS.teamLeavePacket(
+        this.teamName(index), Collections.singleton(entry.getName(this.view))));
   }
 
   private void joinSlot(TabEntry entry, int index) {
-    this.send(
-        TAB_PACKETS.teamJoinPacket(
-            this.teamName(index), Collections.singleton(entry.getName(this.view))));
+    this.send(TAB_PACKETS.teamJoinPacket(
+        this.teamName(index), Collections.singleton(entry.getName(this.view))));
   }
 
   public void finish() {
@@ -145,12 +142,11 @@ public class TabRender {
     if (player != null) {
       int entityId = entry.getFakeEntityId(this.view);
       if (create) {
-        this.deferredPackets.add(
-            TAB_PACKETS.spawnPlayerPacket(
-                entityId,
-                entry.getId(),
-                new Location(this.view.getViewer().getWorld(), 0, Integer.MAX_VALUE / 2d, 0, 0, 0),
-                player));
+        this.deferredPackets.add(TAB_PACKETS.spawnPlayerPacket(
+            entityId,
+            entry.getId(),
+            new Location(this.view.getViewer().getWorld(), 0, Integer.MAX_VALUE / 2d, 0, 0, 0),
+            player));
       } else {
         this.deferredPackets.add(ENTITIES.entityMetadataPacket(entityId, player, true));
       }

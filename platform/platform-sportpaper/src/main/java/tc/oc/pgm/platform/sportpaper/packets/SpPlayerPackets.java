@@ -6,20 +6,15 @@ import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import java.util.Collections;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.DataWatcher;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutBed;
 import net.minecraft.server.v1_8_R3.PacketPlayOutCollect;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityEquipment;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityStatus;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityVelocity;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldBorder;
 import net.minecraft.server.v1_8_R3.WorldBorder;
-import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -36,17 +31,18 @@ public class SpPlayerPackets implements PlayerPackets, PacketSender {
   @Override
   public void playDeathAnimation(Player player) {
     EntityPlayer handle = ((CraftPlayer) player).getHandle();
-    PacketPlayOutEntityMetadata metadata =
+    PacketPlayOutEntityStatus deadStatus = new PacketPlayOutEntityStatus(handle, (byte) 3);
+
+    PacketPlayOutEntityMetadata noHealthMeta =
         new PacketPlayOutEntityMetadata(handle.getId(), handle.getDataWatcher(), false);
 
     // Add/replace health to zero
-
     DataWatcher.WatchableObject zeroHealth =
         new DataWatcher.WatchableObject(TYPE_FLOAT, HEALTH_FIELD, 0f);
 
-    List<DataWatcher.WatchableObject> list = metadata.b;
-    if (metadata.b == null) {
-      metadata.b = Collections.singletonList(zeroHealth);
+    List<DataWatcher.WatchableObject> list = noHealthMeta.b;
+    if (noHealthMeta.b == null) {
+      noHealthMeta.b = Collections.singletonList(zeroHealth);
     } else {
       boolean replaced = false;
       for (int i = 0; i < list.size(); i++) {
@@ -59,12 +55,9 @@ public class SpPlayerPackets implements PlayerPackets, PacketSender {
       }
       if (!replaced) list.add(zeroHealth);
     }
-    sendToViewers(metadata, player, true);
 
-    Location location = player.getLocation();
-    BlockPosition pos = new BlockPosition(location.getX(), location.getY(), location.getZ());
-    sendToViewers(new PacketPlayOutBed(handle, pos), player, true);
-    ENTITIES.teleportEntityPacket(player.getEntityId(), location).sendToViewers(player, true);
+    sendToViewers(noHealthMeta, player, true);
+    sendToViewers(deadStatus, player, true);
   }
 
   @Override
@@ -83,12 +76,11 @@ public class SpPlayerPackets implements PlayerPackets, PacketSender {
   }
 
   @Override
-  public void sendLegacyWearing(Player player, int slot, ItemStack item) {
-    net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
-    Packet<?> packet = new PacketPlayOutEntityEquipment(player.getEntityId(), slot, nms);
+  public void sendLegacyHelmet(Player player, ItemStack item) {
+    var packet = ENTITIES.entityHeadEquipment(player.getEntityId(), item);
     for (EntityPlayer viewer : getViewers(player)) {
       if (ViaUtils.getProtocolVersion(viewer.getBukkitEntity()) <= ViaUtils.VERSION_1_7)
-        viewer.playerConnection.sendPacket(packet);
+        packet.send(viewer.getBukkitEntity());
     }
   }
 

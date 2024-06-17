@@ -24,15 +24,15 @@ public interface FakeEntity {
   }
 
   default Packet ride(int riderId) {
-    return ENTITIES.entityAttach(riderId, entityId(), false);
+    return ENTITIES.entityMount(riderId, entityId());
   }
 
   default Packet mount(Entity vehicle) {
-    return ENTITIES.entityAttach(entityId(), vehicle.getEntityId(), false);
+    return ENTITIES.entityMount(entityId(), vehicle.getEntityId());
   }
 
-  default Packet wear(int slot, ItemStack item) {
-    return ENTITIES.entityEquipment(entityId(), slot, item);
+  default Packet wearHead(ItemStack item) {
+    return ENTITIES.entityHeadEquipment(entityId(), item);
   }
 
   abstract class Impl implements FakeEntity {

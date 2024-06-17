@@ -25,18 +25,18 @@
       <artifactId>paper</artifactId>
       <version>1.20.6-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.mojang</groupId>
-          <artifactId>brigadier</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
       <groupId>com.mojang</groupId>
       <artifactId>authlib</artifactId>
       <version>6.0.54</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.mojang</groupId>
+      <artifactId>datafixerupper</artifactId>
+      <version>7.0.14</version>
       <scope>provided</scope>
     </dependency>
   </dependencies>

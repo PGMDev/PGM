@@ -11,7 +11,7 @@ public interface PlayerPackets {
 
   void fakePlayerItemPickup(Player player, Item item);
 
-  void sendLegacyWearing(Player player, int slot, ItemStack item);
+  void sendLegacyHelmet(Player player, ItemStack item);
 
   void updateVelocity(Player player);
 }
