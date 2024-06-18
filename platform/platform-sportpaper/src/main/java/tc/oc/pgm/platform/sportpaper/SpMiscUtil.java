@@ -20,13 +20,15 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
 import tc.oc.pgm.util.bukkit.MiscUtils;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = SPORTPAPER, priority = HIGH)
@@ -58,14 +60,16 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
-  public PlayerDeathEvent createDeathEvent(Player player, List<ItemStack> drops, String msg) {
+  public PlayerDeathEvent createDeathEvent(
+      Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg) {
     return new PlayerDeathEvent(player, drops, 0, msg);
   }
 
   @Override
   public EntityChangeBlockEvent createEntityChangeBlockEvent(
-      Player player, Block block, MaterialData md) {
-    return new EntityChangeBlockEvent(player, block, md.getItemType(), md.getBukkit().getData());
+      Player player, Block block, BlockMaterialData md) {
+    return new EntityChangeBlockEvent(
+        player, block, md.getItemType(), ((LegacyMaterialData) md).getData());
   }
 
   @Override

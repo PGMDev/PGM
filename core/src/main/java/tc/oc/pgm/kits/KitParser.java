@@ -57,10 +57,13 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.material.ItemMaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -129,7 +132,7 @@ public abstract class KitParser {
     }
 
     Boolean force = XMLUtils.parseBoolean(Node.fromAttr(el, "force"));
-    Boolean potionParticles = XMLUtils.parseBoolean(Node.fromAttr(el, "potion-particles"));
+    boolean potionParticles = XMLUtils.parseBoolean(Node.fromAttr(el, "potion-particles"), false);
     Filter filter = factory.getFilters().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
 
     kits.add(this.parseClearItemsKit(el)); // must be added before anything else
@@ -140,7 +143,7 @@ public abstract class KitParser {
 
     kits.add(this.parseArmorKit(el));
     kits.add(this.parseItemKit(el));
-    kits.add(this.parsePotionKit(el));
+    kits.add(this.parsePotionKit(el, !potionParticles));
     kits.add(this.parseAttributeKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
@@ -211,9 +214,8 @@ public abstract class KitParser {
     org.jdom2.Attribute flySpeedAtt = el.getAttribute("fly-speed");
     float flySpeedMultiplier = 1;
     if (flySpeedAtt != null) {
-      flySpeedMultiplier =
-          XMLUtils.parseNumber(
-              el.getAttribute("fly-speed"), Float.class, Range.closed(FlyKit.MIN, FlyKit.MAX));
+      flySpeedMultiplier = XMLUtils.parseNumber(
+          el.getAttribute("fly-speed"), Float.class, Range.closed(FlyKit.MIN, FlyKit.MAX));
     }
 
     return new FlyKit(canFly, flying, flySpeedMultiplier);
@@ -319,49 +321,52 @@ public abstract class KitParser {
     return slot;
   }
 
-  public PotionKit parsePotionKit(Element el) throws InvalidXMLException {
-    List<PotionEffect> potions = parsePotions(el);
+  public PotionKit parsePotionKit(Element el, boolean ambient) throws InvalidXMLException {
+    List<PotionEffect> potions = parsePotions(el, ambient);
     return potions.isEmpty() ? null : new PotionKit(ImmutableSet.copyOf(potions));
   }
 
   public List<PotionEffect> parsePotions(Element el) throws InvalidXMLException {
+    return parsePotions(el, false);
+  }
+
+  public List<PotionEffect> parsePotions(Element el, boolean ambient) throws InvalidXMLException {
     List<PotionEffect> effects = new ArrayList<>();
 
     Node attr = Node.fromAttr(el, "potion", "potions", "effect", "effects");
     if (attr != null) {
       for (String piece : attr.getValue().split(";")) {
-        effects.add(XMLUtils.parseCompactPotionEffect(attr, piece));
+        effects.add(XMLUtils.parseCompactPotionEffect(attr, piece, ambient));
       }
     }
 
     for (Node elPotion : Node.fromChildren(el, "potion", "effect")) {
-      effects.add(XMLUtils.parsePotionEffect(elPotion.getElement()));
+      effects.add(XMLUtils.parsePotionEffect(elPotion.getElement(), ambient));
     }
 
     return effects;
   }
 
   public AttributeKit parseAttributeKit(Element el) throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = parseAttributeModifiers(el);
+    SetMultimap<Attribute, AttributeModifier> modifiers = parseAttributeModifiers(el);
     attributeModifiers.addAll(modifiers.values());
     return modifiers.isEmpty() ? null : new AttributeKit(modifiers);
   }
 
-  public SetMultimap<String, AttributeModifier> parseAttributeModifiers(Element el)
+  public SetMultimap<Attribute, AttributeModifier> parseAttributeModifiers(Element el)
       throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = HashMultimap.create();
+    SetMultimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
 
     Node attr = Node.fromAttr(el, "attribute", "attributes");
     if (attr != null) {
       for (String modifierText : Splitter.on(";").split(attr.getValue())) {
-        Map.Entry<String, AttributeModifier> mod =
-            XMLUtils.parseCompactAttributeModifier(attr, modifierText);
+        var mod = XMLUtils.parseCompactAttributeModifier(attr, modifierText);
         modifiers.put(mod.getKey(), mod.getValue());
       }
     }
 
     for (Element elAttribute : el.getChildren("attribute")) {
-      Map.Entry<String, AttributeModifier> mod = XMLUtils.parseAttributeModifier(elAttribute);
+      var mod = XMLUtils.parseAttributeModifier(elAttribute);
       modifiers.put(mod.getKey(), mod.getValue());
     }
 
@@ -371,23 +376,23 @@ public abstract class KitParser {
   public ItemStack parseBook(Element el) throws InvalidXMLException {
     ItemStack itemStack = parseItem(el, Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) itemStack.getItemMeta();
-    meta.setTitle(BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "title").getText()));
-    meta.setAuthor(BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "author").getText()));
+    meta.setTitle(
+        BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "title").getText()));
+    meta.setAuthor(
+        BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "author").getText()));
 
     Element elPages = el.getChild("pages");
     if (elPages != null) {
       for (Element elPage : elPages.getChildren("page")) {
         String text = elPage.getText();
         text = text.trim(); // Remove leading and trailing whitespace
-        text =
-            Pattern.compile("^[ \\t]+", Pattern.MULTILINE)
-                .matcher(text)
-                .replaceAll(""); // Remove indentation on each line
-        text =
-            Pattern.compile("^\\n", Pattern.MULTILINE)
-                .matcher(text)
-                .replaceAll(
-                    " \n"); // Add a space to blank lines, otherwise they vanish for unknown reasons
+        text = Pattern.compile("^[ \\t]+", Pattern.MULTILINE)
+            .matcher(text)
+            .replaceAll(""); // Remove indentation on each line
+        text = Pattern.compile("^\\n", Pattern.MULTILINE)
+            .matcher(text)
+            .replaceAll(
+                " \n"); // Add a space to blank lines, otherwise they vanish for unknown reasons
         text = BukkitUtils.colorize(text); // Color codes
         meta.addPage(text);
       }
@@ -398,7 +403,7 @@ public abstract class KitParser {
   }
 
   public ItemStack parseHead(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Materials.PLAYER_HEAD, (short) 3);
+    ItemStack itemStack = parseItem(el, MaterialData.item(Materials.PLAYER_HEAD, (short) 3));
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
     NMS_HACKS.setSkullMetaOwner(
         meta,
@@ -427,14 +432,13 @@ public abstract class KitParser {
         throw new InvalidXMLException("At least one <color> must be defined", explosionEl);
       }
 
-      meta.addEffect(
-          FireworkEffect.builder()
-              .with(type)
-              .withColor(primary)
-              .withFade(fade)
-              .flicker(flicker)
-              .trail(trail)
-              .build());
+      meta.addEffect(FireworkEffect.builder()
+          .with(type)
+          .withColor(primary)
+          .withFade(fade)
+          .flicker(flicker)
+          .trail(trail)
+          .build());
     }
 
     itemStack.setItemMeta(meta);
@@ -486,33 +490,34 @@ public abstract class KitParser {
 
     org.jdom2.Attribute attrMaterial = el.getAttribute("material");
     String name = attrMaterial != null ? attrMaterial.getValue() : el.getValue();
-    Material type = Materials.parseMaterial(name);
-    if (type == null || (type == Material.AIR && !allowAir)) {
+    short dmg = XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0);
+    var md = XMLUtils.parseItemMaterialData(new Node(el), name, dmg);
+
+    if (md == null || (md.getItemType() == Material.AIR && !allowAir)) {
       throw new InvalidXMLException("Invalid material type '" + name + "'", el);
     }
 
-    return parseItem(el, type);
+    return parseItem(el, md);
   }
 
   public ItemStack parseItem(Element el, Material type) throws InvalidXMLException {
     return parseItem(
-        el, type, XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0));
+        el,
+        MaterialData.item(
+            type, XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0)));
   }
 
-  public ItemStack parseItem(Element el, Material type, short damage) throws InvalidXMLException {
+  public ItemStack parseItem(Element el, ItemMaterialData material) throws InvalidXMLException {
     int amount = XMLUtils.parseNumber(Node.fromAttr(el, "amount"), Integer.class, true, 1);
 
     // amount returns max value of integer if "oo" is given as amount
-    if (amount == Integer.MAX_VALUE) amount = -1;
+    if (amount == Integer.MAX_VALUE) amount = ItemKit.INFINITE_STACK_SIZE;
 
     // must be CraftItemStack to keep track of NBT data
-    ItemStack itemStack = INVENTORY_UTILS.craftItemCopy(new ItemStack(type, amount, damage));
+    ItemStack itemStack = INVENTORY_UTILS.craftItemCopy(material.toItemStack(amount));
 
-    if (itemStack.getType() != type) {
-      throw new InvalidXMLException("Invalid item/block", el);
-    }
-
-    if (amount == -1 && !itemStack.getType().isBlock()) {
+    // amount returns max value of integer if "oo" is given as amount
+    if (amount == ItemKit.INFINITE_STACK_SIZE && !itemStack.getType().isBlock()) {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }
 
@@ -534,7 +539,8 @@ public abstract class KitParser {
     }
 
     if (meta instanceof EnchantmentStorageMeta) {
-      for (Entry<Enchantment, Integer> enchant : parseEnchantments(el, "stored-").entrySet()) {
+      for (Entry<Enchantment, Integer> enchant :
+          parseEnchantments(el, "stored-").entrySet()) {
         ((EnchantmentStorageMeta) meta)
             .addStoredEnchant(enchant.getKey(), enchant.getValue(), true);
       }
@@ -562,8 +568,7 @@ public abstract class KitParser {
       meta.setDisplayName("Grenade");
     }
 
-    if (meta instanceof LeatherArmorMeta) {
-      LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
+    if (meta instanceof LeatherArmorMeta armorMeta) {
       Node attrColor = Node.fromAttr(el, "color");
       if (attrColor != null) {
         armorMeta.setColor(XMLUtils.parseHexColor(attrColor));
@@ -601,21 +606,17 @@ public abstract class KitParser {
   }
 
   String itemFlagName(ItemFlag flag) {
-    switch (flag) {
-      case HIDE_ATTRIBUTES:
-        return "attributes";
-      case HIDE_ENCHANTS:
-        return "enchantments";
-      case HIDE_UNBREAKABLE:
-        return "unbreakable";
-      case HIDE_DESTROYS:
-        return "can-destroy";
-      case HIDE_PLACED_ON:
-        return "can-place-on";
-      default:
-        if (flag == InventoryUtils.HIDE_ADDITIONAL_FLAG) return "other";
-    }
-    throw new IllegalStateException("Unknown item flag " + flag);
+    return switch (flag) {
+      case HIDE_ATTRIBUTES -> "attributes";
+      case HIDE_ENCHANTS -> "enchantments";
+      case HIDE_UNBREAKABLE -> "unbreakable";
+      case HIDE_DESTROYS -> "can-destroy";
+      case HIDE_PLACED_ON -> "can-place-on";
+      default -> {
+        if (flag == InventoryUtils.HIDE_ADDITIONAL_FLAG) yield "other";
+        yield flag.name().replace("HIDE_", "").toLowerCase().replace("_", "-");
+      }
+    };
   }
 
   public void parseCustomNBT(Element el, ItemStack itemStack) throws InvalidXMLException {
@@ -639,7 +640,7 @@ public abstract class KitParser {
       ItemTags.LOCKED.set(itemStack, true);
     }
 
-    if (itemStack.getAmount() == -1) {
+    if (itemStack.getAmount() == ItemKit.INFINITE_STACK_SIZE) {
       ItemTags.INFINITE.set(itemStack, true);
     }
 
@@ -742,12 +743,10 @@ public abstract class KitParser {
 
     if (child != null) {
       boolean enabled = XMLUtils.parseBoolean(child.getAttribute("enabled"), true);
-      float power =
-          XMLUtils.parseNumber(
-              child.getAttribute("power"), Float.class, DoubleJumpKit.DEFAULT_POWER);
-      Duration rechargeTime =
-          XMLUtils.parseDuration(
-              child.getAttribute("recharge-time"), DoubleJumpKit.DEFAULT_RECHARGE);
+      float power = XMLUtils.parseNumber(
+          child.getAttribute("power"), Float.class, DoubleJumpKit.DEFAULT_POWER);
+      Duration rechargeTime = XMLUtils.parseDuration(
+          child.getAttribute("recharge-time"), DoubleJumpKit.DEFAULT_RECHARGE);
       boolean rechargeInAir =
           XMLUtils.parseBoolean(child.getAttribute("recharge-before-landing"), false);
 
@@ -793,9 +792,8 @@ public abstract class KitParser {
     Element el = XMLUtils.getUniqueChild(parent, "shield");
     if (el == null) return null;
 
-    double health =
-        XMLUtils.parseNumber(
-            el.getAttribute("health"), Double.class, ShieldParameters.DEFAULT_HEALTH);
+    double health = XMLUtils.parseNumber(
+        el.getAttribute("health"), Double.class, ShieldParameters.DEFAULT_HEALTH);
     Duration rechargeDelay =
         XMLUtils.parseDuration(el.getAttribute("delay"), ShieldParameters.DEFAULT_DELAY);
     return new ShieldKit(new ShieldParameters(health, rechargeDelay));

@@ -63,6 +63,11 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
     this(null, block);
   }
 
+  public BlockQuery withMaterial(MaterialData material) {
+    this.material = material;
+    return this;
+  }
+
   @Override
   public BlockState getBlock() {
     if (block == null) {
@@ -82,7 +87,7 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   @Override
   public MaterialData getMaterial() {
     if (material == null) {
-      material = MaterialData.from(getBlock());
+      material = MaterialData.block(getBlock());
     }
     return material;
   }
@@ -103,13 +108,16 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof BlockQuery)) return false;
-    BlockQuery query = (BlockQuery) o;
-    return world.equals(query.world) && x == query.x && y == query.y && z == query.z;
+    if (!(o instanceof BlockQuery query)) return false;
+    return world.equals(query.world)
+        && x == query.x
+        && y == query.y
+        && z == query.z
+        && getMaterial() == query.getMaterial();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(world, x, y, z);
+    return Objects.hash(world, x, y, z, getMaterial());
   }
 }

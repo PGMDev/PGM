@@ -14,6 +14,7 @@ import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 
 public class ItemKit implements KitDefinition {
+  public static final int INFINITE_STACK_SIZE = 99;
 
   protected final ImmutableMap<Slot, ItemStack> slotItems;
   protected final ImmutableList<ItemStack> freeItems;

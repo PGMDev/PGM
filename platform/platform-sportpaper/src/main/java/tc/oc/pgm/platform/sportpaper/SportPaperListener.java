@@ -1,8 +1,7 @@
 package tc.oc.pgm.platform.sportpaper;
 
-import org.bukkit.Bukkit;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
+import static tc.oc.pgm.util.event.EventUtil.handleCall;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
@@ -19,16 +18,6 @@ import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 public class SportPaperListener implements Listener {
-
-  private static void handleCall(Event pgmEvent, Event sportEvent) {
-    if (sportEvent instanceof Cancellable) {
-      ((Cancellable) pgmEvent).setCancelled(((Cancellable) sportEvent).isCancelled());
-      Bukkit.getServer().getPluginManager().callEvent(pgmEvent);
-      ((Cancellable) sportEvent).setCancelled(((Cancellable) pgmEvent).isCancelled());
-    } else {
-      Bukkit.getServer().getPluginManager().callEvent(pgmEvent);
-    }
-  }
 
   @EventHandler(ignoreCancelled = true)
   public void onBlockFall(org.bukkit.event.block.BlockFallEvent sportEvent) {
@@ -52,19 +41,14 @@ public class SportPaperListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onLocaleChange(org.bukkit.event.player.PlayerLocaleChangeEvent sportEvent) {
-    PlayerLocaleChangeEvent pgmEvent =
-        new PlayerLocaleChangeEvent(
-            sportEvent.getPlayer(), sportEvent.getOldLocale(), sportEvent.getNewLocale());
+    PlayerLocaleChangeEvent pgmEvent = new PlayerLocaleChangeEvent(
+        sportEvent.getPlayer(), sportEvent.getOldLocale(), sportEvent.getNewLocale());
     handleCall(pgmEvent, sportEvent);
   }
 
   @EventHandler(ignoreCancelled = true)
   public void onEffectAdd(org.bukkit.event.entity.PotionEffectAddEvent sportEvent) {
-    PotionEffectAddEvent pgmEvent =
-        new PotionEffectAddEvent(
-            sportEvent.getEntity(),
-            sportEvent.getEffect(),
-            PotionEffectAddEvent.EffectAddReason.valueOf(sportEvent.getReason().name()));
+    var pgmEvent = new PotionEffectAddEvent(sportEvent.getEntity(), sportEvent.getEffect());
     handleCall(pgmEvent, sportEvent);
   }
 
@@ -89,35 +73,29 @@ public class SportPaperListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onDispenseEntity(org.bukkit.event.block.BlockDispenseEntityEvent sportEvent) {
-    BlockDispenseEntityEvent pgmEvent =
-        new BlockDispenseEntityEvent(
-            sportEvent.getBlock(),
-            sportEvent.getItem(),
-            sportEvent.getVelocity(),
-            sportEvent.getEntity());
+    BlockDispenseEntityEvent pgmEvent = new BlockDispenseEntityEvent(
+        sportEvent.getBlock(),
+        sportEvent.getItem(),
+        sportEvent.getVelocity(),
+        sportEvent.getEntity());
     handleCall(pgmEvent, sportEvent);
   }
 
   @EventHandler(ignoreCancelled = true)
   public void onPlayerSpawnEntity(org.bukkit.event.player.PlayerSpawnEntityEvent sportEvent) {
-    PlayerSpawnEntityEvent pgmEvent =
-        new PlayerSpawnEntityEvent(
-            sportEvent.getPlayer(),
-            sportEvent.getEntity(),
-            sportEvent.getLocation(),
-            sportEvent.getItem());
+    PlayerSpawnEntityEvent pgmEvent = new PlayerSpawnEntityEvent(
+        sportEvent.getPlayer(), sportEvent.getEntity(), sportEvent.getItem());
     handleCall(pgmEvent, sportEvent);
   }
 
   @EventHandler(ignoreCancelled = true)
   public void onExplosionPrimeByEntity(
       org.bukkit.event.entity.ExplosionPrimeByEntityEvent sportEvent) {
-    ExplosionPrimeByEntityEvent pgmEvent =
-        new ExplosionPrimeByEntityEvent(
-            sportEvent.getEntity(),
-            sportEvent.getRadius(),
-            sportEvent.getFire(),
-            sportEvent.getPrimer());
+    ExplosionPrimeByEntityEvent pgmEvent = new ExplosionPrimeByEntityEvent(
+        sportEvent.getEntity(),
+        sportEvent.getRadius(),
+        sportEvent.getFire(),
+        sportEvent.getPrimer());
     handleCall(pgmEvent, sportEvent);
   }
 

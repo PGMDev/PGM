@@ -1,64 +1,77 @@
 package tc.oc.pgm.platform.sportpaper.material;
 
+import java.util.Objects;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.ItemMaterialData;
 
 @SuppressWarnings("deprecation")
-class SpMaterialData implements MaterialData {
-  private final org.bukkit.material.MaterialData md;
+class SpMaterialData implements LegacyMaterialData, ItemMaterialData, BlockMaterialData {
+  private final Material material;
+  private final short damage;
+
+  public SpMaterialData(Material material, short damage) {
+    this.material = material;
+    this.damage = damage;
+  }
+
+  public SpMaterialData(Material material) {
+    this(material, (short) 0);
+  }
 
   public SpMaterialData(org.bukkit.material.MaterialData md) {
-    this.md = md;
+    this(md.getItemType(), md.getData());
   }
 
   @Override
   public Material getItemType() {
-    return md.getItemType();
+    return material;
   }
 
   @Override
-  public org.bukkit.material.MaterialData getBukkit() {
-    return md;
+  public byte getData() {
+    return (byte) damage;
   }
 
   @Override
   public void applyTo(Block block, boolean update) {
-    block.setTypeIdAndData(md.getItemTypeId(), md.getData(), update);
+    block.setTypeIdAndData(material.getId(), (byte) damage, update);
   }
 
   @Override
   public void applyTo(BlockState block) {
-    block.setMaterialData(md);
+    block.setMaterialData(new org.bukkit.material.MaterialData(material, (byte) damage));
   }
 
   @Override
-  public void applyTo(ItemStack item) {
-    item.setType(md.getItemType());
-    item.setData(md);
+  public ItemStack toItemStack(int amount) {
+    return new ItemStack(material, amount, damage);
   }
 
   @Override
   public void sendBlockChange(Player player, Location location) {
-    player.sendBlockChange(location, md.getItemTypeId(), md.getData());
+    player.sendBlockChange(location, material, (byte) damage);
   }
 
   @Override
   public int encoded() {
-    return md.getItemTypeId() + (((int) md.getData()) << 12);
+    return material.getId() + (((int) damage) << 12);
   }
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof MaterialData && md.equals(((MaterialData) o).getBukkit());
+    if (this == o) return true;
+    if (!(o instanceof LegacyMaterialData that)) return false;
+    return damage == that.getData() && material == that.getItemType();
   }
 
   @Override
   public int hashCode() {
-    return md.hashCode();
+    return Objects.hash(material, damage);
   }
 }

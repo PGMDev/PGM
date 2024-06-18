@@ -23,7 +23,7 @@ public class BlockInfo extends OwnerInfoBase implements PhysicalInfo, DamageInfo
   }
 
   public BlockInfo(BlockState block, @Nullable ParticipantState owner) {
-    this(MaterialData.from(block.getData()), owner);
+    this(MaterialData.block(block), owner);
   }
 
   public BlockInfo(BlockState block) {

@@ -6,12 +6,12 @@ import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.util.StringUtils;
 
 public class PotionEffects {
-  private static final Map<String, PotionEffectType> byName =
+  private static final Map<String, PotionEffectType> BY_NAME =
       new HashMap<>(PotionEffectType.values().length);
 
   static {
     for (PotionEffectType value : PotionEffectType.values()) {
-      if (value != null) byName.put(StringUtils.simplify(value.getName()), value);
+      if (value != null) BY_NAME.put(StringUtils.simplify(value.getName()), value);
     }
   }
 
@@ -42,12 +42,12 @@ public class PotionEffects {
   private static PotionEffectType parse(String... names) {
     PotionEffectType type = BukkitUtils.parse(PotionEffectType::getByName, names);
     for (String name : names) {
-      byName.put(StringUtils.simplify(name), type);
+      BY_NAME.put(StringUtils.simplify(name), type);
     }
     return type;
   }
 
   public static PotionEffectType getByName(String name) {
-    return byName.get(StringUtils.simplify(name));
+    return BY_NAME.get(StringUtils.simplify(name));
   }
 }

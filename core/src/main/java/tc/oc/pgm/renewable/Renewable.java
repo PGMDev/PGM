@@ -29,6 +29,7 @@ import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialCounter;
 import tc.oc.pgm.util.material.MaterialData;
 
@@ -134,7 +135,7 @@ public class Renewable implements Listener, Tickable {
     for (; count > 0 && !renewablePool.isEmpty(); count--) {
       if (match.getRandom().nextFloat() < count) {
         for (int i = 0; i < MAX_FAILED_ITERATIONS; i++) {
-          BlockVector pos = renewablePool.getAt(match.getRandom().nextInt(renewablePool.size()));
+          BlockVector pos = renewablePool.chooseRandom(match.getRandom());
           if (renew(pos)) break;
         }
       }
@@ -161,7 +162,7 @@ public class Renewable implements Listener, Tickable {
     if (!isOriginalRenewable(pos)) return true;
 
     // If original and current world are both shuffleable, block is new
-    MaterialData currentMaterial = MaterialData.from(currentState);
+    MaterialData currentMaterial = MaterialData.block(currentState);
     if (isOriginalShuffleable(pos)
         && definition.shuffleableBlocks.query(new BlockQuery(currentState)).isAllowed())
       return true;
@@ -207,39 +208,39 @@ public class Renewable implements Listener, Tickable {
     return true;
   }
 
-  MaterialData sampleShuffledMaterial(BlockVector pos) {
+  BlockMaterialData sampleShuffledMaterial(BlockVector pos) {
     Random random = match.getRandom();
     int range = SHUFFLE_SAMPLE_RANGE;
     int diameter = range * 2 + 1;
     for (int i = 0; i < SHUFFLE_SAMPLE_ITERATIONS; i++) {
-      BlockState block =
-          snapshot()
-              .getOriginalBlock(
-                  pos.getBlockX() + random.nextInt(diameter) - range,
-                  pos.getBlockY() + random.nextInt(diameter) - range,
-                  pos.getBlockZ() + random.nextInt(diameter) - range);
+      BlockState block = snapshot()
+          .getOriginalBlock(
+              pos.getBlockX() + random.nextInt(diameter) - range,
+              pos.getBlockY() + random.nextInt(diameter) - range,
+              pos.getBlockZ() + random.nextInt(diameter) - range);
       if (definition.shuffleableBlocks.query(new BlockQuery(block)).isAllowed())
-        return MaterialData.from(block);
+        return MaterialData.block(block);
     }
     return null;
   }
 
-  MaterialData chooseShuffledMaterial() {
-    ImmutableRangeMap.Builder<Double, MaterialData> weightsBuilder = ImmutableRangeMap.builder();
+  BlockMaterialData chooseShuffledMaterial() {
+    ImmutableRangeMap.Builder<Double, BlockMaterialData> weightsBuilder =
+        ImmutableRangeMap.builder();
     double sum = 0d;
-    for (MaterialData material : shuffleableMaterialDeficit.materials()) {
+    for (BlockMaterialData material : shuffleableMaterialDeficit.materials()) {
       double weight = shuffleableMaterialDeficit.get(material);
       if (weight > 0) {
         weightsBuilder.put(Range.closedOpen(sum, sum + weight), material);
         sum += weight;
       }
     }
-    RangeMap<Double, MaterialData> weights = weightsBuilder.build();
+    RangeMap<Double, BlockMaterialData> weights = weightsBuilder.build();
     return weights.get(match.getRandom().nextDouble() * sum);
   }
 
   boolean renew(BlockVector pos) {
-    MaterialData material;
+    BlockMaterialData material;
     if (isOriginalShuffleable(pos)) {
       // If position is shuffled, first try to find a nearby shuffleable block to swap with.
       // This helps to make shuffling less predictable when the world deficit is small or
@@ -259,7 +260,7 @@ public class Renewable implements Listener, Tickable {
     return false;
   }
 
-  boolean renew(BlockVector pos, MaterialData material) {
+  boolean renew(BlockVector pos, BlockMaterialData material) {
     // We need to do the entity check here rather than canRenew, because we are not
     // notified when entities move in our out of the way.
     if (!isClearOfEntities(pos)) return false;

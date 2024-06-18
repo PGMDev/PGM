@@ -5,7 +5,6 @@ import static tc.oc.pgm.util.nms.packets.TabPackets.TeamPacketOperation.*;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.UUID;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -93,22 +92,20 @@ public interface TabPackets {
 
   interface PlayerInfo extends Packet {
     default void addPlayerInfo(UUID uuid) {
-      addPlayerInfo(uuid, null, null, 0, null, null);
+      addPlayerInfo(uuid, null, 0, null, null);
     }
 
     default void addPlayerInfo(UUID uuid, int ping) {
-      addPlayerInfo(uuid, uuid.toString().substring(0, 16), null, ping, null, null);
+      addPlayerInfo(uuid, uuid.toString().substring(0, 16), ping, null, null);
     }
 
     default void addPlayerInfo(UUID uuid, String renderedDisplayName) {
-      addPlayerInfo(
-          uuid, "|" + uuid.toString().substring(0, 15), null, 0, null, renderedDisplayName);
+      addPlayerInfo(uuid, "|" + uuid.toString().substring(0, 15), 0, null, renderedDisplayName);
     }
 
     void addPlayerInfo(
         UUID uuid,
         String name,
-        GameMode gamemode,
         int ping,
         @Nullable Skin skin,
         @Nullable String renderedDisplayName);

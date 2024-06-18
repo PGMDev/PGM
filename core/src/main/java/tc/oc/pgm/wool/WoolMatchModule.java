@@ -40,8 +40,7 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.block.BlockVectors;
-import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -62,7 +61,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   // layout of the wools in the inventory. This is used to refill the container with wools.
   private final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
 
-  private static final SingleMaterialMatcher WOOL = SingleMaterialMatcher.of(Materials.WOOL);
+  private static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().startsWith("WOOL"));
 
   private static final int REFILL_INTERVAL = 30; // seconds
 
@@ -198,13 +197,12 @@ public class WoolMatchModule implements MatchModule, Listener {
         wool.markPlaced();
         this.match.callEvent(new GoalStatusChangeEvent(match, wool, wool.getOwner()));
         this.match.callEvent(new PlayerWoolPlaceEvent(player, wool, event.getNewState()));
-        this.match.callEvent(
-            new GoalCompleteEvent(
-                this.match,
-                wool,
-                wool.getOwner(),
-                true,
-                ImmutableList.of(new Contribution(player, 1))));
+        this.match.callEvent(new GoalCompleteEvent(
+            this.match,
+            wool,
+            wool.getOwner(),
+            true,
+            ImmutableList.of(new Contribution(player, 1))));
       }
     }
   }
@@ -244,6 +242,6 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private static boolean isValidWool(DyeColor expectedColor, BlockState state) {
-    return WOOL.matches(state.getType()) && COLOR_UTILS.getColor(state) == expectedColor;
+    return WOOL.matches(state.getType()) && COLOR_UTILS.isColor(state, expectedColor);
   }
 }

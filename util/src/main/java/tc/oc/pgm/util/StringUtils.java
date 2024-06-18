@@ -155,19 +155,18 @@ public final class StringUtils {
   }
 
   public static String simplify(String string) {
-    return string.toLowerCase().replace(" ", "").replace("_", "");
+    return string.toLowerCase(Locale.ROOT).replace(" ", "").replace("_", "");
   }
 
   public static List<String> complete(String prefix, Iterable<String> options) {
     final String prefixLower = prefix.toLowerCase();
     final int pos = prefixLower.lastIndexOf(' ');
     final List<String> matches = new ArrayList<>();
-    options.forEach(
-        option -> {
-          if (option.toLowerCase().startsWith(prefixLower)) {
-            matches.add(pos == -1 ? option : option.substring(pos + 1));
-          }
-        });
+    options.forEach(option -> {
+      if (option.toLowerCase().startsWith(prefixLower)) {
+        matches.add(pos == -1 ? option : option.substring(pos + 1));
+      }
+    });
     Collections.sort(matches);
     return matches;
   }

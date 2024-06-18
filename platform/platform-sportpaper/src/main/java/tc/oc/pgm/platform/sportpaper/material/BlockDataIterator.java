@@ -8,7 +8,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
@@ -21,7 +20,7 @@ import tc.oc.pgm.util.material.MaterialData;
  * additionally provides no methods to mutate the state.
  */
 @SuppressWarnings("deprecation")
-class BlockDataIterator implements Iterator<BlockData>, BlockData {
+class BlockDataIterator implements Iterator<BlockData>, BlockData, LegacyMaterialData {
 
   private final Map<ChunkVector, ChunkSnapshot> chunks;
   private final Iterator<BlockVector> vectors;
@@ -31,7 +30,7 @@ class BlockDataIterator implements Iterator<BlockData>, BlockData {
 
   private BlockVector blockVector;
   private int materialId;
-  private int data;
+  private byte data;
 
   BlockDataIterator(Map<ChunkVector, ChunkSnapshot> chunks, Iterator<BlockVector> vectors) {
     this.chunks = chunks;
@@ -63,7 +62,7 @@ class BlockDataIterator implements Iterator<BlockData>, BlockData {
 
     // Calling getMaterialData would cause an allocation, so instead use raw types
     materialId = snapshot.getBlockTypeId(offsetX, offsetY, offsetZ);
-    data = snapshot.getBlockData(offsetX, offsetY, offsetZ);
+    data = (byte) snapshot.getBlockData(offsetX, offsetY, offsetZ);
 
     return this;
   }
@@ -74,28 +73,23 @@ class BlockDataIterator implements Iterator<BlockData>, BlockData {
   }
 
   @Override
-  public org.bukkit.material.MaterialData getBukkit() {
-    return new org.bukkit.material.MaterialData(materialId, (byte) data);
+  public byte getData() {
+    return data;
   }
 
   @Override
   public void applyTo(Block block, boolean update) {
-    block.setTypeIdAndData(materialId, (byte) data, update);
+    block.setTypeIdAndData(materialId, data, update);
   }
 
   @Override
   public void applyTo(BlockState block) {
-    block.setMaterialData(new org.bukkit.material.MaterialData(materialId, (byte) data));
-  }
-
-  @Override
-  public void applyTo(ItemStack item) {
-    item.setData(getBukkit());
+    block.setMaterialData(new org.bukkit.material.MaterialData(materialId, data));
   }
 
   @Override
   public void sendBlockChange(Player player, Location location) {
-    player.sendBlockChange(location, materialId, (byte) data);
+    player.sendBlockChange(location, materialId, data);
   }
 
   @Override

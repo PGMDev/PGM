@@ -5,8 +5,8 @@ import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.server.v1_8_R3.ChunkSection;
 import net.minecraft.server.v1_8_R3.EntityArrow;
@@ -20,12 +20,10 @@ import net.minecraft.server.v1_8_R3.WorldData;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
-import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
@@ -36,18 +34,17 @@ import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.platform.sportpaper.attribute.SpAttributeMap;
 import tc.oc.pgm.util.attribute.AttributeMap;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
@@ -66,8 +63,8 @@ public class NMSHacksSportPaper implements NMSHacks {
   }
 
   @Override
-  public boolean isCraftItemArrowEntity(Item item) {
-    return ((CraftItem) item).getHandle() instanceof EntityArrow;
+  public boolean isCraftItemArrowEntity(PlayerPickupItemEvent event) {
+    return ((CraftItem) event.getItem()).getHandle() instanceof EntityArrow;
   }
 
   @Override
@@ -94,11 +91,6 @@ public class NMSHacksSportPaper implements NMSHacks {
   }
 
   @Override
-  public void updateChunkSnapshot(ChunkSnapshot snapshot, BlockState blockState) {
-    snapshot.updateBlock(blockState);
-  }
-
-  @Override
   public void resumeServer() {
     if (Bukkit.getServer().isSuspended()) Bukkit.getServer().setSuspended(false);
   }
@@ -117,9 +109,9 @@ public class NMSHacksSportPaper implements NMSHacks {
   }
 
   @Override
-  public Set<Block> getBlocks(Chunk bukkitChunk, Material material) {
+  public List<Block> getBlocks(Chunk bukkitChunk, Material material) {
     CraftChunk craftChunk = (CraftChunk) bukkitChunk;
-    Set<Block> blocks = new HashSet<>();
+    List<Block> blocks = new ArrayList<>();
 
     net.minecraft.server.v1_8_R3.Block nmsBlock = CraftMagicNumbers.getBlock(material);
     net.minecraft.server.v1_8_R3.Chunk chunk = craftChunk.getHandle();
@@ -162,10 +154,8 @@ public class NMSHacksSportPaper implements NMSHacks {
   }
 
   @Override
-  public boolean canMineBlock(MaterialData blockMaterial, ItemStack tool) {
-    if (!blockMaterial.getItemType().isBlock()) {
-      throw new IllegalArgumentException("Material '" + blockMaterial + "' is not a block");
-    }
+  public boolean canMineBlock(BlockMaterialData blockMaterial, Player player) {
+    ItemStack tool = player.getItemInHand();
 
     net.minecraft.server.v1_8_R3.Block nmsBlock =
         CraftMagicNumbers.getBlock(blockMaterial.getItemType());
@@ -217,12 +207,7 @@ public class NMSHacksSportPaper implements NMSHacks {
   }
 
   @Override
-  public void addRecipe(World world, Recipe recipe) {
-    world.addRecipe(recipe);
-  }
-
-  @Override
-  public void resetRecipes(World world) {
-    world.resetRecipes();
+  public int allocateEntityId() {
+    return Bukkit.allocateEntityId();
   }
 }

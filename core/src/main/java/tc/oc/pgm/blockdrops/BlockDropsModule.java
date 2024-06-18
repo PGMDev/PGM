@@ -26,7 +26,7 @@ import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -60,11 +60,10 @@ public class BlockDropsModule implements MapModule<BlockDropsMatchModule> {
       final Optional<ItemModifyModule> itemModifier =
           Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
-      for (Element elRule :
-          XMLUtils.flattenElements(
-              doc.getRootElement(),
-              ImmutableSet.of("block-drops", "blockdrops"),
-              ImmutableSet.of("rule"))) {
+      for (Element elRule : XMLUtils.flattenElements(
+          doc.getRootElement(),
+          ImmutableSet.of("block-drops", "blockdrops"),
+          ImmutableSet.of("rule"))) {
         Filter filter = filterParser.parseFilterProperty(elRule, "filter");
         Region region = regionParser.parseRegionProperty(elRule, "region");
         Kit kit = kitParser.parseKitProperty(elRule, "kit", null);
@@ -80,7 +79,7 @@ public class BlockDropsModule implements MapModule<BlockDropsMatchModule> {
         Double fallSpeed =
             XMLUtils.parseNumber(Node.fromChildOrAttr(elRule, "fall-speed"), Double.class, null);
 
-        MaterialData replacement = null;
+        BlockMaterialData replacement = null;
         if (elRule.getChild("replacement") != null) {
           replacement =
               XMLUtils.parseBlockMaterialData(Node.fromChildOrAttr(elRule, "replacement"));
@@ -99,15 +98,14 @@ public class BlockDropsModule implements MapModule<BlockDropsMatchModule> {
           }
         }
 
-        rules.add(
-            new BlockDropsRule(
-                filter,
-                region,
-                dropOnWrongTool,
-                punchable,
-                trample,
-                new BlockDrops(
-                    items, kit, experience, replacement, fallChance, landChance, fallSpeed)));
+        rules.add(new BlockDropsRule(
+            filter,
+            region,
+            dropOnWrongTool,
+            punchable,
+            trample,
+            new BlockDrops(
+                items, kit, experience, replacement, fallChance, landChance, fallSpeed)));
       }
 
       return rules.isEmpty() ? null : new BlockDropsModule(new BlockDropsRuleSet(rules));

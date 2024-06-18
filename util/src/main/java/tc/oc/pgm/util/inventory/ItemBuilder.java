@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** A nice way to build {@link ItemStack}s. */
@@ -50,11 +49,6 @@ public class ItemBuilder {
     return this;
   }
 
-  public ItemBuilder material(MaterialData material) {
-    material.applyTo(item);
-    return this;
-  }
-
   public ItemBuilder amount(int amount) {
     item.setAmount(amount);
     return this;
@@ -84,10 +78,9 @@ public class ItemBuilder {
 
   public ItemBuilder lore(@Nullable CommandSender viewer, Component... lore) {
     meta()
-        .setLore(
-            Lists.transform(
-                Arrays.asList(lore),
-                (component) -> TextTranslations.translateLegacy(component, viewer)));
+        .setLore(Lists.transform(
+            Arrays.asList(lore),
+            (component) -> TextTranslations.translateLegacy(component, viewer)));
     return this;
   }
 

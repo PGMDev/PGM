@@ -10,7 +10,7 @@ import tc.oc.pgm.util.event.SportPaper;
 @SportPaper
 public class BlockFallEvent extends BlockEvent implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
-  private FallingBlock fallingBlock;
+  private final FallingBlock fallingBlock;
   private boolean cancelled = false;
 
   public BlockFallEvent(final Block block, final FallingBlock fallingBlock) {

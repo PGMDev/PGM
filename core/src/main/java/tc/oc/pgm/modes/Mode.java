@@ -10,11 +10,11 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 
 @FeatureInfo(name = "mode")
 public class Mode extends SelfIdentifyingFeatureDefinition {
-  private final MaterialData material;
+  private final BlockMaterialData material;
   private final Duration after;
   private final @Nullable Filter filter;
   private final @Nullable String name;
@@ -22,13 +22,13 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
   private final Component componentName;
   private final Duration showBefore;
 
-  public Mode(final MaterialData material, final Duration after, Duration showBefore) {
+  public Mode(final BlockMaterialData material, final Duration after, Duration showBefore) {
     this(null, material, after, null, null, showBefore);
   }
 
   public Mode(
       final @Nullable String id,
-      final MaterialData material,
+      final BlockMaterialData material,
       final Duration after,
       final @Nullable Filter filter,
       final @Nullable String name,
@@ -48,7 +48,7 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     return makeDefaultId() + "--" + makeId(legacyName);
   }
 
-  public MaterialData getMaterialData() {
+  public BlockMaterialData getMaterialData() {
     return this.material;
   }
 

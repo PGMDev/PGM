@@ -151,8 +151,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
         // Do not require PointRegions to be at the exact center of the block.
         // It might make sense to just override PointRegion.getBlockVectors() to
         // always do this, but it does technically violate the contract of that method.
-        banner =
-            toBanner(((PointRegion) region).getPosition().toLocation(match.getWorld()).getBlock());
+        banner = toBanner(
+            ((PointRegion) region).getPosition().toLocation(match.getWorld()).getBlock());
         if (banner != null) break pointLoop;
       } else {
         for (BlockVector pos : returnPoint.getRegion().getBlockVectors()) {
@@ -167,18 +167,18 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
           "Flag '" + getName() + "' must have a banner at its default post");
     }
 
-    this.bannerLocation = getLocationWithYaw(banner);
-    this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());
-
-    this.bannerData = COLOR_UTILS.createBanner(banner, getColoredName());
+    this.bannerData = COLOR_UTILS.createBanner(banner);
+    this.bannerData.setName(getComponentName());
     this.bannerItem = this.getBannerData().createItem();
 
-    this.legacyBannerItem =
-        new ItemBuilder()
-            .material(Materials.WOOL)
-            .color(getDyeColor())
-            .name(getColoredName())
-            .build();
+    this.bannerLocation = getLocationWithYaw(banner, bannerData.getFacing());
+    this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());
+
+    this.legacyBannerItem = new ItemBuilder()
+        .material(Materials.WOOL)
+        .color(getDyeColor())
+        .name(getColoredName())
+        .build();
   }
 
   private static Banner toBanner(Block block) {
@@ -325,10 +325,9 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     this.state.enterState();
   }
 
-  static Location getLocationWithYaw(Banner block) {
+  static Location getLocationWithYaw(Banner block, BlockFace facing) {
     Location location = block.getLocation();
-    location.setYaw(
-        BlockFaces.faceToYaw(((org.bukkit.material.Banner) block.getData()).getFacing()));
+    location.setYaw(BlockFaces.faceToYaw(facing));
     return location;
   }
 

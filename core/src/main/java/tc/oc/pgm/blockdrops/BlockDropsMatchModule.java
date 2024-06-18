@@ -38,6 +38,7 @@ import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -76,9 +77,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       return;
     }
 
-    BlockDrops drops =
-        this.ruleSet.getDrops(
-            event, event.getOldState(), ParticipantBlockTransformEvent.getPlayerState(event));
+    BlockDrops drops = this.ruleSet.getDrops(
+        event, event.getOldState(), ParticipantBlockTransformEvent.getPlayerState(event));
     if (drops != null) {
       event.setDrops(drops);
     }
@@ -163,7 +163,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       final BlockState newState = event.getNewState();
       final Block block = event.getOldState().getBlock();
 
-      MaterialData.from(newState).applyTo(block, true);
+      MaterialData.block(newState).applyTo(block, true);
 
       float yield = 1f;
       boolean explosion = false;
@@ -179,20 +179,20 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
             && oldState.getType() != Material.AIR
             && match.getRandom().nextFloat() < drops.fallChance) {
 
-          FallingBlock fallingBlock =
-              match
-                  .getWorld()
-                  .spawnFallingBlock(
-                      block.getLocation(),
-                      event.getOldState().getType(),
-                      event.getOldState().getRawData());
+          FallingBlock fallingBlock = match
+              .getWorld()
+              .spawnFallingBlock(
+                  block.getLocation(),
+                  event.getOldState().getType(),
+                  event.getOldState().getRawData());
           fallingBlock.setDropItem(false);
 
           if (drops.landChance != null && match.getRandom().nextFloat() >= drops.landChance) {
             this.fallingBlocksThatWillNotLand.add(fallingBlock);
           }
 
-          Vector v = fallingBlock.getLocation().subtract(explodeEvent.getLocation()).toVector();
+          Vector v =
+              fallingBlock.getLocation().subtract(explodeEvent.getLocation()).toVector();
           double distance = v.length();
           v.normalize().multiply(BASE_FALL_SPEED * drops.fallSpeed / Math.max(1d, distance));
 
@@ -240,8 +240,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockFallInVoid(EntityDespawnInVoidEvent event) {
-    if (event.getEntity() instanceof FallingBlock) {
-      this.fallingBlocksThatWillNotLand.remove(event.getEntity());
+    if (event.getEntity() instanceof FallingBlock fb) {
+      this.fallingBlocksThatWillNotLand.remove(fb);
     }
   }
 
@@ -256,7 +256,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
         getRuleSet().getDrops(event, hit.getBlock().getState(), player.getParticipantState());
     if (drops == null) return;
 
-    MaterialData oldMaterial = MaterialData.from(hit.getBlock());
+    BlockMaterialData oldMaterial = MaterialData.block(hit.getBlock());
     replaceBlock(drops, hit.getBlock(), player);
     Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
 

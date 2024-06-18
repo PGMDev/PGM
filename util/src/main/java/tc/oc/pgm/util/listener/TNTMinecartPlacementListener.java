@@ -2,20 +2,20 @@ package tc.oc.pgm.util.listener;
 
 import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.vehicle.VehicleCreateEvent;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.util.event.EventUtil;
 import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 /**
@@ -35,20 +35,12 @@ public class TNTMinecartPlacementListener implements Listener {
   private ItemStack placingStack;
   private Location railLocation;
 
-  private static void handleCall(Event pgmEvent, Event bukkitEvent) {
-    if (bukkitEvent instanceof Cancellable) {
-      ((Cancellable) pgmEvent).setCancelled(((Cancellable) bukkitEvent).isCancelled());
-      Bukkit.getServer().getPluginManager().callEvent(pgmEvent);
-      ((Cancellable) bukkitEvent).setCancelled(((Cancellable) pgmEvent).isCancelled());
-    } else {
-      Bukkit.getServer().getPluginManager().callEvent(pgmEvent);
-    }
-  }
-
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onInteraction(PlayerInteractEvent event) {
     ItemStack stack = event.getItem();
-    if (stack != null && stack.getType() == TNT_MINECART) {
+    if (stack != null
+        && event.getAction() == Action.RIGHT_CLICK_BLOCK
+        && stack.getType() == TNT_MINECART) {
       lastPlacer = event.getPlayer();
       placingStack = stack.clone();
       railLocation = event.getClickedBlock().getLocation();
@@ -62,30 +54,14 @@ public class TNTMinecartPlacementListener implements Listener {
      * Even then, we should account for this case and reset the variables
      * to ensure the tracking works reliably.
      */
-    if (!(event instanceof Cancellable) || !((Cancellable) event).isCancelled()) {
-      if (lastPlacer != null) {
-        Vehicle vehicle = event.getVehicle();
-        Location vehicleLocation = vehicle.getLocation();
+    if (lastPlacer != null
+        && (!(event instanceof Cancellable) || !((Cancellable) event).isCancelled())) {
+      Vehicle vehicle = event.getVehicle();
 
-        if (vehicle instanceof ExplosiveMinecart
-            && areBlockLocationsEqual(railLocation, vehicleLocation)) {
-          ItemStack itemInHand = lastPlacer.getItemInHand();
-
-          PlayerSpawnEntityEvent pgmEvent =
-              new PlayerSpawnEntityEvent(
-                  lastPlacer,
-                  vehicle,
-                  vehicleLocation,
-                  itemInHand != null ? itemInHand : placingStack);
-          handleCall(pgmEvent, event);
-
-          if (pgmEvent.isCancelled()) {
-            if (!(event instanceof Cancellable)) {
-              vehicle.remove();
-            }
-            lastPlacer.getInventory().setItemInHand(placingStack);
-          }
-        }
+      if (vehicle instanceof ExplosiveMinecart
+          && isSameBlock(railLocation, vehicle.getLocation())) {
+        var pgmEvent = new PlayerSpawnEntityEvent(lastPlacer, vehicle, placingStack);
+        EventUtil.handleCall(pgmEvent, event);
       }
     }
     lastPlacer = null;
@@ -93,7 +69,7 @@ public class TNTMinecartPlacementListener implements Listener {
     railLocation = null;
   }
 
-  private static boolean areBlockLocationsEqual(Location locA, Location locB) {
+  private static boolean isSameBlock(Location locA, Location locB) {
     return locA.getBlockX() == locB.getBlockX()
         && locA.getBlockY() == locB.getBlockY()
         && locA.getBlockZ() == locB.getBlockZ();

@@ -6,12 +6,11 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import tc.oc.pgm.util.material.MaterialData;
-import tc.oc.pgm.util.material.MaterialEncoder;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
 public interface Effects {
-  Effects EFFECTS = Platform.requireInstance(Effects.class);
+  Effects EFFECTS = Platform.get(Effects.class);
 
   void coloredDust(Player player, Location location, Color color);
 
@@ -27,9 +26,7 @@ public interface Effects {
 
   void explosion(Player player, Location location);
 
-  default void blockBreak(Location location, MaterialData material) {
-    location
-        .getWorld()
-        .playEffect(location, Effect.STEP_SOUND, MaterialEncoder.encodeMaterial(material));
+  default void blockBreak(Location location, BlockMaterialData material) {
+    location.getWorld().playEffect(location, Effect.STEP_SOUND, material.encoded());
   }
 }

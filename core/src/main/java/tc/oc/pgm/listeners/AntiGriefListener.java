@@ -150,10 +150,9 @@ public class AntiGriefListener implements Listener {
   private void obsTntDefuse(MatchPlayer player, Location loc) {
     List<ParticipantState> owners = this.removeTnt(loc, 5.0);
     if (owners != null && !owners.isEmpty()) {
-      player.sendMessage(
-          translatable(
-              "moderation.defuse.player",
-              TextFormatter.nameList(owners, NameStyle.COLOR, NamedTextColor.WHITE)));
+      player.sendMessage(translatable(
+          "moderation.defuse.player",
+          TextFormatter.nameList(owners, NameStyle.COLOR, NamedTextColor.WHITE)));
     }
   }
 
@@ -195,16 +194,13 @@ public class AntiGriefListener implements Listener {
 
     // TODO: Update information if locale changes
     ItemMeta meta = shears.getItemMeta();
-    meta.setDisplayName(
-        ChatColor.RED
-            + ChatColor.BOLD.toString()
-            + TextTranslations.translate(
-                "moderation.defuse.displayName", event.getPlayer().getBukkit()));
-    meta.setLore(
-        Collections.singletonList(
-            ChatColor.GRAY
-                + TextTranslations.translate(
-                    "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
+    meta.setDisplayName(ChatColor.RED
+        + ChatColor.BOLD.toString()
+        + TextTranslations.translate(
+            "moderation.defuse.displayName", event.getPlayer().getBukkit()));
+    meta.setLore(Collections.singletonList(ChatColor.GRAY
+        + TextTranslations.translate(
+            "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
     shears.setItemMeta(meta);
 
     event.getPlayer().getBukkit().getInventory().setItem(DEFUSE_SLOT, shears);
@@ -214,13 +210,12 @@ public class AntiGriefListener implements Listener {
   public void cloneCraftingWindow(final PlayerInteractEvent event) {
     if (!event.isCancelled()
         && event.getAction() == Action.RIGHT_CLICK_BLOCK
-        && event.getPlayer().getOpenInventory().getType()
-            == InventoryType.CRAFTING /* nothing open */) {
+        && event.getPlayer().getOpenInventory().getType() == InventoryType.CRAFTING) {
       Block block = event.getClickedBlock();
       if (block != null
           && block.getType() == Materials.WORKBENCH
           && !event.getPlayer().isSneaking()) {
-        // create the window ourself
+        // create the window ourselves
         event.setCancelled(true);
         event.getPlayer().openWorkbench(null, true); // doesn't check reachable
       }

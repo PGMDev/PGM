@@ -4,8 +4,6 @@ import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import com.google.common.collect.Iterables;
 import java.util.Arrays;
-import java.util.Set;
-import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -17,12 +15,13 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ToolRepairMatchModule implements MatchModule, Listener {
-  protected final Set<Material> toRepair;
+  protected final MaterialMatcher toRepair;
 
-  public ToolRepairMatchModule(Match match, Set<Material> toRepair) {
+  public ToolRepairMatchModule(Match match, MaterialMatcher toRepair) {
     this.toRepair = toRepair;
   }
 
@@ -47,11 +46,10 @@ public class ToolRepairMatchModule implements MatchModule, Listener {
   public void processRepair(PlayerPickupItemEvent event) {
     ItemStack pickup = event.getItem().getItemStack();
 
-    if (this.toRepair.contains(pickup.getType())) {
+    if (this.toRepair.matches(pickup.getType())) {
       PlayerInventory inv = event.getPlayer().getInventory();
-      for (ItemStack invStack :
-          Iterables.concat(
-              Arrays.asList(inv.getContents()), Arrays.asList(inv.getArmorContents()))) {
+      for (ItemStack invStack : Iterables.concat(
+          Arrays.asList(inv.getContents()), Arrays.asList(inv.getArmorContents()))) {
         if (this.canRepair(pickup, invStack)) {
           this.doRepair(event, invStack);
           return;

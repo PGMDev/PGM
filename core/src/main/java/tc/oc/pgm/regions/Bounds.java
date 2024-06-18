@@ -64,6 +64,12 @@ public class Bounds implements Cloneable {
     }
   }
 
+  public static boolean disjoint(Bounds a, Bounds b) {
+    Vector min = Vector.getMaximum(a.min, b.min);
+    Vector max = Vector.getMinimum(a.max, b.max);
+    return min.getX() >= max.getX() || min.getY() >= max.getY() || min.getZ() >= max.getZ();
+  }
+
   public static Bounds union(Bounds a, Bounds b) {
     if (a.contains(b)) {
       return a;

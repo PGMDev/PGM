@@ -51,6 +51,9 @@ world_the_end/
 wepif.yml
 crash-reports/
 eula.txt
+# Startup scripts
+*.sh
+*.bat
 
 # PGM generated files
 match-*/
@@ -58,4 +61,7 @@ maps.zip
 maps/
 maps-default/
 default-maps/
+
+# Allow alternative server folders
+server-*/*
 

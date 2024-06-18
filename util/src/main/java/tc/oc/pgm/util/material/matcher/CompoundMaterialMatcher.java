@@ -1,16 +1,15 @@
 package tc.oc.pgm.util.material.matcher;
 
 import com.google.common.collect.ImmutableList;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
@@ -27,14 +26,6 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
   public boolean matches(Material material) {
     for (MaterialMatcher child : children) {
       if (child.matches(material)) return true;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean matches(org.bukkit.material.MaterialData materialData) {
-    for (MaterialMatcher child : children) {
-      if (child.matches(materialData)) return true;
     }
     return false;
   }
@@ -68,29 +59,18 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Set<MaterialData> getMaterialData() {
-    Set<MaterialData> result = new HashSet<>(children.size());
-    for (MaterialMatcher child : children) result.addAll(child.getMaterialData());
+  public Set<BlockMaterialData> getPossibleBlocks() {
+    Set<BlockMaterialData> result = new HashSet<>(children.size());
+    for (MaterialMatcher child : children) result.addAll(child.getPossibleBlocks());
     return result;
   }
 
   public static MaterialMatcher of(Collection<? extends MaterialMatcher> matchers) {
-    if (matchers.isEmpty()) {
-      return NoMaterialMatcher.INSTANCE;
-    } else if (matchers.size() == 1) {
-      return matchers.iterator().next();
-    } else {
-      return new CompoundMaterialMatcher(ImmutableList.copyOf(matchers));
-    }
-  }
-
-  public static <T> MaterialMatcher of(
-      Function<T, MaterialMatcher> mapper, Collection<T> materials) {
-    List<MaterialMatcher> matchers = new ArrayList<>(materials.size());
-    for (T material : materials) {
-      matchers.add(mapper.apply(material));
-    }
-    return of(matchers);
+    return switch (matchers.size()) {
+      case 0 -> NoMaterialMatcher.INSTANCE;
+      case 1 -> matchers.iterator().next();
+      default -> new CompoundMaterialMatcher(ImmutableList.copyOf(matchers));
+    };
   }
 
   @Override

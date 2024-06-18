@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -17,18 +16,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
-import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.filters.matcher.StaticFilter;
-import tc.oc.pgm.filters.query.MaterialQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitNode;
+import tc.oc.pgm.regions.Bounds;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
 public class BlockDropsRuleSet {
@@ -50,8 +49,15 @@ public class BlockDropsRuleSet {
   public BlockDropsRuleSet subsetAffecting(FiniteBlockRegion region) {
     ImmutableList.Builder<BlockDropsRule> subset = ImmutableList.builder();
     for (BlockDropsRule rule : this.rules) {
+      if (rule.region == null) {
+        subset.add(rule);
+        continue;
+      }
+
+      if (Bounds.disjoint(rule.region.getBounds(), region.getBounds())) continue;
+
       for (BlockVector block : region.getBlockVectors()) {
-        if (rule.region == null || rule.region.contains(block)) {
+        if (rule.region.contains(block)) {
           subset.add(rule);
           break;
         }
@@ -61,38 +67,22 @@ public class BlockDropsRuleSet {
     return new BlockDropsRuleSet(subset.build());
   }
 
-  /** Return the subset of rules that may act on any of the given world */
-  public BlockDropsRuleSet subsetAffecting(Set<MaterialData> materials) {
-    ImmutableList.Builder<BlockDropsRule> subset = ImmutableList.builder();
-    for (BlockDropsRule rule : this.rules) {
-      for (MaterialData material : materials) {
-        if (rule.filter == null
-            || rule.filter.query(MaterialQuery.get(material)) != Filter.QueryResponse.DENY) {
-          subset.add(rule);
-          break;
-        }
-      }
-    }
-
-    return new BlockDropsRuleSet(subset.build());
-  }
-
-  public BlockDrops getDrops(BlockState block, MaterialData material) {
+  public BlockDrops getDrops(BlockState block, BlockMaterialData material) {
     return this.getDrops(null, block, material, null);
   }
 
   public BlockDrops getDrops(@Nullable Event event, BlockState block, ParticipantState player) {
-    return this.getDrops(event, block, MaterialData.from(block), player);
+    return this.getDrops(event, block, MaterialData.block(block), player);
   }
 
   public BlockDrops getDrops(
       @Nullable Event event,
       BlockState block,
-      MaterialData material,
+      BlockMaterialData material,
       @Nullable ParticipantState playerState) {
     Map<ItemStack, Double> items = new LinkedHashMap<>();
     List<Kit> kits = new ArrayList<>();
-    MaterialData replacement = null;
+    BlockMaterialData replacement = null;
     Float fallChance = null;
     Float landChance = null;
     double fallSpeed = 1;
@@ -101,15 +91,13 @@ public class BlockDropsRuleSet {
     block = BlockStates.cloneWithMaterial(block.getBlock(), material);
 
     boolean rightToolUsed = true;
-    if (event instanceof BlockTransformEvent) {
-      BlockTransformEvent blockTransformEvent = (BlockTransformEvent) event;
-      Entity actor = blockTransformEvent.getActor();
-      if (actor instanceof Player) {
-        rightToolUsed = NMS_HACKS.canMineBlock(material, ((Player) actor).getItemInHand());
+    if (event instanceof BlockTransformEvent transformEvent) {
+      Entity actor = transformEvent.getActor();
+      if (actor instanceof Player p) {
+        rightToolUsed = NMS_HACKS.canMineBlock(material, p);
       }
-    } else if (event instanceof BlockBreakEvent) {
-      rightToolUsed =
-          NMS_HACKS.canMineBlock(material, ((BlockBreakEvent) event).getPlayer().getItemInHand());
+    } else if (event instanceof BlockBreakEvent breakEvent) {
+      rightToolUsed = NMS_HACKS.canMineBlock(material, breakEvent.getPlayer());
     }
 
     for (BlockDropsRule rule : this.rules) {

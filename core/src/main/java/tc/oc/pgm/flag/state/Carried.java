@@ -85,15 +85,14 @@ public class Carried extends Spawned implements Missing {
     if (isCarrying(player)) {
       final Query query = new PlayerStateQuery(player);
       return flag.getNets().stream()
-          .flatMap(
-              net -> {
-                if (net.getCaptureFilter().query(query).isAllowed()) {
-                  return Stream.of(
-                      net.getProximityLocation().toLocation(flag.getMatch().getWorld()));
-                } else {
-                  return Stream.empty();
-                }
-              })
+          .flatMap(net -> {
+            if (net.getCaptureFilter().query(query).isAllowed()) {
+              return Stream.of(
+                  net.getProximityLocation().toLocation(flag.getMatch().getWorld()));
+            } else {
+              return Stream.empty();
+            }
+          })
           .collect(Collectors.toList());
     } else {
       return super.getProximityLocations(player);
@@ -115,7 +114,7 @@ public class Carried extends Spawned implements Missing {
     PGM.get()
         .getExecutor()
         .schedule(
-            () -> PLAYERS.sendLegacyWearing(carrier.getBukkit(), 4, flag.getLegacyBannerItem()),
+            () -> PLAYERS.sendLegacyHelmet(carrier.getBukkit(), flag.getLegacyBannerItem()),
             50L,
             TimeUnit.MILLISECONDS);
 
@@ -127,11 +126,10 @@ public class Carried extends Spawned implements Missing {
       if (postName != null) { // The post needs a name in order to display the message.
         this.flag
             .getMatch()
-            .sendMessage(
-                translatable(
-                    "flag.willRespawn.next",
-                    this.flag.getComponentName(),
-                    text(postName, NamedTextColor.AQUA)));
+            .sendMessage(translatable(
+                "flag.willRespawn.next",
+                this.flag.getComponentName(),
+                text(postName, NamedTextColor.AQUA)));
       }
     }
   }
@@ -176,11 +174,10 @@ public class Carried extends Spawned implements Missing {
       if (this.deniedByNet.getDenyMessage() != null) {
         message = this.deniedByNet.getDenyMessage();
       } else if (this.deniedByFlag != null) {
-        message =
-            translatable(
-                "flag.captureDenied.byFlag",
-                this.flag.getComponentName(),
-                this.deniedByFlag.getComponentName());
+        message = translatable(
+            "flag.captureDenied.byFlag",
+            this.flag.getComponentName(),
+            this.deniedByFlag.getComponentName());
       } else {
         message = translatable("flag.captureDenied", this.flag.getComponentName());
       }
@@ -242,11 +239,10 @@ public class Carried extends Spawned implements Missing {
 
     this.flag
         .getMatch()
-        .sendMessage(
-            translatable(
-                "flag.capture.player",
-                this.flag.getComponentName(),
-                this.carrier.getName(NameStyle.COLOR)));
+        .sendMessage(translatable(
+            "flag.capture.player",
+            this.flag.getComponentName(),
+            this.carrier.getName(NameStyle.COLOR)));
 
     this.flag.resetTouches(this.carrier.getCompetitor());
     this.flag.resetProximity(this.carrier.getCompetitor());
@@ -318,13 +314,9 @@ public class Carried extends Spawned implements Missing {
       event.setCancelled(true);
       event.getView().setCursor(null);
       event.setCurrentItem(null);
-      this.flag
-          .getMatch()
-          .getExecutor(MatchScope.RUNNING)
-          .execute(
-              () -> {
-                if (isCurrent()) dropFlag();
-              });
+      this.flag.getMatch().getExecutor(MatchScope.RUNNING).execute(() -> {
+        if (isCurrent()) dropFlag();
+      });
     }
   }
 

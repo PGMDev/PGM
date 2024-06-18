@@ -31,7 +31,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -124,19 +124,17 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
         deathScore = XMLUtils.parseNumber(scoreEl.getChild("deaths"), Integer.class, defaultPoints);
         killScore = XMLUtils.parseNumber(scoreEl.getChild("kills"), Integer.class, defaultPoints);
 
-        scoreboardFilter =
-            filters.parseProperty(
-                scoreEl, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.PARTY);
+        scoreboardFilter = filters.parseProperty(
+            scoreEl, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.PARTY);
 
         for (Element scoreBoxEl : scoreEl.getChildren("box")) {
-          int points =
-              XMLUtils.parseNumber(
-                  Node.fromAttr(scoreBoxEl, "value", "points"),
-                  Integer.class,
-                  proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) ? 1 : 0);
+          int points = XMLUtils.parseNumber(
+              Node.fromAttr(scoreBoxEl, "value", "points"),
+              Integer.class,
+              proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) ? 1 : 0);
 
           Filter filter = filters.parseProperty(scoreBoxEl, "filter", StaticFilter.ALLOW);
-          Map<SingleMaterialMatcher, Double> redeemables = new HashMap<>();
+          Map<MaterialMatcher, Double> redeemables = new HashMap<>();
           Region region;
 
           if (proto.isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
@@ -148,16 +146,15 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
             if (elItems != null) {
               for (Element elItem : elItems.getChildren("item")) {
                 redeemables.put(
-                    XMLUtils.parseMaterialPattern(elItem),
+                    MaterialMatcher.parse(elItem),
                     XMLUtils.parseNumber(Node.fromAttr(elItem, "points"), Double.class, 1D));
               }
             }
           }
           boolean silent = XMLUtils.parseBoolean(Node.fromAttr(scoreBoxEl, "silent"), false);
 
-          scoreBoxFactories.add(
-              new ScoreBoxFactory(
-                  region, points, filter, ImmutableMap.copyOf(redeemables), silent));
+          scoreBoxFactories.add(new ScoreBoxFactory(
+              region, points, filter, ImmutableMap.copyOf(redeemables), silent));
         }
       }
 

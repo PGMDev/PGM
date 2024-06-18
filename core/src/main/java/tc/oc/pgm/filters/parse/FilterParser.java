@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.jdom2.Attribute;
@@ -85,7 +84,9 @@ import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.XMLParser;
+import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.collection.ContextStore;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.math.OffsetVector;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -118,9 +119,9 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   public abstract ContextStore<? super Filter> getUsedContext();
 
   /**
-   * The top-level method for parsing an individual filter element. This method should call {@link
-   * #parseDynamic} at some point, and should also take care of adding the filter to whatever type
-   * of context is in use.
+   * The top-level method for parsing an individual filter element. This method should call
+   * {@link #parseDynamic} at some point, and should also take care of adding the filter to whatever
+   * type of context is in use.
    */
   public abstract Filter parse(Element el) throws InvalidXMLException;
 
@@ -130,8 +131,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   /**
-   * Return the filter referenced by the given name/id, and assume it appears in the given {@link
-   * Node} for error reporting purposes.
+   * Return the filter referenced by the given name/id, and assume it appears in the given
+   * {@link Node} for error reporting purposes.
    */
   public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
 
@@ -282,7 +283,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("material")
   public MaterialFilter parseMaterial(Element el) throws InvalidXMLException {
-    return new MaterialFilter(XMLUtils.parseMaterialPattern(el));
+    return new MaterialFilter(MaterialMatcher.builder().parse(new Node(el)).build());
   }
 
   @MethodParser("void")
@@ -292,7 +293,11 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("entity")
   public EntityTypeFilter parseEntity(Element el) throws InvalidXMLException {
-    return new EntityTypeFilter(XMLUtils.parseEnum(el, EntityType.class));
+    var type = EntityTypes.getByName(el.getTextNormalize());
+    if (type == null)
+      throw new InvalidXMLException("Could not find entity type: " + el.getTextNormalize(), el);
+
+    return new EntityTypeFilter(type);
   }
 
   @MethodParser("mob")
@@ -396,9 +401,9 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   private Filter parseExplicitTeam(Element el, CompetitorFilter filter) throws InvalidXMLException {
     final boolean any = XMLUtils.parseBoolean(el.getAttribute("any"), false);
-    final Optional<XMLFeatureReference<TeamFactory>> team =
-        Optional.ofNullable(Node.fromAttr(el, "team"))
-            .map(n -> features.createReference(n, TeamFactory.class));
+    final Optional<XMLFeatureReference<TeamFactory>> team = Optional.ofNullable(
+            Node.fromAttr(el, "team"))
+        .map(n -> features.createReference(n, TeamFactory.class));
 
     if (any && team.isPresent())
       throw new InvalidXMLException("Cannot combine attributes 'team' and 'any'", el);
@@ -496,9 +501,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     } else if (maxDuration == null) {
       duration = Range.atLeast((int) (minDuration.getSeconds() * 20));
     } else {
-      duration =
-          Range.closed(
-              (int) (minDuration.getSeconds() * 20), (int) (maxDuration.getSeconds() * 20));
+      duration = Range.closed(
+          (int) (minDuration.getSeconds() * 20), (int) (maxDuration.getSeconds() * 20));
     }
     boolean amplifier = Node.fromAttr(el, "amplifier") != null;
     return new EffectFilter(XMLUtils.parsePotionEffect(el), duration, amplifier);
@@ -616,9 +620,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("players")
   public PlayerCountFilter parsePlayerCountFilter(Element el) throws InvalidXMLException {
-    Filter child =
-        parseProperty(
-            Node.fromAttrOrSelf(el, "filter"), StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
+    Filter child = parseProperty(
+        Node.fromAttrOrSelf(el, "filter"), StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
 
     return new PlayerCountFilter(
         child,

@@ -1,14 +1,19 @@
 package tc.oc.pgm.util.tablist;
 
+import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.util.platform.Platform;
 
 public class TablistResizer {
   private static final int TAB_SIZE = 80;
+  // In 1.20.6 the field to edit is 1, unsure what version exactly broke it
+  private static final int FIELD = Platform.VARIANT == SPORTPAPER ? 2 : 1;
 
   public static void registerAdapter(Plugin plugin) {
     ProtocolLibrary.getProtocolManager().addPacketListener(new TablistResizePacketAdapter(plugin));
@@ -23,7 +28,7 @@ public class TablistResizer {
     @Override
     public void onPacketSending(PacketEvent event) {
       if (event.getPacketType() == PacketType.Play.Server.LOGIN)
-        event.getPacket().getIntegers().write(2, TAB_SIZE);
+        event.getPacket().getIntegers().write(FIELD, TAB_SIZE);
     }
   }
 }

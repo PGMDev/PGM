@@ -142,15 +142,16 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     Beam(Flag flag) {
       this.flag = flag;
 
-      ItemStack wool = new ItemBuilder().material(Materials.WOOL).color(flag.getDyeColor()).build();
+      ItemStack wool =
+          new ItemBuilder().material(Materials.WOOL).color(flag.getDyeColor()).build();
       this.base = ENTITIES.fakeArmorStand(wool);
       this.legacyBase = ENTITIES.fakeWitherSkull();
-      this.segments =
-          range(0, 64) // ~100 blocks is the height which the particles appear to be reasonably
-              // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
-              // to reduce load on the client
-              .mapToObj(i -> ENTITIES.fakeArmorStand(wool))
-              .collect(Collectors.toList());
+      this.segments = range(
+              0, 64) // ~100 blocks is the height which the particles appear to be reasonably
+          // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
+          // to reduce load on the client
+          .mapToObj(i -> ENTITIES.fakeArmorStand(wool))
+          .collect(Collectors.toList());
     }
 
     Optional<MatchPlayer> carrier() {
@@ -160,14 +161,15 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     }
 
     Optional<Location> location() {
-      if (!flag.getLocation().isPresent()) {
-        return Optional.empty();
-      }
+      return flag.getLocation();
+    }
 
-      Location location = flag.getLocation().get().clone();
-      location.setPitch(0f);
-      location.setYaw(0f);
-      return Optional.of(location);
+    Location toBaseLocation(Location loc) {
+      loc = loc.clone().add(0, 2.75, 0);
+      if (loc.getY() < -64) loc.setY(-64);
+      loc.setPitch(0f);
+      loc.setYaw(0f);
+      return loc;
     }
 
     private FakeEntity base(MatchPlayer player) {
@@ -191,13 +193,13 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
       for (int i = 1; i < segments.size(); i++) {
         segments.get(i - 1).ride(segments.get(i).entityId()).send(bukkit);
       }
-      base(player).ride(segments.get(0).entityId()).send(bukkit);
+      base(player).ride(segments.getFirst().entityId()).send(bukkit);
 
       update(player);
     }
 
     private void spawn(Player player, FakeEntity entity) {
-      location().ifPresent(l -> entity.spawn(l).send(player));
+      location().ifPresent(l -> entity.spawn(toBaseLocation(l)).send(player));
     }
 
     public void update() {
@@ -205,14 +207,11 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     }
 
     public void update(MatchPlayer player) {
-      Location loc =
-          carrier().map(c -> c.getBukkit().getLocation()).orElseGet(() -> location().orElse(null));
-      if (loc == null) return;
-      loc = loc.clone().add(0, 2.75, 0);
-      if (loc.getY() < -64) loc.setY(-64);
-      loc.setPitch(0f);
-      loc.setYaw(0f);
-      base(player).teleport(loc).send(player.getBukkit());
+      carrier()
+          .map(MatchPlayer::getLocation)
+          .or(this::location)
+          .map(this::toBaseLocation)
+          .ifPresent(loc -> base(player).teleport(loc).send(player.getBukkit()));
     }
 
     public void hide() {

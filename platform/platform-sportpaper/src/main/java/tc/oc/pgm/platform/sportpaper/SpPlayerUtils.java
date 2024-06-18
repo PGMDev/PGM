@@ -39,7 +39,7 @@ public class SpPlayerUtils implements PlayerUtils {
   @Override
   public Skin getPlayerSkin(Player player) {
     CraftPlayer craftPlayer = (CraftPlayer) player;
-    return Skins.fromProperties(craftPlayer.getProfile().getProperties());
+    return Skins.fromProfile(craftPlayer.getProfile());
   }
 
   @Override

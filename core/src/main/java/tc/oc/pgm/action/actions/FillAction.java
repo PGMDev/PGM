@@ -8,17 +8,17 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.query.BlockQuery;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 
 public class FillAction extends AbstractAction<Match> {
 
   private final Region region;
-  private final MaterialData materialData;
+  private final BlockMaterialData materialData;
   private final @Nullable Filter filter;
   private final boolean events;
 
   public FillAction(
-      Region region, MaterialData materialData, @Nullable Filter filter, boolean events) {
+      Region region, BlockMaterialData materialData, @Nullable Filter filter, boolean events) {
     super(Match.class);
     this.region = region;
     this.materialData = materialData;
@@ -31,16 +31,17 @@ public class FillAction extends AbstractAction<Match> {
     for (Block block : region.getBlocks(match.getWorld())) {
       if (filter != null && filter.query(new BlockQuery(block)).isDenied()) continue;
 
-      BlockState newState = block.getState();
-      materialData.applyTo(newState);
+      if (!events) {
+        materialData.applyTo(block, true);
+      } else {
+        BlockState newState = block.getState();
+        materialData.applyTo(newState);
 
-      if (events) {
         BlockFormEvent event = new BlockFormEvent(block, newState);
         match.callEvent(event);
         if (event.isCancelled()) continue;
+        newState.update(true, true);
       }
-
-      newState.update(true, true);
     }
   }
 }

@@ -22,13 +22,14 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(value = MatchScope.LOADED)
 public class TNTRenderMatchModule implements MatchModule, Listener {
   private static final Duration AFK_TIME = Duration.ofSeconds(30);
   private static final double MAX_DISTANCE = Math.pow(64d, 2);
-  private static final MaterialData TNT = MaterialData.from(Material.TNT);
+  private static final BlockMaterialData TNT = MaterialData.block(Material.TNT);
 
   private final Match match;
   private final List<PrimedTnt> entities;
@@ -82,7 +83,7 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
     }
 
     public boolean update() {
-      MaterialData currentMaterial = MaterialData.from(currentLocation.getBlock());
+      var currentMaterial = MaterialData.block(currentLocation.getBlock());
       if (entity.isDead()) {
         for (MatchPlayer viewer : viewers) {
           currentMaterial.sendBlockChange(viewer.getBukkit(), currentLocation);
@@ -101,7 +102,7 @@ public class TNTRenderMatchModule implements MatchModule, Listener {
       return false;
     }
 
-    private void updatePlayer(MatchPlayer player, MaterialData md) {
+    private void updatePlayer(MatchPlayer player, BlockMaterialData md) {
       if (currentLocation.distanceSquared(player.getLocation()) >= MAX_DISTANCE
           && player.isActive(AFK_TIME)) {
         if (viewers.add(player)) {

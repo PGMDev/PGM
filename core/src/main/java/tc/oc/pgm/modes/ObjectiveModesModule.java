@@ -20,7 +20,7 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -71,7 +71,7 @@ public class ObjectiveModesModule implements MapModule<ObjectiveModesMatchModule
           throw new InvalidXMLException("No period has been specified", modeEl);
         }
 
-        MaterialData material =
+        BlockMaterialData material =
             XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
         Duration after = TextParser.parseDuration(modeEl.getAttributeValue("after"));
         Filter filter =

@@ -5,11 +5,9 @@ import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.google.common.collect.Lists;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.v1_8_R3.DataWatcher;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
@@ -19,7 +17,6 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardTeam;
 import net.minecraft.server.v1_8_R3.WorldSettings;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -45,17 +42,16 @@ public class SpTabPackets implements TabPackets, PacketSender {
   @Override
   public Packet spawnPlayerPacket(int entityId, UUID uuid, Location location, Player player) {
     DataWatcher dataWatcher = copyDataWatcher(player);
-    return new SpPacket<>(
-        new PacketPlayOutNamedEntitySpawn(
-            entityId,
-            uuid,
-            location.getX(),
-            location.getY(),
-            location.getZ(),
-            (byte) location.getYaw(),
-            (byte) location.getPitch(),
-            CraftItemStack.asNMSCopy(null),
-            dataWatcher));
+    return new SpPacket<>(new PacketPlayOutNamedEntitySpawn(
+        entityId,
+        uuid,
+        location.getX(),
+        location.getY(),
+        location.getZ(),
+        (byte) location.getYaw(),
+        (byte) location.getPitch(),
+        CraftItemStack.asNMSCopy(null),
+        dataWatcher));
   }
 
   @Override
@@ -102,20 +98,12 @@ public class SpTabPackets implements TabPackets, PacketSender {
 
   private static PacketPlayOutPlayerInfo.EnumPlayerInfoAction toNmsAction(
       EnumPlayerInfoAction action) {
-    switch (action) {
-      case ADD_PLAYER:
-        return ADD_PLAYER;
-      case UPDATE_GAME_MODE:
-        return UPDATE_GAME_MODE;
-      case UPDATE_LATENCY:
-        return UPDATE_LATENCY;
-      case UPDATE_DISPLAY_NAME:
-        return UPDATE_DISPLAY_NAME;
-      case REMOVE_PLAYER:
-        return REMOVE_PLAYER;
-      default:
-        throw new IllegalArgumentException("Unsupported action: " + action);
-    }
+    return switch (action) {
+      case ADD_PLAYER -> ADD_PLAYER;
+      case UPDATE_LATENCY -> UPDATE_LATENCY;
+      case UPDATE_DISPLAY_NAME -> UPDATE_DISPLAY_NAME;
+      case REMOVE_PLAYER -> REMOVE_PLAYER;
+    };
   }
 
   private static DataWatcher copyDataWatcher(Player player) {
@@ -137,26 +125,18 @@ public class SpTabPackets implements TabPackets, PacketSender {
     public void addPlayerInfo(
         UUID uuid,
         String name,
-        GameMode gamemode,
         int ping,
         @Nullable Skin skin,
         @Nullable String renderedDisplayName) {
       GameProfile profile = new GameProfile(uuid, name);
-      if (skin != null) {
-        for (Map.Entry<String, Collection<Property>> entry :
-            Skins.toProperties(skin).asMap().entrySet()) {
-          profile.getProperties().putAll(entry.getKey(), entry.getValue());
-        }
-      }
+      if (skin != null) Skins.toProfile(profile, skin);
 
-      WorldSettings.EnumGamemode enumGamemode =
-          gamemode == null ? null : WorldSettings.EnumGamemode.getById(gamemode.getValue());
-      IChatBaseComponent iChatBaseComponent =
-          renderedDisplayName == null
-              ? null
-              : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
+      IChatBaseComponent iChatBaseComponent = renderedDisplayName == null
+          ? null
+          : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
 
-      packet.b.add(packet.new PlayerInfoData(profile, ping, enumGamemode, iChatBaseComponent));
+      packet.b.add(packet
+      .new PlayerInfoData(profile, ping, WorldSettings.EnumGamemode.SURVIVAL, iChatBaseComponent));
     }
 
     @Override

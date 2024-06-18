@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
@@ -15,11 +16,6 @@ public class NoMaterialMatcher implements MaterialMatcher {
 
   @Override
   public boolean matches(Material material) {
-    return false;
-  }
-
-  @Override
-  public boolean matches(org.bukkit.material.MaterialData materialData) {
     return false;
   }
 
@@ -39,8 +35,8 @@ public class NoMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Set<MaterialData> getMaterialData() {
-    return Collections.emptySet();
+  public Set<BlockMaterialData> getPossibleBlocks() {
+    return Set.of();
   }
 
   @Override

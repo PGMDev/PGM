@@ -55,10 +55,9 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
     long delaySecs = (config.getStartTime().getSeconds() + 1) / 2;
     try {
-      delaySecs =
-          TextParser.parseInteger(
-              config.getExperiments().getOrDefault("match-destroy-seconds", "").toString(),
-              Range.atLeast(0));
+      delaySecs = TextParser.parseInteger(
+          config.getExperiments().getOrDefault("match-destroy-seconds", "").toString(),
+          Range.atLeast(0));
     } catch (TextException e) {
       // No-op, since this is experimental
     }
@@ -89,11 +88,12 @@ public class MatchManagerImpl implements MatchManager, Listener {
     matchByWorld.remove(assertNotNull(match.getWorld()).getName());
 
     PGM.get()
-        .getAsyncExecutor()
+        .getExecutor()
         .schedule(
             () -> {
               match.destroy();
-              logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+              logger.info(
+                  "Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
             },
             destroyDelaySecs,
             TimeUnit.SECONDS);

@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
@@ -16,11 +17,6 @@ public class AllMaterialMatcher implements MaterialMatcher {
 
   @Override
   public boolean matches(Material material) {
-    return true;
-  }
-
-  @Override
-  public boolean matches(org.bukkit.material.MaterialData materialData) {
     return true;
   }
 
@@ -40,7 +36,7 @@ public class AllMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Set<MaterialData> getMaterialData() {
+  public Set<BlockMaterialData> getPossibleBlocks() {
     throw new UnsupportedOperationException("Cannot iterate material data for all materials");
   }
 

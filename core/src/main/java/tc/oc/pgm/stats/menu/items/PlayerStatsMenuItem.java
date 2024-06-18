@@ -20,8 +20,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import tc.oc.pgm.menu.MenuItem;
@@ -48,44 +46,41 @@ public class PlayerStatsMenuItem implements MenuItem {
 
   @Override
   public Component getDisplayName() {
-    return stats.getPlayerComponent();
+    return stats.getPlayerComponent() != null
+        ? stats.getPlayerComponent()
+        : player(uuid, NameStyle.VERBOSE);
   }
 
   @Override
   public List<String> getLore(Player player) {
     List<String> lore = new ArrayList<>();
 
-    Component statLore =
-        translatable(
-            "match.stats.concise",
-            RESET,
-            number(stats.getKills(), NamedTextColor.GREEN),
-            number(stats.getDeaths(), NamedTextColor.RED),
-            number(stats.getKD(), NamedTextColor.GREEN));
-    Component killstreakLore =
-        translatable(
-            "match.stats.killstreak.concise",
-            RESET,
-            number(stats.getMaxKillstreak(), NamedTextColor.GREEN));
-    Component damageDealtLore =
-        translatable(
-            "match.stats.damage.dealt",
-            RESET,
-            damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
-            damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
-    Component damageReceivedLore =
-        translatable(
-            "match.stats.damage.received",
-            RESET,
-            damageComponent(stats.getDamageTaken(), NamedTextColor.RED),
-            damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD));
-    Component bowLore =
-        translatable(
-            "match.stats.bow",
-            RESET,
-            number(stats.getShotsHit(), NamedTextColor.YELLOW),
-            number(stats.getShotsTaken(), NamedTextColor.YELLOW),
-            number(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
+    Component statLore = translatable(
+        "match.stats.concise",
+        RESET,
+        number(stats.getKills(), NamedTextColor.GREEN),
+        number(stats.getDeaths(), NamedTextColor.RED),
+        number(stats.getKD(), NamedTextColor.GREEN));
+    Component killstreakLore = translatable(
+        "match.stats.killstreak.concise",
+        RESET,
+        number(stats.getMaxKillstreak(), NamedTextColor.GREEN));
+    Component damageDealtLore = translatable(
+        "match.stats.damage.dealt",
+        RESET,
+        damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
+        damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
+    Component damageReceivedLore = translatable(
+        "match.stats.damage.received",
+        RESET,
+        damageComponent(stats.getDamageTaken(), NamedTextColor.RED),
+        damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD));
+    Component bowLore = translatable(
+        "match.stats.bow",
+        RESET,
+        number(stats.getShotsHit(), NamedTextColor.YELLOW),
+        number(stats.getShotsTaken(), NamedTextColor.YELLOW),
+        number(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
 
     lore.add(TextTranslations.translateLegacy(statLore, player));
     lore.add(TextTranslations.translateLegacy(killstreakLore, player));
@@ -97,15 +92,14 @@ public class PlayerStatsMenuItem implements MenuItem {
         lore, stats.getFlagsCaptured(), "match.stats.flagsCaptured.concise", player)) {
       if (!stats.getLongestFlagHold().equals(Duration.ZERO)) {
         lore.add(null);
-        lore.add(
-            TextTranslations.translateLegacy(
-                translatable(
-                    "match.stats.flaghold.concise",
-                    RESET,
-                    TemporalComponent.briefNaturalApproximate(stats.getLongestFlagHold())
-                        .color(NamedTextColor.AQUA)
-                        .decoration(TextDecoration.BOLD, true)),
-                player));
+        lore.add(TextTranslations.translateLegacy(
+            translatable(
+                "match.stats.flaghold.concise",
+                RESET,
+                TemporalComponent.briefNaturalApproximate(stats.getLongestFlagHold())
+                    .color(NamedTextColor.AQUA)
+                    .decoration(TextDecoration.BOLD, true)),
+            player));
       }
     }
     optionalStat(lore, stats.getDestroyablePiecesBroken(), "match.stats.broken.concise", player);
@@ -129,6 +123,11 @@ public class PlayerStatsMenuItem implements MenuItem {
   }
 
   @Override
+  public short getData() {
+    return 3; // Player head
+  }
+
+  @Override
   public void onClick(Player player, ClickType clickType) {}
 
   @Override
@@ -145,26 +144,5 @@ public class PlayerStatsMenuItem implements MenuItem {
     NMS_HACKS.setSkullMetaOwner(skullMeta, "name", uuid, playerSkin);
 
     return skullMeta;
-  }
-
-  @Override
-  public ItemStack createItem(Player player) {
-    ItemStack stack = new ItemStack(getMaterial(player), 1, (byte) 3);
-    ItemMeta meta = stack.getItemMeta();
-
-    Component playerComponent =
-        stats.getPlayerComponent() != null
-            ? stats.getPlayerComponent()
-            : player(uuid, NameStyle.VERBOSE);
-
-    meta.setDisplayName(
-        TextTranslations.translateLegacy(
-            playerComponent.decoration(TextDecoration.BOLD, true), player));
-    meta.setLore(getLore(player));
-    meta.addItemFlags(ItemFlag.values());
-
-    stack.setItemMeta(modifyMeta(meta));
-
-    return stack;
   }
 }

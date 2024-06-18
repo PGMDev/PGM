@@ -14,6 +14,7 @@ import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.chunk.ChunkVector;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
 /**
@@ -21,8 +22,8 @@ import tc.oc.pgm.util.material.MaterialData;
  * copy-on-write strategy. This module does nothing on its own, but other modules can use it to
  * query for the original world of the map.
  *
- * <p>The correct functioning of this module depends on EVERY block change firing a {@link
- * BlockTransformEvent}, without exception.
+ * <p>The correct functioning of this module depends on EVERY block change firing a
+ * {@link BlockTransformEvent}, without exception.
  */
 @ListenerScope(MatchScope.LOADED)
 public class SnapshotMatchModule implements MatchModule, Listener {
@@ -48,7 +49,7 @@ public class SnapshotMatchModule implements MatchModule, Listener {
     return snapshot.getOriginalMaterial(x, y, z);
   }
 
-  public MaterialData getOriginalMaterial(Vector pos) {
+  public BlockMaterialData getOriginalMaterial(Vector pos) {
     return snapshot.getOriginalMaterial(pos);
   }
 
@@ -74,8 +75,8 @@ public class SnapshotMatchModule implements MatchModule, Listener {
    * @param cv the chunk vector to save
    * @param state optional block state to write on the snapshot
    */
-  public void saveSnapshot(ChunkVector cv, @Nullable BlockState state) {
-    snapshot.saveSnapshot(cv, state);
+  public void saveSnapshot(ChunkVector cv, @Nullable BlockState oldState) {
+    snapshot.saveSnapshot(cv, oldState);
   }
 
   public WorldSnapshot getOriginalSnapshot() {

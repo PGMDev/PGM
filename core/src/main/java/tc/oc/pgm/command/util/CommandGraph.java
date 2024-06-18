@@ -18,7 +18,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.incendo.cloud.CommandManager;
 import org.incendo.cloud.annotations.AnnotationParser;
-import org.incendo.cloud.bukkit.CloudBukkitCapabilities;
 import org.incendo.cloud.exception.ArgumentParseException;
 import org.incendo.cloud.exception.CommandExecutionException;
 import org.incendo.cloud.exception.InvalidCommandSenderException;
@@ -71,21 +70,11 @@ public abstract class CommandGraph<P extends Plugin> {
 
     manager.settings().set(ManagerSetting.LIBERAL_FLAG_PARSING, true);
 
-    // Register Brigadier mappings
-    if (manager.hasCapability(CloudBukkitCapabilities.BRIGADIER)) manager.registerBrigadier();
-
-    // Register asynchronous completions
-    if (manager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
-      manager.registerAsynchronousCompletions();
-
     // Basic suggestion filtering processor which avoids suggesting flags when not applicable
-    manager.suggestionProcessor(
-        new FilteringSuggestionProcessor<>(
-            FilteringSuggestionProcessor.Filter.Simple.contextFree(
-                (s, i) ->
-                    i.isEmpty()
-                        || !s.startsWith("-")
-                        || s.toLowerCase(Locale.ROOT).startsWith(i.toLowerCase(Locale.ROOT)))));
+    manager.suggestionProcessor(new FilteringSuggestionProcessor<>(
+        FilteringSuggestionProcessor.Filter.Simple.contextFree((s, i) -> i.isEmpty()
+            || !s.startsWith("-")
+            || s.toLowerCase(Locale.ROOT).startsWith(i.toLowerCase(Locale.ROOT)))));
 
     return manager;
   }
@@ -153,12 +142,9 @@ public abstract class CommandGraph<P extends Plugin> {
 
   protected <E extends Exception> void registerExceptionHandler(
       Class<E> ex, Function<E, ComponentLike> toComponent) {
-    manager
-        .exceptionController()
-        .registerHandler(
-            ex,
-            (c) ->
-                Audience.get(c.context().sender()).sendWarning(toComponent.apply(c.exception())));
+    manager.exceptionController().registerHandler(ex, (c) -> Audience.get(
+            c.context().sender())
+        .sendWarning(toComponent.apply(c.exception())));
   }
 
   protected <E extends Exception> void handleException(ExceptionContext<CommandSender, E> context) {

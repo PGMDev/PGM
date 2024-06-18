@@ -4,7 +4,6 @@ import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.google.common.collect.SetMultimap;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
@@ -14,6 +13,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.platform.sportpaper.attribute.AttributeUtilBukkit;
+import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.platform.Supports;
@@ -59,17 +60,11 @@ public class SpInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
 
   @Override
   public void applyAttributeModifiers(
-      SetMultimap<String, AttributeModifier> attributeModifiers, ItemMeta meta) {
-    for (Map.Entry<String, AttributeModifier> entry : attributeModifiers.entries()) {
-      AttributeModifier attributeModifier = entry.getValue();
+      SetMultimap<Attribute, AttributeModifier> attributeModifiers, ItemMeta meta) {
+    for (var entry : attributeModifiers.entries()) {
       meta.addAttributeModifier(
-          entry.getKey(),
-          new org.bukkit.attribute.AttributeModifier(
-              attributeModifier.getUniqueId(),
-              attributeModifier.getName(),
-              attributeModifier.getAmount(),
-              org.bukkit.attribute.AttributeModifier.Operation.fromOpcode(
-                  attributeModifier.getOperation().ordinal())));
+          AttributeUtilBukkit.toBukkit(entry.getKey()),
+          AttributeUtilBukkit.toBukkit(entry.getValue()));
     }
   }
 

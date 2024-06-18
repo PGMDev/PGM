@@ -78,9 +78,8 @@ public class CoreMatchModule implements MatchModule, Listener {
           // core has leaked
           core.markLeaked();
           this.match.callEvent(new CoreLeakEvent(this.match, core, event.getNewState()));
-          this.match.callEvent(
-              new GoalCompleteEvent(
-                  this.match, core, core.getOwner(), false, core.getContributions()));
+          this.match.callEvent(new GoalCompleteEvent(
+              this.match, core, core.getOwner(), false, core.getContributions()));
         }
       }
     }
@@ -101,7 +100,7 @@ public class CoreMatchModule implements MatchModule, Listener {
 
             if (team == core.getOwner()) {
               event.setCancelled(translatable("objective.damageOwn", core.getComponentName()));
-            } else if (core.isCoreMaterial(MaterialData.from(event.getOldState()))) {
+            } else if (core.isCoreMaterial(MaterialData.block(event.getOldState()))) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
 

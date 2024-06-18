@@ -143,10 +143,9 @@ public class PGMListener implements Listener {
               ChatColor.RED + TextTranslations.translate("misc.incorrectWorld", event.getPlayer()));
       this.parent
           .getLogger()
-          .info(
-              "Had to kick player "
-                  + event.getPlayer().getName()
-                  + " due to them spawning in the incorrect world");
+          .info("Had to kick player "
+              + event.getPlayer().getName()
+              + " due to them spawning in the incorrect world");
       return;
     }
 
@@ -205,7 +204,7 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void lockFireTick(final MatchLoadEvent event) {
+  public void initGamerules(final MatchLoadEvent event) {
     setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
   }
 
@@ -223,7 +222,7 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void lockFireTick(final MatchFinishEvent event) {
+  public void postGamerules(final MatchFinishEvent event) {
     setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
   }
 
@@ -318,22 +317,18 @@ public class PGMListener implements Listener {
       Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
       Component staffName =
           UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
-      Component matchLimit =
-          text()
-              .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
-              .append(space())
-              .append(
-                  translatable(
-                      "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""),
-                      NamedTextColor.GRAY))
-              .build();
+      Component matchLimit = text()
+          .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
+          .append(space())
+          .append(translatable(
+              "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""), NamedTextColor.GRAY))
+          .build();
 
       // No limit
       Component forced = translatable("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
-        Component time =
-            TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
-                .color(NamedTextColor.GREEN);
+        Component time = TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
+            .color(NamedTextColor.GREEN);
 
         // If time & match limit are present, display both
         if (event.getMatchLimit() != 0) {
@@ -353,17 +348,15 @@ public class PGMListener implements Listener {
 
     // Broadcast map pool changes due to size
     if (event.getNewPool().isDynamic()) {
-      Component broadcast =
-          text()
-              .append(text("[", NamedTextColor.WHITE))
-              .append(translatable("pool.name", NamedTextColor.GOLD))
-              .append(text("] ", NamedTextColor.WHITE))
-              .append(
-                  translatable(
-                      "pool.change",
-                      NamedTextColor.GREEN,
-                      text(event.getNewPool().getName(), NamedTextColor.AQUA)))
-              .build();
+      Component broadcast = text()
+          .append(text("[", NamedTextColor.WHITE))
+          .append(translatable("pool.name", NamedTextColor.GOLD))
+          .append(text("] ", NamedTextColor.WHITE))
+          .append(translatable(
+              "pool.change",
+              NamedTextColor.GREEN,
+              text(event.getNewPool().getName(), NamedTextColor.AQUA)))
+          .build();
 
       event.getMatch().sendMessage(broadcast);
     }

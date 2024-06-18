@@ -186,9 +186,8 @@ public class EventFilterMatchModule implements MatchModule, Listener {
       ClickType clickType = convertClick(event.getAction(), event.getPlayer());
       if (clickType == null) return;
 
-      match.callEvent(
-          new ObserverInteractEvent(
-              player, clickType, event.getClickedBlock(), null, event.getItem()));
+      match.callEvent(new ObserverInteractEvent(
+          player, clickType, event.getClickedBlock(), null, event.getItem()));
     }
   }
 
@@ -206,13 +205,12 @@ public class EventFilterMatchModule implements MatchModule, Listener {
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    match.callEvent(
-        new ObserverInteractEvent(
-            player,
-            convertClick(ClickType.RIGHT, event.getPlayer()),
-            null,
-            event.getRightClicked(),
-            event.getPlayer().getItemInHand()));
+    match.callEvent(new ObserverInteractEvent(
+        player,
+        convertClick(ClickType.RIGHT, event.getPlayer()),
+        null,
+        event.getRightClicked(),
+        event.getPlayer().getItemInHand()));
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -301,13 +299,12 @@ public class EventFilterMatchModule implements MatchModule, Listener {
         MatchPlayer player = match.getPlayer(entityEvent.getDamager());
         if (player == null) return;
 
-        match.callEvent(
-            new ObserverInteractEvent(
-                player,
-                ClickType.LEFT,
-                null,
-                event.getEntity(),
-                player.getInventory().getItemInHand()));
+        match.callEvent(new ObserverInteractEvent(
+            player,
+            ClickType.LEFT,
+            null,
+            event.getEntity(),
+            player.getInventory().getItemInHand()));
       }
     }
   }

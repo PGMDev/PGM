@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.nms.packets;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -9,10 +10,9 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 public interface EntityPackets {
-  AtomicInteger ENTITY_IDS = new AtomicInteger(Integer.MAX_VALUE);
 
   default int allocateEntityId() {
-    return ENTITY_IDS.decrementAndGet();
+    return NMS_HACKS.allocateEntityId();
   }
 
   default FakeEntity fakeWitherSkull() {
@@ -24,12 +24,12 @@ public interface EntityPackets {
     };
   }
 
-  default FakeEntity fakeArmorStand(@Nullable ItemStack head) {
+  default FakeEntity fakeArmorStand(@Nullable ItemStack helmet) {
     return new FakeEntity.Impl(allocateEntityId()) {
       @Override
       public Packet spawn(Location location, Vector velocity) {
-        Packet spawn = spawnArmorStand(location, allocateEntityId(), velocity);
-        return head != null ? Packet.of(spawn, wear(4, head)) : spawn;
+        Packet spawn = spawnArmorStand(location, entityId(), velocity);
+        return helmet != null ? Packet.of(spawn, wearHead(helmet)) : spawn;
       }
     };
   }
@@ -56,9 +56,9 @@ public interface EntityPackets {
 
   Packet teleportEntityPacket(int entityId, Location location);
 
-  Packet entityAttach(int entityId, int vehicleId, boolean leash);
+  Packet entityMount(int entityId, int vehicleId);
 
-  Packet entityEquipment(int entityId, int slot, ItemStack armor);
+  Packet entityHeadEquipment(int entityId, ItemStack helmet);
 
   Packet entityMetadataPacket(int entityId, Entity entity, boolean complete);
 }

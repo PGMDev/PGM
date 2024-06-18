@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionType;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -27,13 +27,15 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
 import tc.oc.pgm.spawner.objects.SpawnablePotion;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class SpawnerModule implements MapModule<SpawnerMatchModule> {
 
-  private static final PotionType[] POTION_TYPES = PotionType.values();
+  private static final int SPLASH_BIT = 0x4000;
+
   private final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
 
   @Override
@@ -80,9 +82,8 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
           throw new InvalidXMLException("Max-delay must be longer than min-delay", spawnerEl);
         }
 
-        int maxEntities =
-            XMLUtils.parseNumber(
-                spawnerEl.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
+        int maxEntities = XMLUtils.parseNumber(
+            spawnerEl.getAttribute("max-entities"), Integer.class, Integer.MAX_VALUE);
         Filter playerFilter =
             filterParser.parseFilterProperty(spawnerEl, "filter", StaticFilter.ALLOW);
 
@@ -94,46 +95,31 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
         }
 
         for (Element potionEl : XMLUtils.getChildren(spawnerEl, "potion")) {
-          ImmutableList.Builder<PotionEffect> effectsBuilder = ImmutableList.builder();
+          short dmg = XMLUtils.parseNumber(potionEl.getAttribute("damage"), Short.class, (short) 0);
+          ItemStack potion =
+              MaterialData.item(Material.POTION, (short) (dmg | SPLASH_BIT)).toItemStack(1);
+          PotionMeta meta = (PotionMeta) potion.getItemMeta();
           for (Element potionChild : potionEl.getChildren("effect")) {
-            effectsBuilder.add(XMLUtils.parsePotionEffect(new InheritingElement(potionChild)));
+            meta.addCustomEffect(
+                XMLUtils.parsePotionEffect(new InheritingElement(potionChild)), false);
           }
-          ImmutableList<PotionEffect> effects = effectsBuilder.build();
-          if (effects.isEmpty()) {
+          if (!meta.hasCustomEffects()) {
             throw new InvalidXMLException("Expected child effects, but found none", spawnerEl);
           }
-          PotionType baseType = null;
-          if (potionEl.getAttribute("damage") != null) {
-            int potionId =
-                XMLUtils.parseNumber(potionEl.getAttribute("damage"), Integer.class, 0) & 0x63;
-            if (potionId > 0 && potionId < POTION_TYPES.length) {
-              baseType = POTION_TYPES[potionId];
-            }
-          } else {
-            for (PotionEffect potionEffect : effects) {
-              // PotionType lists "true" potions, PotionEffectType "potionEffect.getType()" lists
-              // all possible status effects (ie wither, blindness, etc)
-              // Use the first listed PotionType for potion color
-              if (PotionType.getByEffect(potionEffect.getType()) != null) {
-                baseType = PotionType.getByEffect(potionEffect.getType());
-                break;
-              }
-            }
-          }
-          objects.add(new SpawnablePotion(effects, baseType, id));
+          potion.setItemMeta(meta);
+          objects.add(new SpawnablePotion(potion, id));
         }
 
-        SpawnerDefinition spawnerDefinition =
-            new SpawnerDefinition(
-                id,
-                objects,
-                spawnRegion,
-                playerRegion,
-                playerFilter,
-                delay,
-                minDelay,
-                maxDelay,
-                maxEntities);
+        SpawnerDefinition spawnerDefinition = new SpawnerDefinition(
+            id,
+            objects,
+            spawnRegion,
+            playerRegion,
+            playerFilter,
+            delay,
+            minDelay,
+            maxDelay,
+            maxEntities);
         factory.getFeatures().addFeature(spawnerEl, spawnerDefinition);
         spawnerModule.spawnerDefinitions.add(spawnerDefinition);
       }

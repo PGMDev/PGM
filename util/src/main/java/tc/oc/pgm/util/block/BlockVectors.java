@@ -3,8 +3,8 @@ package tc.oc.pgm.util.block;
 import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
 import com.google.common.collect.ImmutableSet;
-import gnu.trove.set.TLongSet;
-import gnu.trove.set.hash.TLongHashSet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Collection;
 import java.util.Set;
 import org.bukkit.Location;
@@ -20,18 +20,17 @@ import tc.oc.pgm.util.material.Materials;
 public interface BlockVectors {
 
   // Names removed/renamed in higher versions
-  Set<Material> SUPPORTIVE_BLOCKS =
-      ImmutableSet.of(
-          parse(Material::valueOf, "ENCHANTMENT_TABLE", "ENCHANTING_TABLE"),
-          parse(Material::valueOf, "DAYLIGHT_DETECTOR_INVERTED", "DAYLIGHT_DETECTOR"),
-          // TODO: PLATFORM DEPENDANT, new versions should use a longer list of blocks
-          parse(Material::valueOf, "LEAVES", "LEGACY_LEAVES"),
-          parse(Material::valueOf, "LEAVES_2", "LEGACY_LEAVES_2"),
-          parse(Material::valueOf, "PISTON_BASE", "PISTON"),
-          parse(Material::valueOf, "PISTON_STICKY_BASE", "STICKY_PISTON"),
-          parse(Material::valueOf, "SOIL", "FARMLAND"),
-          Materials.LILY_PAD,
-          parse(Material::valueOf, "CAKE_BLOCK", "CAKE"));
+  Set<Material> SUPPORTIVE_BLOCKS = ImmutableSet.of(
+      parse(Material::valueOf, "ENCHANTMENT_TABLE", "ENCHANTING_TABLE"),
+      parse(Material::valueOf, "DAYLIGHT_DETECTOR_INVERTED", "DAYLIGHT_DETECTOR"),
+      // TODO: PLATFORM DEPENDANT, new versions should use a longer list of blocks
+      parse(Material::valueOf, "LEAVES", "LEGACY_LEAVES"),
+      parse(Material::valueOf, "LEAVES_2", "LEGACY_LEAVES_2"),
+      parse(Material::valueOf, "PISTON_BASE", "PISTON"),
+      parse(Material::valueOf, "PISTON_STICKY_BASE", "STICKY_PISTON"),
+      parse(Material::valueOf, "SOIL", "FARMLAND"),
+      Materials.LILY_PAD,
+      parse(Material::valueOf, "CAKE_BLOCK", "CAKE"));
 
   static BlockVector position(BlockState block) {
     return new BlockVector(block.getX(), block.getY(), block.getZ());
@@ -114,11 +113,11 @@ public interface BlockVectors {
     return encodePos(block.getX(), block.getY(), block.getZ());
   }
 
-  static TLongSet encodePosSet(Collection<?> vectors) {
-    TLongSet encoded = new TLongHashSet(vectors.size());
+  static LongSet encodePosSet(Collection<?> vectors) {
+    LongSet encoded = new LongOpenHashSet(vectors.size());
     for (Object o : vectors) {
-      if (o instanceof BlockVector) {
-        encoded.add(encodePos((BlockVector) o));
+      if (o instanceof BlockVector vec) {
+        encoded.add(encodePos(vec));
       }
     }
     return encoded;
@@ -140,10 +139,8 @@ public interface BlockVectors {
    * is more efficient than creating an intermediate {@link BlockVector}, and more convenient.
    */
   static Block blockAt(World world, long encoded) {
-    return world.getBlockAt(
-        (int) unpack(encoded, 0),
-        (int) unpack(encoded, SHIFT),
-        (int) unpack(encoded, SHIFT + SHIFT));
+    return world.getBlockAt((int) unpack(encoded, 0), (int) unpack(encoded, SHIFT), (int)
+        unpack(encoded, SHIFT + SHIFT));
   }
 
   // TODO: PLATFORM DEPENDANT, could optimize all the "endsWith" by using diff paths

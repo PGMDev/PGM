@@ -10,16 +10,16 @@ import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.attribute.AttributeModifier;
 
 public class AttributeKit extends AbstractKit {
-  private final SetMultimap<String, AttributeModifier> modifiers;
+  private final SetMultimap<Attribute, AttributeModifier> modifiers;
 
-  public AttributeKit(SetMultimap<String, AttributeModifier> modifiers) {
+  public AttributeKit(SetMultimap<Attribute, AttributeModifier> modifiers) {
     this.modifiers = modifiers;
   }
 
   @Override
   protected void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    for (Map.Entry<String, AttributeModifier> entry : modifiers.entries()) {
-      AttributeInstance attributeValue = player.getAttribute(Attribute.byName(entry.getKey()));
+    for (Map.Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
+      AttributeInstance attributeValue = player.getAttribute(entry.getKey());
       if (attributeValue != null && !attributeValue.getModifiers().contains(entry.getValue())) {
         attributeValue.addModifier(entry.getValue());
       }
@@ -33,8 +33,8 @@ public class AttributeKit extends AbstractKit {
 
   @Override
   public void remove(MatchPlayer player) {
-    for (Map.Entry<String, AttributeModifier> entry : modifiers.entries()) {
-      AttributeInstance attributeValue = player.getAttribute(Attribute.byName(entry.getKey()));
+    for (Map.Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
+      AttributeInstance attributeValue = player.getAttribute(entry.getKey());
       if (attributeValue != null && attributeValue.getModifiers().contains(entry.getValue())) {
         attributeValue.removeModifier(entry.getValue());
       }

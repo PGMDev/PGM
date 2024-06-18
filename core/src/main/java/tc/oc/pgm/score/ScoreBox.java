@@ -13,13 +13,13 @@ import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.query.PlayerStateQuery;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class ScoreBox {
   private final Region region;
   private final int score;
   private final Filter trigger;
-  private final ImmutableMap<SingleMaterialMatcher, Double> redeemables;
+  private final ImmutableMap<MaterialMatcher, Double> redeemables;
   private final boolean silent;
 
   private final Map<MatchPlayerState, Instant> lastScoreTime = Maps.newHashMap();
@@ -28,7 +28,7 @@ public class ScoreBox {
       Region region,
       int score,
       Filter filter,
-      ImmutableMap<SingleMaterialMatcher, Double> redeemables,
+      ImmutableMap<MaterialMatcher, Double> redeemables,
       boolean silent) {
     this.region = assertNotNull(region, "region");
     this.score = score;
@@ -49,7 +49,7 @@ public class ScoreBox {
     return this.trigger;
   }
 
-  public Map<SingleMaterialMatcher, Double> getRedeemables() {
+  public Map<MaterialMatcher, Double> getRedeemables() {
     return redeemables;
   }
 
