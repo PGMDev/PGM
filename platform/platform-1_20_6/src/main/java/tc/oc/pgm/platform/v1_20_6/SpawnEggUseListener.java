@@ -21,7 +21,7 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 public class SpawnEggUseListener implements Listener {
 
   private static final MaterialMatcher MATERIALS =
-      MaterialMatcher.builder().add(m -> m.name().endsWith("_SPAWN_EGG")).build();
+      MaterialMatcher.builder().addAll(m -> m.name().endsWith("_SPAWN_EGG")).build();
   ;
 
   private Player lastPlacer;

@@ -24,7 +24,8 @@ public class PlPacket implements Packet {
   @Override
   public void sendToViewers(Entity entity, boolean excludeSpectators) {
     if (excludeSpectators)
-      throw new UnsupportedOperationException("Protocol lib packets can't send to all except N");
+      throw new UnsupportedOperationException(
+          "Protocol lib packets can't send to all except spectators");
     PL.broadcastServerPacket(packet, entity, true);
   }
 

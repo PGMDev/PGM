@@ -27,7 +27,7 @@ Dependencies
 ------------
 You'll need to make sure your machine has the following dependencies before compiling PGM. The instructions will vary by operation system, so click on each link to read the detailed steps.
 
- * [Java 8](https://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) - the Java Virtual Machine required to run the Minecraft server and PGM plugin.
+ * [Java 21](https://docs.oracle.com/en/java/javase/21/install/overview-jdk-installation.html) - the Java Virtual Machine required to run the Minecraft server and PGM plugin.
  * [Maven](https://maven.apache.org/install.html) - a compilation tool to bundle all the Java dependencies into `.jar` file
 
 Steps
@@ -41,10 +41,10 @@ git clone git@github.com:PGMDev/PGM.git
 
 2. Make your changes (league system, anyone?)
 
-3. Run the code formatter, we follow Google's [code style.](https://google.github.io/styleguide/javaguide.html)
+3. Run the code formatter, we follow [palantir java format](https://github.com/palantir/palantir-java-format), based on google's [code style.](https://google.github.io/styleguide/javaguide.html)
 
 ```bash
-mvn com.coveo:fmt-maven-plugin:format
+mvn spotless:apply
 ```
 
 4. Use one of two options to compile a new version with your changes.

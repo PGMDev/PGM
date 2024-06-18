@@ -9,6 +9,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -39,30 +40,8 @@ public class ModernEntityPackets implements EntityPackets {
 
   @Override
   public Packet spawnArmorStand(Location loc, int entityId, Vector velocity) {
-    /*
-       return new ModernPacket<>(new ClientboundBundlePacket(List.of(
-       new ClientboundAddEntityPacket(
-           entityId,
-           UUID.randomUUID(),
-           loc.getX(),
-           loc.getY(),
-           loc.getZ(),
-           loc.getPitch(),
-           loc.getYaw(),
-           EntityType.ARMOR_STAND,
-           0,
-           CraftVector.toNMS(velocity),
-           0),
-       new ClientboundSetEntityDataPacket(
-           entityId,
-           List.of(
-               SynchedEntityData.DataValue.create(ENTITY_FLAGS, (byte) (1 << FLAG_INVISIBLE)),
-               SynchedEntityData.DataValue.create(ENTITY_AIR, 0),
-               SynchedEntityData.DataValue.create(ArmorStand.DATA_CLIENT_FLAGS, (byte) 0))))));
-    */
-
-    return Packet.of(
-        new ModernPacket<>(new ClientboundAddEntityPacket(
+    return new ModernPacket<>(new ClientboundBundlePacket(List.of(
+        new ClientboundAddEntityPacket(
             entityId,
             UUID.randomUUID(),
             loc.getX(),
@@ -73,13 +52,13 @@ public class ModernEntityPackets implements EntityPackets {
             EntityType.ARMOR_STAND,
             0,
             CraftVector.toNMS(velocity),
-            0)),
-        new ModernPacket<>(new ClientboundSetEntityDataPacket(
+            0),
+        new ClientboundSetEntityDataPacket(
             entityId,
             List.of(
                 SynchedEntityData.DataValue.create(ENTITY_FLAGS, (byte) (1 << FLAG_INVISIBLE)),
                 SynchedEntityData.DataValue.create(ENTITY_AIR, 0),
-                SynchedEntityData.DataValue.create(ArmorStand.DATA_CLIENT_FLAGS, (byte) 0)))));
+                SynchedEntityData.DataValue.create(ArmorStand.DATA_CLIENT_FLAGS, (byte) 0))))));
   }
 
   @Override

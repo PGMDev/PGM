@@ -38,6 +38,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class CoreModule implements MapModule<CoreMatchModule> {
 
+  private static final MaterialMatcher OBSIDIAN = MaterialMatcher.of(Material.OBSIDIAN);
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("core", Gamemode.DESTROY_THE_CORE, false));
   protected final List<CoreFactory> coreFactories;
@@ -89,11 +90,8 @@ public class CoreModule implements MapModule<CoreMatchModule> {
       HashMap<TeamFactory, Integer> serialNumbers = new HashMap<>();
 
       for (Element coreEl : XMLUtils.flattenElements(doc.getRootElement(), "cores", "core")) {
-        var matNode = Node.fromAttr(coreEl, "material");
-
-        MaterialMatcher material = MaterialMatcher.builder()
-            .parse(Node.fromAttr(coreEl, "material"))
-            .ifEmpty(MaterialMatcher.of(Material.OBSIDIAN));
+        MaterialMatcher material =
+            MaterialMatcher.builder().parse(Node.fromAttr(coreEl, "material")).ifEmpty(OBSIDIAN);
 
         int leakLevel = Integer.parseInt(coreEl.getAttributeValue("leak", "5"));
 

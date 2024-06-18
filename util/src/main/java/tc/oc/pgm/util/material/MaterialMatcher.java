@@ -61,7 +61,7 @@ public interface MaterialMatcher {
   }
 
   static MaterialMatcher of(Predicate<Material> materials) {
-    return builder().add(materials).build();
+    return builder().addAll(materials).build();
   }
 
   static MaterialMatcher ofMatchers(Collection<? extends MaterialMatcher> matchers) {
@@ -116,17 +116,22 @@ public interface MaterialMatcher {
 
     Builder add(Material material);
 
+    default Builder addNullable(Material material) {
+      if (material != null) return add(material);
+      return this;
+    }
+
     Builder add(Material material, boolean flatten);
+
+    Builder add(ItemStack item, boolean flatten);
 
     Builder addAll(Material... material);
 
     Builder addAll(Collection<Material> material);
 
-    Builder add(Predicate<Material> materialPredicate);
+    Builder addAll(Predicate<Material> materialPredicate);
 
     Builder add(MaterialMatcher matcher);
-
-    Builder add(ItemStack item, boolean flatten);
 
     boolean isEmpty();
 
@@ -192,7 +197,7 @@ public interface MaterialMatcher {
     }
 
     @Override
-    public Builder add(Predicate<Material> materialPredicate) {
+    public Builder addAll(Predicate<Material> materialPredicate) {
       for (Material m : Material.values()) {
         if (materialPredicate.test(m)) this.materials.add(m);
       }

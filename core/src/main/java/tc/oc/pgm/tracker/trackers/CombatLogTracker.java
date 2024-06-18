@@ -220,7 +220,8 @@ public class CombatLogTracker implements Listener {
    * Get the cause of the player's imminent death, or null if they are not about to die NOTE: not
    * idempotent, has the side effect of clearing the recentDamage cache
    */
-  public @Nullable ImminentDeath getImminentDeath(Player player) {
+  @Nullable
+  ImminentDeath getImminentDeath(Player player) {
     // If the player is already dead or in creative mode, we don't care
     if (player.isDead()
         || player.hasMetadata("isDead")

@@ -1,10 +1,7 @@
 package tc.oc.pgm.util.material;
 
 import static org.bukkit.Material.*;
-import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
-import com.google.common.collect.ImmutableSet;
-import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,39 +11,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Materials {
-  // Weapons
-  Material WOODEN_SWORD = parse("WOOD_SWORD", "WOODEN_SWORD");
-  Material GOLDEN_SWORD = parse("GOLD_SWORD", "GOLDEN_SWORD");
-  Material WOOD_AXE = parse("WOOD_AXE", "WOODEN_AXE");
-  Material GOLD_AXE = parse("GOLD_AXE", "GOLDEN_AXE");
-  Material WOOD_PICKAXE = parse("WOOD_PICKAXE", "WOODEN_PICKAXE");
-  Material GOLD_PICKAXE = parse("GOLD_PICKAXE", "GOLDEN_PICKAXE");
-  Material WOOD_SHOVEL = parse("WOOD_SPADE", "WOODEN_SHOVEL");
-  Material STONE_SHOVEL = parse("STONE_SPADE", "STONE_SHOVEL");
-  Material GOLD_SHOVEL = parse("GOLD_SPADE", "GOLDEN_SHOVEL");
-  Material IRON_SHOVEL = parse("IRON_SPADE", "IRON_SHOVEL");
-  Material DIAMOND_SHOVEL = parse("DIAMOND_SPADE", "DIAMOND_SHOVEL");
-  Material WOOD_HOE = parse("WOOD_HOE", "WOODEN_HOE");
-  Material GOLD_HOE = parse("GOLD_HOE", "GOLDEN_HOE");
 
-  Material SIGN_POST = parse("SIGN_POST", "LEGACY_SIGN_POST");
-  Material WALL_SIGN = parse("WALL_SIGN", "LEGACY_WALL_SIGN");
-  Material WOOD_PLATE = parse("WOOD_PLATE", "LEGACY_WOOD_PLATE");
-  Material STONE_PLATE = parse("STONE_PLATE", "STONE_PRESSURE_PLATE");
-  Material IRON_PLATE = parse("IRON_PLATE", "HEAVY_WEIGHTED_PRESSURE_PLATE");
-  Material GOLD_PLATE = parse("GOLD_PLATE", "LIGHT_WEIGHTED_PRESSURE_PLATE");
-
+  // Constants used across PGM for materials that changed name in newer versions
   Material STILL_WATER = parse("STATIONARY_WATER", "LEGACY_STATIONARY_WATER");
   Material STILL_LAVA = parse("STATIONARY_LAVA", "LEGACY_STATIONARY_LAVA");
 
-  Material BANNER = parse("BANNER", "LEGACY_BANNER");
-  Material STANDING_BANNER = parse("STANDING_BANNER", "LEGACY_STANDING_BANNER");
   Material WOOL = parse("WOOL", "LEGACY_WOOL");
   Material STAINED_GLASS_PANE = parse("STAINED_GLASS_PANE", "LEGACY_STAINED_GLASS_PANE");
   Material SHORT_GRASS = parse("LONG_GRASS", "SHORT_GRASS");
 
   Material WEB = parse("WEB", "COBWEB");
-  Material LEASH = parse("LEASH", "LEAD");
   Material LILY_PAD = parse("WATER_LILY", "LILY_PAD");
   Material SIGN = parse("SIGN", "OAK_SIGN");
   Material SKULL = parse("SKULL_ITEM", "SKELETON_SKULL");
@@ -64,43 +38,25 @@ public interface Materials {
   Material MOVING_PISTON = parse("PISTON_MOVING_PIECE", "MOVING_PISTON");
   Material PISTON_HEAD = parse("PISTON_EXTENSION", "PISTON_HEAD");
 
+  MaterialMatcher WEAPONS = MaterialMatcher.builder()
+      .addAll(m -> m.name().endsWith("_SWORD")
+          || m.name().endsWith("_AXE")
+          || m.name().endsWith("_PICKAXE")
+          || m.name().endsWith("_SHOVEL")
+          || m.name().endsWith("_HOE"))
+      .addAll(BOW, FLINT_AND_STEEL, SHEARS, STICK)
+      .addNullable(Material.getMaterial("TRIDENT"))
+      .addNullable(Material.getMaterial("MACE"))
+      .build();
+
+  MaterialMatcher SOLID_EXCLUSIONS = MaterialMatcher.builder()
+      .add(parse("SIGN_POST", "LEGACY_SIGN_POST")) // on modern, it's just *_SIGN
+      .addAll(m -> m.name().endsWith("_PLATE") || m.name().endsWith("_SIGN"))
+      .build();
+
   static Material parse(String... names) {
     return BukkitUtils.parse(Material::valueOf, names);
   }
-
-  Set<Material> WEAPONS = ImmutableSet.of(
-      WOODEN_SWORD,
-      STONE_SWORD,
-      GOLDEN_SWORD,
-      IRON_SWORD,
-      DIAMOND_SWORD,
-      WOOD_AXE,
-      STONE_AXE,
-      GOLD_AXE,
-      IRON_AXE,
-      DIAMOND_AXE,
-      WOOD_PICKAXE,
-      STONE_PICKAXE,
-      GOLD_PICKAXE,
-      IRON_PICKAXE,
-      DIAMOND_PICKAXE,
-      WOOD_SHOVEL,
-      STONE_SHOVEL,
-      GOLD_SHOVEL,
-      IRON_SHOVEL,
-      DIAMOND_SHOVEL,
-      WOOD_HOE,
-      STONE_HOE,
-      GOLD_HOE,
-      IRON_HOE,
-      DIAMOND_HOE,
-      BOW,
-      FLINT_AND_STEEL,
-      SHEARS,
-      STICK);
-
-  Set<Material> SOLID_EXCLUSIONS =
-      ImmutableSet.of(SIGN_POST, WALL_SIGN, WOOD_PLATE, STONE_PLATE, IRON_PLATE, GOLD_PLATE);
 
   /**
    * Replacement for Integer#parseInt, but with key differences that tailor it to material parsing.
@@ -131,17 +87,11 @@ public interface Materials {
   }
 
   static boolean isWeapon(Material material) {
-    if (material == null) return false;
-    return WEAPONS.contains(material);
+    return material != null && WEAPONS.matches(material);
   }
 
   static boolean isSolid(Material material) {
-    if (material == null) {
-      return false;
-    }
-    return material.isSolid()
-        && !SOLID_EXCLUSIONS.contains(material)
-        && !material.name().endsWith("PRESSURE_PLATE");
+    return material != null && material.isSolid() && !SOLID_EXCLUSIONS.matches(material);
   }
 
   static boolean itemsSimilar(
