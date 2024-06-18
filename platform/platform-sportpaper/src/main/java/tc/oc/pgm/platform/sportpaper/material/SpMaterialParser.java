@@ -30,6 +30,9 @@ class SpMaterialParser {
 
     text = text.toUpperCase(Locale.ROOT).replaceAll("\\s+", "_").replaceAll("\\W", "");
 
+    // At some point prior to legacy, this rename happened
+    if (text.equals("SNOWBALL")) return Material.SNOW_BALL;
+
     var material = Material.getMaterial(text);
     if (material == null) {
       throw new InvalidXMLException("Could not find material '" + text + "'.", node);

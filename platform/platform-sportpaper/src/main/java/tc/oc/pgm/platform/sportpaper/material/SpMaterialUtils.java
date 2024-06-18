@@ -123,7 +123,7 @@ public class SpMaterialUtils implements MaterialUtils {
   }
 
   static void validateItem(Material material, Node node) throws InvalidXMLException {
-    if (CraftMagicNumbers.getItem(material) == null) {
+    if (CraftMagicNumbers.getItem(material) == null && material != Material.AIR) {
       throw new InvalidXMLException("Invalid item/block " + material, node);
     }
   }
