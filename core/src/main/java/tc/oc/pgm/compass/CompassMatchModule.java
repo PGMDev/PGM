@@ -39,13 +39,13 @@ public class CompassMatchModule implements MatchModule, Tickable, Listener {
   private static final long REFRESH_TICKS_UNFOCUSED = 20 * 10;
   private final Match match;
   private final Map<UUID, Long> lastRefresh;
-  private final ImmutableList<CompassTarget> compassTargets;
+  private final ImmutableList<CompassTarget<?>> compassTargets;
   private final OrderStrategy orderStrategy;
   private final boolean showDistance;
 
   public CompassMatchModule(
       Match match,
-      ImmutableList<CompassTarget> compassTargets,
+      ImmutableList<CompassTarget<?>> compassTargets,
       OrderStrategy orderStrategy,
       boolean showDistance) {
     this.match = match;
@@ -63,7 +63,7 @@ public class CompassMatchModule implements MatchModule, Tickable, Listener {
         UUID uuid = lastRefreshEntry.getKey();
         MatchPlayer player = this.match.getPlayer(uuid);
         if (player == null || player.getInventory() == null || !player.isAlive()) {
-          lastRefresh.remove(player.getId());
+          lastRefresh.remove(uuid);
           continue;
         }
         if (!Material.COMPASS.equals(player.getInventory().getItemInHand().getType())
@@ -80,9 +80,8 @@ public class CompassMatchModule implements MatchModule, Tickable, Listener {
 
   private void updatePlayerCompass(
       MatchPlayer player, Optional<CompassTargetResult> compassResultOption, long tick) {
-    compassResultOption.ifPresent(
-        compassTargetResult ->
-            player.getBukkit().setCompassTarget(compassTargetResult.getLocation()));
+    compassResultOption.ifPresent(compassTargetResult ->
+        player.getBukkit().setCompassTarget(compassTargetResult.getLocation()));
 
     PlayerInventory inventory = player.getInventory();
     if (inventory == null) {
@@ -96,12 +95,13 @@ public class CompassMatchModule implements MatchModule, Tickable, Listener {
 
     ItemMeta itemMeta = itemstack.getItemMeta();
 
-    Component itemName =
-        compassResultOption
-            .map(this::buildComponent)
-            .orElse(translatable("compass.tracking.unknown", style(NamedTextColor.WHITE)));
+    Component itemName = compassResultOption
+        .map(this::buildComponent)
+        .orElse(translatable("compass.tracking.unknown", style(NamedTextColor.WHITE)));
 
-    itemMeta.setDisplayName(translateLegacy(itemName, player) + "§" + tick % 7);
+    // Append space at front & end to keep alignment,
+    // Randomly color the one at the end to force a change and make name not fade away
+    itemMeta.setDisplayName(" " + translateLegacy(itemName, player) + "§" + (tick % 7) + " ");
     itemstack.setItemMeta(itemMeta);
 
     player.getInventory().setItemInHand(itemstack);
@@ -110,41 +110,29 @@ public class CompassMatchModule implements MatchModule, Tickable, Listener {
   private Component buildComponent(CompassTargetResult compassResult) {
     Component resultComponent = compassResult.getComponent();
 
-    TextComponent.Builder builder =
-        text()
-            .append(translatable("compass.tracking", style(NamedTextColor.GRAY)))
-            .append(text(": ", style(NamedTextColor.WHITE)))
-            .append(resultComponent);
+    TextComponent.Builder builder = text()
+        .append(translatable("compass.tracking", style(NamedTextColor.GRAY)))
+        .append(text(": ", style(NamedTextColor.WHITE)))
+        .append(resultComponent);
 
     if (showDistance) {
       builder
           .append(text(" "))
-          .append(
-              translatable(
-                  "compass.tracking.distance",
-                  style(NamedTextColor.AQUA),
-                  text((int) compassResult.getDistance())));
+          .append(translatable("compass.tracking.distance", style(NamedTextColor.AQUA), text((int)
+              compassResult.getDistance())));
     }
 
     return builder.build();
   }
 
   private Optional<CompassTargetResult> chooseCompassTarget(MatchPlayer player) {
-    Optional<CompassTargetResult> result = Optional.empty();
-    Stream<CompassTargetResult> targetStream =
-        compassTargets.stream()
-            .map((compassTarget -> compassTarget.getResult(match, player)))
-            .filter(Optional::isPresent)
-            .map(Optional::get);
-    switch (orderStrategy) {
-      case DEFINITION_ORDER:
-        result = targetStream.findFirst();
-        break;
-      case CLOSEST:
-        result = targetStream.min(CompassTargetResult::compareTo);
-        break;
-    }
-    return result;
+    Stream<CompassTargetResult> targetStream = compassTargets.stream()
+        .map(compassTarget -> compassTarget.getResult(player))
+        .flatMap(Optional::stream);
+    return switch (orderStrategy) {
+      case DEFINITION_ORDER -> targetStream.findFirst();
+      case CLOSEST -> targetStream.min(CompassTargetResult::compareTo);
+    };
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
