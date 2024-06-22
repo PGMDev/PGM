@@ -1,18 +1,22 @@
 package tc.oc.pgm.compass;
 
 import java.util.Optional;
-import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 
-public interface CompassTarget {
-  Filter getFilter();
+public abstract class CompassTarget<T> {
+  private final Filter holderFilter;
 
-  Component getName(Match match, MatchPlayer player);
+  public CompassTarget(Filter holderFilter) {
+    this.holderFilter = holderFilter;
+  }
 
-  Optional<Location> getLocation(Match match, MatchPlayer player);
+  public final Optional<CompassTargetResult> getResult(MatchPlayer player) {
+    if (!holderFilter.query(player).isAllowed()) return Optional.empty();
+    return getMatching(player).flatMap(r -> buildResult(r, player));
+  }
 
-  Optional<CompassTargetResult> getResult(Match match, MatchPlayer player);
+  protected abstract Optional<T> getMatching(MatchPlayer player);
+
+  protected abstract Optional<CompassTargetResult> buildResult(T type, MatchPlayer player);
 }

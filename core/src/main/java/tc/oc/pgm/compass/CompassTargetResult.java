@@ -17,6 +17,11 @@ public class CompassTargetResult {
     this.component = component;
   }
 
+  public static CompassTargetResult of(Location target, Location holder, Component component) {
+    double yDifference = target.getY() - holder.getY();
+    return new CompassTargetResult(target, holder.distance(target), yDifference, component);
+  }
+
   public Location getLocation() {
     return location;
   }
