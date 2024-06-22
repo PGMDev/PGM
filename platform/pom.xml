@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
   <modules>
     <module>platform-sportpaper</module>
-    <module>platform-1_20_6</module>
+    <module>platform-modern</module>
     <module>platform-all</module>
   </modules>
 
