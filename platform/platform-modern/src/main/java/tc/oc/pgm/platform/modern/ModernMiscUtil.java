@@ -1,16 +1,15 @@
-package tc.oc.pgm.platform.sportpaper;
+package tc.oc.pgm.platform.modern;
 
-import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
-import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
+import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.google.gson.JsonObject;
 import java.util.List;
-import net.minecraft.server.v1_8_R3.EntityPotion;
-import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -24,27 +23,27 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
+import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = SPORTPAPER, priority = HIGH)
-public class SpMiscUtil implements MiscUtils {
+@Supports(value = PAPER, minVersion = "1.20.6")
+public class ModernMiscUtil implements MiscUtils {
   @Override
   public boolean yield(Event event) {
-    event.yield();
-    return true;
+    return false;
   }
 
   @Override
   public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
-    return event.getOrCreateExtra(plugin);
+    // TODO: PLATFORM 1.20 no support for extra fields in server ping
+    return new JsonObject();
   }
 
   @Override
   public EventException createEventException(Throwable cause, Event event) {
-    return new EventException(cause, event);
+    return new EventException(cause);
   }
 
   @Override
@@ -53,34 +52,37 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
+  @SuppressWarnings({"deprecation", "UnstableApiUsage"})
   public PlayerDeathEvent createDeathEvent(
       Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg) {
-    return new PlayerDeathEvent(player, drops, 0, msg);
+    return new PlayerDeathEvent(
+        player, DamageSource.builder(DamageType.GENERIC_KILL).build(), drops, 0, msg);
   }
 
   @Override
   public EntityChangeBlockEvent createEntityChangeBlockEvent(
       Player player, Block block, BlockMaterialData md) {
-    return new EntityChangeBlockEvent(
-        player, block, md.getItemType(), ((LegacyMaterialData) md).getData());
+    return new EntityChangeBlockEvent(player, block, ((ModernBlockMaterialData) md).getBlock());
   }
 
   @Override
   public int getDurationTicks(EntityCombustEvent event) {
-    return event.getDuration();
+    // Seconds to ticks
+    return (int) (event.getDuration() * 20);
   }
 
   @Override
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
-    World world = ((CraftWorld) loc.getWorld()).getHandle();
-    EntityPotion potion =
-        new EntityPotion(world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
-    world.addEntity(potion);
+    var world = ((CraftWorld) loc.getWorld()).getHandle();
+    var potion = new net.minecraft.world.entity.projectile.ThrownPotion(
+        world, loc.getX(), loc.getY(), loc.getZ());
+    potion.setItem(CraftItemStack.asNMSCopy(item));
+    world.addFreshEntity(potion);
     return (ThrownPotion) potion.getBukkitEntity();
   }
 
   @Override
   public double getArrowDamage(Arrow arrow) {
-    return arrow.spigot().getDamage();
+    return arrow.getDamage();
   }
 }
