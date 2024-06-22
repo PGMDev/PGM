@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
@@ -24,9 +25,10 @@ import org.jdom2.Element;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.Pair;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.attribute.AttributeModifier;
+import tc.oc.pgm.util.attribute.Attributes;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.DyeColors;
 import tc.oc.pgm.util.bukkit.Enchantments;
@@ -1029,33 +1031,31 @@ public final class XMLUtils {
     return enchantment;
   }
 
-  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node, String text)
+  public static org.bukkit.attribute.Attribute parseAttribute(Node node, String text)
       throws InvalidXMLException {
-    tc.oc.pgm.util.attribute.Attribute attribute = tc.oc.pgm.util.attribute.Attribute.byName(text);
+    var attribute = Attributes.getByName(text);
     if (attribute != null) return attribute;
 
-    attribute = tc.oc.pgm.util.attribute.Attribute.byName("generic." + text);
+    attribute = Attributes.getByName("generic" + text);
     if (attribute != null) return attribute;
 
     throw new InvalidXMLException("Unknown attribute '" + text + "'", node);
   }
 
-  public static tc.oc.pgm.util.attribute.Attribute parseAttribute(Node node)
+  public static org.bukkit.attribute.Attribute parseAttribute(Node node)
       throws InvalidXMLException {
     return parseAttribute(node, node.getValueNormalize());
   }
 
   public static AttributeModifier.Operation parseAttributeOperation(Node node, String text)
       throws InvalidXMLException {
-    switch (text.toLowerCase()) {
-      case "add":
-        return AttributeModifier.Operation.ADD_NUMBER;
-      case "base":
-        return AttributeModifier.Operation.ADD_SCALAR;
-      case "multiply":
-        return AttributeModifier.Operation.MULTIPLY_SCALAR_1;
-    }
-    throw new InvalidXMLException("Unknown attribute modifier operation '" + text + "'", node);
+    return switch (text.toLowerCase(Locale.ROOT)) {
+      case "add" -> AttributeModifier.Operation.ADD_NUMBER;
+      case "base" -> AttributeModifier.Operation.ADD_SCALAR;
+      case "multiply" -> AttributeModifier.Operation.MULTIPLY_SCALAR_1;
+      default -> throw new InvalidXMLException(
+          "Unknown attribute modifier operation '" + text + "'", node);
+    };
   }
 
   public static AttributeModifier.Operation parseAttributeOperation(Node node)
@@ -1068,7 +1068,7 @@ public final class XMLUtils {
     return node == null ? def : parseAttributeOperation(node);
   }
 
-  public static Map.Entry<tc.oc.pgm.util.attribute.Attribute, AttributeModifier>
+  public static Map.Entry<org.bukkit.attribute.Attribute, AttributeModifier>
       parseCompactAttributeModifier(Node node, String text) throws InvalidXMLException {
     String[] parts = text.split(":");
 
@@ -1084,15 +1084,14 @@ public final class XMLUtils {
         attribute, new AttributeModifier("FromXML", amount, operation));
   }
 
-  public static Map.Entry<tc.oc.pgm.util.attribute.Attribute, AttributeModifier>
-      parseAttributeModifier(Element el) throws InvalidXMLException {
+  public static Pair<org.bukkit.attribute.Attribute, AttributeModifier> parseAttributeModifier(
+      Element el) throws InvalidXMLException {
     var attribute = parseAttribute(new Node(el));
     double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
     AttributeModifier.Operation operation = parseAttributeOperation(
         Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);
 
-    return new AbstractMap.SimpleImmutableEntry<>(
-        attribute, new AttributeModifier("FromXML", amount, operation));
+    return new Pair<>(attribute, new AttributeModifier("FromXML", amount, operation));
   }
 
   public static GameMode parseGameMode(Node node, String text) throws InvalidXMLException {

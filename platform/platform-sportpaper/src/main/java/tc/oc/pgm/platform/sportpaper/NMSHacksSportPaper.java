@@ -42,8 +42,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.platform.sportpaper.attribute.SpAttributeMap;
-import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
@@ -189,11 +187,6 @@ public class NMSHacksSportPaper implements NMSHacks {
   @Override
   public double getTPS() {
     return Bukkit.getServer().spigot().getTPS()[0];
-  }
-
-  @Override
-  public AttributeMap buildAttributeMap(Player player) {
-    return new SpAttributeMap(player);
   }
 
   @Override

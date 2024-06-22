@@ -16,7 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.skin.Skin;
@@ -49,8 +48,6 @@ public interface NMSHacks {
   void resetDimension(World world);
 
   double getTPS();
-
-  AttributeMap buildAttributeMap(Player player);
 
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);
 

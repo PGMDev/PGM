@@ -155,7 +155,7 @@ public final class StringUtils {
   }
 
   public static String simplify(String string) {
-    return string.toLowerCase(Locale.ROOT).replace(" ", "").replace("_", "");
+    return string.toLowerCase(Locale.ROOT).replace(" ", "").replace("_", "").replace(".", "");
   }
 
   public static List<String> complete(String prefix, Iterable<String> options) {

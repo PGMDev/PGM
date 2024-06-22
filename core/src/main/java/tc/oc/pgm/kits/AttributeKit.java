@@ -3,11 +3,11 @@ package tc.oc.pgm.kits;
 import com.google.common.collect.SetMultimap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeInstance;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 
 public class AttributeKit extends AbstractKit {
   private final SetMultimap<Attribute, AttributeModifier> modifiers;
