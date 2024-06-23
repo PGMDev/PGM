@@ -52,12 +52,13 @@ public final class MapInfoParser extends StringLikeParser<CommandSender, MapInfo
       @NotNull CommandContext<CommandSender> context, @NotNull CommandInput input) {
 
     // Words to keep, as they cannot be replaced (they're not the last arg)
-    String keep = StringUtils.getMustKeepText(input);
+    String originalKeep = StringUtils.getMustKeepArg(input);
+    String textKeep = StringUtils.suggestionToText(originalKeep);
 
     return library
         .getMaps(StringUtils.getText(input))
         .map(MapInfo::getName)
-        .map(name -> StringUtils.getSuggestion(name, keep))
+        .map(name -> StringUtils.getSuggestion(name, originalKeep, textKeep))
         .collect(Collectors.toList());
   }
 }

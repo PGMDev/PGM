@@ -88,14 +88,21 @@ public final class StringUtils {
     return bestScore < 0.75 ? null : bestObj;
   }
 
-  public static String getSuggestion(String suggestion, String mustKeep) {
+  /**
+   * @param suggestion The text we want to suggest
+   * @param originalKeep Text sent by the client before the last space: "Golden┈Drought " or "Golden
+   *     Drought"
+   * @param textKeep Text version of the above: "Golden Drought "
+   * @return the suggestion cloud should receive to properly suggest what we want
+   */
+  public static String getSuggestion(String suggestion, String originalKeep, String textKeep) {
     // At least one of the two has no spaces, algorithm isn't needed.
-    if (mustKeep.length() > 1 && suggestion.contains(SPACE)) {
-      int matchIdx = LiquidMetal.getIndexOf(suggestion, mustKeep);
+    if (textKeep.length() > 1 && suggestion.contains(SPACE)) {
+      int matchIdx = LiquidMetal.getIndexOf(suggestion, textKeep);
 
       // Bad case, this can happen when input was normalized before search
       if (matchIdx == -1) {
-        int normalizedMatch = LiquidMetal.getIndexOf(suggestion, StringUtils.normalize(mustKeep));
+        int normalizedMatch = LiquidMetal.getIndexOf(suggestion, StringUtils.normalize(textKeep));
 
         // Keep until the end of the word, to compensate for removed chars in normalization.
         // This is FAR from ideal, but it's the edge-case of an edge-case.
@@ -108,7 +115,7 @@ public final class StringUtils {
       suggestion = suggestion.substring(matchIdx + 1);
     }
 
-    return mustKeep + textToSuggestion(suggestion);
+    return originalKeep + textToSuggestion(suggestion);
   }
 
   public static String textToSuggestion(String text) {
@@ -124,14 +131,12 @@ public final class StringUtils {
     return suggestionToText(inputQueue.remainingInput());
   }
 
-  public static String getMustKeepText(CommandInput inputQueue) {
+  public static String getMustKeepArg(CommandInput inputQueue) {
     if (inputQueue.isEmpty()) return "";
     String next = inputQueue.remainingInput();
     int index = next.lastIndexOf(' ');
-    if (index != -1) {
-      next = next.substring(0, index);
-    }
-    return suggestionToText(next) + " ";
+    if (index == -1) return ""; // Nothing to keep
+    return next.substring(0, index + 1);
   }
 
   public static String truncate(String text, int length) {
