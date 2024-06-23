@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
@@ -59,9 +60,8 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
 
   @Override
   public void applyAttributeModifiers(
-      SetMultimap<org.bukkit.attribute.Attribute, AttributeModifier> attributeModifiers,
-      ItemMeta meta) {
-    for (var entry : attributeModifiers.entries()) {
+      SetMultimap<Attribute, AttributeModifier> modifiers, ItemMeta meta) {
+    for (var entry : modifiers.entries()) {
       meta.addAttributeModifier(entry.getKey(), entry.getValue());
     }
   }

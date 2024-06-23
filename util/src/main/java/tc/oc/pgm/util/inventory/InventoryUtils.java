@@ -188,7 +188,7 @@ public final class InventoryUtils {
     void copyAttributeModifiers(ItemMeta destination, ItemMeta source);
 
     void applyAttributeModifiers(
-        SetMultimap<Attribute, AttributeModifier> attributeModifiers, ItemMeta meta);
+        SetMultimap<Attribute, AttributeModifier> modifiers, ItemMeta meta);
 
     void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials);
 

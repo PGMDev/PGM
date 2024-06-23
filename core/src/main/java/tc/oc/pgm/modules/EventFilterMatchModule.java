@@ -26,6 +26,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -332,7 +333,8 @@ public class EventFilterMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onInventoryClick(final InventoryClickEvent event) {
-    if (!event.getInventory().equals(event.getWhoClicked().getInventory())) {
+    if (!event.getInventory().equals(event.getWhoClicked().getInventory())
+        && event.getInventory().getType() != InventoryType.CRAFTING) {
       cancelUnlessInteracting(event, event.getWhoClicked());
     }
   }

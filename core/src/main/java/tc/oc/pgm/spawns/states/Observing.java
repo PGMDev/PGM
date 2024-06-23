@@ -10,6 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -136,8 +137,9 @@ public class Observing extends State {
   public void onEvent(InventoryClickEvent event) {
     super.onEvent(event);
 
-    if (!(event.getClickedInventory() instanceof PlayerInventory) || event.getCursor() == null)
-      return;
+    if (!(event.getClickedInventory() instanceof PlayerInventory
+            || event.getClickedInventory().getType() == InventoryType.CRAFTING)
+        || event.getCursor() == null) return;
 
     ItemStack item = event.getCursor();
     if (BAD_TYPES.contains(item.getType()) || item.getData() instanceof Door) {

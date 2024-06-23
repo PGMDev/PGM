@@ -59,8 +59,8 @@ public class SpInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
 
   @Override
   public void applyAttributeModifiers(
-      SetMultimap<Attribute, AttributeModifier> attributeModifiers, ItemMeta meta) {
-    for (var entry : attributeModifiers.entries()) {
+      SetMultimap<Attribute, AttributeModifier> modifiers, ItemMeta meta) {
+    for (var entry : modifiers.entries()) {
       meta.addAttributeModifier(entry.getKey(), entry.getValue());
     }
   }
