@@ -17,11 +17,10 @@ public abstract class StringLikeParser<S, T> implements ArgumentParser<S, T> {
 
   public StringLikeParser(CommandManager<S> manager, ParserParameters options) {
     this.options = options;
-    this.stringParser =
-        manager
-            .parserRegistry()
-            .createParser(TypeToken.get(String.class), options)
-            .orElseThrow(IllegalStateException::new);
+    this.stringParser = manager
+        .parserRegistry()
+        .createParser(TypeToken.get(String.class), options)
+        .orElseThrow(IllegalStateException::new);
   }
 
   @Override

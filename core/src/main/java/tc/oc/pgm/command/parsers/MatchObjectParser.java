@@ -77,7 +77,8 @@ public abstract class MatchObjectParser<T, IT, M extends MatchModule>
     if (match == null) return Collections.emptyList();
 
     String text = StringUtils.getText(input);
-    String mustKeep = StringUtils.getMustKeepText(input);
+    String mustKeepArg = StringUtils.getMustKeepArg(input);
+    String mustKeepTxt = StringUtils.suggestionToText(mustKeepArg);
 
     return match
         .moduleOptional(moduleType)
@@ -85,7 +86,7 @@ public abstract class MatchObjectParser<T, IT, M extends MatchModule>
         .orElse(Stream.of())
         .map(this::getName)
         .filter(name -> LiquidMetal.match(name, text))
-        .map(name -> StringUtils.getSuggestion(name, mustKeep))
+        .map(name -> StringUtils.getSuggestion(name, mustKeepArg, mustKeepTxt))
         .collect(Collectors.toList());
   }
 
