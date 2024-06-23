@@ -1,17 +1,18 @@
 package tc.oc.pgm.util.bukkit;
 
+import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
+
 import com.viaversion.viaversion.api.Via;
 import java.lang.reflect.Field;
 import java.util.List;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.util.platform.Platform;
 
 public class ViaUtils {
-  /** Minecraft 1.7.6 &ndash; 1.7.10 */
   public static final int VERSION_1_7 = 5;
-  /** Minecraft 1.8 &ndash; 1.8.9 */
   public static final int VERSION_1_8 = 47;
-  /** Minecraft 1.9 &ndash; 1.9.1-pre1 */
-  public static final int VERSION_1_9 = 107;
+  public static final int VERSION_1_13 = 393;
+  public static final int VERSION_1_21 = 767;
 
   private static final boolean ENABLED = isViaLoaded();
 
@@ -36,7 +37,7 @@ public class ViaUtils {
     if (enabled()) {
       return Via.getAPI().getPlayerVersion(player.getUniqueId());
     } else {
-      return VERSION_1_8;
+      return Platform.VARIANT == SPORTPAPER ? VERSION_1_8 : VERSION_1_21;
     }
   }
 

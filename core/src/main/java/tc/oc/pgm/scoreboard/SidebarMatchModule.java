@@ -48,6 +48,7 @@ import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.concurrent.RateLimiter;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 
@@ -89,7 +90,12 @@ public class SidebarMatchModule implements MatchModule, Listener {
   }
 
   private void addSidebar(MatchPlayer player) {
-    FastBoard sidebar = new FastBoard(player.getBukkit());
+    FastBoard sidebar = new FastBoard(player.getBukkit()) {
+      @Override
+      public boolean hasLinesMaxLength() {
+        return player.getProtocolVersion() < ViaUtils.VERSION_1_13;
+      }
+    };
     // Only render the title once, since it does not change during the match.
     sidebar.updateTitle(renderer.renderTitle(title, player));
 
@@ -107,28 +113,16 @@ public class SidebarMatchModule implements MatchModule, Listener {
     match
         .needModule(GoalMatchModule.class)
         .getGoals()
-        .forEach(
-            goal ->
-                fmm.onChange(
-                    Match.class,
-                    goal.getScoreboardFilter(),
-                    (m, v) -> this.renderSidebarDebounce()));
+        .forEach(goal -> fmm.onChange(
+            Match.class, goal.getScoreboardFilter(), (m, v) -> this.renderSidebarDebounce()));
     match
         .moduleOptional(ScoreMatchModule.class)
-        .ifPresent(
-            smm ->
-                fmm.onChange(
-                    Party.class,
-                    smm.getScoreboardFilter(),
-                    (p, v) -> this.renderSidebarDebounce()));
+        .ifPresent(smm -> fmm.onChange(
+            Party.class, smm.getScoreboardFilter(), (p, v) -> this.renderSidebarDebounce()));
     match
         .moduleOptional(BlitzMatchModule.class)
-        .ifPresent(
-            bmm ->
-                fmm.onChange(
-                    Party.class,
-                    bmm.getScoreboardFilter(),
-                    (p, v) -> this.renderSidebarDebounce()));
+        .ifPresent(bmm -> fmm.onChange(
+            Party.class, bmm.getScoreboardFilter(), (p, v) -> this.renderSidebarDebounce()));
   }
 
   @Override
@@ -244,18 +238,16 @@ public class SidebarMatchModule implements MatchModule, Listener {
   private void renderSidebarDebounce() {
     // Debounced render
     if (this.renderTask == null || renderTask.isDone()) {
-      Runnable render =
-          () -> {
-            rateLimit.beforeTask();
-            SidebarMatchModule.this.renderTask = null;
-            SidebarMatchModule.this.renderSidebar();
-            rateLimit.afterTask();
-          };
+      Runnable render = () -> {
+        rateLimit.beforeTask();
+        SidebarMatchModule.this.renderTask = null;
+        SidebarMatchModule.this.renderSidebar();
+        rateLimit.afterTask();
+      };
 
-      this.renderTask =
-          match
-              .getExecutor(MatchScope.LOADED)
-              .schedule(render, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
+      this.renderTask = match
+          .getExecutor(MatchScope.LOADED)
+          .schedule(render, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
     }
   }
 
@@ -303,11 +295,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
     private BlinkTask(Goal<?> goal, float rateHz, @Nullable Duration duration) {
       this.goal = goal;
       this.intervalTicks = (long) (10f / rateHz);
-      this.task =
-          match
-              .getExecutor(MatchScope.RUNNING)
-              .scheduleWithFixedDelay(
-                  this, 0, intervalTicks * TimeUtils.TICK, TimeUnit.MILLISECONDS);
+      this.task = match
+          .getExecutor(MatchScope.RUNNING)
+          .scheduleWithFixedDelay(this, 0, intervalTicks * TimeUtils.TICK, TimeUnit.MILLISECONDS);
 
       this.reset(duration);
     }
