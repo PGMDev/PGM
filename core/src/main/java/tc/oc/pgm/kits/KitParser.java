@@ -28,6 +28,8 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -57,8 +59,6 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -71,19 +71,10 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class KitParser {
   protected final MapFactory factory;
-  protected final Set<AttributeModifier> attributeModifiers = new HashSet<>();
   protected final Set<Kit> kits = new HashSet<>();
 
   public KitParser(MapFactory factory) {
     this.factory = factory;
-  }
-
-  /**
-   * Return all {@link AttributeModifier}s used by parsed {@link AttributeKit}s. We need to keep
-   * track of these so we can remove them from players.
-   */
-  public Set<AttributeModifier> getAttributeModifiers() {
-    return attributeModifiers;
   }
 
   public Set<Kit> getKits() {
@@ -349,7 +340,6 @@ public abstract class KitParser {
 
   public AttributeKit parseAttributeKit(Element el) throws InvalidXMLException {
     SetMultimap<Attribute, AttributeModifier> modifiers = parseAttributeModifiers(el);
-    attributeModifiers.addAll(modifiers.values());
     return modifiers.isEmpty() ? null : new AttributeKit(modifiers);
   }
 
@@ -367,7 +357,7 @@ public abstract class KitParser {
 
     for (Element elAttribute : el.getChildren("attribute")) {
       var mod = XMLUtils.parseAttributeModifier(elAttribute);
-      modifiers.put(mod.getKey(), mod.getValue());
+      modifiers.put(mod.getLeft(), mod.getRight());
     }
 
     return modifiers;
@@ -547,8 +537,7 @@ public abstract class KitParser {
     }
 
     List<PotionEffect> potions = parsePotions(el);
-    if (!potions.isEmpty() && meta instanceof PotionMeta) {
-      PotionMeta potionMeta = (PotionMeta) meta;
+    if (!potions.isEmpty() && meta instanceof PotionMeta potionMeta) {
 
       for (PotionEffect effect : potionMeta.getCustomEffects()) {
         potionMeta.removeCustomEffect(effect.getType());

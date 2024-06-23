@@ -35,9 +35,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.platform.modern.attribute.AttributeMapBukkit;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
-import tc.oc.pgm.util.attribute.AttributeMap;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
@@ -162,11 +160,6 @@ public class ModernNMSHacks implements NMSHacks {
   @Override
   public double getTPS() {
     return Bukkit.getServer().getTPS()[0];
-  }
-
-  @Override
-  public AttributeMap buildAttributeMap(Player player) {
-    return new AttributeMapBukkit(player);
   }
 
   @Override

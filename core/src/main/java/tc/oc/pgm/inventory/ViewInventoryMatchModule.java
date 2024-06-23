@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -52,8 +54,6 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeInstance;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.inventory.InventoryUtils;
@@ -93,16 +93,13 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   private void checkAllMonitoredInventories() {
     if (updateQueue.isEmpty()) return;
 
-    updateQueue
-        .entrySet()
-        .removeIf(
-            entry -> {
-              if (!entry.getValue().isAfter(match.getTick().instant)) {
-                checkMonitoredInventories(entry.getKey());
-                return true;
-              }
-              return false;
-            });
+    updateQueue.entrySet().removeIf(entry -> {
+      if (!entry.getValue().isAfter(match.getTick().instant)) {
+        checkMonitoredInventories(entry.getKey());
+        return true;
+      }
+      return false;
+    });
   }
 
   @EventHandler
@@ -177,7 +174,10 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
           continue invLoop;
 
         for (int i = 0; i < inventory.getViewers().size(); i++) {
-          if (!inventory.getViewers().get(i).equals(tracker.getWatched().getViewers().get(i))) {
+          if (!inventory
+              .getViewers()
+              .get(i)
+              .equals(tracker.getWatched().getViewers().get(i))) {
             continue invLoop;
           }
         }
@@ -301,9 +301,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     Player holder = (Player) inventory.getHolder();
     // Ensure that the title of the inventory is <= 32 characters long to appease Minecraft's
     // restrictions on inventory titles
-    String title =
-        StringUtils.substring(
-            TextTranslations.translateLegacy(player(holder, NameStyle.FANCY), viewer), 0, 32);
+    String title = StringUtils.substring(
+        TextTranslations.translateLegacy(player(holder, NameStyle.FANCY), viewer), 0, 32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 
@@ -320,10 +319,9 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         ItemStack lives = new ItemStack(Material.EGG, livesLeft);
         ItemMeta lifeMeta = lives.getItemMeta();
         String key = livesLeft == 1 ? "misc.life" : "misc.lives";
-        lifeMeta.setDisplayName(
-            ChatColor.GREEN
-                + TextTranslations.translate(
-                    key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN));
+        lifeMeta.setDisplayName(ChatColor.GREEN
+            + TextTranslations.translate(
+                key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN));
         lives.setItemMeta(lifeMeta);
         preview.setItem(4, lives);
       }
@@ -346,42 +344,34 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       if (knockbackAttribute != null) {
         double knockbackResistance = knockbackAttribute.getValue();
         if (knockbackResistance > 0) {
-          specialLore.add(
-              ChatColor.LIGHT_PURPLE
-                  + TextTranslations.translate(
-                      "preview.knockbackResistance",
-                      viewer,
-                      (int) Math.ceil(knockbackResistance * 100)));
+          specialLore.add(ChatColor.LIGHT_PURPLE
+              + TextTranslations.translate("preview.knockbackResistance", viewer, (int)
+                  Math.ceil(knockbackResistance * 100)));
         }
       }
 
       double knockbackReduction = PLAYER_UTILS.getKnockbackReduction(holder);
       if (knockbackReduction > 0) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.knockbackReduction",
-                    viewer,
-                    (int) Math.ceil(knockbackReduction * 100)));
+        specialLore.add(ChatColor.LIGHT_PURPLE
+            + TextTranslations.translate(
+                "preview.knockbackReduction", viewer, (int) Math.ceil(knockbackReduction * 100)));
       }
 
       double walkSpeed = holder.getWalkSpeed();
       if (walkSpeed != WalkSpeedKit.BUKKIT_DEFAULT) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.walkSpeed",
-                    viewer,
-                    String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
+        specialLore.add(ChatColor.LIGHT_PURPLE
+            + TextTranslations.translate(
+                "preview.walkSpeed",
+                viewer,
+                String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
       }
 
       if (!specialLore.isEmpty()) {
         ItemStack special = new ItemStack(Material.NETHER_STAR);
         ItemMeta specialMeta = special.getItemMeta();
-        specialMeta.setDisplayName(
-            ChatColor.AQUA.toString()
-                + ChatColor.ITALIC
-                + TextTranslations.translate("preview.specialAbilities", viewer));
+        specialMeta.setDisplayName(ChatColor.AQUA.toString()
+            + ChatColor.ITALIC
+            + TextTranslations.translate("preview.specialAbilities", viewer));
         specialMeta.setLore(specialLore);
         special.setItemMeta(specialMeta);
         preview.setItem(5, special);
@@ -392,18 +382,16 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     boolean hasPotions = holder.getActivePotionEffects().size() > 0;
     ItemStack potions = new ItemStack(hasPotions ? Material.POTION : Material.GLASS_BOTTLE);
     ItemMeta potionMeta = potions.getItemMeta();
-    potionMeta.setDisplayName(
-        ChatColor.AQUA.toString()
-            + ChatColor.ITALIC
-            + TextTranslations.translate("preview.potionEffects", viewer));
+    potionMeta.setDisplayName(ChatColor.AQUA.toString()
+        + ChatColor.ITALIC
+        + TextTranslations.translate("preview.potionEffects", viewer));
     List<String> lore = Lists.newArrayList();
     if (hasPotions) {
       for (PotionEffect effect : holder.getActivePotionEffects()) {
-        lore.add(
-            ChatColor.YELLOW
-                + BukkitUtils.potionEffectTypeName(effect.getType())
-                + " "
-                + (effect.getAmplifier() + 1));
+        lore.add(ChatColor.YELLOW
+            + BukkitUtils.potionEffectTypeName(effect.getType())
+            + " "
+            + (effect.getAmplifier() + 1));
       }
     } else {
       lore.add(ChatColor.YELLOW + TextTranslations.translate("preview.noPotionEffects", viewer));
@@ -415,20 +403,18 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     // hunger and health
     ItemStack hunger = new ItemStack(Material.COOKED_BEEF, holder.getFoodLevel());
     ItemMeta hungerMeta = hunger.getItemMeta();
-    hungerMeta.setDisplayName(
-        ChatColor.AQUA.toString()
-            + ChatColor.ITALIC
-            + TextTranslations.translate("preview.hungerLevel", viewer));
+    hungerMeta.setDisplayName(ChatColor.AQUA.toString()
+        + ChatColor.ITALIC
+        + TextTranslations.translate("preview.hungerLevel", viewer));
     hungerMeta.addItemFlags(InventoryUtils.HIDE_ADDITIONAL_FLAG);
     hunger.setItemMeta(hungerMeta);
     preview.setItem(7, hunger);
 
     ItemStack health = new ItemStack(Material.REDSTONE, (int) holder.getHealth());
     ItemMeta healthMeta = health.getItemMeta();
-    healthMeta.setDisplayName(
-        ChatColor.AQUA.toString()
-            + ChatColor.ITALIC
-            + TextTranslations.translate("preview.healthLevel", viewer));
+    healthMeta.setDisplayName(ChatColor.AQUA.toString()
+        + ChatColor.ITALIC
+        + TextTranslations.translate("preview.healthLevel", viewer));
     healthMeta.addItemFlags(InventoryUtils.HIDE_ADDITIONAL_FLAG);
     health.setItemMeta(healthMeta);
     preview.setItem(8, health);

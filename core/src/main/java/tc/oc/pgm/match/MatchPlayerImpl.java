@@ -21,6 +21,9 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -54,10 +57,6 @@ import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.attribute.Attribute;
-import tc.oc.pgm.util.attribute.AttributeInstance;
-import tc.oc.pgm.util.attribute.AttributeMap;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.listener.AfkTracker;
 import tc.oc.pgm.util.named.NameStyle;
@@ -81,7 +80,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final AtomicBoolean visible;
   private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
-  private final AttributeMap attributeMap;
   private final AfkTracker.Activity activity;
 
   public MatchPlayerImpl(Match match, Player player) {
@@ -97,7 +95,6 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.visible = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
-    this.attributeMap = NMS_HACKS.buildAttributeMap(player);
     this.activity = PGM.get().getAfkTracker().getActivity(player);
   }
 
@@ -156,10 +153,12 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     }
   }
 
-  @Nullable
   @Override
   public Player getBukkit() {
-    return bukkit.get();
+    Player b = bukkit.get();
+    if (b == null)
+      throw new IllegalStateException("Attempted to access unset bukkit player from MatchPlayer");
+    return b;
   }
 
   @Override
@@ -432,7 +431,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public AttributeInstance getAttribute(Attribute attribute) {
-    return attributeMap.getAttribute(attribute);
+    return getBukkit().getAttribute(attribute);
   }
 
   @Override
