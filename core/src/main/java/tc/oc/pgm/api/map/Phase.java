@@ -67,11 +67,10 @@ public enum Phase {
       Phases aggregate = of(inputPhases);
       if (!aggregate.phases.isEmpty()) return aggregate;
 
-      EnumSet<Phase> chosenPhases = EnumSet.noneOf(Phase.class);
       EnumSet.allOf(Phase.class).stream()
           .filter(p -> sender.hasPermission(p.permission))
-          .forEach(chosenPhases::add);
-      return new Phases(chosenPhases);
+          .forEach(aggregate.phases::add);
+      return aggregate;
     }
   }
 }

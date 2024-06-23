@@ -41,7 +41,7 @@ public class PhasesParser extends StringLikeParser<CommandSender, Phase.Phases>
   @Override
   public @NonNull Iterable<@NonNull String> stringSuggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {
-    final String next = input.peekString().toLowerCase();
+    final String next = input.peekString().toLowerCase(Locale.ROOT);
 
     List<String> suggestions = EnumSet.allOf(Phase.class).stream()
         .map(p -> p.name().toLowerCase(Locale.ROOT))
