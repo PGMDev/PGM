@@ -26,10 +26,6 @@ public enum Phase {
     return translatable("map.phase." + this.name().toLowerCase());
   }
 
-  public boolean prefixedBy(String query) {
-    return this.name().toLowerCase(Locale.ROOT).startsWith(query.toLowerCase(Locale.ROOT));
-  }
-
   public static Phase of(String query) {
     query = query.toLowerCase(Locale.ROOT);
     for (Phase phase : Phase.values()) {
@@ -41,7 +37,7 @@ public enum Phase {
   }
 
   public static class Phases {
-    EnumSet<Phase> phases;
+    private final EnumSet<Phase> phases;
 
     private Phases(EnumSet<Phase> phases) {
       this.phases = phases;

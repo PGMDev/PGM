@@ -35,7 +35,7 @@ public class PhasesParser extends StringLikeParser<CommandSender, Phase.Phases>
     }
 
     return EnumSet.allOf(Phase.class).stream()
-        .filter((phase) -> phase.prefixedBy(text))
+        .filter((phase) -> phase == Phase.of(text))
         .min(Comparator.comparingInt((phase) -> phase.name().length()))
         .map(phase -> success(Phase.Phases.of(phase)))
         .orElseGet(() -> failure(invalidFormat(text, Phase.class)));
@@ -47,7 +47,7 @@ public class PhasesParser extends StringLikeParser<CommandSender, Phase.Phases>
     final String next = input.peekString();
 
     List<String> suggestions = EnumSet.allOf(Phase.class).stream()
-        .filter((phase) -> phase.prefixedBy(next))
+        .filter((phase) -> phase == Phase.of(next))
         .map(p -> p.name().toLowerCase(Locale.ROOT))
         .collect(Collectors.toList());
 
