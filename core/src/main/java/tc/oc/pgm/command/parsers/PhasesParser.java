@@ -4,7 +4,6 @@ import static org.incendo.cloud.parser.ArgumentParseResult.failure;
 import static org.incendo.cloud.parser.ArgumentParseResult.success;
 import static tc.oc.pgm.util.text.TextException.invalidFormat;
 
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
@@ -34,21 +33,19 @@ public class PhasesParser extends StringLikeParser<CommandSender, Phase.Phases>
       return success(Phase.Phases.allOf());
     }
 
-    return EnumSet.allOf(Phase.class).stream()
-        .filter((phase) -> phase == Phase.of(text))
-        .min(Comparator.comparingInt((phase) -> phase.name().length()))
-        .map(phase -> success(Phase.Phases.of(phase)))
-        .orElseGet(() -> failure(invalidFormat(text, Phase.class)));
+    Phase phase = Phase.of(text);
+    if (phase == null) return failure(invalidFormat(text, Phase.class));
+    return success(Phase.Phases.of(phase));
   }
 
   @Override
   public @NonNull Iterable<@NonNull String> stringSuggestions(
       @NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {
-    final String next = input.peekString();
+    final String next = input.peekString().toLowerCase();
 
     List<String> suggestions = EnumSet.allOf(Phase.class).stream()
-        .filter((phase) -> phase == Phase.of(next))
         .map(p -> p.name().toLowerCase(Locale.ROOT))
+        .filter(name -> name.startsWith(next))
         .collect(Collectors.toList());
 
     if ("*".startsWith(next)) suggestions.add("*");

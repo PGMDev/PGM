@@ -64,20 +64,14 @@ public enum Phase {
     }
 
     public static Phases parse(CommandSender sender, Collection<Phases> inputPhases) {
-      EnumSet<Phase> aggregatePhases = EnumSet.noneOf(Phase.class);
-      for (Phases inputPhase : inputPhases) {
-        aggregatePhases.addAll(inputPhase.phases);
-      }
+      Phases aggregate = of(inputPhases);
+      if (!aggregate.phases.isEmpty()) return aggregate;
 
-      if (aggregatePhases.isEmpty()) {
-        EnumSet<Phase> chosenPhases = EnumSet.noneOf(Phase.class);
-        chosenPhases.addAll(EnumSet.allOf(Phase.class).stream()
-            .filter(p -> sender.hasPermission(p.permission))
-            .toList());
-        return new Phases(chosenPhases);
-      } else {
-        return new Phases(aggregatePhases);
-      }
+      EnumSet<Phase> chosenPhases = EnumSet.noneOf(Phase.class);
+      EnumSet.allOf(Phase.class).stream()
+          .filter(p -> sender.hasPermission(p.permission))
+          .forEach(chosenPhases::add);
+      return new Phases(chosenPhases);
     }
   }
 }
