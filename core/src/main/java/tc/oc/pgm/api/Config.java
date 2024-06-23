@@ -72,6 +72,9 @@ public interface Config {
   /** @return If unused XML tags should be reported or ignored */
   boolean showUnusedXml();
 
+  /** @return Should setting dev phase maps be restricted to Devs */
+  boolean enforceDevPhase();
+
   /**
    * Gets a duration to wait before starting a match.
    *
@@ -402,18 +405,16 @@ public interface Config {
       if (getClickLink() != null && !getClickLink().isEmpty()) {
         if (addNewline) hover.append(newline());
 
-        Component clickLink =
-            translatable(
-                "chat.clickLink",
-                NamedTextColor.DARK_AQUA,
-                text(getClickLink(), NamedTextColor.AQUA, TextDecoration.UNDERLINED));
+        Component clickLink = translatable(
+            "chat.clickLink",
+            NamedTextColor.DARK_AQUA,
+            text(getClickLink(), NamedTextColor.AQUA, TextDecoration.UNDERLINED));
         hover.append(clickLink);
       }
 
-      TextComponent.Builder component =
-          text()
-              .append(text(prefix ? getPrefix() : getSuffix()))
-              .hoverEvent(showText(hover.build()));
+      TextComponent.Builder component = text()
+          .append(text(prefix ? getPrefix() : getSuffix()))
+          .hoverEvent(showText(hover.build()));
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
         component.clickEvent(openUrl(getClickLink()));
