@@ -1,8 +1,10 @@
 package tc.oc.pgm.join;
 
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.events.PlayerJoinResultEvent;
 import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.teams.Team;
 
@@ -15,6 +17,11 @@ public interface JoinHandler {
 
   default boolean join(MatchPlayer joining, JoinRequest request) {
     JoinResult result = queryJoin(joining, request);
+
+    PlayerJoinResultEvent joinResultEvent = new PlayerJoinResultEvent(joining, result, request);
+    PGM.get().getServer().getPluginManager().callEvent(joinResultEvent);
+    if (joinResultEvent.isCancelled()) return false;
+
     return join(joining, request, result);
   }
 
