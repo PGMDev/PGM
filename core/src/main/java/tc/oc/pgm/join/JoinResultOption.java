@@ -13,8 +13,7 @@ public enum JoinResultOption implements JoinResult {
   CHOICE_DISABLED(false), // Tried to choose a specific team and team choosing is disabled
   CHOICE_DENIED(false), // Tried to choose a specific team without choose-team permission
   FULL(false), // Match/team is full
-  VANISHED(false), // Player is vanished, therefore unable to join
-  CANCELLED(false); // Another plugin cancelled the join
+  VANISHED(false); // Player is vanished, therefore unable to join
 
   public final boolean success;
 
