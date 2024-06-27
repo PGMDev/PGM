@@ -10,21 +10,27 @@ import com.mojang.authlib.GameProfile;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundBundlePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Action;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Entry;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
@@ -46,14 +52,23 @@ public class ModernTabPackets implements TabPackets {
   }
 
   @Override
-  public Packet spawnPlayerPacket(int entityId, UUID uuid, Location location, Player player) {
-    return new Packet() {
-      @Override
-      public void send(Player viewer) {}
-
-      @Override
-      public void sendToViewers(Entity entity, boolean excludeSpectators) {}
-    };
+  public Packet spawnPlayerPacket(int entityId, UUID uuid, Location loc, Player player) {
+    var data = ((CraftEntity) player).getHandle().getEntityData().packAll();
+    if (data == null) return Packet.of();
+    return new ModernPacket<>(new ClientboundBundlePacket(List.of(
+        new ClientboundAddEntityPacket(
+            entityId,
+            uuid,
+            loc.getX(),
+            loc.getY(),
+            loc.getZ(),
+            loc.getPitch(),
+            loc.getYaw(),
+            EntityType.PLAYER,
+            0,
+            new Vec3(0, 0, 0),
+            0),
+        new ClientboundSetEntityDataPacket(entityId, data))));
   }
 
   Team.Visibility[] NMS_TEAM_VISIBILITY = Team.Visibility.values();
@@ -78,6 +93,8 @@ public class ModernTabPackets implements TabPackets {
             if (suffix != null) team.setPlayerSuffix(Component.literal(suffix));
             team.setAllowFriendlyFire(friendlyFire);
             team.setSeeFriendlyInvisibles(seeFriendlyInvisibles);
+            if (nameTagVisibility != null)
+              team.setNameTagVisibility(NMS_TEAM_VISIBILITY[nameTagVisibility.ordinal()]);
             team.getPlayers().addAll(players);
 
             yield ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(
