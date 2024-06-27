@@ -3,6 +3,8 @@ package tc.oc.pgm.platform.modern;
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.entity.FallingBlock;
@@ -15,6 +17,7 @@ import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.world.WorldLoadEvent;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
@@ -80,16 +83,20 @@ public class ModernListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onSkinPartsChange(PlayerClientOptionsChangeEvent event) {
+    List<Event> pgmEvents = new ArrayList<>(2);
     if (event.hasSkinPartsChanged()) {
-      var pgmEvent = new PlayerSkinPartsChangeEvent(event.getPlayer());
-      handleCall(pgmEvent, event);
+      pgmEvents.add(new PlayerSkinPartsChangeEvent(event.getPlayer()));
     }
     if (event.hasLocaleChanged()) {
-      var pgmEvent = new PlayerLocaleChangeEvent(
+      pgmEvents.add(new PlayerLocaleChangeEvent(
           event.getPlayer(),
           event.getPlayer().getClientOption(ClientOption.LOCALE),
-          event.getLocale());
-      handleCall(pgmEvent, event);
+          event.getLocale()));
+    }
+    if (!pgmEvents.isEmpty()) {
+      Bukkit.getScheduler()
+          .runTask(
+              BukkitUtils.getPlugin(), () -> pgmEvents.forEach(pgmEv -> handleCall(pgmEv, event)));
     }
   }
 
