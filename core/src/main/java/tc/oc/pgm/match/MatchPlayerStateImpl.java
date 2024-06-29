@@ -102,6 +102,11 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
+  public boolean canInteract() {
+    return false;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof MatchPlayerStateImpl)) return false;
