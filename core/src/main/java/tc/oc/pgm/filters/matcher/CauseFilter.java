@@ -82,8 +82,7 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
     EntityDamageEvent.DamageCause damageCause = null;
     DamageInfo damageInfo = null;
     boolean punchDamage = false;
-    if (event instanceof EntityDamageEvent) {
-      EntityDamageEvent damageEvent = (EntityDamageEvent) event;
+    if (event instanceof EntityDamageEvent damageEvent) {
       damageCause = damageEvent.getCause();
       damageInfo = tracker.resolveDamage(damageEvent);
       if (damageInfo instanceof MeleeInfo) {
