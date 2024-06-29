@@ -1,6 +1,5 @@
 package tc.oc.pgm.platform.sportpaper.material;
 
-import static org.bukkit.Material.BANNER;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.google.common.collect.ImmutableSet;
@@ -17,7 +16,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.material.Dye;
-import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.block.BlockFaces;
@@ -36,7 +34,7 @@ public class SpColorUtils implements ColorUtils {
       Material.STAINED_CLAY,
       Material.STAINED_GLASS,
       Material.STAINED_GLASS_PANE,
-      BANNER);
+      Material.BANNER);
 
   @Override
   public boolean isColorAffected(Material material) {
@@ -51,9 +49,10 @@ public class SpColorUtils implements ColorUtils {
     } else if (type == Material.INK_SACK) {
       item.setData(new Dye(color));
     } else {
-      item.setData(new MaterialData(item.getType(), color.getWoolData()));
+      item.setData(
+          type.getNewData(type == Material.BANNER ? color.getDyeData() : color.getWoolData()));
     }
-    item.setDurability(color.getWoolData());
+    item.setDurability(item.getData().getData());
   }
 
   @Override
@@ -81,7 +80,7 @@ public class SpColorUtils implements ColorUtils {
 
   @Override
   public BannerData createBanner(Banner block) {
-    BannerMeta meta = (BannerMeta) Bukkit.getItemFactory().getItemMeta(BANNER);
+    BannerMeta meta = (BannerMeta) Bukkit.getItemFactory().getItemMeta(Material.BANNER);
     meta.setBaseColor(block.getBaseColor());
     meta.setPatterns(block.getPatterns());
     BlockFace facing = ((org.bukkit.material.Banner) block.getData()).getFacing();
@@ -118,7 +117,7 @@ public class SpColorUtils implements ColorUtils {
           banner.setBaseColor(meta.getBaseColor());
           banner.setPatterns(meta.getPatterns());
 
-          org.bukkit.material.Banner material = (org.bukkit.material.Banner) banner.getData();
+          var material = (org.bukkit.material.Banner) banner.getData();
           material.setFacingDirection(BlockFaces.yawToFace(location.getYaw()));
           banner.setData(material);
           banner.update(true, false);
