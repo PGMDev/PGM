@@ -24,7 +24,7 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
-public class PartyImpl implements Party, Audience {
+public abstract class PartyImpl implements Party, Audience {
 
   private final Match match;
   private final Map<UUID, MatchPlayer> memberMap;

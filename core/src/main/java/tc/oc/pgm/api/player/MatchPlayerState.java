@@ -58,27 +58,25 @@ public interface MatchPlayerState extends Audience, Named {
   String getNick();
 
   /**
-   * Get the current {@link tc.oc.pgm.api.player.MatchPlayer} if they are online and their {@link
-   * Party} is the same.
+   * Get the current {@link tc.oc.pgm.api.player.MatchPlayer} if they are online and their
+   * {@link Party} is the same.
    *
    * @return The current {@link tc.oc.pgm.api.player.MatchPlayer}.
    */
   Optional<MatchPlayer> getPlayer();
 
   /**
-   * Get whether the {@link MatchPlayerState} represents the given {@link
-   * tc.oc.pgm.api.player.MatchPlayer}.
+   * Get whether the {@link MatchPlayerState} represents the given
+   * {@link tc.oc.pgm.api.player.MatchPlayer}.
    *
    * @param player The {@link tc.oc.pgm.api.player.MatchPlayer} to check.
-   * @return Whether the {@link MatchPlayerState} is from the {@link
-   *     tc.oc.pgm.api.player.MatchPlayer}.
+   * @return Whether the {@link MatchPlayerState} is from the
+   *     {@link tc.oc.pgm.api.player.MatchPlayer}.
    */
   default boolean isPlayer(MatchPlayer player) {
     return getPlayer().map(player::equals).orElse(false);
   }
 
-  /** @return if the player can interact */
-  default boolean canInteract() {
-    return getPlayer().map(MatchPlayer::canInteract).orElse(false);
-  }
+  /** @return if the player state can interact */
+  boolean canInteract();
 }

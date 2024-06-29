@@ -127,26 +127,18 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
   boolean isAutomatic();
 
   /**
-   * Tests if the party is a {@link Competitor}.
+   * Tests if the party is a {@link Competitor} &amp; match is running.
    *
-   * @return if the party is a competitor
-   * @deprecated {@code x instanceof Competitor}
+   * @return if the party is currently competing
    */
-  @Deprecated
-  default boolean isParticipating() {
-    return this instanceof Competitor;
-  }
+  boolean isParticipating();
 
   /**
-   * Tests if the party is not a {@link Competitor}.
+   * Tests if the party is not participating in the match.
    *
-   * @return if the party is not a competitor
-   * @deprecated {@code !(x instanceof Competitor)}
+   * @return if the party observer, or match isn't running
    */
-  @Deprecated
-  default boolean isObserving() {
-    return !this.isParticipating();
-  }
+  boolean isObserving();
 
   @Override
   @Nullable
