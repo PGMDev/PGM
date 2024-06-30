@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -29,6 +30,8 @@ import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.action.actions.SoundAction;
 import tc.oc.pgm.action.actions.TakePaymentAction;
+import tc.oc.pgm.action.actions.TeleportAction;
+import tc.oc.pgm.action.actions.VelocityAction;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
@@ -363,5 +366,43 @@ public class ActionParser {
         payable,
         parseProperty(Node.fromChildOrAttr(el, "success-action"), MatchPlayer.class, null),
         parseProperty(Node.fromChildOrAttr(el, "fail-action"), MatchPlayer.class, null));
+  }
+
+  @MethodParser("velocity")
+  public Action<? super MatchPlayer> parseVelocity(Element el, Class<?> scope)
+      throws InvalidXMLException {
+    Formula<MatchPlayer> xFormula = Formula.of(
+        Node.fromRequiredAttr(el, "x").getValue(), variables.getContext(MatchPlayer.class));
+    Formula<MatchPlayer> yFormula = Formula.of(
+        Node.fromRequiredAttr(el, "y").getValue(), variables.getContext(MatchPlayer.class));
+    Formula<MatchPlayer> zFormula = Formula.of(
+        Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(MatchPlayer.class));
+
+    return new VelocityAction(xFormula, yFormula, zFormula);
+  }
+
+  @MethodParser("teleport")
+  public Action<? super MatchPlayer> parseTeleport(Element el, Class<?> scope)
+      throws InvalidXMLException {
+    Formula<MatchPlayer> xFormula = Formula.of(
+        Node.fromRequiredAttr(el, "x").getValue(), variables.getContext(MatchPlayer.class));
+    Formula<MatchPlayer> yFormula = Formula.of(
+        Node.fromRequiredAttr(el, "y").getValue(), variables.getContext(MatchPlayer.class));
+    Formula<MatchPlayer> zFormula = Formula.of(
+        Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(MatchPlayer.class));
+
+    Node pitchNode = Node.fromChildOrAttr(el, "pitch");
+    Optional<Formula<MatchPlayer>> pitchFormula = Optional.ofNullable(
+        pitchNode == null
+            ? null
+            : Formula.of(pitchNode.getValue(), variables.getContext(MatchPlayer.class)));
+
+    Node yawNode = Node.fromChildOrAttr(el, "yaw");
+    Optional<Formula<MatchPlayer>> yawFormula = Optional.ofNullable(
+        yawNode == null
+            ? null
+            : Formula.of(yawNode.getValue(), variables.getContext(MatchPlayer.class)));
+
+    return new TeleportAction(xFormula, yFormula, zFormula, pitchFormula, yawFormula);
   }
 }
