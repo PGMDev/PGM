@@ -305,6 +305,20 @@ public interface Config {
   float getAssistPercent();
 
   /**
+   * Gets if extra votes are allowed based on the "pgm.vote.extra.#" permission.
+   *
+   * @return {@code true} if extra votes are enabled, {@code false} otherwise.
+   */
+  boolean allowExtraVotes();
+
+  /**
+   * Gets the maximum number of extra votes a player can use.
+   *
+   * @return The maximum number of extra votes allowed per player.
+   */
+  int getMaxExtraVotes();
+
+  /**
    * Gets a group of players, used for prefixes and player sorting.
    *
    * @return A list of groups.
