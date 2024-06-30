@@ -15,6 +15,8 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -155,14 +157,14 @@ public final class InventoryUtils {
     return stack;
   }
 
-  public static void consumeItem(Player player) {
-    PlayerInventory inv = player.getInventory();
-    int heldSlot = inv.getHeldItemSlot();
-    ItemStack itemInHand = inv.getItem(heldSlot);
+  public static void consumeItem(PlayerEvent player) {
+    PlayerInventory inv = player.getPlayer().getInventory();
+    EquipmentSlot hand = INVENTORY_UTILS.getUsedHand(player);
+    ItemStack itemInHand = inv.getItem(hand);
     if (itemInHand.getAmount() > 1) {
       itemInHand.setAmount(itemInHand.getAmount() - 1);
     } else {
-      inv.setItem(heldSlot, null);
+      inv.setItem(hand, null);
     }
   }
 
@@ -189,6 +191,8 @@ public final class InventoryUtils {
 
     void applyAttributeModifiers(
         SetMultimap<Attribute, AttributeModifier> modifiers, ItemMeta meta);
+
+    EquipmentSlot getUsedHand(PlayerEvent event);
 
     void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials);
 

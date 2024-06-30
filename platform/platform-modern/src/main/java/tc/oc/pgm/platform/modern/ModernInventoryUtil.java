@@ -12,6 +12,10 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -64,6 +68,15 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
     for (var entry : modifiers.entries()) {
       meta.addAttributeModifier(entry.getKey(), entry.getValue());
     }
+  }
+
+  @Override
+  public EquipmentSlot getUsedHand(PlayerEvent event) {
+    return switch (event) {
+      case PlayerItemConsumeEvent e -> e.getHand();
+      case PlayerInteractEvent e -> e.getHand();
+      default -> EquipmentSlot.HAND;
+    };
   }
 
   @Override
