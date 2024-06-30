@@ -59,13 +59,7 @@ public class ConsumableModule implements MapModule<ConsumableMatchModule> {
             XMLUtils.parseEnum(Node.fromRequiredAttr(el, "on"), ConsumeCause.class);
 
         boolean override = XMLUtils.parseBoolean(el.getAttribute("override"), true);
-        boolean consume =
-            XMLUtils.parseBoolean(el.getAttribute("consume"), cause == ConsumeCause.EAT);
-
-        if (!consume && !override && cause == ConsumeCause.EAT) {
-          throw new InvalidXMLException(
-              "Not consuming while not overriding isn't supported for EAT", el);
-        }
+        boolean consume = computeConsume(cause, override, el);
 
         var consumable = new ConsumableDefinition(id, action, cause, override, consume);
 
@@ -75,6 +69,16 @@ public class ConsumableModule implements MapModule<ConsumableMatchModule> {
       var built = builder.build();
 
       return built.isEmpty() ? null : new ConsumableModule(built);
+    }
+
+    private boolean computeConsume(ConsumeCause cause, boolean override, Element el)
+        throws InvalidXMLException {
+      if (cause == ConsumeCause.EAT) return override;
+      // When overriding can safely assume a true.
+      // When not overriding it may depend on vanilla behavior, force it to be specified
+      return override
+          ? XMLUtils.parseBoolean(el.getAttribute("consume"), true)
+          : XMLUtils.parseBoolean(Node.fromRequiredAttr(el, "consume"));
     }
   }
 }

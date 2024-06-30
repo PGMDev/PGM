@@ -2,6 +2,7 @@ package tc.oc.pgm.consumable;
 
 import com.google.common.collect.ImmutableMap;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,6 +31,7 @@ public class ConsumableMatchModule implements MatchModule, Listener {
   }
 
   private @Nullable ConsumableDefinition getConsumableDefinition(ItemStack item) {
+    if (item == null) return null;
     return consumables.get(ItemTags.CONSUMABLE.get(item));
   }
 
@@ -41,8 +43,11 @@ public class ConsumableMatchModule implements MatchModule, Listener {
     runConsumable(event, consumable);
   }
 
-  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.HIGH)
   private void onClick(PlayerInteractEvent event) {
+    // It's been cancelled
+    if (event.useItemInHand() == Event.Result.DENY) return;
+
     ConsumableDefinition consumable = getConsumableDefinition(event.getItem());
     if (consumable == null) return;
 
@@ -68,10 +73,7 @@ public class ConsumableMatchModule implements MatchModule, Listener {
     if (consumable.getOverride()) {
       event.setCancelled(true);
     }
-
-    boolean naturallyConsumes =
-        event instanceof PlayerItemConsumeEvent && !consumable.getOverride();
-    if (consumable.getConsume() && !naturallyConsumes) {
+    if (consumable.getConsume()) {
       InventoryUtils.consumeItem(event);
     }
 
