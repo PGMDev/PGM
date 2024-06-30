@@ -1,9 +1,13 @@
 package tc.oc.pgm.consumable;
 
-import com.google.common.collect.ImmutableSet;
-import org.bukkit.entity.Player;
+import com.google.common.collect.ImmutableMap;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -17,42 +21,60 @@ import tc.oc.pgm.util.inventory.InventoryUtils;
 public class ConsumableMatchModule implements MatchModule, Listener {
 
   private final Match match;
-  private final ImmutableSet<ConsumableDefinition> consumableDefinitions;
+  private final ImmutableMap<String, ConsumableDefinition> consumables;
 
   public ConsumableMatchModule(
-      Match match, ImmutableSet<ConsumableDefinition> consumableDefinitions) {
+      Match match, ImmutableMap<String, ConsumableDefinition> consumables) {
     this.match = match;
-    this.consumableDefinitions = consumableDefinitions;
-  }
-
-  @EventHandler
-  private void onItemConsume(PlayerItemConsumeEvent event) {
-    ConsumableDefinition consumableDefinition = getConsumableDefinition(event.getItem());
-    if (consumableDefinition == null) return;
-    if (consumableDefinition.getCause() != ConsumeCause.EAT) return;
-
-    Player player = event.getPlayer();
-    MatchPlayer matchPlayer = match.getPlayer(player);
-    if (!MatchPlayers.canInteract(matchPlayer)) return;
-
-    if (consumableDefinition.getOverride()) {
-      InventoryUtils.consumeItem(player);
-      event.setCancelled(true);
-    }
-
-    consumableDefinition.getAction().trigger(matchPlayer);
+    this.consumables = consumables;
   }
 
   private @Nullable ConsumableDefinition getConsumableDefinition(ItemStack item) {
-    String consumableId = ItemTags.CONSUMABLE.get(item);
-    if (consumableId != null) {
-      for (ConsumableDefinition consumableDefinition : consumableDefinitions) {
-        if (consumableDefinition.getId().equals(consumableId)) {
-          return consumableDefinition;
-        }
-      }
+    return consumables.get(ItemTags.CONSUMABLE.get(item));
+  }
+
+  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+  private void onItemConsume(PlayerItemConsumeEvent event) {
+    ConsumableDefinition consumable = getConsumableDefinition(event.getItem());
+    if (consumable == null || consumable.getCause() != ConsumeCause.EAT) return;
+
+    runConsumable(event, consumable);
+  }
+
+  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+  private void onClick(PlayerInteractEvent event) {
+    ConsumableDefinition consumable = getConsumableDefinition(event.getItem());
+    if (consumable == null) return;
+
+    var action = event.getAction();
+    if (!switch (consumable.getCause()) {
+      case LEFT_CLICK -> action == Action.LEFT_CLICK_BLOCK || action == Action.LEFT_CLICK_AIR;
+      case RIGHT_CLICK -> action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR;
+      case CLICK -> action == Action.LEFT_CLICK_BLOCK
+          || action == Action.LEFT_CLICK_AIR
+          || action == Action.RIGHT_CLICK_BLOCK
+          || action == Action.RIGHT_CLICK_AIR;
+      default -> false;
+    }) return;
+
+    runConsumable(event, consumable);
+  }
+
+  public <T extends PlayerEvent & Cancellable> void runConsumable(
+      T event, ConsumableDefinition consumable) {
+    MatchPlayer matchPlayer = match.getPlayer(event.getPlayer());
+    if (!MatchPlayers.canInteract(matchPlayer)) return;
+
+    if (consumable.getOverride()) {
+      event.setCancelled(true);
     }
 
-    return null;
+    boolean naturallyConsumes =
+        event instanceof PlayerItemConsumeEvent && !consumable.getOverride();
+    if (consumable.getConsume() && !naturallyConsumes) {
+      InventoryUtils.consumeItem(event);
+    }
+
+    consumable.getAction().trigger(matchPlayer);
   }
 }

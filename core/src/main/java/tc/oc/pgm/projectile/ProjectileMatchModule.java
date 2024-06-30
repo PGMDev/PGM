@@ -127,7 +127,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       }
 
       if (projectileDefinition.throwable) {
-        InventoryUtils.consumeItem(player);
+        InventoryUtils.consumeItem(event);
       }
 
       if (projectileDefinition.coolDown != null) {
