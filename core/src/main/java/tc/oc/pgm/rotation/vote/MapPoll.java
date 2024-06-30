@@ -29,6 +29,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import tc.oc.pgm.api.Config;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
@@ -95,11 +97,10 @@ public class MapPoll {
     Component mapName =
         winner.getStyledName(MapNameStyle.COLOR).decoration(TextDecoration.BOLD, true);
 
-    viewer.showTitle(
-        title(
-            top ? mapName : empty(),
-            top ? empty() : mapName,
-            Title.Times.times(fromTicks(5), fromTicks(60), fromTicks(5))));
+    viewer.showTitle(title(
+        top ? mapName : empty(),
+        top ? empty() : mapName,
+        Title.Times.times(fromTicks(5), fromTicks(60), fromTicks(5))));
   }
 
   private Component getMapChatComponent(MatchPlayer viewer, MapInfo map, boolean winner) {
@@ -107,16 +108,14 @@ public class MapPoll {
 
     return text()
         .append(text("["))
-        .append(
-            text(
-                voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
-                voted ? NamedTextColor.GREEN : NamedTextColor.DARK_RED))
+        .append(text(
+            voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
+            voted ? NamedTextColor.GREEN : NamedTextColor.DARK_RED))
         .append(text(" ").decoration(TextDecoration.BOLD, !voted)) // Fix 1px symbol diff
         .append(text("" + countVotes(votes.get(map)), NamedTextColor.YELLOW))
         .append(text("] "))
-        .append(
-            map.getStyledName(
-                winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS))
+        .append(map.getStyledName(
+            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS))
         .build();
   }
 
@@ -140,6 +139,11 @@ public class MapPoll {
       content
           .append(newline())
           .append(getVotingBookCreator().getMapBookComponent(viewer, pgmMap, voted));
+    }
+
+    Component footer = getVotingBookCreator().getMapBookFooter(viewer);
+    if (footer != null) {
+      content.append(footer);
     }
 
     Book book = Book.builder().author(VOTE_BOOK_AUTHOR).pages(content.build()).build();
@@ -206,21 +210,28 @@ public class MapPoll {
    * @return The number of votes counted.
    */
   private int countVotes(Collection<UUID> uuids) {
-    return uuids.stream().map(Bukkit::getPlayer).mapToInt(this::calcVoteMultiplier).sum();
+    return uuids.stream()
+        .map(Bukkit::getPlayer)
+        .mapToInt(this::calcVoteMultiplier)
+        .sum();
   }
 
   private int calcVoteMultiplier(Player player) {
-    if (player != null) {
+    Config config = PGM.get().getConfiguration();
+    if (player != null && config.allowExtraVotes()) {
+      int maxVotes = Math.abs(config.getMaxExtraVotes());
 
       // Determine the player's custom vote multiplier, if any.
-      for (int i = 5; i > 1; i--) {
+      for (int i = maxVotes; i > 1; i--) {
         if (player.hasPermission(Permissions.EXTRA_VOTE + "." + i)) {
           return i;
         }
       }
 
       // Default extra vote permission
-      return player.hasPermission(Permissions.EXTRA_VOTE) ? 2 : 1;
+      if (player.hasPermission(Permissions.EXTRA_VOTE)) {
+        return 2;
+      }
     }
 
     // Count disconnected players as 1. We can't test for offline player perms

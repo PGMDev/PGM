@@ -82,6 +82,10 @@ public final class PGMConfig implements Config {
   private final int griefScore;
   private final float assistPercent;
 
+  // votes.*
+  private final boolean allowExtraVotes;
+  private final int maxExtraVotes;
+
   // join.*
   private final long minPlayers;
   private final boolean limitJoin;
@@ -179,6 +183,9 @@ public final class PGMConfig implements Config {
         parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
     this.assistPercent =
         parseFloat(config.getString("gameplay.assist-percent", "0.3"), Range.openClosed(0f, 1f));
+
+    this.allowExtraVotes = parseBoolean(config.getString("votes.allow-extra-votes", "true"));
+    this.maxExtraVotes = parseInteger(config.getString("votes.max-extra-votes", "5"));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
@@ -649,6 +656,16 @@ public final class PGMConfig implements Config {
   @Override
   public String getMotd() {
     return motd;
+  }
+
+  @Override
+  public boolean allowExtraVotes() {
+    return allowExtraVotes;
+  }
+
+  @Override
+  public int getMaxExtraVotes() {
+    return maxExtraVotes;
   }
 
   @Override

@@ -77,6 +77,17 @@ gameplay:
   refill-wool: true # Should wool in wool rooms be automatically refilled?
   grief-score: -10 # Score under which players should be kept out of the match
   assist-percent: 0.3 # What percent of the damage is required for an assist 0.3 = 30% of max hp
+  
+# Changes map voting mechanics.
+votes:
+  # Players can gain extra votes based on the permission "pgm.vote.extra.#".
+  #
+  # Examples of granting extra votes:
+  #   "pgm.vote.extra.2" = double votes
+  #   "pgm.vote.extra.4" = quadruple votes
+  #
+  allow-extra-votes: true # Can players use extra votes based on their permissions?
+  max-extra-votes: 5      # Maximum number of extra votes allowed per player.
 
 # Toggles various user interfaces.
 ui:
