@@ -7,4 +7,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public interface VotingBookCreator {
 
   Component getMapBookComponent(MatchPlayer viewer, MapInfo map, boolean voted);
+
+  Component getMapBookFooter(MatchPlayer viewer);
 }

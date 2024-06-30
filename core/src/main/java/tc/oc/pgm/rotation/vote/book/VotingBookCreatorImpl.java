@@ -1,5 +1,6 @@
 package tc.oc.pgm.rotation.vote.book;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
@@ -25,15 +26,19 @@ public class VotingBookCreatorImpl implements VotingBookCreator {
   @Override
   public Component getMapBookComponent(MatchPlayer viewer, MapInfo map, boolean voted) {
     TextComponent.Builder text = text();
-    text.append(
-        text(
-            voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
-            voted ? NamedTextColor.DARK_GREEN : NamedTextColor.DARK_RED));
+    text.append(text(
+        voted ? SYMBOL_VOTED : SYMBOL_IGNORE,
+        voted ? NamedTextColor.DARK_GREEN : NamedTextColor.DARK_RED));
     text.append(text(" ").decoration(TextDecoration.BOLD, !voted)); // Fix 1px symbol diff
     text.append(text(map.getName(), NamedTextColor.GOLD, TextDecoration.BOLD));
     text.hoverEvent(showText(getHover(viewer, map, voted)));
     text.clickEvent(runCommand("/votenext -o " + map.getName()));
     return text.build();
+  }
+
+  @Override
+  public Component getMapBookFooter(MatchPlayer viewer) {
+    return empty();
   }
 
   public ComponentLike getHover(MatchPlayer viewer, MapInfo map, boolean voted) {
@@ -45,19 +50,17 @@ public class VotingBookCreatorImpl implements VotingBookCreator {
       text.append(map.getGamemode().colorIfAbsent(NamedTextColor.AQUA)).appendNewline();
     } else if (!gamemodes.isEmpty()) {
       boolean acronyms = gamemodes.size() > 1;
-      text.append(
-              TextFormatter.list(
-                  gamemodes.stream()
-                      .map(gm -> text(acronyms ? gm.getAcronym() : gm.getFullName()))
-                      .collect(Collectors.toList()),
-                  NamedTextColor.AQUA))
+      text.append(TextFormatter.list(
+              gamemodes.stream()
+                  .map(gm -> text(acronyms ? gm.getAcronym() : gm.getFullName()))
+                  .collect(Collectors.toList()),
+              NamedTextColor.AQUA))
           .appendNewline();
     }
 
-    text.append(
-        text(
-            map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
-            NamedTextColor.YELLOW));
+    text.append(text(
+        map.getTags().stream().map(MapTag::toString).collect(Collectors.joining(" ")),
+        NamedTextColor.YELLOW));
 
     return text;
   }
