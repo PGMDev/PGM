@@ -26,6 +26,11 @@ public class RayBlockIntersection {
     return face;
   }
 
+  /** @return Where a new blockw would be placed */
+  public Block getPlaceAt() {
+    return block.getRelative(face);
+  }
+
   /** @return The first intersected point on the surface of the block */
   public Vector getPosition() {
     return position;
