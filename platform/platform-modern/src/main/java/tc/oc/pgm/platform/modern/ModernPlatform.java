@@ -22,6 +22,6 @@ public class ModernPlatform implements Platform.Manifest {
     Bukkit.getServer().getPluginManager().registerEvents(new ModernListener(), plugin);
     Bukkit.getServer().getPluginManager().registerEvents(new SpawnEggUseListener(), plugin);
 
-    PacketManipulations.registerAdapters(plugin);
+    Bukkit.getServer().getPluginManager().registerEvents(new PacketManipulations(plugin), plugin);
   }
 }

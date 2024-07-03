@@ -55,10 +55,10 @@ public class SpPlayerPackets implements PlayerPackets, PacketSender {
       }
       if (!replaced) list.add(zeroHealth);
     }
-    sendToViewers(noHealthMeta, player, true);
-
     Location location = player.getLocation();
     BlockPosition pos = new BlockPosition(location.getX(), location.getY(), location.getZ());
+
+    sendToViewers(noHealthMeta, player, true);
     sendToViewers(new PacketPlayOutBed(handle, pos), player, true);
     ENTITIES.teleportEntityPacket(player.getEntityId(), location).sendToViewers(player, true);
   }
