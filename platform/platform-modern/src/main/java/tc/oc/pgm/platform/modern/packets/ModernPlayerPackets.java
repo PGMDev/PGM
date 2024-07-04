@@ -1,20 +1,25 @@
 package tc.oc.pgm.platform.modern.packets;
 
+import static tc.oc.pgm.util.nms.Packets.ENTITIES;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderWarningDistancePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.border.WorldBorder;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -28,18 +33,25 @@ import tc.oc.pgm.util.platform.Supports;
 @Supports(value = PAPER, minVersion = "1.20.6")
 public class ModernPlayerPackets implements PlayerPackets, PacketSender {
 
+  private static final int POSE_FIELD = 6;
+  private static final int BED_LOCATION = 14;
+
   @Override
   public void playDeathAnimation(Player player) {
-    var handle = ((CraftPlayer) player).getHandle();
-    var deadStatus = new ClientboundEntityEventPacket(handle, (byte) 3);
+    Location location = player.getLocation();
+    BlockPos pos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-    var dataWatcher = ((CraftPlayer) player).getHandle().getEntityData();
-    dataWatcher.set(LivingEntity.DATA_HEALTH_ID, 0f, true);
-    var noHealth = new ClientboundSetEntityDataPacket(
-        player.getEntityId(), Objects.requireNonNull(dataWatcher.packAll()));
+    var metadata = new ClientboundSetEntityDataPacket(
+        player.getEntityId(),
+        List.of(
+            SynchedEntityData.DataValue.create(LivingEntity.DATA_HEALTH_ID, 0f),
+            new SynchedEntityData.DataValue<>(
+                POSE_FIELD, EntityDataSerializers.POSE, Pose.SLEEPING),
+            new SynchedEntityData.DataValue<>(
+                BED_LOCATION, EntityDataSerializers.OPTIONAL_BLOCK_POS, Optional.of(pos))));
 
-    sendToViewers(noHealth, player, true);
-    sendToViewers(deadStatus, player, true);
+    sendToViewers(metadata, player, true);
+    ENTITIES.teleportEntityPacket(player.getEntityId(), location).sendToViewers(player, false);
   }
 
   @Override
