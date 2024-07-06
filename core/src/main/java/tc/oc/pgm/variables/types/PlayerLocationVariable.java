@@ -3,33 +3,29 @@ package tc.oc.pgm.variables.types;
 import static java.lang.Math.toRadians;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
-import java.util.HashMap;
+import org.bukkit.Location;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.block.RayBlockIntersection;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.variables.VariableDefinition;
 
 public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
 
   private final Component component;
-  private final HashMap<MatchPlayer, RayBlockIntersection> locationTargetMap;
-  private long tickCached;
+  private Location lastLocation;
+  private RayBlockIntersection lastRayCast;
 
   public PlayerLocationVariable(VariableDefinition<MatchPlayer> definition, Component component) {
     super(definition);
     this.component = component;
-    this.locationTargetMap = new HashMap<>();
-    this.tickCached = -1;
   }
 
   private RayBlockIntersection intersection(MatchPlayer player) {
-    long tick = NMSHacks.NMS_HACKS.getMonotonicTime(player.getWorld());
-    if (tickCached != tick) {
-      tickCached = tick;
-      locationTargetMap.clear();
+    if (player.getLocation().equals(lastLocation)) {
+      return lastRayCast;
     }
-    return locationTargetMap.computeIfAbsent(
-        player, matchPlayer -> PLAYER_UTILS.getTargetedBlock(matchPlayer.getBukkit()));
+    lastLocation = player.getLocation().clone();
+    lastRayCast = PLAYER_UTILS.getTargetedBlock(player.getBukkit());
+    return lastRayCast;
   }
 
   @Override
@@ -54,6 +50,7 @@ public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
       case PLACE_X -> intersection(player).getPlaceAt().getX();
       case PLACE_Y -> intersection(player).getPlaceAt().getY();
       case PLACE_Z -> intersection(player).getPlaceAt().getZ();
+      case HAS_TARGET -> intersection(player) == null ? 0 : 1;
     };
   }
 
@@ -80,5 +77,6 @@ public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
     PLACE_X,
     PLACE_Y,
     PLACE_Z,
+    HAS_TARGET,
   }
 }
