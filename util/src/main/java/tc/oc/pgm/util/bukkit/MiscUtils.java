@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.bukkit;
 
 import com.google.gson.JsonObject;
+import java.nio.file.Path;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -48,4 +49,6 @@ public interface MiscUtils {
   ThrownPotion spawnPotion(Location loc, ItemStack item);
 
   double getArrowDamage(Arrow arrow);
+
+  int getWorldDataVersion(Path levelDatPath);
 }
