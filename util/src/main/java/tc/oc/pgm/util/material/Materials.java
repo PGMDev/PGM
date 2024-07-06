@@ -30,7 +30,7 @@ public interface Materials {
   Material EYE_OF_ENDER = parse("EYE_OF_ENDER", "ENDER_EYE");
   Material FIREWORK = parse("FIREWORK", "FIREWORK_ROCKET");
   Material WATCH = parse("WATCH", "CLOCK");
-  Material DYE = parse("INK_SACK", "LEGACY_INK_SACK");
+  Material DYE = parse("INK_SACK", "BLACK_DYE");
   Material IRON_DOOR = parse("IRON_DOOR_BLOCK", "IRON_DOOR");
   Material RAW_FISH = parse("RAW_FISH", "COD");
   Material WORKBENCH = parse("WORKBENCH", "CRAFTING_TABLE");
