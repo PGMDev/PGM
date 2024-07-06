@@ -3,12 +3,15 @@ package tc.oc.pgm.variables.types;
 import static java.lang.Math.toRadians;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
+import java.util.function.ToDoubleFunction;
 import org.bukkit.Location;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.variables.VariableDefinition;
 
 public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
+
+  private static final double NULL_VALUE = -1000000; // negative 1 million
 
   private final Component component;
   private Location lastLocation;
@@ -44,14 +47,19 @@ public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
       case VEL_X -> player.getBukkit().getVelocity().getX();
       case VEL_Y -> player.getBukkit().getVelocity().getY();
       case VEL_Z -> player.getBukkit().getVelocity().getZ();
-      case TARGET_X -> intersection(player).getBlock().getX();
-      case TARGET_Y -> intersection(player).getBlock().getY();
-      case TARGET_Z -> intersection(player).getBlock().getZ();
-      case PLACE_X -> intersection(player).getPlaceAt().getX();
-      case PLACE_Y -> intersection(player).getPlaceAt().getY();
-      case PLACE_Z -> intersection(player).getPlaceAt().getZ();
+      case TARGET_X -> getOrDefault(intersection(player), (i) -> i.getBlock().getX());
+      case TARGET_Y -> getOrDefault(intersection(player), (i) -> i.getBlock().getY());
+      case TARGET_Z -> getOrDefault(intersection(player), (i) -> i.getBlock().getZ());
+      case PLACE_X -> getOrDefault(intersection(player), (i) -> i.getPlaceAt().getX());
+      case PLACE_Y -> getOrDefault(intersection(player), (i) -> i.getPlaceAt().getY());
+      case PLACE_Z -> getOrDefault(intersection(player), (i) -> i.getPlaceAt().getZ());
       case HAS_TARGET -> intersection(player) == null ? 0 : 1;
     };
+  }
+
+  private double getOrDefault(
+      RayBlockIntersection intersection, ToDoubleFunction<RayBlockIntersection> function) {
+    return intersection == null ? NULL_VALUE : function.applyAsDouble(intersection);
   }
 
   @Override
