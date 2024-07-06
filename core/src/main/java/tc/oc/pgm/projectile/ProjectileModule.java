@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -63,8 +64,9 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
             Node.fromAttr(projectileElement, "click"), ClickAction.class, ClickAction.BOTH);
         Class<? extends Entity> entity =
             XMLUtils.parseEntityTypeAttribute(projectileElement, "projectile", Arrow.class);
-        BlockMaterialData blockMaterial =
-            XMLUtils.parseBlockMaterialData(Node.fromAttr(projectileElement, "material"));
+        BlockMaterialData blockMaterial = entity.isAssignableFrom(FallingBlock.class)
+            ? XMLUtils.parseBlockMaterialData(Node.fromAttr(projectileElement, "material"))
+            : null;
         Float power = XMLUtils.parseNumber(
             Node.fromChildOrAttr(projectileElement, "power"), Float.class, (Float) null);
         List<PotionEffect> potionKit = kitParser.parsePotions(projectileElement);
