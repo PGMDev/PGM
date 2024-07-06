@@ -39,6 +39,7 @@ import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -119,12 +120,11 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @NotNull
-  private static Map<String, VariantInfo> createVariantMap(Element root)
-      throws InvalidXMLException {
+  private Map<String, VariantInfo> createVariantMap(Element root) throws InvalidXMLException {
     ImmutableMap.Builder<String, VariantInfo> variants = ImmutableMap.builder();
-    variants.put(DEFAULT_VARIANT, new VariantData(root, null));
+    variants.put(DEFAULT_VARIANT, new VariantData(root, this, null));
     for (Element el : root.getChildren("variant")) {
-      VariantData vd = new VariantData(root, el);
+      VariantData vd = new VariantData(root, this, el);
       variants.put(vd.variantId, vd);
     }
     return variants.build();
@@ -366,13 +366,17 @@ public class MapInfoImpl implements MapInfo {
   }
 
   private static class VariantData implements VariantInfo {
+    // taken from https://minecraft.wiki/w/Data_version#Java_Edition
+    private static final int MAP_DATA_VERSION_1_13 = 1519;
+    private static final Version VERSION_1_13 = new Version(1, 13, 0);
     private final String variantId;
     private final String mapName;
     private final String mapId;
     private final String world;
     private final Range<Version> serverVersions;
 
-    public VariantData(Element root, @Nullable Element variantEl) throws InvalidXMLException {
+    public VariantData(Element root, MapInfo mapInfo, @Nullable Element variantEl)
+        throws InvalidXMLException {
       String name = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
       String slug = assertNotNull(root).getChildTextNormalize("slug");
       Node minVer = Node.fromAttr(root, "min-server-version");
@@ -404,7 +408,9 @@ public class MapInfoImpl implements MapInfo {
       this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
 
       this.serverVersions = XMLUtils.parseClosedRange(
-          minVer, XMLUtils.parseSemanticVersion(minVer), XMLUtils.parseSemanticVersion(maxVer));
+          minVer,
+          parseOrInferMinimumVersion(mapInfo, minVer),
+          XMLUtils.parseSemanticVersion(maxVer));
     }
 
     @Override
@@ -430,6 +436,30 @@ public class MapInfoImpl implements MapInfo {
     @Override
     public Range<Version> getServerVersions() {
       return serverVersions;
+    }
+
+    @Nullable
+    private Version parseOrInferMinimumVersion(MapInfo mapInfo, @Nullable Node minVer)
+        throws InvalidXMLException {
+      if (minVer != null) {
+        return XMLUtils.parseSemanticVersion(minVer);
+      } else {
+        /*
+         * Infer the map version from the DataVersion field in level.dat. We only need to know
+         * if the world is 1.13+ to avoid server crashes in legacy versions due to changes
+         * in chunk formatting.
+         */
+        var sourceDir = mapInfo.getSource().getAbsoluteDir();
+        var levelDatPath =
+            (world != null ? sourceDir.resolve(world) : sourceDir).resolve("level.dat");
+
+        var mapDataVersion = MiscUtils.MISC_UTILS.getWorldDataVersion(levelDatPath);
+        if (mapDataVersion >= MAP_DATA_VERSION_1_13) {
+          return VERSION_1_13;
+        } else {
+          return null;
+        }
+      }
     }
   }
 }
