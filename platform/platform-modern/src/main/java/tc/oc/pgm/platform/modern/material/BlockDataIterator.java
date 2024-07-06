@@ -3,9 +3,7 @@ package tc.oc.pgm.platform.modern.material;
 import java.util.Iterator;
 import java.util.Map;
 import org.bukkit.ChunkSnapshot;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
@@ -74,12 +72,5 @@ class BlockDataIterator implements Iterator<BlockData>, ModernBlockMaterialData,
   @Override
   public BlockVector getBlockVector() {
     return blockVector;
-  }
-
-  @Override
-  public FallingBlock spawnFallingBlock(Location location) {
-    return location
-        .getWorld()
-        .spawn(location, FallingBlock.class, fallingBlock -> fallingBlock.setBlockData(data));
   }
 }
