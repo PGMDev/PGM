@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Range;
 import java.lang.ref.SoftReference;
 import java.time.LocalDate;
 import java.util.*;
@@ -56,6 +57,7 @@ public class MapInfoImpl implements MapInfo {
   private final Map<String, VariantInfo> variants;
 
   private final String worldFolder;
+  private final Range<Version> serverVersion;
   private final Version proto;
   private final Version version;
   private final Phase phase;
@@ -88,6 +90,7 @@ public class MapInfoImpl implements MapInfo {
     if (variant == null) throw new InvalidXMLException("Could not find variant definition", root);
 
     this.worldFolder = variant.getWorld();
+    this.serverVersion = variant.getServerVersions();
 
     this.name = variant.getMapName();
     this.normalizedName = StringUtils.normalize(name);
@@ -97,25 +100,22 @@ public class MapInfoImpl implements MapInfo {
     this.proto = assertNotNull(XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")));
     this.version =
         assertNotNull(XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")));
-    this.description =
-        assertNotNull(
-            Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize());
+    this.description = assertNotNull(
+        Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize());
     this.created = XMLUtils.parseDate(Node.fromChildOrAttr(root, "created"));
     this.authors = parseContributors(root, "author");
     this.contributors = parseContributors(root, "contributor");
     this.rules = parseRules(root);
-    this.difficulty =
-        XMLUtils.parseEnum(
-                Node.fromLastChildOrAttr(root, "difficulty"), Difficulty.class, Difficulty.NORMAL)
-            .ordinal();
+    this.difficulty = XMLUtils.parseEnum(
+            Node.fromLastChildOrAttr(root, "difficulty"), Difficulty.class, Difficulty.NORMAL)
+        .ordinal();
     this.world = parseWorld(root);
     this.gamemode = XMLUtils.parseFormattedText(Node.fromLastChildOrAttr(root, "game"));
     this.gamemodes = parseGamemodes(root);
     this.phase =
         XMLUtils.parseEnum(Node.fromLastChildOrAttr(root, "phase"), Phase.class, Phase.PRODUCTION);
-    this.friendlyFire =
-        XMLUtils.parseBoolean(
-            Node.fromLastChildOrAttr(root, "friendlyfire", "friendly-fire"), false);
+    this.friendlyFire = XMLUtils.parseBoolean(
+        Node.fromLastChildOrAttr(root, "friendlyfire", "friendly-fire"), false);
   }
 
   @NotNull
@@ -143,6 +143,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public Map<String, VariantInfo> getVariants() {
     return variants;
+  }
+
+  @Override
+  public Range<Version> getServerVersion() {
+    return serverVersion;
   }
 
   @Override
@@ -349,14 +354,12 @@ public class MapInfoImpl implements MapInfo {
       // If the map defines no game-modes manually, derive them from map tags, sorted by auxiliary
       // last.
       if (this.gamemodes.isEmpty()) {
-        this.gamemodes =
-            this.tags.stream()
-                .filter(MapTag::isGamemode)
-                .sorted(
-                    Comparator.comparing(MapTag::isAuxiliary)
-                        .thenComparing(Comparator.naturalOrder()))
-                .map(MapTag::getGamemode)
-                .collect(StreamUtils.toImmutableList());
+        this.gamemodes = this.tags.stream()
+            .filter(MapTag::isGamemode)
+            .sorted(
+                Comparator.comparing(MapTag::isAuxiliary).thenComparing(Comparator.naturalOrder()))
+            .map(MapTag::getGamemode)
+            .collect(StreamUtils.toImmutableList());
       }
     }
     this.context = new SoftReference<>(context);
@@ -367,10 +370,13 @@ public class MapInfoImpl implements MapInfo {
     private final String mapName;
     private final String mapId;
     private final String world;
+    private final Range<Version> serverVersions;
 
     public VariantData(Element root, @Nullable Element variantEl) throws InvalidXMLException {
       String name = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
       String slug = assertNotNull(root).getChildTextNormalize("slug");
+      Node minVer = Node.fromAttr(root, "min-server-version");
+      Node maxVer = Node.fromAttr(root, "max-server-version");
 
       if (variantEl == null) {
         this.variantId = DEFAULT_VARIANT;
@@ -384,9 +390,21 @@ public class MapInfoImpl implements MapInfo {
         boolean override = XMLUtils.parseBoolean(Node.fromAttr(variantEl, "override"), false);
         this.mapName = (override ? "" : name + ": ") + variantEl.getTextNormalize();
         this.world = variantEl.getAttributeValue("world");
-        if (slug != null) slug += "_" + variantId;
+
+        String variantSlug = variantEl.getAttributeValue("slug");
+        if (variantSlug != null) slug = variantSlug;
+        else if (slug != null) slug += "_" + variantId;
+
+        Node minVerVariant = Node.fromAttr(variantEl, "min-server-version");
+        if (minVerVariant != null) minVer = minVerVariant;
+
+        Node maxVerVariant = Node.fromAttr(variantEl, "max-server-version");
+        if (maxVerVariant != null) minVer = minVerVariant;
       }
       this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
+
+      this.serverVersions = XMLUtils.parseClosedRange(
+          minVer, XMLUtils.parseSemanticVersion(minVer), XMLUtils.parseSemanticVersion(maxVer));
     }
 
     @Override
@@ -407,6 +425,11 @@ public class MapInfoImpl implements MapInfo {
     @Override
     public String getWorld() {
       return world;
+    }
+
+    @Override
+    public Range<Version> getServerVersions() {
+      return serverVersions;
     }
   }
 }

@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,6 +36,7 @@ import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.xml.DocumentWrapper;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -55,7 +57,8 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
 
   public MapFactoryImpl(Logger logger, MapSource source, MapIncludeProcessor includes) {
     super(Modules.MAP, Modules.MAP_DEPENDENCY_ONLY); // Don't copy, avoid N factory copies
-    this.logger = ClassLogger.get(assertNotNull(logger), getClass(), assertNotNull(source).getId());
+    this.logger =
+        ClassLogger.get(assertNotNull(logger), getClass(), assertNotNull(source).getId());
     this.source = source;
     this.includes = includes;
   }
@@ -75,6 +78,12 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
       document = MapFilePreprocessor.getDocument(source, includes);
 
       info = new MapInfoImpl(source, document.getRootElement());
+
+      // We're not loading this map, return a dummy map context to allow variants to load, if needed
+      if (!info.getServerVersion().contains(Platform.MINECRAFT_VERSION)) {
+        return new MapContextImpl(info, List.of());
+      }
+
       try {
         loadAll();
       } catch (ModuleLoadException e) {
