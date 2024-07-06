@@ -29,6 +29,7 @@ import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 
 public class MapLibraryImpl implements MapLibrary {
@@ -55,9 +56,8 @@ public class MapLibraryImpl implements MapLibrary {
     MapInfo map = maps.get(StringUtils.slugify(idOrName));
     if (map == null) {
       // Fuzzy match
-      map =
-          StringUtils.bestFuzzyMatch(
-              StringUtils.normalize(idOrName), maps.values(), MapInfo::getNormalizedName);
+      map = StringUtils.bestFuzzyMatch(
+          StringUtils.normalize(idOrName), maps.values(), MapInfo::getNormalizedName);
     }
 
     return map;
@@ -103,16 +103,15 @@ public class MapLibraryImpl implements MapLibrary {
     } else if (ok <= 0) {
       logger.info("Failed to load " + ChatColor.YELLOW + fail + ChatColor.RESET + " maps");
     } else {
-      logger.info(
-          "Loaded "
-              + ChatColor.YELLOW
-              + ok
-              + ChatColor.RESET
-              + " new maps, failed to load "
-              + ChatColor.YELLOW
-              + fail
-              + ChatColor.RESET
-              + " maps");
+      logger.info("Loaded "
+          + ChatColor.YELLOW
+          + ok
+          + ChatColor.RESET
+          + " new maps, failed to load "
+          + ChatColor.YELLOW
+          + fail
+          + ChatColor.RESET
+          + " maps");
     }
   }
 
@@ -130,72 +129,66 @@ public class MapLibraryImpl implements MapLibrary {
     final int oldOk = reset ? 0 : maps.size();
 
     return CompletableFuture.runAsync(UsernameResolvers::startBatch)
-        .thenRunAsync(
-            () -> {
-              // First ensure loadNewSources is called for all factories, this may take some time
-              // (eg: Git pull)
-              List<Stream<MapSource>> mapSources =
-                  factories
-                      .parallelStream()
-                      .map(s -> s.loadNewSources(this::logMapError))
-                      .collect(Collectors.toList());
+        .thenRunAsync(() -> {
+          // First ensure loadNewSources is called for all factories, this may take some time
+          // (eg: Git pull)
+          List<Stream<MapSource>> mapSources = factories.parallelStream()
+              .map(s -> s.loadNewSources(this::logMapError))
+              .collect(Collectors.toList());
 
-              if (reset) {
-                // Doing full reset; add all known maps to be re-loaded
-                mapSources.add(this.maps.values().stream().map(MapInfo::getSource));
-              } else {
-                // Not a full reset; reload failed & modified maps
-                mapSources.add(failed.stream());
+          if (reset) {
+            // Doing full reset; add all known maps to be re-loaded
+            mapSources.add(this.maps.values().stream().map(MapInfo::getSource));
+          } else {
+            // Not a full reset; reload failed & modified maps
+            mapSources.add(failed.stream());
 
-                mapSources.add(
-                    this.maps.entrySet().stream()
-                        .filter(
-                            entry -> {
-                              try {
-                                return entry.getValue().getSource().checkForUpdates();
-                              } catch (MapMissingException e) {
-                                logMapError(e);
-                                this.maps.remove(entry.getKey());
-                                return false;
-                              }
-                            })
-                        .map(entry -> entry.getValue().getSource()));
-              }
+            mapSources.add(this.maps.entrySet().stream()
+                .filter(entry -> {
+                  try {
+                    return entry.getValue().getSource().checkForUpdates();
+                  } catch (MapMissingException e) {
+                    logMapError(e);
+                    this.maps.remove(entry.getKey());
+                    return false;
+                  }
+                })
+                .map(entry -> entry.getValue().getSource()));
+          }
 
-              // Finally load all the maps
-              try (Stream<MapSource> stream =
-                  mapSources.stream().flatMap(Function.identity()).parallel().unordered()) {
-                stream.forEach(s -> this.loadMapSafe(s, null));
-              }
-            })
+          // Finally load all the maps
+          try (Stream<MapSource> stream =
+              mapSources.stream().flatMap(Function.identity()).parallel().unordered()) {
+            stream.forEach(s -> this.loadMapSafe(s, null));
+          }
+        })
         .thenRunAsync(() -> logMapSuccess(oldFail, oldOk))
         .thenRunAsync(UsernameResolvers::endBatch);
   }
 
   @Override
   public CompletableFuture<MapContext> loadExistingMap(String id) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          final MapInfo info = maps.get(id);
-          if (info == null) {
-            throw new RuntimeException(
-                new MapMissingException(id, "Unable to find map from id (was it deleted?)"));
-          }
+    return CompletableFuture.supplyAsync(() -> {
+      final MapInfo info = maps.get(id);
+      if (info == null) {
+        throw new RuntimeException(
+            new MapMissingException(id, "Unable to find map from id (was it deleted?)"));
+      }
 
-          final MapContext context = info.getContext();
-          try {
-            if (context != null && !info.getSource().checkForUpdates()) {
-              return context;
-            }
-          } catch (MapMissingException e) {
-            failed.remove(info.getSource());
-            maps.remove(id);
-            throw new RuntimeException(e);
-          }
+      final MapContext context = info.getContext();
+      try {
+        if (context != null && !info.getSource().checkForUpdates()) {
+          return context;
+        }
+      } catch (MapMissingException e) {
+        failed.remove(info.getSource());
+        maps.remove(id);
+        throw new RuntimeException(e);
+      }
 
-          logger.info(ChatColor.GREEN + "XML changes detected, reloading");
-          return loadMapSafe(info.getSource(), info.getId());
-        });
+      logger.info(ChatColor.GREEN + "XML changes detected, reloading");
+      return loadMapSafe(info.getSource(), info.getId());
+    });
   }
 
   private MapContext loadMap(MapSource source, @Nullable String mapId) throws MapException {
@@ -226,8 +219,11 @@ public class MapLibraryImpl implements MapLibrary {
     }
 
     MapInfo info = context.getInfo();
-    maps.merge(
-        info.getId(), info, (m1, m2) -> m2.getVersion().isOlderThan(m1.getVersion()) ? m1 : m2);
+    // Only if from a supported version, add it to our library
+    if (info.getServerVersion().contains(Platform.MINECRAFT_VERSION)) {
+      maps.merge(
+          info.getId(), info, (m1, m2) -> m2.getVersion().isOlderThan(m1.getVersion()) ? m1 : m2);
+    }
     failed.remove(source);
 
     return context;

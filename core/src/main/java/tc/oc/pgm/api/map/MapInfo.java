@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.map;
 
+import com.google.common.collect.Range;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
@@ -33,6 +34,14 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return a map of variants by their variant id
    */
   Map<String, VariantInfo> getVariants();
+
+  /**
+   * Get what servers versions should load this map, servers outside the range should ignore the
+   * map.
+   *
+   * @return range of the server versions that can load this map
+   */
+  Range<Version> getServerVersion();
 
   /** @return the subfolder in which the world is in, or null for the parent folder */
   @Nullable
@@ -203,5 +212,7 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
     String getMapName();
 
     String getWorld();
+
+    Range<Version> getServerVersions();
   }
 }
