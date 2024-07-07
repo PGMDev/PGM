@@ -11,7 +11,7 @@ import tc.oc.pgm.variables.VariableDefinition;
 
 public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
 
-  private static final double NULL_VALUE = -1; // negative 1 million
+  private static final double NULL_VALUE = -1;
 
   private final Component component;
   private Location lastLocation;
