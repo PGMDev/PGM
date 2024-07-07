@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
@@ -40,5 +41,12 @@ public interface ModernBlockMaterialData extends BlockMaterialData {
   @Override
   default MaterialMatcher toMatcher() {
     return new BlockStateMaterialMatcher(getBlock());
+  }
+
+  @Override
+  default FallingBlock spawnFallingBlock(Location location) {
+    return location
+        .getWorld()
+        .spawn(location, FallingBlock.class, fallingBlock -> fallingBlock.setBlockData(getBlock()));
   }
 }

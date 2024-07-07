@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -51,6 +52,11 @@ class SpMaterialData implements LegacyMaterialData, ItemMaterialData, BlockMater
   @Override
   public ItemStack toItemStack(int amount) {
     return new ItemStack(material, amount, damage);
+  }
+
+  @Override
+  public FallingBlock spawnFallingBlock(Location location) {
+    return location.getWorld().spawnFallingBlock(location, material, (byte) damage);
   }
 
   @Override

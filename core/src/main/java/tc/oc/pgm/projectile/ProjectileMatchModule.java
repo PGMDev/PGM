@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -101,8 +102,13 @@ public class ProjectileMatchModule implements MatchModule, Listener {
             NMSHacks.NMS_HACKS.setFireballDirection(fireball, velocity);
           }
         } else {
-          projectile =
-              player.getWorld().spawn(player.getEyeLocation(), projectileDefinition.projectile);
+          if (FallingBlock.class.isAssignableFrom(projectileDefinition.projectile)) {
+            projectile =
+                projectileDefinition.blockMaterial.spawnFallingBlock(player.getEyeLocation());
+          } else {
+            projectile =
+                player.getWorld().spawn(player.getEyeLocation(), projectileDefinition.projectile);
+          }
           projectile.setVelocity(velocity);
         }
         if (projectileDefinition.power != null && projectile instanceof Explosive) {
