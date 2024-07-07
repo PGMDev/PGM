@@ -7,6 +7,7 @@ import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.util.material.BlockMaterialData;
 
 public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
   protected @Nullable String name;
@@ -20,6 +21,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
   protected Duration coolDown;
   protected boolean throwable;
   protected boolean precise;
+  protected BlockMaterialData blockMaterial;
 
   public ProjectileDefinition(
       @Nullable String id,
@@ -33,7 +35,8 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
       Filter destroyFilter,
       Duration coolDown,
       boolean throwable,
-      boolean precise) {
+      boolean precise,
+      BlockMaterialData blockMaterial) {
     super(id);
     this.name = name;
     this.damage = damage;
@@ -46,6 +49,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
     this.coolDown = coolDown;
     this.throwable = throwable;
     this.precise = precise;
+    this.blockMaterial = blockMaterial;
   }
 
   public @Nullable String getName() {
