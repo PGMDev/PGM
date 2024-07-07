@@ -31,7 +31,8 @@ public enum SettingKey implements Aliased {
       Materials.SKULL,
       DEATH_ALL,
       DEATH_OWN,
-      DEATH_FRIENDS), // Changes which death messages are seen
+      DEATH_FRIENDS,
+      DEATH_SQUAD), // Changes which death messages are seen
   PICKER(
       "picker",
       Material.LEATHER_HELMET,

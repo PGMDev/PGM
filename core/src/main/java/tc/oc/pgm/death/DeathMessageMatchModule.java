@@ -1,5 +1,6 @@
 package tc.oc.pgm.death;
 
+import java.util.function.BiPredicate;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -41,42 +42,43 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
     Component message = builder.getMessage().color(NamedTextColor.GRAY);
 
     for (MatchPlayer viewer : event.getMatch().getPlayers()) {
-      switch (viewer.getSettings().getValue(SettingKey.DEATH)) {
-        case DEATH_OWN:
-          if (event.isInvolved(viewer) || event.isInvolved(viewer.getSpectatorTarget())) {
-            viewer.sendMessage(message);
-          } else if (event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF)) {
-            viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
-          }
-          break;
-        case DEATH_FRIENDS:
-          if (event.isInvolved(viewer)) {
-            viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
-          } else if (isFriendInvolved(viewer.getBukkit(), event)) {
-            viewer.sendMessage(message);
-          } else if (event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF)) {
-            viewer.sendMessage(message.decoration(TextDecoration.ITALIC, true));
-          }
-          break;
-        case DEATH_ALL:
-          if (event.isInvolved(viewer) || event.isInvolved(viewer.getSpectatorTarget())) {
-            viewer.sendMessage(message.decoration(TextDecoration.BOLD, true));
-          } else {
-            viewer.sendMessage(message);
-          }
-          break;
+      boolean involved = event.isInvolved(viewer) || event.isInvolved(viewer.getSpectatorTarget());
+      boolean isStaff = event.isTeamKill() && viewer.getBukkit().hasPermission(Permissions.STAFF);
+      boolean show = involved
+          || isStaff
+          || switch (viewer.getSettings().getValue(SettingKey.DEATH)) {
+            case DEATH_OWN -> false;
+            case DEATH_FRIENDS -> isFriendInvolved(viewer.getBukkit(), event);
+            case DEATH_SQUAD -> isFriendInvolved(viewer.getBukkit(), event)
+                || isSquadInvolved(viewer.getBukkit(), event);
+            case DEATH_ALL -> true;
+            default -> false;
+          };
+
+      if (show) {
+        if (involved) message = message.decoration(TextDecoration.BOLD, true);
+        else if (isStaff) message = message.decoration(TextDecoration.ITALIC, true);
+        viewer.sendMessage(message);
       }
     }
   }
 
+  private boolean isSquadInvolved(Player viewer, MatchPlayerDeathEvent event) {
+    return isPlayerInvolved(viewer, event, Integration::areInSquad);
+  }
+
   private boolean isFriendInvolved(Player viewer, MatchPlayerDeathEvent event) {
-    Player killer =
-        event.getKiller() != null && event.getKiller().getPlayer().isPresent()
-            ? event.getKiller().getPlayer().get().getBukkit()
-            : null;
+    return isPlayerInvolved(viewer, event, Integration::isFriend);
+  }
+
+  private boolean isPlayerInvolved(
+      Player viewer, MatchPlayerDeathEvent event, BiPredicate<Player, Player> relationCheck) {
+    Player killer = event.getKiller() != null && event.getKiller().getPlayer().isPresent()
+        ? event.getKiller().getPlayer().get().getBukkit()
+        : null;
     Player victim = event.getVictim().getBukkit();
 
-    return (killer != null && Integration.isFriend(viewer, killer))
-        || (victim != null && Integration.isFriend(viewer, victim));
+    return (killer != null && relationCheck.test(viewer, killer))
+        || (victim != null && relationCheck.test(viewer, victim));
   }
 }
