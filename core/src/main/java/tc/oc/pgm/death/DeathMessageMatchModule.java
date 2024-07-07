@@ -56,9 +56,10 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
           };
 
       if (show) {
-        if (involved) message = message.decoration(TextDecoration.BOLD, true);
-        else if (isStaff) message = message.decoration(TextDecoration.ITALIC, true);
-        viewer.sendMessage(message);
+        var messageToSend = message;
+        if (involved) messageToSend = message.decoration(TextDecoration.BOLD, true);
+        else if (isStaff) messageToSend = message.decoration(TextDecoration.ITALIC, true);
+        viewer.sendMessage(messageToSend);
       }
     }
   }
