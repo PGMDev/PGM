@@ -1,6 +1,7 @@
 package tc.oc.pgm.api.map;
 
 public enum Gamemode {
+  FIVE_CONTROL_POINT("5cp", "5 Control Points", "5CP"),
   ATTACK_DEFEND("ad", "Attack/Defend", "A/D"),
   ARCADE("arcade", "Arcade", "Arcade"),
   BEDWARS("bedwars", "Bed Wars", "Bed Wars"),
