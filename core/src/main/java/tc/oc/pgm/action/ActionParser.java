@@ -25,6 +25,7 @@ import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
+import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
@@ -48,6 +49,7 @@ import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
+import tc.oc.pgm.structure.StructureDefinition;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -404,5 +406,21 @@ public class ActionParser {
             : Formula.of(yawNode.getValue(), variables.getContext(MatchPlayer.class)));
 
     return new TeleportAction(xFormula, yFormula, zFormula, pitchFormula, yawFormula);
+  }
+
+  @MethodParser("paste-structure")
+  public <T extends Filterable<?>> PasteStructureAction<T> parseStructure(
+      Element el, Class<T> scope) throws InvalidXMLException {
+    Formula<T> xFormula =
+        Formula.of(Node.fromRequiredAttr(el, "x").getValue(), variables.getContext(scope));
+    Formula<T> yFormula =
+        Formula.of(Node.fromRequiredAttr(el, "y").getValue(), variables.getContext(scope));
+    Formula<T> zFormula =
+        Formula.of(Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(scope));
+
+    XMLFeatureReference<StructureDefinition> structure =
+        features.createReference(Node.fromRequiredAttr(el, "structure"), StructureDefinition.class);
+
+    return new PasteStructureAction<>(scope, xFormula, yFormula, zFormula, structure);
   }
 }
