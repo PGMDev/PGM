@@ -49,7 +49,7 @@ public class Structure implements Feature<StructureDefinition> {
     snapshot.placeBlocks(region, offset);
   }
 
-  public void placeAbsolute(Vector vector) {
+  public void placeAbsolute(BlockVector vector) {
     place(new BlockVector(
         new Vector(0, 0, 0).subtract(getRegion().getBounds().getBlockMin()).add(vector)));
   }

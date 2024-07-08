@@ -419,8 +419,7 @@ public class ActionParser {
         Formula.of(Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(scope));
 
     XMLFeatureReference<StructureDefinition> structure =
-        features.addReference(new XMLFeatureReference<>(
-            features, Node.fromRequiredAttr(el, "structure"), StructureDefinition.class));
+        features.createReference(Node.fromRequiredAttr(el, "structure"), StructureDefinition.class);
 
     return new PasteStructureAction<>(scope, xFormula, yFormula, zFormula, structure);
   }
