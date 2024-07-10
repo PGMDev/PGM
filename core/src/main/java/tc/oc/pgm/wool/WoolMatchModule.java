@@ -61,7 +61,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   // layout of the wools in the inventory. This is used to refill the container with wools.
   private final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
 
-  private static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().startsWith("WOOL"));
+  private static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().endsWith("WOOL"));
 
   private static final int REFILL_INTERVAL = 30; // seconds
 
