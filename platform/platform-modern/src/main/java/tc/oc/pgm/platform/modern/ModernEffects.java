@@ -62,11 +62,11 @@ public class ModernEffects implements Effects {
 
   @Override
   public void spawnFlame(World world, Location location) {
-    world.spawnParticle(Particle.FLAME, location, 40, 0, 0.15f, 0, 0, true);
+    world.spawnParticle(Particle.FLAME, location, 40, 0, 0.15f, 0, 0, null, true);
   }
 
   @Override
   public void explosion(Player player, Location location) {
-    player.spawnParticle(Particle.EXPLOSION, location, 1, 0d, 0d, 0d, 0, true);
+    player.spawnParticle(Particle.EXPLOSION, location, 1, 0d, 0d, 0d, 0, null, true);
   }
 }
