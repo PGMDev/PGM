@@ -1,6 +1,7 @@
 package tc.oc.pgm.wool;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.wool.WoolModule.WOOL;
 
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
@@ -120,13 +121,11 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public boolean isObjectiveWool(ItemStack stack) {
-    return stack != null
-        && WoolModule.WOOL.matches(stack)
-        && ColorUtils.COLOR_UTILS.isColor(stack, color);
+    return stack != null && WOOL.matches(stack) && ColorUtils.COLOR_UTILS.isColor(stack, color);
   }
 
   public boolean isObjectiveWool(BlockState state) {
-    return WoolModule.WOOL.matches(state) && ColorUtils.COLOR_UTILS.isColor(state, color);
+    return WOOL.matches(state) && ColorUtils.COLOR_UTILS.isColor(state, color);
   }
 
   public boolean isHolding(InventoryHolder holder) {

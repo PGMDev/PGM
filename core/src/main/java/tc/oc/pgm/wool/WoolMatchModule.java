@@ -2,6 +2,7 @@ package tc.oc.pgm.wool;
 
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
+import static tc.oc.pgm.wool.WoolModule.WOOL;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -80,7 +81,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private boolean isObjectiveWool(ItemStack stack) {
-    if (WoolModule.WOOL.matches(stack.getType())) {
+    if (WOOL.matches(stack.getType())) {
       for (MonumentWool wool : this.wools.values()) {
         if (wool.getDefinition().isObjectiveWool(stack)) return true;
       }
@@ -215,7 +216,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (holder instanceof Player) {
       MatchPlayer playerHolder = this.match.getPlayer((Player) holder);
 
-      if (playerHolder != null && result != null && WoolModule.WOOL.matches(result.getType())) {
+      if (playerHolder != null && result != null && WOOL.matches(result.getType())) {
         for (MonumentWool wool : this.wools.values()) {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
@@ -239,6 +240,6 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private static boolean isValidWool(DyeColor expectedColor, BlockState state) {
-    return WoolModule.WOOL.matches(state.getType()) && COLOR_UTILS.isColor(state, expectedColor);
+    return WOOL.matches(state.getType()) && COLOR_UTILS.isColor(state, expectedColor);
   }
 }
