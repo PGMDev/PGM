@@ -8,7 +8,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Wool;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -18,6 +17,7 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @FeatureInfo(name = "wool")
@@ -123,7 +123,10 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public boolean isObjectiveWool(org.bukkit.material.MaterialData material) {
-    return material instanceof Wool && ((Wool) material).getColor() == this.color;
+    // On 1.21, CraftItemStack#getData() on wool item stacks returns unsubclassed MaterialData,
+    // hence we're comparing the item type and color manually
+    return material.getItemType() == Materials.WOOL
+        && DyeColor.getByWoolData(material.getData()) == color;
   }
 
   public boolean isHolding(InventoryHolder holder) {
