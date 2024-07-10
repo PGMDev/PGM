@@ -21,6 +21,7 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.material.ColorUtils;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = PAPER, minVersion = "1.20.6")
@@ -103,18 +104,9 @@ public class ModernColorUtils implements ColorUtils {
     block.setType(setColor(block.getType(), color));
   }
 
-  private boolean setAndCompare(Material mat, DyeColor color) {
-    return setColor(mat, color) == mat;
-  }
-
   @Override
-  public boolean isColor(BlockState block, DyeColor color) {
-    return setAndCompare(block.getType(), color);
-  }
-
-  @Override
-  public boolean isColor(ItemStack stack, DyeColor color) {
-    return setAndCompare(stack.getType(), color);
+  public boolean isColor(MaterialData data, DyeColor color) {
+    return setColor(data.getItemType(), color) == data.getItemType();
   }
 
   @Override

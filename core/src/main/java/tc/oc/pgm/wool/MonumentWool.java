@@ -28,6 +28,7 @@ import tc.oc.pgm.kits.ArmorKit;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -102,11 +103,12 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   @Override
   protected boolean canBlockUpdateProximity(BlockState oldState, BlockState newState) {
     // If monument proximity metric is closest block, make it only the wool
-    return !hasTouched(getOwner()) || this.getDefinition().isObjectiveWool(newState);
+    return !hasTouched(getOwner())
+        || this.getDefinition().isObjectiveWool(MaterialData.block(newState));
   }
 
   public void handleWoolAcquisition(Player player, ItemStack item) {
-    if (!this.isPlaced() && this.getDefinition().isObjectiveWool(item)) {
+    if (!this.isPlaced() && this.getDefinition().isObjectiveWool(MaterialData.item(item))) {
       ParticipantState participant = this.getMatch().getParticipantState(player);
       if (participant != null && this.canComplete(participant.getParty())) {
         touch(participant);

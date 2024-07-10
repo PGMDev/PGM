@@ -6,7 +6,6 @@ import static tc.oc.pgm.wool.WoolModule.WOOL;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;
-import org.bukkit.block.BlockState;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -20,6 +19,7 @@ import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.ColorUtils;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @FeatureInfo(name = "wool")
@@ -120,12 +120,10 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
     return this.craftable;
   }
 
-  public boolean isObjectiveWool(ItemStack stack) {
-    return stack != null && WOOL.matches(stack) && ColorUtils.COLOR_UTILS.isColor(stack, color);
-  }
-
-  public boolean isObjectiveWool(BlockState state) {
-    return WOOL.matches(state) && ColorUtils.COLOR_UTILS.isColor(state, color);
+  public boolean isObjectiveWool(MaterialData materialData) {
+    return materialData != null
+        && WOOL.matches(materialData)
+        && ColorUtils.COLOR_UTILS.isColor(materialData, color);
   }
 
   public boolean isHolding(InventoryHolder holder) {
@@ -134,7 +132,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
 
   public boolean isHolding(Inventory inv) {
     for (ItemStack stack : inv.getContents()) {
-      if (this.isObjectiveWool(stack)) return true;
+      if (this.isObjectiveWool(MaterialData.item(stack))) return true;
     }
     return false;
   }
