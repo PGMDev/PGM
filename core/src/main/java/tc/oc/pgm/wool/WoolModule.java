@@ -35,7 +35,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WoolModule implements MapModule<WoolMatchModule> {
-  static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().endsWith("WOOL"));
+  protected static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().endsWith("WOOL"));
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("wool", Gamemode.CAPTURE_THE_WOOL, false));
 
