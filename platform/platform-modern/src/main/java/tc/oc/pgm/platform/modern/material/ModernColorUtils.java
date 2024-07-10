@@ -103,9 +103,18 @@ public class ModernColorUtils implements ColorUtils {
     block.setType(setColor(block.getType(), color));
   }
 
+  private boolean setAndCompare(Material mat, DyeColor color) {
+    return setColor(mat, color) == mat;
+  }
+
   @Override
   public boolean isColor(BlockState block, DyeColor color) {
-    return setColor(block.getType(), color) == block.getType();
+    return setAndCompare(block.getType(), color);
+  }
+
+  @Override
+  public boolean isColor(ItemStack stack, DyeColor color) {
+    return setAndCompare(stack.getType(), color);
   }
 
   @Override

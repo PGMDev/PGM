@@ -102,7 +102,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   @Override
   protected boolean canBlockUpdateProximity(BlockState oldState, BlockState newState) {
     // If monument proximity metric is closest block, make it only the wool
-    return !hasTouched(getOwner()) || this.getDefinition().isObjectiveWool(newState.getData());
+    return !hasTouched(getOwner()) || this.getDefinition().isObjectiveWool(newState);
   }
 
   public void handleWoolAcquisition(Player player, ItemStack item) {
@@ -129,7 +129,8 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onArmorKitApplication(ApplyKitEvent event) {
     if (event.getKit() instanceof ArmorKit) {
-      for (ArmorKit.ArmorItem armorPiece : ((ArmorKit) event.getKit()).getArmor().values()) {
+      for (ArmorKit.ArmorItem armorPiece :
+          ((ArmorKit) event.getKit()).getArmor().values()) {
         handleWoolAcquisition(event.getPlayer().getBukkit(), armorPiece.stack);
       }
     }

@@ -29,11 +29,13 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WoolModule implements MapModule<WoolMatchModule> {
+  static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().endsWith("WOOL"));
   private static final Collection<MapTag> TAGS =
       ImmutableList.of(new MapTag("wool", Gamemode.CAPTURE_THE_WOOL, false));
 
@@ -98,36 +100,32 @@ public class WoolModule implements MapModule<WoolMatchModule> {
         ShowOptions options = ShowOptions.parse(factory.getFilters(), woolEl);
         Boolean required = XMLUtils.parseBoolean(woolEl.getAttribute("required"), null);
 
-        ProximityMetric woolProximityMetric =
-            ProximityMetric.parse(
-                woolEl, "wool", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
-        ProximityMetric monumentProximityMetric =
-            ProximityMetric.parse(
-                woolEl, "monument", new ProximityMetric(ProximityMetric.Type.CLOSEST_BLOCK, false));
+        ProximityMetric woolProximityMetric = ProximityMetric.parse(
+            woolEl, "wool", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
+        ProximityMetric monumentProximityMetric = ProximityMetric.parse(
+            woolEl, "monument", new ProximityMetric(ProximityMetric.Type.CLOSEST_BLOCK, false));
 
         Vector location;
         if (factory.getProto().isOlderThan(MapProtos.WOOL_LOCATIONS)) {
           // The default location is at infinity, so players/blocks are always an infinite distance
           // from it
-          location =
-              new Vector(
-                  Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+          location = new Vector(
+              Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         } else {
           location = XMLUtils.parseVector(XMLUtils.getRequiredAttribute(woolEl, "location"));
         }
 
-        MonumentWoolFactory wool =
-            new MonumentWoolFactory(
-                id,
-                required,
-                options,
-                team,
-                woolProximityMetric,
-                monumentProximityMetric,
-                color,
-                location,
-                placement,
-                craftable);
+        MonumentWoolFactory wool = new MonumentWoolFactory(
+            id,
+            required,
+            options,
+            team,
+            woolProximityMetric,
+            monumentProximityMetric,
+            color,
+            location,
+            placement,
+            craftable);
         factory.getFeatures().addFeature(woolEl, wool);
         woolFactories.put(team, wool);
       }

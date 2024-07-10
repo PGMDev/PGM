@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +18,7 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.material.ColorUtils;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @FeatureInfo(name = "wool")
@@ -119,14 +120,13 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public boolean isObjectiveWool(ItemStack stack) {
-    return stack != null && this.isObjectiveWool(stack.getData());
+    return stack != null
+        && WoolModule.WOOL.matches(stack)
+        && ColorUtils.COLOR_UTILS.isColor(stack, color);
   }
 
-  public boolean isObjectiveWool(org.bukkit.material.MaterialData material) {
-    // On 1.21, CraftItemStack#getData() on wool item stacks returns unsubclassed MaterialData,
-    // hence we're comparing the item type and color manually
-    return material.getItemType() == Materials.WOOL
-        && DyeColor.getByWoolData(material.getData()) == color;
+  public boolean isObjectiveWool(BlockState state) {
+    return WoolModule.WOOL.matches(state) && ColorUtils.COLOR_UTILS.isColor(state, color);
   }
 
   public boolean isHolding(InventoryHolder holder) {

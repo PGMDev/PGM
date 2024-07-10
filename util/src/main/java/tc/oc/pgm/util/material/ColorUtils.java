@@ -29,6 +29,8 @@ public interface ColorUtils {
 
   boolean isColor(BlockState block, DyeColor color);
 
+  boolean isColor(ItemStack stack, DyeColor color);
+
   default void setColor(World world, Iterable<BlockVector> positions, DyeColor color) {
     for (BlockVector pos : positions) {
       setColor(world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()), color);

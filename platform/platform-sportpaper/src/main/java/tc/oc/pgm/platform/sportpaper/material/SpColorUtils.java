@@ -71,6 +71,11 @@ public class SpColorUtils implements ColorUtils {
     return color.getWoolData() == block.getRawData();
   }
 
+  @Override
+  public boolean isColor(ItemStack stack, DyeColor color) {
+    return color.getWoolData() == stack.getDurability();
+  }
+
   public void setColor(World world, Iterable<BlockVector> positions, DyeColor color) {
     byte blockData = color.getWoolData();
     for (BlockVector pos : positions) {
