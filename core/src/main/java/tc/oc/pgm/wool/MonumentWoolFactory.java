@@ -1,14 +1,15 @@
 package tc.oc.pgm.wool;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;
+import org.bukkit.block.BlockState;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Wool;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -18,10 +19,14 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.text.TextFormatter;
 
 @FeatureInfo(name = "wool")
 public class MonumentWoolFactory extends ProximityGoalDefinition {
+  protected static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().endsWith("WOOL"));
+
   protected final DyeColor color;
   protected final Vector location;
   protected final Region placement;
@@ -119,11 +124,15 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   }
 
   public boolean isObjectiveWool(ItemStack stack) {
-    return stack != null && this.isObjectiveWool(stack.getData());
+    return stack != null
+        && WOOL.matches(stack.getType())
+        && COLOR_UTILS.isColor(MaterialData.item(stack), color);
   }
 
-  public boolean isObjectiveWool(org.bukkit.material.MaterialData material) {
-    return material instanceof Wool && ((Wool) material).getColor() == this.color;
+  public boolean isObjectiveWool(BlockState block) {
+    return block != null
+        && WOOL.matches(block.getType())
+        && COLOR_UTILS.isColor(MaterialData.block(block), color);
   }
 
   public boolean isHolding(InventoryHolder holder) {

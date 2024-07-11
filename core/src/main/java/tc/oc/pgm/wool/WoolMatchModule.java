@@ -1,7 +1,7 @@
 package tc.oc.pgm.wool;
 
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
+import static tc.oc.pgm.wool.MonumentWoolFactory.WOOL;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -10,9 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,7 +38,6 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.block.BlockVectors;
-import tc.oc.pgm.util.material.MaterialMatcher;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -60,8 +57,6 @@ public class WoolMatchModule implements MatchModule, Listener {
   // the exact
   // layout of the wools in the inventory. This is used to refill the container with wools.
   private final Map<Inventory, Map<Integer, ItemStack>> woolChests = new HashMap<>();
-
-  private static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().endsWith("WOOL"));
 
   private static final int REFILL_INTERVAL = 30; // seconds
 
@@ -176,7 +171,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     MonumentWool wool = woolEntry.getValue();
 
     if (event.getNewState().getType() == Material.AIR) { // block is being destroyed
-      if (isValidWool(wool.getDyeColor(), event.getOldState())) {
+      if (wool.getDefinition().isObjectiveWool(event.getOldState())) {
         event.setCancelled(true);
       }
       return;
@@ -188,7 +183,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
     if (player != null) { // wool can only be placed by a player
       Component woolName = wool.getComponentName();
-      if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
+      if (!wool.getDefinition().isObjectiveWool(event.getNewState())) {
         player.sendWarning(translatable("wool.wrongWool", woolName));
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(translatable("wool.wrongTeam", wool.getOwner().getName(), woolName));
@@ -239,9 +234,5 @@ public class WoolMatchModule implements MatchModule, Listener {
       }
     }
     return null;
-  }
-
-  private static boolean isValidWool(DyeColor expectedColor, BlockState state) {
-    return WOOL.matches(state.getType()) && COLOR_UTILS.isColor(state, expectedColor);
   }
 }

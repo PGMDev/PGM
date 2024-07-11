@@ -9,7 +9,6 @@ import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scoreboard.Team;
@@ -27,7 +26,7 @@ public interface ColorUtils {
 
   void setColor(Block block, DyeColor color);
 
-  boolean isColor(BlockState block, DyeColor color);
+  boolean isColor(MaterialData data, DyeColor color);
 
   default void setColor(World world, Iterable<BlockVector> positions, DyeColor color) {
     for (BlockVector pos : positions) {
