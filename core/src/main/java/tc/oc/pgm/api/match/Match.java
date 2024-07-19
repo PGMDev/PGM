@@ -38,8 +38,8 @@ import tc.oc.pgm.util.Audience;
  *
  * <p>Each {@link Match} should operate like an independent {@link org.bukkit.Server}, and ensure
  * its resources, such as {@link MatchPlayer}s, can only interact with other resources in the same
- * {@link Match}. This should allow multiple {@link Match}es to run concurrently on the same {@link
- * org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
+ * {@link Match}. This should allow multiple {@link Match}es to run concurrently on the same
+ * {@link org.bukkit.Server}, as long as resources are cleaned up after {@link #unload()}.
  */
 public interface Match
     extends MatchPlayerResolver,
@@ -254,8 +254,8 @@ public interface Match
   /**
    * Get the {@link CountdownContext} for the {@link Match}.
    *
-   * <p>There are several places in the code that assume this should be a {@link
-   * tc.oc.pgm.countdowns.SingleCountdownContext}. Will need to be fixed later.
+   * <p>There are several places in the code that assume this should be a
+   * {@link tc.oc.pgm.countdowns.SingleCountdownContext}. Will need to be fixed later.
    *
    * @return The {@link CountdownContext}.
    */
@@ -420,12 +420,15 @@ public interface Match
   Collection<VictoryCondition> getVictoryConditions();
 
   /**
-   * Calculate whether a {@link VictoryCondition} has been meet, and if so, transition the {@link
-   * Match} to {@link MatchPhase#FINISHED}.
+   * Calculate whether a {@link VictoryCondition} has been meet, and if so, transition the
+   * {@link Match} to {@link MatchPhase#FINISHED}.
    *
    * @return If the {@link Match} was just ended.
    */
   boolean calculateVictory();
+
+  /** Invalidates the ranking of participating competitors. */
+  void invalidateRanking();
 
   /**
    * Get whether friendly fire should be on or off.
