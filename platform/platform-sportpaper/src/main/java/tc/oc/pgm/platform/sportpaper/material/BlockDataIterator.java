@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.block.BlockData;
@@ -100,5 +101,10 @@ class BlockDataIterator implements Iterator<BlockData>, BlockData, LegacyMateria
   @Override
   public int encoded() {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public FallingBlock spawnFallingBlock(Location location) {
+    return location.getWorld().spawnFallingBlock(location, materialId, data);
   }
 }

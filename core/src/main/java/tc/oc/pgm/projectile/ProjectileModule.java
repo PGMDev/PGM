@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -21,6 +22,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -54,20 +56,19 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
           XMLUtils.flattenElements(doc.getRootElement(), "projectiles", "projectile")) {
         String id = XMLUtils.getRequiredAttribute(projectileElement, "id").getValue();
         String name = projectileElement.getAttributeValue("name");
-        Double damage =
-            XMLUtils.parseNumber(
-                projectileElement.getAttribute("damage"), Double.class, (Double) null);
-        double velocity =
-            XMLUtils.parseNumber(
-                Node.fromChildOrAttr(projectileElement, "velocity"), Double.class, 1.0);
-        ClickAction clickAction =
-            XMLUtils.parseEnum(
-                Node.fromAttr(projectileElement, "click"), ClickAction.class, ClickAction.BOTH);
+        Double damage = XMLUtils.parseNumber(
+            projectileElement.getAttribute("damage"), Double.class, (Double) null);
+        double velocity = XMLUtils.parseNumber(
+            Node.fromChildOrAttr(projectileElement, "velocity"), Double.class, 1.0);
+        ClickAction clickAction = XMLUtils.parseEnum(
+            Node.fromAttr(projectileElement, "click"), ClickAction.class, ClickAction.BOTH);
         Class<? extends Entity> entity =
             XMLUtils.parseEntityTypeAttribute(projectileElement, "projectile", Arrow.class);
-        Float power =
-            XMLUtils.parseNumber(
-                Node.fromChildOrAttr(projectileElement, "power"), Float.class, (Float) null);
+        BlockMaterialData blockMaterial = entity.isAssignableFrom(FallingBlock.class)
+            ? XMLUtils.parseBlockMaterialData(Node.fromAttr(projectileElement, "material"))
+            : null;
+        Float power = XMLUtils.parseNumber(
+            Node.fromChildOrAttr(projectileElement, "power"), Float.class, (Float) null);
         List<PotionEffect> potionKit = kitParser.parsePotions(projectileElement);
         Filter destroyFilter =
             filterParser.parseFilterProperty(projectileElement, "destroy-filter");
@@ -76,20 +77,20 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
             XMLUtils.parseBoolean(projectileElement.getAttribute("throwable"), true);
         boolean precise = XMLUtils.parseBoolean(projectileElement.getAttribute("precise"), true);
 
-        ProjectileDefinition projectileDefinition =
-            new ProjectileDefinition(
-                id,
-                name,
-                damage,
-                power,
-                velocity,
-                clickAction,
-                entity,
-                potionKit,
-                destroyFilter,
-                coolDown,
-                throwable,
-                precise);
+        ProjectileDefinition projectileDefinition = new ProjectileDefinition(
+            id,
+            name,
+            damage,
+            power,
+            velocity,
+            clickAction,
+            entity,
+            potionKit,
+            destroyFilter,
+            coolDown,
+            throwable,
+            precise,
+            blockMaterial);
 
         factory.getFeatures().addFeature(projectileElement, projectileDefinition);
         projectiles.add(projectileDefinition);

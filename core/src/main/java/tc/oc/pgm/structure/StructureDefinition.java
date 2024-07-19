@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.regions.Bounds;
@@ -53,5 +54,9 @@ public class StructureDefinition extends SelfIdentifyingFeatureDefinition {
       this.bounds = region.getBounds();
     }
     return bounds;
+  }
+
+  public Structure getStructure(Match match) {
+    return match.getFeatureContext().get(this.getId(), Structure.class);
   }
 }

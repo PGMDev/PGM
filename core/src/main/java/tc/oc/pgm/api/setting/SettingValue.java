@@ -53,7 +53,11 @@ public enum SettingValue {
   TIME_LIGHT("time", "light", DyeColor.WHITE), // Player time is always set to midnight
 
   PICKER_MANUAL("picker", "manual", DyeColor.WHITE), // Only display the picker GUI if right clicked
-  SOUNDS_CHAT("sounds", "chat", DyeColor.ORANGE); // Only play DM and admin sounds
+  SOUNDS_CHAT("sounds", "chat", DyeColor.ORANGE), // Only play DM and admin sounds
+  DEATH_SQUAD(
+      "death",
+      "squad",
+      DyeColor.YELLOW); // Only send death messages involving yourself, friends, or squad members
 
   private final String key;
   private final String name;
