@@ -20,6 +20,7 @@ import org.bukkit.material.Wool;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.material.ColorUtils;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -67,8 +68,9 @@ public class SpColorUtils implements ColorUtils {
   }
 
   @Override
-  public boolean isColor(BlockState block, DyeColor color) {
-    return color.getWoolData() == block.getRawData();
+  public boolean isColor(MaterialData data, DyeColor color) {
+    return data instanceof LegacyMaterialData legacyData
+        && color.getWoolData() == legacyData.getData();
   }
 
   public void setColor(World world, Iterable<BlockVector> positions, DyeColor color) {
