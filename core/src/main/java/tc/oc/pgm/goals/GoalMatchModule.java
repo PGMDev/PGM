@@ -144,13 +144,11 @@ public class GoalMatchModule implements MatchModule, Listener {
     return progress;
   }
 
-  protected void updateProgress(Goal goal) {
+  protected void updateProgress(Goal<?> goal) {
     for (Competitor competitor : competitorsByGoal.get(goal)) {
       progressByCompetitor.put(competitor, new GoalProgress(competitor));
     }
-
-    // Forces team rankings to be invalidated
-    match.getWinners();
+    match.invalidateRanking();
   }
 
   // TODO: These events will often be fired together.. debounce them somehow?
