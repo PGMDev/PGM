@@ -1,10 +1,10 @@
 package tc.oc.pgm.scoreboard;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import fr.mrmicky.fastboard.FastBoard;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -89,7 +89,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     this.title = renderer.renderTitle();
   }
 
-  private void addSidebar(MatchPlayer player) {
+  private FastBoard addSidebar(MatchPlayer player) {
     FastBoard sidebar = new FastBoard(player.getBukkit()) {
       @Override
       public boolean hasLinesMaxLength() {
@@ -100,6 +100,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
     sidebar.updateTitle(renderer.renderTitle(title, player));
 
     sidebars.put(player.getId(), sidebar);
+    return sidebar;
   }
 
   @Override
@@ -149,8 +150,15 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void addPlayer(PlayerJoinMatchEvent event) {
-    addSidebar(event.getPlayer());
+    FastBoard sidebar = addSidebar(event.getPlayer());
     renderSidebarDebounce();
+    // After match end we stop updating sidebars for lag reasons.
+    // That causes newly joined players to have nothing if we don't explicitly render for them.
+    if (match.isFinished()) {
+      var player = event.getPlayer();
+      var rows = renderer.renderSidebar(player.getParty());
+      sidebar.updateLines(Collections2.transform(rows, r -> renderer.renderRow(r, player)));
+    }
   }
 
   @EventHandler
@@ -259,13 +267,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       if (sidebar == null) continue;
 
       List<Component> rows = cache.computeIfAbsent(player.getParty(), renderer::renderSidebar);
-
-      List<String> result = new ArrayList<>(rows.size());
-      for (Component row : rows) {
-        result.add(renderer.renderRow(row, player));
-      }
-
-      sidebar.updateLines(result);
+      sidebar.updateLines(Collections2.transform(rows, r -> renderer.renderRow(r, player)));
     }
   }
 

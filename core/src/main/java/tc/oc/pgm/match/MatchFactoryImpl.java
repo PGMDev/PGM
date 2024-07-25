@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
@@ -34,10 +35,12 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();
@@ -220,10 +223,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private File getDirectory() {
       if (dir == null) {
-        dir =
-            new File(
-                PGM.get().getServer().getWorldContainer().getAbsoluteFile(),
-                "match-" + counter.getAndIncrement());
+        dir = new File(
+            PGM.get().getServer().getWorldContainer().getAbsoluteFile(),
+            "match-" + counter.getAndIncrement());
       }
       return dir;
     }
@@ -269,14 +271,12 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       if (creator == null) {
         creator = new WorldCreator(worldName);
       }
-      final World world =
-          PGM.get()
-              .getServer()
-              .createWorld(
-                  creator
-                      .environment(environments[info.getEnvironment()])
-                      .generator(info.hasTerrain() ? null : NullChunkGenerator.INSTANCE)
-                      .seed(info.hasTerrain() ? info.getSeed() : creator.seed()));
+      final World world = PGM.get()
+          .getServer()
+          .createWorld(creator
+              .environment(environments[info.getEnvironment()])
+              .generator(info.hasTerrain() ? null : NullChunkGenerator.INSTANCE)
+              .seed(info.hasTerrain() ? info.getSeed() : creator.seed()));
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 
       world.setPVP(true);
@@ -371,14 +371,13 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
       int tpPerSecond = Integer.MAX_VALUE;
       try {
-        tpPerSecond =
-            TextParser.parseInteger(
-                PGM.get()
-                    .getConfiguration()
-                    .getExperiments()
-                    .getOrDefault("match-teleports-per-second", "")
-                    .toString(),
-                Range.atLeast(1));
+        tpPerSecond = TextParser.parseInteger(
+            PGM.get()
+                .getConfiguration()
+                .getExperiments()
+                .getOrDefault("match-teleports-per-second", "")
+                .toString(),
+            Range.atLeast(1));
       } catch (TextException e) {
         // No-op, since an experimental feature
       }
@@ -387,19 +386,23 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() {
       // Create copy to avoid CME on mach unload
-      for (Match otherMatch : Lists.newArrayList(PGM.get().getMatchManager().getMatches())) {
-        if (match.equals(otherMatch)) continue;
+      int teleported = 0;
+      for (Match oldMatch : Lists.newArrayList(PGM.get().getMatchManager().getMatches())) {
+        if (match.equals(oldMatch)) continue;
 
-        int teleported = 0;
-        for (MatchPlayer player : otherMatch.getPlayers()) {
+        for (MatchPlayer player : oldMatch.getPlayers()) {
           if (teleported++ >= teleportsPerSecond) return this;
 
           final Player bukkit = player.getBukkit();
 
-          otherMatch.removePlayer(bukkit);
+          oldMatch.removePlayer(bukkit);
           match.addPlayer(bukkit);
         }
-        otherMatch.unload();
+
+        // Old match should be empty. TP or kick anyone still in the old world.
+        ensureEmpty(oldMatch.getWorld());
+
+        oldMatch.unload();
       }
 
       // After all players have been teleported, remove the dummy team
@@ -408,6 +411,27 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       match.callEvent(new MatchAfterLoadEvent(match));
 
       return null;
+    }
+
+    private void ensureEmpty(World world) {
+      // No one left, we're good
+      if (world.getPlayerCount() <= 0) return;
+
+      var spawn = match.moduleRequire(SpawnMatchModule.class).getDefaultSpawn();
+      for (Player player : world.getPlayers()) {
+        var matchPlayer = match.getPlayer(player);
+        Location loc = matchPlayer == null ? null : spawn.getSpawn(matchPlayer);
+
+        if (loc != null) {
+          player.teleport(loc);
+        } else {
+          player.kickPlayer(
+              ChatColor.RED + TextTranslations.translate("misc.incorrectWorld", player));
+          PGM.get()
+              .getLogger()
+              .info("Kicked " + player.getName() + " due to not being in the right match");
+        }
+      }
     }
 
     @Override
@@ -431,13 +455,12 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   }
 
   private static <V> CompletableFuture<V> runAsyncThread(Callable<V> task) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            return task.call();
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        });
+    return CompletableFuture.supplyAsync(() -> {
+      try {
+        return task.call();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 }
