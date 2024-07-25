@@ -168,7 +168,7 @@ class SidebarRenderer {
 
   private List<Competitor> getSortedCompetitors(RenderContext context, Party viewer) {
     List<Competitor> sortedCompetitors = new ArrayList<>(match.getSortedCompetitors());
-    sortedCompetitors.retainAll(context.competitorsWithGoals);
+    sortedCompetitors.retainAll(context.competitorGoals.keySet());
     // Bump viewing party to the top of the list
     if (viewer instanceof Competitor && sortedCompetitors.remove(viewer)) {
       sortedCompetitors.add(0, (Competitor) viewer);
@@ -185,7 +185,7 @@ class SidebarRenderer {
     if (context.isCompactWool) {
       boolean firstWool = true;
 
-      List<Goal> sortedWools = new ArrayList<>(context.gmm.getGoals(competitor));
+      List<Goal<?>> sortedWools = context.competitorGoals.get(competitor);
       sortedWools.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
       // Calculate whether having three spaces between each wool would fit on the scoreboard.
@@ -193,8 +193,7 @@ class SidebarRenderer {
           MAX_LENGTH < (3 * sortedWools.size()) + (3 * (sortedWools.size() - 1)) + 1;
       TextComponent.Builder woolText = text();
       for (Goal<?> goal : sortedWools) {
-        if (goal instanceof MonumentWool && goal.hasShowOption(ShowOption.SHOW_SIDEBAR)) {
-          MonumentWool wool = (MonumentWool) goal;
+        if (goal instanceof MonumentWool wool) {
           TextComponent spacer = space();
           if (!firstWool && !horizontalCompact) {
             spacer = spacer.append(space()).append(space());
@@ -211,12 +210,8 @@ class SidebarRenderer {
 
     } else {
       // Not compact; add a row for each of this team's goals
-      for (Goal<?> goal : context.gmm.getGoals()) {
-        if (!goal.isShared()
-            && goal.canComplete(competitor)
-            && goal.hasShowOption(ShowOption.SHOW_SIDEBAR)) {
-          context.addRow(this.renderGoal(goal, competitor, context.viewer));
-        }
+      for (Goal<?> goal : context.competitorGoals.get(competitor)) {
+        context.addRow(this.renderGoal(goal, competitor, context.viewer));
       }
     }
   }
