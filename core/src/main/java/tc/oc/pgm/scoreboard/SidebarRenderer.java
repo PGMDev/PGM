@@ -28,7 +28,6 @@ import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.ProximityGoal;
-import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
@@ -66,10 +65,9 @@ class SidebarRenderer {
     final Collection<Gamemode> gamemodes = map.getGamemodes();
     if (!gamemodes.isEmpty()) {
       boolean acronyms = gamemodes.size() > 1;
-      List<Component> gmComponents =
-          gamemodes.stream()
-              .map(gm -> text(acronyms ? gm.getAcronym() : gm.getFullName()))
-              .collect(Collectors.toList());
+      List<Component> gmComponents = gamemodes.stream()
+          .map(gm -> text(acronyms ? gm.getAcronym() : gm.getFullName()))
+          .collect(Collectors.toList());
       return TextFormatter.list(gmComponents, NamedTextColor.AQUA);
     }
 
@@ -199,10 +197,9 @@ class SidebarRenderer {
             spacer = spacer.append(space()).append(space());
           }
           firstWool = false;
-          woolText.append(
-              spacer
-                  .append(wool.renderSidebarStatusText(competitor, context.viewer))
-                  .color(wool.renderSidebarStatusColor(competitor, context.viewer)));
+          woolText.append(spacer
+              .append(wool.renderSidebarStatusText(competitor, context.viewer))
+              .color(wool.renderSidebarStatusColor(competitor, context.viewer)));
         }
       }
       // Add a row for the compact wools
@@ -262,12 +259,11 @@ class SidebarRenderer {
     final TextComponent.Builder line = text();
 
     line.append(space());
-    line.append(
-        goal.renderSidebarStatusText(competitor, viewingParty)
-            .color(
-                blinkTask != null && blinkTask.isDark()
-                    ? NamedTextColor.BLACK
-                    : goal.renderSidebarStatusColor(competitor, viewingParty)));
+    line.append(goal.renderSidebarStatusText(competitor, viewingParty)
+        .color(
+            blinkTask != null && blinkTask.isDark()
+                ? NamedTextColor.BLACK
+                : goal.renderSidebarStatusColor(competitor, viewingParty)));
 
     if (goal instanceof ProximityGoal) {
       final ProximityGoal<?> proximity = (ProximityGoal<?>) goal;
@@ -278,9 +274,8 @@ class SidebarRenderer {
     }
 
     line.append(space());
-    line.append(
-        goal.renderSidebarLabelText(competitor, viewingParty)
-            .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
+    line.append(goal.renderSidebarLabelText(competitor, viewingParty)
+        .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
 
     return line.build();
   }

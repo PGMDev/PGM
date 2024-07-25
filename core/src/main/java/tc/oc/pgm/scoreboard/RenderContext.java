@@ -4,10 +4,8 @@ import static net.kyori.adventure.text.Component.empty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
@@ -47,12 +45,14 @@ class RenderContext {
 
     // Count the rows used for goals
     for (Goal<?> goal : gmm.getGoals()) {
-      if (goal.hasShowOption(ShowOption.SHOW_SIDEBAR) && goal.getScoreboardFilter().response(match)) {
+      if (goal.hasShowOption(ShowOption.SHOW_SIDEBAR)
+          && goal.getScoreboardFilter().response(match)) {
         if (goal.isShared()) {
           sharedGoals.add(goal);
         } else {
-          gmm.getCompetitors(goal).forEach(competitor ->
-              competitorGoals.computeIfAbsent(competitor, ignored -> new ArrayList<>()).add(goal));
+          gmm.getCompetitors(goal).forEach(competitor -> competitorGoals
+              .computeIfAbsent(competitor, ignored -> new ArrayList<>())
+              .add(goal));
         }
       }
     }
