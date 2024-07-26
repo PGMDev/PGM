@@ -3,9 +3,9 @@ package tc.oc.pgm.scoreboard;
 import static net.kyori.adventure.text.Component.empty;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
@@ -24,8 +24,7 @@ class RenderContext {
   public final boolean hasScores;
   public final boolean isBlitz;
   public final boolean isCompactWool;
-  public final GoalMatchModule gmm;
-  public final Set<Competitor> competitorsWithGoals;
+  public final Map<Competitor, List<Goal<?>>> competitorGoals;
   public final List<Goal<?>> sharedGoals;
   public final boolean isSuperCompact;
 
@@ -40,8 +39,8 @@ class RenderContext {
     this.isBlitz = match.getModule(BlitzMatchModule.class) != null;
     this.isCompactWool = isCompactWool();
 
-    this.gmm = match.needModule(GoalMatchModule.class);
-    this.competitorsWithGoals = new HashSet<>();
+    GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
+    this.competitorGoals = new HashMap<>();
     this.sharedGoals = new ArrayList<>();
 
     // Count the rows used for goals
@@ -51,7 +50,9 @@ class RenderContext {
         if (goal.isShared()) {
           sharedGoals.add(goal);
         } else {
-          competitorsWithGoals.addAll(gmm.getCompetitors(goal));
+          gmm.getCompetitors(goal).forEach(competitor -> competitorGoals
+              .computeIfAbsent(competitor, ignored -> new ArrayList<>())
+              .add(goal));
         }
       }
     }
@@ -100,7 +101,7 @@ class RenderContext {
 
   // Determines if all the map objectives can fit onto the scoreboard with empty rows in between.
   private boolean isSuperCompact() {
-    int rowsUsed = competitorsWithGoals.size() * 2 - 1;
+    int rowsUsed = competitorGoals.size() * 2 - 1;
 
     if (isCompactWool()) {
       WoolMatchModule wmm = match.needModule(WoolMatchModule.class);
