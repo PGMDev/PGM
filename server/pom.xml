@@ -115,45 +115,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Optionally, builds an "out-of-the-box" PGM server as a Docker image -->
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <version>3.3.1</version>
-                <configuration>
-                    <from>
-                        <image>shipilev/openjdk:8</image>
-                    </from>
-                    <to>
-                        <image>pgm</image>
-                        <tags>
-                            <tag>latest</tag>
-                        </tags>
-                    </to>
-                    <container>
-                        <jvmFlags>
-                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
-                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
-                            <jvmFlag>-XX:+AggressiveOpts</jvmFlag>
-                            <jvmFlag>-XX:+UseShenandoahGC</jvmFlag>
-                            <jvmFlag>-XX:+AlwaysPreTouch</jvmFlag>
-                            <jvmFlag>-XX:+ParallelRefProcEnabled</jvmFlag>
-                            <jvmFlag>-XX:+UseLargePagesInMetaspace</jvmFlag>
-                            <jvmFlag>-XX:+UseNUMA</jvmFlag>
-                            <jvmFlag>-XX:-UseBiasedLocking</jvmFlag>
-                            <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
-                        </jvmFlags>
-                        <ports>
-                            <port>25565/tcp</port>
-                        </ports>
-                        <volumes>
-                            <volume>/server</volume>
-                        </volumes>
-                        <workingDirectory>/server</workingDirectory>
-                    </container>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
 </project>
