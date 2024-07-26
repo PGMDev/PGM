@@ -14,11 +14,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.bukkit.entity.Player;
@@ -59,13 +59,13 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
  * <p>A {@link Filter} can have the possibility of being dynamic or not, but the match module
  * decides whether to use a filter dynamically or not. In this sense the docs can be a little
  * misleading when thinking about dynamic filters programmatically. The docs say "the [dynamic]
- * filter will notify the module when it's time to do something". In reality this {@link
- * FilterMatchModule} will "notify" the modules using registered {@link FilterListener}s to execute
- * code in the module.
+ * filter will notify the module when it's time to do something". In reality this
+ * {@link FilterMatchModule} will "notify" the modules using registered {@link FilterListener}s to
+ * execute code in the module.
  *
  * <p>When registering {@link FilterListener}s we use the words "rise" and "fall" to describe the
- * states of a dynamic filter we want to listen for. The relevant methods are explained in {@link
- * FilterDispatcher}.
+ * states of a dynamic filter we want to listen for. The relevant methods are explained in
+ * {@link FilterDispatcher}.
  *
  * @see #onChange(Class, Filter, FilterListener)
  * @see #onRise(Class, Filter, Consumer)
@@ -76,11 +76,21 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   private final Match match;
   private final ContextStore<? super Filter> filterContext;
-  private final List<Class<? extends Event>> listeningFor = new LinkedList<>();
+  private final Set<Class<? extends Event>> listeningFor = new HashSet<>();
+  private final AtomicBoolean loaded = new AtomicBoolean(false);
 
   private final Map<ReactorFactory<?>, ReactorFactory.Reactor> activeReactors = new HashMap<>();
 
   private final DummyListener dummyListener = new DummyListener();
+
+  private final Table<Filter, Class<? extends Filterable<?>>, ListenerSet> listeners =
+      HashBasedTable.create();
+
+  // Most recent responses for each filter with listeners (used to detect changes)
+  private final Table<Filter, Filterable<?>, Boolean> lastResponses = HashBasedTable.create();
+
+  // Filterables that need a check in the next tick (cleared every tick)
+  private final Set<Filterable<?>> dirtySet = new HashSet<>();
 
   /**
    * Create the FilterMatchModule
@@ -99,18 +109,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     final Set<FilterListener<?>> fall = new HashSet<>();
   }
 
-  private final Table<Filter, Class<? extends Filterable<?>>, ListenerSet> listeners =
-      HashBasedTable.create();
-
-  // Most recent responses for each filter with listeners (used to detect changes)
-  private final Table<Filter, Filterable<?>, Boolean> lastResponses = HashBasedTable.create();
-
-  // Filterables that need a check in the next tick (cleared every tick)
-  private final Set<Filterable<?>> dirtySet = new HashSet<>();
-
-  // cleanup players from onPartyChange for non SportPaper servers
-  private Set<MatchPlayer> nonSportCleanUpSet = new HashSet<>();
-
   public ContextStore<? super Filter> getFilterContext() {
     return filterContext;
   }
@@ -126,18 +124,15 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         .forEach(this::findAndCreateReactorFactories);
 
     // Then register all event listeners
-    this.listeners
-        .rowKeySet()
-        .forEach(
-            filter -> {
-              if (!filter.isDynamic()) {
-                match
-                    .getLogger()
-                    .warning("Filter " + filter + " was submitted as a dynamic filter but is not!");
-                return;
-              }
-              this.registerListenersFor(filter.getRelevantEvents());
-            });
+    this.listeners.rowKeySet().forEach(filter -> {
+      if (!filter.isDynamic()) {
+        match
+            .getLogger()
+            .warning("Filter " + filter + " was submitted as a dynamic filter but is not!");
+        return;
+      }
+      this.registerListenersFor(filter.getRelevantEvents());
+    });
     // We always need to register this to handle players leaving the match cleaning-up filters.
     // See comment in PlayerPartyChangeEvent handler for more info
     this.registerListenersFor(Collections.singleton(PlayerPartyChangeEvent.class));
@@ -150,35 +145,30 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
         ListenerSet set = row.get(scope);
         if (set == null) continue;
-        match
-            .getFilterableDescendants(scope)
-            .forEach(
-                filterable -> {
-                  final boolean last = this.lastResponse(filter, filterable);
-                  if (!last) {
-                    for (FilterListener<?> filterListener : set.fall) {
-                      dispatch(
-                          (FilterListener<Filterable<?>>) filterListener, filter, filterable, last);
-                    }
-                  } else {
-                    for (FilterListener<?> filterListener : set.rise) {
-                      dispatch(
-                          (FilterListener<Filterable<?>>) filterListener, filter, filterable, last);
-                    }
-                  }
-                });
+        match.getFilterableDescendants(scope).forEach(filterable -> {
+          final boolean last = this.lastResponse(filter, filterable);
+          if (!last) {
+            for (FilterListener<?> filterListener : set.fall) {
+              dispatch((FilterListener<Filterable<?>>) filterListener, filter, filterable, last);
+            }
+          } else {
+            for (FilterListener<?> filterListener : set.rise) {
+              dispatch((FilterListener<Filterable<?>>) filterListener, filter, filterable, last);
+            }
+          }
+        });
       }
     }
+
+    loaded.set(true);
   }
 
   private void findAndCreateReactorFactories(Filter filter) {
     filter
         .deepDependencies(Filter.class)
         .filter(f -> f instanceof ReactorFactory)
-        .forEach(
-            factory ->
-                activeReactors.computeIfAbsent(
-                    (ReactorFactory<?>) factory, f -> f.createReactor(match, this)));
+        .forEach(factory -> activeReactors.computeIfAbsent(
+            (ReactorFactory<?>) factory, f -> f.createReactor(match, this)));
   }
 
   @Override
@@ -203,7 +193,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       throw new IllegalStateException("Cannot register filter listener after match has started");
     }
 
-    /**
+    /*
      * This should never happen. If any feature is going to register a dynamic filter, it should
      * validate at parse time using a {@link tc.oc.pgm.filters.parse.DynamicFilterValidation}
      */
@@ -230,13 +220,12 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     if (match.getLogger().isLoggable(Level.FINE)) {
       match
           .getLogger()
-          .fine(
-              "onChange scope="
-                  + scope.getSimpleName()
-                  + " listener="
-                  + listener
-                  + " filter="
-                  + filter);
+          .fine("onChange scope="
+              + scope.getSimpleName()
+              + " listener="
+              + listener
+              + " filter="
+              + filter);
     }
     register(scope, filter, true, listener);
     register(scope, filter, false, listener);
@@ -253,13 +242,12 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       Class<F> scope, Filter filter, Consumer<? super F> listener) {
     match
         .getLogger()
-        .fine(
-            "onRise scope="
-                + scope.getSimpleName()
-                + " listener="
-                + listener
-                + " filter="
-                + filter);
+        .fine("onRise scope="
+            + scope.getSimpleName()
+            + " listener="
+            + listener
+            + " filter="
+            + filter);
     register(scope, filter, true, (filterable, response) -> listener.accept(filterable));
   }
 
@@ -274,13 +262,12 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       Class<F> scope, Filter filter, Consumer<? super F> listener) {
     match
         .getLogger()
-        .fine(
-            "onFall scope="
-                + scope.getSimpleName()
-                + " listener="
-                + listener
-                + " filter="
-                + filter);
+        .fine("onFall scope="
+            + scope.getSimpleName()
+            + " listener="
+            + listener
+            + " filter="
+            + filter);
     register(scope, filter, false, (filterable, response) -> listener.accept(filterable));
   }
 
@@ -302,15 +289,14 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     if (match.getLogger().isLoggable(Level.FINER)) {
       match
           .getLogger()
-          .finer(
-              "Dispatching response="
-                  + response
-                  + " listener="
-                  + listener
-                  + " filter="
-                  + filter
-                  + " filterable="
-                  + filterable);
+          .finer("Dispatching response="
+              + response
+              + " listener="
+              + listener
+              + " filter="
+              + filter
+              + " filterable="
+              + filterable);
     }
     listener.filterQueryChanged(filterable, response);
   }
@@ -330,44 +316,33 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     final Map<Filter, Boolean> afterCache = this.lastResponses.column(filterable);
 
     // For each scope that the given filterable applies to
-    this.listeners
-        .columnMap()
-        .forEach(
-            (scope, column) -> {
-              if (scope.isInstance(filterable)) {
-                // For each filter in this scope
-                column.forEach(
-                    (filter, filterListeners) -> {
-                      final Boolean before;
-                      final boolean after;
-                      if (beforeCache.containsKey(filter)) {
-                        // If the filter has already been checked, we have both responses saved.
-                        before = beforeCache.get(filter);
-                        after = afterCache.get(filter);
-                      } else {
-                        // The first time a particular filter is checked, move the old response to
-                        // a local temporary cache and save the new response to the permanent cache.
-                        before = afterCache.get(filter);
-                        beforeCache.put(filter, before);
-                        after = filter.response(query);
-                        afterCache.put(filter, after);
-                      }
+    this.listeners.columnMap().forEach((scope, column) -> {
+      if (scope.isInstance(filterable)) {
+        // For each filter in this scope
+        column.forEach((filter, filterListeners) -> {
+          final Boolean before;
+          final boolean after;
+          if (beforeCache.containsKey(filter)) {
+            // If the filter has already been checked, we have both responses saved.
+            before = beforeCache.get(filter);
+            after = afterCache.get(filter);
+          } else {
+            // The first time a particular filter is checked, move the old response to
+            // a local temporary cache and save the new response to the permanent cache.
+            before = afterCache.get(filter);
+            beforeCache.put(filter, before);
+            after = filter.response(query);
+            afterCache.put(filter, after);
+          }
 
-                      if (before == null || before != after) {
-                        dispatches.add(
-                            () ->
-                                (after ? filterListeners.rise : filterListeners.fall)
-                                    .forEach(
-                                        listener ->
-                                            dispatch(
-                                                (FilterListener<? super F>) listener,
-                                                filter,
-                                                filterable,
-                                                after)));
-                      }
-                    });
-              }
-            });
+          if (before == null || before != after) {
+            dispatches.add(() -> (after ? filterListeners.rise : filterListeners.fall)
+                .forEach(listener ->
+                    dispatch((FilterListener<? super F>) listener, filter, filterable, after)));
+          }
+        });
+      }
+    });
   }
 
   /**
@@ -386,20 +361,12 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   @Override
   public void tick(Match match, Tick tick) {
-    if (!match.isRunning()) return;
-
     this.tick();
   }
 
   public void tick() {
-    // Always empty when the server is running sportpaper
-    if (!nonSportCleanUpSet.isEmpty()) {
-      for (MatchPlayer matchPlayer : nonSportCleanUpSet) {
-        dirtySet.remove(matchPlayer);
-        this.lastResponses.columnKeySet().remove(matchPlayer);
-      }
-      nonSportCleanUpSet.clear();
-    }
+    // Tried to tick while haven't finished loading!
+    if (!loaded.get()) return;
 
     final Set<Filterable<?>> checked = new HashSet<>();
     Set<Filterable<?>> checking;
@@ -460,24 +427,23 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
               .log(Level.SEVERE, "No getter for Filterable or Player found in " + event, e);
           continue;
         }
-        result =
-            (l, e) -> {
-              try {
-                final Object o = handle.invoke(e);
-                if (o instanceof Player) {
-                  MatchPlayer mp = this.match.getPlayer((Player) o);
-                  if (mp != null) invalidate(mp);
-                  else match.getLogger().warning("MatchPlayer not found for player " + o);
-                } else if (o instanceof Filterable) {
-                  this.invalidate((Filterable<?>) o);
-                } else {
-                  throw new IllegalStateException(
-                      "A cached MethodHandle returned a non-expected type. Was: " + o.getClass());
-                }
-              } catch (Throwable t) {
-                match.getLogger().log(Level.SEVERE, "Error extracting Filterable for " + e, t);
-              }
-            };
+        result = (l, e) -> {
+          try {
+            final Object o = handle.invoke(e);
+            if (o instanceof Player) {
+              MatchPlayer mp = this.match.getPlayer((Player) o);
+              if (mp != null) invalidate(mp);
+              else match.getLogger().warning("MatchPlayer not found for player " + o);
+            } else if (o instanceof Filterable) {
+              this.invalidate((Filterable<?>) o);
+            } else {
+              throw new IllegalStateException(
+                  "A cached MethodHandle returned a non-expected type. Was: " + o.getClass());
+            }
+          } catch (Throwable t) {
+            match.getLogger().log(Level.SEVERE, "Error extracting Filterable for " + e, t);
+          }
+        };
       }
 
       listeningFor.add(event);
@@ -522,36 +488,34 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
       //
       // Example: a countdown filter with a bossbar doesn't delete the bossbar if you /cycle 0 -f,
       // due to the player matching the filter even while the player is leaving that match.
-      this.listeners
-          .columnMap()
-          .forEach(
-              (scope, column) -> {
-                if (scope.isInstance(event.getPlayer())) {
-                  // For each filter in this scope
-                  column.forEach(
-                      (filter, filterListeners) -> {
-                        // If player joined very recently, they may not have a cached response yet
-                        final Boolean response = this.lastResponses.get(filter, event.getPlayer());
-                        if (response != null && response) {
-                          filterListeners.fall.forEach(
-                              listener ->
-                                  dispatch(
-                                      (FilterListener<? super MatchPlayer>) listener,
-                                      filter,
-                                      event.getPlayer(),
-                                      false));
-                        }
-                      });
-                }
-              });
+      this.listeners.columnMap().forEach((scope, column) -> {
+        if (scope.isInstance(event.getPlayer())) {
+          // For each filter in this scope
+          column.forEach((filter, filterListeners) -> {
+            // If player joined very recently, they may not have a cached response yet
+            final Boolean response = this.lastResponses.get(filter, event.getPlayer());
+            if (response != null && response) {
+              filterListeners.fall.forEach(listener -> dispatch(
+                  (FilterListener<? super MatchPlayer>) listener,
+                  filter,
+                  event.getPlayer(),
+                  false));
+            }
+          });
+        }
+      });
 
       if (MISC_UTILS.yield(event)) {
         // Wait until after the event to remove them, in case they get invalidated during the event.
         dirtySet.remove(event.getPlayer());
         this.lastResponses.columnKeySet().remove(event.getPlayer());
       } else {
-        // Clean up at the start of the next tick. Most platforms don't include event.yield()
-        nonSportCleanUpSet.add(event.getPlayer());
+        var matchPlayer = event.getPlayer();
+        // Clean up next time tasks are handled. Most platforms don't include event.yield()
+        NMS_HACKS.postToMainThread(PGM.get(), true, () -> {
+          this.dirtySet.remove(matchPlayer);
+          this.lastResponses.columnKeySet().remove(matchPlayer);
+        });
       }
     }
   }

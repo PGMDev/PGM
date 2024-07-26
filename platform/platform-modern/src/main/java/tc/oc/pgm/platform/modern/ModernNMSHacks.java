@@ -7,7 +7,10 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -20,6 +23,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftChunk;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftFirework;
@@ -142,11 +146,6 @@ public class ModernNMSHacks implements NMSHacks {
 
   @Override
   public boolean canMineBlock(BlockMaterialData blockMaterial, Player player) {
-    // Alternative NMS method
-    // var nmsPlayer = ((CraftPlayer) player).getHandle();
-    // var nmsBlock = CraftMagicNumbers.getBlock(blockMaterial.getItemType());
-    // return nmsPlayer.hasCorrectToolForDrops(nmsBlock.defaultBlockState());
-
     return ((ModernBlockMaterialData) blockMaterial)
         .getBlock()
         .isPreferredTool(player.getInventory().getItemInMainHand());
@@ -164,7 +163,16 @@ public class ModernNMSHacks implements NMSHacks {
 
   @Override
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
-    Bukkit.getServer().getScheduler().runTask(plugin, task);
+    DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
+    server.tell(new TickTask(server.getTickCount(), () -> {
+      try {
+        task.run();
+      } catch (Throwable t) {
+        plugin
+            .getLogger()
+            .log(Level.SEVERE, "Exception running task from plugin " + plugin.getName(), t);
+      }
+    }));
   }
 
   @Override

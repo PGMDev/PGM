@@ -191,7 +191,7 @@ public class NMSHacksSportPaper implements NMSHacks {
 
   @Override
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
-    Bukkit.getServer().postToMainThread(plugin, true, task);
+    Bukkit.getServer().postToMainThread(plugin, priority, task);
   }
 
   @Override
