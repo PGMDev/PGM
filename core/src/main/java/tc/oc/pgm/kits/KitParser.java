@@ -65,11 +65,14 @@ import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class KitParser {
+  private static final Set<String> ITEM_TYPES = Set.of("item", "book", "head", "firework");
+
   protected final MapFactory factory;
   protected final Set<Kit> kits = new HashSet<>();
 
@@ -244,7 +247,7 @@ public abstract class KitParser {
     Map<Slot, ItemStack> slotItems = Maps.newHashMap();
     List<ItemStack> freeItems = new ArrayList<>();
 
-    for (Element itemEl : el.getChildren()) {
+    for (Element itemEl : ((InheritingElement) el).getChildren(ITEM_TYPES)) {
       ItemStack item = this.parseItemStack(itemEl);
 
       if (item != null) {
@@ -271,22 +274,13 @@ public abstract class KitParser {
   }
 
   public @Nullable ItemStack parseItemStack(Element el) throws InvalidXMLException {
-    switch (el.getName()) {
-      case "item":
-        return parseItem(el, true);
-
-      case "book":
-        return parseBook(el);
-
-      case "head":
-        return parseHead(el);
-
-      case "firework":
-        return parseFirework(el);
-
-      default:
-        return null;
-    }
+    return switch (el.getName()) {
+      case "item" -> parseItem(el, true);
+      case "book" -> parseBook(el);
+      case "head" -> parseHead(el);
+      case "firework" -> parseFirework(el);
+      default -> null;
+    };
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
