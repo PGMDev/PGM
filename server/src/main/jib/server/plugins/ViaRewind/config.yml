@@ -1,8 +1,0 @@
-# Disable showing cooldown indicator to 1.8 clients
-cooldown-indicator: DISABLED
-
-# Simulate adventure mode for 1.7 clients
-replace-adventure: true
-
-# Simulate unknown particles to 1.8 clients
-replace-particles: true

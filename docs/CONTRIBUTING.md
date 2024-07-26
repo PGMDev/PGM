@@ -50,7 +50,6 @@ mvn spotless:apply
 4. Use one of two options to compile a new version with your changes.
 ```bash
 mvn clean install # creates .jar in target/ which you would copy to your plugins folder
-mvn -pl server clean compile jib:dockerBuild # builds a Docker container named "pgm" which is a full server
 ```
 
 5. Commit your changes, using the `-S` and `-s` tag to [sign](https://help.github.com/en/github/authenticating-to-github/signing-commits) and [certify](https://developercertificate.org) the origin of your code.

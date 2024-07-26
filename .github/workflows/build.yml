@@ -2,10 +2,14 @@ name: Build
 on:
   pull_request:
   workflow_dispatch:
+  push:
+    branches:
+      - dev
 jobs:
   build:
     permissions:
       contents: read
+      packages: write
     runs-on: ubuntu-latest
     steps:
     - id: checkout
@@ -21,8 +25,13 @@ jobs:
         distribution: temurin
         cache: maven
     - id: build
-      name: Build
-      run: mvn install
+      name: ${{ (github.repository == 'PGMDev/PGM' && github.ref == 'refs/heads/dev') && 'Deploy JAR' || 'Build' }}
+      run: |
+        mvn --batch-mode ${{ (github.repository == 'PGMDev/PGM' && github.ref == 'refs/heads/dev') && 
+          'deploy' ||
+          'install' }}
+      env:
+        GITHUB_TOKEN: ${{ (github.repository == 'PGMDev/PGM' && github.ref == 'refs/heads/dev') && secrets.GITHUB_TOKEN || '' }}
     - id: artifact
       name: Upload Jar
       uses: actions/upload-artifact@v4
