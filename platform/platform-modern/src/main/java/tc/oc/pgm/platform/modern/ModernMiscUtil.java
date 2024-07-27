@@ -92,10 +92,12 @@ public class ModernMiscUtil implements MiscUtils {
 
   @Override
   public int getWorldDataVersion(Path levelDatPath) {
+    // Constant from LevelStorageSource, sounds way too high (104mb) but better than unbounded
+    long MAX_HEAP = 104857600L;
     try {
-      var rootLevelTag = NbtIo.readCompressed(levelDatPath, NbtAccounter.unlimitedHeap());
-      return NbtUtils.getDataVersion(rootLevelTag.getCompound("Data"), -1);
-    } catch (Exception ignored) {
+      var root = NbtIo.readCompressed(levelDatPath, NbtAccounter.create(MAX_HEAP));
+      return NbtUtils.getDataVersion(root.getCompound("Data"), -1);
+    } catch (Throwable ignored) {
       // In case we cannot read the level.dat file, return a constant
       return -1;
     }
