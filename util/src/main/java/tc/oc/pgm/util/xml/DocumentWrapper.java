@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.xml;
 
-import com.google.common.collect.Sets;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.jdom2.Attribute;
@@ -13,7 +12,7 @@ import org.jdom2.Namespace;
 public class DocumentWrapper extends Document {
 
   private static final Set<String> IGNORED =
-      Sets.newHashSet("name", "variant", "tutorial", "edition");
+      Set.of("constants", "edition", "name", "tutorial", "variant");
 
   private boolean visitingAllowed = true;
 
