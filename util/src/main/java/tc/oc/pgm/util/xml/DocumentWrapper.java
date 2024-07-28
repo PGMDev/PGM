@@ -12,7 +12,8 @@ import org.jdom2.Namespace;
 
 public class DocumentWrapper extends Document {
 
-  private static final Set<String> IGNORED = Sets.newHashSet("variant", "tutorial", "edition");
+  private static final Set<String> IGNORED =
+      Sets.newHashSet("name", "variant", "tutorial", "edition");
 
   private boolean visitingAllowed = true;
 
@@ -57,15 +58,16 @@ public class DocumentWrapper extends Document {
         unvisited.accept(Node.fromNullable(attribute));
     }
 
+    boolean canIgnore = el == getRootElement();
+
     for (int i = 0; i < el.getContentSize(); i++) {
       Content c = el.getContent(i);
-      if (!(c instanceof InheritingElement)) continue;
-      InheritingElement child = (InheritingElement) c;
+      if (!(c instanceof InheritingElement child)) continue;
+      if (child.getNamespace() != Namespace.NO_NAMESPACE) continue;
+      if (canIgnore && IGNORED.contains(child.getName())) continue;
 
-      if (child.getNamespace() == Namespace.NO_NAMESPACE && !IGNORED.contains(child.getName())) {
-        if (!child.wasVisited()) unvisited.accept(Node.fromNullable(child));
-        else checkVisited(child, unvisited);
-      }
+      if (!child.wasVisited()) unvisited.accept(Node.fromNullable(child));
+      else checkVisited(child, unvisited);
     }
   }
 

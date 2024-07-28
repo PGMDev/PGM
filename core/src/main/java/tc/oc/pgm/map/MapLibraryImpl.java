@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
@@ -29,7 +30,6 @@ import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 
 public class MapLibraryImpl implements MapLibrary {
@@ -159,7 +159,7 @@ public class MapLibraryImpl implements MapLibrary {
           // Finally load all the maps
           try (Stream<MapSource> stream =
               mapSources.stream().flatMap(Function.identity()).parallel().unordered()) {
-            stream.forEach(s -> this.loadMapSafe(s, null));
+            stream.forEach(s -> this.loadMapSafe(s, null, null));
           }
         })
         .thenRunAsync(() -> logMapSuccess(oldFail, oldOk))
@@ -187,19 +187,23 @@ public class MapLibraryImpl implements MapLibrary {
       }
 
       logger.info(ChatColor.GREEN + "XML changes detected, reloading");
-      return loadMapSafe(info.getSource(), info.getId());
+      return loadMapSafe(info.getSource(), null, info.getId());
     });
   }
 
-  private MapContext loadMap(MapSource source, @Nullable String mapId) throws MapException {
+  private MapContext loadMap(
+      MapSource source, @Nullable Map<String, MapInfo.VariantInfo> variants, @Nullable String mapId)
+      throws MapException {
     final MapContext context;
-    try (final MapFactory factory = new MapFactoryImpl(logger, source, includes)) {
+    try (final MapFactory factory = new MapFactoryImpl(logger, source, variants, includes)) {
       context = factory.load();
 
       // We're not loading a specific map id, and we're not on a variant, load variants
-      if (mapId == null && DEFAULT_VARIANT.equals(source.getVariantId())) {
-        for (String variant : factory.getVariants()) {
-          loadMapSafe(source.asVariant(variant), null);
+      if (variants == null && mapId == null && DEFAULT_VARIANT.equals(source.getVariantId())) {
+        var foundVariants = context.getInfo().getVariants();
+        for (String variantId : foundVariants.keySet()) {
+          if (!DEFAULT_VARIANT.equals(variantId))
+            loadMapSafe(source.asVariant(variantId), foundVariants, null);
         }
       }
 
@@ -220,7 +224,7 @@ public class MapLibraryImpl implements MapLibrary {
 
     MapInfo info = context.getInfo();
     // Only if from a supported version, add it to our library
-    if (info.getServerVersion().contains(Platform.MINECRAFT_VERSION)) {
+    if (info.isServerSupported()) {
       maps.merge(
           info.getId(), info, (m1, m2) -> m2.getVersion().isOlderThan(m1.getVersion()) ? m1 : m2);
     }
@@ -229,9 +233,12 @@ public class MapLibraryImpl implements MapLibrary {
     return context;
   }
 
-  private @Nullable MapContext loadMapSafe(MapSource source, @Nullable String mapId) {
+  private @Nullable MapContext loadMapSafe(
+      MapSource source,
+      @Nullable Map<String, MapInfo.VariantInfo> variants,
+      @Nullable String mapId) {
     try {
-      return loadMap(source, mapId);
+      return loadMap(source, variants, mapId);
     } catch (MapException e) {
       logMapError(e);
     }

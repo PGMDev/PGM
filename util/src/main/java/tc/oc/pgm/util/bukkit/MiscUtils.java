@@ -50,5 +50,5 @@ public interface MiscUtils {
 
   double getArrowDamage(Arrow arrow);
 
-  int getWorldDataVersion(Path levelDatPath);
+  int getWorldDataVersion(Path levelDat);
 }

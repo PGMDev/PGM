@@ -82,12 +82,13 @@ public class MapInfoImpl implements MapInfo {
   protected Collection<Integer> players = ImmutableList.of();
   protected SoftReference<MapContext> context = null;
 
-  public MapInfoImpl(MapSource source, Element root) throws InvalidXMLException {
+  public MapInfoImpl(MapSource source, @Nullable Map<String, VariantInfo> variants, Element root)
+      throws InvalidXMLException {
     this.source = source;
     this.variantId = source.getVariantId();
-    this.variants = createVariantMap(root);
+    this.variants = variants == null ? createVariantMap(root) : variants;
 
-    VariantInfo variant = variants.get(variantId);
+    VariantInfo variant = this.variants.get(variantId);
     if (variant == null) throw new InvalidXMLException("Could not find variant definition", root);
 
     this.worldFolder = variant.getWorld();
@@ -121,13 +122,14 @@ public class MapInfoImpl implements MapInfo {
 
   @NotNull
   private Map<String, VariantInfo> createVariantMap(Element root) throws InvalidXMLException {
-    ImmutableMap.Builder<String, VariantInfo> variants = ImmutableMap.builder();
+    Map<String, VariantInfo> variants = new LinkedHashMap<>();
     variants.put(DEFAULT_VARIANT, new VariantData(root, null));
     for (Element el : root.getChildren("variant")) {
       VariantData vd = new VariantData(root, el);
-      variants.put(vd.variantId, vd);
+      if (variants.put(vd.variantId, vd) != null)
+        throw new InvalidXMLException("Duplicate variant ids are not allowed", el);
     }
-    return variants.build();
+    return ImmutableMap.copyOf(variants);
   }
 
   @Override
@@ -386,10 +388,10 @@ public class MapInfoImpl implements MapInfo {
         this.mapName = name;
         this.world = null;
       } else {
-        this.variantId = Node.fromRequiredAttr(variantEl, "id").getValue();
-        if (DEFAULT_VARIANT.equals(variantId)) {
-          throw new InvalidXMLException("Default variant is not allowed", variantEl);
-        }
+        this.variantId = XMLUtils.parseRequiredId(variantEl);
+        if (DEFAULT_VARIANT.equals(variantId))
+          throw new InvalidXMLException("Variant id must not be 'default'", variantEl);
+
         boolean override = XMLUtils.parseBoolean(Node.fromAttr(variantEl, "override"), false);
         this.mapName = (override ? "" : name + ": ") + variantEl.getTextNormalize();
         this.world = variantEl.getAttributeValue("world");
@@ -398,18 +400,19 @@ public class MapInfoImpl implements MapInfo {
         if (variantSlug != null) slug = variantSlug;
         else if (slug != null) slug += "_" + variantId;
 
-        Node minVerVariant = Node.fromAttr(variantEl, "min-server-version");
-        if (minVerVariant != null) minVer = minVerVariant;
-
-        Node maxVerVariant = Node.fromAttr(variantEl, "max-server-version");
-        if (maxVerVariant != null) minVer = minVerVariant;
+        minVer = fallback(Node.fromAttr(variantEl, "min-server-version"), minVer);
+        maxVer = fallback(Node.fromAttr(variantEl, "max-server-version"), maxVer);
       }
       this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
 
       this.serverVersions = XMLUtils.parseClosedRange(
-          minVer,
+          fallback(minVer, maxVer),
           parseOrInferMinimumVersion(source, minVer),
           XMLUtils.parseSemanticVersion(maxVer));
+    }
+
+    static <T> T fallback(T obj, T fallback) {
+      return obj != null ? obj : fallback;
     }
 
     @Override

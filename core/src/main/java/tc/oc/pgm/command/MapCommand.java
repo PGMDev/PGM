@@ -357,13 +357,19 @@ public final class MapCommand {
       if (map.getVariantId().equals(variant.getVariantId())) {
         variantComp = text(variant.getVariantId(), null, TextDecoration.UNDERLINED)
             .hoverEvent(showText(translatable("map.info.variants.current", NamedTextColor.GRAY)));
-      } else {
+      } else if (variant.isServerSupported()) {
         variantComp = text(variant.getVariantId())
             .hoverEvent(showText(translatable(
                 "command.maps.hover",
                 NamedTextColor.GRAY,
                 text(variant.getMapName(), NamedTextColor.GOLD))))
             .clickEvent(runCommand("/map " + variant.getMapName()));
+      } else {
+        variantComp = text(variant.getVariantId(), NamedTextColor.RED)
+            .hoverEvent(showText(translatable(
+                "command.maps.unsupported",
+                NamedTextColor.GRAY,
+                text(variant.getMapName(), NamedTextColor.GOLD))));
       }
       text.append(variantComp).append(text(" "));
     }

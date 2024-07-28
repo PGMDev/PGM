@@ -3,18 +3,16 @@ package tc.oc.pgm.map;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
-import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
+import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapSource;
@@ -36,17 +34,16 @@ import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.xml.DocumentWrapper;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
-import tc.oc.pgm.util.xml.XMLUtils;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?>>
     implements MapFactory {
 
   private final Logger logger;
   private final MapSource source;
+  private final Map<String, MapInfo.VariantInfo> variants;
   private final MapIncludeProcessor includes;
   private Document document;
   private MapInfoImpl info;
@@ -55,11 +52,16 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   private KitParser kits;
   private FeatureDefinitionContext features;
 
-  public MapFactoryImpl(Logger logger, MapSource source, MapIncludeProcessor includes) {
+  public MapFactoryImpl(
+      Logger logger,
+      MapSource source,
+      Map<String, MapInfo.VariantInfo> variants,
+      MapIncludeProcessor includes) {
     super(Modules.MAP, Modules.MAP_DEPENDENCY_ONLY); // Don't copy, avoid N factory copies
     this.logger =
         ClassLogger.get(assertNotNull(logger), getClass(), assertNotNull(source).getId());
     this.source = source;
+    this.variants = variants;
     this.includes = includes;
   }
 
@@ -77,10 +79,10 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     try {
       document = MapFilePreprocessor.getDocument(source, includes);
 
-      info = new MapInfoImpl(source, document.getRootElement());
+      info = new MapInfoImpl(source, variants, document.getRootElement());
 
       // We're not loading this map, return a dummy map context to allow variants to load, if needed
-      if (!info.getServerVersion().contains(Platform.MINECRAFT_VERSION)) {
+      if (!info.isServerSupported()) {
         return new MapContextImpl(info, List.of());
       }
 
@@ -176,20 +178,6 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
       features = new FeatureDefinitionContext();
     }
     return features;
-  }
-
-  @Override
-  public Collection<String> getVariants() throws InvalidXMLException {
-    Set<String> collect = new HashSet<>();
-    for (Element variant : document.getRootElement().getChildren("variant")) {
-      String id = XMLUtils.parseRequiredId(variant);
-      if ("default".equals(id))
-        throw new InvalidXMLException("Variant id must not be 'default'", variant);
-
-      if (!collect.add(id))
-        throw new InvalidXMLException("Duplicate variant ids are not allowed", variant);
-    }
-    return collect;
   }
 
   @Override
