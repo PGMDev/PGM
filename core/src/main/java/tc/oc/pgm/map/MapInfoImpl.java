@@ -398,6 +398,7 @@ public class MapInfoImpl implements MapInfo {
 
         String variantSlug = variantEl.getAttributeValue("slug");
         if (variantSlug != null) slug = variantSlug;
+        else if (override) slug = null;
         else if (slug != null) slug += "_" + variantId;
 
         minVer = fallback(Node.fromAttr(variantEl, "min-server-version"), minVer);
