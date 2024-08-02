@@ -14,6 +14,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
@@ -35,6 +36,11 @@ public class FlagModule implements MapModule<FlagMatchModule> {
     this.posts = ImmutableList.copyOf(posts);
     this.nets = ImmutableList.copyOf(nets);
     this.flags = ImmutableList.copyOf(flags);
+  }
+
+  @Override
+  public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+    return ImmutableList.of(FilterMatchModule.class);
   }
 
   @Override
