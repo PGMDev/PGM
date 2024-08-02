@@ -4,8 +4,11 @@ import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.google.gson.JsonObject;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import net.minecraft.server.v1_8_R3.EntityPotion;
+import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -31,6 +34,8 @@ import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = SPORTPAPER, priority = HIGH)
 public class SpMiscUtil implements MiscUtils {
+  private static final byte NBT_TAG_ANY_NUMERIC = 99;
+
   @Override
   public boolean yield(Event event) {
     event.yield();
@@ -82,5 +87,18 @@ public class SpMiscUtil implements MiscUtils {
   @Override
   public double getArrowDamage(Arrow arrow) {
     return arrow.spigot().getDamage();
+  }
+
+  @Override
+  public int getWorldDataVersion(Path levelDat) {
+    try {
+      var dataTag = NBTCompressedStreamTools.a(Files.newInputStream(levelDat)).getCompound("Data");
+      return dataTag.hasKeyOfType("DataVersion", NBT_TAG_ANY_NUMERIC)
+          ? dataTag.getInt("DataVersion")
+          : -1;
+    } catch (Throwable ignored) {
+      // In case we cannot read the level.dat file, return a constant
+      return -1;
+    }
   }
 }

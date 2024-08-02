@@ -3,7 +3,11 @@ package tc.oc.pgm.platform.modern;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.google.gson.JsonObject;
+import java.nio.file.Path;
 import java.util.List;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -84,5 +88,18 @@ public class ModernMiscUtil implements MiscUtils {
   @Override
   public double getArrowDamage(Arrow arrow) {
     return arrow.getDamage();
+  }
+
+  @Override
+  public int getWorldDataVersion(Path levelDat) {
+    // Constant from LevelStorageSource, sounds way too high (104mb) but better than unbounded
+    long MAX_HEAP = 104857600L;
+    try {
+      var root = NbtIo.readCompressed(levelDat, NbtAccounter.create(MAX_HEAP));
+      return NbtUtils.getDataVersion(root.getCompound("Data"), -1);
+    } catch (Throwable ignored) {
+      // In case we cannot read the level.dat file, return a constant
+      return -1;
+    }
   }
 }

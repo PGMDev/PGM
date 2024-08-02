@@ -4,11 +4,13 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Range;
 import java.lang.ref.SoftReference;
 import java.time.LocalDate;
 import java.util.*;
@@ -56,6 +58,7 @@ public class MapInfoImpl implements MapInfo {
   private final Map<String, VariantInfo> variants;
 
   private final String worldFolder;
+  private final Range<Version> serverVersion;
   private final Version proto;
   private final Version version;
   private final Phase phase;
@@ -79,15 +82,17 @@ public class MapInfoImpl implements MapInfo {
   protected Collection<Integer> players = ImmutableList.of();
   protected SoftReference<MapContext> context = null;
 
-  public MapInfoImpl(MapSource source, Element root) throws InvalidXMLException {
+  public MapInfoImpl(MapSource source, @Nullable Map<String, VariantInfo> variants, Element root)
+      throws InvalidXMLException {
     this.source = source;
     this.variantId = source.getVariantId();
-    this.variants = createVariantMap(root);
+    this.variants = variants == null ? createVariantMap(root) : variants;
 
-    VariantInfo variant = variants.get(variantId);
+    VariantInfo variant = this.variants.get(variantId);
     if (variant == null) throw new InvalidXMLException("Could not find variant definition", root);
 
     this.worldFolder = variant.getWorld();
+    this.serverVersion = variant.getServerVersions();
 
     this.name = variant.getMapName();
     this.normalizedName = StringUtils.normalize(name);
@@ -97,37 +102,34 @@ public class MapInfoImpl implements MapInfo {
     this.proto = assertNotNull(XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")));
     this.version =
         assertNotNull(XMLUtils.parseSemanticVersion(Node.fromRequiredChildOrAttr(root, "version")));
-    this.description =
-        assertNotNull(
-            Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize());
+    this.description = assertNotNull(
+        Node.fromRequiredChildOrAttr(root, "objective", "description").getValueNormalize());
     this.created = XMLUtils.parseDate(Node.fromChildOrAttr(root, "created"));
     this.authors = parseContributors(root, "author");
     this.contributors = parseContributors(root, "contributor");
     this.rules = parseRules(root);
-    this.difficulty =
-        XMLUtils.parseEnum(
-                Node.fromLastChildOrAttr(root, "difficulty"), Difficulty.class, Difficulty.NORMAL)
-            .ordinal();
+    this.difficulty = XMLUtils.parseEnum(
+            Node.fromLastChildOrAttr(root, "difficulty"), Difficulty.class, Difficulty.NORMAL)
+        .ordinal();
     this.world = parseWorld(root);
     this.gamemode = XMLUtils.parseFormattedText(Node.fromLastChildOrAttr(root, "game"));
     this.gamemodes = parseGamemodes(root);
     this.phase =
         XMLUtils.parseEnum(Node.fromLastChildOrAttr(root, "phase"), Phase.class, Phase.PRODUCTION);
-    this.friendlyFire =
-        XMLUtils.parseBoolean(
-            Node.fromLastChildOrAttr(root, "friendlyfire", "friendly-fire"), false);
+    this.friendlyFire = XMLUtils.parseBoolean(
+        Node.fromLastChildOrAttr(root, "friendlyfire", "friendly-fire"), false);
   }
 
   @NotNull
-  private static Map<String, VariantInfo> createVariantMap(Element root)
-      throws InvalidXMLException {
-    ImmutableMap.Builder<String, VariantInfo> variants = ImmutableMap.builder();
+  private Map<String, VariantInfo> createVariantMap(Element root) throws InvalidXMLException {
+    Map<String, VariantInfo> variants = new LinkedHashMap<>();
     variants.put(DEFAULT_VARIANT, new VariantData(root, null));
     for (Element el : root.getChildren("variant")) {
       VariantData vd = new VariantData(root, el);
-      variants.put(vd.variantId, vd);
+      if (variants.put(vd.variantId, vd) != null)
+        throw new InvalidXMLException("Duplicate variant ids are not allowed", el);
     }
-    return variants.build();
+    return ImmutableMap.copyOf(variants);
   }
 
   @Override
@@ -143,6 +145,11 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public Map<String, VariantInfo> getVariants() {
     return variants;
+  }
+
+  @Override
+  public Range<Version> getServerVersion() {
+    return serverVersion;
   }
 
   @Override
@@ -349,44 +356,64 @@ public class MapInfoImpl implements MapInfo {
       // If the map defines no game-modes manually, derive them from map tags, sorted by auxiliary
       // last.
       if (this.gamemodes.isEmpty()) {
-        this.gamemodes =
-            this.tags.stream()
-                .filter(MapTag::isGamemode)
-                .sorted(
-                    Comparator.comparing(MapTag::isAuxiliary)
-                        .thenComparing(Comparator.naturalOrder()))
-                .map(MapTag::getGamemode)
-                .collect(StreamUtils.toImmutableList());
+        this.gamemodes = this.tags.stream()
+            .filter(MapTag::isGamemode)
+            .sorted(
+                Comparator.comparing(MapTag::isAuxiliary).thenComparing(Comparator.naturalOrder()))
+            .map(MapTag::getGamemode)
+            .collect(StreamUtils.toImmutableList());
       }
     }
     this.context = new SoftReference<>(context);
   }
 
-  private static class VariantData implements VariantInfo {
+  private class VariantData implements VariantInfo {
+    // taken from https://minecraft.wiki/w/Data_version#Java_Edition
+    private static final int MAP_DATA_VERSION_1_13 = 1519;
+    private static final Version VERSION_1_13 = new Version(1, 13, 0);
     private final String variantId;
     private final String mapName;
     private final String mapId;
     private final String world;
+    private final Range<Version> serverVersions;
 
     public VariantData(Element root, @Nullable Element variantEl) throws InvalidXMLException {
       String name = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
       String slug = assertNotNull(root).getChildTextNormalize("slug");
+      Node minVer = Node.fromAttr(root, "min-server-version");
+      Node maxVer = Node.fromAttr(root, "max-server-version");
 
       if (variantEl == null) {
         this.variantId = DEFAULT_VARIANT;
         this.mapName = name;
         this.world = null;
       } else {
-        this.variantId = Node.fromRequiredAttr(variantEl, "id").getValue();
-        if (DEFAULT_VARIANT.equals(variantId)) {
-          throw new InvalidXMLException("Default variant is not allowed", variantEl);
-        }
+        this.variantId = XMLUtils.parseRequiredId(variantEl);
+        if (DEFAULT_VARIANT.equals(variantId))
+          throw new InvalidXMLException("Variant id must not be 'default'", variantEl);
+
         boolean override = XMLUtils.parseBoolean(Node.fromAttr(variantEl, "override"), false);
         this.mapName = (override ? "" : name + ": ") + variantEl.getTextNormalize();
         this.world = variantEl.getAttributeValue("world");
-        if (slug != null) slug += "_" + variantId;
+
+        String variantSlug = variantEl.getAttributeValue("slug");
+        if (variantSlug != null) slug = variantSlug;
+        else if (override) slug = null;
+        else if (slug != null) slug += "_" + variantId;
+
+        minVer = fallback(Node.fromAttr(variantEl, "min-server-version"), minVer);
+        maxVer = fallback(Node.fromAttr(variantEl, "max-server-version"), maxVer);
       }
       this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
+
+      this.serverVersions = XMLUtils.parseClosedRange(
+          fallback(minVer, maxVer),
+          parseOrInferMinimumVersion(source, minVer),
+          XMLUtils.parseSemanticVersion(maxVer));
+    }
+
+    static <T> T fallback(T obj, T fallback) {
+      return obj != null ? obj : fallback;
     }
 
     @Override
@@ -407,6 +434,25 @@ public class MapInfoImpl implements MapInfo {
     @Override
     public String getWorld() {
       return world;
+    }
+
+    @Override
+    public Range<Version> getServerVersions() {
+      return serverVersions;
+    }
+
+    @Nullable
+    private Version parseOrInferMinimumVersion(MapSource source, @Nullable Node minVer)
+        throws InvalidXMLException {
+      if (minVer != null) return XMLUtils.parseSemanticVersion(minVer);
+      /* Infer the map version from the DataVersion field in level.dat. If 1.13+, set that as
+      the min version to avoid legacy servers crashing when loading the chunks. */
+      var sourceDir = source.getAbsoluteDir();
+      var levelDat = (world != null ? sourceDir.resolve(world) : sourceDir).resolve("level.dat");
+
+      var mapDataVersion = MISC_UTILS.getWorldDataVersion(levelDat);
+      if (mapDataVersion >= MAP_DATA_VERSION_1_13) return VERSION_1_13;
+      return null;
     }
   }
 }
