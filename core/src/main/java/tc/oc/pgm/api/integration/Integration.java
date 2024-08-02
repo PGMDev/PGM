@@ -79,6 +79,10 @@ public final class Integration {
     return VANISH.get().setVanished(player, vanish, quiet);
   }
 
+  public static boolean isDisguised(Player player) {
+    return isVanished(player) || getNick(player) != null;
+  }
+
   // No-op Implementations
 
   private static class NoopFriendIntegration implements FriendIntegration {

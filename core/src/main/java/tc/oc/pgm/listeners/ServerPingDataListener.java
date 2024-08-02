@@ -46,19 +46,17 @@ public class ServerPingDataListener implements Listener {
     this.logger = ClassLogger.get(assertNotNull(parentLogger), ServerPingDataListener.class);
     this.ready = new AtomicBoolean();
     this.legacySportPaper = new AtomicBoolean();
-    this.matchCache =
-        CacheBuilder.newBuilder()
-            .weakKeys()
-            .expireAfterWrite(5L, TimeUnit.SECONDS)
-            .build(
-                new CacheLoader<Match, JsonObject>() {
-                  @Override
-                  public JsonObject load(Match match) throws Exception {
-                    JsonObject jsonObject = new JsonObject();
-                    serializeMatch(match, jsonObject);
-                    return jsonObject;
-                  }
-                });
+    this.matchCache = CacheBuilder.newBuilder()
+        .weakKeys()
+        .expireAfterWrite(5L, TimeUnit.SECONDS)
+        .build(new CacheLoader<Match, JsonObject>() {
+          @Override
+          public JsonObject load(Match match) throws Exception {
+            JsonObject jsonObject = new JsonObject();
+            serializeMatch(match, jsonObject);
+            return jsonObject;
+          }
+        });
   }
 
   @EventHandler
@@ -74,25 +72,21 @@ public class ServerPingDataListener implements Listener {
     Iterator<Player> playerSample = event.iterator();
     while (playerSample.hasNext()) {
       Player player = playerSample.next();
-      if (Integration.isVanished(player)) {
+      if (Integration.isDisguised(player)) {
         playerSample.remove();
       }
     }
 
     try {
       JsonObject root = MISC_UTILS.getServerListExtra(event, PGM.get());
-      this.matchManager
-          .getMatches()
-          .forEachRemaining(
-              match -> {
-                String matchId = match.getId();
-                try {
-                  root.add(matchId, this.matchCache.get(match));
-                } catch (ExecutionException e) {
-                  this.logger.log(
-                      Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
-                }
-              });
+      this.matchManager.getMatches().forEachRemaining(match -> {
+        String matchId = match.getId();
+        try {
+          root.add(matchId, this.matchCache.get(match));
+        } catch (ExecutionException e) {
+          this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
+        }
+      });
     } catch (NoSuchMethodError ex) {
       legacySportPaper.compareAndSet(false, true);
     }
