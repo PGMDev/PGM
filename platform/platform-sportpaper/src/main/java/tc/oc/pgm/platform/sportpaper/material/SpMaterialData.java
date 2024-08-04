@@ -66,7 +66,7 @@ class SpMaterialData implements LegacyMaterialData, ItemMaterialData, BlockMater
 
   @Override
   public int encoded() {
-    return material.getId() + (((int) damage) << 12);
+    return SpEncodeUtil.encode(material, damage);
   }
 
   @Override

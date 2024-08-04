@@ -5,12 +5,15 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.util.bukkit.Effects;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = PAPER, minVersion = "1.20.6")
@@ -68,5 +71,12 @@ public class ModernEffects implements Effects {
   @Override
   public void explosion(Player player, Location location) {
     player.spawnParticle(Particle.EXPLOSION, location, 1, 0d, 0d, 0d, 0, null, true);
+  }
+
+  @Override
+  public void blockBreak(Location location, BlockMaterialData material) {
+    location
+        .getWorld()
+        .playEffect(location, Effect.STEP_SOUND, ((ModernBlockMaterialData) material).getBlock());
   }
 }

@@ -2,7 +2,6 @@ package tc.oc.pgm.util.bukkit;
 
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -26,7 +25,5 @@ public interface Effects {
 
   void explosion(Player player, Location location);
 
-  default void blockBreak(Location location, BlockMaterialData material) {
-    location.getWorld().playEffect(location, Effect.STEP_SOUND, material.encoded());
-  }
+  void blockBreak(Location location, BlockMaterialData material);
 }
