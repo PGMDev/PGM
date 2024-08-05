@@ -13,6 +13,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
+import tc.oc.pgm.api.map.VariantInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.rotation.MapPoolManager;
 
@@ -90,17 +91,17 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   private static MapInfo getVariant(MapLibrary maps, MapInfo map, List<String> variantIds) {
     if (variantIds == null || !map.getVariantId().equals(DEFAULT_VARIANT)) return map;
 
-    Map<String, ? extends MapInfo.VariantInfo> variants = map.getVariants();
+    Map<String, ? extends VariantInfo> variants = map.getVariants();
     for (String varId : variantIds) {
-      MapInfo.VariantInfo variant = variants.get(varId);
+      VariantInfo variant = variants.get(varId);
       if (variant == null) continue;
-      MapInfo variantMap = maps.getMap(variant.getMapId());
+      MapInfo variantMap = maps.getMap(variant.getId());
       if (variantMap != null) {
         return variantMap;
       } else {
         PGM.get()
             .getLogger()
-            .warning("[MapPool] Failed to get map " + variant.getMapId() + ". Moving on...");
+            .warning("[MapPool] Failed to get map " + variant.getId() + ". Moving on...");
       }
     }
     return map;
@@ -152,7 +153,8 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
    *
    * @param match The match that is currently ending
    */
-  public void unloadPool(Match match) {};
+  public void unloadPool(Match match) {}
+  ;
 
   @Override
   public int compareTo(MapPool o) {
