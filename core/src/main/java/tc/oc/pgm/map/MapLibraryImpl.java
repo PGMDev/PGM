@@ -53,7 +53,7 @@ public class MapLibraryImpl implements MapLibrary {
   @Override
   public MapInfo getMap(String idOrName) {
     // Exact match
-    MapInfo bySlug = maps.get(StringUtils.slugify(idOrName));
+    MapInfo bySlug = getMapById(StringUtils.slugify(idOrName));
     if (bySlug != null && !bySlug.hasCustomId()) return bySlug;
 
     // Fuzzy match
@@ -61,6 +61,11 @@ public class MapLibraryImpl implements MapLibrary {
         StringUtils.normalize(idOrName), maps.values(), MapInfo::getNormalizedName);
 
     return byName != null ? byName : bySlug;
+  }
+
+  @Override
+  public @Nullable MapInfo getMapById(String id) {
+    return maps.get(id);
   }
 
   @Override
@@ -169,7 +174,7 @@ public class MapLibraryImpl implements MapLibrary {
   @Override
   public CompletableFuture<MapContext> loadExistingMap(String id) {
     return CompletableFuture.supplyAsync(() -> {
-      final MapInfo info = maps.get(id);
+      final MapInfo info = getMapById(id);
       if (info == null) {
         throw new RuntimeException(
             new MapMissingException(id, "Unable to find map from id (was it deleted?)"));

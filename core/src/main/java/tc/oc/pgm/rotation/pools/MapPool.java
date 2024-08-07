@@ -95,7 +95,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     for (String varId : variantIds) {
       VariantInfo variant = variants.get(varId);
       if (variant == null) continue;
-      MapInfo variantMap = maps.getMap(variant.getId());
+      MapInfo variantMap = maps.getMapById(variant.getId());
       if (variantMap != null) {
         return variantMap;
       } else {
@@ -154,7 +154,6 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
    * @param match The match that is currently ending
    */
   public void unloadPool(Match match) {}
-  ;
 
   @Override
   public int compareTo(MapPool o) {

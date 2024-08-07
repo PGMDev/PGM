@@ -409,7 +409,7 @@ public final class MapCommand {
           .append(text(" ["))
           .append(translatable("map.info.xml.edit"))
           .append(text("]"))
-          .clickEvent(runCommand("/showxml " + map.getId()))
+          .clickEvent(runCommand("/showxml " + map.getName()))
           .hoverEvent(showText(translatable("map.info.xml.edit.tip", NamedTextColor.AQUA))));
     }
     return xmlText;
