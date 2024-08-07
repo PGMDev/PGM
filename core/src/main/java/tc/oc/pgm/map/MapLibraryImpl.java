@@ -23,6 +23,7 @@ import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.VariantInfo;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -51,16 +52,20 @@ public class MapLibraryImpl implements MapLibrary {
 
   @Override
   public MapInfo getMap(String idOrName) {
-
     // Exact match
-    MapInfo map = maps.get(StringUtils.slugify(idOrName));
-    if (map == null) {
-      // Fuzzy match
-      map = StringUtils.bestFuzzyMatch(
-          StringUtils.normalize(idOrName), maps.values(), MapInfo::getNormalizedName);
-    }
+    MapInfo bySlug = getMapById(StringUtils.slugify(idOrName));
+    if (bySlug != null && !bySlug.hasCustomId()) return bySlug;
 
-    return map;
+    // Fuzzy match
+    MapInfo byName = StringUtils.bestFuzzyMatch(
+        StringUtils.normalize(idOrName), maps.values(), MapInfo::getNormalizedName);
+
+    return byName != null ? byName : bySlug;
+  }
+
+  @Override
+  public @Nullable MapInfo getMapById(String id) {
+    return maps.get(id);
   }
 
   @Override
@@ -169,7 +174,7 @@ public class MapLibraryImpl implements MapLibrary {
   @Override
   public CompletableFuture<MapContext> loadExistingMap(String id) {
     return CompletableFuture.supplyAsync(() -> {
-      final MapInfo info = maps.get(id);
+      final MapInfo info = getMapById(id);
       if (info == null) {
         throw new RuntimeException(
             new MapMissingException(id, "Unable to find map from id (was it deleted?)"));
@@ -192,7 +197,7 @@ public class MapLibraryImpl implements MapLibrary {
   }
 
   private MapContext loadMap(
-      MapSource source, @Nullable Map<String, MapInfo.VariantInfo> variants, @Nullable String mapId)
+      MapSource source, @Nullable Map<String, VariantInfo> variants, @Nullable String mapId)
       throws MapException {
     final MapContext context;
     try (final MapFactory factory = new MapFactoryImpl(logger, source, variants, includes)) {
@@ -234,9 +239,7 @@ public class MapLibraryImpl implements MapLibrary {
   }
 
   private @Nullable MapContext loadMapSafe(
-      MapSource source,
-      @Nullable Map<String, MapInfo.VariantInfo> variants,
-      @Nullable String mapId) {
+      MapSource source, @Nullable Map<String, VariantInfo> variants, @Nullable String mapId) {
     try {
       return loadMap(source, variants, mapId);
     } catch (MapException e) {

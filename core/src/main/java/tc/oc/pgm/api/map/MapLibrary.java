@@ -10,13 +10,22 @@ import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 public interface MapLibrary {
 
   /**
-   * Get the {@link MapInfo} given its id or name.
+   * Get the {@link MapInfo} given its name, or id.
    *
-   * @param idOrName The id or an approximate name of a map.
+   * @param nameOrId The id or an approximate name of a map.
    * @return The best matching {@link MapInfo} or {@code null} if not found.
    */
   @Nullable
-  MapInfo getMap(String idOrName);
+  MapInfo getMap(String nameOrId);
+
+  /**
+   * Get the {@link MapInfo} given its id.
+   *
+   * @param id The id of the map
+   * @return The {@link MapInfo} with that id, or null.
+   */
+  @Nullable
+  MapInfo getMapById(String id);
 
   /**
    * Get all {@link MapInfo}s matching the query.

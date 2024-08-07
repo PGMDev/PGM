@@ -45,6 +45,7 @@ import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
+import tc.oc.pgm.api.map.VariantInfo;
 import tc.oc.pgm.map.source.MapRoot;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.MapPool;
@@ -352,7 +353,7 @@ public final class MapCommand {
     TextComponent.Builder text =
         text().append(mapInfoLabel("map.info.variants")).color(NamedTextColor.GOLD);
 
-    for (MapInfo.VariantInfo variant : map.getVariants().values()) {
+    for (VariantInfo variant : map.getVariants().values()) {
       TextComponent variantComp;
       if (map.getVariantId().equals(variant.getVariantId())) {
         variantComp = text(variant.getVariantId(), null, TextDecoration.UNDERLINED)
@@ -362,14 +363,14 @@ public final class MapCommand {
             .hoverEvent(showText(translatable(
                 "command.maps.hover",
                 NamedTextColor.GRAY,
-                text(variant.getMapName(), NamedTextColor.GOLD))))
-            .clickEvent(runCommand("/map " + variant.getMapName()));
+                text(variant.getName(), NamedTextColor.GOLD))))
+            .clickEvent(runCommand("/map " + variant.getName()));
       } else {
         variantComp = text(variant.getVariantId(), NamedTextColor.RED)
             .hoverEvent(showText(translatable(
                 "command.maps.unsupported",
                 NamedTextColor.GRAY,
-                text(variant.getMapName(), NamedTextColor.GOLD))));
+                text(variant.getName(), NamedTextColor.GOLD))));
       }
       text.append(variantComp).append(text(" "));
     }
@@ -408,7 +409,7 @@ public final class MapCommand {
           .append(text(" ["))
           .append(translatable("map.info.xml.edit"))
           .append(text("]"))
-          .clickEvent(runCommand("/showxml " + map.getId()))
+          .clickEvent(runCommand("/showxml " + map.getName()))
           .hoverEvent(showText(translatable("map.info.xml.edit.tip", NamedTextColor.AQUA))));
     }
     return xmlText;
