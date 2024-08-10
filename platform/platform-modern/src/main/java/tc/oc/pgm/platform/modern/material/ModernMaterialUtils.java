@@ -33,7 +33,6 @@ import tc.oc.pgm.util.xml.Node;
 @Supports(value = PAPER, minVersion = "1.20.6")
 @SuppressWarnings("deprecation")
 public class ModernMaterialUtils implements MaterialUtils {
-  private static final int ENCODED_NULL_MATERIAL = -1;
 
   @Override
   public BlockMaterialData createBlockData(Material material) {
@@ -83,8 +82,7 @@ public class ModernMaterialUtils implements MaterialUtils {
 
   @Override
   public BlockMaterialData decode(int encoded) {
-    if (encoded == ENCODED_NULL_MATERIAL) return null;
-    return new ModernBlockData(Material.values()[encoded].createBlockData());
+    return ModernEncodeUtil.decode(encoded);
   }
 
   @Override

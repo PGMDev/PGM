@@ -100,7 +100,7 @@ class BlockDataIterator implements Iterator<BlockData>, BlockData, LegacyMateria
 
   @Override
   public int encoded() {
-    throw new UnsupportedOperationException();
+    return SpEncodeUtil.encode(materialId, data);
   }
 
   @Override

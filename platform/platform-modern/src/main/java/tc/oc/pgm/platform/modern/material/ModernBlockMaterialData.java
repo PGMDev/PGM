@@ -11,6 +11,7 @@ import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public interface ModernBlockMaterialData extends BlockMaterialData {
+
   BlockData getBlock();
 
   @Override
@@ -30,7 +31,7 @@ public interface ModernBlockMaterialData extends BlockMaterialData {
 
   @Override
   default int encoded() {
-    return getItemType().ordinal();
+    return ModernEncodeUtil.encode(getBlock());
   }
 
   @Override

@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.bukkit.Effects;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(SPORTPAPER)
@@ -96,6 +97,11 @@ public class SpEffects implements Effects {
   @Override
   public void explosion(Player player, Location location) {
     player.spigot().playEffect(location, Effect.EXPLOSION_HUGE, 0, 0, 0f, 0f, 0f, 1f, 1, 256);
+  }
+
+  @Override
+  public void blockBreak(Location location, BlockMaterialData material) {
+    location.getWorld().playEffect(location, Effect.STEP_SOUND, material.encoded());
   }
 
   private float rgbToParticle(int rgb) {

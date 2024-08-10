@@ -82,17 +82,7 @@ public class SpMaterialUtils implements MaterialUtils {
 
   @Override
   public BlockMaterialData decode(int encoded) {
-    if (encoded == ENCODED_NULL_MATERIAL) return null;
-    Material material = Material.getMaterial(decodeTypeId(encoded));
-    return new SpMaterialData(material, decodeMetadata(encoded));
-  }
-
-  static int decodeTypeId(int encoded) {
-    return encoded & 0xfff;
-  }
-
-  static byte decodeMetadata(int encoded) {
-    return (byte) (encoded >> 12);
+    return SpEncodeUtil.decode(encoded);
   }
 
   @Override

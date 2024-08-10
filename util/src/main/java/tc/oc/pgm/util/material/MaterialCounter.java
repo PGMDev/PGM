@@ -6,7 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import java.util.Iterator;
 import org.bukkit.block.BlockState;
 
-/** Efficiently counts distinct {@link MaterialData}s */
+/** Efficiently counts distinct {@link BlockMaterialData}s */
 public class MaterialCounter {
   private final Int2IntMap counts;
 
@@ -14,28 +14,16 @@ public class MaterialCounter {
     this.counts = new Int2IntOpenHashMap();
   }
 
-  public boolean contains(int encodedMaterial) {
-    return counts.containsKey(encodedMaterial);
-  }
-
   public boolean contains(BlockMaterialData material) {
-    return contains(material.encoded());
-  }
-
-  public int get(int encodedMaterial) {
-    return counts.get(encodedMaterial);
+    return counts.containsKey(material.encoded());
   }
 
   public int get(BlockMaterialData material) {
-    return get(material.encoded());
+    return counts.get(material.encoded());
   }
 
-  public int increment(int encodedMaterial, int count) {
-    return counts.merge(encodedMaterial, count, (key, v) -> v + count);
-  }
-
-  public int increment(BlockState block, int count) {
-    return increment(MaterialData.block(block).encoded(), count);
+  public void increment(BlockState block, int count) {
+    counts.merge(MaterialData.block(block).encoded(), count, (key, v) -> v + count);
   }
 
   public void clear() {
