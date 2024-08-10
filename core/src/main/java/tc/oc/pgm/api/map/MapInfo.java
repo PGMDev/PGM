@@ -1,6 +1,5 @@
 package tc.oc.pgm.api.map;
 
-import com.google.common.collect.Range;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Map;
@@ -9,25 +8,13 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
-import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.text.TextTranslations;
 
-/** Essential information about a map. */
-public interface MapInfo extends Comparable<MapInfo>, Cloneable {
+/** Basic information about a map. The most bare-bones part is in {@link VariantInfo} */
+public interface MapInfo extends VariantInfo.Forwarding, Comparable<MapInfo>, Cloneable {
 
-  /**
-   * Get a unique id for the map.
-   *
-   * @return A unique id.
-   */
-  String getId();
-
-  /**
-   * The map variant this info represents
-   *
-   * @return A variant for the map, if any.
-   */
-  String getVariantId();
+  /** @return The map variant info for this map */
+  VariantInfo getVariant();
 
   /**
    * Get all the variants available for the map
@@ -35,22 +22,6 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return a map of variants by their variant id
    */
   Map<String, VariantInfo> getVariants();
-
-  /**
-   * Get what servers versions should load this map, servers outside the range should ignore the
-   * map.
-   *
-   * @return range of the server versions that can load this map
-   */
-  Range<Version> getServerVersion();
-
-  default boolean isServerSupported() {
-    return getServerVersion().contains(Platform.MINECRAFT_VERSION);
-  }
-
-  /** @return the subfolder in which the world is in, or null for the parent folder */
-  @Nullable
-  String getWorldFolder();
 
   /**
    * Get the proto of the map's {@link org.jdom2.Document}.
@@ -66,13 +37,6 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return The version.
    */
   Version getVersion();
-
-  /**
-   * Get a unique, human-readable name for the map.
-   *
-   * @return A name, alphanumeric with spaces allowed.
-   */
-  String getName();
 
   /**
    * Get the maps' name, but normalized to standard english characters and lower case.
@@ -207,21 +171,5 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
   @Override
   default int compareTo(MapInfo o) {
     return getId().compareTo(o.getId());
-  }
-
-  interface VariantInfo {
-    String getVariantId();
-
-    String getMapId();
-
-    String getMapName();
-
-    String getWorld();
-
-    Range<Version> getServerVersions();
-
-    default boolean isServerSupported() {
-      return getServerVersions().contains(Platform.MINECRAFT_VERSION);
-    }
   }
 }

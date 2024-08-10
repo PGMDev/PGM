@@ -12,10 +12,10 @@ import org.jdom2.input.JDOMParseException;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
-import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.VariantInfo;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -43,7 +43,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
 
   private final Logger logger;
   private final MapSource source;
-  private final Map<String, MapInfo.VariantInfo> variants;
+  private final Map<String, VariantInfo> variants;
   private final MapIncludeProcessor includes;
   private Document document;
   private MapInfoImpl info;
@@ -55,7 +55,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   public MapFactoryImpl(
       Logger logger,
       MapSource source,
-      Map<String, MapInfo.VariantInfo> variants,
+      Map<String, VariantInfo> variants,
       MapIncludeProcessor includes) {
     super(Modules.MAP, Modules.MAP_DEPENDENCY_ONLY); // Don't copy, avoid N factory copies
     this.logger =

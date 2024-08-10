@@ -31,6 +31,7 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
+import tc.oc.pgm.api.map.VariantInfo;
 import tc.oc.pgm.api.map.WorldInfo;
 import tc.oc.pgm.ffa.FreeForAllModule;
 import tc.oc.pgm.map.contrib.PlayerContributor;
@@ -53,16 +54,12 @@ public class MapInfoImpl implements MapInfo {
 
   private final MapSource source;
 
-  private final String id;
-  private final String variantId;
+  private final VariantInfo variant;
   private final Map<String, VariantInfo> variants;
 
-  private final String worldFolder;
-  private final Range<Version> serverVersion;
   private final Version proto;
   private final Version version;
   private final Phase phase;
-  private final String name;
   private final String normalizedName;
   private final String description;
   private final LocalDate created;
@@ -85,19 +82,12 @@ public class MapInfoImpl implements MapInfo {
   public MapInfoImpl(MapSource source, @Nullable Map<String, VariantInfo> variants, Element root)
       throws InvalidXMLException {
     this.source = source;
-    this.variantId = source.getVariantId();
     this.variants = variants == null ? createVariantMap(root) : variants;
+    this.variant = this.variants.get(source.getVariantId());
 
-    VariantInfo variant = this.variants.get(variantId);
     if (variant == null) throw new InvalidXMLException("Could not find variant definition", root);
 
-    this.worldFolder = variant.getWorld();
-    this.serverVersion = variant.getServerVersions();
-
-    this.name = variant.getMapName();
-    this.normalizedName = StringUtils.normalize(name);
-
-    this.id = assertNotNull(variant.getMapId());
+    this.normalizedName = StringUtils.normalize(variant.getName());
 
     this.proto = assertNotNull(XMLUtils.parseSemanticVersion(Node.fromRequiredAttr(root, "proto")));
     this.version =
@@ -133,28 +123,13 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
-  public String getVariantId() {
-    return variantId;
+  public VariantInfo getVariant() {
+    return variant;
   }
 
   @Override
   public Map<String, VariantInfo> getVariants() {
     return variants;
-  }
-
-  @Override
-  public Range<Version> getServerVersion() {
-    return serverVersion;
-  }
-
-  @Override
-  public String getWorldFolder() {
-    return worldFolder;
   }
 
   @Override
@@ -165,11 +140,6 @@ public class MapInfoImpl implements MapInfo {
   @Override
   public Version getVersion() {
     return version;
-  }
-
-  @Override
-  public String getName() {
-    return name;
   }
 
   @Override
@@ -255,7 +225,7 @@ public class MapInfoImpl implements MapInfo {
 
   @Override
   public String toString() {
-    return "MapInfo{id=" + this.id + ", version=" + this.version + "}";
+    return "MapInfo{id=" + getId() + ", version=" + this.version + "}";
   }
 
   @Override
@@ -374,6 +344,7 @@ public class MapInfoImpl implements MapInfo {
     private final String variantId;
     private final String mapName;
     private final String mapId;
+    private final boolean customId;
     private final String world;
     private final Range<Version> serverVersions;
 
@@ -404,6 +375,7 @@ public class MapInfoImpl implements MapInfo {
         minVer = fallback(Node.fromAttr(variantEl, "min-server-version"), minVer);
         maxVer = fallback(Node.fromAttr(variantEl, "max-server-version"), maxVer);
       }
+      this.customId = slug != null;
       this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
 
       this.serverVersions = XMLUtils.parseClosedRange(
@@ -422,17 +394,22 @@ public class MapInfoImpl implements MapInfo {
     }
 
     @Override
-    public String getMapId() {
+    public String getId() {
       return mapId;
     }
 
     @Override
-    public String getMapName() {
+    public String getName() {
       return mapName;
     }
 
     @Override
-    public String getWorld() {
+    public boolean hasCustomId() {
+      return customId;
+    }
+
+    @Override
+    public String getWorldFolder() {
       return world;
     }
 
