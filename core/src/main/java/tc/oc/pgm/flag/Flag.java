@@ -97,9 +97,9 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private final ItemStack legacyBannerItem;
   private final AngleProvider bannerYawProvider;
   private final @Nullable Team owner;
-  private final Set<Team> capturers;
-  private final Set<Team> controllers;
-  private final Set<Team> completers;
+  private Set<Team> capturers;
+  private Set<Team> controllers;
+  private Set<Team> completers;
   private BaseState state;
   private boolean transitioning;
 
@@ -115,33 +115,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     } else {
       this.owner = null;
     }
-
-    ImmutableSet.Builder<Team> capturersBuilder = ImmutableSet.builder();
-    if (tmm != null) {
-      for (Team team : tmm.getTeams()) {
-        Query query = team.getQuery();
-        if (getDefinition().canPickup(query) && canCapture(query)) {
-          capturersBuilder.add(team);
-        }
-      }
-    }
-    this.capturers = capturersBuilder.build();
-
-    ImmutableSet.Builder<Team> controllersBuilder = ImmutableSet.builder();
-    ImmutableSet.Builder<Team> completersBuilder = ImmutableSet.builder();
-    for (NetDefinition net : nets) {
-      PostDefinition netPost = net.getReturnPost();
-      if (netPost != null && netPost.getFallback().getOwner() != null && tmm != null) {
-        Team controller = tmm.getTeam(netPost.getFallback().getOwner());
-        controllersBuilder.add(controller);
-
-        if (net.getReturnPost().getFallback().isPermanent()) {
-          completersBuilder.add(controller);
-        }
-      }
-    }
-    this.controllers = controllersBuilder.build();
-    this.completers = completersBuilder.build();
 
     Banner banner = null;
     pointLoop:
@@ -320,6 +293,34 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   // Misc
 
   public void load(FlagMatchModule fmm) {
+    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
+    ImmutableSet.Builder<Team> capturersBuilder = ImmutableSet.builder();
+    if (tmm != null) {
+      for (Team team : tmm.getTeams()) {
+        Query query = team.getQuery();
+        if (getDefinition().canPickup(query) && canCapture(query)) {
+          capturersBuilder.add(team);
+        }
+      }
+    }
+    this.capturers = capturersBuilder.build();
+
+    ImmutableSet.Builder<Team> controllersBuilder = ImmutableSet.builder();
+    ImmutableSet.Builder<Team> completersBuilder = ImmutableSet.builder();
+    for (NetDefinition net : nets) {
+      PostDefinition netPost = net.getReturnPost();
+      if (netPost != null && netPost.getFallback().getOwner() != null && tmm != null) {
+        Team controller = tmm.getTeam(netPost.getFallback().getOwner());
+        controllersBuilder.add(controller);
+
+        if (net.getReturnPost().getFallback().isPermanent()) {
+          completersBuilder.add(controller);
+        }
+      }
+    }
+    this.controllers = controllersBuilder.build();
+    this.completers = completersBuilder.build();
+
     this.state =
         new Returned(this, fmm.getPost(this.getDefinition().getDefaultPost()), this.bannerLocation);
     this.state.enterState();

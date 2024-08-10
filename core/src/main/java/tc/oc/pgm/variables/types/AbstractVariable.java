@@ -2,23 +2,17 @@ package tc.oc.pgm.variables.types;
 
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.variables.Variable;
-import tc.oc.pgm.variables.VariableDefinition;
 
-public abstract class AbstractVariable<T extends Filterable<?>> implements Variable<T> {
-  protected final VariableDefinition<T> definition;
+abstract class AbstractVariable<T extends Filterable<?>> implements Variable<T> {
+  private final Class<T> scope;
 
-  public AbstractVariable(VariableDefinition<T> definition) {
-    this.definition = definition;
+  public AbstractVariable(Class<T> scope) {
+    this.scope = scope;
   }
 
-  @Override
-  public VariableDefinition<T> getDefinition() {
-    return definition;
+  public Class<T> getScope() {
+    return scope;
   }
-
-  protected abstract double getValueImpl(T obj);
-
-  protected abstract void setValueImpl(T obj, double value);
 
   @Override
   public double getValue(Filterable<?> context) {
@@ -30,16 +24,19 @@ public abstract class AbstractVariable<T extends Filterable<?>> implements Varia
     setValueImpl(getAncestor(context), value);
   }
 
+  protected abstract double getValueImpl(T obj);
+
+  protected abstract void setValueImpl(T obj, double value);
+
   protected T getAncestor(Filterable<?> context) {
-    T filterable = context.getFilterableAncestor(definition.getScope());
+    T filterable = context.getFilterableAncestor(getScope());
     if (filterable != null) return filterable;
 
-    throw new IllegalStateException(
-        "Wrong variable scope for '"
-            + getId()
-            + "', expected "
-            + definition.getScope().getSimpleName()
-            + " which cannot be found in "
-            + context.getClass().getSimpleName());
+    throw new IllegalStateException("Wrong variable scope for '"
+        + this
+        + "', expected "
+        + getScope().getSimpleName()
+        + " which cannot be found in "
+        + context.getClass().getSimpleName());
   }
 }

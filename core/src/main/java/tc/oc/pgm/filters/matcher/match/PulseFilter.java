@@ -34,7 +34,7 @@ public class PulseFilter extends SingleFilterFunction
 
   @Override
   public boolean matches(MatchQuery query) {
-    return query.reactor(this).matches(query);
+    return query.state(this).matches(query);
   }
 
   @Override
@@ -88,13 +88,12 @@ public class PulseFilter extends SingleFilterFunction
     public void tick(Match match, Tick tick) {
       final long now = tick.tick;
 
-      startTimes.forEach(
-          (filterable, start) -> {
-            long ticks = (now - start) % period;
-            if (ticks == 0 || ticks == duration) {
-              this.invalidate(filterable);
-            }
-          });
+      startTimes.forEach((filterable, start) -> {
+        long ticks = (now - start) % period;
+        if (ticks == 0 || ticks == duration) {
+          this.invalidate(filterable);
+        }
+      });
     }
   }
 }

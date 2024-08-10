@@ -1,11 +1,9 @@
 package tc.oc.pgm.variables;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -15,47 +13,40 @@ import net.objecthunter.exp4j.function.Function;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
-import tc.oc.pgm.blitz.BlitzMatchModule;
+import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
-import tc.oc.pgm.regions.RegionMatchModule;
-import tc.oc.pgm.score.ScoreMatchModule;
-import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
-import tc.oc.pgm.variables.types.IndexedVariable;
+import tc.oc.pgm.variables.types.LivesVariable;
+import tc.oc.pgm.variables.types.MaxBuildVariable;
+import tc.oc.pgm.variables.types.PlayerLocationVariable;
+import tc.oc.pgm.variables.types.ScoreVariable;
+import tc.oc.pgm.variables.types.TimeLimitVariable;
 
 public class VariablesModule implements MapModule<VariablesMatchModule> {
 
-  private final ImmutableList<VariableDefinition<?>> variables;
+  private final FeatureDefinitionContext context;
   private final ImmutableMap<Class<? extends Filterable<?>>, Context<?>> variablesByScope;
 
-  public VariablesModule(ImmutableList<VariableDefinition<?>> variables) {
-    this.variables = variables;
+  public VariablesModule(FeatureDefinitionContext context) {
+    this.context = context;
 
     ImmutableMap.Builder<Class<? extends Filterable<?>>, Context<?>> varsBuilder =
         ImmutableMap.builder();
     for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
-      varsBuilder.put(scope, Context.of(scope, variables));
+      varsBuilder.put(scope, Context.of(scope, context));
     }
 
     this.variablesByScope = varsBuilder.build();
-  }
-
-  @Override
-  public @Nullable Collection<Class<? extends MatchModule>> getWeakDependencies() {
-    return ImmutableList.of(
-        TeamMatchModule.class,
-        BlitzMatchModule.class,
-        ScoreMatchModule.class,
-        RegionMatchModule.class);
   }
 
   @SuppressWarnings("unchecked")
@@ -63,31 +54,23 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     return (Formula.ContextFactory<T>) variablesByScope.get(scope);
   }
 
-  private static class Context<T extends Filterable<?>> implements Formula.ContextFactory<T> {
-    private final ImmutableSet<String> variables;
-    private final ImmutableSet<String> arrays;
-    private final Map<String, VariableDefinition<?>> vars;
-
-    public Context(
-        ImmutableSet<String> variables,
-        ImmutableSet<String> arrays,
-        Map<String, VariableDefinition<?>> vars) {
-      this.variables = variables;
-      this.arrays = arrays;
-      this.vars = vars;
-    }
+  private record Context<T extends Filterable<?>>(
+      ImmutableSet<String> variables, ImmutableSet<String> arrays, Map<String, Variable<?>> vars)
+      implements Formula.ContextFactory<T> {
 
     public static <T extends Filterable<?>> Context<T> of(
-        Class<T> scope, List<VariableDefinition<?>> variables) {
+        Class<T> scope, FeatureDefinitionContext context) {
       ImmutableSet.Builder<String> variableNames = ImmutableSet.builder();
       ImmutableSet.Builder<String> arrayNames = ImmutableSet.builder();
-      ImmutableMap.Builder<String, VariableDefinition<?>> variableMap = ImmutableMap.builder();
+      ImmutableMap.Builder<String, Variable<?>> variableMap = ImmutableMap.builder();
 
-      for (VariableDefinition<?> variable : variables) {
-        if (!Filterables.isAssignable(scope, variable.getScope())) continue;
+      for (Map.Entry<String, FeatureDefinition> definition : context) {
+        if (definition.getValue() instanceof Variable<?> variable) {
+          if (!Filterables.isAssignable(scope, variable.getScope())) continue;
 
-        (variable.isIndexed() ? arrayNames : variableNames).add(variable.getId());
-        variableMap.put(variable.getId(), variable);
+          (variable.isIndexed() ? arrayNames : variableNames).add(definition.getKey());
+          variableMap.put(definition.getKey(), variable);
+        }
       }
       return new Context<>(variableNames.build(), arrayNames.build(), variableMap.build());
     }
@@ -104,7 +87,6 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
     @Override
     public ExpressionContext withContext(T scope) {
-      Match match = scope.getMatch();
       Map<String, Double> variableCache = new HashMap<>();
       Map<String, Function> arrayCache = new HashMap<>();
 
@@ -116,8 +98,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
         @Override
         public Double getVariable(String id) {
-          return variableCache.computeIfAbsent(
-              id, key -> vars.get(key).getVariable(match).getValue(scope));
+          return variableCache.computeIfAbsent(id, key -> vars.get(key).getValue(scope));
         }
 
         @Override
@@ -127,20 +108,17 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
         @Override
         public Function getFunction(String id) {
-          return arrayCache.computeIfAbsent(
-              id,
-              key -> {
-                VariableDefinition<?> def = vars.get(key);
-                if (def == null) return null;
+          return arrayCache.computeIfAbsent(id, key -> {
+            Variable.Indexed<?> def = (Variable.Indexed<?>) vars.get(key);
+            if (def == null) return null;
 
-                IndexedVariable<?> variable = (IndexedVariable<?>) def.getVariable(match);
-                return new Function(id, 1) {
-                  @Override
-                  public double apply(double... doubles) {
-                    return variable.getValue(scope, (int) doubles[0]);
-                  }
-                };
-              });
+            return new Function(id, 1) {
+              @Override
+              public double apply(double... doubles) {
+                return def.getValue(scope, (int) doubles[0]);
+              }
+            };
+          });
         }
       };
     }
@@ -149,11 +127,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
   @Nullable
   @Override
   public VariablesMatchModule createMatchModule(Match match) throws ModuleLoadException {
-    for (VariableDefinition<?> varDef : this.variables) {
-      match.getFeatureContext().add(varDef.buildInstance());
-    }
-
-    return new VariablesMatchModule(match);
+    return new VariablesMatchModule(match, context);
   }
 
   public static class Factory implements MapModuleFactory<VariablesModule> {
@@ -166,16 +140,26 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     public VariablesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
 
-      ImmutableList.Builder<VariableDefinition<?>> variables = ImmutableList.builder();
+      boolean featureIds = factory.getProto().isNoOlderThan(MapProtos.FEATURE_SINGLETON_IDS);
       VariableParser parser = new VariableParser(factory);
 
-      for (Element variable : XMLUtils.flattenElements(doc.getRootElement(), "variables", null)) {
-        VariableDefinition<?> varDef = parser.parse(variable);
-        factory.getFeatures().addFeature(variable, varDef);
-        variables.add(varDef);
+      var features = factory.getFeatures();
+      if (featureIds) {
+        features.addFeature(null, "lives", LivesVariable.INSTANCE);
+        features.addFeature(null, "score", ScoreVariable.INSTANCE);
+        features.addFeature(null, "timelimit", TimeLimitVariable.INSTANCE);
+        features.addFeature(null, "maxbuildheight", MaxBuildVariable.INSTANCE);
+        for (var entry : PlayerLocationVariable.INSTANCES.entrySet()) {
+          String key = "player." + entry.getKey().name().toLowerCase(Locale.ROOT);
+          features.addFeature(null, key, entry.getValue());
+        }
       }
 
-      return new VariablesModule(variables.build());
+      for (Element variable : XMLUtils.flattenElements(doc.getRootElement(), "variables", null)) {
+        features.addFeature(variable, parser.parse(variable));
+      }
+
+      return new VariablesModule(factory.getFeatures());
     }
   }
 }

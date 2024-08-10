@@ -54,19 +54,18 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
    */
   public void addFeature(@Nullable Element node, @Nullable String id, FeatureDefinition definition)
       throws InvalidXMLException {
-    if (definitions.add(definition)) {
-      if (id != null) {
-        FeatureDefinition old = this.store.put(id, definition);
-        if (old != null && old != definition) {
-          this.store.put(id, old);
-          throw new InvalidXMLException(
-              "The ID '" + id + "' is already in use by a different feature", node);
-        }
+    definitions.add(definition);
+    if (id != null) {
+      FeatureDefinition old = this.store.put(id, definition);
+      if (old != null && old != definition) {
+        this.store.put(id, old);
+        throw new InvalidXMLException(
+            "The ID '" + id + "' is already in use by a different feature", node);
       }
+    }
 
-      if (node != null) {
-        definitionNodes.put(definition, node);
-      }
+    if (node != null) {
+      definitionNodes.put(definition, node);
     }
   }
 

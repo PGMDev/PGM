@@ -64,7 +64,7 @@ import tc.oc.pgm.command.injectors.TeamMatchModuleProvider;
 import tc.oc.pgm.command.parsers.DurationParser;
 import tc.oc.pgm.command.parsers.EnumParser;
 import tc.oc.pgm.command.parsers.ExposedActionParser;
-import tc.oc.pgm.command.parsers.FilterArgumentParser;
+import tc.oc.pgm.command.parsers.FilterParser;
 import tc.oc.pgm.command.parsers.MapInfoParser;
 import tc.oc.pgm.command.parsers.MapPoolParser;
 import tc.oc.pgm.command.parsers.MatchPlayerParser;
@@ -192,7 +192,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
     registerParser(
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());
-    registerParser(Filter.class, FilterArgumentParser::new);
+    registerParser(Filter.class, FilterParser::new);
     registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
     registerParser(Phase.Phases.class, PhasesParser::new);

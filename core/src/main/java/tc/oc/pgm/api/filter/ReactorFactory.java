@@ -3,6 +3,7 @@ package tc.oc.pgm.api.filter;
 import org.bukkit.event.Event;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.features.StateHolder;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.Filterable;
 
@@ -11,7 +12,12 @@ import tc.oc.pgm.filters.Filterable;
  * properly invalidate {@link Filterable}s. A filter can theoretically both depend on listening to
  * some events AND have a reactor, but this is rarely the case.
  */
-public interface ReactorFactory<R extends ReactorFactory.Reactor> extends FilterDefinition {
+public interface ReactorFactory<R extends ReactorFactory.Reactor>
+    extends FilterDefinition, StateHolder<R> {
+
+  default void register(Match match, FilterMatchModule fmm) {
+    match.getFeatureContext().registerState(this, createReactor(match, fmm));
+  }
 
   /**
    * Get an instance of this filter's reactor. This will only be called once per match and always
@@ -23,9 +29,9 @@ public interface ReactorFactory<R extends ReactorFactory.Reactor> extends Filter
   R createReactor(Match match, FilterMatchModule fmm);
 
   /**
-   * A match scoped singleton responsible for match time invalidation of filterables that the {@link
-   * ReactorFactory} that created this might have changed its opinion about. This is created at the
-   * end of match load.
+   * A match scoped singleton responsible for match time invalidation of filterables that the
+   * {@link ReactorFactory} that created this might have changed its opinion about. This is created
+   * at the end of match load.
    *
    * @see FilterMatchModule#onMatchLoad(MatchLoadEvent)
    */

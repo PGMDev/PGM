@@ -5,32 +5,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.features.StateHolder;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.Filterable;
-import tc.oc.pgm.variables.VariableDefinition;
+import tc.oc.pgm.variables.Variable;
+import tc.oc.pgm.variables.VariablesMatchModule;
 
 public class ArrayVariable<T extends Filterable<?>> extends AbstractVariable<T>
-    implements IndexedVariable<T> {
+    implements Variable.Indexed<T>, StateHolder<Map<T, double[]>> {
 
   private static final String OOB_ERR = "Index %d out of bounds for array '%s' (length %d)";
 
   private final int size;
   private final double def;
-  private final Map<T, double[]> values;
 
-  public ArrayVariable(VariableDefinition<T> definition, int size, double def) {
-    super(definition);
+  public ArrayVariable(Class<T> scope, int size, double def) {
+    super(scope);
     this.size = size;
     this.def = def;
-    this.values = new HashMap<>();
   }
 
-  public int checkBounds(int idx) {
-    if (idx < 0 || idx >= size) {
-      PGM.get().getGameLogger().log(Level.SEVERE, String.format(OOB_ERR, idx, getId(), size));
-      return 0;
-    }
-    return idx;
+  @Override
+  public boolean isDynamic() {
+    return true;
+  }
+
+  @Override
+  public void load(Match match) {
+    match.getFeatureContext().registerState(this, new HashMap<>());
   }
 
   @Override
@@ -40,25 +43,33 @@ public class ArrayVariable<T extends Filterable<?>> extends AbstractVariable<T>
 
   @Override
   public double getValue(Filterable<?> obj, int idx) {
-    double[] val = values.get(getAncestor(obj));
-    return val == null ? def : val[checkBounds(idx)];
+    var scope = getAncestor(obj);
+    double[] val = obj.state(this).get(scope);
+    return val == null ? def : val[checkBounds(idx, scope)];
   }
 
   @Override
   public void setValue(Filterable<?> obj, int idx, double value) {
-    values.compute(
-        getAncestor(obj),
-        (k, arr) -> {
-          if (arr == null) {
-            if (value == def) return null;
-            arr = buildArray();
-          }
-          arr[checkBounds(idx)] = value;
-          return arr;
-        });
+    obj.state(this).compute(getAncestor(obj), (scope, arr) -> {
+      if (arr == null) {
+        if (value == def) return null;
+        arr = buildArray();
+      }
+      arr[checkBounds(idx, scope)] = value;
+      return arr;
+    });
 
     // For performance reasons, let's avoid launching an event for every variable change
     obj.moduleRequire(FilterMatchModule.class).invalidate(obj);
+  }
+
+  public int checkBounds(int idx, T obj) {
+    if (idx < 0 || idx >= size) {
+      String id = obj.moduleRequire(VariablesMatchModule.class).getId(this);
+      PGM.get().getGameLogger().log(Level.SEVERE, String.format(OOB_ERR, idx, id, size));
+      return 0;
+    }
+    return idx;
   }
 
   private double[] buildArray() {

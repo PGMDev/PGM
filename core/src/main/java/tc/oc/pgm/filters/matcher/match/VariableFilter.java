@@ -13,21 +13,18 @@ import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.variables.Variable;
-import tc.oc.pgm.variables.VariableDefinition;
-import tc.oc.pgm.variables.types.IndexedVariable;
 
 public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedFilter<Q> {
 
-  private final VariableDefinition<?> variable;
+  private final Variable<?> variable;
   private final Range<Double> values;
 
-  private VariableFilter(VariableDefinition<?> variable, Range<Double> values) {
+  private VariableFilter(Variable<?> variable, Range<Double> values) {
     this.variable = variable;
     this.values = values;
   }
 
-  public static VariableFilter<?> of(
-      VariableDefinition<?> var, Integer idx, Range<Double> range, Node node)
+  public static VariableFilter<?> of(Variable<?> var, Integer idx, Range<Double> range, Node node)
       throws InvalidXMLException {
     if (var.isIndexed()) {
       if (idx == null)
@@ -47,8 +44,7 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     Filterable<?> filterable = query.extractFilterable();
     if (!Filterables.isAssignable(filterable, variable.getScope())) return QueryResponse.ABSTAIN;
 
-    return QueryResponse.fromBoolean(
-        values.contains(getValue(variable.getVariable(filterable.getMatch()), filterable)));
+    return QueryResponse.fromBoolean(values.contains(getValue(variable, filterable)));
   }
 
   protected double getValue(Variable<?> variable, Filterable<?> filterable) {
@@ -74,7 +70,7 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
 
   public static class Generic extends VariableFilter<MatchQuery> {
 
-    public Generic(VariableDefinition<?> variable, Range<Double> values) {
+    public Generic(Variable<?> variable, Range<Double> values) {
       super(variable, values);
     }
 
@@ -90,7 +86,7 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
    */
   public static class Team extends VariableFilter<PartyQuery> implements CompetitorFilter {
 
-    public Team(VariableDefinition<?> variable, Range<Double> values) {
+    public Team(Variable<?> variable, Range<Double> values) {
       super(variable, values);
     }
 
@@ -107,28 +103,28 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
   public static class Indexed extends Generic {
     private final int idx;
 
-    public Indexed(VariableDefinition<?> variable, int idx, Range<Double> values) {
+    public Indexed(Variable<?> variable, int idx, Range<Double> values) {
       super(variable, values);
       this.idx = idx;
     }
 
     @Override
     protected double getValue(Variable<?> variable, Filterable<?> filterable) {
-      return ((IndexedVariable<?>) variable).getValue(filterable, idx);
+      return ((Variable.Indexed<?>) variable).getValue(filterable, idx);
     }
   }
 
   public static class TeamIndexed extends Team {
     private final int idx;
 
-    public TeamIndexed(VariableDefinition<?> variable, int idx, Range<Double> values) {
+    public TeamIndexed(Variable<?> variable, int idx, Range<Double> values) {
       super(variable, values);
       this.idx = idx;
     }
 
     @Override
     protected double getValue(Variable<?> variable, Filterable<?> filterable) {
-      return ((IndexedVariable<?>) variable).getValue(filterable, idx);
+      return ((Variable.Indexed<?>) variable).getValue(filterable, idx);
     }
   }
 }

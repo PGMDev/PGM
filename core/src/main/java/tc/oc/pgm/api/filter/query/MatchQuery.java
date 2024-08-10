@@ -2,10 +2,9 @@ package tc.oc.pgm.api.filter.query;
 
 import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.api.filter.ReactorFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.features.StateHolder;
 import tc.oc.pgm.filters.Filterable;
 
 public interface MatchQuery extends Query {
@@ -27,8 +26,8 @@ public interface MatchQuery extends Query {
     return Optional.ofNullable(getMatch().getModule(cls));
   }
 
-  default <T extends ReactorFactory.Reactor> T reactor(ReactorFactory<T> factory) {
-    return getMatch().needModule(FilterMatchModule.class).getReactor(factory);
+  default <T> T state(StateHolder<T> factory) {
+    return getMatch().getFeatureContext().getState(factory);
   }
 
   @Nullable

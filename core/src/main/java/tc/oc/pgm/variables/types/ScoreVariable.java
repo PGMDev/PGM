@@ -1,32 +1,26 @@
 package tc.oc.pgm.variables.types;
 
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.score.ScoreMatchModule;
-import tc.oc.pgm.variables.VariableDefinition;
 
 public class ScoreVariable extends AbstractVariable<Party> {
+  public static final ScoreVariable INSTANCE = new ScoreVariable();
 
-  private ScoreMatchModule smm;
-
-  public ScoreVariable(VariableDefinition<Party> definition) {
-    super(definition);
-  }
-
-  @Override
-  public void postLoad(Match match) {
-    smm = match.moduleRequire(ScoreMatchModule.class);
+  public ScoreVariable() {
+    super(Party.class);
   }
 
   @Override
   protected double getValueImpl(Party party) {
-    if (party instanceof Competitor) return smm.getScore((Competitor) party);
+    if (party instanceof Competitor)
+      return party.moduleRequire(ScoreMatchModule.class).getScore((Competitor) party);
     return 0;
   }
 
   @Override
   protected void setValueImpl(Party party, double value) {
-    if (party instanceof Competitor) smm.setScore((Competitor) party, value);
+    if (party instanceof Competitor)
+      party.moduleRequire(ScoreMatchModule.class).setScore((Competitor) party, value);
   }
 }

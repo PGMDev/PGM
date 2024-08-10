@@ -1,6 +1,5 @@
 package tc.oc.pgm.filters;
 
-import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
@@ -29,7 +28,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
-import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterListener;
@@ -79,8 +77,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final Set<Class<? extends Event>> listeningFor = new HashSet<>();
   private final AtomicBoolean loaded = new AtomicBoolean(false);
 
-  private final Map<ReactorFactory<?>, ReactorFactory.Reactor> activeReactors = new HashMap<>();
-
   private final DummyListener dummyListener = new DummyListener();
 
   private final Table<Filter, Class<? extends Filterable<?>>, ListenerSet> listeners =
@@ -113,7 +109,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
     return filterContext;
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.LOW)
   public void onMatchLoad(MatchLoadEvent event) {
 
     // These two have to be on separate passes, in case a reactor wants to register a child filter
@@ -164,17 +160,17 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   private void findAndCreateReactorFactories(Filter filter) {
-    filter
-        .deepDependencies(Filter.class)
-        .filter(f -> f instanceof ReactorFactory)
-        .forEach(factory -> activeReactors.computeIfAbsent(
-            (ReactorFactory<?>) factory, f -> f.createReactor(match, this)));
+    filter.deepDependencies(Filter.class).forEach(dep -> {
+      if (dep instanceof ReactorFactory<?> rf) rf.register(match, this);
+    });
   }
 
   @Override
   public void unload() {
     HandlerList.unregisterAll(this.dummyListener);
-    this.activeReactors.values().forEach(ReactorFactory.Reactor::unload);
+    for (Object state : match.getFeatureContext().getStates().values()) {
+      if (state instanceof ReactorFactory.Reactor r) r.unload();
+    }
   }
 
   /**
@@ -522,18 +518,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
 
   public void onFlagStateChange(FlagStateChangeEvent event) {
     this.invalidate(match);
-  }
-
-  /**
-   * Gets the active {@link ReactorFactory.Reactor} created by the given factory for this match.
-   *
-   * @param factory a factory which was used to create a reactor for this match
-   * @return an active reactor
-   * @throws NullPointerException if no active reactor is found for the given factory
-   */
-  @SuppressWarnings("unchecked")
-  public <T extends ReactorFactory.Reactor> @NotNull T getReactor(ReactorFactory<T> factory) {
-    return (T) assertNotNull(this.activeReactors.get(factory), "reactor");
   }
 
   private static class DummyListener implements Listener {}

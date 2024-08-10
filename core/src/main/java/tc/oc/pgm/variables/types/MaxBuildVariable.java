@@ -2,30 +2,24 @@ package tc.oc.pgm.variables.types;
 
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.regions.RegionMatchModule;
-import tc.oc.pgm.variables.VariableDefinition;
 
 public class MaxBuildVariable extends AbstractVariable<Match> {
 
-  private RegionMatchModule rmm;
+  public static final MaxBuildVariable INSTANCE = new MaxBuildVariable();
 
-  public MaxBuildVariable(VariableDefinition<Match> definition) {
-    super(definition);
+  public MaxBuildVariable() {
+    super(Match.class);
   }
 
   @Override
-  public void postLoad(Match match) {
-    rmm = match.moduleRequire(RegionMatchModule.class);
-  }
-
-  @Override
-  protected double getValueImpl(Match player) {
-    Integer val = rmm.getMaxBuildHeight();
+  protected double getValueImpl(Match match) {
+    Integer val = match.moduleRequire(RegionMatchModule.class).getMaxBuildHeight();
     return val == null ? -1 : val;
   }
 
   @Override
-  protected void setValueImpl(Match player, double value) {
+  protected void setValueImpl(Match match, double value) {
     int val = (int) value;
-    rmm.setMaxBuildHeight(val <= -1 ? null : val);
+    match.moduleRequire(RegionMatchModule.class).setMaxBuildHeight(val <= -1 ? null : val);
   }
 }

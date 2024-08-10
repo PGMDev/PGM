@@ -27,12 +27,15 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 
+@ListenerScope(MatchScope.RUNNING)
 public class CompassMatchModule implements MatchModule, Tickable, Listener {
 
   private static final long REFRESH_TICKS = 20;
