@@ -23,6 +23,16 @@ public class TeamVariableAdapter extends AbstractVariable<Match>
   }
 
   @Override
+  public boolean isDynamic() {
+    return child.isDynamic();
+  }
+
+  @Override
+  public boolean isReadonly() {
+    return child.isReadonly();
+  }
+
+  @Override
   public boolean isIndexed() {
     return child.isIndexed();
   }
