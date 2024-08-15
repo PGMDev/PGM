@@ -155,14 +155,13 @@ public class MatchTabManager extends TabManager implements Listener {
   @Override
   protected void scheduleRender() {
     if (dirty.isHeaderOrFooter() && this.renderHeaderFooterTask == null) {
-      this.renderHeaderFooterTask =
-          executor.schedule(
-              () -> {
-                this.renderHeaderFooterTask = null;
-                this.renderHeaderFooter();
-              },
-              100,
-              TimeUnit.MILLISECONDS);
+      this.renderHeaderFooterTask = executor.schedule(
+          () -> {
+            this.renderHeaderFooterTask = null;
+            this.renderHeaderFooter();
+          },
+          100,
+          TimeUnit.MILLISECONDS);
     }
 
     // Already a priority task scheduled, nothing to be done
@@ -214,6 +213,10 @@ public class MatchTabManager extends TabManager implements Listener {
     return (PlayerTabEntry) this.getPlayerEntry(player.getBukkit());
   }
 
+  public PlayerTabEntry getPlayerEntryOrNull(MatchPlayer player) {
+    return (PlayerTabEntry) this.getPlayerEntryOrNull(player.getBukkit());
+  }
+
   public TeamTabEntry getTeamEntry(Team team) {
     return this.teamEntries.get(team);
   }
@@ -235,7 +238,8 @@ public class MatchTabManager extends TabManager implements Listener {
   }
 
   protected void invalidate(MatchPlayer player) {
-    getPlayerEntry(player).invalidate();
+    var entry = getPlayerEntryOrNull(player);
+    if (entry != null) entry.invalidate();
     for (Contributor author : player.getMatch().getMap().getAuthors()) {
       if (author.isPlayer(player.getId())) {
         MapTabEntry mapEntry = mapEntries.get(player.getMatch());
@@ -282,10 +286,9 @@ public class MatchTabManager extends TabManager implements Listener {
     rateLimit.timeOut(5_000);
 
     // One priority render scheduled, essentially forcing one full re-render
-    enabledViews.forEach(
-        (player, view) -> {
-          if (view != null) view.getDirtyTracker().prioritize();
-        });
+    enabledViews.forEach((player, view) -> {
+      if (view != null) view.getDirtyTracker().prioritize();
+    });
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
