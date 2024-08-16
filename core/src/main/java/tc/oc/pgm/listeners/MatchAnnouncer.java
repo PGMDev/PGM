@@ -53,7 +53,7 @@ public class MatchAnnouncer implements Listener {
     final Match match = event.getMatch();
     match
         .getExecutor(MatchScope.LOADED)
-        .scheduleWithFixedDelay(() -> sendCurrentlyPlaying(match), 0, 1, TimeUnit.MINUTES);
+        .scheduleWithFixedDelay(() -> sendCurrentlyPlaying(match), 0, 5, TimeUnit.MINUTES);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
