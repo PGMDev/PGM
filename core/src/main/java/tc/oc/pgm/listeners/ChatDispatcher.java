@@ -12,6 +12,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -31,6 +33,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.incendo.cloud.annotation.specifier.Greedy;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
@@ -52,7 +55,6 @@ import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.Players;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.channels.Channel;
 import tc.oc.pgm.util.event.ChannelMessageEvent;
 import tc.oc.pgm.util.named.NameStyle;
@@ -69,7 +71,7 @@ public class ChatDispatcher implements Listener {
   }
 
   private final MatchManager manager;
-  private final OnlinePlayerMapAdapter<MessageSenderIdentity> lastMessagedBy;
+  private final Map<UUID, MessageSenderIdentity> lastMessagedBy;
 
   public static final TextComponent ADMIN_CHAT_PREFIX = text()
       .append(text("[", NamedTextColor.WHITE))
@@ -94,7 +96,7 @@ public class ChatDispatcher implements Listener {
 
   public ChatDispatcher() {
     this.manager = PGM.get().getMatchManager();
-    this.lastMessagedBy = new OnlinePlayerMapAdapter<>(PGM.get());
+    this.lastMessagedBy = new HashMap<>();
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
   }
 
@@ -439,13 +441,17 @@ public class ChatDispatcher implements Listener {
         .build();
   }
 
+  @EventHandler(ignoreCancelled = true)
+  public void onPlayerQuit(PlayerQuitEvent event) {
+    this.lastMessagedBy.remove(event.getPlayer().getUniqueId());
+  }
+
   private void trackMessage(Player receiver, Player sender) {
-    MessageSenderIdentity senderIdent = new MessageSenderIdentity(receiver, sender);
-    this.lastMessagedBy.put(receiver, senderIdent);
+    this.lastMessagedBy.put(receiver.getUniqueId(), new MessageSenderIdentity(receiver, sender));
   }
 
   private UUID getLastMessagedId(Player sender) {
-    MessageSenderIdentity targetIdent = lastMessagedBy.get(sender);
+    MessageSenderIdentity targetIdent = lastMessagedBy.get(sender.getUniqueId());
     if (targetIdent == null) return null;
     MatchPlayer target = manager.getPlayer(targetIdent.getPlayerId());
 
@@ -466,10 +472,9 @@ public class ChatDispatcher implements Listener {
     return null;
   }
 
-  private class MessageSenderIdentity {
-
-    private UUID playerId;
-    private String name;
+  private static class MessageSenderIdentity {
+    private final UUID playerId;
+    private final String name;
 
     public MessageSenderIdentity(Player viewer, Player player) {
       this.playerId = player.getUniqueId();
