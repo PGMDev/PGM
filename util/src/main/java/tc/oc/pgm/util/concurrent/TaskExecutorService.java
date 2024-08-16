@@ -2,7 +2,6 @@ package tc.oc.pgm.util.concurrent;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -18,7 +17,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.TimeUtils;
 
