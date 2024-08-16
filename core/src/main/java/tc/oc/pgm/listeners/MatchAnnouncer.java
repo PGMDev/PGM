@@ -34,7 +34,9 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.teams.Team;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.LegacyFormatUtils;
+import tc.oc.pgm.util.concurrent.TaskExecutorService;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -53,8 +55,7 @@ public class MatchAnnouncer implements Listener {
     final Match match = event.getMatch();
     match
         .getExecutor(MatchScope.LOADED)
-        .scheduleWithFixedDelay(
-            () -> match.getPlayers().forEach(this::sendCurrentlyPlaying), 0, 5, TimeUnit.MINUTES);
+        .scheduleWithFixedDelay(() -> sendCurrentlyPlaying(match), 0, 1, TimeUnit.MINUTES);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -173,11 +174,11 @@ public class MatchAnnouncer implements Listener {
     viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));
   }
 
-  private void sendCurrentlyPlaying(MatchPlayer viewer) {
-    viewer.sendMessage(
+  private void sendCurrentlyPlaying(Match match) {
+    match.sendMessage(
         translatable(
             "misc.playing",
             NamedTextColor.DARK_PURPLE,
-            viewer.getMatch().getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
+            match.getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 }
