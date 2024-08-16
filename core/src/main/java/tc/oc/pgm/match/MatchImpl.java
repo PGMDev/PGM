@@ -124,7 +124,7 @@ public class MatchImpl implements Match {
     this.world = new WeakReference<>(assertNotNull(world));
     this.matchModules = new ConcurrentHashMap<>();
 
-    this.clock = new WorldTickClock(world);
+    this.clock = new WorldTickClock(this);
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
     this.random = new Random();
     this.tickRandoms = new HashMap<>();
