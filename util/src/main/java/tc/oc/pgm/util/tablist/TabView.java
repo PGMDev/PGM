@@ -338,8 +338,10 @@ public class TabView {
     if (this.manager == null) return;
 
     if (this.display != null) {
-      Arrays.fill(this.slots, null);
-      Arrays.fill(this.rendered, null);
+      for (int index = 0; index < this.size; index++) {
+        this.slots[index].removeFromView(this);
+        this.slots[index] = this.rendered[index] = null;
+      }
       display.tearDown();
 
       return;
@@ -352,6 +354,7 @@ public class TabView {
         this.manager.getBlankEntry(this.footerSlot).getContent(this));
 
     for (int index = 0; index < this.size; index++) {
+      this.slots[index].removeFromView(this);
       render.destroySlot(this.rendered[index], index);
       this.slots[index] = this.rendered[index] = null;
     }
