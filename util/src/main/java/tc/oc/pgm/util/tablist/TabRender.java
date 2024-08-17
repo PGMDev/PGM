@@ -43,12 +43,12 @@ public class TabRender {
     packet.send(this.view.getViewer());
   }
 
-  private String getJson(TabEntry entry) {
-    return TextTranslations.toMinecraftGson(entry.getContent(this.view), this.view.getViewer());
+  private Component getJson(TabEntry entry) {
+    return TextTranslations.translate(entry.getContent(this.view), this.view.getViewer());
   }
 
   private void appendAddition(TabEntry entry, int index) {
-    String renderedDisplayName = this.getJson(entry);
+    var renderedDisplayName = this.getJson(entry);
     this.addPacket.addPlayerInfo(
         entry.getId(),
         entry.getName(this.view),

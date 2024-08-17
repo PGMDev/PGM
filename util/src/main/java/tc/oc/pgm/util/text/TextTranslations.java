@@ -29,7 +29,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
@@ -52,18 +51,8 @@ public final class TextTranslations {
   private static final UTF8Control SOURCE_CONTROL = new UTF8Control();
 
   // A list of all .properties files to load
-  private static final List<String> SOURCE_NAMES =
-      ImmutableList.of(
-          "command",
-          "death",
-          "error",
-          "gamemode",
-          "join",
-          "map",
-          "match",
-          "misc",
-          "moderation",
-          "ui");
+  private static final List<String> SOURCE_NAMES = ImmutableList.of(
+      "command", "death", "error", "gamemode", "join", "map", "match", "misc", "moderation", "ui");
 
   private static SortedMap<String, Map<Locale, MessageFormat>> getTreeMap() {
     try {
@@ -106,20 +95,18 @@ public final class TextTranslations {
     loadKeys(Locale.getDefault());
     // Add this translator to the global registry (so components are auto-translated by the
     // platform)
-    GlobalTranslator.translator()
-        .addSource(
-            new Translator() {
-              @Override
-              public @NotNull Key name() {
-                return NAMESPACE;
-              }
+    GlobalTranslator.translator().addSource(new Translator() {
+      @Override
+      public @NotNull Key name() {
+        return NAMESPACE;
+      }
 
-              @Override
-              public @Nullable MessageFormat translate(
-                  final @NotNull String key, final @NotNull Locale locale) {
-                return TextTranslations.getNearestKey(locale, key);
-              }
-            });
+      @Override
+      public @Nullable MessageFormat translate(
+          final @NotNull String key, final @NotNull Locale locale) {
+        return TextTranslations.getNearestKey(locale, key);
+      }
+    });
   }
 
   /**
@@ -156,10 +143,9 @@ public final class TextTranslations {
 
     int maxScore = 0;
     for (Locale other : getLocales()) {
-      int score =
-          (locale.getLanguage().equals(other.getLanguage()) ? 3 : 0)
-              + (locale.getCountry().equals(other.getCountry()) ? 2 : 0)
-              + (locale.getVariant().equals(other.getVariant()) ? 1 : 0);
+      int score = (locale.getLanguage().equals(other.getLanguage()) ? 3 : 0)
+          + (locale.getCountry().equals(other.getCountry()) ? 2 : 0)
+          + (locale.getVariant().equals(other.getVariant()) ? 1 : 0);
       if (score > maxScore) {
         maxScore = score;
         nearest = other;
@@ -377,9 +363,8 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translate(String key, @NotNull Pointered viewer, @NotNull Object... args) {
-    final Component text =
-        translatable(
-            key, Stream.of(args).map(TextTranslations::toComponent).collect(Collectors.toList()));
+    final Component text = translatable(
+        key, Stream.of(args).map(TextTranslations::toComponent).collect(Collectors.toList()));
 
     return LegacyComponentSerializer.legacySection().serialize(translate(text, viewer));
   }
@@ -388,10 +373,5 @@ public final class TextTranslations {
     if (obj instanceof Component) return (Component) obj;
     if (obj instanceof ComponentLike) return (ComponentLike) obj;
     return text(String.valueOf(obj));
-  }
-
-  public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
-    Component translated = translate(component, getPointered(viewer));
-    return GsonComponentSerializer.colorDownsamplingGson().serialize(translated);
   }
 }
