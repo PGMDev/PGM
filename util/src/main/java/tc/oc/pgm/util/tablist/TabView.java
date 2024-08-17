@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.tablist;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
@@ -386,21 +385,13 @@ public class TabView {
   private void respawnFakeEntities() {
     if (this.manager == null || this.display != null) return;
 
-    this.viewer
-        .getServer()
-        .getScheduler()
-        .runTask(
-            this.manager.getPlugin(),
-            new Runnable() {
-              @Override
-              public void run() {
-                TabRender render = new TabRender(TabView.this);
-                for (TabEntry entry : TabView.this.rendered) {
-                  render.updateFakeEntity(entry, true);
-                }
-                render.finish();
-              }
-            });
+    this.viewer.getServer().getScheduler().runTask(this.manager.getPlugin(), () -> {
+      TabRender render = new TabRender(TabView.this);
+      for (TabEntry entry : TabView.this.rendered) {
+        render.updateFakeEntity(entry, true);
+      }
+      render.finish();
+    });
   }
 
   protected void onRespawn(PlayerRespawnEvent event) {
