@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.v1_8_R3.DataWatcher;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent;
@@ -116,27 +118,26 @@ public class SpTabPackets implements TabPackets, PacketSender {
     return copy;
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   class SpPlayerInfo extends SpPacket<PacketPlayOutPlayerInfo> implements PlayerInfo {
+    private static final MinecraftComponentSerializer SERIALIZER =
+        MinecraftComponentSerializer.get();
+
     public SpPlayerInfo(PacketPlayOutPlayerInfo packet) {
       super(packet);
     }
 
     @Override
     public void addPlayerInfo(
-        UUID uuid,
-        String name,
-        int ping,
-        @Nullable Skin skin,
-        @Nullable String renderedDisplayName) {
+        UUID uuid, String name, int ping, @Nullable Skin skin, @Nullable Component displayName) {
       GameProfile profile = new GameProfile(uuid, name);
       if (skin != null) Skins.toProfile(profile, skin);
 
-      IChatBaseComponent iChatBaseComponent = renderedDisplayName == null
-          ? null
-          : IChatBaseComponent.ChatSerializer.a(renderedDisplayName);
+      var nmsComponent =
+          displayName == null ? null : (IChatBaseComponent) SERIALIZER.serialize(displayName);
 
       packet.b.add(packet
-      .new PlayerInfoData(profile, ping, WorldSettings.EnumGamemode.SURVIVAL, iChatBaseComponent));
+      .new PlayerInfoData(profile, ping, WorldSettings.EnumGamemode.SURVIVAL, nmsComponent));
     }
 
     @Override
