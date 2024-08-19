@@ -170,6 +170,12 @@ public class PlayerMoveListener implements Listener {
     this.handleMovementMonitor(event);
   }
 
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerQuit(final PlayerQuitEvent event) {
+    // Faster & predictable cleanup even if player object fails to GC
+    this.lastToLocation.remove(event.getPlayer());
+  }
+
   private void handleMovementMonitor(PlayerMoveEvent event) {
     // It's possible for a PlayerMoveEvent to be modified by another
     // HIGHEST handler after we handle it, so we also check it at MONITOR
