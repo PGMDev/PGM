@@ -167,8 +167,9 @@ public class NMSHacksSportPaper implements NMSHacks {
 
   @Override
   public void resetDimension(World world) {
+    var nmsWorld = ((CraftWorld) world).getHandle();
     try {
-      ((CraftWorld) world).getHandle().dimension = 11;
+      nmsWorld.dimension = 11;
     } catch (IllegalAccessError e) {
 
       Field worldServerField = ReflectionUtils.getField(CraftWorld.class, "world");
@@ -182,6 +183,8 @@ public class NMSHacksSportPaper implements NMSHacks {
         // No-op, newer version of Java have disabled modifying final fields
       }
     }
+
+    nmsWorld.craftingManager.lastCraftView = null;
   }
 
   @Override
