@@ -115,7 +115,7 @@ public class Payload extends ControlPoint {
 
     if (definition.showBeam()) {
       DyeColor dyeColor = display != null ? display.getDyeColor() : DyeColor.WHITE;
-      EFFECTS.beam(match.getWorld(), loc, dyeColor);
+      EFFECTS.beam(match.getWorld(), position.toLocation(match.getWorld()), dyeColor);
     }
   }
 
