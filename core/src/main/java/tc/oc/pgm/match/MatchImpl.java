@@ -2,6 +2,7 @@ package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -909,6 +910,7 @@ public class MatchImpl implements Match {
     if (world == null) return;
 
     final String worldName = world.getName();
+    NMS_HACKS.cleanupWorld(world);
     if (PGM.get().getServer().unloadWorld(worldName, false)) {
       logger.fine("Successfully unloaded " + worldName);
     } else {

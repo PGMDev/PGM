@@ -104,6 +104,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
     if (name.startsWith("match")) return;
 
     NMS_HACKS.resetDimension(world);
+    NMS_HACKS.cleanupWorld(world);
 
     if (PGM.get().getServer().unloadWorld(name, false)) {
       logger.info("Unloaded non-match " + name);

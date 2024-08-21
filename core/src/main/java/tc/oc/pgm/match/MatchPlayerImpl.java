@@ -283,6 +283,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     bukkit.setFlySpeed(0.1f);
     bukkit.setWalkSpeed(WalkSpeedKit.BUKKIT_DEFAULT);
     bukkit.setLastDamageCause(null);
+    NMS_HACKS.cleanupPlayer(bukkit);
     PLAYER_UTILS.clearArrowsInPlayer(bukkit);
     PLAYER_UTILS.setKnockbackReduction(bukkit, 0);
     bukkit.setVelocity(new Vector());
