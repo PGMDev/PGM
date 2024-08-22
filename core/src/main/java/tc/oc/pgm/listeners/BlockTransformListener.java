@@ -174,12 +174,12 @@ public class BlockTransformListener implements Listener {
     BlockState oldState = event.getOldState().getBlock().getRelative(relative).getState();
     BlockState newState = event.getBlock().getRelative(relative).getState();
     BlockTransformEvent toCall;
-    if (event instanceof ParticipantBlockTransformEvent) {
+    if (event instanceof ParticipantBlockTransformEvent bte) {
       toCall = new ParticipantBlockTransformEvent(
-          event, oldState, newState, ((ParticipantBlockTransformEvent) event).getPlayerState());
-    } else if (event instanceof PlayerBlockTransformEvent) {
-      toCall = new PlayerBlockTransformEvent(
-          event, oldState, newState, ((PlayerBlockTransformEvent) event).getPlayerState());
+          event.getCause(), oldState, newState, bte.getPlayerState());
+    } else if (event instanceof PlayerBlockTransformEvent bte) {
+      toCall =
+          new PlayerBlockTransformEvent(event.getCause(), oldState, newState, bte.getPlayerState());
     } else {
       toCall = new BlockTransformEvent(event, oldState, newState);
     }
