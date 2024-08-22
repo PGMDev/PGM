@@ -30,6 +30,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftFireball;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftFirework;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftItem;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
@@ -183,8 +184,20 @@ public class NMSHacksSportPaper implements NMSHacks {
         // No-op, newer version of Java have disabled modifying final fields
       }
     }
+  }
 
+  @Override
+  public void cleanupWorld(World world) {
+    var nmsWorld = ((CraftWorld) world).getHandle();
     nmsWorld.craftingManager.lastCraftView = null;
+    world.setKeepSpawnInMemory(false);
+  }
+
+  @Override
+  public void cleanupPlayer(Player player) {
+    var nmsPlayer = ((CraftPlayer) player).getHandle();
+    nmsPlayer.killer = null;
+    nmsPlayer.p(null); // Resets who last hit the entityLiving
   }
 
   @Override
