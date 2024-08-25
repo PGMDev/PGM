@@ -28,6 +28,7 @@ import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.Phase;
@@ -102,7 +103,7 @@ public class MapInfoImpl implements MapInfo {
             Node.fromLastChildOrAttr(root, "difficulty"), Difficulty.class, Difficulty.NORMAL)
         .ordinal();
     this.world = parseWorld(root);
-    this.gamemode = XMLUtils.parseFormattedText(Node.fromLastChildOrAttr(root, "game"));
+    this.gamemode = parseGamemode(root);
     this.gamemodes = parseGamemodes(root);
     this.phase =
         XMLUtils.parseEnum(Node.fromLastChildOrAttr(root, "phase"), Phase.class, Phase.PRODUCTION);
@@ -263,6 +264,23 @@ public class MapInfoImpl implements MapInfo {
     return XMLUtils.flattenElements(root, "rules", "rule").stream()
         .map(Element::getTextNormalize)
         .collect(StreamUtils.toImmutableList());
+  }
+
+  private Component parseGamemode(Element root) throws InvalidXMLException {
+    Component gamemode = XMLUtils.parseFormattedText(root, "game");
+
+    if (gamemode == null) {
+      for (Element title : XMLUtils.flattenElements(root, "blitz", "title")) {
+        if (this.getProto().isNoOlderThan(MapProtos.REMOVE_BLITZ_TITLE)) {
+          throw new InvalidXMLException(
+              "<title> inside <blitz> is no longer supported, use <map game=\"...\"> or <game>",
+              title);
+        }
+        return XMLUtils.parseFormattedText(new Node(title));
+      }
+    }
+
+    return gamemode;
   }
 
   private static @NotNull List<Gamemode> parseGamemodes(Element root) throws InvalidXMLException {
