@@ -93,7 +93,7 @@ public class SpPlayerUtils implements PlayerUtils {
 
   @Override
   public void clearArrowsInPlayer(Player player) {
-    ((CraftPlayer) player).getHandle().o(0);
+    player.setArrowsStuck(0);
   }
 
   @Override

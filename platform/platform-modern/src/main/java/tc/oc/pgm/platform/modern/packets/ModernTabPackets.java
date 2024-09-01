@@ -12,8 +12,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
-import net.minecraft.core.HolderLookup;
+import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -133,7 +132,7 @@ public class ModernTabPackets implements TabPackets {
         String name,
         int ping,
         @Nullable Skin skin,
-        @Nullable String renderedDisplayName) {
+        @Nullable net.kyori.adventure.text.Component displayName) {
       packet.profileIds().add(uuid);
     }
 
@@ -143,8 +142,11 @@ public class ModernTabPackets implements TabPackets {
     }
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   static class ModernPlayerInfo extends ModernPacket<ClientboundPlayerInfoUpdatePacket>
       implements PlayerInfo {
+    private static final MinecraftComponentSerializer SERIALIZER =
+        MinecraftComponentSerializer.get();
 
     public ModernPlayerInfo(EnumPlayerInfoAction action) {
       super(new ClientboundPlayerInfoUpdatePacket(toNmsAction(action), new ArrayList<Entry>()));
@@ -152,14 +154,16 @@ public class ModernTabPackets implements TabPackets {
 
     @Override
     public void addPlayerInfo(
-        UUID uuid, String name, int ping, @Nullable Skin skin, @Nullable String jsonName) {
+        UUID uuid,
+        String name,
+        int ping,
+        @Nullable Skin skin,
+        @Nullable net.kyori.adventure.text.Component displayName) {
 
       GameProfile profile = new GameProfile(uuid, name);
       if (skin != null) Skins.toProfile(profile, skin);
 
-      Component nmsComponent = jsonName == null
-          ? null
-          : Component.Serializer.fromJson(jsonName, HolderLookup.Provider.create(Stream.of()));
+      var nmsComponent = displayName == null ? null : (Component) SERIALIZER.serialize(displayName);
 
       packet
           .entries()

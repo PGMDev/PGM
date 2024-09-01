@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.nms.packets.TabPackets.TeamPacketOperation.*;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -99,16 +100,12 @@ public interface TabPackets {
       addPlayerInfo(uuid, uuid.toString().substring(0, 16), ping, null, null);
     }
 
-    default void addPlayerInfo(UUID uuid, String renderedDisplayName) {
-      addPlayerInfo(uuid, "|" + uuid.toString().substring(0, 15), 0, null, renderedDisplayName);
+    default void addPlayerInfo(UUID uuid, Component displayName) {
+      addPlayerInfo(uuid, "|" + uuid.toString().substring(0, 15), 0, null, displayName);
     }
 
     void addPlayerInfo(
-        UUID uuid,
-        String name,
-        int ping,
-        @Nullable Skin skin,
-        @Nullable String renderedDisplayName);
+        UUID uuid, String name, int ping, @Nullable Skin skin, @Nullable Component displayName);
 
     boolean isNotEmpty();
   }

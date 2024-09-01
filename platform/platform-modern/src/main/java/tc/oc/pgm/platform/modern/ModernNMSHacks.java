@@ -157,6 +157,16 @@ public class ModernNMSHacks implements NMSHacks {
   }
 
   @Override
+  public void cleanupWorld(World world) {
+    // no-op
+  }
+
+  @Override
+  public void cleanupPlayer(Player player) {
+    // no-op
+  }
+
+  @Override
   public double getTPS() {
     return Bukkit.getServer().getTPS()[0];
   }

@@ -1,5 +1,9 @@
 package tc.oc.pgm.damage;
 
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.CUSTOM;
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.ENTITY_ATTACK;
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.FIRE;
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.MAGIC;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.List;
@@ -166,10 +170,9 @@ public class DamageMatchModule implements MatchModule, Listener {
   }
 
   /** Query the given damage event and cancel it if the result was denied. */
-  public Filter.QueryResponse processDamageEvent(
+  public void processDamageEvent(
       Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
-    Filter.QueryResponse response = queryDamage(assertNotNull(event), victim, damageInfo);
-    if (response.isDenied()) {
+    if (queryDamage(assertNotNull(event), victim, damageInfo).isDenied()) {
       event.setCancelled(true);
     } else if (attackerAction != null || victimAction != null) {
       MatchPlayerState attacker;
@@ -184,7 +187,6 @@ public class DamageMatchModule implements MatchModule, Listener {
             .ifPresent(p -> victimAction.trigger(p, getQuery(event, victim, damageInfo)));
       }
     }
-    return response;
   }
 
   /** Search the rider stack for a participant */
@@ -216,9 +218,7 @@ public class DamageMatchModule implements MatchModule, Listener {
     processDamageEvent(
         event,
         victim.getParticipantState(),
-        tracker()
-            .resolveDamage(
-                EntityDamageEvent.DamageCause.CUSTOM, event.getVehicle(), event.getAttacker()));
+        tracker().resolveDamage(CUSTOM, event.getVehicle(), event.getAttacker()));
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -226,12 +226,13 @@ public class DamageMatchModule implements MatchModule, Listener {
     MatchPlayer victim = getVictim(event.getEntity());
     if (victim == null) return;
 
-    processDamageEvent(
-        event,
-        victim.getParticipantState(),
-        tracker()
-            .resolveDamage(
-                EntityDamageEvent.DamageCause.FIRE, event.getEntity(), event.getCombuster()));
+    if (queryDamage(
+            event,
+            victim.getParticipantState(),
+            tracker().resolveDamage(FIRE, event.getEntity(), event.getCombuster()))
+        .isDenied()) {
+      event.setCancelled(true);
+    }
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -239,12 +240,13 @@ public class DamageMatchModule implements MatchModule, Listener {
     MatchPlayer victim = getVictim(event.getEntity());
     if (victim == null) return;
 
-    processDamageEvent(
-        event,
-        victim.getParticipantState(),
-        tracker()
-            .resolveDamage(
-                EntityDamageEvent.DamageCause.FIRE, event.getEntity(), event.getCombuster()));
+    if (queryDamage(
+            event,
+            victim.getParticipantState(),
+            tracker().resolveDamage(FIRE, event.getEntity(), event.getCombuster()))
+        .isDenied()) {
+      event.setCancelled(true);
+    }
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -254,8 +256,7 @@ public class DamageMatchModule implements MatchModule, Listener {
 
     for (LivingEntity entity : event.getAffectedEntities()) {
       ParticipantState victim = match.getParticipantState(entity);
-      DamageInfo damageInfo =
-          tracker().resolveDamage(EntityDamageEvent.DamageCause.MAGIC, entity, potion);
+      DamageInfo damageInfo = tracker().resolveDamage(MAGIC, entity, potion);
 
       if (victim != null && queryDamage(event, victim, damageInfo).isDenied()) {
         event.setIntensity(entity, 0);
@@ -278,9 +279,8 @@ public class DamageMatchModule implements MatchModule, Listener {
       }
       if (victimState == null) return;
 
-      DamageInfo damageInfo = tracker()
-          .resolveDamage(
-              EntityDamageEvent.DamageCause.ENTITY_ATTACK, event.getTarget(), event.getEntity());
+      DamageInfo damageInfo =
+          tracker().resolveDamage(ENTITY_ATTACK, event.getTarget(), event.getEntity());
       if (queryHostile(victimState, damageInfo).isDenied()) {
         event.setCancelled(true);
       }

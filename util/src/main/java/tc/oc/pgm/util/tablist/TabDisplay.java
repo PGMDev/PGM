@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.tablist;
 
+import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
 
 import java.util.Arrays;
@@ -62,7 +63,7 @@ public class TabDisplay {
     SlotBuilder slots = new SlotBuilder();
     for (int slot = 0; slot < this.slots; ++slot) {
       String name = slots.getPlayerName(slot);
-      String renderedPlayerName = "{\"text\":\"" + name + "\"}";
+      var renderedPlayerName = text(name);
 
       String teamName = this.slotTeamName(slot);
       this.teamCreatePackets[slot] = TAB_PACKETS.teamCreatePacket(

@@ -25,6 +25,7 @@ import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.util.xml.DocumentWrapper;
+import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.SAXHandler;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -141,6 +142,7 @@ public class MapFilePreprocessor {
   }
 
   private List<Content> processConstant(Element el) throws InvalidXMLException {
+    el = new InheritingElement(el);
     boolean isDelete = XMLUtils.parseBoolean(el.getAttribute("delete"), false);
     String text = el.getTextNormalize();
     if ((text == null || text.isEmpty()) != isDelete)

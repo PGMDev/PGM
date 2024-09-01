@@ -53,8 +53,7 @@ public class MatchAnnouncer implements Listener {
     final Match match = event.getMatch();
     match
         .getExecutor(MatchScope.LOADED)
-        .scheduleWithFixedDelay(
-            () -> match.getPlayers().forEach(this::sendCurrentlyPlaying), 0, 5, TimeUnit.MINUTES);
+        .scheduleWithFixedDelay(() -> sendCurrentlyPlaying(match), 0, 5, TimeUnit.MINUTES);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -83,12 +82,11 @@ public class MatchAnnouncer implements Listener {
         title = translatable("broadcast.gameOver");
       } else {
         if (singleWinner) {
-          title =
-              translatable(
-                  Iterables.getOnlyElement(winners).isNamePlural()
-                      ? "broadcast.gameOver.teamWinners"
-                      : "broadcast.gameOver.teamWinner",
-                  TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
+          title = translatable(
+              Iterables.getOnlyElement(winners).isNamePlural()
+                  ? "broadcast.gameOver.teamWinners"
+                  : "broadcast.gameOver.teamWinner",
+              TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
         }
 
         // Use stream here instead of #contains to avoid unchecked cast
@@ -156,13 +154,11 @@ public class MatchAnnouncer implements Listener {
 
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
-      viewer.sendMessage(
-          space()
-              .append(
-                  translatable(
-                      "misc.createdBy",
-                      NamedTextColor.GRAY,
-                      TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
+      viewer.sendMessage(space()
+          .append(translatable(
+              "misc.createdBy",
+              NamedTextColor.GRAY,
+              TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
     }
 
     // Send extra info from other plugins
@@ -173,11 +169,10 @@ public class MatchAnnouncer implements Listener {
     viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));
   }
 
-  private void sendCurrentlyPlaying(MatchPlayer viewer) {
-    viewer.sendMessage(
-        translatable(
-            "misc.playing",
-            NamedTextColor.DARK_PURPLE,
-            viewer.getMatch().getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
+  private void sendCurrentlyPlaying(Match match) {
+    match.sendMessage(translatable(
+        "misc.playing",
+        NamedTextColor.DARK_PURPLE,
+        match.getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 }

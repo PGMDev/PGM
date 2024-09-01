@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.tablist;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
@@ -338,8 +337,10 @@ public class TabView {
     if (this.manager == null) return;
 
     if (this.display != null) {
-      Arrays.fill(this.slots, null);
-      Arrays.fill(this.rendered, null);
+      for (int index = 0; index < this.size; index++) {
+        this.slots[index].removeFromView(this);
+        this.slots[index] = this.rendered[index] = null;
+      }
       display.tearDown();
 
       return;
@@ -352,6 +353,7 @@ public class TabView {
         this.manager.getBlankEntry(this.footerSlot).getContent(this));
 
     for (int index = 0; index < this.size; index++) {
+      this.slots[index].removeFromView(this);
       render.destroySlot(this.rendered[index], index);
       this.slots[index] = this.rendered[index] = null;
     }
@@ -383,21 +385,13 @@ public class TabView {
   private void respawnFakeEntities() {
     if (this.manager == null || this.display != null) return;
 
-    this.viewer
-        .getServer()
-        .getScheduler()
-        .runTask(
-            this.manager.getPlugin(),
-            new Runnable() {
-              @Override
-              public void run() {
-                TabRender render = new TabRender(TabView.this);
-                for (TabEntry entry : TabView.this.rendered) {
-                  render.updateFakeEntity(entry, true);
-                }
-                render.finish();
-              }
-            });
+    this.viewer.getServer().getScheduler().runTask(this.manager.getPlugin(), () -> {
+      TabRender render = new TabRender(TabView.this);
+      for (TabEntry entry : TabView.this.rendered) {
+        render.updateFakeEntity(entry, true);
+      }
+      render.finish();
+    });
   }
 
   protected void onRespawn(PlayerRespawnEvent event) {

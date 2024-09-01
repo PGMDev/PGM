@@ -47,6 +47,10 @@ public interface NMSHacks {
 
   void resetDimension(World world);
 
+  void cleanupWorld(World world);
+
+  void cleanupPlayer(Player player);
+
   double getTPS();
 
   void postToMainThread(Plugin plugin, boolean priority, Runnable task);

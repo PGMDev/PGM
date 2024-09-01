@@ -74,7 +74,7 @@ class ConditionalChecker {
     var cmp = XMLUtils.parseEnum(
         Node.fromAttr(el, "constant-comparison"),
         Cmp.class,
-        value == null ? Cmp.DEFINED : Cmp.EQUALS);
+        value == null ? Cmp.DEFINED_VALUE : Cmp.EQUALS);
 
     var constants = ctx.getConstants();
     var isDefined = constants.containsKey(id);
