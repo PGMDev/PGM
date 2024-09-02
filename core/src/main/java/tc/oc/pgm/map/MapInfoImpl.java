@@ -267,7 +267,7 @@ public class MapInfoImpl implements MapInfo {
   }
 
   private Component parseGamemode(Element root) throws InvalidXMLException {
-    Component gamemode = XMLUtils.parseFormattedText(root, "game");
+    Component gamemode = XMLUtils.parseFormattedText(Node.fromLastChildOrAttr(root, "game"));
 
     if (gamemode == null) {
       for (Element title : XMLUtils.flattenElements(root, "blitz", "title")) {
