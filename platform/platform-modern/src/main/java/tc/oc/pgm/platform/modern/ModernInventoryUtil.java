@@ -23,7 +23,7 @@ import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.1")
 public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
 
   @Override
@@ -80,24 +80,26 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   }
 
   @Override
-  public void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
-    // TODO: PLATFORM 1.20 no support for can place/destroy
+  @SuppressWarnings("removal")
+  public void setCanDestroy(ItemMeta itemMeta, Set<Material> materials) {
+    itemMeta.setCanDestroy(materials);
   }
 
   @Override
+  @SuppressWarnings("removal")
   public Set<Material> getCanDestroy(ItemMeta itemMeta) {
-    // TODO: PLATFORM 1.20 no support for can place/destroy
-    return Collections.emptySet();
+    return itemMeta.getCanDestroy();
   }
 
   @Override
-  public void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
-    // TODO: PLATFORM 1.20 no support for can place/destroy
+  @SuppressWarnings("removal")
+  public void setCanPlaceOn(ItemMeta itemMeta, Set<Material> materials) {
+    itemMeta.setCanPlaceOn(materials);
   }
 
   @Override
+  @SuppressWarnings("removal")
   public Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
-    // TODO: PLATFORM 1.20 no support for can place/destroy
-    return Collections.emptySet();
+    return itemMeta.getCanPlaceOn();
   }
 }
