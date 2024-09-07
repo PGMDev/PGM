@@ -36,17 +36,16 @@ public class ItemTransferListener implements Listener {
     // from inside the event, so instead we replace the entire stack.
 
     int initialQuantity = event.getItem().getItemStack().getAmount();
-    PlayerItemTransferEvent transferEvent =
-        new PlayerItemTransferEvent(
-            event,
-            ItemTransferEvent.Reason.PICKUP,
-            event.getPlayer(),
-            null,
-            event.getPlayer().getInventory(),
-            event.getItem().getItemStack(),
-            event.getItem(),
-            initialQuantity,
-            event.getPlayer().getOpenInventory().getCursor());
+    PlayerItemTransferEvent transferEvent = new PlayerItemTransferEvent(
+        event,
+        ItemTransferEvent.Reason.PICKUP,
+        event.getPlayer(),
+        null,
+        event.getPlayer().getInventory(),
+        event.getItem().getItemStack(),
+        event.getItem(),
+        initialQuantity,
+        event.getPlayer().getOpenInventory().getCursor());
 
     callEvent(transferEvent);
 
@@ -71,15 +70,14 @@ public class ItemTransferListener implements Listener {
   public void onBlockPickupItem(final InventoryPickupItemEvent event) {
     int initialQuantity =
         getQuantityPlaceable(event.getItem().getItemStack(), event.getInventory());
-    ItemTransferEvent transferEvent =
-        new ItemTransferEvent(
-            event,
-            ItemTransferEvent.Reason.PICKUP,
-            null,
-            event.getInventory(),
-            event.getItem().getItemStack(),
-            event.getItem(),
-            initialQuantity);
+    ItemTransferEvent transferEvent = new ItemTransferEvent(
+        event,
+        ItemTransferEvent.Reason.PICKUP,
+        null,
+        event.getInventory(),
+        event.getItem().getItemStack(),
+        event.getItem(),
+        initialQuantity);
 
     callEvent(transferEvent);
 
@@ -128,17 +126,16 @@ public class ItemTransferListener implements Listener {
       int quantity = event.getCurrentItem().getAmount();
 
       // The take event has no items on the cursor, because those will be placed by the second event
-      PlayerItemTransferEvent transferEvent =
-          new PlayerItemTransferEvent(
-              event,
-              ItemTransferEvent.Reason.TAKE,
-              player,
-              inventory,
-              null,
-              event.getCurrentItem(),
-              null,
-              quantity,
-              null);
+      PlayerItemTransferEvent transferEvent = new PlayerItemTransferEvent(
+          event,
+          ItemTransferEvent.Reason.TAKE,
+          player,
+          inventory,
+          null,
+          event.getCurrentItem(),
+          null,
+          quantity,
+          null);
       this.callEvent(transferEvent);
       cancelled = cancelled | event.isCancelled() | quantity != transferEvent.getQuantity();
 
@@ -147,17 +144,16 @@ public class ItemTransferListener implements Listener {
       event.setCurrentItem(null);
 
       quantity = event.getCursor().getAmount();
-      transferEvent =
-          new PlayerItemTransferEvent(
-              event,
-              ItemTransferEvent.Reason.PLACE,
-              player,
-              null,
-              inventory,
-              event.getCursor(),
-              null,
-              event.getCursor().getAmount(),
-              event.getCursor());
+      transferEvent = new PlayerItemTransferEvent(
+          event,
+          ItemTransferEvent.Reason.PLACE,
+          player,
+          null,
+          inventory,
+          event.getCursor(),
+          null,
+          event.getCursor().getAmount(),
+          event.getCursor());
       event.setCancelled(cancelled | event.isCancelled() | quantity != transferEvent.getQuantity());
 
       // Replace the old item in the inventory
@@ -288,11 +284,9 @@ public class ItemTransferListener implements Listener {
 
       case PLACE_SOME: // left-click with cursor stack on undersized-slot (e.g. beacon) or matching
         // stack without enough space
-        initialQuantity =
-            Math.min(
-                event.getCursor().getAmount(),
-                Math.min(
-                    event.getCursor().getMaxStackSize(), event.getInventory().getMaxStackSize()));
+        initialQuantity = Math.min(
+            event.getCursor().getAmount(),
+            Math.min(event.getCursor().getMaxStackSize(), event.getInventory().getMaxStackSize()));
         ItemStack existingStack = event.getCurrentItem();
         if (existingStack != null) {
           initialQuantity -= existingStack.getAmount();
@@ -319,17 +313,16 @@ public class ItemTransferListener implements Listener {
       return;
     }
 
-    PlayerItemTransferEvent transferEvent =
-        new PlayerItemTransferEvent(
-            event,
-            type,
-            player,
-            fromInventory,
-            toInventory,
-            itemStack,
-            null,
-            initialQuantity,
-            event.getCursor());
+    PlayerItemTransferEvent transferEvent = new PlayerItemTransferEvent(
+        event,
+        type,
+        player,
+        fromInventory,
+        toInventory,
+        itemStack,
+        null,
+        initialQuantity,
+        event.getCursor());
 
     callEvent(transferEvent);
     int quantity = Math.min(transferEvent.getQuantity(), initialQuantity);
@@ -453,17 +446,16 @@ public class ItemTransferListener implements Listener {
       // an inventory click (e.g. drop key, death, etc), so an event has not yet been fired
       int initialQuantity = event.getItemDrop().getItemStack().getAmount();
       ItemStack stack = event.getItemDrop().getItemStack();
-      PlayerItemTransferEvent transferEvent =
-          new PlayerItemTransferEvent(
-              event,
-              ItemTransferEvent.Reason.DROP,
-              event.getPlayer(),
-              event.getPlayer().getInventory(),
-              null,
-              stack,
-              event.getItemDrop(),
-              initialQuantity,
-              event.getPlayer().getOpenInventory().getCursor());
+      PlayerItemTransferEvent transferEvent = new PlayerItemTransferEvent(
+          event,
+          ItemTransferEvent.Reason.DROP,
+          event.getPlayer(),
+          event.getPlayer().getInventory(),
+          null,
+          stack,
+          event.getItemDrop(),
+          initialQuantity,
+          event.getPlayer().getOpenInventory().getCursor());
       callEvent(transferEvent);
 
       if (!transferEvent.isCancelled() && transferEvent.getQuantity() < initialQuantity) {
@@ -493,48 +485,45 @@ public class ItemTransferListener implements Listener {
     if (this.collectToCursor) {
       this.collectToCursor = false;
 
-      if (!(event.getWhoClicked() instanceof Player)) {
-        return;
-      }
-      Player player = (Player) event.getWhoClicked();
+      if (!(event.getWhoClicked() instanceof Player player)) return;
 
       ItemStack cursor = event.getCursor().clone();
+      var view = event.getView();
+      int totalSize = getViewSize(view);
 
       for (int pass = 0; pass < 2; pass++) {
-        for (int rawSlot = 0; rawSlot < event.getView().countSlots(); rawSlot++) {
+        for (int rawSlot = 0; rawSlot < totalSize; rawSlot++) {
           if (cursor.getAmount() >= cursor.getMaxStackSize()) {
             // If the gathered stack is full, we're done
             break;
           }
 
-          ItemStack stack = event.getView().getItem(rawSlot);
+          ItemStack stack = view.getItem(rawSlot);
           // First pass takes incomplete stacks, second pass takes complete ones
           if (cursor.isSimilar(stack)
               && ((pass == 0 && stack.getAmount() < stack.getMaxStackSize())
                   || (pass == 1 && stack.getAmount() >= stack.getMaxStackSize()))) {
             // Calculate how much can be collected from this stack
             // If it is the output slot of a transaction preview, 0
-            int quantity =
-                event.getView().getTopInventory() instanceof CraftingInventory
-                            && event.getView().convertSlot(rawSlot) == 0
-                        || event.getView().getTopInventory() instanceof MerchantInventory
-                            && event.getView().convertSlot(rawSlot) == 2
-                    ? 0
-                    : Math.min(stack.getAmount(), cursor.getMaxStackSize() - cursor.getAmount());
-            Inventory localInventory = getLocalInventory(event.getView(), rawSlot);
+            int quantity = view.getTopInventory() instanceof CraftingInventory
+                        && view.convertSlot(rawSlot) == 0
+                    || view.getTopInventory() instanceof MerchantInventory
+                        && view.convertSlot(rawSlot) == 2
+                ? 0
+                : Math.min(stack.getAmount(), cursor.getMaxStackSize() - cursor.getAmount());
+            Inventory localInventory = getLocalInventory(view, rawSlot);
             if (localInventory.getHolder() != player) {
               // If stack comes from an external inventory, fire a transfer event
-              PlayerItemTransferEvent transferEvent =
-                  new PlayerItemTransferEvent(
-                      event,
-                      ItemTransferEvent.Reason.TAKE,
-                      player,
-                      localInventory,
-                      null,
-                      stack,
-                      null,
-                      quantity,
-                      cursor);
+              PlayerItemTransferEvent transferEvent = new PlayerItemTransferEvent(
+                  event,
+                  ItemTransferEvent.Reason.TAKE,
+                  player,
+                  localInventory,
+                  null,
+                  stack,
+                  null,
+                  quantity,
+                  cursor);
               callEvent(transferEvent);
               if (transferEvent.isCancelled()) {
                 // If the event is cancelled, don't transfer from this slot
@@ -548,7 +537,7 @@ public class ItemTransferListener implements Listener {
               // Collect items from this stack to the cursor
               cursor.setAmount(cursor.getAmount() + quantity);
               if (quantity == stack.getAmount()) {
-                event.getView().setItem(rawSlot, null);
+                view.setItem(rawSlot, null);
               } else {
                 stack.setAmount(stack.getAmount() - quantity);
               }
@@ -557,9 +546,18 @@ public class ItemTransferListener implements Listener {
         }
       }
 
-      event.getView().setCursor(cursor);
+      view.setCursor(cursor);
       player.updateInventory();
     }
+  }
+
+  private int getViewSize(InventoryView view) {
+    // Modern view.countSlots() sums all slots (including armor & offhand), which out-of-bounds if
+    // you try to later try to view.getItem(slot) with the highest numbers as they're not part of
+    // the view. As a workaround, only use countSlots() when in the player's view (ie: the 2x2
+    // Crafting view), otherwise hard-code the 36 slots of 9x4.
+    if (view.getTopInventory().getType().equals(InventoryType.CRAFTING)) return view.countSlots();
+    return view.getTopInventory().getSize() + 36;
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -585,17 +583,16 @@ public class ItemTransferListener implements Listener {
 
     if (externalInventory != null) {
       int initialQuantity = transferred.getAmount();
-      PlayerItemTransferEvent transferEvent =
-          new PlayerItemTransferEvent(
-              event,
-              ItemTransferEvent.Reason.PLACE,
-              player,
-              null,
-              externalInventory,
-              transferred,
-              null,
-              initialQuantity,
-              event.getOldCursor());
+      PlayerItemTransferEvent transferEvent = new PlayerItemTransferEvent(
+          event,
+          ItemTransferEvent.Reason.PLACE,
+          player,
+          null,
+          externalInventory,
+          transferred,
+          null,
+          initialQuantity,
+          event.getOldCursor());
 
       callEvent(transferEvent);
 
