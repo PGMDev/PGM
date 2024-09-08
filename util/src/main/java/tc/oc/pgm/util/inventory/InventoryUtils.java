@@ -171,10 +171,6 @@ public final class InventoryUtils {
   public interface InventoryUtilsPlatform {
     Collection<PotionEffect> getPotionEffects(ItemStack item);
 
-    default boolean isUnbreakable(ItemStack item) {
-      return isUnbreakable(item.getItemMeta());
-    }
-
     boolean isUnbreakable(ItemMeta item);
 
     default void setUnbreakable(ItemStack item, boolean unbreakable) {
@@ -194,11 +190,11 @@ public final class InventoryUtils {
 
     EquipmentSlot getUsedHand(PlayerEvent event);
 
-    void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials);
+    void setCanDestroy(ItemMeta itemMeta, Set<Material> materials);
 
     Set<Material> getCanDestroy(ItemMeta itemMeta);
 
-    void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials);
+    void setCanPlaceOn(ItemMeta itemMeta, Set<Material> materials);
 
     Set<Material> getCanPlaceOn(ItemMeta itemMeta);
   }
