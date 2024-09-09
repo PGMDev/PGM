@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.jetbrains.annotations.Nullable;
-import sun.misc.Unsafe;
 import tc.oc.pgm.util.ClassLogger;
 
 public final class ReflectionUtils {
@@ -101,25 +100,6 @@ public final class ReflectionUtils {
     } catch (NoSuchFieldException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private static Unsafe unsafe;
-
-  static {
-    try {
-      final Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-      unsafeField.setAccessible(true);
-      unsafe = (Unsafe) unsafeField.get(null);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-  }
-
-  public static void setFinalStatic(Field field, Object value) {
-    Object fieldBase = unsafe.staticFieldBase(field);
-    long fieldOffset = unsafe.staticFieldOffset(field);
-
-    unsafe.putObject(fieldBase, fieldOffset, value);
   }
 
   public static void setField(Object base, Object value, Field field) {
