@@ -307,10 +307,10 @@ public class ModernNMSHacks implements NMSHacks {
         Objects.requireNonNull(worlddimension),
         console.progressListenerFactory.create(
             worlddata.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS)),
-        false,
+        false, // isDebug
         j,
         ImmutableList.of(),
-        true,
+        true, // tickTime
         console.overworld().getRandomSequences(),
         creator.environment(),
         generator,

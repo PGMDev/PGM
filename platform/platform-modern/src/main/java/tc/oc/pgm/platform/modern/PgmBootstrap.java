@@ -27,7 +27,7 @@ public class PgmBootstrap implements PluginBootstrap {
         .getLifecycleManager()
         .registerEventHandler(PgmRegistryEvents.DIMENSION_TYPE.freeze().newHandler(e -> e.registry()
             .register(
-                TypedKey.create(PgmRegistryKey.DIMENSION_TYPE, Key.key("pgm:legacy_overworld")),
+                TypedKey.create(PgmRegistryKey.DIMENSION_TYPE, Key.key("pgm", "legacy_overworld")),
                 b -> b.setDimension(new DimensionType(
                     OptionalLong.empty(),
                     true,
