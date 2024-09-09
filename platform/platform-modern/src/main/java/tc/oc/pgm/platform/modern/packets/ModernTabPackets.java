@@ -33,7 +33,7 @@ import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.platform.modern.Skins;
+import tc.oc.pgm.platform.modern.util.Skins;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.nms.packets.TabPackets;

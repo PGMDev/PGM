@@ -79,7 +79,7 @@ publishing {
 
 tasks {
     processResources {
-        filesMatching(listOf("plugin.yml")) {
+        filesMatching(listOf("plugin.yml", "paper-plugin.yml")) {
             expand(
                 "name" to project.name,
                 "description" to project.description,

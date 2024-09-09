@@ -10,6 +10,7 @@ import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -25,7 +26,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
@@ -37,7 +37,6 @@ import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.FileUtils;
-import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -67,7 +66,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       // Match creation was cancelled, no need to show an error
       if (e.getCause() instanceof InterruptedException) throw e;
 
-      Throwable err = e.getCause();
+      Throwable err = Objects.requireNonNullElse(e.getCause(), e);
       PGM.get().getGameLogger().log(Level.SEVERE, err.getMessage(), err.getCause());
       throw e;
     }
@@ -267,16 +266,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getInfo().getWorld();
-      WorldCreator creator = NMS_HACKS.detectWorld(worldName);
-      if (creator == null) {
-        creator = new WorldCreator(worldName);
-      }
-      final World world = PGM.get()
-          .getServer()
-          .createWorld(creator
-              .environment(environments[info.getEnvironment()])
-              .generator(info.hasTerrain() ? null : NullChunkGenerator.INSTANCE)
-              .seed(info.hasTerrain() ? info.getSeed() : creator.seed()));
+      final World world = NMS_HACKS.createWorld(
+          worldName, info.getEnvironment(), info.hasTerrain(), info.getSeed());
+
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 
       world.setPVP(true);

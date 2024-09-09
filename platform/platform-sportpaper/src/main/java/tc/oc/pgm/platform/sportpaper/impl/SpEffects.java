@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.sportpaper;
+package tc.oc.pgm.platform.sportpaper.impl;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 

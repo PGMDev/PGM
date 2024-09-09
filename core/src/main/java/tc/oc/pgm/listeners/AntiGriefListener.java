@@ -1,6 +1,7 @@
 package tc.oc.pgm.listeners;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -202,7 +203,7 @@ public class AntiGriefListener implements Listener {
   public void cloneCraftingWindow(final PlayerInteractEvent event) {
     if (!event.isCancelled()
         && event.getAction() == Action.RIGHT_CLICK_BLOCK
-        && event.getPlayer().getOpenInventory().getType() == InventoryType.CRAFTING) {
+        && INVENTORY_VIEW.getType(event.getPlayer().getOpenInventory()) == InventoryType.CRAFTING) {
       Block block = event.getClickedBlock();
       if (block != null
           && block.getType() == Materials.WORKBENCH

@@ -26,7 +26,7 @@ import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftTeam;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.platform.sportpaper.Skins;
+import tc.oc.pgm.platform.sportpaper.utils.Skins;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.nms.packets.TabPackets;

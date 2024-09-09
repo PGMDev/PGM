@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.sportpaper;
+package tc.oc.pgm.platform.sportpaper.utils;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
