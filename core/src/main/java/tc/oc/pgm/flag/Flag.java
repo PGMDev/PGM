@@ -1,7 +1,5 @@
 package tc.oc.pgm.flag;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
@@ -75,20 +73,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public static final Component RETURNED_SYMBOL = text("\u2691"); // ⚑
   public static final Component DROPPED_SYMBOL = text("\u2691"); // ⚑
   public static final Component CARRIED_SYMBOL = text("\u2794"); // ➔
-
-  public static final Sound PICKUP_SOUND_OWN =
-      sound(key("mob.wither.idle"), Sound.Source.MASTER, 0.7f, 1.2f);
-  public static final Sound DROP_SOUND_OWN =
-      sound(key("mob.wither.hurt"), Sound.Source.MASTER, 0.7f, 1);
-  public static final Sound RETURN_SOUND_OWN =
-      sound(key("mob.zombie.infect"), Sound.Source.MASTER, 1.1f, 1.2f);
-
-  public static final Sound PICKUP_SOUND =
-      sound(key("entity.firework_rocket.blast_far"), Sound.Source.MASTER, 1f, 0.7f);
-  public static final Sound DROP_SOUND =
-      sound(key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
-  public static final Sound RETURN_SOUND =
-      sound(key("entity.firework_rocket.twinkle_far"), Sound.Source.MASTER, 1f, 1f);
 
   private final ImmutableSet<NetDefinition> nets;
   private final Location bannerLocation;

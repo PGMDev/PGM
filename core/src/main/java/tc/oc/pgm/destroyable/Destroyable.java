@@ -1,7 +1,5 @@
 package tc.oc.pgm.destroyable;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
@@ -20,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.FireworkEffect;
@@ -55,6 +52,7 @@ import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
@@ -362,9 +360,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
           // for them
           for (MatchPlayer listener : this.getOwner().getMatch().getPlayers()) {
             if (listener.getBukkit().getLocation().distance(blockLocation) > 64) {
-              listener.playSound(sound(key("fireworks.blast_far"), Sound.Source.MASTER, 0.75f, 1f));
-              listener.playSound(
-                  sound(key("fireworks.twinkle_far"), Sound.Source.MASTER, 0.75f, 1f));
+              listener.playSound(Sounds.OBJECTIVE_FIREWORKS_FAR);
+              listener.playSound(Sounds.OBJECTIVE_FIREWORKS_TWINKLE);
             }
           }
         }

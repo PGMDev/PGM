@@ -1,10 +1,7 @@
 package tc.oc.pgm.portals;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -14,6 +11,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 public class Portal implements FeatureDefinition {
 
@@ -41,16 +39,13 @@ public class Portal implements FeatureDefinition {
   }
 
   public void load(FilterMatchModule fmm) {
-    fmm.onRise(
-        MatchPlayer.class,
-        trigger,
-        matchPlayer -> {
-          if (matchPlayer != null
-              && canUse(matchPlayer)
-              && !PortalMatchModule.teleported(matchPlayer)) {
-            teleportPlayer(matchPlayer, matchPlayer.getBukkit().getLocation());
-          }
-        });
+    fmm.onRise(MatchPlayer.class, trigger, matchPlayer -> {
+      if (matchPlayer != null
+          && canUse(matchPlayer)
+          && !PortalMatchModule.teleported(matchPlayer)) {
+        teleportPlayer(matchPlayer, matchPlayer.getBukkit().getLocation());
+      }
+    });
   }
 
   protected boolean canUse(MatchPlayer player) {
@@ -82,11 +77,7 @@ public class Portal implements FeatureDefinition {
       for (MatchPlayer listener : match.getPlayers()) {
         if (listener != player && listener.getBukkit().canSee(player.getBukkit())) {
           final Location loc = bukkit.getLocation();
-          listener.playSound(
-              sound(key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
-              loc.getX(),
-              loc.getY(),
-              loc.getZ());
+          listener.playSound(Sounds.PORTAL, loc.getX(), loc.getY(), loc.getZ());
         }
       }
     }
@@ -105,11 +96,7 @@ public class Portal implements FeatureDefinition {
     if (this.sound) {
       for (MatchPlayer listener : match.getPlayers()) {
         if (listener.getBukkit().canSee(player.getBukkit())) {
-          listener.playSound(
-              sound(key("mob.endermen.portal"), Sound.Source.MASTER, 1f, 1f),
-              to.getX(),
-              to.getY(),
-              to.getZ());
+          listener.playSound(Sounds.PORTAL, to.getX(), to.getY(), to.getZ());
         }
       }
     }

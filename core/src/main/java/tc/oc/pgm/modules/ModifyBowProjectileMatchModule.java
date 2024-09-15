@@ -1,12 +1,9 @@
 package tc.oc.pgm.modules;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import java.util.Set;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -32,6 +29,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
@@ -41,9 +39,6 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
   private final float velocityMod;
   private final Set<PotionEffect> potionEffects;
   private final Filter pickupFilter;
-
-  private static final Sound PROJECTILE_SOUND =
-      sound(key("random.successful_hit"), Sound.Source.MASTER, 0.18f, 0.45f);
 
   public ModifyBowProjectileMatchModule(
       Match match,
@@ -150,7 +145,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
             Player bukkitShooter = (Player) customProjectile.getShooter();
             MatchPlayer shooter = match.getPlayer(bukkitShooter);
             if (shooter != null && event.getEntity() != null) {
-              shooter.playSound(PROJECTILE_SOUND);
+              shooter.playSound(Sounds.PROJECTILE_HIT);
             }
           }
         }

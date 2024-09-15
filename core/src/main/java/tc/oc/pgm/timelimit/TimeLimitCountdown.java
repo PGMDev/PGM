@@ -1,26 +1,17 @@
 package tc.oc.pgm.timelimit;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.MatchCountdown;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 public class TimeLimitCountdown extends MatchCountdown {
-
-  private static final Sound NOTICE_SOUND =
-      sound(key("note.pling"), Sound.Source.MASTER, 1f, 1.19f); // Significant moments
-  private static final Sound IMMINENT_SOUND =
-      sound(key("random.click"), Sound.Source.MASTER, 0.25f, 2f); // Last 30 seconds
-  private static final Sound CRESCENDO_SOUND =
-      sound(key("portal.trigger"), Sound.Source.MASTER, 1f, 0.78f); // Last few seconds
 
   protected final TimeLimit timeLimit;
 
@@ -61,15 +52,15 @@ public class TimeLimitCountdown extends MatchCountdown {
       if (secondsLeft > 30) {
         // Beep for chat messages before the last 30 seconds
         if (this.showChat()) {
-          this.getMatch().playSound(NOTICE_SOUND);
+          this.getMatch().playSound(Sounds.MATCH_COUNTDOWN);
         }
       } else if (secondsLeft > 0) {
         // Tick for the last 30 seconds
-        this.getMatch().playSound(IMMINENT_SOUND);
+        this.getMatch().playSound(Sounds.TIMELIMIT_COUNTDOWN);
       }
       if (secondsLeft == 5) {
         // Play the portal crescendo sound up to the last moment
-        this.getMatch().playSound(CRESCENDO_SOUND);
+        this.getMatch().playSound(Sounds.TIMELIMIT_CRESCENDO);
       }
     }
   }

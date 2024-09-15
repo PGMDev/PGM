@@ -1,21 +1,17 @@
 package tc.oc.pgm.shops;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.kyori.adventure.sound.Sound;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 public class Shop extends SelfIdentifyingFeatureDefinition {
-
-  private static Sound PURCHASE_SOUND = sound(key("fire.ignite"), Sound.Source.MASTER, 1f, 1.4f);
 
   private final String name;
   private final ImmutableList<Category> categories;
@@ -44,7 +40,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
     if (icon.takePayment(buyer)) {
       icon.getAction().trigger(buyer);
       buyer.getBukkit().updateInventory();
-      buyer.playSound(PURCHASE_SOUND);
+      buyer.playSound(Sounds.SHOP_PURCHASE);
     } else if (!buyer.getMatch().isRunning()) {
       buyer.sendWarning(translatable("match.error.noMatch"));
     } else {
