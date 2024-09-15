@@ -3,7 +3,9 @@ package tc.oc.pgm.util.bukkit;
 import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.List;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -51,4 +53,6 @@ public interface MiscUtils {
   double getArrowDamage(Arrow arrow);
 
   int getWorldDataVersion(Path levelDat);
+
+  Key getSound(Sound constant);
 }

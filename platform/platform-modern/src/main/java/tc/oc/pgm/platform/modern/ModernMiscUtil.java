@@ -5,10 +5,12 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.List;
+import net.kyori.adventure.key.Key;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -101,5 +103,10 @@ public class ModernMiscUtil implements MiscUtils {
       // In case we cannot read the level.dat file, return a constant
       return -1;
     }
+  }
+
+  @Override
+  public Key getSound(Sound enumConstant) {
+    return enumConstant.key();
   }
 }

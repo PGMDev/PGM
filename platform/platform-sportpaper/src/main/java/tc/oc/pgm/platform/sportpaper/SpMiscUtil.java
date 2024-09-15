@@ -1,5 +1,6 @@
 package tc.oc.pgm.platform.sportpaper;
 
+import static net.kyori.adventure.key.Key.key;
 import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
@@ -7,11 +8,14 @@ import com.google.gson.JsonObject;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import net.kyori.adventure.key.Key;
 import net.minecraft.server.v1_8_R3.EntityPotion;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_8_R3.CraftSound;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Arrow;
@@ -100,5 +104,11 @@ public class SpMiscUtil implements MiscUtils {
       // In case we cannot read the level.dat file, return a constant
       return -1;
     }
+  }
+
+  @Override
+  @SuppressWarnings("PatternValidation")
+  public Key getSound(Sound enumConstant) {
+    return key(CraftSound.getSound(enumConstant));
   }
 }
