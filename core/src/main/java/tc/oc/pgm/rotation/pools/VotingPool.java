@@ -70,9 +70,9 @@ public class VotingPool extends MapPool {
   private void tickScores(Match match) {
     // If the current map isn't from this pool, ignore ticking
     if (!mapScores.containsKey(match.getMap())) return;
-    mapScores.replaceAll((mapScores, value) -> value > DEFAULT_SCORE
-        ? Math.max(value - constants.scoreDecay(), DEFAULT_SCORE)
-        : Math.min(value + constants.scoreRise(), DEFAULT_SCORE));
+    mapScores.replaceAll((mapScores, value) -> value > constants.defaultScore()
+        ? Math.max(value - constants.scoreDecay(), constants.defaultScore())
+        : Math.min(value + constants.scoreRise(), constants.defaultScore()));
     mapScores.put(
         match.getMap(), constants.scoreAfterPlay().applyAsDouble(new Context(match.getDuration())));
   }
