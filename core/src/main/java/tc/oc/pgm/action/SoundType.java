@@ -4,7 +4,7 @@ import net.kyori.adventure.sound.Sound;
 import tc.oc.pgm.util.bukkit.Sounds;
 
 public enum SoundType {
-  CUSTOM(Sounds.CUSTOM),
+  CUSTOM(Sounds.FALLBACK),
   TIP(Sounds.TIP),
   ALERT(Sounds.ALERT),
   PORTAL(Sounds.PORTAL),

@@ -9,7 +9,6 @@ public interface Sounds {
   Sound ALERT = sound("NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING", 1f, 2f);
   Sound CONTROL_POINT_GOOD = sound("PORTAL_TRAVEL", "BLOCK_PORTAL_TRAVEL", 0.35f, 2f);
   Sound CONTROL_POINT_BAD = sound("BLAZE_DEATH", "ENTITY_BLAZE_DEATH", 0.4f, 0.8f);
-  Sound CUSTOM = sound("NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING");
   Sound DEATH_OWN =
       sound("IRONGOLEM_DEATH", "ENTITY_IRON_GOLEM_DEATH"); // Own death is normal pitch, full volume
   Sound DEATH_KILLED = sound(
@@ -23,6 +22,7 @@ public interface Sounds {
       sound("IRONGOLEM_HIT", "ENTITY_IRON_GOLEM_HURT", 1f, 4f / 3f); // Enemy death is higher pitch
   Sound DEFUSE = sound("FIZZ", "ENTITY_GENERIC_EXTINGUISH_FIRE");
   Sound DIRECT_MESSAGE = sound("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP", 1f, 1.2f);
+  Sound FALLBACK = sound("NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING");
   Sound FLAG_DROP = sound("FIREWORK_TWINKLE2", "ENTITY_FIREWORK_ROCKET_TWINKLE_FAR");
   Sound FLAG_DROP_OWN = sound("WITHER_HURT", "ENTITY_WITHER_HURT", 0.7f, 1f);
   Sound FLAG_PICKUP = sound("FIREWORK_BLAST2", "ENTITY_FIREWORK_ROCKET_BLAST_FAR", 1f, 0.7f);
