@@ -11,11 +11,8 @@ public interface Sounds {
   Sound CONTROL_POINT_BAD = sound("BLAZE_DEATH", "ENTITY_BLAZE_DEATH", 0.4f, 0.8f);
   Sound DEATH_OWN =
       sound("IRONGOLEM_DEATH", "ENTITY_IRON_GOLEM_DEATH"); // Own death is normal pitch, full volume
-  Sound DEATH_KILLED = sound(
-      "IRONGOLEM_DEATH",
-      "ENTITY_IRON_GOLEM_DEATH",
-      0.75f,
-      4f / 3f); // Kill is higher pitch, quieter
+  // Kill is higher pitch, quieter
+  Sound DEATH_KILLED = sound("IRONGOLEM_DEATH", "ENTITY_IRON_GOLEM_DEATH", 0.75f, 4f / 3f);
   Sound DEATH_ALLY =
       sound("IRONGOLEM_HIT", "ENTITY_IRON_GOLEM_HURT"); // Ally death is a shorter sound
   Sound DEATH_ENEMY =
