@@ -1,14 +1,11 @@
 package tc.oc.pgm.proximity;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -18,13 +15,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.controlpoint.RegionPlayerTracker;
 import tc.oc.pgm.fireworks.FireworkMatchModule;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 public class ProximityAlarm {
   private static final long MESSAGE_INTERVAL = 5000;
   private static final float FLARE_CHANCE = 0.25f;
-
-  private static final Sound SOUND =
-      sound(key("fireworks.blast_far"), Sound.Source.MASTER, 1f, 0.7f);
 
   protected final Random random;
   protected final Match match;
@@ -42,7 +37,8 @@ public class ProximityAlarm {
   }
 
   public void showAlarm() {
-    if (this.random.nextFloat() < FLARE_CHANCE && !this.playerTracker.getPlayers().isEmpty()) {
+    if (this.random.nextFloat() < FLARE_CHANCE
+        && !this.playerTracker.getPlayers().isEmpty()) {
       this.showFlare();
       this.showMessage();
     }
@@ -52,16 +48,15 @@ public class ProximityAlarm {
     if (!definition.flares) return;
 
     float angle = (float) (this.random.nextFloat() * Math.PI * 2);
-    Location location =
-        this.definition
-            .detectRegion
-            .getBounds()
-            .getCenterPoint()
-            .toLocation(match.getWorld())
-            .add(
-                Math.sin(angle) * this.definition.flareRadius,
-                0,
-                Math.cos(angle) * this.definition.flareRadius);
+    Location location = this.definition
+        .detectRegion
+        .getBounds()
+        .getCenterPoint()
+        .toLocation(match.getWorld())
+        .add(
+            Math.sin(angle) * this.definition.flareRadius,
+            0,
+            Math.cos(angle) * this.definition.flareRadius);
 
     Set<Color> colors = new HashSet<>();
 
@@ -69,11 +64,13 @@ public class ProximityAlarm {
       colors.add(player.getParty().getFullColor());
     }
 
-    Firework firework =
-        FireworkMatchModule.spawnFirework(
-            location,
-            FireworkEffect.builder().with(FireworkEffect.Type.BALL).withColor(colors).build(),
-            0);
+    Firework firework = FireworkMatchModule.spawnFirework(
+        location,
+        FireworkEffect.builder()
+            .with(FireworkEffect.Type.BALL)
+            .withColor(colors)
+            .build(),
+        0);
     NMS_HACKS.skipFireworksLaunch(firework);
   }
 
@@ -89,7 +86,7 @@ public class ProximityAlarm {
       for (MatchPlayer player : this.match.getPlayers()) {
         if (this.definition.alertFilter.query(player).isAllowed()) {
           player.sendMessage(text(this.definition.alertMessage, NamedTextColor.RED));
-          player.playSound(SOUND);
+          player.playSound(Sounds.PROXIMITY_ALARM);
         }
       }
     }

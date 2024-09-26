@@ -1,7 +1,5 @@
 package tc.oc.pgm.modes;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.ImmutableList;
@@ -9,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
@@ -22,26 +19,23 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.LOADED)
 public class ObjectiveModesMatchModule implements MatchModule, Listener {
-
-  private static final Sound SOUND =
-      sound(key("mob.zombie.remedy"), Sound.Source.MASTER, 0.15f, 1.2f);
 
   // Sort by what's the next known mode to trigger
   // - Sort by remaining time (applicable while match is running).
   // - Non-triggered filtered modes go last (if triggered, they'd have a remaining time)
   // - Then sort by after time defined in monument mode
   // - Lastly sort by name
-  private static final Comparator<ModeChangeCountdown> MODE_COMPARATOR =
-      Comparator.comparing(
-              ModeChangeCountdown::getRemaining, Comparator.nullsLast(Comparator.naturalOrder()))
-          .thenComparing(
-              ModeChangeCountdown::getMode,
-              Comparator.comparing((Mode m) -> m.getFilter() != null)
-                  .thenComparing(Mode::getAfter)
-                  .thenComparing(Mode::getLegacyName));
+  private static final Comparator<ModeChangeCountdown> MODE_COMPARATOR = Comparator.comparing(
+          ModeChangeCountdown::getRemaining, Comparator.nullsLast(Comparator.naturalOrder()))
+      .thenComparing(
+          ModeChangeCountdown::getMode,
+          Comparator.comparing((Mode m) -> m.getFilter() != null)
+              .thenComparing(Mode::getAfter)
+              .thenComparing(Mode::getLegacyName));
 
   private final Match match;
   private final ImmutableList<Mode> modes;
@@ -63,14 +57,11 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
       this.countdowns.add(countdown);
       if (mode.getFilter() != null) {
         // if filter returns ALLOW at any time in the match, start countdown for mode change
-        fmm.onRise(
-            Match.class,
-            mode.getFilter(),
-            listener -> {
-              if (!this.countdownContext.isRunning(countdown) && match.isRunning()) {
-                this.countdownContext.start(countdown, countdown.getMode().getAfter());
-              }
-            });
+        fmm.onRise(Match.class, mode.getFilter(), listener -> {
+          if (!this.countdownContext.isRunning(countdown) && match.isRunning()) {
+            this.countdownContext.start(countdown, countdown.getMode().getAfter());
+          }
+        });
       }
     }
   }
@@ -120,20 +111,22 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
   }
 
   public ModeChangeCountdown getCountdown(Mode mode) {
-    return this.countdowns.stream().filter(mcc -> mcc.getMode() == mode).findFirst().orElse(null);
+    return this.countdowns.stream()
+        .filter(mcc -> mcc.getMode() == mode)
+        .findFirst()
+        .orElse(null);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onObjectiveModeChange(ObjectiveModeChangeEvent event) {
     if (event.isVisible()) {
-      Component broadcast =
-          text()
-              .append(text("> > > > ", NamedTextColor.DARK_AQUA))
-              .append(text(event.getName(), NamedTextColor.DARK_RED))
-              .append(text(" < < < <", NamedTextColor.DARK_AQUA))
-              .build();
+      Component broadcast = text()
+          .append(text("> > > > ", NamedTextColor.DARK_AQUA))
+          .append(text(event.getName(), NamedTextColor.DARK_RED))
+          .append(text(" < < < <", NamedTextColor.DARK_AQUA))
+          .build();
       match.sendMessage(broadcast);
-      match.playSound(SOUND);
+      match.playSound(Sounds.OBJECTIVE_MODE);
     }
   }
 }

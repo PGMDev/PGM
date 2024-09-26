@@ -1,8 +1,6 @@
 package tc.oc.pgm.listeners;
 
 import static net.kyori.adventure.identity.Identity.identity;
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -55,6 +53,7 @@ import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.Players;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.channels.Channel;
 import tc.oc.pgm.util.event.ChannelMessageEvent;
 import tc.oc.pgm.util.named.NameStyle;
@@ -78,9 +77,6 @@ public class ChatDispatcher implements Listener {
       .append(text("A", NamedTextColor.GOLD))
       .append(text("] ", NamedTextColor.WHITE))
       .build();
-
-  private static final Sound DM_SOUND = sound(key("random.orb"), Sound.Source.MASTER, 1f, 1.2f);
-  private static final Sound AC_SOUND = sound(key("random.orb"), Sound.Source.MASTER, 1f, 0.7f);
 
   private static final String GLOBAL_SYMBOL = "!";
   private static final String DM_SYMBOL = "@";
@@ -192,7 +188,7 @@ public class ChatDispatcher implements Listener {
       match.getPlayers().stream()
           .filter(AC_FILTER) // Initial filter
           .filter(viewer -> !viewer.equals(sender)) // Don't play sound for sender
-          .forEach(pl -> playSound(pl, AC_SOUND));
+          .forEach(pl -> playSound(pl, Sounds.ADMIN_CHAT));
     }
   }
 
@@ -258,7 +254,7 @@ public class ChatDispatcher implements Listener {
         s -> true,
         null,
         Channel.PRIVATE_SENDER);
-    playSound(receiver, DM_SOUND);
+    playSound(receiver, Sounds.DIRECT_MESSAGE);
   }
 
   private String formatPrivateMessage(String key, CommandSender viewer) {
@@ -419,7 +415,7 @@ public class ChatDispatcher implements Listener {
     SettingValue value = player.getSettings().getValue(SettingKey.SOUNDS);
     if (value.equals(SettingValue.SOUNDS_ALL)
         || value.equals(SettingValue.SOUNDS_CHAT)
-        || (sound.equals(DM_SOUND) && value.equals(SettingValue.SOUNDS_DM))) {
+        || (sound.equals(Sounds.DIRECT_MESSAGE) && value.equals(SettingValue.SOUNDS_DM))) {
       player.playSound(sound);
     }
   }

@@ -1,7 +1,5 @@
 package tc.oc.pgm.broadcast;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertNotNull;
@@ -14,16 +12,13 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 public class Broadcast implements Comparable<Broadcast> {
   public enum Type {
-    TIP(
-        translatable("misc.tip", NamedTextColor.BLUE),
-        sound(key("mob.endermen.idle"), Sound.Source.MASTER, 1, 1.2f)),
+    TIP(translatable("misc.tip", NamedTextColor.BLUE), Sounds.TIP),
 
-    ALERT(
-        translatable("misc.alert", NamedTextColor.YELLOW),
-        sound(key("note.pling"), Sound.Source.MASTER, 1, 2f));
+    ALERT(translatable("misc.alert", NamedTextColor.YELLOW), Sounds.ALERT);
 
     final Component prefix;
     final Sound sound;
@@ -38,11 +33,10 @@ public class Broadcast implements Comparable<Broadcast> {
           .append(text("["))
           .append(prefix)
           .append(text("] "))
-          .append(
-              message
-                  .color(NamedTextColor.AQUA)
-                  .decoration(TextDecoration.BOLD, false)
-                  .decoration(TextDecoration.ITALIC, true))
+          .append(message
+              .color(NamedTextColor.AQUA)
+              .decoration(TextDecoration.BOLD, false)
+              .decoration(TextDecoration.ITALIC, true))
           .colorIfAbsent(NamedTextColor.GRAY)
           .decoration(TextDecoration.BOLD, true)
           .build();

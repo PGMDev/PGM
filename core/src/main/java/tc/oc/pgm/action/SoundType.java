@@ -1,38 +1,37 @@
 package tc.oc.pgm.action;
 
+import net.kyori.adventure.sound.Sound;
+import tc.oc.pgm.util.bukkit.Sounds;
+
 public enum SoundType {
-  CUSTOM("note.pling", 1f, 1f),
-  TIP("mob.endermen.idle", 1f, 1.2f),
-  ALERT("note.pling", 1f, 2f),
-  PORTAL("mob.endermen.portal", 1f, 1f),
-  SCORE("random.levelup", 1f, 1f),
-  OBJECTIVE_FIREWORKS_FAR("fireworks.blast_far", 0.75f, 1f),
-  OBJECTIVE_FIREWORKS_TWINKLE("fireworks.twinkle_far", 0.75f, 1f),
-  OBJECTIVE_GOOD("portal.travel", 0.7f, 2f),
-  OBJECTIVE_BAD("mob.blaze.death", 0.8f, 0.8f),
-  OBJECTIVE_MODE("mob.zombie.remedy", 0.15f, 1.2f),
-  DEATH_OWN("mob.irongolem.death", 1f, 1f),
-  DEATH_OTHER("mob.irongolem.hit", 1f, 1f);
+  CUSTOM(Sounds.FALLBACK),
+  TIP(Sounds.TIP),
+  ALERT(Sounds.ALERT),
+  PORTAL(Sounds.PORTAL),
+  SCORE(Sounds.SCORE),
+  OBJECTIVE_FIREWORKS_FAR(Sounds.OBJECTIVE_FIREWORKS_FAR),
+  OBJECTIVE_FIREWORKS_TWINKLE(Sounds.OBJECTIVE_FIREWORKS_TWINKLE),
+  OBJECTIVE_GOOD(Sounds.OBJECTIVE_GOOD),
+  OBJECTIVE_BAD(Sounds.OBJECTIVE_BAD),
+  OBJECTIVE_MODE(Sounds.OBJECTIVE_MODE),
+  DEATH_OWN(Sounds.DEATH_OWN),
+  DEATH_OTHER(Sounds.DEATH_ENEMY);
 
-  private final String resource;
-  private final float volume;
-  private final float pitch;
+  private final Sound sound;
 
-  SoundType(String resource, float volume, float pitch) {
-    this.resource = resource;
-    this.volume = volume;
-    this.pitch = pitch;
+  SoundType(Sound sound) {
+    this.sound = sound;
   }
 
   public String getResource() {
-    return resource;
+    return sound.name().value();
   }
 
   public float getVolume() {
-    return volume;
+    return sound.volume();
   }
 
   public float getPitch() {
-    return pitch;
+    return sound.pitch();
   }
 }

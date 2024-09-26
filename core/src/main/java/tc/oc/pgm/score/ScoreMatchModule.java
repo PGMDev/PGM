@@ -1,7 +1,5 @@
 package tc.oc.pgm.score;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
@@ -16,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -40,6 +37,7 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -279,7 +277,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
             wholePoints == 1 ? "misc.point" : "misc.points",
             text(wholePoints, NamedTextColor.DARK_AQUA)),
         player.getParty().getName()));
-    player.playSound(sound(key("random.levelup"), Sound.Source.MASTER, 1, 1));
+    player.playSound(Sounds.SCORE);
   }
 
   public void incrementScore(UUID player, Competitor competitor, double amount) {

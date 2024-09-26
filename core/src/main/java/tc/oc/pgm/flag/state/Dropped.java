@@ -16,6 +16,7 @@ import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 /**
  * State of a flag after a player drops it on the ground, either by dying or by clicking on the
@@ -47,7 +48,7 @@ public class Dropped extends Uncarried implements Missing {
     super.enterState();
 
     if (!Duration.ZERO.equals(getDuration())) {
-      this.flag.playStatusSound(Flag.DROP_SOUND_OWN, Flag.DROP_SOUND);
+      this.flag.playStatusSound(Sounds.FLAG_DROP_OWN, Sounds.FLAG_DROP);
       this.flag.getMatch().sendMessage(translatable("flag.drop", this.flag.getComponentName()));
     }
 

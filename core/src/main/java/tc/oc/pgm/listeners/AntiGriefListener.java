@@ -1,14 +1,10 @@
 package tc.oc.pgm.listeners;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -34,6 +30,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
@@ -45,8 +42,6 @@ public class AntiGriefListener implements Listener {
 
   private static final Material DEFUSE_ITEM = Material.SHEARS;
   private static final int DEFUSE_SLOT = 4;
-
-  private static final Sound DEFUSE_SOUND = sound(key("random.fizz"), Sound.Source.MASTER, 1, 1);
 
   private final MatchManager mm;
 
@@ -124,7 +119,7 @@ public class AntiGriefListener implements Listener {
     clicker
         .getMatch()
         .playSound(
-            DEFUSE_SOUND,
+            Sounds.DEFUSE,
             entity.getLocation().getX(),
             entity.getLocation().getY(),
             entity.getLocation().getZ());
