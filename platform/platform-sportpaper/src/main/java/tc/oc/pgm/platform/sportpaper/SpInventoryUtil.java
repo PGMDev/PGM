@@ -73,7 +73,7 @@ public class SpInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
   }
 
   @Override
-  public void setCanDestroy(ItemMeta itemMeta, Collection<Material> materials) {
+  public void setCanDestroy(ItemMeta itemMeta, Set<Material> materials) {
     itemMeta.setCanDestroy(materials);
   }
 
@@ -83,7 +83,7 @@ public class SpInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
   }
 
   @Override
-  public void setCanPlaceOn(ItemMeta itemMeta, Collection<Material> materials) {
+  public void setCanPlaceOn(ItemMeta itemMeta, Set<Material> materials) {
     itemMeta.setCanPlaceOn(materials);
   }
 

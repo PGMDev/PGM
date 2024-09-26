@@ -30,6 +30,24 @@ pools:
     variants:
       - default
 
+    # Voted pool only: num of maps to show each vote
+    vote-options: 5
+    # Voted pool only: modify how score behaves
+    score:
+      # How much score should maps start with by default.
+      default: 0.2
+      # How much score decreases/increases after each match. Null to be proportional to amount of maps.
+      decay: null
+      rise: null
+      # When a map is voted, enforce that it never falls out of the range of:
+      min-after-vote: 0.01 # 1%, avoids fully discarding the map
+      max-after-vote: 1
+      # Maps with less than this are ignored for a vote
+      min-for-vote: 0.01
+      # After the map plays, reset the score to:
+      # Supports a formula with play_minutes
+      after-playing: 0
+
     # Voted pools support modifiers which come in the form of a formula (does not affect any other type of pool).
     #
     # This formula is parsed by exp4j library, it's quite flexible and supports many built-in functions.

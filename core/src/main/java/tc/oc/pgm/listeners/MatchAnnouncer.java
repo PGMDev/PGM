@@ -1,7 +1,5 @@
 package tc.oc.pgm.listeners;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
@@ -14,7 +12,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -35,19 +32,12 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.LegacyFormatUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class MatchAnnouncer implements Listener {
-
-  private static final Sound SOUND_MATCH_START =
-      sound(key("note.pling"), Sound.Source.MASTER, 1f, 1.59f);
-  private static final Sound SOUND_MATCH_WIN =
-      sound(key("mob.wither.death"), Sound.Source.MASTER, 1f, 1f);
-  private static final Sound SOUND_MATCH_LOSE =
-      sound(key("mob.wither.spawn"), Sound.Source.MASTER, 1f, 1f);
-
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchLoad(final MatchLoadEvent event) {
     final Match match = event.getMatch();
@@ -66,7 +56,7 @@ public class MatchAnnouncer implements Listener {
     match.showTitle(
         title(go, empty(), Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(15))));
 
-    match.playSound(SOUND_MATCH_START);
+    match.playSound(Sounds.MATCH_START);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -92,19 +82,19 @@ public class MatchAnnouncer implements Listener {
         // Use stream here instead of #contains to avoid unchecked cast
         if (winners.stream().anyMatch(w -> w == viewer.getParty())) {
           // Winner
-          viewer.playSound(SOUND_MATCH_WIN);
+          viewer.playSound(Sounds.MATCH_WIN);
           if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamWon", NamedTextColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
-          viewer.playSound(SOUND_MATCH_LOSE);
+          viewer.playSound(Sounds.MATCH_LOSE);
           if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamLost", NamedTextColor.RED);
           }
         } else {
           // Observer
-          viewer.playSound(SOUND_MATCH_WIN);
+          viewer.playSound(Sounds.MATCH_WIN);
         }
       }
 

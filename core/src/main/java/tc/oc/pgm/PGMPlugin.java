@@ -185,7 +185,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (config.getMapPoolFile() != null) {
       MapPoolManager manager =
           new MapPoolManager(logger, config.getMapPoolFile().toFile(), datastore);
-      if (manager.getActiveMapPool() != null) mapOrder = manager;
+      var pool = manager.getActiveMapPool();
+      if (pool != null) {
+        if (!pool.getMaps().isEmpty()) mapOrder = manager;
+        else logger.severe("Active pool has no maps. Falling back to a random pool.");
+      }
     }
     if (mapOrder == null) mapOrder = new RandomMapOrder(Lists.newArrayList(mapLibrary.getMaps()));
 

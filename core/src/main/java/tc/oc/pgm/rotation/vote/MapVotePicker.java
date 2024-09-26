@@ -1,7 +1,7 @@
 package tc.oc.pgm.rotation.vote;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -9,17 +9,17 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
+import net.objecthunter.exp4j.ExpressionContext;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
-import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.rotation.MapPoolManager;
+import tc.oc.pgm.rotation.pools.VotingPool;
 import tc.oc.pgm.util.math.Formula;
-import tc.oc.pgm.util.math.VariableExpressionContext;
 
 /**
  * Responsible for picking the set of maps that will be on the vote. It's able to apply any
@@ -33,35 +33,39 @@ public class MapVotePicker {
 
   // A 0 that prevents arbitrarily low values with tons of precision, which cause issues when mixed
   // with larger numbers.
-  private static final double MINIMUM_WEIGHT = 0.00000001;
+  private static final double MINIMUM_WEIGHT = 0.000001;
 
-  private static final Formula<Context> DEFAULT_MODIFIER = c -> Math.pow(c.getVariable("score"), 2);
+  private static final Formula<MapVoteContext> DEFAULT_MODIFIER =
+      c -> Math.pow(c.getVariable("score"), 2);
 
   private final MapPoolManager manager;
-  private final Formula<Context> modifier;
+  private final VotingPool.VoteConstants constants;
+  private final Formula<MapVoteContext> modifier;
 
-  public static MapVotePicker of(MapPoolManager manager, ConfigurationSection config) {
+  public static MapVotePicker of(
+      MapPoolManager manager, VotingPool.VoteConstants constants, ConfigurationSection config) {
     // Create dummy config to read defaults off of.
     if (config == null) config = new MemoryConfiguration();
 
-    Formula<Context> formula = DEFAULT_MODIFIER;
+    Formula<MapVoteContext> formula = DEFAULT_MODIFIER;
     try {
       formula =
-          Formula.of(
-              config.getString("modifier"),
-              Formula.ContextFactory.ofStatic(new Context().getVariables()),
-              DEFAULT_MODIFIER);
+          Formula.of(config.getString("modifier"), MapVoteContext.variables(), DEFAULT_MODIFIER);
     } catch (IllegalArgumentException e) {
       PGM.get()
           .getLogger()
           .log(Level.SEVERE, "Failed to load vote picker modifier formula, using fallback", e);
     }
 
-    return new MapVotePicker(manager, formula);
+    return new MapVotePicker(manager, constants, formula);
   }
 
-  public MapVotePicker(MapPoolManager manager, Formula<Context> modifier) {
+  private MapVotePicker(
+      MapPoolManager manager,
+      VotingPool.VoteConstants constants,
+      Formula<MapVoteContext> modifier) {
     this.manager = manager;
+    this.constants = constants;
     this.modifier = modifier;
   }
 
@@ -84,7 +88,7 @@ public class MapVotePicker {
     if (selected == null) selected = new ArrayList<>();
 
     List<MapInfo> unmodifiable = Collections.unmodifiableList(selected);
-    while (selected.size() < MAX_VOTE_OPTIONS) {
+    while (selected.size() < constants.voteOptions()) {
       MapInfo map = getMap(unmodifiable, scores);
 
       if (map == null) break; // Ran out of maps!
@@ -115,50 +119,40 @@ public class MapVotePicker {
    * @return random weight for the map
    */
   public double getWeight(@Nullable List<MapInfo> selected, @NotNull MapInfo map, double score) {
-    if ((selected != null && selected.contains(map)) || score <= 0) return 0;
+    if ((selected != null && selected.contains(map)) || score <= constants.scoreMinToVote())
+      return 0;
 
-    Context context =
-        new Context(
-            score,
-            getRepeatedGamemodes(selected, map),
-            map.getMaxPlayers().stream().mapToInt(i -> i).sum(),
-            manager.getActivePlayers(null));
+    var context = new MapVoteContext(
+        score,
+        getRepeatedGamemodes(selected, map),
+        map.getMaxPlayers().stream().mapToInt(i -> i).sum(),
+        manager.getActivePlayers(null));
 
     return Math.max(modifier.applyAsDouble(context), 0);
   }
 
   private double getRepeatedGamemodes(List<MapInfo> selected, MapInfo map) {
     if (selected == null || selected.isEmpty()) return 0;
-    List<MapTag> gamemodes =
-        map.getTags().stream().filter(MapTag::isGamemode).collect(Collectors.toList());
+    Collection<Gamemode> gamemodes = map.getGamemodes();
 
-    return selected.stream().filter(s -> !Collections.disjoint(gamemodes, s.getTags())).count();
+    return selected.stream()
+        .filter(s -> !Collections.disjoint(gamemodes, s.getGamemodes()))
+        .count();
   }
 
-  private static final class Context implements VariableExpressionContext {
-    private final ImmutableMap<String, Double> values;
-
-    public Context(double score, double sameGamemode, double mapsize, double players) {
-      this.values =
-          ImmutableMap.of(
+  private static final class MapVoteContext extends ExpressionContext.Impl {
+    public MapVoteContext(double score, double sameGamemode, double mapsize, double players) {
+      super(
+          Map.of(
               "score", score,
               "same_gamemode", sameGamemode,
               "mapsize", mapsize,
-              "players", players);
+              "players", players),
+          null);
     }
 
-    private Context() {
-      this(0, 0, 0, 0);
-    }
-
-    @Override
-    public Set<String> getVariables() {
-      return values.keySet();
-    }
-
-    @Override
-    public Double getVariable(String s) {
-      return values.get(s);
+    static Set<String> variables() {
+      return new MapVoteContext(0, 0, 0, 0).getVariables();
     }
   }
 }

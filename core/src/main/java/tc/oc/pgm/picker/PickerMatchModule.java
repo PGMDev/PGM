@@ -1,7 +1,6 @@
 package tc.oc.pgm.picker;
 
 import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
@@ -15,7 +14,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -62,6 +60,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.Enchantments;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialData;
@@ -663,7 +662,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private void handleInventoryClick(
       final MatchPlayer player, final String name, final ItemStack item) {
-    player.playSound(sound(key("random.click"), Sound.Source.MASTER, 1, 2));
+    player.playSound(Sounds.INVENTORY_CLICK);
 
     if (hasClasses) {
       ClassMatchModule cmm = player.getMatch().needModule(ClassMatchModule.class);

@@ -29,8 +29,8 @@ map:
     # - uri: "https://github.com/PGMDev/Maps"
     #  path: "default-maps"
 
-  # A path to a map pools file, or empty to disable map pools.
-  pools: "map-pools.yml"
+  # A path to a map pools file, empty or commented-out to disable pools.
+  # pools: "map-pools.yml"
   
   # A path to the includes folder, or empty to disable map includes.
   includes: "includes"

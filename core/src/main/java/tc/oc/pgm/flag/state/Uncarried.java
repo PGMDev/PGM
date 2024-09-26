@@ -22,6 +22,7 @@ import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.hologram.Hologram;
 import tc.oc.pgm.hologram.HologramMatchModule;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.material.Materials;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */
@@ -36,14 +37,13 @@ public abstract class Uncarried extends Spawned {
   public Uncarried(Flag flag, Post post, @Nullable Location location) {
     super(flag, post);
     if (location == null) location = flag.getReturnPoint(post);
-    this.location =
-        new Location(
-            location.getWorld(),
-            location.getBlockX() + 0.5,
-            location.getBlockY(),
-            location.getBlockZ() + 0.5,
-            location.getYaw(),
-            location.getPitch());
+    this.location = new Location(
+        location.getWorld(),
+        location.getBlockX() + 0.5,
+        location.getBlockY(),
+        location.getBlockZ() + 0.5,
+        location.getYaw(),
+        location.getPitch());
 
     Block block = this.location.getBlock();
     if (block.getState() instanceof Banner) {
@@ -53,10 +53,9 @@ public abstract class Uncarried extends Spawned {
       this.oldBlock = block.getState();
     }
     this.oldBase = block.getRelative(BlockFace.DOWN).getState();
-    this.hologram =
-        flag.getMatch()
-            .needModule(HologramMatchModule.class)
-            .createHologram(this.location.clone().add(0, 1.7, 0), flag.getComponentName(), false);
+    this.hologram = flag.getMatch()
+        .needModule(HologramMatchModule.class)
+        .createHologram(this.location.clone().add(0, 1.7, 0), flag.getComponentName(), false);
   }
 
   @Override
@@ -118,7 +117,7 @@ public abstract class Uncarried extends Spawned {
       this.pickingUp = null;
     }
 
-    this.flag.playStatusSound(Flag.PICKUP_SOUND_OWN, Flag.PICKUP_SOUND);
+    this.flag.playStatusSound(Sounds.FLAG_PICKUP_OWN, Sounds.FLAG_PICKUP);
     this.flag.touch(carrier.getParticipantState());
 
     this.flag.transition(new Carried(this.flag, this.post, carrier, this.location));
