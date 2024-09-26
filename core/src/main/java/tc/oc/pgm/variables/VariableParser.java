@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.jdom2.Element;
-import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
@@ -19,8 +18,8 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.ArrayVariable;
-import tc.oc.pgm.variables.types.BlitzVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
+import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerLocationVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
@@ -39,7 +38,7 @@ public class VariableParser {
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
 
-  public VariableDefinition<?> parse(Element el) throws InvalidXMLException {
+  public Variable<?> parse(Element el) throws InvalidXMLException {
     String id = Node.fromRequiredAttr(el, "id").getValue();
     if (!VARIABLE_ID.matcher(id).matches())
       throw new InvalidXMLException(
@@ -49,7 +48,7 @@ public class VariableParser {
     Method parser = methodParsers.get(el.getName().toLowerCase());
     if (parser != null) {
       try {
-        return (VariableDefinition<?>) parser.invoke(this, el, id);
+        return (Variable<?>) parser.invoke(this, el);
       } catch (Exception e) {
         throw InvalidXMLException.coerce(e, new Node(el));
       }
@@ -59,76 +58,63 @@ public class VariableParser {
   }
 
   @MethodParser("variable")
-  public VariableDefinition<?> parseDummy(Element el, String id) throws InvalidXMLException {
+  public Variable<?> parseDummy(Element el) throws InvalidXMLException {
     Class<? extends Filterable<?>> scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     double def = XMLUtils.parseNumber(Node.fromAttr(el, "default"), Double.class, 0d);
     Integer excl = XMLUtils.parseNumberInRange(
         Node.fromAttr(el, "exclusive"), Integer.class, Range.closed(1, 50), null);
-    return new VariableDefinition<>(
-        id, scope, true, false, vd -> new DummyVariable<>(vd, def, excl));
+    return new DummyVariable<>(scope, def, excl);
   }
 
   @MethodParser("array")
-  public VariableDefinition<?> parseArray(Element el, String id) throws InvalidXMLException {
+  public Variable<?> parseArray(Element el) throws InvalidXMLException {
     Class<? extends Filterable<?>> scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     int size = XMLUtils.parseNumberInRange(
         Node.fromRequiredAttr(el, "size"), Integer.class, Range.closed(1, 1024));
     double def = XMLUtils.parseNumber(Node.fromAttr(el, "default"), Double.class, 0d);
-    return new VariableDefinition<>(
-        id, scope, true, true, vd -> new ArrayVariable<>(vd, size, def));
+    return new ArrayVariable<>(scope, size, def);
   }
 
   @MethodParser("lives")
-  public VariableDefinition<MatchPlayer> parseBlitzLives(Element el, String id)
-      throws InvalidXMLException {
-    return VariableDefinition.ofStatic(id, MatchPlayer.class, BlitzVariable::new);
+  public Variable<MatchPlayer> parseBlitzLives(Element el) {
+    return LivesVariable.INSTANCE;
   }
 
   @MethodParser("score")
-  public VariableDefinition<Party> parseScore(Element el, String id) throws InvalidXMLException {
-    return VariableDefinition.ofStatic(id, Party.class, ScoreVariable::new);
+  public Variable<Party> parseScore(Element el) {
+    return ScoreVariable.INSTANCE;
   }
 
   @MethodParser("timelimit")
-  public VariableDefinition<Match> parseTimeLimit(Element el, String id)
-      throws InvalidXMLException {
-    return VariableDefinition.ofStatic(id, Match.class, TimeLimitVariable::new);
+  public Variable<Match> parseTimeLimit(Element el) {
+    return TimeLimitVariable.INSTANCE;
   }
 
   @MethodParser("with-team")
-  public VariableDefinition<Match> parseTeamAdapter(Element el, String id)
-      throws InvalidXMLException {
+  public Variable<Match> parseTeamAdapter(Element el) throws InvalidXMLException {
+    var features = factory.getFeatures();
     @SuppressWarnings("unchecked")
-    VariableDefinition<Party> var =
-        factory.getFeatures().resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
+    Variable<Party> var = features.resolve(Node.fromRequiredAttr(el, "var"), Variable.class);
     if (var.getScope() != Party.class) {
       throw new InvalidXMLException(
           "Team scope is required for with-team variable, got " + var.getScope().getSimpleName(),
           el);
     }
 
-    FeatureReference<TeamFactory> team =
-        factory.getFeatures().createReference(Node.fromRequiredAttr(el, "team"), TeamFactory.class);
+    var team = features.createReference(Node.fromRequiredAttr(el, "team"), TeamFactory.class);
 
-    return new VariableDefinition<>(
-        id,
-        Match.class,
-        var.isDynamic(),
-        var.isIndexed(),
-        vd -> new TeamVariableAdapter(vd, var, team));
+    return new TeamVariableAdapter(var, team);
   }
 
   @MethodParser("maxbuildheight")
-  public VariableDefinition<Match> parseMaxBuild(Element el, String id) throws InvalidXMLException {
-    return VariableDefinition.ofStatic(id, Match.class, MaxBuildVariable::new);
+  public Variable<Match> parseMaxBuild(Element el) {
+    return MaxBuildVariable.INSTANCE;
   }
 
   @MethodParser("player-location")
-  public VariableDefinition<MatchPlayer> parsePlayerLocation(Element el, String id)
-      throws InvalidXMLException {
-    PlayerLocationVariable.Component component =
+  public Variable<MatchPlayer> parsePlayerLocation(Element el) throws InvalidXMLException {
+    var component =
         XMLUtils.parseEnum(Node.fromAttr(el, "component"), PlayerLocationVariable.Component.class);
-    return new VariableDefinition<>(
-        id, MatchPlayer.class, false, false, vd -> new PlayerLocationVariable(vd, component));
+    return PlayerLocationVariable.INSTANCES.get(component);
   }
 }

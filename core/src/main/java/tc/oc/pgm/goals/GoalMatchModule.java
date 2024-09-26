@@ -14,10 +14,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
@@ -92,10 +94,6 @@ public class GoalMatchModule implements MatchModule, Listener {
     }
 
     goals.add(goal);
-
-    for (Competitor competitor : match.getCompetitors()) {
-      addCompetitorGoal(competitor, goal);
-    }
   }
 
   private void addCompetitorGoal(Competitor competitor, Goal<?> goal) {
@@ -104,6 +102,15 @@ public class GoalMatchModule implements MatchModule, Listener {
 
       goalsByCompetitor.put(competitor, goal);
       competitorsByGoal.put(goal, competitor);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onMatchLoad(MatchLoadEvent event) {
+    for (Goal goal : goals) {
+      for (Competitor competitor : match.getCompetitors()) {
+        addCompetitorGoal(competitor, goal);
+      }
     }
   }
 

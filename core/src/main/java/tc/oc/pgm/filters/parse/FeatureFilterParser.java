@@ -27,7 +27,7 @@ import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
-import tc.oc.pgm.variables.VariableDefinition;
+import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class FeatureFilterParser extends FilterParser {
@@ -96,11 +96,10 @@ public class FeatureFilterParser extends FilterParser {
   }
 
   private static final Pattern INLINE_VARIABLE =
-      Pattern.compile(
-          "(%VAR%)(?:\\[(\\d+)])?\\s*=\\s*(%RANGE%|%NUM%)"
-              .replace("%VAR%", VariablesModule.Factory.VARIABLE_ID.pattern())
-              .replace("%RANGE%", XMLUtils.RANGE_DOTTED.pattern())
-              .replace("%NUM%", "-?\\d*\\.?\\d+"));
+      Pattern.compile("(%VAR%)(?:\\[(\\d+)])?\\s*=\\s*(%RANGE%|%NUM%)"
+          .replace("%VAR%", VariablesModule.Factory.VARIABLE_ID.pattern())
+          .replace("%RANGE%", XMLUtils.RANGE_DOTTED.pattern())
+          .replace("%NUM%", "-?\\d*\\.?\\d+"));
 
   private @Nullable Filter parseInlineFilter(Node node, String text) throws InvalidXMLException {
     // Formula-style inline filter
@@ -115,8 +114,7 @@ public class FeatureFilterParser extends FilterParser {
     // Parse variable filter
     Matcher match = INLINE_VARIABLE.matcher(text);
     if (match.matches()) {
-      VariableDefinition<?> variable =
-          features.resolve(node, match.group(1), VariableDefinition.class);
+      Variable<?> variable = features.resolve(node, match.group(1), Variable.class);
       Integer index =
           match.group(2) == null ? null : XMLUtils.parseNumber(node, match.group(2), Integer.class);
       Range<Double> range = XMLUtils.parseNumericRange(node, match.group(3), Double.class);
@@ -128,22 +126,16 @@ public class FeatureFilterParser extends FilterParser {
 
   private Filter buildFilter(Node node, ParsingNode parsed) throws InvalidXMLException {
     if (parsed.getChildren() == null) return parseReference(node, parsed.getBase());
-    switch (parsed.getBase()) {
-      case "all":
-        return AllFilter.of(buildChildren(node, parsed));
-      case "any":
-        return AnyFilter.of(buildChildren(node, parsed));
-      case "one":
-        return OneFilter.of(buildChildren(node, parsed));
-      case "not":
-        return new InverseFilter(buildChild(node, parsed));
-      case "deny":
-        return new DenyFilter(buildChild(node, parsed));
-      case "allow":
-        return new AllowFilter(buildChild(node, parsed));
-      default:
-        throw new SyntaxException("Unknown inline filter type " + parsed.getBase(), parsed);
-    }
+    return switch (parsed.getBase()) {
+      case "all" -> AllFilter.of(buildChildren(node, parsed));
+      case "any" -> AnyFilter.of(buildChildren(node, parsed));
+      case "one" -> OneFilter.of(buildChildren(node, parsed));
+      case "not" -> new InverseFilter(buildChild(node, parsed));
+      case "deny" -> new DenyFilter(buildChild(node, parsed));
+      case "allow" -> new AllowFilter(buildChild(node, parsed));
+      default -> throw new SyntaxException(
+          "Unknown inline filter type " + parsed.getBase(), parsed);
+    };
   }
 
   private List<Filter> buildChildren(Node node, ParsingNode parent) throws InvalidXMLException {
@@ -156,6 +148,6 @@ public class FeatureFilterParser extends FilterParser {
     if (parent.getChildrenCount() != 1)
       throw new SyntaxException(
           "Expected exactly one child but got " + parent.getChildrenCount(), parent);
-    return buildFilter(node, parent.getChildren().get(0));
+    return buildFilter(node, parent.getChildren().getFirst());
   }
 }

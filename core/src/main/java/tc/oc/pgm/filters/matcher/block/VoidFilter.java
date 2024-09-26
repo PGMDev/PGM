@@ -9,6 +9,8 @@ import tc.oc.pgm.listeners.WorldProblemListener;
 /** Matches blocks that have only air/void below them */
 public class VoidFilter extends TypedFilter.Impl<BlockQuery> {
 
+  public static final VoidFilter INSTANCE = new VoidFilter();
+
   @Override
   public Class<? extends BlockQuery> queryType() {
     return BlockQuery.class;

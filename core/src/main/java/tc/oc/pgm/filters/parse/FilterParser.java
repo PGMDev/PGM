@@ -91,7 +91,7 @@ import tc.oc.pgm.util.math.OffsetVector;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
-import tc.oc.pgm.variables.VariableDefinition;
+import tc.oc.pgm.variables.Variable;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
@@ -288,7 +288,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("void")
   public VoidFilter parseVoid(Element el) throws InvalidXMLException {
-    return new VoidFilter();
+    return VoidFilter.INSTANCE;
   }
 
   @MethodParser("entity")
@@ -361,27 +361,27 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("crouching")
   public PlayerMovementFilter parseCrouching(Element el) throws InvalidXMLException {
-    return new PlayerMovementFilter(false, true);
+    return PlayerMovementFilter.CROUCHING;
   }
 
   @MethodParser("walking")
   public PlayerMovementFilter parseWalking(Element el) throws InvalidXMLException {
-    return new PlayerMovementFilter(false, false);
+    return PlayerMovementFilter.WALKING;
   }
 
   @MethodParser("sprinting")
   public PlayerMovementFilter parseSprinting(Element el) throws InvalidXMLException {
-    return new PlayerMovementFilter(true, false);
+    return PlayerMovementFilter.SPRINTING;
   }
 
   @MethodParser("flying")
   public FlyingFilter parseFlying(Element el) throws InvalidXMLException {
-    return new FlyingFilter();
+    return FlyingFilter.INSTANCE;
   }
 
   @MethodParser("can-fly")
   public CanFlyFilter parseCanFly(Element el) throws InvalidXMLException {
-    return new CanFlyFilter();
+    return CanFlyFilter.INSTANCE;
   }
 
   @MethodParser("grounded")
@@ -567,40 +567,29 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("match-phase")
   public Filter parseMatchPhase(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter(el.getValue(), el);
+    return switch (el.getTextNormalize()) {
+      case "running" -> MatchPhaseFilter.RUNNING;
+      case "finished" -> MatchPhaseFilter.FINISHED;
+      case "starting" -> MatchPhaseFilter.STARTING;
+      case "idle" -> MatchPhaseFilter.IDLE;
+      case "started" -> MatchPhaseFilter.STARTED;
+      default -> throw new InvalidXMLException("Invalid or no match state found", el);
+    };
   }
 
   @MethodParser("match-started")
   public Filter parseMatchStarted(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter("started", el);
+    return MatchPhaseFilter.STARTED;
   }
 
   @MethodParser("match-running")
   public Filter parseMatchRunning(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter("running", el);
+    return MatchPhaseFilter.RUNNING;
   }
 
   @MethodParser("match-finished")
   public Filter parseMatchFinished(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter("finished", el);
-  }
-
-  private Filter parseMatchPhaseFilter(String matchState, Element el) throws InvalidXMLException {
-
-    switch (matchState) {
-      case "running":
-        return MatchPhaseFilter.RUNNING;
-      case "finished":
-        return MatchPhaseFilter.FINISHED;
-      case "starting":
-        return MatchPhaseFilter.STARTING;
-      case "idle":
-        return MatchPhaseFilter.IDLE;
-      case "started":
-        return MatchPhaseFilter.STARTED;
-    }
-
-    throw new InvalidXMLException("Invalid or no match state found", el);
+    return MatchPhaseFilter.FINISHED;
   }
 
   // Methods for parsing QueryModifiers
@@ -632,8 +621,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("variable")
   public Filter parseVariableFilter(Element el) throws InvalidXMLException {
-    VariableDefinition<?> varDef =
-        features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
+    Variable<?> varDef = features.resolve(Node.fromRequiredAttr(el, "var"), Variable.class);
     Integer index = null;
     if (varDef.isIndexed())
       index = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "index"), Integer.class);

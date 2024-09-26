@@ -1,23 +1,48 @@
 package tc.oc.pgm.variables;
 
-import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.Filterable;
 
-public interface Variable<T extends Filterable<?>> extends Feature<VariableDefinition<T>> {
-
-  @Override
-  default String getId() {
-    return getDefinition().getId();
-  }
+public interface Variable<T extends Filterable<?>> extends FeatureDefinition {
 
   double getValue(Filterable<?> context);
 
   void setValue(Filterable<?> context, double value);
 
-  default boolean isIndexed() {
-    return getDefinition().isIndexed();
+  Class<T> getScope();
+
+  default boolean isDynamic() {
+    return false;
   }
 
-  default void postLoad(Match match) {}
+  default boolean isIndexed() {
+    return false;
+  }
+
+  default boolean isReadonly() {
+    return false;
+  }
+
+  default void load(Match match) {}
+
+  /**
+   * Variable that has indexing, ie: arrays Note: you must always check {@link #isIndexed} to know
+   * if it actually is an indexed variable or not.
+   *
+   * @param <T> The filter type of this variable
+   */
+  interface Indexed<T extends Filterable<?>> extends Variable<T> {
+
+    @Override
+    default boolean isIndexed() {
+      return true;
+    }
+
+    double getValue(Filterable<?> context, int idx);
+
+    void setValue(Filterable<?> context, int idx, double value);
+
+    int size();
+  }
 }

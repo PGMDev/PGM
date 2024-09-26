@@ -2,6 +2,7 @@ package tc.oc.pgm.action;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -15,6 +16,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class ActionModule implements MapModule<ActionMatchModule> {
@@ -57,17 +59,14 @@ public class ActionModule implements MapModule<ActionMatchModule> {
         throws InvalidXMLException {
       ActionParser parser = new ActionParser(factory);
 
-      for (Element actions : doc.getRootElement().getChildren("actions")) {
-        for (Element action : actions.getChildren()) {
-          if (parser.isAction(action)) parser.parse(action, null);
-        }
+      for (Element action :
+          XMLUtils.flattenElements(doc.getRootElement(), Set.of("actions"), parser.actionTypes())) {
+        parser.parse(action, null);
       }
 
       ImmutableList.Builder<Trigger<?>> triggers = ImmutableList.builder();
-      for (Element actions : doc.getRootElement().getChildren("actions")) {
-        for (Element rule : actions.getChildren("trigger")) {
-          triggers.add(parser.parseTrigger(rule));
-        }
+      for (Element rule : XMLUtils.flattenElements(doc.getRootElement(), "actions", "trigger")) {
+        triggers.add(parser.parseTrigger(rule));
       }
 
       return new ActionModule(triggers.build());

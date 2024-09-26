@@ -3,63 +3,46 @@ package tc.oc.pgm.variables.types;
 import static java.lang.Math.toRadians;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.ToDoubleFunction;
 import org.bukkit.Location;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.block.RayBlockIntersection;
-import tc.oc.pgm.variables.VariableDefinition;
 
 public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
 
+  public static final Map<Component, PlayerLocationVariable> INSTANCES;
+
+  static {
+    var values = new EnumMap<Component, PlayerLocationVariable>(Component.class);
+    for (Component component : Component.values()) {
+      values.put(component, new PlayerLocationVariable(component));
+    }
+    INSTANCES = Collections.unmodifiableMap(values);
+  }
+
   private static final double NULL_VALUE = -1;
+  private static RayCastCache lastRaytrace;
+
+  record RayCastCache(Location location, RayBlockIntersection rayCast) {}
 
   private final Component component;
-  private Location lastLocation;
-  private RayBlockIntersection lastRayCast;
 
-  public PlayerLocationVariable(VariableDefinition<MatchPlayer> definition, Component component) {
-    super(definition);
+  public PlayerLocationVariable(Component component) {
+    super(MatchPlayer.class);
     this.component = component;
   }
 
-  private RayBlockIntersection intersection(MatchPlayer player) {
-    if (player.getLocation().equals(lastLocation)) {
-      return lastRayCast;
-    }
-    lastLocation = player.getLocation().clone();
-    lastRayCast = PLAYER_UTILS.getTargetedBlock(player.getBukkit());
-    return lastRayCast;
+  @Override
+  public boolean isReadonly() {
+    return true;
   }
 
   @Override
   protected double getValueImpl(MatchPlayer player) {
-    return switch (component) {
-      case X -> player.getLocation().getX();
-      case Y -> player.getLocation().getY();
-      case Z -> player.getLocation().getZ();
-      case PITCH -> player.getLocation().getPitch();
-      case YAW -> player.getLocation().getYaw();
-      case DIR_X -> -Math.cos(toRadians(player.getLocation().getPitch()))
-          * Math.sin(toRadians(player.getLocation().getYaw()));
-      case DIR_Y -> -Math.sin(toRadians(player.getLocation().getPitch()));
-      case DIR_Z -> Math.cos(toRadians(player.getLocation().getPitch()))
-          * Math.cos(toRadians(player.getLocation().getYaw()));
-      case VEL_X -> player.getBukkit().getVelocity().getX();
-      case VEL_Y -> player.getBukkit().getVelocity().getY();
-      case VEL_Z -> player.getBukkit().getVelocity().getZ();
-      case TARGET_X -> getOrDefault(intersection(player), (i) -> i.getBlock().getX());
-      case TARGET_Y -> getOrDefault(intersection(player), (i) -> i.getBlock().getY());
-      case TARGET_Z -> getOrDefault(intersection(player), (i) -> i.getBlock().getZ());
-      case PLACE_X -> getOrDefault(intersection(player), (i) -> i.getPlaceAt().getX());
-      case PLACE_Y -> getOrDefault(intersection(player), (i) -> i.getPlaceAt().getY());
-      case PLACE_Z -> getOrDefault(intersection(player), (i) -> i.getPlaceAt().getZ());
-      case HAS_TARGET -> intersection(player) == null ? 0 : 1;
-    };
-  }
-
-  private double getOrDefault(
-      RayBlockIntersection intersection, ToDoubleFunction<RayBlockIntersection> function) {
-    return intersection == null ? NULL_VALUE : function.applyAsDouble(intersection);
+    return component.getter.applyAsDouble(player);
   }
 
   @Override
@@ -68,23 +51,47 @@ public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
   }
 
   public enum Component {
-    X,
-    Y,
-    Z,
-    PITCH,
-    YAW,
-    DIR_X,
-    DIR_Y,
-    DIR_Z,
-    VEL_X,
-    VEL_Y,
-    VEL_Z,
-    TARGET_X,
-    TARGET_Y,
-    TARGET_Z,
-    PLACE_X,
-    PLACE_Y,
-    PLACE_Z,
-    HAS_TARGET,
+    X(p -> p.getLocation().getX()),
+    Y(p -> p.getLocation().getY()),
+    Z(p -> p.getLocation().getZ()),
+    PITCH(p -> p.getLocation().getPitch()),
+    YAW(p -> p.getLocation().getYaw()),
+    DIR_X(p -> -Math.cos(toRadians(p.getLocation().getPitch()))
+        * Math.sin(toRadians(p.getLocation().getYaw()))),
+    DIR_Y(p -> -Math.sin(toRadians(p.getLocation().getPitch()))),
+    DIR_Z(p -> Math.cos(toRadians(p.getLocation().getPitch()))
+        * Math.cos(toRadians(p.getLocation().getYaw()))),
+    VEL_X(p -> p.getBukkit().getVelocity().getX()),
+    VEL_Y(p -> p.getBukkit().getVelocity().getY()),
+    VEL_Z(p -> p.getBukkit().getVelocity().getZ()),
+    TARGET_X(p -> intersection(p, i -> i.getBlock().getX())),
+    TARGET_Y(p -> intersection(p, i -> i.getBlock().getY())),
+    TARGET_Z(p -> intersection(p, i -> i.getBlock().getZ())),
+    PLACE_X(p -> intersection(p, i -> i.getPlaceAt().getX())),
+    PLACE_Y(p -> intersection(p, i -> i.getPlaceAt().getY())),
+    PLACE_Z(p -> intersection(p, i -> i.getPlaceAt().getZ())),
+    HAS_TARGET(p -> intersection(p) == null ? 0 : 1);
+
+    private final ToDoubleFunction<MatchPlayer> getter;
+
+    Component(ToDoubleFunction<MatchPlayer> getter) {
+      this.getter = getter;
+    }
+  }
+
+  private static RayBlockIntersection intersection(MatchPlayer player) {
+    RayCastCache cache = lastRaytrace;
+    if (player.getLocation().equals(cache.location)) {
+      return cache.rayCast;
+    }
+    lastRaytrace = cache = new RayCastCache(
+        player.getLocation().clone(), PLAYER_UTILS.getTargetedBlock(player.getBukkit()));
+    return cache.rayCast;
+  }
+
+  private static double intersection(
+      MatchPlayer player, ToDoubleFunction<RayBlockIntersection> toDouble) {
+    var intersection = intersection(player);
+    return intersection == null ? NULL_VALUE : toDouble.applyAsDouble(intersection);
   }
 }

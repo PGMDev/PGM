@@ -4,50 +4,80 @@ import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.features.StateHolder;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.Filterable;
-import tc.oc.pgm.variables.VariableDefinition;
 
-public class DummyVariable<T extends Filterable<?>> extends AbstractVariable<T> {
+public class DummyVariable<T extends Filterable<?>> extends AbstractVariable<T>
+    implements StateHolder<DummyVariable<T>.Values> {
 
   private final double def;
-  private final Map<T, Double> values;
+  private final Integer exclusive;
 
-  // Circular buffer of last additions, head marks next location to replace
-  private @Nullable final T[] additions;
-  private int head = 0;
-
-  public DummyVariable(VariableDefinition<T> definition, double def, Integer exclusive) {
-    super(definition);
+  public DummyVariable(Class<T> scope, double def, Integer exclusive) {
+    super(scope);
     this.def = def;
-    this.values = new HashMap<>();
-    //noinspection unchecked
-    this.additions =
-        exclusive == null ? null : (T[]) Array.newInstance(definition.getScope(), exclusive);
+    this.exclusive = exclusive;
+  }
+
+  @Override
+  public boolean isDynamic() {
+    return true;
+  }
+
+  @Override
+  public void load(Match match) {
+    match
+        .getFeatureContext()
+        .registerState(this, exclusive == null ? new Values() : new LimitedValues());
   }
 
   @Override
   protected double getValueImpl(T obj) {
-    return values.getOrDefault(obj, def);
+    return obj.state(this).values.getOrDefault(obj, def);
   }
 
   @Override
   protected void setValueImpl(T obj, double value) {
-    Double oldVal = values.put(obj, value);
-
-    // Limit is enabled, and we're not replacing a pre-existing key
-    if (additions != null && oldVal == null) {
-      T toRemove = additions[head];
-      if (toRemove != null) {
-        values.remove(toRemove);
-        toRemove.moduleRequire(FilterMatchModule.class).invalidate(toRemove);
-      }
-
-      additions[head] = obj;
-      head = (head + 1) % additions.length;
-    }
+    obj.state(this).setValue(obj, value);
 
     // For performance reasons, let's avoid launching an event for every variable change
     obj.moduleRequire(FilterMatchModule.class).invalidate(obj);
+  }
+
+  class Values {
+    protected final Map<T, Double> values = new HashMap<>();
+
+    protected void setValue(T obj, double value) {
+      values.put(obj, value);
+    }
+  }
+
+  class LimitedValues extends Values {
+    // Circular buffer of last additions, head marks next location to replace
+    private final @Nullable T[] additions;
+    private int head = 0;
+
+    public LimitedValues() {
+      //noinspection unchecked
+      this.additions = (T[]) Array.newInstance(getScope(), exclusive);
+    }
+
+    protected void setValue(T obj, double value) {
+      Double oldVal = values.put(obj, value);
+
+      // Limit is enabled, and we're not replacing a pre-existing key
+      if (additions != null && oldVal == null) {
+        T toRemove = additions[head];
+        if (toRemove != null) {
+          values.remove(toRemove);
+          toRemove.moduleRequire(FilterMatchModule.class).invalidate(toRemove);
+        }
+
+        additions[head] = obj;
+        head = (head + 1) % additions.length;
+      }
+    }
   }
 }

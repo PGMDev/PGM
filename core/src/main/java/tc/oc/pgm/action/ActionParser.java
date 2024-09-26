@@ -13,6 +13,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -36,12 +37,16 @@ import tc.oc.pgm.action.actions.VelocityAction;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
+import tc.oc.pgm.api.filter.query.PartyQuery;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
+import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
@@ -58,7 +63,7 @@ import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
-import tc.oc.pgm.variables.VariableDefinition;
+import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class ActionParser {
@@ -66,6 +71,7 @@ public class ActionParser {
   private static final NumberFormat DEFAULT_FORMAT = NumberFormat.getIntegerInstance();
 
   private final MapFactory factory;
+  private final boolean legacy;
   private final FeatureDefinitionContext features;
   private final FilterParser filters;
   private final RegionParser regions;
@@ -74,6 +80,7 @@ public class ActionParser {
 
   public ActionParser(MapFactory factory) {
     this.factory = factory;
+    this.legacy = !factory.getProto().isNoOlderThan(MapProtos.ACTION_REVAMP);
     this.features = factory.getFeatures();
     this.filters = factory.getFilters();
     this.regions = factory.getRegions();
@@ -106,8 +113,8 @@ public class ActionParser {
     return result;
   }
 
-  public boolean isAction(Element el) {
-    return getParserFor(el) != null;
+  public Set<String> actionTypes() {
+    return methodParsers.keySet();
   }
 
   private boolean maybeReference(Element el) {
@@ -175,14 +182,6 @@ public class ActionParser {
     }
   }
 
-  public <T extends Filterable<?>> Trigger<T> parseTrigger(Element el) throws InvalidXMLException {
-    Class<T> cls = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
-    return new Trigger<>(
-        cls,
-        filters.parseRequiredProperty(el, "filter", DynamicFilterValidation.of(cls)),
-        parseProperty(Node.fromRequiredChildOrAttr(el, "action", "trigger"), cls));
-  }
-
   private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
       throws InvalidXMLException {
     return parseScope(el, scope, "scope");
@@ -199,9 +198,32 @@ public class ActionParser {
     return scope;
   }
 
-  @MethodParser("action")
-  public <B extends Filterable<?>> ActionNode<? super B> parseAction(Element el, Class<B> scope)
+  private <B extends Filterable<?>> boolean includeObs(Element el, Class<B> scope)
       throws InvalidXMLException {
+    return PartyQuery.class.isAssignableFrom(scope)
+        || XMLUtils.parseBoolean(el.getAttribute("observers"), legacy);
+  }
+
+  private Filter wrapFilter(Filter outer, boolean includeObs) {
+    if (includeObs || outer == StaticFilter.DENY) return outer;
+    if (outer == StaticFilter.ALLOW) return ParticipatingFilter.PARTICIPATING;
+    return AllFilter.of(outer, ParticipatingFilter.PARTICIPATING);
+  }
+
+  // Parser for <trigger> elements
+  public <T extends Filterable<?>> Trigger<T> parseTrigger(Element el) throws InvalidXMLException {
+    Class<T> cls = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
+    return new Trigger<>(
+        cls,
+        wrapFilter(
+            filters.parseRequiredProperty(el, "filter", DynamicFilterValidation.of(cls)),
+            includeObs(el, cls)),
+        parseProperty(Node.fromRequiredChildOrAttr(el, "action", "trigger"), cls));
+  }
+
+  // Generic action with N children parser
+  public <B extends Filterable<?>> ActionNode<? super B> parseAction(
+      Element el, Class<B> scope, boolean includeObs) throws InvalidXMLException {
     scope = parseScope(el, scope);
 
     ImmutableList.Builder<Action<? super B>> builder = ImmutableList.builder();
@@ -209,10 +231,21 @@ public class ActionParser {
       builder.add(parse(child, scope));
     }
 
-    Filter filter = filters.parseFilterProperty(el, "filter", StaticFilter.ALLOW);
-    Filter untriggerFilter = filters.parseFilterProperty(el, "untrigger-filter", StaticFilter.DENY);
+    Filter filter =
+        wrapFilter(filters.parseFilterProperty(el, "filter", StaticFilter.ALLOW), includeObs);
+    Filter untriggerFilter = wrapFilter(
+        filters.parseFilterProperty(
+            el, "untrigger-filter", legacy ? StaticFilter.DENY : StaticFilter.ALLOW),
+        includeObs);
 
     return new ActionNode<>(builder.build(), filter, untriggerFilter, scope);
+  }
+
+  // Parsers
+  @MethodParser("action")
+  public <B extends Filterable<?>> ActionNode<? super B> parseAction(Element el, Class<B> scope)
+      throws InvalidXMLException {
+    return parseAction(el, scope, true);
   }
 
   @MethodParser("switch-scope")
@@ -221,7 +254,7 @@ public class ActionParser {
     outer = parseScope(el, outer, "outer");
     Class<I> inner = parseScope(el, null, "inner");
 
-    ActionDefinition<? super I> child = parseAction(el, inner);
+    ActionDefinition<? super I> child = parseAction(el, inner, includeObs(el, inner));
 
     Action<? super O> result = ScopeSwitchAction.of(child, outer, inner);
     if (result == null) {
@@ -307,27 +340,30 @@ public class ActionParser {
   @MethodParser("set")
   public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(Element el, Class<T> scope)
       throws InvalidXMLException {
-    VariableDefinition<?> var =
-        features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
+    var node = Node.fromRequiredAttr(el, "var");
+    Variable<?> var = features.resolve(node, Variable.class);
     scope = parseScope(el, scope);
 
     if (!Filterables.isAssignable(scope, var.getScope()))
       throw new InvalidXMLException(
           "Wrong variable scope for '"
-              + var.getId()
+              + node.getValue()
               + "', expected "
               + var.getScope().getSimpleName()
               + " which cannot be found in "
               + scope.getSimpleName(),
           el);
 
+    if (var.isReadonly())
+      throw new InvalidXMLException("You may not use a read-only variable in set", el);
+
     Formula<T> formula =
         Formula.of(Node.fromRequiredAttr(el, "value").getValue(), variables.getContext(scope));
 
-    if (var.isIndexed()) {
+    if (var.isIndexed() && var instanceof Variable.Indexed<?> indexedVar) {
       Formula<T> idx =
           Formula.of(Node.fromRequiredAttr(el, "index").getValue(), variables.getContext(scope));
-      return new SetVariableAction.Indexed<>(scope, var, idx, formula);
+      return new SetVariableAction.Indexed<>(scope, indexedVar, idx, formula);
     }
 
     return new SetVariableAction<>(scope, var, formula);
@@ -411,6 +447,7 @@ public class ActionParser {
   @MethodParser("paste-structure")
   public <T extends Filterable<?>> PasteStructureAction<T> parseStructure(
       Element el, Class<T> scope) throws InvalidXMLException {
+    scope = parseScope(el, scope);
     Formula<T> xFormula =
         Formula.of(Node.fromRequiredAttr(el, "x").getValue(), variables.getContext(scope));
     Formula<T> yFormula =
@@ -418,7 +455,7 @@ public class ActionParser {
     Formula<T> zFormula =
         Formula.of(Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(scope));
 
-    XMLFeatureReference<StructureDefinition> structure =
+    var structure =
         features.createReference(Node.fromRequiredAttr(el, "structure"), StructureDefinition.class);
 
     return new PasteStructureAction<>(scope, xFormula, yFormula, zFormula, structure);

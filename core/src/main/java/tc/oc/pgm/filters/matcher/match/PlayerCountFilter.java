@@ -34,9 +34,8 @@ public class PlayerCountFilter extends TypedFilter.Impl<MatchQuery>
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return ImmutableList.copyOf(
-        Iterables.concat(
-            filter.getRelevantEvents(), ImmutableList.of(PlayerPartyChangeEvent.class)));
+    return ImmutableList.copyOf(Iterables.concat(
+        filter.getRelevantEvents(), ImmutableList.of(PlayerPartyChangeEvent.class)));
   }
 
   @Override
@@ -51,7 +50,7 @@ public class PlayerCountFilter extends TypedFilter.Impl<MatchQuery>
 
   @Override
   public boolean matches(MatchQuery query) {
-    return query.reactor(this).response();
+    return query.state(this).response();
   }
 
   protected final class Reactor extends ReactorFactory.Reactor
