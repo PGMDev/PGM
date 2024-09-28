@@ -200,7 +200,7 @@ public class ActionParser {
 
   private <B extends Filterable<?>> boolean includeObs(Element el, Class<B> scope)
       throws InvalidXMLException {
-    return PartyQuery.class.isAssignableFrom(scope)
+    return !PartyQuery.class.isAssignableFrom(scope)
         || XMLUtils.parseBoolean(el.getAttribute("observers"), legacy);
   }
 
