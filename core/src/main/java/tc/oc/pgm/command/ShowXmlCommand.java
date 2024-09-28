@@ -116,7 +116,7 @@ public final class ShowXmlCommand {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
-      server.getScheduler().runTaskLater(PGM.get(), () -> usePlayer(e.getPlayer()), 10L);
+      server.getScheduler().runTaskLater(PGM.get(), () -> usePlayer(e.getPlayer()), 25L);
     }
 
     @Override
