@@ -128,6 +128,8 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
         boolean showProgress =
             XMLUtils.parseBoolean(destroyableEl.getAttribute("show-progress"), false);
         boolean sparks = XMLUtils.parseBoolean(destroyableEl.getAttribute("sparks"), false);
+        boolean sparksMatch =
+            XMLUtils.parseBoolean(destroyableEl.getAttribute("sparks-match"), true);
         boolean repairable = XMLUtils.parseBoolean(destroyableEl.getAttribute("repairable"), true);
         ShowOptions options = ShowOptions.parse(context.getFilters(), destroyableEl);
         Boolean required = XMLUtils.parseBoolean(destroyableEl.getAttribute("required"), null);
@@ -147,6 +149,7 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
             modeSet,
             showProgress,
             sparks,
+            sparksMatch,
             repairable);
 
         context.getFeatures().addFeature(destroyableEl, factory);

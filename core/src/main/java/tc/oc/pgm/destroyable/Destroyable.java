@@ -356,12 +356,15 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
             NMS_HACKS.skipFireworksLaunch(firework);
           }
 
-          // Players more than 64m away will not see or hear the fireworks, so just play the sound
-          // for them
-          for (MatchPlayer listener : this.getOwner().getMatch().getPlayers()) {
-            if (listener.getBukkit().getLocation().distance(blockLocation) > 64) {
-              listener.playSound(Sounds.OBJECTIVE_FIREWORKS_FAR);
-              listener.playSound(Sounds.OBJECTIVE_FIREWORKS_TWINKLE);
+          if (this.definition.hasSparksMatch()) {
+            // Players more than 64m away will not see or hear the fireworks, so play sound for them
+            for (MatchPlayer listener : this.getOwner().getMatch().getPlayers()) {
+              if (listener.getBukkit().getLocation().distance(blockLocation) > 64) {
+                listener.playSound(
+                    sound(key("fireworks.blast_far"), Sound.Source.MASTER, 0.75f, 1f));
+                listener.playSound(
+                    sound(key("fireworks.twinkle_far"), Sound.Source.MASTER, 0.75f, 1f));
+              }
             }
           }
         }
