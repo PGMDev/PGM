@@ -19,6 +19,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
   protected final ImmutableSet<Mode> modeList;
   protected final boolean showProgress;
   protected final boolean sparks;
+  protected final boolean sparksMatch;
   protected final boolean repairable;
 
   public DestroyableFactory(
@@ -34,6 +35,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       @Nullable ImmutableSet<Mode> modeList,
       boolean showProgress,
       boolean sparks,
+      boolean sparksMatch,
       boolean repairable) {
     super(id, name, required, showOptions, owner, proximityMetric);
     this.region = region;
@@ -42,6 +44,7 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     this.modeList = modeList;
     this.showProgress = showProgress;
     this.sparks = sparks;
+    this.sparksMatch = sparksMatch;
     this.repairable = repairable;
   }
 
@@ -67,6 +70,10 @@ public class DestroyableFactory extends ProximityGoalDefinition {
 
   public boolean hasSparks() {
     return this.sparks;
+  }
+
+  public boolean hasSparksMatch() {
+    return this.sparksMatch;
   }
 
   public boolean isRepairable() {
