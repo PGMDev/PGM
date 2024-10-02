@@ -2,6 +2,7 @@ package tc.oc.pgm.rotation.pools;
 
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
+import tc.oc.pgm.rotation.vote.VoteData;
 import tc.oc.pgm.util.math.Formula;
 
 public class VotingPool extends MapPool {
@@ -30,17 +32,22 @@ public class VotingPool extends MapPool {
   public final MapVotePicker mapPicker;
 
   // The current rating of maps. Eventually should be persisted elsewhere.
-  private final Map<MapInfo, Double> mapScores = new HashMap<>();
+  private final Map<MapInfo, VoteData> mapScores;
 
   private MapPoll currentPoll;
 
   public VotingPool(
-      MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
-    super(type, name, manager, section);
+      MapPoolType type,
+      String name,
+      MapPoolManager manager,
+      ConfigurationSection section,
+      MapParser parser) {
+    super(type, name, manager, section, parser);
     this.constants = new VoteConstants(section, maps.size());
-
     this.mapPicker = MapVotePicker.of(manager, constants, section);
-    for (MapInfo map : maps) mapScores.put(map, constants.defaultScore());
+    Map<MapInfo, VoteData> ms = new HashMap<>();
+    maps.forEach(m -> ms.put(m, new VoteData(parser.getWeight(m), constants.defaultScore())));
+    this.mapScores = Collections.unmodifiableMap(ms);
   }
 
   public VotingPool(
@@ -55,7 +62,9 @@ public class VotingPool extends MapPool {
     super(type, name, manager, enabled, players, dynamic, cycleTime, maps);
     this.constants = new VoteConstants(new MemoryConfiguration(), maps.size());
     this.mapPicker = MapVotePicker.of(manager, constants, null);
-    for (MapInfo map : maps) mapScores.put(map, constants.defaultScore());
+    Map<MapInfo, VoteData> ms = new HashMap<>();
+    maps.forEach(m -> ms.put(m, new VoteData(1, constants.defaultScore())));
+    this.mapScores = Collections.unmodifiableMap(ms);
   }
 
   public MapPoll getCurrentPoll() {
@@ -63,26 +72,30 @@ public class VotingPool extends MapPool {
   }
 
   public double getMapScore(MapInfo map) {
-    return mapScores.get(map);
+    return mapScores.get(map).getScore();
+  }
+
+  public VoteData getVoteData(MapInfo map) {
+    VoteData data = mapScores.get(map);
+    if (data == null) data = new VoteData(1, constants.defaultScore());
+    return data;
   }
 
   /** Ticks scores for all maps, making them go slowly towards DEFAULT_WEIGHT. */
   private void tickScores(Match match) {
     // If the current map isn't from this pool, ignore ticking
     if (!mapScores.containsKey(match.getMap())) return;
-    mapScores.replaceAll((mapScores, value) -> value > constants.defaultScore()
-        ? Math.max(value - constants.scoreDecay(), constants.defaultScore())
-        : Math.min(value + constants.scoreRise(), constants.defaultScore()));
-    mapScores.put(
-        match.getMap(), constants.scoreAfterPlay().applyAsDouble(new Context(match.getDuration())));
+    mapScores.forEach((mapScores, value) -> value.tickScore(constants));
+    mapScores
+        .get(match.getMap())
+        .setScore(constants.scoreAfterPlay().applyAsDouble(new Context(match.getDuration())));
   }
 
   private void updateScores(Map<MapInfo, Set<UUID>> votes) {
     double voters =
         votes.values().stream().flatMap(Collection::stream).distinct().count();
     if (voters == 0) return; // Literally no one voted
-    votes.forEach((m, v) ->
-        mapScores.computeIfPresent(m, (a, b) -> constants.afterVoteScore(v.size() / voters)));
+    votes.forEach((m, v) -> getVoteData(m).setScore(constants.afterVoteScore(v.size() / voters)));
   }
 
   @Override
