@@ -1,7 +1,6 @@
 package tc.oc.pgm.destroyable;
 
 import com.google.common.collect.ImmutableSet;
-import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
@@ -11,29 +10,13 @@ import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.material.MaterialMatcher;
-import tc.oc.pgm.util.xml.InvalidXMLException;
 
 @FeatureInfo(name = "destroyable")
 public class DestroyableFactory extends ProximityGoalDefinition {
   public static enum SparksType {
-    SPARKS_ALL("true"),
-    SPARKS_NONE("false"),
-    SPARKS_NEAR("near");
-
-    private final String name;
-
-    private SparksType(String name) {
-      this.name = name;
-    }
-
-    public static SparksType fromString(String name, Element el) throws InvalidXMLException {
-      for (SparksType i : SparksType.values()) {
-        if (i.name.equalsIgnoreCase(name)) {
-          return i;
-        }
-      }
-      throw new InvalidXMLException("Unknown Destroyable sparks type: " + name, el);
-    }
+    FALSE, // none
+    NEAR,  // normal sparks
+    TRUE;  // normal/far sparks
   }
 
   protected final Region region;
@@ -56,17 +39,15 @@ public class DestroyableFactory extends ProximityGoalDefinition {
       double destructionRequired,
       @Nullable ImmutableSet<Mode> modeList,
       boolean showProgress,
-      String sparks,
-      boolean repairable,
-      Element el)
-      throws InvalidXMLException {
+      SparksType sparks,
+      boolean repairable) {
     super(id, name, required, showOptions, owner, proximityMetric);
     this.region = region;
     this.materials = materials;
     this.destructionRequired = destructionRequired;
     this.modeList = modeList;
     this.showProgress = showProgress;
-    this.sparks = SparksType.fromString(sparks, el);
+    this.sparks = sparks;
     this.repairable = repairable;
   }
 
@@ -91,11 +72,11 @@ public class DestroyableFactory extends ProximityGoalDefinition {
   }
 
   public boolean isSparksActive() {
-    return this.sparks != SparksType.SPARKS_NONE;
+    return this.sparks != SparksType.FALSE;
   }
 
   public boolean isSparksAll() {
-    return this.sparks != SparksType.SPARKS_NEAR;
+    return this.sparks == SparksType.TRUE;
   }
 
   public boolean isRepairable() {
