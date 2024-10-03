@@ -15,8 +15,8 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 public class DestroyableFactory extends ProximityGoalDefinition {
   public static enum SparksType {
     FALSE, // none
-    NEAR,  // normal sparks
-    TRUE;  // normal/far sparks
+    NEAR, // normal sparks
+    TRUE; // normal/far sparks
   }
 
   protected final Region region;
