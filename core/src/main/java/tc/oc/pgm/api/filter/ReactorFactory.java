@@ -16,7 +16,8 @@ public interface ReactorFactory<R extends ReactorFactory.Reactor>
     extends FilterDefinition, StateHolder<R> {
 
   default void register(Match match, FilterMatchModule fmm) {
-    match.getFeatureContext().registerState(this, createReactor(match, fmm));
+    if (!match.getFeatureContext().hasState(this))
+      match.getFeatureContext().registerState(this, createReactor(match, fmm));
   }
 
   /**
