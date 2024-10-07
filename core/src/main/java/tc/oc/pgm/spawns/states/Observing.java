@@ -137,8 +137,9 @@ public class Observing extends State {
   public void onEvent(InventoryClickEvent event) {
     super.onEvent(event);
 
-    if (!(event.getClickedInventory() instanceof PlayerInventory
-            || event.getClickedInventory().getType() == InventoryType.CRAFTING)
+    var inv = event.getInventory();
+    if (inv == null
+        || !(inv instanceof PlayerInventory || inv.getType() == InventoryType.CRAFTING)
         || event.getCursor() == null) return;
 
     ItemStack item = event.getCursor();
