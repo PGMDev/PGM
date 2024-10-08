@@ -29,6 +29,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.util.Aliased;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -343,7 +344,7 @@ public final class TextParser {
     String name = text.replace(' ', '_');
     E value = StringUtils.bestFuzzyMatch(name, type);
 
-    if (value == null || (!fuzzyMatch && !name.equalsIgnoreCase(value.name()))) {
+    if (value == null || (!fuzzyMatch && !isExactMatch(name, value))) {
       throw invalidFormat(text, type, value != null ? value.name().toLowerCase() : null, null);
     }
 
@@ -352,6 +353,17 @@ public final class TextParser {
     }
 
     return value;
+  }
+
+  private static <E extends Enum<E>> boolean isExactMatch(String text, E value) {
+    if (value instanceof Aliased aliased) {
+      for (String aliases : aliased) {
+        if (text.equalsIgnoreCase(aliases)) return true;
+      }
+      return false;
+    } else {
+      return text.equalsIgnoreCase(value.name());
+    }
   }
 
   /**
@@ -434,11 +446,11 @@ public final class TextParser {
    *
    * <p>Accepts full qualified json strings as components.
    *
-   * <p>This method is mainly for backwards compatability for {@link
-   * XMLUtils#parseFormattedText(Node, Component)}. Previously using {@link #parseComponent(String)}
-   * with the result from {@code parseFormattedText} would bug out when sent to older clients, since
-   * the LegacyComponentSerializer expects "&" but {@link BukkitUtils#colorize(String)}(Used in the
-   * XMLUtils method) results in using "§".
+   * <p>This method is mainly for backwards compatability for
+   * {@link XMLUtils#parseFormattedText(Node, Component)}. Previously using
+   * {@link #parseComponent(String)} with the result from {@code parseFormattedText} would bug out
+   * when sent to older clients, since the LegacyComponentSerializer expects "&" but
+   * {@link BukkitUtils#colorize(String)}(Used in the XMLUtils method) results in using "§".
    *
    * @param text The text.
    * @return a Component.

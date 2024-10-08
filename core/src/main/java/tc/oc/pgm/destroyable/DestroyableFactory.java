@@ -1,6 +1,9 @@
 package tc.oc.pgm.destroyable;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterators;
+import java.util.Iterator;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
@@ -9,16 +12,11 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.util.Aliased;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 @FeatureInfo(name = "destroyable")
 public class DestroyableFactory extends ProximityGoalDefinition {
-  public static enum SparksType {
-    FALSE, // none
-    NEAR, // normal sparks
-    TRUE; // normal/far sparks
-  }
-
   protected final Region region;
   protected final MaterialMatcher materials;
   protected final double destructionRequired;
@@ -72,14 +70,32 @@ public class DestroyableFactory extends ProximityGoalDefinition {
   }
 
   public boolean isSparksActive() {
-    return this.sparks != SparksType.FALSE;
+    return this.sparks != SparksType.NONE;
   }
 
   public boolean isSparksAll() {
-    return this.sparks == SparksType.TRUE;
+    return this.sparks == SparksType.ALL;
   }
 
   public boolean isRepairable() {
     return this.repairable;
+  }
+
+  public enum SparksType implements Aliased {
+    NONE("false", "no", "off"),
+    NEAR("near"),
+    ALL("true", "yes", "on");
+
+    private final String[] names;
+
+    SparksType(String... names) {
+      this.names = names;
+    }
+
+    @NotNull
+    @Override
+    public Iterator<String> iterator() {
+      return Iterators.forArray(names);
+    }
   }
 }
