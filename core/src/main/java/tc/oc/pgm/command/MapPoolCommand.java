@@ -73,19 +73,18 @@ public final class MapPoolCommand {
     int resultsPerPage = all ? maps.size() : 8;
     int pages = all ? 1 : (maps.size() + resultsPerPage - 1) / resultsPerPage;
 
-    Component mapPoolComponent =
-        TextFormatter.paginate(
-            text()
-                .append(translatable("pool.name"))
-                .append(text(" (", NamedTextColor.DARK_AQUA))
-                .append(text(mapPool.getName(), NamedTextColor.AQUA))
-                .append(text(")", NamedTextColor.DARK_AQUA))
-                .build(),
-            page,
-            pages,
-            NamedTextColor.DARK_AQUA,
-            NamedTextColor.AQUA,
-            false);
+    Component mapPoolComponent = TextFormatter.paginate(
+        text()
+            .append(translatable("pool.name"))
+            .append(text(" (", NamedTextColor.DARK_AQUA))
+            .append(text(mapPool.getName(), NamedTextColor.AQUA))
+            .append(text(")", NamedTextColor.DARK_AQUA))
+            .build(),
+        page,
+        pages,
+        NamedTextColor.DARK_AQUA,
+        NamedTextColor.AQUA,
+        false);
 
     Component title =
         TextFormatter.horizontalLineHeading(source, mapPoolComponent, NamedTextColor.BLUE, 250);
@@ -96,7 +95,7 @@ public final class MapPoolCommand {
     if (chance && votes != null) {
       double maxWeight = 0, currWeight;
       for (MapInfo map : votes.getMaps()) {
-        chances.put(map, currWeight = votes.mapPicker.getWeight(null, map, votes.getMapScore(map)));
+        chances.put(map, currWeight = votes.mapPicker.getWeight(null, map, votes.getVoteData(map)));
         maxWeight += currWeight;
       }
       double finalMaxWeight = maxWeight;
@@ -106,23 +105,19 @@ public final class MapPoolCommand {
     int nextPos = mapPool instanceof Rotation ? ((Rotation) mapPool).getNextPosition() : -1;
 
     if (order && votes != null) {
-      maps =
-          maps.stream()
-              .sorted(
-                  Comparator.comparingDouble(chance ? chances::get : votes::getMapScore).reversed())
-              .collect(Collectors.toList());
+      maps = maps.stream()
+          .sorted(Comparator.comparingDouble(chance ? chances::get : votes::getMapScore)
+              .reversed())
+          .collect(Collectors.toList());
     }
 
     new PrettyPaginatedComponentResults<MapInfo>(title, resultsPerPage) {
       @Override
       public Component format(MapInfo map, int index) {
         index++;
-        TextComponent.Builder entry =
-            text()
-                .append(
-                    text(
-                        index + ". ",
-                        nextPos == index ? NamedTextColor.DARK_AQUA : NamedTextColor.WHITE));
+        TextComponent.Builder entry = text()
+            .append(text(
+                index + ". ", nextPos == index ? NamedTextColor.DARK_AQUA : NamedTextColor.WHITE));
         if (votes != null && scores)
           entry.append(
               text(SCORE_FORMAT.format(votes.getMapScore(map)) + " ", NamedTextColor.YELLOW));
@@ -156,14 +151,13 @@ public final class MapPoolCommand {
     int resultsPerPage = 8;
     int pages = (mapPools.size() + resultsPerPage - 1) / resultsPerPage;
 
-    Component paginated =
-        TextFormatter.paginate(
-            translatable("pool.title"),
-            page,
-            pages,
-            NamedTextColor.DARK_AQUA,
-            NamedTextColor.AQUA,
-            true);
+    Component paginated = TextFormatter.paginate(
+        translatable("pool.title"),
+        page,
+        pages,
+        NamedTextColor.DARK_AQUA,
+        NamedTextColor.AQUA,
+        true);
 
     Component formattedTitle =
         TextFormatter.horizontalLineHeading(source, paginated, NamedTextColor.BLUE);
@@ -171,30 +165,27 @@ public final class MapPoolCommand {
     new PrettyPaginatedComponentResults<MapPool>(formattedTitle, resultsPerPage) {
       @Override
       public Component format(MapPool mapPool, int index) {
-        Component arrow =
-            text(
-                "» ",
-                poolManager.getActiveMapPool().equals(mapPool)
-                    ? NamedTextColor.GREEN
-                    : NamedTextColor.WHITE);
+        Component arrow = text(
+            "» ",
+            poolManager.getActiveMapPool().equals(mapPool)
+                ? NamedTextColor.GREEN
+                : NamedTextColor.WHITE);
 
-        Component maps =
-            text()
-                .append(text(" (", NamedTextColor.DARK_AQUA))
-                .append(translatable("map.title", NamedTextColor.DARK_GREEN))
-                .append(text(": ", NamedTextColor.DARK_GREEN))
-                .append(text(mapPool.getMaps().size(), NamedTextColor.WHITE))
-                .append(text(")", NamedTextColor.DARK_AQUA))
-                .build();
+        Component maps = text()
+            .append(text(" (", NamedTextColor.DARK_AQUA))
+            .append(translatable("map.title", NamedTextColor.DARK_GREEN))
+            .append(text(": ", NamedTextColor.DARK_GREEN))
+            .append(text(mapPool.getMaps().size(), NamedTextColor.WHITE))
+            .append(text(")", NamedTextColor.DARK_AQUA))
+            .build();
 
-        Component players =
-            text()
-                .append(text(" (", NamedTextColor.DARK_AQUA))
-                .append(translatable("match.info.players", NamedTextColor.AQUA))
-                .append(text(": ", NamedTextColor.AQUA))
-                .append(text(mapPool.getPlayers(), NamedTextColor.WHITE))
-                .append(text(")", NamedTextColor.DARK_AQUA))
-                .build();
+        Component players = text()
+            .append(text(" (", NamedTextColor.DARK_AQUA))
+            .append(translatable("match.info.players", NamedTextColor.AQUA))
+            .append(text(": ", NamedTextColor.AQUA))
+            .append(text(mapPool.getPlayers(), NamedTextColor.WHITE))
+            .append(text(")", NamedTextColor.DARK_AQUA))
+            .build();
 
         return text()
             .append(arrow)
@@ -223,11 +214,10 @@ public final class MapPoolCommand {
     if (newPool == null) throw exception("pool.noPoolMatch");
 
     if (newPool.equals(poolManager.getActiveMapPool())) {
-      sender.sendMessage(
-          translatable(
-              "pool.matching",
-              NamedTextColor.GRAY,
-              text(newPool.getName(), NamedTextColor.LIGHT_PURPLE)));
+      sender.sendMessage(translatable(
+          "pool.matching",
+          NamedTextColor.GRAY,
+          text(newPool.getName(), NamedTextColor.LIGHT_PURPLE)));
       return;
     }
 
@@ -268,17 +258,15 @@ public final class MapPoolCommand {
 
     ((Rotation) pool).advance(positions);
 
-    Component message =
-        text()
-            .append(text("[", NamedTextColor.WHITE))
-            .append(translatable("pool.name", NamedTextColor.GOLD))
-            .append(text("] [", NamedTextColor.WHITE))
-            .append(text(pool.getName(), NamedTextColor.AQUA))
-            .append(text("]", NamedTextColor.WHITE))
-            .append(
-                translatable(
-                    "pool.skip", NamedTextColor.GREEN, text(positions, NamedTextColor.AQUA)))
-            .build();
+    Component message = text()
+        .append(text("[", NamedTextColor.WHITE))
+        .append(translatable("pool.name", NamedTextColor.GOLD))
+        .append(text("] [", NamedTextColor.WHITE))
+        .append(text(pool.getName(), NamedTextColor.AQUA))
+        .append(text("]", NamedTextColor.WHITE))
+        .append(
+            translatable("pool.skip", NamedTextColor.GREEN, text(positions, NamedTextColor.AQUA)))
+        .build();
 
     sender.sendMessage(message);
   }
@@ -291,11 +279,10 @@ public final class MapPoolCommand {
       @Flag(value = "open", aliases = "o") boolean forceOpen,
       @Argument("map") @FlagYielding MapInfo map) {
     boolean voteResult = poll.toggleVote(map, player);
-    Component voteAction =
-        translatable(
-            voteResult ? "vote.for" : "vote.abstain",
-            voteResult ? NamedTextColor.GREEN : NamedTextColor.RED,
-            map.getStyledName(MapNameStyle.COLOR));
+    Component voteAction = translatable(
+        voteResult ? "vote.for" : "vote.abstain",
+        voteResult ? NamedTextColor.GREEN : NamedTextColor.RED,
+        map.getStyledName(MapNameStyle.COLOR));
     player.sendMessage(voteAction);
     poll.sendBook(player, forceOpen);
   }
@@ -318,26 +305,12 @@ public final class MapPoolCommand {
       @Argument("page") @Default("1") @Range(min = "1") int page,
       @Flag(value = "all", aliases = "a") boolean all,
       String[] rawArgs) {
-    wrapLegacy(
-        "pool",
-        sender,
-        rawArgs,
-        () -> {
-          if (poolManager.getActiveMapPool().getType() != MapPoolType.ORDERED)
-            throw exception("pool.noRotation");
+    wrapLegacy("pool", sender, rawArgs, () -> {
+      if (poolManager.getActiveMapPool().getType() != MapPoolType.ORDERED)
+        throw exception("pool.noRotation");
 
-          pool(
-              sender,
-              source,
-              poolManager,
-              page,
-              MapPoolType.ORDERED,
-              null,
-              false,
-              false,
-              false,
-              all);
-        });
+      pool(sender, source, poolManager, page, MapPoolType.ORDERED, null, false, false, false, all);
+    });
   }
 
   @Command("rots [page]")
@@ -391,14 +364,10 @@ public final class MapPoolCommand {
     MapPool resetRot =
         poolManager.getAppropriateDynamicPool(match).orElseThrow(() -> exception("pool.noDynamic"));
 
-    wrapLegacy(
-        "setpool",
-        sender,
-        rawArgs,
-        () -> {
-          if (resetRot.getType() != MapPoolType.ORDERED) throw exception("pool.noRotation");
-          setPool(sender, source, match, poolManager, resetRot, timeLimit, matchLimit);
-        });
+    wrapLegacy("setpool", sender, rawArgs, () -> {
+      if (resetRot.getType() != MapPoolType.ORDERED) throw exception("pool.noRotation");
+      setPool(sender, source, match, poolManager, resetRot, timeLimit, matchLimit);
+    });
   }
 
   private void wrapLegacy(String replace, Audience sender, String[] rawArgs, Runnable task) {

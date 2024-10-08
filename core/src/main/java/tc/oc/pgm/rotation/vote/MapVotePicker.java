@@ -76,7 +76,7 @@ public class MapVotePicker {
    * @param scores maps and their respective scores
    * @return list of maps to include in the vote
    */
-  public List<MapInfo> getMaps(VotePoolOptions options, Map<MapInfo, Double> scores) {
+  public List<MapInfo> getMaps(VotePoolOptions options, Map<MapInfo, VoteData> scores) {
     if (options.shouldOverride())
       return getMaps(new ArrayList<>(), options.getCustomVoteMapsWeighted());
 
@@ -84,7 +84,7 @@ public class MapVotePicker {
     return getMaps(maps, scores);
   }
 
-  protected List<MapInfo> getMaps(@Nullable List<MapInfo> selected, Map<MapInfo, Double> scores) {
+  protected List<MapInfo> getMaps(@Nullable List<MapInfo> selected, Map<MapInfo, VoteData> scores) {
     if (selected == null) selected = new ArrayList<>();
 
     List<MapInfo> unmodifiable = Collections.unmodifiableList(selected);
@@ -98,10 +98,10 @@ public class MapVotePicker {
     return selected;
   }
 
-  protected MapInfo getMap(List<MapInfo> selected, Map<MapInfo, Double> mapScores) {
+  protected MapInfo getMap(List<MapInfo> selected, Map<MapInfo, VoteData> mapScores) {
     NavigableMap<Double, MapInfo> cumulativeScores = new TreeMap<>();
     double maxWeight = 0;
-    for (Map.Entry<MapInfo, Double> map : mapScores.entrySet()) {
+    for (Map.Entry<MapInfo, VoteData> map : mapScores.entrySet()) {
       double weight = getWeight(selected, map.getKey(), map.getValue());
       if (weight > MINIMUM_WEIGHT) cumulativeScores.put(maxWeight += weight, map.getKey());
     }
@@ -115,20 +115,20 @@ public class MapVotePicker {
    *
    * @param selected The list of selected maps so far
    * @param map The map being considered
-   * @param score The score of the map, from player votes
+   * @param data The vote data of the map, from player votes and config
    * @return random weight for the map
    */
-  public double getWeight(@Nullable List<MapInfo> selected, @NotNull MapInfo map, double score) {
-    if ((selected != null && selected.contains(map)) || score <= constants.scoreMinToVote())
-      return 0;
+  public double getWeight(@Nullable List<MapInfo> selected, @NotNull MapInfo map, VoteData data) {
+    if ((selected != null && selected.contains(map))
+        || data.getScore() <= constants.scoreMinToVote()) return 0;
 
     var context = new MapVoteContext(
-        score,
+        data.getScore(),
         getRepeatedGamemodes(selected, map),
         map.getMaxPlayers().stream().mapToInt(i -> i).sum(),
         manager.getActivePlayers(null));
 
-    return Math.max(modifier.applyAsDouble(context), 0);
+    return Math.max(modifier.applyAsDouble(context) * data.getWeight(), 0);
   }
 
   private double getRepeatedGamemodes(List<MapInfo> selected, MapInfo map) {
