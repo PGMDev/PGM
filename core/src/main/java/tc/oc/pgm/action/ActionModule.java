@@ -57,7 +57,7 @@ public class ActionModule implements MapModule<ActionMatchModule> {
     @Override
     public ActionModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      ActionParser parser = new ActionParser(factory);
+      ActionParser parser = factory.getParser().getActionParser();
 
       for (Element action :
           XMLUtils.flattenElements(doc.getRootElement(), Set.of("actions"), parser.actionTypes())) {

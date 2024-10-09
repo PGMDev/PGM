@@ -44,7 +44,6 @@ import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.Action;
-import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -812,10 +811,10 @@ public abstract class KitParser {
   public ActionKit parseActionKit(Element parent) throws InvalidXMLException {
     if (parent.getChildren("action").isEmpty()) return null;
 
-    ActionParser parser = new ActionParser(factory);
+    var parser = factory.getParser();
     ImmutableList.Builder<Action<? super MatchPlayer>> builder = ImmutableList.builder();
     for (Element action : parent.getChildren("action")) {
-      builder.add(parser.parse(action, MatchPlayer.class));
+      builder.add(parser.action(MatchPlayer.class, action).required());
     }
 
     return new ActionKit(builder.build());
