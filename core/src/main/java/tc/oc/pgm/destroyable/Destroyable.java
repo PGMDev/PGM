@@ -330,7 +330,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     if (deltaHealth < 0) {
       touch(player);
 
-      if (this.definition.hasSparks()) {
+      if (this.definition.isSparksActive()) {
         Location blockLocation = BlockVectors.center(oldState);
         Instant now = Instant.now();
 
@@ -356,12 +356,13 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
             NMS_HACKS.skipFireworksLaunch(firework);
           }
 
-          // Players more than 64m away will not see or hear the fireworks, so just play the sound
-          // for them
-          for (MatchPlayer listener : this.getOwner().getMatch().getPlayers()) {
-            if (listener.getBukkit().getLocation().distance(blockLocation) > 64) {
-              listener.playSound(Sounds.OBJECTIVE_FIREWORKS_FAR);
-              listener.playSound(Sounds.OBJECTIVE_FIREWORKS_TWINKLE);
+          if (this.definition.isSparksAll()) {
+            // Players more than 64m away will not see or hear the fireworks, so play sound for them
+            for (MatchPlayer listener : this.getOwner().getMatch().getPlayers()) {
+              if (listener.getBukkit().getLocation().distance(blockLocation) > 64) {
+                listener.playSound(Sounds.OBJECTIVE_FIREWORKS_FAR);
+                listener.playSound(Sounds.OBJECTIVE_FIREWORKS_TWINKLE);
+              }
             }
           }
         }
