@@ -26,7 +26,6 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionModule;
-import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
@@ -34,11 +33,8 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.matcher.StaticFilter;
-import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.ItemKit;
 import tc.oc.pgm.kits.KitNode;
-import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.kits.OverflowWarningKit;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.points.PointProvider;
@@ -48,6 +44,7 @@ import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.shops.menu.Payment;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ShopModule implements MapModule<ShopMatchModule> {
@@ -82,9 +79,7 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     @Override
     public ShopModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      KitParser kitParser = factory.getKits();
-      FilterParser filterParser = factory.getFilters();
-      ActionParser actionParser = new ActionParser(factory);
+      var parser = factory.getParser();
       PointParser pointParser = new PointParser(factory);
       Map<String, Shop> shops = Maps.newHashMap();
       Set<ShopKeeper> keepers = Sets.newHashSet();
@@ -97,9 +92,9 @@ public class ShopModule implements MapModule<ShopMatchModule> {
 
         for (Element category : XMLUtils.getChildren(shop, "category")) {
           Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
-          ItemStack categoryIcon = applyItemFlags(kitParser.parseItem(category, false));
-          List<Icon> icons = parseIcons(category, kitParser, actionParser, filterParser);
-          Filter filter = filterParser.parseFilterProperty(category, "filter", StaticFilter.ALLOW);
+          ItemStack categoryIcon = applyItemFlags(parser.item(category).required());
+          List<Icon> icons = parseIcons(category, parser);
+          Filter filter = parser.filter(category, "filter").orAllow();
 
           categories.add(new Category(categoryId.getValue(), categoryIcon, filter, icons));
         }
@@ -137,12 +132,11 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     }
   }
 
-  private static List<Icon> parseIcons(
-      Element category, KitParser kits, ActionParser actions, FilterParser filters)
+  private static List<Icon> parseIcons(Element category, XMLFluentParser parser)
       throws InvalidXMLException {
     List<Icon> icons = Lists.newArrayList();
     for (Element icon : XMLUtils.getChildren(category, "item")) {
-      icons.add(parseIcon(icon, kits, actions, filters));
+      icons.add(parseIcon(icon, parser));
     }
 
     if (icons.size() > Category.MAX_ICONS) {
@@ -157,46 +151,41 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     return icons;
   }
 
-  private static Icon parseIcon(
-      Element icon, KitParser kits, ActionParser actions, FilterParser filters)
-      throws InvalidXMLException {
+  private static Icon parseIcon(Element icon, XMLFluentParser parser) throws InvalidXMLException {
 
-    List<Payment> payments = parsePayments(icon, kits);
+    List<Payment> payments = parsePayments(icon, parser);
 
-    ItemStack item = kits.parseItem(icon, false);
-    Filter filter = filters.parseFilterProperty(icon, "filter", StaticFilter.ALLOW);
+    ItemStack item = parser.item(icon).required();
+    Filter filter = parser.filter(icon, "filter").orAllow();
 
-    Action<? super MatchPlayer> action;
-    Node actionNode = Node.fromAttr(icon, "action", "kit");
-    if (actionNode != null) {
-      action = actions.parseReference(actionNode, null, MatchPlayer.class);
-    } else {
-      action =
-          KitNode.of(
-              new ItemKit(null, Collections.singletonList(item), false, false, false, true),
-              new OverflowWarningKit(translatable("shop.purchase.overflow")));
-    }
+    Action<? super MatchPlayer> action = parser
+        .action(MatchPlayer.class, icon, "action", "kit")
+        .optional(() -> KitNode.of(
+            new ItemKit(null, Collections.singletonList(item), false, false, false, true),
+            new OverflowWarningKit(translatable("shop.purchase.overflow"))));
 
     return new Icon(payments, item, filter, action);
   }
 
-  public static List<Payment> parsePayments(Element parent, KitParser kits)
+  public static List<Payment> parsePayments(Element parent, XMLFluentParser parser)
       throws InvalidXMLException {
     List<Payment> payments = Lists.newArrayList();
     for (Element payment : XMLUtils.getChildren(parent, "payment")) {
-      payments.add(parsePayment(payment, kits));
+      payments.add(parsePayment(payment, parser));
     }
     if (payments.isEmpty()) {
-      payments.add(ShopModule.parsePayment(parent, kits));
+      payments.add(parsePayment(parent, parser));
     }
-    if (payments.size() != payments.stream().map(Payment::getCurrency).distinct().count()) {
+    if (payments.size()
+        != payments.stream().map(Payment::getCurrency).distinct().count()) {
       throw new InvalidXMLException(
           "Payment materials must be unique within a purchasable", parent);
     }
     return payments;
   }
 
-  public static Payment parsePayment(Element element, KitParser kits) throws InvalidXMLException {
+  public static Payment parsePayment(Element element, XMLFluentParser parser)
+      throws InvalidXMLException {
     Node priceAttr = Node.fromAttr(element, "price");
     Node currencyAttr = Node.fromAttr(element, "currency");
     Node colorAttr = Node.fromAttr(element, "color");
@@ -206,12 +195,7 @@ public class ShopModule implements MapModule<ShopMatchModule> {
         price <= 0 || currencyAttr == null ? null : XMLUtils.parseMaterial(currencyAttr);
     ChatColor color = XMLUtils.parseChatColor(colorAttr, ChatColor.GOLD);
 
-    ItemStack item = null;
-    Element itemEl = XMLUtils.getUniqueChild(element, "item");
-    if (itemEl != null) {
-      item = kits.parseItem(itemEl, false);
-    }
-
+    ItemStack item = parser.item(element, "item").child().orNull();
     if (currency == null && item == null && price > 0) {
       throw new InvalidXMLException("A 'currency' attribute or child <item> is required", element);
     }

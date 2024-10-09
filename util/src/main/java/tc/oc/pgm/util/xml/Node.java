@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.xml;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -170,8 +171,7 @@ public class Node {
    * useful for properties that are allowed as either refs or direct children.
    */
   public static Node fromAttrOrSelf(Element el, String... aliases) throws InvalidXMLException {
-    Node node = null;
-    for (String alias : aliases) node = wrapUnique(node, true, alias, el.getAttribute(alias));
+    Node node = fromAttr(el, aliases);
     return node != null ? node : new Node(el);
   }
 
@@ -235,6 +235,38 @@ public class Node {
     if (node == null) {
       throw new InvalidXMLException(
           "attribute or child element '" + aliases[0] + "' is required", el);
+    }
+    return node;
+  }
+
+  public static @Nullable Node from(
+      boolean attr, boolean child, boolean self, boolean required, Element el, String... aliases)
+      throws InvalidXMLException {
+    assertTrue(el != null || !required, "Cannot request required from null element");
+    assertTrue(!child || !self, "Child and self are mutually exclusive");
+    if (el == null) return null;
+    Node node = null;
+
+    if (attr) {
+      if (child) node = Node.fromChildOrAttr(el, aliases);
+      else if (self) node = Node.fromAttrOrSelf(el, aliases);
+      else node = Node.fromAttr(el, aliases);
+    } else {
+      if (child) node = Node.fromNullable(XMLUtils.getUniqueChild(el, aliases));
+      else if (self) node = Node.fromNullable(el);
+    }
+
+    if (required && node == null) {
+      if (attr) {
+        if (child)
+          throw new InvalidXMLException(
+              "attribute or child element '" + aliases[0] + "' is required", el);
+        else throw new InvalidXMLException("attribute '" + aliases[0] + "' is required", el);
+      } else {
+        if (child)
+          throw new InvalidXMLException("child element '" + aliases[0] + "' is required", el);
+        else throw new IllegalStateException();
+      }
     }
     return node;
   }
