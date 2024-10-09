@@ -10,9 +10,17 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 
 /** A factory for creating {@link MapInfo}s and {@link MapContext}s. */
 public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
+
+  /**
+   * A parser able to parse most commonly required things, with a fluent interface.
+   *
+   * @return A {@link XMLFluentParser}
+   */
+  XMLFluentParser getParser();
 
   /**
    * Get the {@link RegionParser} for parsing region references.

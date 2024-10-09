@@ -9,16 +9,13 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionModule;
-import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 
 public class DamageModule implements MapModule<DamageMatchModule> {
 
@@ -50,22 +47,24 @@ public class DamageModule implements MapModule<DamageMatchModule> {
     @Override
     public DamageModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      FilterParser filterParser = factory.getFilters();
-      ActionParser actionParser = new ActionParser(factory);
+      var parser = factory.getParser();
 
       List<Filter> filters = new ArrayList<>();
       Action<? super MatchPlayer> attackerAction = null;
       Action<? super MatchPlayer> victimAction = null;
 
       for (Element elDamage : doc.getRootElement().getChildren("damage")) {
-        attackerAction = actionParser.parseProperty(
-            Node.fromAttr(elDamage, "attacker-action"), MatchPlayer.class, attackerAction);
-
-        victimAction = actionParser.parseProperty(
-            Node.fromAttr(elDamage, "victim-action"), MatchPlayer.class, victimAction);
+        attackerAction = parser
+            .action(MatchPlayer.class, elDamage, "attacker-action")
+            .attr()
+            .optional(attackerAction);
+        victimAction = parser
+            .action(MatchPlayer.class, elDamage, "victim-action")
+            .attr()
+            .optional(victimAction);
 
         for (Element elFilter : elDamage.getChildren()) {
-          filters.add(filterParser.parse(elFilter));
+          filters.add(parser.filter(elFilter).required());
         }
       }
 

@@ -37,6 +37,7 @@ import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.DocumentWrapper;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?>>
     implements MapFactory {
@@ -51,6 +52,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   private FilterParser filters;
   private KitParser kits;
   private FeatureDefinitionContext features;
+  private XMLFluentParser parser;
 
   public MapFactoryImpl(
       Logger logger,
@@ -146,6 +148,16 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
 
   private boolean isLegacy() {
     return getProto().isOlderThan(MapProtos.FILTER_FEATURES);
+  }
+
+  @Override
+  public XMLFluentParser getParser() {
+    if (parser == null) {
+      parser = new XMLFluentParser(this);
+      // Calling init will cause more calls to getParser, that's why we need them separate
+      parser.init();
+    }
+    return parser;
   }
 
   @Override

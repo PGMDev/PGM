@@ -11,15 +11,14 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.ExposedAction;
@@ -47,11 +46,7 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
 import tc.oc.pgm.filters.operator.AllFilter;
-import tc.oc.pgm.filters.parse.DynamicFilterValidation;
-import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.regions.BlockBoundedValidation;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
@@ -62,9 +57,9 @@ import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.Variable;
-import tc.oc.pgm.variables.VariablesModule;
 
 public class ActionParser {
 
@@ -73,18 +68,14 @@ public class ActionParser {
   private final MapFactory factory;
   private final boolean legacy;
   private final FeatureDefinitionContext features;
-  private final FilterParser filters;
-  private final RegionParser regions;
-  private final VariablesModule variables;
+  private final XMLFluentParser parser;
   private final Map<String, Method> methodParsers;
 
   public ActionParser(MapFactory factory) {
     this.factory = factory;
     this.legacy = !factory.getProto().isNoOlderThan(MapProtos.ACTION_REVAMP);
     this.features = factory.getFeatures();
-    this.filters = factory.getFilters();
-    this.regions = factory.getRegions();
-    this.variables = factory.needModule(VariablesModule.class);
+    this.parser = factory.getParser();
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
 
@@ -126,37 +117,21 @@ public class ActionParser {
     return parseReference(node, node.getValue(), bound);
   }
 
-  public <B> Action<? super B> parseReference(Node node, String id, Class<B> bound)
+  private <B> Action<? super B> parseReference(Node node, String id, Class<B> bound)
       throws InvalidXMLException {
     Action<? super B> action = features.addReference(new XMLActionReference<>(features, node, id));
     validate(action, ActionScopeValidation.of(bound), node);
     return action;
   }
 
-  public <B extends Filterable<?>> Action<? super B> parseProperty(
-      @Nullable Node node, Class<B> bound, Action<? super B> def) throws InvalidXMLException {
-    return node == null ? def : parseProperty(node, bound);
-  }
-
-  public <B extends Filterable<?>> Action<? super B> parseProperty(
-      @NotNull Node node, Class<B> bound) throws InvalidXMLException {
-    if (node.isAttribute()) return this.parseReference(node, bound);
-
-    ActionNode<? super B> result = this.parseAction(node.getElement(), bound);
-
-    if (bound != null) validate(result, ActionScopeValidation.of(bound), node);
-    features.addFeature(node.getElement(), result);
-    return result;
-  }
-
   @SuppressWarnings("rawtypes, unchecked")
-  public void validate(
+  private void validate(
       Action<?> action, FeatureValidation<ActionDefinition<?>> validation, Node node)
       throws InvalidXMLException {
-    if (action instanceof XMLFeatureReference) {
-      factory.getFeatures().validate((XMLFeatureReference) action, validation);
-    } else if (action instanceof ActionDefinition) {
-      factory.getFeatures().validate((ActionDefinition) action, validation, node);
+    if (action instanceof XMLFeatureReference ref) {
+      features.validate(ref, validation);
+    } else if (action instanceof ActionDefinition ad) {
+      features.validate(ad, validation, node);
     } else {
       throw new IllegalStateException(
           "Attempted validation on an action which is neither definition nor reference.");
@@ -215,14 +190,12 @@ public class ActionParser {
     Class<T> cls = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     return new Trigger<>(
         cls,
-        wrapFilter(
-            filters.parseRequiredProperty(el, "filter", DynamicFilterValidation.of(cls)),
-            includeObs(el, cls)),
-        parseProperty(Node.fromRequiredChildOrAttr(el, "action", "trigger"), cls));
+        wrapFilter(parser.filter(el, "filter").dynamic(cls).required(), includeObs(el, cls)),
+        parser.action(cls, el, "action", "trigger").required());
   }
 
   // Generic action with N children parser
-  public <B extends Filterable<?>> ActionNode<? super B> parseAction(
+  private <B extends Filterable<?>> ActionNode<? super B> parseAction(
       Element el, Class<B> scope, boolean includeObs) throws InvalidXMLException {
     scope = parseScope(el, scope);
 
@@ -231,11 +204,11 @@ public class ActionParser {
       builder.add(parse(child, scope));
     }
 
-    Filter filter =
-        wrapFilter(filters.parseFilterProperty(el, "filter", StaticFilter.ALLOW), includeObs);
+    Filter filter = wrapFilter(parser.filter(el, "filter").orAllow(), includeObs);
     Filter untriggerFilter = wrapFilter(
-        filters.parseFilterProperty(
-            el, "untrigger-filter", legacy ? StaticFilter.DENY : StaticFilter.ALLOW),
+        parser
+            .filter(el, "untrigger-filter")
+            .optional(legacy ? StaticFilter.DENY : StaticFilter.ALLOW),
         includeObs);
 
     return new ActionNode<>(builder.build(), filter, untriggerFilter, scope);
@@ -266,7 +239,7 @@ public class ActionParser {
 
   @MethodParser("kit")
   public Kit parseKitTrigger(Element el, Class<?> scope) throws InvalidXMLException {
-    return factory.getKits().parse(el);
+    return parser.kit(el).required();
   }
 
   @MethodParser("message")
@@ -307,10 +280,9 @@ public class ActionParser {
   private <T extends Filterable<?>> MessageAction.Replacement<T> parseReplacement(
       Element el, Class<T> scope) throws InvalidXMLException {
     // TODO: Support alternative replacement types (eg: player(s), team(s), or durations)
-    switch (el.getName()) {
+    switch (el.getName().toLowerCase(Locale.ROOT)) {
       case "decimal":
-        Formula<T> formula =
-            Formula.of(Node.fromRequiredAttr(el, "value").getValue(), variables.getContext(scope));
+        Formula<T> formula = parser.formula(scope, el, "value").required();
         Node formatNode = Node.fromAttr(el, "format");
         NumberFormat format =
             formatNode != null ? new DecimalFormat(formatNode.getValue()) : DEFAULT_FORMAT;
@@ -357,12 +329,10 @@ public class ActionParser {
     if (var.isReadonly())
       throw new InvalidXMLException("You may not use a read-only variable in set", el);
 
-    Formula<T> formula =
-        Formula.of(Node.fromRequiredAttr(el, "value").getValue(), variables.getContext(scope));
+    Formula<T> formula = parser.formula(scope, el, "value").required();
 
     if (var.isIndexed() && var instanceof Variable.Indexed<?> indexedVar) {
-      Formula<T> idx =
-          Formula.of(Node.fromRequiredAttr(el, "index").getValue(), variables.getContext(scope));
+      Formula<T> idx = parser.formula(scope, el, "index").required();
       return new SetVariableAction.Indexed<>(scope, indexedVar, idx, formula);
     }
 
@@ -372,16 +342,16 @@ public class ActionParser {
   @MethodParser("kill-entities")
   public KillEntitiesAction parseKillEntities(Element el, Class<?> scope)
       throws InvalidXMLException {
-    return new KillEntitiesAction(filters.parseProperty(el, "filter"));
+    return new KillEntitiesAction(parser.filter(el, "filter").required());
   }
 
   @MethodParser("replace-item")
   public ReplaceItemAction parseReplaceItem(Element el, Class<?> scope) throws InvalidXMLException {
     ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
-    ItemStack item = factory.getKits().parseItem(el.getChild("replace"), true);
+    ItemStack item = parser.item(el, "replace").allowAir().orNull();
 
-    boolean keepAmount = XMLUtils.parseBoolean(el.getAttribute("keep-amount"), false);
-    boolean keepEnchants = XMLUtils.parseBoolean(el.getAttribute("keep-enchants"), false);
+    boolean keepAmount = parser.parseBool(el, "keep-amount").orFalse();
+    boolean keepEnchants = parser.parseBool(el, "keep-enchants").orFalse();
 
     return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants);
   }
@@ -389,32 +359,29 @@ public class ActionParser {
   @MethodParser("fill")
   public FillAction parseFill(Element el, Class<?> scope) throws InvalidXMLException {
     return new FillAction(
-        regions.parseProperty(Node.fromAttrOrSelf(el, "region"), BlockBoundedValidation.INSTANCE),
+        parser.region(el, "region").blockBounded().orSelf(),
         XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(el, "material")),
-        filters.parseProperty(Node.fromAttr(el, "filter")),
-        XMLUtils.parseBoolean(el.getAttribute("events"), false));
+        parser.filter(el, "filter").orNull(),
+        parser.parseBool(el, "events").orFalse());
   }
 
   @MethodParser("take-payment")
   public Action<? super MatchPlayer> parseTakePayment(Element el, Class<?> scope)
       throws InvalidXMLException {
-    Payable payable = Payable.of(ShopModule.parsePayments(el, factory.getKits()));
+    Payable payable = Payable.of(ShopModule.parsePayments(el, factory.getParser()));
     if (payable.isFree()) throw new InvalidXMLException("Payment has not been defined", el);
     return new TakePaymentAction(
         payable,
-        parseProperty(Node.fromChildOrAttr(el, "success-action"), MatchPlayer.class, null),
-        parseProperty(Node.fromChildOrAttr(el, "fail-action"), MatchPlayer.class, null));
+        parser.action(MatchPlayer.class, el, "success-action").orNull(),
+        parser.action(MatchPlayer.class, el, "fail-action").orNull());
   }
 
   @MethodParser("velocity")
   public Action<? super MatchPlayer> parseVelocity(Element el, Class<?> scope)
       throws InvalidXMLException {
-    Formula<MatchPlayer> xFormula = Formula.of(
-        Node.fromRequiredAttr(el, "x").getValue(), variables.getContext(MatchPlayer.class));
-    Formula<MatchPlayer> yFormula = Formula.of(
-        Node.fromRequiredAttr(el, "y").getValue(), variables.getContext(MatchPlayer.class));
-    Formula<MatchPlayer> zFormula = Formula.of(
-        Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(MatchPlayer.class));
+    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
+    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
+    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
 
     return new VelocityAction(xFormula, yFormula, zFormula);
   }
@@ -422,24 +389,12 @@ public class ActionParser {
   @MethodParser("teleport")
   public Action<? super MatchPlayer> parseTeleport(Element el, Class<?> scope)
       throws InvalidXMLException {
-    Formula<MatchPlayer> xFormula = Formula.of(
-        Node.fromRequiredAttr(el, "x").getValue(), variables.getContext(MatchPlayer.class));
-    Formula<MatchPlayer> yFormula = Formula.of(
-        Node.fromRequiredAttr(el, "y").getValue(), variables.getContext(MatchPlayer.class));
-    Formula<MatchPlayer> zFormula = Formula.of(
-        Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(MatchPlayer.class));
+    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
+    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
+    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
 
-    Node pitchNode = Node.fromChildOrAttr(el, "pitch");
-    Optional<Formula<MatchPlayer>> pitchFormula = Optional.ofNullable(
-        pitchNode == null
-            ? null
-            : Formula.of(pitchNode.getValue(), variables.getContext(MatchPlayer.class)));
-
-    Node yawNode = Node.fromChildOrAttr(el, "yaw");
-    Optional<Formula<MatchPlayer>> yawFormula = Optional.ofNullable(
-        yawNode == null
-            ? null
-            : Formula.of(yawNode.getValue(), variables.getContext(MatchPlayer.class)));
+    var pitchFormula = parser.formula(MatchPlayer.class, el, "pitch").optional();
+    var yawFormula = parser.formula(MatchPlayer.class, el, "yaw").optional();
 
     return new TeleportAction(xFormula, yFormula, zFormula, pitchFormula, yawFormula);
   }
@@ -448,15 +403,11 @@ public class ActionParser {
   public <T extends Filterable<?>> PasteStructureAction<T> parseStructure(
       Element el, Class<T> scope) throws InvalidXMLException {
     scope = parseScope(el, scope);
-    Formula<T> xFormula =
-        Formula.of(Node.fromRequiredAttr(el, "x").getValue(), variables.getContext(scope));
-    Formula<T> yFormula =
-        Formula.of(Node.fromRequiredAttr(el, "y").getValue(), variables.getContext(scope));
-    Formula<T> zFormula =
-        Formula.of(Node.fromRequiredAttr(el, "z").getValue(), variables.getContext(scope));
+    var xFormula = parser.formula(scope, el, "x").required();
+    var yFormula = parser.formula(scope, el, "y").required();
+    var zFormula = parser.formula(scope, el, "z").required();
 
-    var structure =
-        features.createReference(Node.fromRequiredAttr(el, "structure"), StructureDefinition.class);
+    var structure = parser.reference(StructureDefinition.class, el, "structure").required();
 
     return new PasteStructureAction<>(scope, xFormula, yFormula, zFormula, structure);
   }
