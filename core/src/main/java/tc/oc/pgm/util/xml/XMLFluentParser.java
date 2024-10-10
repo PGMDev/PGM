@@ -21,6 +21,7 @@ import tc.oc.pgm.util.xml.parsers.ItemBuilder;
 import tc.oc.pgm.util.xml.parsers.PrimitiveBuilder;
 import tc.oc.pgm.util.xml.parsers.ReferenceBuilder;
 import tc.oc.pgm.util.xml.parsers.RegionBuilder;
+import tc.oc.pgm.util.xml.parsers.VariableBuilder;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class XMLFluentParser {
@@ -88,6 +89,10 @@ public class XMLFluentParser {
   public <T extends FeatureDefinition> ReferenceBuilder<T> reference(
       Class<T> clazz, Element el, String... prop) throws InvalidXMLException {
     return new ReferenceBuilder<T>(features, clazz, el, prop);
+  }
+
+  public VariableBuilder<?> variable(Element el, String... prop) throws InvalidXMLException {
+    return new VariableBuilder<>(features, el, prop);
   }
 
   public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(

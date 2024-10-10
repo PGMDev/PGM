@@ -287,6 +287,12 @@ public class ActionParser {
         NumberFormat format =
             formatNode != null ? new DecimalFormat(formatNode.getValue()) : DEFAULT_FORMAT;
         return (T filterable) -> text(format.format(formula.applyAsDouble(filterable)));
+      case "player":
+        var variable = parser.variable(el, "var").scope(MatchPlayer.class).singleExclusive();
+        var fallback = XMLUtils.parseFormattedText(el, "fallback", empty());
+
+        return (T filterable) ->
+            variable.getHolder(filterable).map(MatchPlayer::getName).orElse(fallback);
       default:
         throw new InvalidXMLException("Unknown replacement type", el);
     }
@@ -312,23 +318,8 @@ public class ActionParser {
   @MethodParser("set")
   public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(Element el, Class<T> scope)
       throws InvalidXMLException {
-    var node = Node.fromRequiredAttr(el, "var");
-    Variable<?> var = features.resolve(node, Variable.class);
     scope = parseScope(el, scope);
-
-    if (!Filterables.isAssignable(scope, var.getScope()))
-      throw new InvalidXMLException(
-          "Wrong variable scope for '"
-              + node.getValue()
-              + "', expected "
-              + var.getScope().getSimpleName()
-              + " which cannot be found in "
-              + scope.getSimpleName(),
-          el);
-
-    if (var.isReadonly())
-      throw new InvalidXMLException("You may not use a read-only variable in set", el);
-
+    Variable<?> var = parser.variable(el, "var").bound(scope).writtable().required();
     Formula<T> formula = parser.formula(scope, el, "value").required();
 
     if (var.isIndexed() && var instanceof Variable.Indexed<?> indexedVar) {

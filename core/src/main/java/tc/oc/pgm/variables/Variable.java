@@ -1,5 +1,7 @@
 package tc.oc.pgm.variables;
 
+import java.util.Collection;
+import java.util.Optional;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.Filterable;
@@ -24,6 +26,10 @@ public interface Variable<T extends Filterable<?>> extends FeatureDefinition {
     return false;
   }
 
+  default boolean isExclusive() {
+    return false;
+  }
+
   default void load(Match match) {}
 
   /**
@@ -44,5 +50,18 @@ public interface Variable<T extends Filterable<?>> extends FeatureDefinition {
     void setValue(Filterable<?> context, int idx, double value);
 
     int size();
+  }
+
+  interface Exclusive<T extends Filterable<?>> extends Variable<T> {
+    @Override
+    default boolean isExclusive() {
+      return getCardinality() != null;
+    }
+
+    Integer getCardinality();
+
+    Optional<T> getHolder(Filterable<?> context);
+
+    Collection<T> getHolders(Filterable<?> context);
   }
 }
