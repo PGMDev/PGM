@@ -1,16 +1,18 @@
 package tc.oc.pgm.variables.types;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.jetbrains.annotations.Nullable;
+import java.util.Optional;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.StateHolder;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.variables.Variable;
 
 public class DummyVariable<T extends Filterable<?>> extends AbstractVariable<T>
-    implements StateHolder<DummyVariable<T>.Values> {
+    implements StateHolder<DummyVariable<T>.Values>, Variable.Exclusive<T> {
 
   private final double def;
   private final Integer exclusive;
@@ -46,6 +48,24 @@ public class DummyVariable<T extends Filterable<?>> extends AbstractVariable<T>
     obj.moduleRequire(FilterMatchModule.class).invalidate(obj);
   }
 
+  @Override
+  public Integer getCardinality() {
+    return exclusive;
+  }
+
+  @Override
+  public Optional<T> getHolder(Filterable<?> obj) {
+    if (!isExclusive()) throw new UnsupportedOperationException();
+    T[] keys = ((LimitedValues) obj.state(this)).additions;
+    return Optional.ofNullable(keys[0]);
+  }
+
+  @Override
+  public Collection<T> getHolders(Filterable<?> obj) {
+    if (!isExclusive()) throw new UnsupportedOperationException();
+    return obj.state(this).values.keySet();
+  }
+
   class Values {
     protected final Map<T, Double> values = new HashMap<>();
 
@@ -56,7 +76,7 @@ public class DummyVariable<T extends Filterable<?>> extends AbstractVariable<T>
 
   class LimitedValues extends Values {
     // Circular buffer of last additions, head marks next location to replace
-    private final @Nullable T[] additions;
+    private final T[] additions;
     private int head = 0;
 
     public LimitedValues() {

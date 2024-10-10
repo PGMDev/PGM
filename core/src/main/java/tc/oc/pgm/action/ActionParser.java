@@ -55,6 +55,7 @@ import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
@@ -287,6 +288,13 @@ public class ActionParser {
         NumberFormat format =
             formatNode != null ? new DecimalFormat(formatNode.getValue()) : DEFAULT_FORMAT;
         return (T filterable) -> text(format.format(formula.applyAsDouble(filterable)));
+      case "player":
+        var variable = parser.variable(el, "var").scope(MatchPlayer.class).singleExclusive();
+        var fallback = XMLUtils.parseFormattedText(el, "fallback", empty());
+        var nameStyle = parser.parseEnum(NameStyle.class, el, "style").optional(NameStyle.VERBOSE);
+
+        return (T filterable) ->
+            variable.getHolder(filterable).map(mp -> mp.getName(nameStyle)).orElse(fallback);
       default:
         throw new InvalidXMLException("Unknown replacement type", el);
     }
@@ -312,23 +320,8 @@ public class ActionParser {
   @MethodParser("set")
   public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(Element el, Class<T> scope)
       throws InvalidXMLException {
-    var node = Node.fromRequiredAttr(el, "var");
-    Variable<?> var = features.resolve(node, Variable.class);
     scope = parseScope(el, scope);
-
-    if (!Filterables.isAssignable(scope, var.getScope()))
-      throw new InvalidXMLException(
-          "Wrong variable scope for '"
-              + node.getValue()
-              + "', expected "
-              + var.getScope().getSimpleName()
-              + " which cannot be found in "
-              + scope.getSimpleName(),
-          el);
-
-    if (var.isReadonly())
-      throw new InvalidXMLException("You may not use a read-only variable in set", el);
-
+    Variable<?> var = parser.variable(el, "var").bound(scope).writtable().required();
     Formula<T> formula = parser.formula(scope, el, "value").required();
 
     if (var.isIndexed() && var instanceof Variable.Indexed<?> indexedVar) {
