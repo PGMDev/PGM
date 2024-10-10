@@ -18,6 +18,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
+import tc.oc.pgm.destroyable.DestroyableFactory.SparksType;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
@@ -127,7 +128,8 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
 
         boolean showProgress =
             XMLUtils.parseBoolean(destroyableEl.getAttribute("show-progress"), false);
-        boolean sparks = XMLUtils.parseBoolean(destroyableEl.getAttribute("sparks"), false);
+        SparksType sparks = XMLUtils.parseEnum(
+            Node.fromAttr(destroyableEl, "sparks"), SparksType.class, SparksType.NONE);
         boolean repairable = XMLUtils.parseBoolean(destroyableEl.getAttribute("repairable"), true);
         ShowOptions options = ShowOptions.parse(context.getFilters(), destroyableEl);
         Boolean required = XMLUtils.parseBoolean(destroyableEl.getAttribute("required"), null);
