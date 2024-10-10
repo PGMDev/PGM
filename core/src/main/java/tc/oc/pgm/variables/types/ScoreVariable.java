@@ -13,14 +13,17 @@ public class ScoreVariable extends AbstractVariable<Party> {
 
   @Override
   protected double getValueImpl(Party party) {
-    if (party instanceof Competitor)
-      return party.moduleRequire(ScoreMatchModule.class).getScore((Competitor) party);
-    return 0;
+    if (party instanceof Competitor c)
+      return party
+          .moduleOptional(ScoreMatchModule.class)
+          .map(smm -> smm.getScore(c))
+          .orElse(-1d);
+    return -1;
   }
 
   @Override
   protected void setValueImpl(Party party, double value) {
-    if (party instanceof Competitor)
-      party.moduleRequire(ScoreMatchModule.class).setScore((Competitor) party, value);
+    if (party instanceof Competitor c)
+      party.moduleOptional(ScoreMatchModule.class).ifPresent(smm -> smm.setScore(c, value));
   }
 }
