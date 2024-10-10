@@ -55,6 +55,7 @@ import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
@@ -290,9 +291,10 @@ public class ActionParser {
       case "player":
         var variable = parser.variable(el, "var").scope(MatchPlayer.class).singleExclusive();
         var fallback = XMLUtils.parseFormattedText(el, "fallback", empty());
+        var nameStyle = parser.parseEnum(NameStyle.class, el, "style").optional(NameStyle.VERBOSE);
 
         return (T filterable) ->
-            variable.getHolder(filterable).map(MatchPlayer::getName).orElse(fallback);
+            variable.getHolder(filterable).map(mp -> mp.getName(nameStyle)).orElse(fallback);
       default:
         throw new InvalidXMLException("Unknown replacement type", el);
     }
