@@ -81,7 +81,7 @@ public class PlayerLocationVariable extends AbstractVariable<MatchPlayer> {
 
   private static RayBlockIntersection intersection(MatchPlayer player) {
     RayCastCache cache = lastRaytrace;
-    if (player.getLocation().equals(cache.location)) {
+    if (cache != null && player.getLocation().equals(cache.location)) {
       return cache.rayCast;
     }
     lastRaytrace = cache = new RayCastCache(
