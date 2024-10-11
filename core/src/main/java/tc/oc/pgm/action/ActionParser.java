@@ -26,6 +26,7 @@ import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
 import tc.oc.pgm.action.actions.PasteStructureAction;
+import tc.oc.pgm.action.actions.RepeatAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
@@ -197,22 +198,23 @@ public class ActionParser {
 
   // Generic action with N children parser
   private <B extends Filterable<?>> ActionNode<? super B> parseAction(
-      Element el, Class<B> scope, boolean includeObs) throws InvalidXMLException {
+      Element el, Class<B> scope, boolean obs) throws InvalidXMLException {
     scope = parseScope(el, scope);
 
-    ImmutableList.Builder<Action<? super B>> builder = ImmutableList.builder();
+    if (el.getChildren().isEmpty())
+      throw new InvalidXMLException("No action children were defined", el);
+
+    ImmutableList.Builder<Action<? super B>> children = ImmutableList.builder();
     for (Element child : el.getChildren()) {
-      builder.add(parse(child, scope));
+      children.add(parse(child, scope));
     }
 
-    Filter filter = wrapFilter(parser.filter(el, "filter").orAllow(), includeObs);
-    Filter untriggerFilter = wrapFilter(
-        parser
-            .filter(el, "untrigger-filter")
-            .optional(legacy ? StaticFilter.DENY : StaticFilter.ALLOW),
-        includeObs);
+    Filter filter = parser.filter(el, "filter").orAllow();
+    Filter untriggerFilter =
+        parser.filter(el, "untrigger-filter").result(!legacy && filter == StaticFilter.ALLOW);
 
-    return new ActionNode<>(builder.build(), filter, untriggerFilter, scope);
+    return new ActionNode<>(
+        children.build(), wrapFilter(filter, obs), wrapFilter(untriggerFilter, obs), scope);
   }
 
   // Parsers
@@ -222,13 +224,24 @@ public class ActionParser {
     return parseAction(el, scope, true);
   }
 
+  @MethodParser("repeat")
+  public <B extends Filterable<?>> Action<? super B> parseRepeat(Element el, Class<B> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+
+    Action<? super B> child = parseAction(el, scope, true);
+    Formula<B> formula = parser.formula(scope, el, "times").required();
+
+    return new RepeatAction<>(scope, child, formula);
+  }
+
   @MethodParser("switch-scope")
   public <O extends Filterable<?>, I extends Filterable<?>> Action<? super O> parseSwitchScope(
       Element el, Class<O> outer) throws InvalidXMLException {
     outer = parseScope(el, outer, "outer");
     Class<I> inner = parseScope(el, null, "inner");
 
-    ActionDefinition<? super I> child = parseAction(el, inner, includeObs(el, inner));
+    Action<? super I> child = parseAction(el, inner, includeObs(el, inner));
 
     Action<? super O> result = ScopeSwitchAction.of(child, outer, inner);
     if (result == null) {
