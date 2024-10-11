@@ -35,6 +35,10 @@ public class FilterBuilder extends Builder<Filter, FilterBuilder> {
     return optional(StaticFilter.DENY);
   }
 
+  public Filter result(boolean result) throws InvalidXMLException {
+    return optional(result ? StaticFilter.ALLOW : StaticFilter.DENY);
+  }
+
   @Override
   protected Filter parse(Node node) throws InvalidXMLException {
     if (prop.length == 0) return filters.parse(el);
