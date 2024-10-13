@@ -15,16 +15,10 @@ public class WorldInfoImpl implements WorldInfo {
   private static final Random random = new Random();
   private final long seed; // 0 means random every time
   private final boolean terrain;
-  private final int environment;
+  private final World.Environment environment;
 
   public WorldInfoImpl() {
-    this(0L, false, 0);
-  }
-
-  public WorldInfoImpl(long seed, boolean terrain, int environment) {
-    this.seed = seed;
-    this.terrain = terrain;
-    this.environment = environment > 1 || environment < -1 ? 0 : environment;
+    this(0L, false, World.Environment.NORMAL);
   }
 
   public WorldInfoImpl(Element element) throws InvalidXMLException {
@@ -32,10 +26,15 @@ public class WorldInfoImpl implements WorldInfo {
         parseSeed(assertNotNull(element).getAttributeValue("seed")),
         XMLUtils.parseBoolean(element.getAttribute("vanilla"), false),
         XMLUtils.parseEnum(
-                Node.fromLastChildOrAttr(element, "environment"),
-                World.Environment.class,
-                World.Environment.NORMAL)
-            .ordinal());
+            Node.fromLastChildOrAttr(element, "environment"),
+            World.Environment.class,
+            World.Environment.NORMAL));
+  }
+
+  private WorldInfoImpl(long seed, boolean terrain, World.Environment environment) {
+    this.seed = seed;
+    this.terrain = terrain;
+    this.environment = environment;
   }
 
   @Override
@@ -49,7 +48,7 @@ public class WorldInfoImpl implements WorldInfo {
   }
 
   @Override
-  public int getEnvironment() {
+  public World.Environment getEnvironment() {
     return environment;
   }
 
