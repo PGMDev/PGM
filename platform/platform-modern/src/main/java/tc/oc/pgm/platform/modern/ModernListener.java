@@ -1,25 +1,37 @@
 package tc.oc.pgm.platform.modern;
 
+import static tc.oc.pgm.util.event.EventUtil.handleCall;
+
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.entity.item.PrimedTnt;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Dispenser;
+import org.bukkit.craftbukkit.entity.CraftTNTPrimed;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.world.WorldLoadEvent;
+import org.bukkit.projectiles.BlockProjectileSource;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
@@ -102,10 +114,48 @@ public class ModernListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   @SuppressWarnings("removal")
-  public void onEntityDespawn(org.bukkit.event.entity.EntityRemoveEvent sportEvent) {
-    if (sportEvent.getCause() == org.bukkit.event.entity.EntityRemoveEvent.Cause.OUT_OF_WORLD) {
-      EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(sportEvent.getEntity());
-      handleCall(pgmEvent, sportEvent);
+  public void onEntityDespawn(org.bukkit.event.entity.EntityRemoveEvent modernEvent) {
+    if (modernEvent.getCause() == org.bukkit.event.entity.EntityRemoveEvent.Cause.OUT_OF_WORLD) {
+      EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(modernEvent.getEntity());
+      handleCall(pgmEvent, modernEvent);
+    }
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onEntitySpawn(EntitySpawnEvent modernEvent) {
+    if (modernEvent.getEntity() instanceof CraftTNTPrimed craftTNTPrimed) {
+      if (craftTNTPrimed.getHandle() instanceof PrimedTnt primedTnt) {
+        if (primedTnt.getOwner() instanceof net.minecraft.world.entity.player.Player player) {
+          ExplosionPrimeByEntityEvent pgmEvent = new ExplosionPrimeByEntityEvent(
+              modernEvent.getEntity(),
+              craftTNTPrimed.getYield(),
+              craftTNTPrimed.getFireTicks() > 0,
+              player.getBukkitEntity());
+          handleCall(pgmEvent, modernEvent);
+        }
+      }
+    } else if (modernEvent.getEntity() instanceof Projectile projectile) {
+      if (projectile.getShooter() instanceof BlockProjectileSource projectileSource) {
+        BlockDispenseEntityEvent pgmEvent = new BlockDispenseEntityEvent(
+            projectileSource.getBlock(),
+            null,
+            modernEvent.getEntity().getVelocity(),
+            modernEvent.getEntity());
+        handleCall(pgmEvent, modernEvent);
+      }
+    }
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onCreatureSpawn(CreatureSpawnEvent modernEvent) {
+    if (modernEvent.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.DISPENSE_EGG)) {
+      BlockFace behind = modernEvent.getEntity().getFacing().getOppositeFace();
+      Block block = modernEvent.getLocation().getBlock().getRelative(behind);
+      if (block instanceof Dispenser) {
+        BlockDispenseEntityEvent pgmEvent = new BlockDispenseEntityEvent(
+            block, null, modernEvent.getEntity().getVelocity(), modernEvent.getEntity());
+        handleCall(pgmEvent, modernEvent);
+      }
     }
   }
 
