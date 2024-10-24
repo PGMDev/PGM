@@ -42,10 +42,13 @@ import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.spawns.states.Joining;
 import tc.oc.pgm.spawns.states.Observing;
 import tc.oc.pgm.spawns.states.State;
+import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
@@ -64,6 +67,8 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   private final ObserverToolFactory observerToolFactory;
   private final Cache<UUID, Long> deathTicks =
       CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
+  private final Cache<UUID, ParticipationData> participationData =
+      CacheBuilder.newBuilder().expireAfterWrite(120, TimeUnit.SECONDS).build();
 
   public SpawnMatchModule(Match match, SpawnModule module) {
     this.match = match;
@@ -180,27 +185,44 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     return deathTick != null ? deathTick : 0;
   }
 
+  public long getJoinPenalty(PlayerPartyChangeEvent event) {
+    if (event.getRequest().has(JoinRequest.Flag.FORCE)) return 0;
+    if (event.getNewParty() == null || !event.getNewParty().isParticipating()) return 0;
+
+    ParticipationData data = participationData.getIfPresent(event.getPlayer().getId());
+    return data == null ? 0 : data.getJoinTick(event.getNewParty() instanceof Team t ? t : null);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerLeave(final PlayerParticipationStopEvent event) {
+    MatchPlayer player = event.getPlayer();
+    // Match not started, or you never fully joined, or forced move
+    if (!event.getMatch().isRunning() || states.get(player) instanceof Joining) return;
+    if (event.getRequest().has(JoinRequest.Flag.FORCE) && event.getNextParty() != null) return;
+
+    ParticipationData data = participationData.getIfPresent(event.getPlayer().getId());
+    (data == null ? data = new ParticipationData() : data).trackLeave(match, event.getCompetitor());
+    participationData.put(event.getPlayer().getId(), data);
+  }
+
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPartyChange(final PlayerPartyChangeEvent event) {
+    MatchPlayer player = event.getPlayer();
     if (event.getOldParty() == null) {
       // Join match
       if (event.getNewParty().isParticipating()) {
-        transition(
-            event.getPlayer(),
-            null,
-            new Joining(this, event.getPlayer(), getDeathTick(event.getPlayer())));
+        transition(player, null, new Joining(this, player, getJoinPenalty(event)));
       } else {
-        transition(event.getPlayer(), null, new Observing(this, event.getPlayer(), true, true));
+        transition(player, null, new Observing(this, player, true, true));
       }
     } else if (event.getNewParty() == null) {
       // Leave match
-      transition(event.getPlayer(), states.get(event.getPlayer()), null);
+      transition(player, states.get(player), null);
     } else {
       // Party change during match
-      State state = states.get(event.getPlayer());
-      if (state != null)
-        state.onEvent((PlayerJoinPartyEvent)
-            event); // Should always be PlayerPartyJoinEvent if getNewParty() != null
+      State state = states.get(player);
+      // Should always be PlayerPartyJoinEvent if getNewParty() != null
+      if (state != null) state.onEvent((PlayerJoinPartyEvent) event);
     }
   }
 

@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -81,6 +82,7 @@ public final class PGMConfig implements Config {
   private final boolean woolRefill;
   private final int griefScore;
   private final float assistPercent;
+  private final Map<TimePenalty, Duration> timePenalties;
 
   // votes.*
   private final boolean allowExtraVotes;
@@ -183,6 +185,12 @@ public final class PGMConfig implements Config {
         parseInteger(config.getString("gameplay.grief-score", "-10"), Range.atMost(0));
     this.assistPercent =
         parseFloat(config.getString("gameplay.assist-percent", "0.3"), Range.openClosed(0f, 1f));
+    this.timePenalties = new EnumMap<>(TimePenalty.class);
+    for (TimePenalty penalty : TimePenalty.values()) {
+      String key = penalty.name().toLowerCase(Locale.ROOT).replace('_', '-');
+      timePenalties.put(
+          penalty, parseDuration(config.getString("gameplay.time-penalties." + key, "0")));
+    }
 
     this.allowExtraVotes = parseBoolean(config.getString("votes.allow-extra-votes", "true"));
     this.maxExtraVotes = parseInteger(config.getString("votes.max-extra-votes", "5"));
@@ -567,6 +575,11 @@ public final class PGMConfig implements Config {
   @Override
   public float getAssistPercent() {
     return assistPercent;
+  }
+
+  @Override
+  public Duration getTimePenalty(TimePenalty penalty) {
+    return timePenalties.get(penalty);
   }
 
   @Override

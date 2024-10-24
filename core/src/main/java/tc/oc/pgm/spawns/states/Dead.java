@@ -36,7 +36,7 @@ public class Dead extends Spawning {
   private boolean kitted, rotted;
 
   public Dead(SpawnMatchModule smm, MatchPlayer player) {
-    super(smm, player, player.getMatch().getTick().tick);
+    super(smm, player, player.getMatch().getTick().tick, 0);
   }
 
   @Override
@@ -55,15 +55,12 @@ public class Dead extends Spawning {
     // Flash/wobble the screen. If we don't delay this then the client glitches out
     // when the player dies from a potion effect. I have no idea why it happens,
     // but this fixes it. We could investigate a better fix at some point.
-    smm.getMatch()
-        .getExecutor(MatchScope.LOADED)
-        .execute(
-            () -> {
-              if (isCurrent() && bukkit.isOnline()) {
-                bukkit.addPotionEffect(options.blackout ? BLINDNESS_LONG : BLINDNESS_SHORT, true);
-                bukkit.addPotionEffect(CONFUSION, true);
-              }
-            });
+    smm.getMatch().getExecutor(MatchScope.LOADED).execute(() -> {
+      if (isCurrent() && bukkit.isOnline()) {
+        bukkit.addPotionEffect(options.blackout ? BLINDNESS_LONG : BLINDNESS_SHORT, true);
+        bukkit.addPotionEffect(CONFUSION, true);
+      }
+    });
   }
 
   @Override

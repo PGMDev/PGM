@@ -25,13 +25,15 @@ public abstract class Spawning extends Participating {
 
   protected final RespawnOptions options;
   protected boolean spawnRequested;
-  protected final long deathTick;
+  protected final long startTick;
+  protected final long spawnAtTick;
 
-  public Spawning(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
+  public Spawning(SpawnMatchModule smm, MatchPlayer player, long deathTick, long minSpawnTick) {
     super(smm, player);
     this.options = smm.getRespawnOptions(player);
     this.spawnRequested = options.auto;
-    this.deathTick = deathTick;
+    this.startTick = player.getMatch().getTick().tick;
+    this.spawnAtTick = Math.max(deathTick + options.delayTicks, minSpawnTick);
   }
 
   @Override
@@ -73,7 +75,7 @@ public abstract class Spawning extends Participating {
   }
 
   protected long age() {
-    return player.getMatch().getTick().tick - deathTick;
+    return player.getMatch().getTick().tick - startTick;
   }
 
   @Override
@@ -100,7 +102,7 @@ public abstract class Spawning extends Participating {
   }
 
   protected long ticksUntilRespawn() {
-    return Math.max(0, options.delayTicks - age());
+    return spawnAtTick - player.getMatch().getTick().tick;
   }
 
   public @Nullable Spawn chooseSpawn() {
@@ -144,7 +146,7 @@ public abstract class Spawning extends Participating {
   }
 
   public void sendMessage() {
-    long ticks = options.delayTicks - age();
+    long ticks = ticksUntilRespawn();
     if (ticks % (ticks > 0 ? 20 : 100) == 0) {
       player.sendMessage(getSubtitle(false));
     }

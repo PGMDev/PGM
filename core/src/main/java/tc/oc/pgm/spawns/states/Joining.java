@@ -15,8 +15,8 @@ public class Joining extends Spawning {
     this(smm, player, 0);
   }
 
-  public Joining(SpawnMatchModule smm, MatchPlayer player, long deathTick) {
-    super(smm, player, deathTick);
+  public Joining(SpawnMatchModule smm, MatchPlayer player, long minSpawnTick) {
+    super(smm, player, smm.getDeathTick(player), minSpawnTick);
     this.spawnRequested = true;
   }
 

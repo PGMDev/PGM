@@ -42,4 +42,12 @@ public final class TimeUtils {
   public static boolean isLongerThan(Duration a, Duration b) {
     return a.compareTo(b) > 0;
   }
+
+  public static Duration max(Duration a, Duration b) {
+    return a.compareTo(b) > 0 ? a : b;
+  }
+
+  public static Duration min(Duration a, Duration b) {
+    return a.compareTo(b) < 0 ? a : b;
+  }
 }

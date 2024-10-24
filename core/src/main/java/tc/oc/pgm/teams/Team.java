@@ -19,7 +19,9 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   // The maximum allowed ratio between the "fullness" of any two teams in a match,
   // as measured by the Team.getFullness method. An imbalance of one player is
   // always allowed, even if it exceeds this ratio.
-  public static final float MAX_IMBALANCE = 1.2f;
+  public static final float MAX_IMBALANCE = 1.25f;
+  // Same as above, but for "standard" 2-team same max-players matches
+  public static final float MAX_STANDARD_IMBALANCE = 1.1f;
 
   private final TeamFactory info;
   private int min, max, overfill;
@@ -186,14 +188,17 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   public int getMaxBalancedSize() {
     // Find the minimum fullness among other teams
     float minFullness = 1f;
+    boolean isStandard = true;
     for (Team team : module().getParticipatingTeams()) {
       if (team != this) {
         minFullness = Math.min(minFullness, team.getFullness());
+        isStandard &= team.getMaxOverfill() == this.getMaxOverfill();
       }
     }
 
     // Calculate the dynamic limit to maintain balance with other teams (this can be zero)
-    int slots = (int) Math.ceil(Math.min(1f, minFullness * MAX_IMBALANCE) * this.getMaxOverfill());
+    float maxImbalance = isStandard ? MAX_STANDARD_IMBALANCE : MAX_IMBALANCE;
+    int slots = (int) Math.ceil(Math.min(1f, minFullness * maxImbalance) * this.getMaxOverfill());
 
     // Clamp to the static limit defined for this team (cannot be zero unless the static limit is
     // zero)
@@ -217,7 +222,8 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     } else {
       // Subtract all players who cannot be kicked
       JoinMatchModule jmm = join();
-      slots -= this.getPlayers().stream().filter(pl -> !jmm.canBePriorityKicked(pl)).count();
+      slots -=
+          this.getPlayers().stream().filter(pl -> !jmm.canBePriorityKicked(pl)).count();
     }
     return Math.max(0, slots);
   }

@@ -305,6 +305,22 @@ public interface Config {
   float getAssistPercent();
 
   /**
+   * Gets how long to penalize players for certain actions
+   *
+   * @return time to make them sit out for
+   */
+  Duration getTimePenalty(TimePenalty penalty);
+
+  enum TimePenalty {
+    FFA_FULL_REJOIN,
+    STACKED,
+    FULL_REJOIN,
+    REJOIN_MULTIPLIER,
+    REJOIN_MAX,
+    SWITCH
+  }
+
+  /**
    * Gets if extra votes are allowed based on the "pgm.vote.extra.#" permission.
    *
    * @return {@code true} if extra votes are enabled, {@code false} otherwise.
