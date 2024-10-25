@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.bukkit.entity.Player;
@@ -75,7 +74,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private final Match match;
   private final ContextStore<? super Filter> filterContext;
   private final Set<Class<? extends Event>> listeningFor = new HashSet<>();
-  private final AtomicBoolean loaded = new AtomicBoolean(false);
 
   private final DummyListener dummyListener = new DummyListener();
 
@@ -155,8 +153,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         });
       }
     }
-
-    loaded.set(true);
   }
 
   private void findAndCreateReactorFactories(Filter filter) {
@@ -361,9 +357,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   public void tick() {
-    // Tried to tick while haven't finished loading!
-    if (!loaded.get()) return;
-
     final Set<Filterable<?>> checked = new HashSet<>();
     Set<Filterable<?>> checking;
     // Collect Filterables that are dirty, and have not already been checked in this tick

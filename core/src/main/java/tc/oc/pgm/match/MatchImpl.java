@@ -845,11 +845,11 @@ public class MatchImpl implements Match {
       }
 
       startListeners(MatchScope.LOADED);
-      startTickables(MatchScope.LOADED);
       addParty(observers);
-
       loaded.set(true);
       callEvent(new MatchLoadEvent(this));
+      // Start ticking after match load event ocurred
+      startTickables(MatchScope.LOADED);
     } catch (Throwable e) {
       e.printStackTrace();
       unload();
