@@ -12,11 +12,15 @@ public class LivesVariable extends AbstractVariable<MatchPlayer> {
 
   @Override
   protected double getValueImpl(MatchPlayer player) {
-    return player.moduleRequire(BlitzMatchModule.class).getNumOfLives(player.getId());
+    return player
+        .moduleOptional(BlitzMatchModule.class)
+        .map(bmm -> bmm.getNumOfLives(player.getId()))
+        .orElse(-1);
   }
 
   @Override
   protected void setValueImpl(MatchPlayer player, double value) {
-    player.moduleRequire(BlitzMatchModule.class).setLives(player, Math.max((int) value, 0));
+    int amt = Math.max((int) value, 0);
+    player.moduleOptional(BlitzMatchModule.class).ifPresent(bmm -> bmm.setLives(player, amt));
   }
 }
