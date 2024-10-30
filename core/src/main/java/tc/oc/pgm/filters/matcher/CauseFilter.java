@@ -77,14 +77,12 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
       event = ((GeneralizedEvent) event).getCause();
     }
 
-    TrackerMatchModule tracker = query.moduleRequire(TrackerMatchModule.class);
-
     EntityDamageEvent.DamageCause damageCause = null;
     DamageInfo damageInfo = null;
     boolean punchDamage = false;
     if (event instanceof EntityDamageEvent damageEvent) {
       damageCause = damageEvent.getCause();
-      damageInfo = tracker.resolveDamage(damageEvent);
+      damageInfo = query.moduleRequire(TrackerMatchModule.class).resolveDamage(damageEvent);
       if (damageInfo instanceof MeleeInfo) {
         PhysicalInfo weapon = ((MeleeInfo) damageInfo).getWeapon();
         if (weapon instanceof ItemInfo && ((ItemInfo) weapon).getItem().getType() == Material.AIR) {
