@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.xml;
 
+import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParser;
@@ -63,19 +65,46 @@ public class XMLFluentParser {
     };
   }
 
-  public FilterBuilder filter(Element el, String... prop) throws InvalidXMLException {
+  public PrimitiveBuilder.Generic<String> string(Element el, String... prop) {
+    return new PrimitiveBuilder.Generic<>(el, prop) {
+      @Override
+      protected String parse(String text) throws TextException {
+        return text;
+      }
+    };
+  }
+
+  public Builder.Generic<Vector> vector(Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected Vector parse(Node node) throws InvalidXMLException {
+        return XMLUtils.parseVector(node);
+      }
+    };
+  }
+
+  public Builder.Generic<BlockVector> blockVector(Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected BlockVector parse(Node node) throws InvalidXMLException {
+        return XMLUtils.parseBlockVector(node);
+      }
+    };
+  }
+
+  public FilterBuilder filter(Element el, String... prop) {
     return new FilterBuilder(filters, el, prop);
   }
 
-  public RegionBuilder region(Element el, String... prop) throws InvalidXMLException {
+  public RegionBuilder region(Element el, String... prop) {
     return new RegionBuilder(regions, el, prop);
   }
 
-  public ItemBuilder item(Element el, String... prop) throws InvalidXMLException {
+  public ItemBuilder item(Element el, String... prop) {
     return new ItemBuilder(kits, el, prop);
   }
 
-  public Builder.Generic<Kit> kit(Element el, String... prop) throws InvalidXMLException {
+  public Builder.Generic<Kit> kit(Element el, String... prop) {
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Kit parse(Node node) throws InvalidXMLException {
@@ -87,16 +116,16 @@ public class XMLFluentParser {
   }
 
   public <T extends FeatureDefinition> ReferenceBuilder<T> reference(
-      Class<T> clazz, Element el, String... prop) throws InvalidXMLException {
+      Class<T> clazz, Element el, String... prop) {
     return new ReferenceBuilder<T>(features, clazz, el, prop);
   }
 
-  public VariableBuilder<?> variable(Element el, String... prop) throws InvalidXMLException {
+  public VariableBuilder<?> variable(Element el, String... prop) {
     return new VariableBuilder<>(features, el, prop);
   }
 
   public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(
-      Class<T> clazz, Element el, String... prop) throws InvalidXMLException {
+      Class<T> clazz, Element el, String... prop) {
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Action<? super T> parse(Node node) throws InvalidXMLException {
@@ -112,7 +141,7 @@ public class XMLFluentParser {
   }
 
   public <T extends Filterable<?>> Builder<Formula<T>, ?> formula(
-      Class<T> clazz, Element el, String... prop) throws InvalidXMLException {
+      Class<T> clazz, Element el, String... prop) {
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Formula<T> parse(Node node) {

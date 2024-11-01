@@ -45,7 +45,7 @@ public class DynamicStructure implements Feature<DynamicStructureDefinition> {
   public void place() {
     if (placed) return;
     placed = true;
-    structure.place(offset);
+    structure.place(offset, definition.shouldUpdate());
   }
 
   /** Remove the structure from the world */
@@ -53,6 +53,6 @@ public class DynamicStructure implements Feature<DynamicStructureDefinition> {
     if (!placed) return;
     placed = false;
 
-    snapshot.placeBlocks(region, new BlockVector());
+    snapshot.placeBlocks(region, new BlockVector(), definition.shouldUpdate());
   }
 }

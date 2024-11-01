@@ -368,6 +368,7 @@ public class ActionParser {
         parser.region(el, "region").blockBounded().orSelf(),
         XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(el, "material")),
         parser.filter(el, "filter").orNull(),
+        parser.parseBool(el, "update").orTrue(),
         parser.parseBool(el, "events").orFalse());
   }
 
@@ -414,7 +415,8 @@ public class ActionParser {
     var zFormula = parser.formula(scope, el, "z").required();
 
     var structure = parser.reference(StructureDefinition.class, el, "structure").required();
+    var update = parser.parseBool(el, "update").orTrue();
 
-    return new PasteStructureAction<>(scope, xFormula, yFormula, zFormula, structure);
+    return new PasteStructureAction<>(scope, xFormula, yFormula, zFormula, structure, update);
   }
 }

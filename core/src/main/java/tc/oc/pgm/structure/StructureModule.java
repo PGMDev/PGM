@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
@@ -23,14 +22,9 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
-import tc.oc.pgm.filters.parse.DynamicFilterValidation;
-import tc.oc.pgm.filters.parse.FilterParser;
-import tc.oc.pgm.regions.BlockBoundedValidation;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.snapshot.SnapshotMatchModule;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class StructureModule implements MapModule<StructureMatchModule> {
@@ -65,18 +59,16 @@ public class StructureModule implements MapModule<StructureMatchModule> {
       Version proto = factory.getProto();
       if (proto.isOlderThan(MapProtos.FILTER_FEATURES)) return null;
 
-      FilterParser filters = factory.getFilters();
-      RegionParser regions = factory.getRegions();
+      var parser = factory.getParser();
 
       final Map<String, StructureDefinition> structures = new HashMap<>();
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "structures", "structure")) {
-        final StructureDefinition definition =
-            new StructureDefinition(
-                XMLUtils.getRequiredAttribute(el, "id").getValue(),
-                XMLUtils.parseVector(el.getAttribute("origin"), (Vector) null),
-                regions.parseProperty(el, "region", BlockBoundedValidation.INSTANCE),
-                XMLUtils.parseBoolean(el.getAttribute("air"), false),
-                XMLUtils.parseBoolean(el.getAttribute("clear"), true));
+        final StructureDefinition definition = new StructureDefinition(
+            parser.string(el, "id").attr().required(),
+            parser.vector(el, "origin").attr().orNull(),
+            parser.region(el, "region").blockBounded().required(),
+            parser.parseBool(el, "air").attr().orFalse(),
+            parser.parseBool(el, "clear").attr().orTrue());
 
         structures.put(definition.getId(), definition);
         factory.getFeatures().addFeature(el, definition);
@@ -84,31 +76,31 @@ public class StructureModule implements MapModule<StructureMatchModule> {
 
       final List<DynamicStructureDefinition> dynamics = new ArrayList<>();
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "structures", "dynamic")) {
-        String id = el.getAttributeValue("id");
-        if (id == null) id = UUID.randomUUID().toString();
+        String id =
+            parser.string(el, "id").attr().optional(() -> UUID.randomUUID().toString());
 
-        BlockVector position = XMLUtils.parseBlockVector(Node.fromAttr(el, "location"));
-        BlockVector offset = XMLUtils.parseBlockVector(Node.fromAttr(el, "offset"));
+        BlockVector position = parser.blockVector(el, "location").attr().orNull();
+        BlockVector offset = parser.blockVector(el, "offset").attr().orNull();
 
         if (position != null && offset != null)
           throw new InvalidXMLException(
               "attributes 'location' and 'offset' cannot be used together", el);
 
-        final StructureDefinition structure =
-            structures.get(XMLUtils.getRequiredAttribute(el, "structure").getValue());
+        var structure = structures.get(parser.string(el, "structure").attr().required());
 
         Filter trigger, filter;
         if (proto.isOlderThan(MapProtos.DYNAMIC_FILTERS)) {
           // Legacy maps use "filter" as their trigger
-          trigger = filters.parseRequiredProperty(el, "filter", DynamicFilterValidation.MATCH);
+          trigger = parser.filter(el, "filter").dynamic(Match.class).required();
           filter = StaticFilter.ALLOW;
         } else {
-          trigger = filters.parseRequiredProperty(el, "trigger", DynamicFilterValidation.MATCH);
-          filter = filters.parseProperty(el, "filter", StaticFilter.ALLOW);
+          trigger = parser.filter(el, "trigger").dynamic(Match.class).required();
+          filter = parser.filter(el, "filter").orAllow();
         }
+        var update = parser.parseBool(el, "update").orTrue();
 
-        DynamicStructureDefinition definition =
-            new DynamicStructureDefinition(id, structure, trigger, filter, position, offset);
+        DynamicStructureDefinition definition = new DynamicStructureDefinition(
+            id, structure, trigger, filter, update, position, offset);
         dynamics.add(definition);
         factory.getFeatures().addFeature(el, definition);
       }

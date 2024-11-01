@@ -46,26 +46,26 @@ public class ControlPointBlockDisplay implements Listener {
     if (progressDisplayRegion == null) {
       this.progressDisplayRegion = null;
     } else {
-      this.progressDisplayRegion =
-          FiniteBlockRegion.fromWorld(
-              progressDisplayRegion, match.getWorld(), visualMaterials, match.getMap().getProto());
+      this.progressDisplayRegion = FiniteBlockRegion.fromWorld(
+          progressDisplayRegion,
+          match.getWorld(),
+          visualMaterials,
+          match.getMap().getProto());
       snapshot.saveRegion(progressDisplayRegion);
     }
 
     if (controllerDisplayRegion == null) {
       this.controllerDisplayRegion = null;
     } else {
-      Filter controllerDisplayFilter =
-          this.progressDisplayRegion == null
-              ? visualMaterials
-              : AllFilter.of(visualMaterials, new InverseFilter(progressDisplayRegion));
+      Filter controllerDisplayFilter = this.progressDisplayRegion == null
+          ? visualMaterials
+          : AllFilter.of(visualMaterials, new InverseFilter(progressDisplayRegion));
 
-      this.controllerDisplayRegion =
-          FiniteBlockRegion.fromWorld(
-              controllerDisplayRegion,
-              match.getWorld(),
-              controllerDisplayFilter,
-              match.getMap().getProto());
+      this.controllerDisplayRegion = FiniteBlockRegion.fromWorld(
+          controllerDisplayRegion,
+          match.getWorld(),
+          controllerDisplayFilter,
+          match.getMap().getProto());
       snapshot.saveRegion(controllerDisplayRegion);
     }
   }
@@ -76,7 +76,7 @@ public class ControlPointBlockDisplay implements Listener {
   public void setController(Competitor controllingTeam) {
     if (this.controllingTeam != controllingTeam && this.controllerDisplayRegion != null) {
       if (controllingTeam == null) {
-        snapshot.placeBlocks(this.controllerDisplayRegion, null);
+        snapshot.placeBlocks(this.controllerDisplayRegion, null, false);
       } else {
         COLOR_UTILS.setColor(
             match.getWorld(),
@@ -97,7 +97,7 @@ public class ControlPointBlockDisplay implements Listener {
       if (team != null) {
         COLOR_UTILS.setColor(block, team.getDyeColor());
       } else {
-        snapshot.getOriginalMaterial(pos).applyTo(block, true);
+        snapshot.getOriginalMaterial(pos).applyTo(block, false);
       }
     }
   }

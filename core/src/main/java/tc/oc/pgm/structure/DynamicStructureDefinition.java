@@ -17,18 +17,21 @@ public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition
   private final Filter passive;
   private final @Nullable BlockVector position;
   private final @NotNull BlockVector offset;
+  private final boolean update;
 
   DynamicStructureDefinition(
       String id,
       StructureDefinition structure,
       Filter trigger,
       Filter passive,
+      boolean update,
       @Nullable BlockVector position,
       @Nullable BlockVector offset) {
     super(id);
     this.structure = assertNotNull(structure);
     this.trigger = assertNotNull(trigger);
     this.passive = assertNotNull(passive);
+    this.update = update;
     this.position = position;
     this.offset = offset == null ? new BlockVector() : offset;
   }
@@ -58,6 +61,11 @@ public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition
    */
   public Filter getPassive() {
     return passive;
+  }
+
+  /** @return If this dynamic should generate block updates when placing */
+  public boolean shouldUpdate() {
+    return update;
   }
 
   /**
