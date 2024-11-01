@@ -15,14 +15,20 @@ public class FillAction extends AbstractAction<Match> {
   private final Region region;
   private final BlockMaterialData materialData;
   private final @Nullable Filter filter;
+  private final boolean update;
   private final boolean events;
 
   public FillAction(
-      Region region, BlockMaterialData materialData, @Nullable Filter filter, boolean events) {
+      Region region,
+      BlockMaterialData materialData,
+      @Nullable Filter filter,
+      boolean update,
+      boolean events) {
     super(Match.class);
     this.region = region;
     this.materialData = materialData;
     this.filter = filter;
+    this.update = update;
     this.events = events;
   }
 
@@ -32,7 +38,7 @@ public class FillAction extends AbstractAction<Match> {
       if (filter != null && filter.query(new BlockQuery(block)).isDenied()) continue;
 
       if (!events) {
-        materialData.applyTo(block, true);
+        materialData.applyTo(block, update);
       } else {
         BlockState newState = block.getState();
         materialData.applyTo(newState);
@@ -40,7 +46,7 @@ public class FillAction extends AbstractAction<Match> {
         BlockFormEvent event = new BlockFormEvent(block, newState);
         match.callEvent(event);
         if (event.isCancelled()) continue;
-        newState.update(true, true);
+        newState.update(true, update);
       }
     }
   }

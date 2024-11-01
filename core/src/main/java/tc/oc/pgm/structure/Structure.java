@@ -2,7 +2,6 @@ package tc.oc.pgm.structure;
 
 import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
@@ -28,7 +27,7 @@ public class Structure implements Feature<StructureDefinition> {
           match.getMap().getProto());
 
     snapshot.saveRegion(region);
-    if (definition.clearSource()) snapshot.removeBlocks(region, new BlockVector());
+    if (definition.clearSource()) snapshot.removeBlocks(region, new BlockVector(), false);
   }
 
   @Override
@@ -45,12 +44,12 @@ public class Structure implements Feature<StructureDefinition> {
     return region;
   }
 
-  public void place(BlockVector offset) {
-    snapshot.placeBlocks(region, offset);
+  public void place(BlockVector offset, boolean update) {
+    snapshot.placeBlocks(region, offset, update);
   }
 
-  public void placeAbsolute(BlockVector vector) {
-    place(new BlockVector(
-        new Vector(0, 0, 0).subtract(getRegion().getBounds().getBlockMin()).add(vector)));
+  public void placeAbsolute(BlockVector vector, boolean update) {
+    vector.subtract(getRegion().getBounds().getBlockMin());
+    place(vector, update);
   }
 }

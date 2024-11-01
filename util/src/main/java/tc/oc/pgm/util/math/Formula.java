@@ -11,52 +11,6 @@ import net.objecthunter.exp4j.function.Function;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Formula<T> extends ToDoubleFunction<T> {
-
-  Function BOUND = new Function("bound", 3) {
-    @Override
-    public double apply(double... doubles) {
-      double val = doubles[0];
-      double min = doubles[1];
-      double max = doubles[2];
-      return Math.max(min, Math.min(val, max));
-    }
-  };
-
-  Function RANDOM = new Function("random", 0) {
-    @Override
-    public double apply(double... doubles) {
-      return Math.random();
-    }
-  };
-
-  Function MAX = new Function("max") {
-    @Override
-    public double apply(double... doubles) {
-      double max = doubles[0];
-      for (int i = 1; i < doubles.length; i++) max = Math.max(max, doubles[i]);
-      return max;
-    }
-
-    @Override
-    public boolean isValidArgCount(int count) {
-      return count >= 1;
-    }
-  };
-
-  Function MIN = new Function("min") {
-    @Override
-    public double apply(double... doubles) {
-      double min = doubles[0];
-      for (int i = 1; i < doubles.length; i++) min = Math.min(min, doubles[i]);
-      return min;
-    }
-
-    @Override
-    public boolean isValidArgCount(int count) {
-      return count >= 1;
-    }
-  };
-
   /**
    * Create a formula for a config, if there's a misconfiguration it logs and uses fallback
    *
@@ -84,7 +38,7 @@ public interface Formula<T> extends ToDoubleFunction<T> {
       throws IllegalArgumentException {
     Expression exp = new ExpressionBuilder(expression)
         .variables(context.getVariables())
-        .functions(BOUND, RANDOM, MAX, MIN)
+        .functions(AddedFunctions.ALL)
         .functions(context.getArrays().stream()
             .map(str -> new Function(str, 1) {
               @Override
@@ -97,6 +51,11 @@ public interface Formula<T> extends ToDoubleFunction<T> {
         .build();
 
     return new ExpFormula<>(exp, context);
+  }
+
+  /** Shorthand for {@link #applyAsDouble} */
+  default double apply(T value) {
+    return applyAsDouble(value);
   }
 
   class ExpFormula<T> implements Formula<T> {

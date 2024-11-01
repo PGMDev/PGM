@@ -12,25 +12,26 @@ public class PasteStructureAction<T extends Filterable<?>> extends AbstractActio
   private final Formula<T> yformula;
   private final Formula<T> zformula;
   private final FeatureReference<StructureDefinition> structureReference;
+  private final boolean update;
 
   public PasteStructureAction(
       Class<T> scope,
       Formula<T> xformula,
       Formula<T> yformula,
       Formula<T> zformula,
-      FeatureReference<StructureDefinition> structureReference) {
+      FeatureReference<StructureDefinition> structureReference,
+      boolean update) {
     super(scope);
     this.xformula = xformula;
     this.yformula = yformula;
     this.zformula = zformula;
     this.structureReference = structureReference;
+    this.update = update;
   }
 
   @Override
   public void trigger(T t) {
-    BlockVector placeLocation = new BlockVector(
-        xformula.applyAsDouble(t), yformula.applyAsDouble(t), zformula.applyAsDouble(t));
-
-    structureReference.get().getStructure(t.getMatch()).placeAbsolute(placeLocation);
+    var loc = new BlockVector(xformula.apply(t), yformula.apply(t), zformula.apply(t));
+    structureReference.get().getStructure(t.getMatch()).placeAbsolute(loc, update);
   }
 }

@@ -83,12 +83,12 @@ public class WorldSnapshot {
     region.getChunkPositions().forEach(cv -> this.saveSnapshot(cv, null));
   }
 
-  public void placeBlocks(Region region, BlockVector offset) {
-    worldEdit.placeBlocks(region, offset);
+  public void placeBlocks(Region region, BlockVector offset, boolean update) {
+    worldEdit.placeBlocks(region, offset, update);
   }
 
-  public void removeBlocks(Region region, BlockVector offset) {
-    worldEdit.removeBlocks(region, offset);
+  public void removeBlocks(Region region, BlockVector offset, boolean update) {
+    worldEdit.removeBlocks(region, offset, update);
   }
 
   /**
