@@ -17,10 +17,12 @@ import java.util.Set;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
+import tc.oc.pgm.action.actions.EnchantItemAction;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
@@ -360,6 +362,15 @@ public class ActionParser {
     boolean keepEnchants = parser.parseBool(el, "keep-enchants").orFalse();
 
     return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants);
+  }
+
+  @MethodParser("enchant-item")
+  public EnchantItemAction parseEnchantItem(Element el, Class<?> scope) throws InvalidXMLException {
+    ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
+    Enchantment enchant = XMLUtils.parseEnchantment(Node.fromRequiredAttr(el, "enchantment"));
+    Formula<MatchPlayer> level = parser.formula(MatchPlayer.class, el, "level").required();
+
+    return new EnchantItemAction(matcher, enchant, level);
   }
 
   @MethodParser("fill")
