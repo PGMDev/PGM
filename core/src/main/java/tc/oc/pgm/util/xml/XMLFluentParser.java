@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.xml;
 
+import java.time.Duration;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
@@ -24,6 +25,7 @@ import tc.oc.pgm.util.xml.parsers.NumberBuilder;
 import tc.oc.pgm.util.xml.parsers.PrimitiveBuilder;
 import tc.oc.pgm.util.xml.parsers.ReferenceBuilder;
 import tc.oc.pgm.util.xml.parsers.RegionBuilder;
+import tc.oc.pgm.util.xml.parsers.StringBuilder;
 import tc.oc.pgm.util.xml.parsers.VariableBuilder;
 import tc.oc.pgm.variables.VariablesModule;
 
@@ -66,11 +68,15 @@ public class XMLFluentParser {
     };
   }
 
-  public PrimitiveBuilder.Generic<String> string(Element el, String... prop) {
+  public StringBuilder string(Element el, String... prop) {
+    return new StringBuilder(el, prop);
+  }
+
+  public PrimitiveBuilder.Generic<Duration> duration(Element el, String... prop) {
     return new PrimitiveBuilder.Generic<>(el, prop) {
       @Override
-      protected String parse(String text) throws TextException {
-        return text;
+      protected Duration parse(String text) throws TextException {
+        return TextParser.parseDuration(text);
       }
     };
   }

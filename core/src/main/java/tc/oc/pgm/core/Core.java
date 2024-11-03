@@ -7,7 +7,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
@@ -132,8 +131,10 @@ public class Core extends TouchableGoal<CoreFactory>
     return proximityLocations;
   }
 
-  public ImmutableSet<Mode> getModes() {
-    return this.definition.getModes();
+  @Override
+  public boolean isAffectedBy(Mode mode) {
+    return mode.getMaterialData() != null
+        && (this.definition.getModes() == null || this.definition.getModes().contains(mode));
   }
 
   public boolean isCoreMaterial(MaterialData material) {
@@ -241,6 +242,7 @@ public class Core extends TouchableGoal<CoreFactory>
     return material.matches(block.getState());
   }
 
+  @Override
   public String getModeChangeMessage(Material material) {
     return ModeUtils.formatMaterial(material) + " CORE MODE";
   }

@@ -117,7 +117,16 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
         .orElse(null);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onObjectiveModeAction(ObjectiveModeChangeEvent event) {
+    var action = event.getMode().getAction();
+    if (action != null) {
+      action.trigger(event.getMatch());
+      event.setVisible(true);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
   public void onObjectiveModeChange(ObjectiveModeChangeEvent event) {
     if (event.isVisible()) {
       Component broadcast = text()

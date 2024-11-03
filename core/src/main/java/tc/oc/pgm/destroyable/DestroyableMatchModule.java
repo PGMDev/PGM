@@ -128,7 +128,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Destroyable destroyable : this.destroyables) {
-      if (destroyable.getModes() == null || destroyable.getModes().contains(event.getMode())) {
+      if (destroyable.isAffectedBy(event.getMode())) {
         double oldCompletion = destroyable.getCompletion();
         destroyable.replaceBlocks(event.getMode().getMaterialData());
         // if at least one of the destroyables are visible, the mode change message will be sent

@@ -6,11 +6,9 @@ import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -18,10 +16,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.FilterMatchModule;
-import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.util.material.BlockMaterialData;
-import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -59,51 +55,44 @@ public class ObjectiveModesModule implements MapModule<ObjectiveModesMatchModule
         return null;
       }
 
+      var parser = factory.getParser();
+
       ImmutableList.Builder<Mode> parsedModes = ImmutableList.builder();
 
       if (doc.getRootElement().getChild("modes") == null) {
         return null;
       }
 
-      for (Element modeEl : XMLUtils.flattenElements(doc.getRootElement(), "modes", "mode")) {
-        String id = modeEl.getAttributeValue("id");
-        if (modeEl.getAttributeValue("after") == null) {
-          throw new InvalidXMLException("No period has been specified", modeEl);
-        }
+      for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "modes", "mode")) {
+        var name = parser.string(el, "name").colored().orNull();
+        var after = parser.duration(el, "after").required();
+        var showBefore = parser.duration(el, "show-before").optional(DEFAULT_SHOW_BEFORE);
+        if (!parser.parseBool(el, "boss-bar").orTrue()) showBefore = Duration.ZERO;
+        var filter = parser.filter(el, "filter").dynamic(Match.class).orNull();
 
-        BlockMaterialData material =
-            XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(modeEl, "material"));
-        Duration after = TextParser.parseDuration(modeEl.getAttributeValue("after"));
-        Filter filter =
-            factory.getFilters().parseProperty(modeEl, "filter", DynamicFilterValidation.MATCH);
-        String name = modeEl.getAttributeValue("name");
-        if (name != null) {
-          name = ChatColor.translateAlternateColorCodes('`', name);
-        }
+        var material = XMLUtils.parseBlockMaterialData(Node.fromAttr(el, "material"));
+        var action = parser.action(Match.class, el, "action").orNull();
 
-        String showBeforeRaw = modeEl.getAttributeValue("show-before");
-        Duration showBefore =
-            showBeforeRaw != null ? TextParser.parseDuration(showBeforeRaw) : DEFAULT_SHOW_BEFORE;
-
-        // Legacy
-        boolean legacyShowBossBar = XMLUtils.parseBoolean(modeEl.getAttribute("boss-bar"), true);
-        if (!legacyShowBossBar) showBefore = Duration.ZERO;
+        if (material == null && (name == null || action == null))
+          throw new InvalidXMLException("Expected either 'material', or 'name' & 'action'", el);
 
         // Autogenerate a unique id, required for /mode start
-        if (id == null) {
-          String legacyName = name != null ? name : ModeUtils.formatMaterial(material);
-          id = makeUniqueId(legacyName, factory.getFeatures());
-        }
+        String id = parser
+            .string(el, "id")
+            .optional(() -> makeUniqueId(name, material, factory.getFeatures()));
 
-        Mode mode = new Mode(id, material, after, filter, name, showBefore);
+        Mode mode = new Mode(id, name, after, showBefore, filter, material, action);
         parsedModes.add(mode);
-        factory.getFeatures().addFeature(modeEl, mode);
+        factory.getFeatures().addFeature(el, mode);
       }
 
       return new ObjectiveModesModule(parsedModes.build());
     }
 
-    private String makeUniqueId(String name, FeatureDefinitionContext features) {
+    private String makeUniqueId(
+        String name, BlockMaterialData material, FeatureDefinitionContext features) {
+      if (name == null) name = ModeUtils.formatMaterial(material);
+
       String baseId = "mode-" + Mode.makeId(name);
       if (!features.contains(baseId)) return baseId;
 

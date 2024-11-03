@@ -3,53 +3,51 @@ package tc.oc.pgm.modes;
 import static net.kyori.adventure.text.Component.text;
 
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Objects;
+import java.util.function.Supplier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.util.material.BlockMaterialData;
 
 @FeatureInfo(name = "mode")
 public class Mode extends SelfIdentifyingFeatureDefinition {
-  private final BlockMaterialData material;
-  private final Duration after;
-  private final @Nullable Filter filter;
   private final @Nullable String name;
   private final String legacyName;
   private final Component componentName;
-  private final Duration showBefore;
 
-  public Mode(final BlockMaterialData material, final Duration after, Duration showBefore) {
-    this(null, material, after, null, null, showBefore);
-  }
+  private final Duration after;
+  private final Duration showBefore;
+  private final @Nullable Filter filter;
+  private final @Nullable BlockMaterialData material;
+  private final @Nullable Action<? super Match> action;
 
   public Mode(
-      final @Nullable String id,
-      final BlockMaterialData material,
-      final Duration after,
-      final @Nullable Filter filter,
+      final String id,
       final @Nullable String name,
-      Duration showBefore) {
+      final Duration after,
+      final Duration showBefore,
+      final @Nullable Filter filter,
+      final @Nullable BlockMaterialData material,
+      final @Nullable Action<? super Match> action) {
     super(id);
-    this.material = material;
-    this.after = after;
-    this.filter = filter;
     this.name = name;
-    this.legacyName = name != null ? name : getPreformattedMaterialName();
+    this.legacyName = getName(() -> ModeUtils.formatMaterial(material));
     this.componentName = text(legacyName, NamedTextColor.RED);
+    this.after = after;
     this.showBefore = showBefore;
+    this.filter = filter;
+    this.material = material;
+    this.action = action;
   }
 
-  @Override
-  protected String getDefaultId() {
-    return makeDefaultId() + "--" + makeId(legacyName);
-  }
-
-  public BlockMaterialData getMaterialData() {
-    return this.material;
+  public String getName(Supplier<String> ifNull) {
+    return Objects.requireNonNullElseGet(this.name, ifNull);
   }
 
   public String getLegacyName() {
@@ -58,10 +56,6 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
 
   public Component getComponentName() {
     return componentName;
-  }
-
-  public String getPreformattedMaterialName() {
-    return ModeUtils.formatMaterial(this.material);
   }
 
   public Duration getAfter() {
@@ -76,11 +70,11 @@ public class Mode extends SelfIdentifyingFeatureDefinition {
     return this.filter;
   }
 
-  public @Nullable String getName() {
-    return this.name;
+  public @Nullable BlockMaterialData getMaterialData() {
+    return this.material;
   }
 
-  public static String makeDefaultId(@Nullable String name, AtomicInteger serial) {
-    return "--" + makeTypeName(Mode.class) + "-" + makeId(name);
+  public @Nullable Action<? super Match> getAction() {
+    return this.action;
   }
 }

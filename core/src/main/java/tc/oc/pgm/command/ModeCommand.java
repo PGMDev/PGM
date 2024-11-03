@@ -38,26 +38,22 @@ public final class ModeCommand {
 
     if (countdowns.isEmpty()) throwNoResults();
 
-    TextComponent.Builder builder =
-        text().append(translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
+    TextComponent.Builder builder = text()
+        .append(translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
 
     ModeChangeCountdown next = countdowns.get(0);
     Duration timeLeft = modes.getCountdown().getTimeLeft(next);
 
     if (timeLeft == null) {
-      builder.append(text(next.getMode().getPreformattedMaterialName(), NamedTextColor.GOLD));
+      builder.append(text(next.getMode().getLegacyName(), NamedTextColor.GOLD));
     } else if (timeLeft.getSeconds() >= 0) {
-      builder.append(
-          text(
-                  WordUtils.capitalize(next.getMode().getPreformattedMaterialName()),
-                  NamedTextColor.GOLD)
-              .append(space())
-              .append(text("(", NamedTextColor.AQUA))
-              .append(
-                  new ModesPaginatedResult(modes)
-                      .formatSingleCountdown(next)
-                      .color(NamedTextColor.AQUA))
-              .append(text(")", NamedTextColor.AQUA)));
+      builder.append(text(WordUtils.capitalize(next.getMode().getLegacyName()), NamedTextColor.GOLD)
+          .append(space())
+          .append(text("(", NamedTextColor.AQUA))
+          .append(new ModesPaginatedResult(modes)
+              .formatSingleCountdown(next)
+              .color(NamedTextColor.AQUA))
+          .append(text(")", NamedTextColor.AQUA)));
     } else {
       throwNoResults();
     }
@@ -83,14 +79,13 @@ public final class ModeCommand {
     List<ModeChangeCountdown> modeList = modes.getSortedCountdowns(true);
     int resultsPerPage = 8;
     int pages = (modeList.size() + resultsPerPage - 1) / resultsPerPage;
-    Component header =
-        TextFormatter.paginate(
-            translatable("command.monumentModes"),
-            page,
-            pages,
-            NamedTextColor.DARK_AQUA,
-            NamedTextColor.AQUA,
-            true);
+    Component header = TextFormatter.paginate(
+        translatable("command.monumentModes"),
+        page,
+        pages,
+        NamedTextColor.DARK_AQUA,
+        NamedTextColor.AQUA,
+        true);
 
     new ModesPaginatedResult(header, resultsPerPage, modes).display(audience, modeList, page);
   }
@@ -122,7 +117,8 @@ public final class ModeCommand {
     TextComponent.Builder builder =
         text().append(translatable("command.modesPushed", NamedTextColor.GOLD).append(space()));
     if (duration.isNegative()) {
-      builder.append(translatable("command.modesPushedBack", NamedTextColor.GOLD).append(space()));
+      builder.append(
+          translatable("command.modesPushedBack", NamedTextColor.GOLD).append(space()));
     } else {
       builder.append(
           translatable("command.modesPushedForwards", NamedTextColor.GOLD).append(space()));
@@ -152,12 +148,10 @@ public final class ModeCommand {
     context.cancel(countdown);
     context.start(countdown, time);
 
-    TextComponent.Builder builder =
-        text()
-            .append(
-                translatable("command.selectedModePushed", mode.getComponentName())
-                    .color(NamedTextColor.GOLD)
-                    .append(space()));
+    TextComponent.Builder builder = text()
+        .append(translatable("command.selectedModePushed", mode.getComponentName())
+            .color(NamedTextColor.GOLD)
+            .append(space()));
     builder.append(clock(Math.abs(time.getSeconds())).color(NamedTextColor.AQUA));
     audience.sendMessage(builder);
   }

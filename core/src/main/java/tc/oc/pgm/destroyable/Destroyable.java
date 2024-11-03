@@ -8,7 +8,6 @@ import static net.kyori.adventure.text.format.Style.style;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.time.Instant;
@@ -171,8 +170,10 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return proximityLocations;
   }
 
-  public ImmutableSet<Mode> getModes() {
-    return this.definition.getModes();
+  @Override
+  public boolean isAffectedBy(Mode mode) {
+    return mode.getMaterialData() != null
+        && (this.definition.getModes() == null || this.definition.getModes().contains(mode));
   }
 
   /** Calculate maximum/current health */
@@ -611,6 +612,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.hasMaterial(MaterialData.block(block));
   }
 
+  @Override
   public String getModeChangeMessage(Material material) {
     return ModeUtils.formatMaterial(material) + " OBJECTIVE MODE";
   }

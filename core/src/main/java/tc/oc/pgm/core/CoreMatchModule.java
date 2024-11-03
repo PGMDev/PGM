@@ -161,7 +161,7 @@ public class CoreMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Core core : this.cores) {
-      if (core.getModes() == null || core.getModes().contains(event.getMode())) {
+      if (core.isAffectedBy(event.getMode())) {
         core.replaceBlocks(event.getMode().getMaterialData());
         // if at least one of the cores are visible, the mode change message will be sent
         if (core.hasShowOption(ShowOption.SHOW_MESSAGES)) {
