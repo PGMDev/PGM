@@ -296,10 +296,12 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
 
   @MethodParser("resize")
   public ResizedRegion parseResize(Element el) throws InvalidXMLException {
+    Region child = this.parseChildren(el);
     Vector min = parser.vector(el, "min").attr().required();
     Vector max = parser.vector(el, "max").attr().required();
     boolean relative = parser.parseBool(el, "relative").attr().orFalse();
-    return new ResizedRegion(this.parseChildren(el), min, max, relative);
+    validate(child, BlockBoundedValidation.INSTANCE, new Node(el));
+    return new ResizedRegion(child, min, max, relative);
   }
 
   @MethodParser("everywhere")

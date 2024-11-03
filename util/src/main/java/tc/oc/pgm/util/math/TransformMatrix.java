@@ -3,10 +3,21 @@ package tc.oc.pgm.util.math;
 import org.bukkit.util.Vector;
 
 public class TransformMatrix {
+
+  private static final TransformMatrix IDENTITY = new TransformMatrix(new double[] {
+    1, 0, 0, 0, //
+    0, 1, 0, 0, //
+    0, 0, 1, 0, //
+    0, 0, 0, 1 //
+  });
   private final double[] matrix;
 
   private TransformMatrix(double[] matrix) {
     this.matrix = matrix;
+  }
+
+  public static TransformMatrix identity() {
+    return IDENTITY;
   }
 
   public static TransformMatrix translate(Vector vector) {
@@ -31,7 +42,12 @@ public class TransformMatrix {
     double x = vector.getX();
     double y = vector.getY();
     double z = vector.getZ();
-    return new TransformMatrix(new double[] {x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1});
+    return new TransformMatrix(new double[] {
+      x, 0, 0, 0, //
+      0, y, 0, 0, //
+      0, 0, z, 0, //
+      0, 0, 0, 1 //
+    });
   }
 
   public static TransformMatrix concat(TransformMatrix... a) {

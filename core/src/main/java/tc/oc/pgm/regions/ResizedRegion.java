@@ -39,6 +39,12 @@ public class ResizedRegion extends TransformedRegion {
     if (matrix != null) return;
 
     var oldBounds = region.getBounds();
+    if (oldBounds.isEmpty() || !oldBounds.isBlockFinite()) {
+      this.bounds = oldBounds;
+      this.matrix = this.inverse = TransformMatrix.identity();
+      return;
+    }
+
     var oldSize = oldBounds.getSize();
 
     if (relative) {
