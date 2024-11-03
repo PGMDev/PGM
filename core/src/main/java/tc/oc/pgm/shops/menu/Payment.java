@@ -45,7 +45,7 @@ public class Payment {
 
   public boolean matches(ItemStack item) {
     return this.item != null
-        ? Materials.itemsSimilar(item, this.item, true, false)
+        ? Materials.itemsSimilar(item, this.item, true)
         : item.getType() == currency;
   }
 }

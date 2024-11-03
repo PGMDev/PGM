@@ -22,9 +22,6 @@ public class ItemMatcher {
       boolean ignoreMetadata,
       boolean ignoreName,
       boolean ignoreEnchantments) {
-    if (ignoreMetadata && (!ignoreName || !ignoreEnchantments))
-      throw new UnsupportedOperationException(
-          "Cannot ignore metadata but respect name or enchantments");
 
     this.ignoreDurability = ignoreDurability;
 
@@ -36,20 +33,31 @@ public class ItemMatcher {
     this.base = stripMeta(base);
   }
 
-  private ItemStack stripMeta(ItemStack item) {
-    ItemMeta meta = item.getItemMeta();
-    if (meta == null || (!ignoreMetadata && !(ignoreEnchantments && meta.hasEnchants())))
-      return item;
+  private ItemStack stripMeta(final ItemStack item) {
+    // No modification needed
+    if (!item.hasItemMeta() || (!ignoreMetadata && !ignoreName && !ignoreEnchantments)) return item;
 
-    item = item.clone();
-    if (ignoreMetadata) item.setItemMeta(null);
-    else item.getEnchantments().keySet().forEach(item::removeEnchantment);
+    var newItem = item.clone();
+    if (ignoreMetadata) {
+      // Strip all meta, then re-add if needed
+      newItem.setItemMeta(null);
 
-    return item;
+      // Restore name or enchants
+      if (!ignoreName) newItem.getItemMeta().setDisplayName(item.getItemMeta().getDisplayName());
+      if (!ignoreEnchantments) newItem.addUnsafeEnchantments(item.getEnchantments());
+    } else {
+      // Strip only specific parts
+      ItemMeta meta = item.getItemMeta();
+
+      if (ignoreName) meta.setDisplayName(null);
+      if (ignoreEnchantments) item.getEnchantments().keySet().forEach(item::removeEnchantment);
+    }
+
+    return newItem;
   }
 
   public boolean matches(ItemStack query) {
-    return Materials.itemsSimilar(base, stripMeta(query), ignoreDurability, ignoreName)
+    return Materials.itemsSimilar(base, stripMeta(query), ignoreDurability)
         && amount.contains(query.getAmount());
   }
 }

@@ -459,11 +459,6 @@ public abstract class KitParser {
     boolean ignoreEnchantments =
         XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-enchantments"), ignoreMetadata);
 
-    if (ignoreMetadata && (!ignoreName || !ignoreEnchantments)) {
-      throw new InvalidXMLException(
-          "Cannot ignore metadata but respect name or enchantments", parent);
-    }
-
     return new ItemMatcher(
         stack, amount, ignoreDurability, ignoreMetadata, ignoreName, ignoreEnchantments);
   }

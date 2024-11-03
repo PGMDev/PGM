@@ -94,8 +94,7 @@ public interface Materials {
     return material != null && material.isSolid() && !SOLID_EXCLUSIONS.matches(material);
   }
 
-  static boolean itemsSimilar(
-      ItemStack first, ItemStack second, boolean skipDur, boolean skipCheckingName) {
+  static boolean itemsSimilar(ItemStack first, ItemStack second, boolean skipDur) {
     if (first == second) {
       return true;
     }
@@ -107,36 +106,12 @@ public interface Materials {
     }
     final boolean hasMeta1 = first.hasItemMeta();
     final boolean hasMeta2 = second.hasItemMeta();
-    if (!hasMeta1 && !hasMeta2) {
-      return true;
-    }
+    if (!hasMeta1 && !hasMeta2) return true;
 
     final ItemMeta meta1 = hasMeta1 ? first.getItemMeta() : null;
     final ItemMeta meta2 = hasMeta2 ? second.getItemMeta() : null;
 
-    final String prevName1 = meta1 != null ? meta1.getDisplayName() : null;
-    final String prevName2 = meta2 != null ? meta2.getDisplayName() : null;
-    if (skipCheckingName) {
-      if (meta1 != null) {
-        meta1.setDisplayName(null);
-      }
-      if (meta2 != null) {
-        meta2.setDisplayName(null);
-      }
-    }
-
-    try {
-      return Bukkit.getItemFactory().equals(meta1, meta2);
-    } finally {
-      if (skipCheckingName) {
-        if (meta1 != null) {
-          meta1.setDisplayName(prevName1);
-        }
-        if (meta2 != null) {
-          meta2.setDisplayName(prevName2);
-        }
-      }
-    }
+    return Bukkit.getItemFactory().equals(meta1, meta2);
   }
 
   static boolean isSolid(MaterialData material) {

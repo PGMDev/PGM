@@ -20,6 +20,7 @@ import tc.oc.pgm.util.xml.parsers.BoolBuilder;
 import tc.oc.pgm.util.xml.parsers.Builder;
 import tc.oc.pgm.util.xml.parsers.FilterBuilder;
 import tc.oc.pgm.util.xml.parsers.ItemBuilder;
+import tc.oc.pgm.util.xml.parsers.NumberBuilder;
 import tc.oc.pgm.util.xml.parsers.PrimitiveBuilder;
 import tc.oc.pgm.util.xml.parsers.ReferenceBuilder;
 import tc.oc.pgm.util.xml.parsers.RegionBuilder;
@@ -72,6 +73,18 @@ public class XMLFluentParser {
         return text;
       }
     };
+  }
+
+  public NumberBuilder<Integer> parseInt(Element el, String... prop) {
+    return number(Integer.class, el, prop);
+  }
+
+  public NumberBuilder<Double> parseDouble(Element el, String... prop) {
+    return number(Double.class, el, prop);
+  }
+
+  public <T extends Number> NumberBuilder<T> number(Class<T> cls, Element el, String... prop) {
+    return new NumberBuilder<>(cls, el, prop);
   }
 
   public Builder.Generic<Vector> vector(Element el, String... prop) {

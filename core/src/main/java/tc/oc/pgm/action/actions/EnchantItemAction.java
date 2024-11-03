@@ -32,7 +32,11 @@ public class EnchantItemAction extends AbstractAction<MatchPlayer> {
     }
     for (int i = 0; i < inv.getSize(); i++) {
       ItemStack current = inv.getItem(i);
-      if (current != null && matcher.matches(current)) enchant(current, level);
+      if (current != null && matcher.matches(current)) {
+        enchant(current, level);
+        // Makes item sync with client instantly
+        inv.setItem(i, current);
+      }
     }
   }
 
