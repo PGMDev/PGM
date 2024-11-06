@@ -83,17 +83,27 @@ public class ActionParser {
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
   }
 
-  @SuppressWarnings("unchecked")
+  public <B extends Filterable<?>> Action<? super B> parseProperty(
+      Element el, @Nullable Class<B> bound) throws InvalidXMLException {
+    return parse(el, bound, true);
+  }
+
   public <B extends Filterable<?>> Action<? super B> parse(Element el, @Nullable Class<B> bound)
       throws InvalidXMLException {
+    return parse(el, bound, false);
+  }
+
+  @SuppressWarnings("unchecked")
+  private <B extends Filterable<?>> Action<? super B> parse(
+      Element el, @Nullable Class<B> bound, boolean property) throws InvalidXMLException {
     String id = FeatureDefinitionContext.parseId(el);
 
     Node node = new Node(el);
-    if (id != null && maybeReference(el)) {
+    if (id != null && maybeReference(el, property)) {
       return parseReference(node, id, bound);
     }
 
-    Action<? super B> result = parseDynamic(el, bound);
+    Action<? super B> result = property ? parseAction(el, bound) : parseDynamic(el, bound);
     if (bound != null) validate(result, ActionScopeValidation.of(bound), node);
     if (result instanceof ActionDefinition) {
       if (XMLUtils.parseBoolean(Node.fromAttr(el, "expose"), false)) {
@@ -112,8 +122,8 @@ public class ActionParser {
     return methodParsers.keySet();
   }
 
-  private boolean maybeReference(Element el) {
-    return "action".equals(el.getName()) && el.getChildren().isEmpty();
+  private boolean maybeReference(Element el, boolean property) {
+    return (property || "action".equals(el.getName())) && el.getChildren().isEmpty();
   }
 
   public <B> Action<? super B> parseReference(Node node, Class<B> bound)
