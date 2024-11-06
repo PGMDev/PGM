@@ -71,6 +71,29 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   }
 
   @Override
+  public boolean attributesEqual(ItemMeta meta1, ItemMeta meta2) {
+    var attributes1 = meta1.getAttributeModifiers();
+    var attributes2 = meta2.getAttributeModifiers();
+    if (attributes1 == null || attributes2 == null) return false;
+
+    if (!attributes1.keySet().equals(attributes2.keySet())) return false;
+
+    for (Attribute attr : attributes1.keySet()) {
+      if (modifiersDiffer(attributes1.get(attr), attributes2.get(attr))) return false;
+    }
+    return true;
+  }
+
+  @Override
+  public void stripAttributes(ItemMeta meta) {
+    var attributes = meta.getAttributeModifiers();
+
+    if (attributes != null && !attributes.isEmpty()) {
+      attributes.keySet().forEach(meta::removeAttributeModifier);
+    }
+  }
+
+  @Override
   public EquipmentSlot getUsedHand(PlayerEvent event) {
     return switch (event) {
       case PlayerItemConsumeEvent e -> e.getHand();

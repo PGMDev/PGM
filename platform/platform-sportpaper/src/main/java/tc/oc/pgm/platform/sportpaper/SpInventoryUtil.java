@@ -68,6 +68,25 @@ public class SpInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
   }
 
   @Override
+  public boolean attributesEqual(ItemMeta meta1, ItemMeta meta2) {
+    var attributes = meta1.getModifiedAttributes();
+    if (!attributes.equals(meta2.getModifiedAttributes())) return false;
+
+    for (String attr : attributes) {
+      if (modifiersDiffer(meta1.getAttributeModifiers(attr), meta2.getAttributeModifiers(attr)))
+        return false;
+    }
+    return true;
+  }
+
+  @Override
+  public void stripAttributes(ItemMeta meta) {
+    for (String attr : meta.getModifiedAttributes()) {
+      meta.getAttributeModifiers(attr).clear();
+    }
+  }
+
+  @Override
   public EquipmentSlot getUsedHand(PlayerEvent event) {
     return EquipmentSlot.HAND;
   }

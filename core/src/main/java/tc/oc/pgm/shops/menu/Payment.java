@@ -39,8 +39,14 @@ public class Payment {
   }
 
   public boolean hasPayment(PlayerInventory inventory) {
-    return price <= 0
-        || (item != null ? inventory.contains(item, price) : inventory.contains(currency, price));
+    if (price <= 0) return true;
+
+    int remaining = price;
+    for (ItemStack item : inventory.getContents()) {
+      if (item == null || !matches(item)) continue;
+      if ((remaining -= item.getAmount()) <= 0) return true;
+    }
+    return false;
   }
 
   public boolean matches(ItemStack item) {

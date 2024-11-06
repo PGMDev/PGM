@@ -43,7 +43,6 @@ import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.shops.menu.Payment;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -184,20 +183,15 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     return payments;
   }
 
-  public static Payment parsePayment(Element element, XMLFluentParser parser)
+  public static Payment parsePayment(Element el, XMLFluentParser parser)
       throws InvalidXMLException {
-    Node priceAttr = Node.fromAttr(element, "price");
-    Node currencyAttr = Node.fromAttr(element, "currency");
-    Node colorAttr = Node.fromAttr(element, "color");
+    Integer price = parser.parseInt(el, "price").optional(0);
+    Material currency = price <= 0 ? null : parser.material(el, "currency").orNull();
+    ChatColor color = parser.parseEnum(ChatColor.class, el, "color").optional(ChatColor.GOLD);
 
-    Integer price = XMLUtils.parseNumber(priceAttr, Integer.class, 0);
-    Material currency =
-        price <= 0 || currencyAttr == null ? null : XMLUtils.parseMaterial(currencyAttr);
-    ChatColor color = XMLUtils.parseChatColor(colorAttr, ChatColor.GOLD);
-
-    ItemStack item = parser.item(element, "item").child().orNull();
+    ItemStack item = parser.item(el, "item").child().orNull();
     if (currency == null && item == null && price > 0) {
-      throw new InvalidXMLException("A 'currency' attribute or child <item> is required", element);
+      throw new InvalidXMLException("A 'currency' attribute or child <item> is required", el);
     }
 
     return new Payment(currency, price, color, item);

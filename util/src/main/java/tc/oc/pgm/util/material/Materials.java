@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.material;
 
 import static org.bukkit.Material.*;
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -108,8 +109,21 @@ public interface Materials {
     final boolean hasMeta2 = second.hasItemMeta();
     if (!hasMeta1 && !hasMeta2) return true;
 
-    final ItemMeta meta1 = hasMeta1 ? first.getItemMeta() : null;
-    final ItemMeta meta2 = hasMeta2 ? second.getItemMeta() : null;
+    ItemMeta meta1 = hasMeta1 ? first.getItemMeta() : null;
+    ItemMeta meta2 = hasMeta2 ? second.getItemMeta() : null;
+
+    if (hasMeta1 && hasMeta2 && meta1.hasAttributeModifiers() && meta2.hasAttributeModifiers()) {
+      if (INVENTORY_UTILS.attributesEqual(meta1, meta2)) {
+        // If attributes match, strip them not to affect the comparison.
+        // This is done because attributes have a random UUID in t hem that make them never equal
+        meta1 = meta1.clone();
+        meta2 = meta2.clone();
+        INVENTORY_UTILS.stripAttributes(meta1);
+        INVENTORY_UTILS.stripAttributes(meta2);
+      } else {
+        return false;
+      }
+    }
 
     return Bukkit.getItemFactory().equals(meta1, meta2);
   }

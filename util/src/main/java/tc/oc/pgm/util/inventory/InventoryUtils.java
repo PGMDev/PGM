@@ -25,6 +25,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.platform.Platform;
@@ -187,6 +188,40 @@ public final class InventoryUtils {
 
     void applyAttributeModifiers(
         SetMultimap<Attribute, AttributeModifier> modifiers, ItemMeta meta);
+
+    boolean attributesEqual(ItemMeta meta1, ItemMeta meta2);
+
+    default boolean modifiersDiffer(
+        Collection<AttributeModifier> a, Collection<AttributeModifier> b) {
+      if (a.size() != b.size()) return true;
+      if (a.isEmpty()) return false;
+      // Fast case for single  modifier
+      if (a.size() == 1) {
+        var modA = a.iterator().next();
+        var modB = b.iterator().next();
+        return modA.getOperation() != modB.getOperation() || modA.getAmount() != modB.getAmount();
+      }
+
+      record SimpleModifier(double amount, AttributeModifier.Operation operation)
+          implements Comparable<SimpleModifier> {
+        public SimpleModifier(AttributeModifier modifier) {
+          this(modifier.getAmount(), modifier.getOperation());
+        }
+
+        @Override
+        public int compareTo(@NotNull SimpleModifier o) {
+          int res = operation.ordinal() - o.operation.ordinal();
+          if (res != 0) return res;
+          return Double.compare(amount, o.amount);
+        }
+      }
+
+      var listA = a.stream().map(SimpleModifier::new).sorted().toList();
+      var listB = b.stream().map(SimpleModifier::new).sorted().toList();
+      return !listA.equals(listB);
+    }
+
+    void stripAttributes(ItemMeta meta);
 
     EquipmentSlot getUsedHand(PlayerEvent event);
 

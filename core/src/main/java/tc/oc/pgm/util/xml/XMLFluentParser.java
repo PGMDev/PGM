@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.xml;
 
 import java.time.Duration;
+import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
@@ -91,6 +92,15 @@ public class XMLFluentParser {
 
   public <T extends Number> NumberBuilder<T> number(Class<T> cls, Element el, String... prop) {
     return new NumberBuilder<>(cls, el, prop);
+  }
+
+  public Builder.Generic<Material> material(Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected Material parse(Node node) throws InvalidXMLException {
+        return XMLUtils.parseMaterial(node);
+      }
+    };
   }
 
   public Builder.Generic<Vector> vector(Element el, String... prop) {
