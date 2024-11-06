@@ -160,7 +160,7 @@ public class XMLFluentParser {
       protected Action<? super T> parse(Node node) throws InvalidXMLException {
         return node.isAttribute()
             ? actions.parseReference(node, clazz)
-            : actions.parse(node.getElement(), clazz);
+            : actions.parseProperty(node.getElement(), clazz);
       }
     };
   }
