@@ -1,6 +1,8 @@
 package tc.oc.pgm.filters.matcher.match;
 
 import com.google.common.collect.Range;
+import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.filter.query.PartyQuery;
@@ -10,6 +12,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.WeakTypedFilter;
 import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
+import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.variables.Variable;
@@ -37,6 +40,14 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
         throw new InvalidXMLException("Non-array variables cannot contain an index.", node);
       return var.getScope() == Party.class ? new Team(var, range) : new Generic(var, range);
     }
+  }
+
+  public static <T extends Filterable<?>> Filter of(
+      Formula<?> formula, Class<T> scope, Range<Double> range) throws InvalidXMLException {
+    //noinspection unchecked
+    return scope == Party.class
+        ? new TeamFormula((Formula<Party>) formula, range)
+        : new GenericFormula<>((Formula<T>) formula, scope, range);
   }
 
   @Override
@@ -125,6 +136,57 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     @Override
     protected double getValue(Variable<?> variable, Filterable<?> filterable) {
       return ((Variable.Indexed<?>) variable).getValue(filterable, idx);
+    }
+  }
+
+  public static class GenericFormula<T extends Filterable<?>> implements FilterDefinition {
+    private final Formula<T> formula;
+    private final Class<T> scope;
+    private final Range<Double> values;
+
+    public GenericFormula(Formula<T> variable, Class<T> scope, Range<Double> values) {
+      this.formula = variable;
+      this.scope = scope;
+      this.values = values;
+    }
+
+    @Override
+    public QueryResponse query(Query q) {
+      T target;
+      if (!(q instanceof MatchQuery mq) || (target = mq.filterable(scope)) == null)
+        return QueryResponse.ABSTAIN;
+      return QueryResponse.fromBoolean(values.contains(formula.apply(target)));
+    }
+
+    @Override
+    public boolean respondsTo(Class<? extends Query> queryType) {
+      //noinspection unchecked
+      return Filterable.class.isAssignableFrom(queryType)
+          && Filterables.isAssignable((Class<Filterable<?>>) queryType, scope);
+    }
+  }
+
+  /**
+   * Specialization for team formulas implementing CompetitorFilter. Allows team to be set to a
+   * specific one.
+   */
+  public static class TeamFormula implements CompetitorFilter {
+    private final Formula<Party> formula;
+    private final Range<Double> values;
+
+    public TeamFormula(Formula<Party> variable, Range<Double> values) {
+      this.formula = variable;
+      this.values = values;
+    }
+
+    @Override
+    public boolean matches(PartyQuery query) {
+      return values.contains(formula.apply(query.getParty()));
+    }
+
+    @Override
+    public boolean matches(MatchQuery query, Competitor competitor) {
+      return matches(competitor);
     }
   }
 }

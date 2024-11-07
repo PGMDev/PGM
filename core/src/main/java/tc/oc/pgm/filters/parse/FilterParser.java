@@ -16,6 +16,7 @@ import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
+import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.region.Region;
@@ -90,6 +91,7 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.math.OffsetVector;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.Variable;
 
@@ -97,10 +99,12 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   protected final Map<String, Method> methodParsers;
   protected final MapFactory factory;
+  protected final XMLFluentParser parser;
   protected final FeatureDefinitionContext features;
 
   public FilterParser(MapFactory factory) {
     this.factory = factory;
+    this.parser = factory.getParser();
     this.features = factory.getFeatures();
 
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
@@ -621,13 +625,23 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("variable")
   public Filter parseVariableFilter(Element el) throws InvalidXMLException {
-    Variable<?> varDef = features.resolve(Node.fromRequiredAttr(el, "var"), Variable.class);
-    Integer index = null;
-    if (varDef.isIndexed())
-      index = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "index"), Integer.class);
     Range<Double> range = XMLUtils.parseNumericRange(new Node(el), Double.class);
 
-    VariableFilter<?> filter = VariableFilter.of(varDef, index, range, new Node(el));
+    Filter filter;
+    if (el.getAttribute("var") != null) {
+      Variable<?> varDef = parser.variable(el, "var").required();
+      Integer index = varDef.isIndexed() ? parser.parseInt(el, "index").required() : null;
+
+      filter = VariableFilter.of(varDef, index, range, new Node(el));
+    } else if (el.getAttribute("value") != null) {
+      var scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
+      var formula = parser.formula(scope, el, "value").attr().required();
+
+      filter = VariableFilter.of(formula, scope, range);
+    } else {
+      throw new InvalidXMLException("Expected one of 'var' or 'value'", el);
+    }
+
     return filter instanceof CompetitorFilter
         ? parseExplicitTeam(el, (CompetitorFilter) filter)
         : filter;
