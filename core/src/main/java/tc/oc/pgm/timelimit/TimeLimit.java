@@ -13,6 +13,8 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.goals.GoalsVictoryCondition;
+import tc.oc.pgm.result.ImmediateVictoryCondition;
 import tc.oc.pgm.util.collection.RankedSet;
 
 @FeatureInfo(name = "time-limit")
@@ -66,6 +68,12 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
 
   public @Nullable VictoryCondition getResult() {
     return result;
+  }
+
+  public boolean isProximityRelevant(boolean includeOvertime) {
+    return result == null
+        || result instanceof GoalsVictoryCondition
+        || (includeOvertime && overtime != null && !(result instanceof ImmediateVictoryCondition));
   }
 
   public boolean getShow() {

@@ -491,6 +491,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return StringUtils.percentage(this.getCompletion());
   }
 
+  @NotNull
   @Override
   public String renderPreciseCompletion() {
     return this.getBreaks() + "/" + this.getBreaksRequired();

@@ -166,7 +166,17 @@ public interface Config {
    *
    * @return If proximity is visible.
    */
-  boolean showProximity();
+  default boolean showProximity() {
+    return showProximity(false);
+  }
+
+  /**
+   * Gets whether proximity metrics are visible to players.
+   *
+   * @param relevant If proximity is currently relevant (ie: an active time limit)
+   * @return If proximity is visible.
+   */
+  boolean showProximity(boolean relevant);
 
   /**
    * Gets whether the side bar is rendered.

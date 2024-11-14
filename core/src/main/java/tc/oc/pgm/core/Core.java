@@ -205,7 +205,7 @@ public class Core extends TouchableGoal<CoreFactory>
     return StringUtils.percentage(this.getCompletion());
   }
 
-  @Nullable
+  @NotNull
   @Override
   public String renderPreciseCompletion() {
     return this.leak + "/" + this.leakRequired;

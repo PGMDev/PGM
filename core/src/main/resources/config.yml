@@ -102,7 +102,7 @@ ui:
   tablist: true    # Enable the tab list?
   tablist-resize: false # Resize the tab list for 1.7 players? Requires ProtocolLib
   ping: false      # Should tab list show real ping?
-  proximity: false # Should the proximity of objectives be visible?
+  proximity: auto # Should the proximity of objectives be visible?
   fireworks: true  # Spawn fireworks after objectives are completed?
   participants-see-observers: true # Can participants see observers in the tab list?
   flag-beams: false # Should everyone see floating wool flag beams?

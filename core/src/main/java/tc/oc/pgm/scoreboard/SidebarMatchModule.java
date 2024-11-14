@@ -32,6 +32,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.destroyable.Destroyable;
+import tc.oc.pgm.events.CountdownCancelEvent;
+import tc.oc.pgm.events.CountdownStartEvent;
 import tc.oc.pgm.events.FeatureChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
@@ -47,6 +49,8 @@ import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
+import tc.oc.pgm.timelimit.TimeLimitCountdown;
+import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.concurrent.RateLimiter;
@@ -209,9 +213,22 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void goalProximityChange(final GoalProximityChangeEvent event) {
-    if (PGM.get().getConfiguration().showProximity()) {
+    boolean willUseProx = match.moduleRequire(TimeLimitMatchModule.class).willUseProximity();
+    if (PGM.get().getConfiguration().showProximity(willUseProx)) {
       renderSidebarDebounce();
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void timelimitToggle(final CountdownStartEvent event) {
+    if (!(event.getCountdown() instanceof TimeLimitCountdown)) return;
+    renderSidebarDebounce();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void timelimitToggle(final CountdownCancelEvent event) {
+    if (!(event.getCountdown() instanceof TimeLimitCountdown)) return;
+    renderSidebarDebounce();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

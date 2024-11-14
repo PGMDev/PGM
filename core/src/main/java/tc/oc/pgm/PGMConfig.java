@@ -102,7 +102,7 @@ public final class PGMConfig implements Config {
   private final boolean showTabList;
   private final boolean resizeTabList;
   private final boolean showTabListPing;
-  private final boolean showProximity;
+  private final Boolean showProximity;
   private final boolean showFireworks;
   private final boolean participantsSeeObservers;
   private final boolean verboseStats;
@@ -202,7 +202,8 @@ public final class PGMConfig implements Config {
     this.queueJoin = parseBoolean(config.getString("join.queue", "false"));
     this.anytimeJoin = parseBoolean(config.getString("join.anytime", "true"));
 
-    this.showProximity = parseBoolean(config.getString("ui.proximity", "false"));
+    var proximityStr = config.getString("ui.proximity", "false");
+    this.showProximity = proximityStr.equalsIgnoreCase("auto") ? null : parseBoolean(proximityStr);
     this.showSideBar = parseBoolean(config.getString("ui.sidebar", "true"));
     this.showTabList = parseBoolean(config.getString("ui.tablist", "true"));
     this.resizeTabList = parseBoolean(config.getString("ui.tablist-resize", "false"));
@@ -558,8 +559,8 @@ public final class PGMConfig implements Config {
   }
 
   @Override
-  public boolean showProximity() {
-    return showProximity;
+  public boolean showProximity(boolean relevant) {
+    return showProximity != null ? showProximity : relevant;
   }
 
   @Override
