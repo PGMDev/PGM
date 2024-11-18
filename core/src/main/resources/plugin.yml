@@ -1,7 +1,7 @@
 name: PGM
 api-version: 1.20.6
 softdepend: [ViaVersion, ProtocolLib]
-description: ${project.parent.description}
-main: ${project.mainClass}
-version: ${project.version} (git-${git.commit.id.abbrev})
-website: ${project.parent.url}
+description: ${description}
+main: ${mainClass}
+version: ${version} (git-${commitHash})
+website: ${url}

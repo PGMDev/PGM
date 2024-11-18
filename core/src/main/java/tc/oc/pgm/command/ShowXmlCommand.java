@@ -6,7 +6,7 @@ import static tc.oc.pgm.util.text.TextException.noPermission;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;

@@ -7,8 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Namespace;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import tc.oc.pgm.util.Pair;
 
 public final class ParseRangeTest {
@@ -24,17 +24,16 @@ public final class ParseRangeTest {
 
   @Test
   public void testParsedMathematicalRanges() throws InvalidXMLException {
-    final List<Pair<String, Range<Integer>>> mathematicalFormatRanges =
-        Lists.newArrayList(
-            Pair.of("[1,5]", Range.closed(1, 5)),
-            Pair.of("[1,oo)", Range.atLeast(1)),
-            Pair.of("(-oo,5]", Range.atMost(5)),
-            Pair.of("(1,20)", Range.open(1, 20)),
-            Pair.of("(1,oo)", Range.greaterThan(1)),
-            Pair.of("(-oo,80)", Range.lessThan(80)),
-            Pair.of("(-oo,oo)", Range.all()),
-            Pair.of("(1,5]", Range.openClosed(1, 5)),
-            Pair.of("[1,5)", Range.closedOpen(1, 5)));
+    final List<Pair<String, Range<Integer>>> mathematicalFormatRanges = Lists.newArrayList(
+        Pair.of("[1,5]", Range.closed(1, 5)),
+        Pair.of("[1,oo)", Range.atLeast(1)),
+        Pair.of("(-oo,5]", Range.atMost(5)),
+        Pair.of("(1,20)", Range.open(1, 20)),
+        Pair.of("(1,oo)", Range.greaterThan(1)),
+        Pair.of("(-oo,80)", Range.lessThan(80)),
+        Pair.of("(-oo,oo)", Range.all()),
+        Pair.of("(1,5]", Range.openClosed(1, 5)),
+        Pair.of("[1,5)", Range.closedOpen(1, 5)));
 
     for (Pair<String, Range<Integer>> mathematicalFormatRange : mathematicalFormatRanges) {
       Range<Integer> parsedRange =
@@ -46,20 +45,19 @@ public final class ParseRangeTest {
 
   @Test
   public void testParsedVanillaRanges() throws InvalidXMLException {
-    final List<Pair<String, Range<Double>>> vanillaFormatRanges =
-        Lists.newArrayList(
-            Pair.of("1..5", Range.closed(1D, 5D)),
-            Pair.of("  1  ..5    ", Range.closed(1D, 5D)),
-            Pair.of("1..", Range.atLeast(1D)),
-            Pair.of("..5", Range.atMost(5D)),
-            Pair.of("-oo..1", Range.atMost(1D)),
-            Pair.of("1..oo", Range.atLeast(1D)),
-            Pair.of("-oo..oo", Range.all()),
-            Pair.of("-oo ..", Range.all()),
-            Pair.of(" ..oo", Range.all()),
-            Pair.of(".5..5", Range.closed(0.5D, 5D)),
-            Pair.of("0.5  ..5 ", Range.closed(0.5D, 5D)),
-            Pair.of("..", Range.all()));
+    final List<Pair<String, Range<Double>>> vanillaFormatRanges = Lists.newArrayList(
+        Pair.of("1..5", Range.closed(1D, 5D)),
+        Pair.of("  1  ..5    ", Range.closed(1D, 5D)),
+        Pair.of("1..", Range.atLeast(1D)),
+        Pair.of("..5", Range.atMost(5D)),
+        Pair.of("-oo..1", Range.atMost(1D)),
+        Pair.of("1..oo", Range.atLeast(1D)),
+        Pair.of("-oo..oo", Range.all()),
+        Pair.of("-oo ..", Range.all()),
+        Pair.of(" ..oo", Range.all()),
+        Pair.of(".5..5", Range.closed(0.5D, 5D)),
+        Pair.of("0.5  ..5 ", Range.closed(0.5D, 5D)),
+        Pair.of("..", Range.all()));
 
     for (Pair<String, Range<Double>> vanillaFormatRange : vanillaFormatRanges) {
       Range<Double> parsedRange =
@@ -71,19 +69,18 @@ public final class ParseRangeTest {
 
   @Test
   public void testFaultyVanillaRanges() {
-    final List<String> faultyRanges =
-        Lists.newArrayList(
-            "oo..1",
-            "oo..oo",
-            "5..1",
-            "oo..oo",
-            "-oo..-oo",
-            "oo..-oo",
-            "4..-oo",
-            "===..5",
-            "3..###",
-            "3..wow",
-            "amazing..3");
+    final List<String> faultyRanges = Lists.newArrayList(
+        "oo..1",
+        "oo..oo",
+        "5..1",
+        "oo..oo",
+        "-oo..-oo",
+        "oo..-oo",
+        "4..-oo",
+        "===..5",
+        "3..###",
+        "3..wow",
+        "amazing..3");
 
     for (String faultyRange : faultyRanges) {
       AtomicReference<Range<Integer>> faultyResult = new AtomicReference<>(null);
@@ -111,9 +108,8 @@ public final class ParseRangeTest {
       AtomicReference<Range<Integer>> faultyResult = new AtomicReference<>(null);
       Assertions.assertThrows(
           InvalidXMLException.class,
-          () ->
-              faultyResult.set(
-                  XMLUtils.parseBoundedNumericRange(dummyNode(nonBoundedRange), Integer.class)),
+          () -> faultyResult.set(
+              XMLUtils.parseBoundedNumericRange(dummyNode(nonBoundedRange), Integer.class)),
           () -> "\"" + nonBoundedRange + "\"" + " parsed faulty to result: " + faultyResult.get());
     }
   }

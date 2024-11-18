@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.tablist;
 
-import java.awt.*;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
