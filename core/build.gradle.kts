@@ -68,7 +68,7 @@ publishing {
     repositories {
         maven {
             name = "ghPackages"
-            url = uri("https://github.com/PGMDev/PGM")
+            url = uri("https://maven.pkg.github.com/PGMDev/PGM")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
