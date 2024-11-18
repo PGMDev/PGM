@@ -20,6 +20,7 @@ tasks.named<ShadowJar>("shadowJar") {
         attributes["paperweight-mappings-namespace"] = "mojang"
     }
     archiveFileName = "PGM.jar"
+    archiveClassifier.set("")
     destinationDirectory = rootProject.projectDir.resolve("build/libs")
 
     minimize {
@@ -58,9 +59,9 @@ tasks.named<ShadowJar>("shadowJar") {
 
 publishing {
     publications.create<MavenPublication>("pgm") {
-        groupId = rootProject.group as String
+        groupId = project.group as String
         artifactId = project.name
-        version = rootProject.version as String
+        version = project.version as String
 
         artifact(tasks["shadowJar"])
     }
