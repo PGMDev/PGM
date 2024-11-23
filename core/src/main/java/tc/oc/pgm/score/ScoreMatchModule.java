@@ -32,7 +32,6 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
@@ -61,9 +60,9 @@ public class ScoreMatchModule implements MatchModule, Listener {
     this.scoreBoxes = scoreBoxes;
     this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
 
-    if (this.config.mercyLimit > 0) {
+    if (this.config.mercyLimit() > 0) {
       this.mercyRule =
-          new MercyRule(this, config.scoreLimit, config.mercyLimit, config.mercyLimitMin);
+          new MercyRule(this, config.scoreLimit(), config.mercyLimit(), config.mercyLimitMin());
     }
   }
 
@@ -72,8 +71,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
     match.addVictoryCondition(new ScoreVictoryCondition());
   }
 
+  public ScoreConfig.Display getDisplay() {
+    return config.display();
+  }
+
   public boolean hasScoreLimit() {
-    return this.config.scoreLimit > 0 || hasMercyRule();
+    return this.config.scoreLimit() > 0 || hasMercyRule();
   }
 
   public boolean hasMercyRule() {
@@ -81,7 +84,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   public Filter getScoreboardFilter() {
-    return this.config.scoreboardFilter;
+    return this.config.scoreboardFilter();
   }
 
   public int getScoreLimit() {
@@ -91,7 +94,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
       return this.mercyRule.getScoreLimit();
     }
 
-    return this.config.scoreLimit;
+    return this.config.scoreLimit();
   }
 
   public Map<Competitor, Double> getScores() {
@@ -148,8 +151,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
   public Component getStatusMessage(MatchPlayer matchPlayer) {
     Component message = this.getScoreMessage(matchPlayer);
 
-    if (this.config.scoreLimit > 0) {
-      message = message.append(text("  [" + this.config.scoreLimit + "]", NamedTextColor.GRAY));
+    if (this.config.scoreLimit() > 0) {
+      message = message.append(text("  [" + this.config.scoreLimit() + "]", NamedTextColor.GRAY));
     }
     return message;
   }
@@ -161,10 +164,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
     // add +1 to killer's team if it was a kill, otherwise -1 to victim's team
     if (event.isChallengeKill()) {
       this.incrementScore(
-          event.getKiller().getId(), event.getKiller().getParty(), this.config.killScore);
+          event.getKiller().getId(), event.getKiller().getParty(), this.config.killScore());
     } else {
       this.incrementScore(
-          event.getVictim().getId(), event.getVictim().getCompetitor(), -this.config.deathScore);
+          event.getVictim().getId(), event.getVictim().getCompetitor(), -this.config.deathScore());
     }
   }
 
@@ -209,21 +212,16 @@ public class ScoreMatchModule implements MatchModule, Listener {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null || !player.canInteract() || player.getBukkit().isDead()) return;
 
-    ParticipantState playerState = player.getParticipantState();
     Vector from = event.getBlockFrom().toVector();
     Vector to = event.getBlockTo().toVector();
 
     for (ScoreBox box : this.scoreBoxes) {
-      if (box.getRegion().enters(from, to) && box.canScore(playerState)) {
-        if (box.isCoolingDown(playerState)) {
+      if (box.getRegion().enters(from, to) && box.canScore(player)) {
+        if (box.isCoolingDown(player)) {
           match
               .getLogger()
-              .warning(playerState.getId()
-                  + " tried to score multiple times in one second (from="
-                  + from
-                  + " to="
-                  + to
-                  + ")");
+              .warning("%s tried to score multiple times in under a second (from=%s to=%s)"
+                  .formatted(player.getId(), from, to));
         } else {
           this.playerScore(box, player, box.getScore() + redeemItems(box, player.getInventory()));
         }
@@ -240,7 +238,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
     for (final ScoreBox box : this.scoreBoxes) {
       if (!box.getRedeemables().isEmpty()
           && box.getRegion().contains(player.getBukkit())
-          && box.canScore(player.getParticipantState())) {
+          && box.canScore(player)) {
         match.getExecutor(MatchScope.RUNNING).execute(() -> {
           if (player.getBukkit().isOnline()) {
             double points = redeemItems(box, player.getInventory());
@@ -265,7 +263,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
     if (points == 0) return;
 
     this.incrementScore(player.getId(), player.getCompetitor(), points);
-    box.setLastScoreTime(player.getState(), Instant.now());
+    box.setLastScoreTime(player, Instant.now());
 
     int wholePoints = (int) points;
     if (wholePoints < 1 || box.isSilent()) return;
@@ -313,8 +311,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   private void setScore(Competitor competitor, double oldScore, double newScore) {
-    if (this.config.scoreLimit > 0 && newScore > this.config.scoreLimit) {
-      newScore = this.config.scoreLimit;
+    if (this.config.scoreLimit() > 0 && newScore > this.config.scoreLimit()) {
+      newScore = this.config.scoreLimit();
     }
 
     CompetitorScoreChangeEvent event =

@@ -15,13 +15,16 @@ import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ShowOption;
+import tc.oc.pgm.score.ScoreConfig;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.wool.WoolMatchModule;
 
 class RenderContext {
   public final @NotNull Match match;
   public final @NotNull Party viewer;
+  public final ScoreMatchModule smm;
   public final boolean hasScores;
+  public final ScoreConfig.Display display;
   public final boolean isBlitz;
   public final boolean isCompactWool;
   public final Map<Competitor, List<Goal<?>>> competitorGoals;
@@ -35,7 +38,9 @@ class RenderContext {
   public RenderContext(@NotNull Match match, @NotNull Party viewer) {
     this.match = match;
     this.viewer = viewer;
-    this.hasScores = match.getModule(ScoreMatchModule.class) != null;
+    this.smm = match.getModule(ScoreMatchModule.class);
+    this.hasScores = smm != null;
+    this.display = smm != null ? smm.getDisplay() : ScoreConfig.Display.NUMERICAL;
     this.isBlitz = match.getModule(BlitzMatchModule.class) != null;
     this.isCompactWool = isCompactWool();
 

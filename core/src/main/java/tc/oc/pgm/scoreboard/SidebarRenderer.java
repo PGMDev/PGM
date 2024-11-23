@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,6 @@ import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.ProximityGoal;
-import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -137,18 +137,22 @@ class SidebarRenderer {
     if (!context.hasScores && !context.isBlitz) return;
     context.startSection();
 
-    for (Competitor competitor : match.getSortedCompetitors()) {
-      Component text;
-      if (context.hasScores) {
-        text = renderScore(competitor);
-      } else {
-        text = renderBlitz(competitor);
-      }
-      if (text != null) {
+    if (context.hasScores) {
+      var smm = assertNotNull(context.smm);
+      int limit = smm.hasScoreLimit() ? smm.getScoreLimit() : -1;
 
-        if (text != empty()) {
-          text = text.append(space());
-        }
+      for (Competitor competitor : match.getSortedCompetitors()) {
+        if (!smm.getScoreboardFilter().response(competitor)) continue;
+        context.addRow(context.display.format(competitor, (int) smm.getScore(competitor), limit));
+
+        // No point rendering more scores, usually seen in FFA
+        if (context.isFull()) break;
+      }
+    } else {
+      for (Competitor competitor : match.getSortedCompetitors()) {
+        Component text = renderBlitz(competitor);
+        if (text == null) continue;
+        if (text != empty()) text = text.append(space());
         context.addRow(text.append(competitor.getName(NameStyle.SIMPLE_COLOR)));
 
         // No point rendering more scores, usually seen in FFA
@@ -222,22 +226,6 @@ class SidebarRenderer {
       }
       context.addRow(footer);
     }
-  }
-
-  private Component renderScore(Competitor competitor) {
-    ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
-    if (!smm.getScoreboardFilter().response(competitor)) {
-      return null;
-    }
-    Component score = text((int) smm.getScore(competitor), NamedTextColor.WHITE);
-    if (!smm.hasScoreLimit()) {
-      return score;
-    }
-    return text()
-        .append(score)
-        .append(text("/", NamedTextColor.DARK_GRAY))
-        .append(text(smm.getScoreLimit(), NamedTextColor.GRAY))
-        .build();
   }
 
   private Component renderBlitz(Competitor competitor) {

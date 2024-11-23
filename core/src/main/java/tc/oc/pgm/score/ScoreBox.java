@@ -2,80 +2,66 @@ package tc.oc.pgm.score;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.api.player.MatchPlayerState;
-import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.filters.query.PlayerStateQuery;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class ScoreBox {
-  private final Region region;
-  private final int score;
-  private final Filter trigger;
-  private final ImmutableMap<MaterialMatcher, Double> redeemables;
-  private final boolean silent;
+  private static final Duration COOLDOWN = Duration.ofMillis(500);
+  private final ScoreBoxDefinition definition;
 
-  private final Map<MatchPlayerState, Instant> lastScoreTime = Maps.newHashMap();
+  private final Map<UUID, Instant> lastScoreTime = Maps.newHashMap();
 
-  public ScoreBox(
-      Region region,
-      int score,
-      Filter filter,
-      ImmutableMap<MaterialMatcher, Double> redeemables,
-      boolean silent) {
-    this.region = assertNotNull(region, "region");
-    this.score = score;
-    this.trigger = assertNotNull(filter, "filter");
-    this.redeemables = redeemables;
-    this.silent = silent;
+  public ScoreBox(ScoreBoxDefinition definition) {
+    this.definition = definition;
   }
 
   public Region getRegion() {
-    return this.region;
+    return this.definition.region();
   }
 
   public int getScore() {
-    return this.score;
+    return this.definition.score();
   }
 
   public Filter getFilter() {
-    return this.trigger;
+    return this.definition.filter();
   }
 
   public Map<MaterialMatcher, Double> getRedeemables() {
-    return redeemables;
+    return this.definition.redeemables();
   }
 
   public boolean isSilent() {
-    return silent;
+    return this.definition.silent();
   }
 
-  public @Nullable Instant getLastScoreTime(MatchPlayerState player) {
+  public @Nullable Instant getLastScoreTime(MatchPlayer player) {
     assertNotNull(player, "player");
 
-    return this.lastScoreTime.get(player);
+    return this.lastScoreTime.get(player.getId());
   }
 
-  public boolean canScore(ParticipantState player) {
-    return this.trigger.query(new PlayerStateQuery(null, player)).isAllowed();
+  public boolean canScore(MatchPlayer player) {
+    return this.definition.filter().query(player).isAllowed();
   }
 
-  public boolean isCoolingDown(MatchPlayerState player) {
+  public boolean isCoolingDown(MatchPlayer player) {
     Instant lastScore = this.getLastScoreTime(player);
-    return lastScore != null && lastScore.plus(Duration.ofSeconds(1)).isAfter(Instant.now());
+    return lastScore != null && Duration.between(lastScore, Instant.now()).compareTo(COOLDOWN) < 0;
   }
 
-  public void setLastScoreTime(MatchPlayerState player, Instant time) {
+  public void setLastScoreTime(MatchPlayer player, Instant time) {
     assertNotNull(player, "player");
     assertNotNull(time, "time");
 
-    this.lastScoreTime.put(player, time);
+    this.lastScoreTime.put(player.getId(), time);
   }
 }

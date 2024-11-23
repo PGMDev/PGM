@@ -6,9 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
@@ -22,56 +20,56 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
-import tc.oc.pgm.filters.parse.DynamicFilterValidation;
-import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ScoreModule implements MapModule<ScoreMatchModule> {
   private static final MapTag SCORE_TAG = new MapTag("deathmatch", Gamemode.DEATHMATCH, false);
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox");
 
-  public ScoreModule(@NotNull ScoreConfig config, @NotNull Set<ScoreBoxFactory> scoreBoxFactories) {
+  private final @NotNull ScoreConfig config;
+  private final @NotNull Set<ScoreBoxDefinition> scoreBoxDefinitions;
+
+  public ScoreModule(
+      @NotNull ScoreConfig config, @NotNull Set<ScoreBoxDefinition> scoreBoxDefinitions) {
     assertNotNull(config, "score config");
-    assertNotNull(scoreBoxFactories, "score box factories");
+    assertNotNull(scoreBoxDefinitions, "score box factories");
 
     this.config = config;
-    this.scoreBoxFactories = scoreBoxFactories;
+    this.scoreBoxDefinitions = scoreBoxDefinitions;
+  }
+
+  @NotNull
+  public ScoreConfig getConfig() {
+    return config;
   }
 
   @Override
   public Collection<MapTag> getTags() {
     ImmutableList.Builder<MapTag> builder = ImmutableList.builder();
-    if (config.killScore != 0 || config.deathScore != 0) builder.add(SCORE_TAG);
-    if (!scoreBoxFactories.isEmpty()) builder.add(BOX_TAG);
+    if (config.killScore() != 0 || config.deathScore() != 0) builder.add(SCORE_TAG);
+    if (!scoreBoxDefinitions.isEmpty()) builder.add(BOX_TAG);
     return builder.build();
   }
 
   @Override
   public ScoreMatchModule createMatchModule(Match match) {
     ImmutableSet.Builder<ScoreBox> scoreBoxes = ImmutableSet.builder();
-    for (ScoreBoxFactory factory : this.scoreBoxFactories) {
+    for (ScoreBoxDefinition factory : this.scoreBoxDefinitions) {
       scoreBoxes.add(factory.createScoreBox(match));
     }
 
     return new ScoreMatchModule(match, this.config, scoreBoxes.build());
-  }
-
-  private final @NotNull ScoreConfig config;
-  private final @NotNull Set<ScoreBoxFactory> scoreBoxFactories;
-
-  @NotNull
-  public ScoreConfig getConfig() {
-    return config;
   }
 
   public static class Factory implements MapModuleFactory<ScoreModule> {
@@ -89,10 +87,10 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
     public ScoreModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Version proto = factory.getProto();
-      FilterParser filters = factory.getFilters();
+      var parser = factory.getParser();
 
       List<Element> scoreElements = doc.getRootElement().getChildren("score");
-      if (scoreElements.size() == 0) {
+      if (scoreElements.isEmpty()) {
         return null;
       }
 
@@ -100,68 +98,66 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
       int scoreLimit = -1;
       int deathScore = 0;
       int killScore = 0;
-      int mercyLimit = 0;
-      int mercyLimitMin = 0;
-      Filter scoreboardFilter = StaticFilter.ALLOW;
-      ImmutableSet.Builder<ScoreBoxFactory> scoreBoxFactories = ImmutableSet.builder();
+      int mercyLimit = -1;
+      int mercyLimitMin = -1;
+      var display = ScoreConfig.Display.NUMERICAL;
+      Filter sbFilter = StaticFilter.ALLOW;
+      ImmutableSet.Builder<ScoreBoxDefinition> scoreBoxes = ImmutableSet.builder();
 
-      for (Element scoreEl : scoreElements) {
-        scoreLimit = XMLUtils.parseNumber(scoreEl.getChild("limit"), Integer.class, -1);
+      for (Element el : scoreElements) {
+        scoreLimit = parser.parseInt(el, "limit").optional(-1);
 
-        Element mercyEl = XMLUtils.getUniqueChild(scoreEl, "mercy");
+        // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
+        // tag is not present
+        int defPoints = proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) ? 1 : 0;
+        int defaultScore = el.getChild("king") == null ? defPoints : 0;
+        deathScore = parser.parseInt(el, "deaths").child().optional(defaultScore);
+        killScore = parser.parseInt(el, "kills").child().optional(defaultScore);
+
+        Element mercyEl = XMLUtils.getUniqueChild(el, "mercy");
         if (mercyEl != null) {
-          mercyLimit = XMLUtils.parseNumber(mercyEl, Integer.class, -1);
-          mercyLimitMin = XMLUtils.parseNumber(Node.fromAttr(mercyEl, "min"), Integer.class, -1);
+          mercyLimit = parser.parseInt(mercyEl).optional(-1);
+          mercyLimitMin = parser.parseInt(mercyEl, "min").attr().optional(-1);
         }
 
-        int defaultPoints = 0;
-        if (proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO)
-            && scoreEl.getChild("king") == null) {
-          // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
-          // tag is not present
-          defaultPoints = 1;
-        }
-        deathScore = XMLUtils.parseNumber(scoreEl.getChild("deaths"), Integer.class, defaultPoints);
-        killScore = XMLUtils.parseNumber(scoreEl.getChild("kills"), Integer.class, defaultPoints);
+        display = parser.parseEnum(ScoreConfig.Display.class, el, "display").optional(display);
 
-        scoreboardFilter = filters.parseProperty(
-            scoreEl, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.PARTY);
+        sbFilter = parser.filter(el, "scoreboard-filter").dynamic(Party.class).orAllow();
 
-        for (Element scoreBoxEl : scoreEl.getChildren("box")) {
-          int points = XMLUtils.parseNumber(
-              Node.fromAttr(scoreBoxEl, "value", "points"),
-              Integer.class,
-              proto.isOlderThan(MapProtos.DEFAULT_SCORES_TO_ZERO) ? 1 : 0);
+        for (Element scoreBoxEl : el.getChildren("box")) {
+          int points = parser.parseInt(scoreBoxEl, "value", "points").attr().optional(defPoints);
 
-          Filter filter = filters.parseProperty(scoreBoxEl, "filter", StaticFilter.ALLOW);
-          Map<MaterialMatcher, Double> redeemables = new HashMap<>();
+          Filter filter = parser.filter(scoreBoxEl, "filter").orAllow();
+          ImmutableMap<MaterialMatcher, Double> redeemables;
           Region region;
 
           if (proto.isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
             region = regionParser.parseChildren(scoreBoxEl);
+            redeemables = ImmutableMap.of();
           } else {
             region = regionParser.parseRequiredRegionProperty(scoreBoxEl, "region");
-
-            Element elItems = scoreBoxEl.getChild("redeemables");
-            if (elItems != null) {
-              for (Element elItem : elItems.getChildren("item")) {
-                redeemables.put(
-                    MaterialMatcher.parse(elItem),
-                    XMLUtils.parseNumber(Node.fromAttr(elItem, "points"), Double.class, 1D));
-              }
-            }
+            redeemables = parseRedeemables(scoreBoxEl.getChild("redeemables"), parser);
           }
-          boolean silent = XMLUtils.parseBoolean(Node.fromAttr(scoreBoxEl, "silent"), false);
+          boolean silent = parser.parseBool(scoreBoxEl, "silent").attr().orFalse();
 
-          scoreBoxFactories.add(new ScoreBoxFactory(
-              region, points, filter, ImmutableMap.copyOf(redeemables), silent));
+          scoreBoxes.add(new ScoreBoxDefinition(region, points, filter, redeemables, silent));
         }
       }
 
-      return new ScoreModule(
-          new ScoreConfig(
-              scoreLimit, deathScore, killScore, mercyLimit, mercyLimitMin, scoreboardFilter),
-          scoreBoxFactories.build());
+      var config = new ScoreConfig(
+          scoreLimit, deathScore, killScore, mercyLimit, mercyLimitMin, display, sbFilter);
+      return new ScoreModule(config, scoreBoxes.build());
+    }
+
+    private static ImmutableMap<MaterialMatcher, Double> parseRedeemables(
+        Element redeemablesEl, XMLFluentParser parser) throws InvalidXMLException {
+      if (redeemablesEl == null) return ImmutableMap.of();
+      var redeemables = ImmutableMap.<MaterialMatcher, Double>builder();
+      for (Element elItem : redeemablesEl.getChildren("item")) {
+        double points = parser.parseDouble(elItem, "points").attr().optional(1d);
+        redeemables.put(MaterialMatcher.parse(elItem), points);
+      }
+      return redeemables.build();
     }
   }
 }
