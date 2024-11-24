@@ -526,7 +526,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     }
 
     // Give them the bad news
-    if (jmm.canBePriorityKicked(kickMe)) {
+    if (jmm.canPriorityKick(kickMe)) {
       kickMe.sendMessage(translatable("join.ok.moved", kickTo.getName()));
       kickMe.sendMessage(translatable("join.ok.moved.explanation"));
     } else {
