@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -29,6 +30,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -108,5 +110,11 @@ public class ModernMiscUtil implements MiscUtils {
   @Override
   public Key getSound(Sound enumConstant) {
     return enumConstant.key();
+  }
+
+  @Override
+  public void initScoreboardTeam(Team team, NamedTextColor color) {
+    team.color(color);
+    team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
   }
 }

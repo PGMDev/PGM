@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -96,7 +96,7 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
    */
   ChatColor getColor();
 
-  TextColor getTextColor();
+  NamedTextColor getTextColor();
 
   /**
    * Gets the {@link Color} of the party.

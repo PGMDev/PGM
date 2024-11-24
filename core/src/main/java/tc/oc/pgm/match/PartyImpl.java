@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -35,7 +36,7 @@ public abstract class PartyImpl implements Party, Audience {
   private final ChatColor chatColor;
   private final Color color;
   private final DyeColor dyeColor;
-  private final TextColor textColor;
+  private final NamedTextColor textColor;
   private String legacyName;
   private Component name;
   private Component prefix;
@@ -160,7 +161,7 @@ public abstract class PartyImpl implements Party, Audience {
   }
 
   @Override
-  public TextColor getTextColor() {
+  public NamedTextColor getTextColor() {
     return this.textColor;
   }
 

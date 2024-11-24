@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,7 +17,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.material.ColorUtils;
 import tc.oc.pgm.util.material.MaterialData;
@@ -107,11 +105,6 @@ public class ModernColorUtils implements ColorUtils {
   @Override
   public boolean isColor(MaterialData data, DyeColor color) {
     return setColor(data.getItemType(), color) == data.getItemType();
-  }
-
-  @Override
-  public void setColor(Team team, ChatColor color) {
-    team.setColor(color);
   }
 
   @Override

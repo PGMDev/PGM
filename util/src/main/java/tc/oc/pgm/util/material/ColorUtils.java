@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.material;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,7 +10,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.scoreboard.Team;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.platform.Platform;
 
@@ -33,8 +31,6 @@ public interface ColorUtils {
       setColor(world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ()), color);
     }
   }
-
-  default void setColor(Team team, ChatColor color) {}
 
   BannerData createBanner(Banner banner);
 
