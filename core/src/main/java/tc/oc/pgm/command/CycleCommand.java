@@ -30,9 +30,13 @@ public final class CycleCommand {
       MapOrder mapOrder,
       @Argument("duration") Duration duration,
       @Argument("map") @FlagYielding MapInfo map,
-      @Flag(value = "force", aliases = "f") boolean force) {
-    if (match.isRunning() && !force) {
-      throw exception("admin.matchRunning.cycle");
+      @Flag(value = "force", aliases = "f") boolean force,
+      @Flag(value = "override") boolean override) {
+    if (match.isRunning()) {
+      if (!force) throw exception("admin.matchRunning.cycle");
+      if (needsOverride(match) && !override) {
+        throw exception("admin.matchRunning.cycle.override");
+      }
     }
 
     if (map != null && mapOrder.getNextMap() != map) {
@@ -56,7 +60,12 @@ public final class CycleCommand {
       Match match,
       MapOrder mapOrder,
       @Argument("duration") Duration duration,
-      @Flag(value = "force", aliases = "f") boolean force) {
-    cycle(sender, match, mapOrder, duration, match.getMap(), force);
+      @Flag(value = "force", aliases = "f") boolean force,
+      @Flag(value = "override") boolean override) {
+    cycle(sender, match, mapOrder, duration, match.getMap(), force, override);
+  }
+
+  private boolean needsOverride(Match match) {
+    return match.getPlayers().size() >= 8 && match.getDuration().toMinutes() >= 5;
   }
 }
