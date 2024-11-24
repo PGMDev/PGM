@@ -153,6 +153,7 @@ public interface BlockVectors {
     // blocks that aren't listed as occluding but can support a player
     if (type.isBlock()) {
       if (type.name().endsWith("STAIRS")) return true;
+      if (type.name().endsWith("SLAB")) return true;
       if (type.name().endsWith("STEP")) return true;
       if (type.name().endsWith("STAINED_GLASS")) return true;
       if (type.name().endsWith("CARPET")) return true;
