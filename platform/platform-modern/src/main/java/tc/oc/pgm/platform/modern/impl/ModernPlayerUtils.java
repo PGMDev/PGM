@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern;
+package tc.oc.pgm.platform.modern.impl;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
@@ -13,6 +13,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.platform.modern.util.Skins;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;

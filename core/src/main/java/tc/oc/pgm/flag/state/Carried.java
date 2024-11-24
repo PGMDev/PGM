@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
+import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
 import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import java.time.Duration;
@@ -309,10 +310,9 @@ public class Carried extends Spawned implements Missing {
   @Override
   public void onEvent(InventoryClickEvent event) {
     super.onEvent(event);
-    if (this.isCarrier(event.getWhoClicked())
-        && event.getSlot() == ArmorType.HELMET.inventorySlot()) {
+    if (isCarrier(event.getWhoClicked()) && event.getSlot() == ArmorType.HELMET.inventorySlot()) {
       event.setCancelled(true);
-      event.getView().setCursor(null);
+      INVENTORY_VIEW.setCursor(event.getView(), null);
       event.setCurrentItem(null);
       this.flag.getMatch().getExecutor(MatchScope.RUNNING).execute(() -> {
         if (isCurrent()) dropFlag();

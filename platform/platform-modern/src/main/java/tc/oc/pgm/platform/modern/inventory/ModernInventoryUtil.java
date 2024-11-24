@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern;
+package tc.oc.pgm.platform.modern.inventory;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 

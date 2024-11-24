@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern;
+package tc.oc.pgm.platform.modern.util;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;

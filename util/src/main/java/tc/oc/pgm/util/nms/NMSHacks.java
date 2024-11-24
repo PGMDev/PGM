@@ -5,7 +5,6 @@ import java.util.UUID;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
@@ -41,7 +40,7 @@ public interface NMSHacks {
 
   void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin);
 
-  WorldCreator detectWorld(String worldName);
+  World createWorld(String worldName, World.Environment env, boolean terrain, long seed);
 
   boolean canMineBlock(BlockMaterialData blockMaterial, Player player);
 

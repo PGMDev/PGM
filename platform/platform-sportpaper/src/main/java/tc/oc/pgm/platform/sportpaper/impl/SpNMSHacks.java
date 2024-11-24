@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.sportpaper;
+package tc.oc.pgm.platform.sportpaper.impl;
 
 import static tc.oc.pgm.util.nms.Packets.ENTITIES;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
@@ -43,6 +43,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
@@ -50,7 +51,7 @@ import tc.oc.pgm.util.reflect.ReflectionUtils;
 import tc.oc.pgm.util.skin.Skin;
 
 @Supports(SPORTPAPER)
-public class NMSHacksSportPaper implements NMSHacks {
+public class SpNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
     EntityFireworks entityFirework = ((CraftFirework) firework).getHandle();
@@ -139,17 +140,25 @@ public class NMSHacksSportPaper implements NMSHacks {
   }
 
   @Override
-  public WorldCreator detectWorld(String worldName) {
+  public World createWorld(String worldName, World.Environment env, boolean terrain, long seed) {
+    WorldCreator creator = new WorldCreator(worldName);
+
     IDataManager sdm =
         new ServerNBTManager(Bukkit.getServer().getWorldContainer(), worldName, true);
     WorldData worldData = sdm.getWorldData();
-    if (worldData == null) return null;
+    if (worldData != null) {
+      creator
+          .generateStructures(worldData.shouldGenerateMapFeatures())
+          .generatorSettings(worldData.getGeneratorOptions())
+          .seed(worldData.getSeed())
+          .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
+    }
 
-    return new WorldCreator(worldName)
-        .generateStructures(worldData.shouldGenerateMapFeatures())
-        .generatorSettings(worldData.getGeneratorOptions())
-        .seed(worldData.getSeed())
-        .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
+    return Bukkit.getServer()
+        .createWorld(creator
+            .environment(env)
+            .generator(terrain ? null : NullChunkGenerator.INSTANCE)
+            .seed(terrain ? seed : creator.seed()));
   }
 
   @Override

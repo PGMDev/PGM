@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
@@ -64,7 +65,7 @@ public class MatchManagerImpl implements MatchManager, Listener {
     this.destroyDelaySecs = delaySecs;
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.LOWEST)
   public void onMatchLoad(MatchLoadEvent event) {
     final Match match = event.getMatch();
 

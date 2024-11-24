@@ -28,5 +28,5 @@ public interface WorldInfo {
    *
    * @return The world environment type.
    */
-  int getEnvironment();
+  World.Environment getEnvironment();
 }
