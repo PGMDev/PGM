@@ -1,7 +1,7 @@
 package tc.oc.pgm.scoreboard;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -80,7 +80,7 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
         StringUtils.truncate(TextTranslations.translateLegacy(party.getName(NameStyle.FANCY)), 32));
     team.setPrefix(party.getColor().toString());
     team.setSuffix(ChatColor.WHITE.toString());
-    COLOR_UTILS.setColor(team, party.getColor());
+    MISC_UTILS.initScoreboardTeam(team, party.getTextColor());
 
     team.setCanSeeFriendlyInvisibles(true);
     team.setAllowFriendlyFire(match.getFriendlyFire());

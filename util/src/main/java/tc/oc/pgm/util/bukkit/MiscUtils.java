@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -20,6 +21,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
@@ -55,4 +57,6 @@ public interface MiscUtils {
   int getWorldDataVersion(Path levelDat);
 
   Key getSound(Sound constant);
+
+  default void initScoreboardTeam(Team team, NamedTextColor color) {}
 }

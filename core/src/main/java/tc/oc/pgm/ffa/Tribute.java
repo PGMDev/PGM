@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -36,8 +36,8 @@ import tc.oc.pgm.util.text.TextFormatter;
  * rejoins the same match, the FFA module will retrieve their existing Tribute and add them back to
  * it, instead of creating a new one.
  *
- * <p>Attempting to add the wrong player, or add multiple players, will throw {@link
- * UnsupportedOperationException}.
+ * <p>Attempting to add the wrong player, or add multiple players, will throw
+ * {@link UnsupportedOperationException}.
  */
 public class Tribute implements Competitor {
 
@@ -49,7 +49,7 @@ public class Tribute implements Competitor {
   private final ChatColor chatColor;
   private final Color color;
   private final DyeColor dyeColor;
-  private final TextColor textColor;
+  private final NamedTextColor textColor;
   private final PartyQuery query;
   private NameTagVisibility nameTagOverride;
 
@@ -104,7 +104,7 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public TextColor getTextColor() {
+  public NamedTextColor getTextColor() {
     return this.textColor;
   }
 
