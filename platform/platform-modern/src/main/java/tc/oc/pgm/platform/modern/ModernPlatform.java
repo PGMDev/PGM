@@ -3,9 +3,12 @@ package tc.oc.pgm.platform.modern;
 import static tc.oc.pgm.util.platform.Supports.Priority.HIGHEST;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
+import org.spigotmc.SpigotConfig;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
+import tc.oc.pgm.platform.modern.util.RecipeUnlocker;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
 
@@ -19,9 +22,25 @@ public class ModernPlatform implements Platform.Manifest {
           "ProtocolLib is not installed, and is required for PGM modern version support");
     }
 
-    Bukkit.getServer().getPluginManager().registerEvents(new ModernListener(), plugin);
-    Bukkit.getServer().getPluginManager().registerEvents(new SpawnEggUseListener(), plugin);
+    List.of(
+            new ModernListener(),
+            new SpawnEggUseListener(),
+            new PacketManipulations(plugin),
+            new RecipeUnlocker())
+        .forEach(l -> Bukkit.getServer().getPluginManager().registerEvents(l, plugin));
 
-    Bukkit.getServer().getPluginManager().registerEvents(new PacketManipulations(plugin), plugin);
+    if (!SpigotConfig.disabledAdvancements.contains("*")) {
+      plugin
+          .getLogger()
+          .warning(
+              """
+              You have not disabled advancements in your spigot config.
+              If you want to remove them you should modify your spigot.yml config to have:
+              advancements:
+                disable-saving: true
+                disabled:
+                - '*'
+              """);
+    }
   }
 }

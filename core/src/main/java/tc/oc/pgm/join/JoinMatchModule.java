@@ -80,6 +80,11 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     return getConfig().canPriorityKick() && !match.isRunning();
   }
 
+  public boolean canPriorityKick(MatchPlayer player) {
+    JoinRequest request = requests.get(player.getBukkit());
+    return request != null && canPriorityKick(request);
+  }
+
   public boolean canPriorityKick(JoinRequest request) {
     return priorityKickAllowed() && request.isForcedOr(JoinRequest.Flag.JOIN_FULL);
   }
