@@ -39,6 +39,7 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.matcher.AllMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.BlockMaterialMatcher;
 import tc.oc.pgm.util.math.OffsetVector;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextException;
@@ -833,7 +834,11 @@ public final class XMLUtils {
 
   private static PotionEffect createPotionEffect(
       PotionEffectType type, Duration duration, int amplifier, boolean ambient) {
-    return new PotionEffect(type, (int) TimeUtils.toTicks(duration), amplifier, ambient);
+    // Modern supports infinite durations with value -1
+    int ticks = Platform.isModern() && TimeUtils.isInfinite(duration)
+        ? -1
+        : (int) TimeUtils.toTicks(duration);
+    return new PotionEffect(type, ticks, amplifier, ambient);
   }
 
   public static PotionEffect parsePotionEffect(Element el) throws InvalidXMLException {

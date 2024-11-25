@@ -52,6 +52,14 @@ public abstract class Platform {
     return (T) Platform.getBestSupported(clazz);
   }
 
+  public static boolean isLegacy() {
+    return VARIANT == Variant.SPORTPAPER;
+  }
+
+  public static boolean isModern() {
+    return VARIANT == Variant.PAPER;
+  }
+
   private static <T> Iterable<Class<?>> getSupported(Class<T> parent) {
     return REFLECTIONS.get(TypesAnnotated.with(Supports.class, Supports.List.class)
         .asClass()
