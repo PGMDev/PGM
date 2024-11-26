@@ -25,7 +25,9 @@ import org.bukkit.entity.Firework;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -94,10 +96,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
     public FireworkRunner(Match match, Collection<Competitor> winners) {
       this.match = match;
       this.winners = winners;
-      this.colors =
-          winners.stream()
-              .map(winner -> BukkitUtils.colorOf(winner.getColor()))
-              .collect(Collectors.toSet());
+      this.colors = winners.stream()
+          .map(winner -> BukkitUtils.colorOf(winner.getColor()))
+          .collect(Collectors.toSet());
     }
 
     @Override
@@ -113,15 +114,14 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
           Type type = FIREWORK_TYPES.get(match.getRandom().nextInt(FIREWORK_TYPES.size()));
 
-          FireworkEffect effect =
-              FireworkEffect.builder()
-                  .with(type)
-                  .withFlicker()
-                  .withColor(this.colors)
-                  .withFade(Color.BLACK)
-                  .build();
+          FireworkEffect effect = FireworkEffect.builder()
+              .with(type)
+              .withFlicker()
+              .withColor(this.colors)
+              .withFade(Color.BLACK)
+              .build();
 
-          spawnFirework(player.getBukkit().getLocation(), effect, ROCKET_POWER);
+          spawnFirework(player.getLocation(), effect, ROCKET_POWER);
         }
       }
       this.iterations++;
@@ -213,16 +213,22 @@ public class FireworkMatchModule implements MatchModule, Listener {
     }
   }
 
+  private static final String FIREWORK_METADATA = "pgm-custom-firework";
+
+  @EventHandler
+  public void onPlayerDamage(EntityDamageByEntityEvent event) {
+    if (event.getDamager().hasMetadata(FIREWORK_METADATA)) event.setCancelled(true);
+  }
+
   public void spawnFireworkDisplay(
       Location center, Color color, int count, double radius, int power) {
     if (Double.isInfinite(radius)) return;
-    FireworkEffect effect =
-        FireworkEffect.builder()
-            .with(Type.BURST)
-            .withFlicker()
-            .withColor(color)
-            .withFade(Color.BLACK)
-            .build();
+    FireworkEffect effect = FireworkEffect.builder()
+        .with(Type.BURST)
+        .withFlicker()
+        .withColor(color)
+        .withFade(Color.BLACK)
+        .build();
 
     for (int i = 0; i < count; i++) {
       double angle = 2 * Math.PI / count * i;
@@ -253,6 +259,7 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
     Firework firework = (Firework) location.getWorld().spawnEntity(location, FIREWORK_ENTITY);
     firework.setFireworkMeta(meta);
+    firework.setMetadata(FIREWORK_METADATA, new FixedMetadataValue(PGM.get(), true));
 
     return firework;
   }
