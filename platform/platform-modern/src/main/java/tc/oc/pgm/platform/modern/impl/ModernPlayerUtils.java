@@ -5,7 +5,10 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 import com.mojang.authlib.GameProfile;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -79,15 +82,23 @@ public class ModernPlayerUtils implements PlayerUtils {
     player.setCollidable(collides);
   }
 
+  private final ResourceLocation KB_REDUCT =
+      ResourceLocation.fromNamespaceAndPath("pgm", "custom_kb_reduction");
+
   @Override
   public void setKnockbackReduction(Player player, float reduction) {
-    // TODO: PLATFORM 1.20 does not support kb reduction
+    // Use NMS to have access to addOrUpdateTransientModifier
+    var nmsPlayer = ((CraftPlayer) player).getHandle();
+    var attr = nmsPlayer.getAttributes().getInstance(Attributes.KNOCKBACK_RESISTANCE);
+    if (attr == null) return;
+    attr.addOrUpdateTransientModifier(
+        new AttributeModifier(KB_REDUCT, reduction, AttributeModifier.Operation.ADD_VALUE));
   }
 
   @Override
   public float getKnockbackReduction(Player player) {
-    // TODO: PLATFORM 1.20 does not support kb reduction
-    return 0;
+    var attr = player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+    return attr != null ? (float) attr.getValue() : 0;
   }
 
   @Override
