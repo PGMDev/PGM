@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.xml;
 
+import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
 
 import com.google.common.base.Predicate;
@@ -1075,38 +1076,27 @@ public final class XMLUtils {
 
   public static AttributeModifier.Operation parseAttributeOperation(Node node)
       throws InvalidXMLException {
-    return parseAttributeOperation(node, node.getValueNormalize());
+    return node == null
+        ? AttributeModifier.Operation.ADD_NUMBER
+        : parseAttributeOperation(node, node.getValueNormalize());
   }
 
-  public static AttributeModifier.Operation parseAttributeOperation(
-      Node node, AttributeModifier.Operation def) throws InvalidXMLException {
-    return node == null ? def : parseAttributeOperation(node);
-  }
-
-  public static Map.Entry<org.bukkit.attribute.Attribute, AttributeModifier>
+  public static Pair<org.bukkit.attribute.Attribute, AttributeModifier>
       parseCompactAttributeModifier(Node node, String text) throws InvalidXMLException {
     String[] parts = text.split(":");
+    if (parts.length != 3) throw new InvalidXMLException("Bad attribute modifier format", node);
 
-    if (parts.length != 3) {
-      throw new InvalidXMLException("Bad attribute modifier format", node);
-    }
-
-    var attribute = parseAttribute(node, parts[0]);
-    AttributeModifier.Operation operation = parseAttributeOperation(node, parts[1]);
-    double amount = parseNumber(node, parts[2], Double.class);
-
-    return new AbstractMap.SimpleImmutableEntry<>(
-        attribute, new AttributeModifier("FromXML", amount, operation));
+    return Pair.of(
+        parseAttribute(node, parts[0]),
+        new AttributeModifier(
+            "FromXML",
+            parseNumber(node, parts[2], Double.class),
+            parseAttributeOperation(node, parts[1])));
   }
 
   public static Pair<org.bukkit.attribute.Attribute, AttributeModifier> parseAttributeModifier(
       Element el) throws InvalidXMLException {
-    var attribute = parseAttribute(new Node(el));
-    double amount = parseNumber(Node.fromRequiredAttr(el, "amount"), Double.class);
-    AttributeModifier.Operation operation = parseAttributeOperation(
-        Node.fromAttr(el, "operation"), AttributeModifier.Operation.ADD_NUMBER);
-
-    return new Pair<>(attribute, new AttributeModifier("FromXML", amount, operation));
+    return new Pair<>(parseAttribute(new Node(el)), ATTRIBUTE_UTILS.parseModifier(el));
   }
 
   public static GameMode parseGameMode(Node node, String text) throws InvalidXMLException {

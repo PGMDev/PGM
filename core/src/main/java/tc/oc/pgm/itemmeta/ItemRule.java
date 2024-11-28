@@ -1,5 +1,6 @@
 package tc.oc.pgm.itemmeta;
 
+import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
 
 import java.util.EnumSet;
@@ -43,14 +44,12 @@ public class ItemRule {
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 
-      INVENTORY_UTILS.copyAttributeModifiers(meta, this.meta);
+      ATTRIBUTE_UTILS.copyAttributeModifiers(meta, this.meta);
 
-      Set<Material> canDestroy =
-          unionMaterials(
-              INVENTORY_UTILS.getCanDestroy(meta), INVENTORY_UTILS.getCanDestroy(this.meta));
-      Set<Material> canPlaceOn =
-          unionMaterials(
-              INVENTORY_UTILS.getCanPlaceOn(meta), INVENTORY_UTILS.getCanPlaceOn(this.meta));
+      Set<Material> canDestroy = unionMaterials(
+          INVENTORY_UTILS.getCanDestroy(meta), INVENTORY_UTILS.getCanDestroy(this.meta));
+      Set<Material> canPlaceOn = unionMaterials(
+          INVENTORY_UTILS.getCanPlaceOn(meta), INVENTORY_UTILS.getCanPlaceOn(this.meta));
 
       if (!canDestroy.isEmpty()) INVENTORY_UTILS.setCanDestroy(meta, canDestroy);
       if (!canPlaceOn.isEmpty()) INVENTORY_UTILS.setCanPlaceOn(meta, canPlaceOn);

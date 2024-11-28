@@ -17,7 +17,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
-import tc.oc.pgm.kits.ArmorType;
+import tc.oc.pgm.util.inventory.ArmorType;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -45,8 +45,8 @@ public class ItemKeepMatchModule implements MatchModule, Listener {
   }
 
   /**
-   * NOTE: Must be called before {@link
-   * tc.oc.pgm.tracker.trackers.DeathTracker#onPlayerDeath(PlayerDeathEvent)}
+   * NOTE: Must be called before
+   * {@link tc.oc.pgm.tracker.trackers.DeathTracker#onPlayerDeath(PlayerDeathEvent)}
    */
   @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

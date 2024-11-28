@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import java.util.*;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.inventory.Slot;
 
 /**
  * Fired when an {@link ItemKit} is applied to a player. The kit can be modified through the

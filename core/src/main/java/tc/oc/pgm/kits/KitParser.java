@@ -1,5 +1,6 @@
 package tc.oc.pgm.kits;
 
+import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
@@ -59,8 +60,10 @@ import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.ArmorType;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
@@ -344,7 +347,7 @@ public abstract class KitParser {
     if (attr != null) {
       for (String modifierText : Splitter.on(";").split(attr.getValue())) {
         var mod = XMLUtils.parseCompactAttributeModifier(attr, modifierText);
-        modifiers.put(mod.getKey(), mod.getValue());
+        modifiers.put(mod.getLeft(), mod.getRight());
       }
     }
 
@@ -536,7 +539,7 @@ public abstract class KitParser {
       }
     }
 
-    INVENTORY_UTILS.applyAttributeModifiers(parseAttributeModifiers(el), meta);
+    ATTRIBUTE_UTILS.applyAttributeModifiers(parseAttributeModifiers(el), meta);
 
     String customName = el.getAttributeValue("name");
     if (customName != null) {

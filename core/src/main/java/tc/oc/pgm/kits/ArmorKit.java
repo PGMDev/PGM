@@ -6,6 +6,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.tag.ItemModifier;
+import tc.oc.pgm.util.inventory.ArmorType;
 
 public class ArmorKit extends AbstractKit {
   public static class ArmorItem {

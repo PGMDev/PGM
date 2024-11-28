@@ -36,9 +36,9 @@ import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.EntityQuery;
 import tc.oc.pgm.itemmeta.ItemModifyMatchModule;
-import tc.oc.pgm.kits.Slot;
 import tc.oc.pgm.util.Pair;
 import tc.oc.pgm.util.collection.InstantMap;
+import tc.oc.pgm.util.inventory.Slot;
 
 @ListenerScope(value = MatchScope.LOADED)
 public class LootableMatchModule implements MatchModule, Listener {
@@ -62,11 +62,9 @@ public class LootableMatchModule implements MatchModule, Listener {
 
     final FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
 
-    fillers.forEach(filler -> {
-      fmm.onRise(Match.class, filler.getRefillTrigger(), m -> this.filledAt
-          .keySet()
-          .removeIf(f -> filler.equals(f.getRight())));
-    });
+    fillers.forEach(filler -> fmm.onRise(Match.class, filler.getRefillTrigger(), m -> this.filledAt
+        .keySet()
+        .removeIf(f -> filler.equals(f.getRight()))));
   }
 
   /**
@@ -74,22 +72,19 @@ public class LootableMatchModule implements MatchModule, Listener {
    * InventoryHolder is not something that we should be filling.
    */
   private static @Nullable Predicate<Filter> filterPredicate(InventoryHolder holder) {
-    if (holder instanceof DoubleChest) {
-      final DoubleChest doubleChest = (DoubleChest) holder;
+    if (holder instanceof DoubleChest doubleChest) {
       return filter -> !filter
               .query(new BlockQuery((Chest) doubleChest.getLeftSide()))
               .isDenied()
           || !filter.query(new BlockQuery((Chest) doubleChest.getRightSide())).isDenied();
     } else if (holder instanceof BlockState) {
       return filter -> !filter.query(new BlockQuery((BlockState) holder)).isDenied();
-    } else if (holder instanceof Player) {
-      // This happens with crafting inventories, and possibly other transient inventory types
-      // Pretty sure we never want to fill an inventory held by the player
-      return null;
-    } else if (holder instanceof Entity) {
+    } else if (holder instanceof Entity && !(holder instanceof Player)) {
       return filter -> !filter.query(new EntityQuery((Entity) holder)).isDenied();
     } else {
-      // If we're not sure what it is, don't fill it
+      // This happens with crafting inventories, and possibly other transient inventory types
+      // Pretty sure we never want to fill an inventory held by the player, or one we don't know
+      // about
       return null;
     }
   }
@@ -139,7 +134,7 @@ public class LootableMatchModule implements MatchModule, Listener {
       final List<FillerDefinition> coolFillers = fillers.stream()
           .filter(filler ->
               filledAt.putUnlessNewer(new Pair<>(this, filler), filler.getRefillInterval()) == null)
-          .collect(Collectors.toList());
+          .toList();
 
       // Find all the Inventories for this Fillable, and build a map of Fillers to the subset
       // of Inventories that they are allowed to fill, based on the filter of each Filler.
@@ -170,7 +165,7 @@ public class LootableMatchModule implements MatchModule, Listener {
         for (Inventory inv : inventories) {
           for (int index = 0; index < inv.getSize(); index++) {
             if (inv.getItem(index) == null) {
-              slots.add(new InventorySlot(index, inv));
+              slots.add(InventorySlot.fromInventoryIndex(inv, index));
             }
           }
         }
@@ -248,18 +243,22 @@ public class LootableMatchModule implements MatchModule, Listener {
   /** A wrapper of a slot that belongs to a specified {@link Inventory} */
   private static class InventorySlot {
 
-    private final Slot slot;
     private final Inventory inventory;
+    private final Slot slot;
 
-    private InventorySlot(Slot slot, Inventory inventory) {
-      assertNotNull(slot, "slot");
+    private InventorySlot(Inventory inventory, Slot slot) {
       assertNotNull(inventory, "inventory");
-      this.slot = slot;
+      assertNotNull(slot, "slot");
       this.inventory = inventory;
+      this.slot = slot;
     }
 
-    private InventorySlot(int index, Inventory inventory) {
-      this(Slot.forInventoryIndex(inventory, index), inventory);
+    static InventorySlot fromInventoryIndex(Inventory inventory, int index) {
+      final Slot slot = Slot.forInventoryIndex(inventory.getClass(), index);
+      if (slot == null)
+        throw new IllegalArgumentException(
+            "Could not determine slot at index " + index + " in inventory " + inventory);
+      return new InventorySlot(inventory, slot);
     }
 
     private void putItem(ItemStack item) {

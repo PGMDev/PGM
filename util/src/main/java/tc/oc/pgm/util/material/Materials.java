@@ -1,7 +1,7 @@
 package tc.oc.pgm.util.material;
 
 import static org.bukkit.Material.*;
-import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -9,6 +9,8 @@ import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Materials {
@@ -113,13 +115,13 @@ public interface Materials {
     ItemMeta meta2 = hasMeta2 ? second.getItemMeta() : null;
 
     if (hasMeta1 && hasMeta2 && meta1.hasAttributeModifiers() && meta2.hasAttributeModifiers()) {
-      if (INVENTORY_UTILS.attributesEqual(meta1, meta2)) {
+      if (ATTRIBUTE_UTILS.attributesEqual(meta1, meta2)) {
         // If attributes match, strip them not to affect the comparison.
         // This is done because attributes have a random UUID in t hem that make them never equal
         meta1 = meta1.clone();
         meta2 = meta2.clone();
-        INVENTORY_UTILS.stripAttributes(meta1);
-        INVENTORY_UTILS.stripAttributes(meta2);
+        ATTRIBUTE_UTILS.stripAttributes(meta1);
+        ATTRIBUTE_UTILS.stripAttributes(meta2);
       } else {
         return false;
       }
@@ -189,6 +191,15 @@ public interface Materials {
         || bucket == Material.LAVA_BUCKET
         || bucket == Material.WATER_BUCKET
         || bucket == Material.MILK_BUCKET;
+  }
+
+  static int amount(@Nullable ItemStack stack) {
+    return stack == null || stack.getType() == Material.AIR ? 0 : stack.getAmount();
+  }
+
+  @Contract(value = "null -> true", pure = true)
+  static boolean isNothing(@Nullable ItemStack stack) {
+    return amount(stack) == 0;
   }
 
   static Material materialInBucket(ItemStack bucket) {

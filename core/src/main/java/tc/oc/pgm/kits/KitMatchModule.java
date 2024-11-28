@@ -29,6 +29,7 @@ import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.event.ItemTransferEvent;
+import tc.oc.pgm.util.inventory.Slot;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KitMatchModule implements MatchModule, Listener {

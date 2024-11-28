@@ -2,13 +2,10 @@ package tc.oc.pgm.platform.modern.inventory;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
-import com.google.common.collect.SetMultimap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -54,43 +51,6 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   @Override
   public ItemStack craftItemCopy(ItemStack item) {
     return CraftItemStack.asCraftCopy(item);
-  }
-
-  @Override
-  public void copyAttributeModifiers(ItemMeta destination, ItemMeta source) {
-    var modifiers = source.getAttributeModifiers();
-    if (modifiers != null) modifiers.forEach(destination::addAttributeModifier);
-  }
-
-  @Override
-  public void applyAttributeModifiers(
-      SetMultimap<Attribute, AttributeModifier> modifiers, ItemMeta meta) {
-    for (var entry : modifiers.entries()) {
-      meta.addAttributeModifier(entry.getKey(), entry.getValue());
-    }
-  }
-
-  @Override
-  public boolean attributesEqual(ItemMeta meta1, ItemMeta meta2) {
-    var attributes1 = meta1.getAttributeModifiers();
-    var attributes2 = meta2.getAttributeModifiers();
-    if (attributes1 == null || attributes2 == null) return false;
-
-    if (!attributes1.keySet().equals(attributes2.keySet())) return false;
-
-    for (Attribute attr : attributes1.keySet()) {
-      if (modifiersDiffer(attributes1.get(attr), attributes2.get(attr))) return false;
-    }
-    return true;
-  }
-
-  @Override
-  public void stripAttributes(ItemMeta meta) {
-    var attributes = meta.getAttributeModifiers();
-
-    if (attributes != null && !attributes.isEmpty()) {
-      attributes.keySet().forEach(meta::removeAttributeModifier);
-    }
   }
 
   @Override
