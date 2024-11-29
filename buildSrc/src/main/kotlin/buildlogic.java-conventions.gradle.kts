@@ -37,7 +37,7 @@ dependencies {
     api("org.reflections:reflections:0.10.2")
 
     // Optional plugin deps
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
+    compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
     compileOnly("com.viaversion:viaversion-api:5.0.0")
 
     // Minecraft includes these (or equivalents)

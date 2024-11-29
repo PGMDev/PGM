@@ -128,7 +128,7 @@ public abstract class KitParser {
     }
 
     Boolean force = XMLUtils.parseBoolean(Node.fromAttr(el, "force"));
-    boolean potionParticles = XMLUtils.parseBoolean(Node.fromAttr(el, "potion-particles"), false);
+    Boolean potionParticles = XMLUtils.parseBoolean(Node.fromAttr(el, "potion-particles"));
     Filter filter = factory.getFilters().parseFilterProperty(el, "filter", StaticFilter.ALLOW);
 
     kits.add(this.parseClearItemsKit(el)); // must be added before anything else
@@ -139,7 +139,7 @@ public abstract class KitParser {
 
     kits.add(this.parseArmorKit(el));
     kits.add(this.parseItemKit(el));
-    kits.add(this.parsePotionKit(el, !potionParticles));
+    kits.add(this.parsePotionKit(el));
     kits.add(this.parseAttributeKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
@@ -308,27 +308,23 @@ public abstract class KitParser {
     return slot;
   }
 
-  public PotionKit parsePotionKit(Element el, boolean ambient) throws InvalidXMLException {
-    List<PotionEffect> potions = parsePotions(el, ambient);
+  public PotionKit parsePotionKit(Element el) throws InvalidXMLException {
+    List<PotionEffect> potions = parsePotions(el);
     return potions.isEmpty() ? null : new PotionKit(ImmutableSet.copyOf(potions));
   }
 
   public List<PotionEffect> parsePotions(Element el) throws InvalidXMLException {
-    return parsePotions(el, false);
-  }
-
-  public List<PotionEffect> parsePotions(Element el, boolean ambient) throws InvalidXMLException {
     List<PotionEffect> effects = new ArrayList<>();
 
     Node attr = Node.fromAttr(el, "potion", "potions", "effect", "effects");
     if (attr != null) {
       for (String piece : attr.getValue().split(";")) {
-        effects.add(XMLUtils.parseCompactPotionEffect(attr, piece, ambient));
+        effects.add(XMLUtils.parseCompactPotionEffect(attr, piece));
       }
     }
 
     for (Node elPotion : Node.fromChildren(el, "potion", "effect")) {
-      effects.add(XMLUtils.parsePotionEffect(elPotion.getElement(), ambient));
+      effects.add(XMLUtils.parsePotionEffect(elPotion.getElement()));
     }
 
     return effects;

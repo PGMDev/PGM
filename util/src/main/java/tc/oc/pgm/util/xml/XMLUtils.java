@@ -843,21 +843,16 @@ public final class XMLUtils {
   }
 
   public static PotionEffect parsePotionEffect(Element el) throws InvalidXMLException {
-    return parsePotionEffect(el, false);
-  }
-
-  public static PotionEffect parsePotionEffect(Element el, boolean ambientDef)
-      throws InvalidXMLException {
     PotionEffectType type = parsePotionEffectType(new Node(el));
     Duration duration =
         parseSecondDuration(Node.fromAttr(el, "duration"), TimeUtils.INFINITE_DURATION);
     int amplifier = parseNumber(Node.fromAttr(el, "amplifier"), Integer.class, 1) - 1;
-    boolean ambient = parseBoolean(Node.fromAttr(el, "ambient"), ambientDef);
+    boolean ambient = parseBoolean(Node.fromAttr(el, "ambient"), false);
 
     return createPotionEffect(type, duration, amplifier, ambient);
   }
 
-  public static PotionEffect parseCompactPotionEffect(Node node, String text, boolean particle)
+  public static PotionEffect parseCompactPotionEffect(Node node, String text)
       throws InvalidXMLException {
     String[] parts = text.split(":");
 
@@ -865,7 +860,7 @@ public final class XMLUtils {
     PotionEffectType type = parsePotionEffectType(node, parts[0]);
     Duration duration = TimeUtils.INFINITE_DURATION;
     int amplifier = 0;
-    boolean ambient = !particle;
+    boolean ambient = false;
 
     if (parts.length >= 2) {
       duration = parseTickDuration(node, parts[1]);

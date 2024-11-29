@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.spigotmc.SpigotConfig;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
+import tc.oc.pgm.platform.modern.util.PlayerTracker;
 import tc.oc.pgm.platform.modern.util.RecipeUnlocker;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
@@ -22,12 +23,15 @@ public class ModernPlatform implements Platform.Manifest {
           "ProtocolLib is not installed, and is required for PGM modern version support");
     }
 
+    PlayerTracker tracker;
     List.of(
             new ModernListener(),
             new SpawnEggUseListener(),
-            new PacketManipulations(plugin),
-            new RecipeUnlocker())
+            new RecipeUnlocker(),
+            tracker = new PlayerTracker())
         .forEach(l -> Bukkit.getServer().getPluginManager().registerEvents(l, plugin));
+
+    new PacketManipulations(plugin, tracker);
 
     if (!SpigotConfig.disabledAdvancements.contains("*")) {
       plugin

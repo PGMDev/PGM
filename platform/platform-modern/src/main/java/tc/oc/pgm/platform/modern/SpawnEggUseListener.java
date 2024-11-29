@@ -22,7 +22,6 @@ public class SpawnEggUseListener implements Listener {
 
   private static final MaterialMatcher MATERIALS =
       MaterialMatcher.builder().addAll(m -> m.name().endsWith("_SPAWN_EGG")).build();
-  ;
 
   private Player lastPlacer;
   private ItemStack placingStack;

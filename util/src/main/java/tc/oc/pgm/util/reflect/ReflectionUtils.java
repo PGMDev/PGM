@@ -82,6 +82,10 @@ public final class ReflectionUtils {
     }
   }
 
+  public static <T> T readStaticField(Class<?> parent, Class<T> type, String name) {
+    return readField(parent, null, type, name);
+  }
+
   public static Object readField(@Nullable Object obj, Field field) {
     final boolean wasAccessible = field.isAccessible();
     try {

@@ -15,9 +15,11 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.platform.modern.util.Skins;
 import tc.oc.pgm.util.block.RayBlockIntersection;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
@@ -111,9 +113,21 @@ public class ModernPlayerUtils implements PlayerUtils {
     return player.getPing();
   }
 
+  public static final String HIDE_PARTICLES = "hideParticles";
+  private static final FixedMetadataValue TRUE =
+      new FixedMetadataValue(BukkitUtils.getPlugin(), true);
+
   @Override
   public void setPotionParticles(Player player, boolean enabled) {
-    // TODO: PLATFORM 1.20 does not support disabling particles
+    if (player.hasMetadata(HIDE_PARTICLES) != enabled) return;
+
+    if (enabled) player.removeMetadata(HIDE_PARTICLES, BukkitUtils.getPlugin());
+    else player.setMetadata(HIDE_PARTICLES, TRUE);
+
+    var nmsPlayer = ((CraftPlayer) player).getHandle();
+    if (!nmsPlayer.getActiveEffects().isEmpty()) {
+      nmsPlayer.effectsDirty = true;
+    }
   }
 
   @Override
