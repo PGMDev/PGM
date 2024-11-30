@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.util;
+package tc.oc.pgm.platform.modern.listeners;
 
 import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import it.unimi.dsi.fastutil.ints.Int2ReferenceOpenHashMap;

@@ -42,7 +42,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -68,6 +67,7 @@ import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.material.Materials;
 
 public class BlockTransformListener implements Listener {

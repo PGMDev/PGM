@@ -14,8 +14,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
 import tc.oc.pgm.platform.modern.util.Packets;
-import tc.oc.pgm.platform.modern.util.PlayerTracker;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public class PacketManipulations implements PacketSender {
@@ -108,7 +108,7 @@ public class PacketManipulations implements PacketSender {
 
       if (checkHealth && item.id() == DATA_HEALTH_ID.id()) {
         float val = (float) item.value();
-        if (!isSelf || val <= 0) {
+        if (isSelf ? val <= 0 : val > 0) {
           val = isSelf ? Math.max(val, 1f) : 0f;
           items.set(i, SynchedEntityData.DataValue.create(DATA_HEALTH_ID, val));
         }

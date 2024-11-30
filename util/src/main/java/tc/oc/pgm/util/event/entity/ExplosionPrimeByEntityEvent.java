@@ -4,7 +4,6 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.event.SportPaper;
 
 /**
@@ -16,7 +15,6 @@ import tc.oc.pgm.util.event.SportPaper;
  */
 @SportPaper
 public class ExplosionPrimeByEntityEvent extends ExplosionPrimeEvent {
-
   private final Entity primer;
 
   public ExplosionPrimeByEntityEvent(Entity what, float radius, boolean fire, Entity primer) {

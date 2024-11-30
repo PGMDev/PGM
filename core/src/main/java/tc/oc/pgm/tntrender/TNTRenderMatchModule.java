@@ -15,13 +15,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 

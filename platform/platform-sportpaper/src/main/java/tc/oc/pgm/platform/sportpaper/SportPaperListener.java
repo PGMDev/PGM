@@ -9,6 +9,7 @@ import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.EntityExtinguishEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
@@ -89,14 +90,17 @@ public class SportPaperListener implements Listener {
   }
 
   @EventHandler(ignoreCancelled = true)
-  public void onExplosionPrimeByEntity(
-      org.bukkit.event.entity.ExplosionPrimeByEntityEvent sportEvent) {
-    ExplosionPrimeByEntityEvent pgmEvent = new ExplosionPrimeByEntityEvent(
-        sportEvent.getEntity(),
-        sportEvent.getRadius(),
-        sportEvent.getFire(),
-        sportEvent.getPrimer());
-    handleCall(pgmEvent, sportEvent);
+  public void onExplosionPrime(org.bukkit.event.entity.ExplosionPrimeEvent e) {
+    ExplosionPrimeEvent pgmEvent;
+    if (e instanceof org.bukkit.event.entity.ExplosionPrimeByEntityEvent e2) {
+      pgmEvent = new ExplosionPrimeByEntityEvent(
+          e2.getEntity(), e2.getRadius(), e2.getFire(), e2.getPrimer());
+    } else {
+      pgmEvent = new ExplosionPrimeEvent(e.getEntity(), e.getRadius(), e.getFire());
+    }
+    handleCall(pgmEvent, e);
+    e.setRadius(pgmEvent.getRadius());
+    e.setFire(pgmEvent.getFire());
   }
 
   @EventHandler(ignoreCancelled = true)

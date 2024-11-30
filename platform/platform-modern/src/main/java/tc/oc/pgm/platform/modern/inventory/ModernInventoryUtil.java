@@ -9,7 +9,8 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.Event;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -54,10 +55,11 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   }
 
   @Override
-  public EquipmentSlot getUsedHand(PlayerEvent event) {
+  public EquipmentSlot getUsedHand(Event event) {
     return switch (event) {
       case PlayerItemConsumeEvent e -> e.getHand();
       case PlayerInteractEvent e -> e.getHand();
+      case BlockPlaceEvent e -> e.getHand();
       default -> EquipmentSlot.HAND;
     };
   }

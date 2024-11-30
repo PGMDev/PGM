@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.util;
+package tc.oc.pgm.platform.modern.listeners;
 
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;

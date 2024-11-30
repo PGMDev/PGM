@@ -1,4 +1,6 @@
-package tc.oc.pgm.platform.modern;
+package tc.oc.pgm.platform.modern.listeners;
+
+import static tc.oc.pgm.util.event.EventUtil.handleCall;
 
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
@@ -9,7 +11,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,23 +30,9 @@ import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 
 /**
  * TODO: fix unsupported events: <br>
- * - BlockDispenseEntityEvent <br>
- * - ExplosionPrimeByEntityEvent <br>
  * - EntityExtinguishEvent <br>
  */
 public class ModernListener implements Listener {
-
-  private static void handleCall(Event pgmEvent, Event modernEvent) {
-    if (pgmEvent == null) return;
-    if (modernEvent instanceof Cancellable modernCancel
-        && pgmEvent instanceof Cancellable pgmCancel) {
-      pgmCancel.setCancelled(modernCancel.isCancelled());
-      Bukkit.getServer().getPluginManager().callEvent(pgmEvent);
-      modernCancel.setCancelled(pgmCancel.isCancelled());
-    } else {
-      Bukkit.getServer().getPluginManager().callEvent(pgmEvent);
-    }
-  }
 
   @EventHandler(ignoreCancelled = true)
   public void onBlockFall(EntitySpawnEvent event) {
@@ -102,10 +89,10 @@ public class ModernListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   @SuppressWarnings("removal")
-  public void onEntityDespawn(org.bukkit.event.entity.EntityRemoveEvent sportEvent) {
-    if (sportEvent.getCause() == org.bukkit.event.entity.EntityRemoveEvent.Cause.OUT_OF_WORLD) {
-      EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(sportEvent.getEntity());
-      handleCall(pgmEvent, sportEvent);
+  public void onEntityDespawn(org.bukkit.event.entity.EntityRemoveEvent modernEvent) {
+    if (modernEvent.getCause() == org.bukkit.event.entity.EntityRemoveEvent.Cause.OUT_OF_WORLD) {
+      EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(modernEvent.getEntity());
+      handleCall(pgmEvent, modernEvent);
     }
   }
 

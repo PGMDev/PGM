@@ -7,6 +7,7 @@ import org.bukkit.event.Event;
 public class EventUtil {
 
   public static void handleCall(Event pgmEvent, Event bukkitEvent) {
+    if (pgmEvent == null) return;
     if (bukkitEvent instanceof Cancellable bCancellable
         && pgmEvent instanceof Cancellable pgmCancellable) {
       pgmCancellable.setCancelled(bCancellable.isCancelled());

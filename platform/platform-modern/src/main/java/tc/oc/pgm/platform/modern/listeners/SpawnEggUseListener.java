@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern;
+package tc.oc.pgm.platform.modern.listeners;
 
 import static org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG;
 

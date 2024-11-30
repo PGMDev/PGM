@@ -7,9 +7,13 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.spigotmc.SpigotConfig;
+import tc.oc.pgm.platform.modern.listeners.DispenserListener;
+import tc.oc.pgm.platform.modern.listeners.ModernListener;
+import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
+import tc.oc.pgm.platform.modern.listeners.RecipeUnlocker;
+import tc.oc.pgm.platform.modern.listeners.SpawnEggUseListener;
+import tc.oc.pgm.platform.modern.listeners.TntListener;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
-import tc.oc.pgm.platform.modern.util.PlayerTracker;
-import tc.oc.pgm.platform.modern.util.RecipeUnlocker;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
 
@@ -25,10 +29,12 @@ public class ModernPlatform implements Platform.Manifest {
 
     PlayerTracker tracker;
     List.of(
+            new DispenserListener(),
             new ModernListener(),
-            new SpawnEggUseListener(),
+            tracker = new PlayerTracker(),
             new RecipeUnlocker(),
-            tracker = new PlayerTracker())
+            new SpawnEggUseListener(),
+            new TntListener())
         .forEach(l -> Bukkit.getServer().getPluginManager().registerEvents(l, plugin));
 
     new PacketManipulations(plugin, tracker);

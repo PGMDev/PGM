@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -154,15 +155,20 @@ public final class InventoryUtils {
     return stack;
   }
 
-  public static void consumeItem(PlayerEvent player) {
-    PlayerInventory inv = player.getPlayer().getInventory();
-    EquipmentSlot hand = INVENTORY_UTILS.getUsedHand(player);
-    ItemStack itemInHand = inv.getItem(hand);
-    if (itemInHand.getAmount() > 1) {
-      itemInHand.setAmount(itemInHand.getAmount() - 1);
+  public static void consumeItem(PlayerEvent event) {
+    consumeItem(event, event.getPlayer());
+  }
+
+  public static void consumeItem(Event event, Player player) {
+    PlayerInventory inv = player.getInventory();
+    EquipmentSlot hand = INVENTORY_UTILS.getUsedHand(event);
+    ItemStack inHand = inv.getItem(hand);
+    if (inHand.getAmount() == 1) {
+      inHand = null;
     } else {
-      inv.setItem(hand, null);
+      inHand.setAmount(inHand.getAmount() - 1);
     }
+    inv.setItem(hand, inHand);
   }
 
   public interface InventoryUtilsPlatform {
@@ -180,7 +186,7 @@ public final class InventoryUtils {
 
     ItemStack craftItemCopy(ItemStack item);
 
-    EquipmentSlot getUsedHand(PlayerEvent event);
+    EquipmentSlot getUsedHand(Event event);
 
     void setCanDestroy(ItemMeta itemMeta, Set<Material> materials);
 

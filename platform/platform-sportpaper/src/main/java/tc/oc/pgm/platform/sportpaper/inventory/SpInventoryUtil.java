@@ -8,7 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
-import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.event.Event;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -47,7 +47,7 @@ public class SpInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
   }
 
   @Override
-  public EquipmentSlot getUsedHand(PlayerEvent event) {
+  public EquipmentSlot getUsedHand(Event event) {
     return EquipmentSlot.HAND;
   }
 
