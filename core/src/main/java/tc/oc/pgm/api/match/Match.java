@@ -347,6 +347,13 @@ public interface Match
   Collection<Competitor> getSortedCompetitors();
 
   /**
+   * Get the current position for a {@link Competitor}, where the team in the lead is 1st
+   *
+   * @return 1st for the team closest to winning, 2nd for the runner-up, etc
+   */
+  int getCompetitorIndex(Competitor competitor);
+
+  /**
    * Get all the currently winning {@link Competitor}s in the {@link Match}.
    *
    * @return All the winning {@link Competitor}s.

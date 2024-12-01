@@ -661,6 +661,11 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public int getCompetitorIndex(Competitor competitor) {
+    return winners.getPosition(competitor);
+  }
+
+  @Override
   public void invalidateRanking() {
     winners.invalidateRanking();
   }

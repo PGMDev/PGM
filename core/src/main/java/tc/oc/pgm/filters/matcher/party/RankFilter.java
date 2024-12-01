@@ -1,7 +1,6 @@
 package tc.oc.pgm.filters.matcher.party;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
 import java.util.Collection;
 import org.bukkit.event.Event;
@@ -34,8 +33,6 @@ public class RankFilter implements CompetitorFilter {
 
   @Override
   public boolean matches(MatchQuery query, Competitor competitor) {
-    return positions.contains(
-        Iterators.indexOf(
-            query.getMatch().getSortedCompetitors().iterator(), c -> c == competitor));
+    return positions.contains(query.getMatch().getCompetitorIndex(competitor) + 1);
   }
 }
