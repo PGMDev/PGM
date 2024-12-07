@@ -380,6 +380,8 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   public void invalidate(Filterable<?> filterable) {
+    // Ignore invalidations from other matches
+    if (filterable instanceof MatchPlayer mp && mp.getMatch() != match) return;
     if (dirtySet.add(Objects.requireNonNull(filterable))) {
       filterable.getFilterableChildren().forEach(this::invalidate);
     }
@@ -467,6 +469,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   }
 
   public void onPartyChange(PlayerPartyChangeEvent event) throws EventException {
+    if (event.getMatch() != match) return;
     if (event.getNewParty() != null) {
       invalidate(event.getPlayer());
     } else {

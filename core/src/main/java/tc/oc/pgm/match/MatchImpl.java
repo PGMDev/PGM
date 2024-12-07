@@ -756,8 +756,7 @@ public class MatchImpl implements Match {
         try {
           tickable.tick(MatchImpl.this, tick);
         } catch (Throwable t) {
-          logger.log(Level.SEVERE, "Could not tick " + tickable, t);
-          tickables.remove(tickable);
+          logger.log(Level.SEVERE, "Could not tick " + tickable + " in match #" + id, t);
         }
       }
     }
