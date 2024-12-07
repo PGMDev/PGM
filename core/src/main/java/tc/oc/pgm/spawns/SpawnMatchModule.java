@@ -216,7 +216,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     if (event.getOldParty() == null) {
       // Join match
       if (event.getNewParty().isParticipating()) {
-        transition(player, null, new Joining(this, player, getJoinPenalty(event)));
+        transition(player, null, new Joining(this, player, getJoinPenalty(event), false));
       } else {
         transition(player, null, new Observing(this, player, true, true));
       }

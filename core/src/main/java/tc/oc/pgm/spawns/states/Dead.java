@@ -37,6 +37,9 @@ public class Dead extends Spawning {
 
   public Dead(SpawnMatchModule smm, MatchPlayer player) {
     super(smm, player, player.getMatch().getTick().tick, 0);
+
+    // Allow stuff like /tp or /j
+    if (options.spectate) this.permission = new StatePermissions.Observer();
   }
 
   @Override
@@ -108,7 +111,10 @@ public class Dead extends Spawning {
   @Override
   public void onEvent(PlayerJoinPartyEvent event) {
     super.onEvent(event);
-    if (!(event.getNewParty() instanceof Competitor)) {
+
+    if (event.getNewParty() instanceof Competitor) {
+      transition(new Joining(smm, player, smm.getJoinPenalty(event), true));
+    } else {
       transition(new Observing(smm, player, true, false));
     }
   }
