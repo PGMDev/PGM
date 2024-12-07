@@ -74,7 +74,7 @@ public class CompassModule implements MapModule<CompassMatchModule> {
         }
       }
       ImmutableList<CompassTarget<?>> targets = compassTargets.build();
-      if (targets == null) return null;
+      if (targets.isEmpty()) return null;
       return new CompassModule(targets, orderStrategy, showDistance);
     }
   }

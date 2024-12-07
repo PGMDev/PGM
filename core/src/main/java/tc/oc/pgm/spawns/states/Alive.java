@@ -111,7 +111,7 @@ public class Alive extends Participating {
     super.onEvent(event);
 
     if (event.getNewParty() instanceof Competitor) {
-      transition(new Joining(smm, player, smm.getJoinPenalty(event)));
+      transition(new Joining(smm, player, smm.getJoinPenalty(event), true));
     } else {
       transition(new Observing(smm, player, true, true));
     }

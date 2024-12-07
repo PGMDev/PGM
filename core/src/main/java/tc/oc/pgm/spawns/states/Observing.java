@@ -1,13 +1,11 @@
 package tc.oc.pgm.spawns.states;
 
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -15,9 +13,6 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.material.Door;
-import org.bukkit.permissions.PermissionAttachment;
-import tc.oc.pgm.api.Config;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -40,27 +35,28 @@ public class Observing extends State {
 
   private final boolean reset;
   private final boolean teleport;
-  private PermissionAttachment permissionAttachment;
 
   public Observing(SpawnMatchModule smm, MatchPlayer player, boolean reset, boolean teleport) {
     super(smm, player);
     this.reset = reset;
     this.teleport = teleport;
+    this.permission = new StatePermissions.Observer();
   }
 
   @Override
   public void enterState() {
     super.enterState();
-
-    permissionAttachment = bukkit.addAttachment(PGM.get());
-    for (Config.Group group : PGM.get().getConfiguration().getGroups()) {
-      if (bukkit.hasPermission(group.getPermission())) {
-        permissionAttachment.setPermission(group.getObserverPermission(), true);
-      }
-    }
-
-    if (reset) player.reset();
     player.setDead(false);
+    resetPlayer(smm, player, reset, teleport);
+    player.setVisible(true);
+    player.resetVisibility();
+  }
+
+  // Made static to allow for reuse
+  public static void resetPlayer(
+      SpawnMatchModule smm, MatchPlayer player, boolean reset, boolean teleport) {
+    var bukkit = player.getBukkit();
+    if (reset) player.reset();
     player.resetInteraction();
     bukkit.setGameMode(GameMode.CREATIVE);
     bukkit.setAllowFlight(true);
@@ -94,8 +90,6 @@ public class Observing extends State {
     }
 
     player.getBukkit().updateInventory();
-    player.setVisible(true);
-    player.resetVisibility();
 
     // The player is not standing on anything, turn their flying on
     if (bukkit.getAllowFlight()) {
@@ -107,23 +101,17 @@ public class Observing extends State {
   }
 
   @Override
-  public void leaveState(List<Event> events) {
-    super.leaveState(events);
-    if (permissionAttachment != null) bukkit.removeAttachment(permissionAttachment);
-  }
-
-  @Override
   public void onEvent(MatchStartEvent event) {
     super.onEvent(event);
     if (player.isParticipating()) {
-      transition(new Joining(smm, player));
+      transition(new Joining(smm, player, 0, false));
     }
   }
 
   @Override
   public void onEvent(PlayerJoinPartyEvent event) {
     if (event.getNewParty() instanceof Competitor && event.getMatch().isRunning()) {
-      transition(new Joining(smm, player, smm.getJoinPenalty(event)));
+      transition(new Joining(smm, player, smm.getJoinPenalty(event), false));
     }
   }
 

@@ -11,20 +11,21 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 /** Player is waiting to spawn after joining a team */
 public class Joining extends Spawning {
 
-  public Joining(SpawnMatchModule smm, MatchPlayer player) {
-    this(smm, player, 0);
-  }
+  private final boolean reset;
 
-  public Joining(SpawnMatchModule smm, MatchPlayer player, long minSpawnTick) {
+  public Joining(SpawnMatchModule smm, MatchPlayer player, long minSpawnTick, boolean reset) {
     super(smm, player, smm.getDeathTick(player), minSpawnTick);
     this.spawnRequested = true;
+    this.reset = reset;
+    this.permission = new StatePermissions.Observer();
   }
 
   @Override
   public void enterState() {
     player.setVisible(false);
-
     super.enterState();
+
+    if (reset) Observing.resetPlayer(smm, player, true, false);
   }
 
   @Override
