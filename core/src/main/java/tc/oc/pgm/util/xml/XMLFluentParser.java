@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.xml;
 
+import com.google.common.collect.Range;
 import java.time.Duration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -95,6 +96,24 @@ public class XMLFluentParser {
 
   public <T extends Number> NumberBuilder<T> number(Class<T> cls, Element el, String... prop) {
     return new NumberBuilder<>(cls, el, prop);
+  }
+
+  public Builder.Generic<Range<Integer>> intRange(Element el, String... prop) {
+    return numericRange(Integer.class, el, prop);
+  }
+
+  public Builder.Generic<Range<Double>> doubleRange(Element el, String... prop) {
+    return numericRange(Double.class, el, prop);
+  }
+
+  public <T extends Number & Comparable<T>> Builder.Generic<Range<T>> numericRange(
+      Class<T> cls, Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected Range<T> parse(Node node) throws InvalidXMLException {
+        return XMLUtils.parseNumericRange(node, cls);
+      }
+    };
   }
 
   public Builder.Generic<Material> material(Element el, String... prop) {

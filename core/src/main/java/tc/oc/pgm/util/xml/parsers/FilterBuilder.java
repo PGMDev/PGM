@@ -1,7 +1,9 @@
 package tc.oc.pgm.util.xml.parsers;
 
 import org.jdom2.Element;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.DynamicFilterValidation;
@@ -24,6 +26,26 @@ public class FilterBuilder extends Builder<Filter, FilterBuilder> {
 
   public FilterBuilder dynamic(Class<? extends Filterable<?>> type) {
     validate((f, n) -> filters.validate(f, DynamicFilterValidation.of(type), n));
+    return this;
+  }
+
+  public FilterBuilder respondsTo(@NotNull Class<? extends Filterable<?>> type) {
+    validate((filter, node) -> filters.validate(
+        filter,
+        (definition, n) -> {
+          if (!definition.respondsTo(type)) {
+            throw new InvalidXMLException(
+                "Expected a filter that can respond to "
+                    + type.getSimpleName()
+                    + ". The filter "
+                    + definition.getDefinitionType().getSimpleName()
+                    + " only responds to "
+                    + Filterables.scope(definition).getSimpleName()
+                    + " or lower",
+                n);
+          }
+        },
+        node));
     return this;
   }
 
