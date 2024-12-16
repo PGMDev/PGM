@@ -2,11 +2,9 @@ package tc.oc.pgm.damagehistory;
 
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
-import java.util.Collections;
 import java.util.Deque;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -51,42 +49,30 @@ public class DamageHistoryMatchModule implements MatchModule, Listener {
   }
 
   public @Nullable ParticipantState getAssister(MatchPlayer player) {
-    Deque<DamageEntry> damageHistory = getDamageHistory(player);
-    if (damageHistory == null || damageHistory.size() <= 1) return null;
+    Deque<DamageEntry> history = getDamageHistory(player);
+    if (history == null || history.size() <= 1) return null;
 
-    ParticipantState killer = damageHistory.getLast().getDamager();
+    ParticipantState killer = history.getLast().getDamager();
     if (killer == null) return null;
 
-    double damageReceived = damageHistory.stream().mapToDouble(DamageEntry::getDamage).sum();
+    double total = history.stream().mapToDouble(DamageEntry::getDamage).sum();
 
-    Collections.reverse((List<?>) damageHistory);
+    var highest = history.reversed().stream()
+        .filter(dmg -> dmg.canAssist(player, killer))
+        .collect(Collectors.groupingBy(
+            DamageHistoryKey::from,
+            LinkedHashMap::new,
+            Collectors.mapping(DamageEntry::getDamage, Collectors.reducing(0d, Double::sum))))
+        .entrySet()
+        .stream()
+        .max(Map.Entry.comparingByValue())
+        .orElse(null);
 
-    Set<Map.Entry<DamageHistoryKey, Double>> entries =
-        damageHistory.stream()
-            // Filter out damage without players, or damage from self or killer
-            .filter(
-                historicDamage -> {
-                  ParticipantState damager = historicDamage.getDamager();
-                  return !(damager == null
-                      || damager.getId().equals(player.getId())
-                      || damager.getId().equals(killer.getId()));
-                })
-            .collect(
-                Collectors.groupingBy(
-                    DamageHistoryKey::from,
-                    Collectors.mapping(
-                        DamageEntry::getDamage, Collectors.reducing(0d, Double::sum))))
-            .entrySet();
+    if (highest == null
+        || highest.getValue() < (total * PGM.get().getConfiguration().getAssistPercent())
+        || highest.getKey().getParty().equals(player.getParty())) return null;
 
-    Map.Entry<DamageHistoryKey, Double> highestDamager =
-        entries.stream().max(Map.Entry.comparingByValue()).orElse(null);
-
-    if (highestDamager == null
-        || highestDamager.getValue()
-            < (damageReceived * PGM.get().getConfiguration().getAssistPercent())
-        || highestDamager.getKey().getParty().equals(player.getParty())) return null;
-
-    return highestDamager.getKey().getState();
+    return highest.getKey().getState();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
