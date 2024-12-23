@@ -148,6 +148,11 @@ public class Tribute implements Competitor {
     return this.players;
   }
 
+  @Nullable
+  public MatchPlayer getPlayer() {
+    return this.player;
+  }
+
   @Override
   public @Nullable MatchPlayer getPlayer(final UUID playerId) {
     return player != null && player.getId().equals(playerId) ? player : null;

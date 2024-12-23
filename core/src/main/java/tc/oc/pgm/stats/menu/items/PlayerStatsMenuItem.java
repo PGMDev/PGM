@@ -2,6 +2,7 @@ package tc.oc.pgm.stats.menu.items;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -33,7 +33,6 @@ import tc.oc.pgm.util.text.TextTranslations;
 /** Represents a player's stats via player head & lore * */
 public class PlayerStatsMenuItem implements MenuItem {
 
-  private final TextColor RESET = NamedTextColor.GRAY;
   private final UUID uuid;
   private final PlayerStats stats;
   private final Skin skin;
@@ -57,27 +56,27 @@ public class PlayerStatsMenuItem implements MenuItem {
 
     Component statLore = translatable(
         "match.stats.concise",
-        RESET,
+        GRAY,
         number(stats.getKills(), NamedTextColor.GREEN),
         number(stats.getDeaths(), NamedTextColor.RED),
         number(stats.getKD(), NamedTextColor.GREEN));
     Component killstreakLore = translatable(
         "match.stats.killstreak.concise",
-        RESET,
+        GRAY,
         number(stats.getMaxKillstreak(), NamedTextColor.GREEN));
     Component damageDealtLore = translatable(
         "match.stats.damage.dealt",
-        RESET,
+        GRAY,
         damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
         damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
     Component damageReceivedLore = translatable(
         "match.stats.damage.received",
-        RESET,
+        GRAY,
         damageComponent(stats.getDamageTaken(), NamedTextColor.RED),
         damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD));
     Component bowLore = translatable(
         "match.stats.bow",
-        RESET,
+        GRAY,
         number(stats.getShotsHit(), NamedTextColor.YELLOW),
         number(stats.getShotsTaken(), NamedTextColor.YELLOW),
         number(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
@@ -95,7 +94,7 @@ public class PlayerStatsMenuItem implements MenuItem {
         lore.add(TextTranslations.translateLegacy(
             translatable(
                 "match.stats.flaghold.concise",
-                RESET,
+                GRAY,
                 TemporalComponent.briefNaturalApproximate(stats.getLongestFlagHold())
                     .color(NamedTextColor.AQUA)
                     .decoration(TextDecoration.BOLD, true)),
@@ -110,7 +109,7 @@ public class PlayerStatsMenuItem implements MenuItem {
   private boolean optionalStat(List<String> lore, Number stat, String key, Player player) {
     if (stat.doubleValue() > 0) {
       lore.add(null);
-      Component loreComponent = translatable(key, RESET, number(stat, NamedTextColor.AQUA));
+      Component loreComponent = translatable(key, GRAY, number(stat, NamedTextColor.AQUA));
       lore.add(TextTranslations.translateLegacy(loreComponent, player));
       return true;
     }

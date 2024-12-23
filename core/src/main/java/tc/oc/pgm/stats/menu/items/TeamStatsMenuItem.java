@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
@@ -37,34 +36,22 @@ public class TeamStatsMenuItem implements MenuItem {
   private final Competitor team;
   private final Match match;
   private final TeamStats stats;
-  private List<PlayerStatsMenuItem> members;
-
-  private final NamedTextColor RESET = NamedTextColor.GRAY;
+  private final List<PlayerStatsMenuItem> members;
 
   public TeamStatsMenuItem(Match match, Competitor team, Map<UUID, PlayerStats> playerStats) {
-
     this.team = team;
-    this.members = Lists.newArrayList();
     this.stats = new TeamStats(playerStats.values());
 
     Datastore datastore = PGM.get().getDatastore();
 
-    this.members =
-        playerStats.entrySet().stream()
-            .map(
-                entry -> {
-                  UUID uuid = entry.getKey();
-                  PlayerStats stats = entry.getValue();
-
-                  MatchPlayer p = match.getPlayer(uuid);
-                  Skin skin =
-                      (p != null)
-                          ? PLAYER_UTILS.getPlayerSkin(p.getBukkit())
-                          : datastore.getSkin(uuid);
-
-                  return new PlayerStatsMenuItem(uuid, stats, skin);
-                })
-            .collect(Collectors.toList());
+    this.members = playerStats.entrySet().stream()
+        .map(entry -> {
+          UUID id = entry.getKey();
+          MatchPlayer p = match.getPlayer(id);
+          Skin skin = p != null ? PLAYER_UTILS.getPlayerSkin(p.getBukkit()) : datastore.getSkin(id);
+          return new PlayerStatsMenuItem(id, entry.getValue(), skin);
+        })
+        .toList();
 
     this.match = match;
   }
@@ -78,33 +65,29 @@ public class TeamStatsMenuItem implements MenuItem {
   public List<String> getLore(Player player) {
     List<String> lore = Lists.newArrayList();
 
-    Component statLore =
-        translatable(
-            "match.stats.concise",
-            RESET,
-            number(stats.getTeamKills(), NamedTextColor.GREEN),
-            number(stats.getTeamDeaths(), NamedTextColor.RED),
-            number(stats.getTeamKD(), NamedTextColor.GREEN));
+    Component statLore = translatable(
+        "match.stats.concise",
+        NamedTextColor.GRAY,
+        number(stats.getTeamKills(), NamedTextColor.GREEN),
+        number(stats.getTeamDeaths(), NamedTextColor.RED),
+        number(stats.getTeamKD(), NamedTextColor.GREEN));
 
-    Component damageDealtLore =
-        translatable(
-            "match.stats.damage.dealt",
-            RESET,
-            damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
-            damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
-    Component damageReceivedLore =
-        translatable(
-            "match.stats.damage.received",
-            RESET,
-            damageComponent(stats.getDamageTaken(), NamedTextColor.RED),
-            damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD));
-    Component bowLore =
-        translatable(
-            "match.stats.bow",
-            RESET,
-            number(stats.getShotsHit(), NamedTextColor.YELLOW),
-            number(stats.getShotsTaken(), NamedTextColor.YELLOW),
-            number(stats.getTeamBowAcc(), NamedTextColor.YELLOW).append(text('%')));
+    Component damageDealtLore = translatable(
+        "match.stats.damage.dealt",
+        NamedTextColor.GRAY,
+        damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
+        damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
+    Component damageReceivedLore = translatable(
+        "match.stats.damage.received",
+        NamedTextColor.GRAY,
+        damageComponent(stats.getDamageTaken(), NamedTextColor.RED),
+        damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD));
+    Component bowLore = translatable(
+        "match.stats.bow",
+        NamedTextColor.GRAY,
+        number(stats.getShotsHit(), NamedTextColor.YELLOW),
+        number(stats.getShotsTaken(), NamedTextColor.YELLOW),
+        number(stats.getTeamBowAcc(), NamedTextColor.YELLOW).append(text('%')));
 
     lore.add(TextTranslations.translateLegacy(statLore, player));
     lore.add(TextTranslations.translateLegacy(damageDealtLore, player));
@@ -122,20 +105,18 @@ public class TeamStatsMenuItem implements MenuItem {
   @Override
   public void onClick(Player player, ClickType clickType) {
     new TeamStatsMenu(
-        team,
-        stats,
-        members,
-        match.getPlayer(player),
-        createItem(player),
-        PGM.get().getInventoryManager().getInventory(player).orElse(null));
+            team,
+            members,
+            match.getPlayer(player),
+            getClickableItem(player),
+            PGM.get().getInventoryManager().getInventory(player).orElse(null))
+        .open();
   }
 
   @Override
   public ItemMeta modifyMeta(ItemMeta meta) {
     LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) meta;
-
     leatherArmorMeta.setColor(team.getFullColor());
-
     return leatherArmorMeta;
   }
 }

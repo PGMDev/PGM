@@ -40,12 +40,11 @@ public abstract class InventoryMenu implements InventoryProvider {
       Component title, int rows, MatchPlayer viewer, @Nullable SmartInventory parent) {
     this.viewer = viewer;
 
-    SmartInventory.Builder builder =
-        SmartInventory.builder()
-            .manager(PGM.get().getInventoryManager())
-            .title(translateLegacy(title, getBukkit()))
-            .size(rows, 9)
-            .provider(this);
+    SmartInventory.Builder builder = SmartInventory.builder()
+        .manager(PGM.get().getInventoryManager())
+        .title(translateLegacy(title, getBukkit()))
+        .size(rows, 9)
+        .provider(this);
 
     if (parent != null) {
       builder.parent(parent);
@@ -70,6 +69,10 @@ public abstract class InventoryMenu implements InventoryProvider {
     return inventory;
   }
 
+  public int lastRow() {
+    return inventory.getRows() - 1;
+  }
+
   public void addBackButton(
       InventoryContents contents, Component parentMenuTitle, int row, int col) {
     Component back = translatable("menu.page.return", NamedTextColor.GRAY, parentMenuTitle);
@@ -78,18 +81,8 @@ public abstract class InventoryMenu implements InventoryProvider {
         row,
         col,
         ClickableItem.of(
-            new ItemBuilder()
-                .material(Material.BARRIER)
-                .name(translateLegacy(back, getBukkit()))
-                .build(),
-            c -> {
-              getInventory()
-                  .getParent()
-                  .ifPresent(
-                      parent -> {
-                        parent.open(getBukkit());
-                      });
-            }));
+            new ItemBuilder().material(Material.BARRIER).name(getBukkit(), back).build(),
+            c -> getInventory().getParent().ifPresent(parent -> parent.open(getBukkit()))));
   }
 
   @Override

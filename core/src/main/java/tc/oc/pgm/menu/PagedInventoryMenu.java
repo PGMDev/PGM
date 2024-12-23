@@ -84,14 +84,18 @@ public abstract class PagedInventoryMenu extends InventoryMenu {
    *
    * @return a {@link SlotPos} where previous page button will be located.
    */
-  public abstract SlotPos getPreviousPageSlot();
+  public SlotPos getPreviousPageSlot() {
+    return SlotPos.of(lastRow(), 0);
+  }
 
   /**
    * The position of the next page button.
    *
    * @return a {@link SlotPos} where next page button will be located.
    */
-  public abstract SlotPos getNextPageSlot();
+  public SlotPos getNextPageSlot() {
+    return SlotPos.of(lastRow(), 8);
+  }
 
   /**
    * The position of the no page contents button, only displayed when page contents is empty or
@@ -112,8 +116,10 @@ public abstract class PagedInventoryMenu extends InventoryMenu {
 
   protected ClickableItem getEmptyContentsButton(Player viewer) {
     Component name = translatable("menu.page.empty", NamedTextColor.DARK_RED, TextDecoration.BOLD);
-    return ClickableItem.empty(
-        new ItemBuilder().material(Material.BARRIER).name(translateLegacy(name, viewer)).build());
+    return ClickableItem.empty(new ItemBuilder()
+        .material(Material.BARRIER)
+        .name(translateLegacy(name, viewer))
+        .build());
   }
 
   protected ClickableItem getPageItem(Player player, int page, String key) {

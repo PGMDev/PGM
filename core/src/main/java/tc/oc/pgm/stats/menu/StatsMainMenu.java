@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.menu.PagedInventoryMenu;
 import tc.oc.pgm.stats.StatsMatchModule;
 import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
@@ -17,34 +18,39 @@ import tc.oc.pgm.stats.menu.items.VerboseStatsMenuItem;
 
 /**
  * Menu overview of match stats - populated with {@link TeamStatsMenuItem} which lead to more
- * detailed team stats *
+ * detailed team stats
  */
 public class StatsMainMenu extends PagedInventoryMenu {
 
   // GUI values
-  private static final int TOTAL_ROWS = 4;
-  private static final int PER_PAGE = 18;
+  private static final int MIN_TEAM_ROWS = 2;
+  private static final int MAX_TEAM_ROWS = 4;
 
   // How to populate the inventory slots when within fancy slot max
-  private static final int MAX_FANCY_SLOTS = 13;
-  private static final int[][] FANCY_SLOTS = {{3, 5, 1, 7}, {4, 0, 8, 2, 6}};
+  private static final int[][] SLOTS = {{}, {4}, {3, 5}, {2, 4, 6}, {1, 3, 5, 7}, {0, 2, 4, 6, 8}};
+  private static final int MAX_FANCY_SLOTS = SLOTS[SLOTS.length - 1].length * 2;
 
   private final StatsMatchModule stats;
   private final VerboseStatsMenuItem item;
-  private final List<TeamStatsMenuItem> teams;
+  private final List<MenuItem> teams;
 
-  public StatsMainMenu(MatchPlayer viewer, List<TeamStatsMenuItem> teams, StatsMatchModule stats) {
+  public StatsMainMenu(MatchPlayer viewer, List<MenuItem> teams, StatsMatchModule stats) {
     super(
         translatable("match.stats.title", NamedTextColor.GOLD),
-        TOTAL_ROWS,
+        2 + teamRows(teams.size()),
         viewer,
         null,
-        PER_PAGE,
+        teamRows(teams.size()) * 9,
         1,
         0);
     this.stats = stats;
     this.teams = teams;
     this.item = new VerboseStatsMenuItem();
+  }
+
+  private static int teamRows(int teams) {
+    int requiredRows = (teams + 8) / 9;
+    return Math.max(Math.min(requiredRows, MAX_TEAM_ROWS), MIN_TEAM_ROWS);
   }
 
   public ItemStack getItem() {
@@ -53,8 +59,7 @@ public class StatsMainMenu extends PagedInventoryMenu {
 
   @Override
   public void init(Player player, InventoryContents contents) {
-    contents.set(
-        0, 4, ClickableItem.empty(stats.getPlayerStatsItem(getViewer()).createItem(getBukkit())));
+    contents.set(0, 4, stats.getPlayerStatsItem(getViewer()).getClickableItem(getBukkit()));
 
     // Use pagination when too many teams are present
     if (teams.size() > MAX_FANCY_SLOTS) {
@@ -62,35 +67,17 @@ public class StatsMainMenu extends PagedInventoryMenu {
       return;
     }
 
-    // Fancy Slots layout supports up to 13 teams. If a map contains more than this
-    // menu will default to a paginated style with 18 teams per page.
-    int slotCol = 0;
-    int slotRow = 0;
-    int row = 1;
-    for (TeamStatsMenuItem team : teams) {
-      contents.set(row, FANCY_SLOTS[slotRow][slotCol], team.getClickableItem(player));
+    int splitAt = teams.size() <= 4 ? teams.size() : (teams.size() + 1) >> 1;
+    fancyLayoutRow(1, contents, teams.subList(0, splitAt), player);
+    fancyLayoutRow(2, contents, teams.subList(splitAt, teams.size()), player);
+  }
 
-      slotCol++;
-      if (slotCol >= FANCY_SLOTS[slotRow].length) {
-        slotCol = 0;
-        slotRow++;
-        row++;
-      }
-
-      if (slotRow >= FANCY_SLOTS.length) {
-        slotRow = 0;
-      }
+  private void fancyLayoutRow(
+      int row, InventoryContents contents, List<MenuItem> items, Player player) {
+    int[] slots = SLOTS[items.size()];
+    for (int i = 0; i < items.size(); i++) {
+      contents.set(row, slots[i], items.get(i).getClickableItem(player));
     }
-  }
-
-  @Override
-  public SlotPos getPreviousPageSlot() {
-    return SlotPos.of(3, 0);
-  }
-
-  @Override
-  public SlotPos getNextPageSlot() {
-    return SlotPos.of(3, 8);
   }
 
   @Override
@@ -100,7 +87,6 @@ public class StatsMainMenu extends PagedInventoryMenu {
 
   @Override
   public ClickableItem[] getPageContents(Player viewer) {
-    if (teams.isEmpty() || teams == null) return null;
     return teams.stream().map(team -> team.getClickableItem(viewer)).toArray(ClickableItem[]::new);
   }
 }
