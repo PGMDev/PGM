@@ -140,7 +140,7 @@ public class MatchImpl implements Match {
     this.tickables = new EnumMap<>(MatchScope.class);
     for (MatchScope scope : MatchScope.values()) {
       executors.put(scope, new BukkitExecutorService(PGM.get(), false));
-      listeners.put(scope, new LinkedList<>());
+      listeners.put(scope, new LinkedHashSet<>());
       tickables.put(scope, new CopyOnWriteArraySet<>());
     }
     this.tick = new AtomicReference<>(null);
