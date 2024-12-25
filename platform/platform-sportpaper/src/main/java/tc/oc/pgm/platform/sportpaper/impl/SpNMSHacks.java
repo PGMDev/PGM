@@ -8,21 +8,22 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
+
+import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.ChunkSection;
 import net.minecraft.server.v1_8_R3.EntityArrow;
 import net.minecraft.server.v1_8_R3.EntityFireball;
 import net.minecraft.server.v1_8_R3.EntityFireworks;
 import net.minecraft.server.v1_8_R3.IBlockData;
 import net.minecraft.server.v1_8_R3.IDataManager;
+import net.minecraft.server.v1_8_R3.MovingObjectPosition;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.ServerNBTManager;
+import net.minecraft.server.v1_8_R3.Vec3D;
 import net.minecraft.server.v1_8_R3.WorldData;
 import net.minecraft.server.v1_8_R3.WorldServer;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -228,5 +229,73 @@ public class SpNMSHacks implements NMSHacks {
   @Override
   public int allocateEntityId() {
     return Bukkit.allocateEntityId();
+  }
+
+  @Override
+  public boolean collidesWithBlock(Location center, double halfSize, Vector delta, int substeps, Vector substep) {
+    Location pos = center.clone();
+    
+    AxisAlignedBB AABB = new AxisAlignedBB(
+      pos.getX() - halfSize + Math.min(0, delta.getX()),
+      pos.getY() - halfSize + Math.min(0, delta.getY()),
+      pos.getZ() - halfSize + Math.min(0, delta.getZ()),
+
+      pos.getX() + halfSize + Math.max(0, delta.getX()),
+      pos.getY() + halfSize + Math.max(0, delta.getY()),
+      pos.getZ() + halfSize + Math.max(0, delta.getZ())
+    );
+    
+    net.minecraft.server.v1_8_R3.World world = ((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) pos.getWorld()).getHandle();
+    if (!world.getCubes(null, AABB).isEmpty()) {
+      for (int i = 0; i < substeps; i++) {
+        AABB = new AxisAlignedBB(
+          pos.getX() - halfSize,
+          pos.getY() - halfSize,
+          pos.getZ() - halfSize,
+
+          pos.getX() + halfSize,
+          pos.getY() + halfSize,
+          pos.getZ() + halfSize
+        );
+
+        if (!world.getCubes(null, AABB).isEmpty()) {
+        return true;
+        }
+        pos.add(substep);
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public Entity collidesWithPlayer(Location center, double halfSize, Vector delta, Predicate<Entity> predicate) {
+    Vector start = center.toVector();
+    Vector end = start.clone().add(delta);
+
+    AxisAlignedBB searchBox = new AxisAlignedBB(
+      Math.min(start.getX(), end.getX()), Math.min(start.getY(), end.getY()), Math.min(start.getZ(), end.getZ()),
+      Math.max(start.getX(), end.getX()), Math.max(start.getY(), end.getY()), Math.max(start.getZ(), end.getZ())
+    ).grow(halfSize, halfSize, halfSize);
+
+    net.minecraft.server.v1_8_R3.World world = ((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) center.getWorld()).getHandle();
+    
+    List<net.minecraft.server.v1_8_R3.Entity> entities = world.getEntities(null, searchBox);
+
+    Vec3D vecStart = new Vec3D(start.getX(), start.getY(), start.getZ());
+    Vec3D vecEnd = new Vec3D(end.getX(), end.getY(), end.getZ());
+
+    for (net.minecraft.server.v1_8_R3.Entity entity : entities) {
+      if (!predicate.test(entity.getBukkitEntity())) continue;
+
+      AxisAlignedBB expandedBox = entity.getBoundingBox().grow(halfSize, halfSize, halfSize);
+      
+      MovingObjectPosition intercept = expandedBox.a(vecStart, vecEnd);
+
+      if (intercept != null) {
+        return entity.getBukkitEntity();
+      }
+    }
+
+    return null;
   }
 }
