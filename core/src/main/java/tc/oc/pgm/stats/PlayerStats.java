@@ -22,6 +22,7 @@ public class PlayerStats {
   // K/D
   private int kills;
   private int deaths;
+  private int assists;
   private int killstreak; // Current killstreak
   private int killstreakMax; // The highest killstreak reached this match
 
@@ -79,6 +80,11 @@ public class PlayerStats {
     deaths++;
     killstreak = 0;
     if (parent != null) parent.onDeath();
+  }
+
+  protected void onAssist() {
+    assists++;
+    if (parent != null) parent.onAssist();
   }
 
   protected void onDamage(double damage, boolean bow) {
@@ -194,6 +200,10 @@ public class PlayerStats {
 
   public int getDeaths() {
     return deaths;
+  }
+
+  public int getAssists() {
+    return assists;
   }
 
   public int getKillstreak() {

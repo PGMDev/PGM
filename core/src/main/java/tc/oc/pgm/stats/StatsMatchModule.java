@@ -266,6 +266,11 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       sendPlayerStats(murderer, murdererStats);
     }
+
+    ParticipantState assister = event.getAssister();
+    if (assister != null) {
+      getPlayerStat(assister).onAssist();
+    }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
