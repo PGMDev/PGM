@@ -10,9 +10,11 @@ import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
+import tc.oc.pgm.filters.matcher.party.TeamFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.operator.FilterNode;
 import tc.oc.pgm.filters.operator.InverseFilter;
+import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -112,6 +114,12 @@ public class LegacyFilterParser extends FilterParser {
     } else {
       return this.parseAll(el);
     }
+  }
+
+  // Legacy has separate context, team wouldn't be found in the filter context.
+  @MethodParser("team")
+  public TeamFilter parseTeam(Element el) throws InvalidXMLException {
+    return new TeamFilter(Teams.getTeamRef(new Node(el), this.factory));
   }
 
   // Legacy not allows for multiple children and is an implicit and

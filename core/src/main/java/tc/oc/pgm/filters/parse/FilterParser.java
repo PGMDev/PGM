@@ -46,7 +46,6 @@ import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
 import tc.oc.pgm.filters.matcher.party.ScoreFilter;
-import tc.oc.pgm.filters.matcher.party.TeamFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingItemFilter;
@@ -80,7 +79,6 @@ import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
@@ -193,8 +191,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   /**
-   * Return a list containing any and all of the following: - A filter reference in an attribute of
-   * the given name - Inline filters inside child tags of the given name
+   * @param name the attribute/child name
+   * @return list with all filters defined as either attribute or child named {@param name}
    */
   public List<Filter> parseFiltersProperty(Element el, String name) throws InvalidXMLException {
     List<Filter> filters = new ArrayList<>();
@@ -240,8 +238,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   @MethodParser("team")
-  public TeamFilter parseTeam(Element el) throws InvalidXMLException {
-    return new TeamFilter(Teams.getTeamRef(new Node(el), this.factory));
+  public Filter parseTeam(Element el) throws InvalidXMLException {
+    return FilterWrapper.of(el, parseReference(new Node(el)));
   }
 
   @MethodParser("same-team")
