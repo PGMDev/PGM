@@ -76,6 +76,10 @@ public interface MaterialMatcher {
     return MATERIAL_UTILS.matcherBuilder();
   }
 
+  interface Singular extends MaterialMatcher {
+    Material getMaterial();
+  }
+
   interface Builder {
     /**
      * Set the builder to only accept materials, error on material:data syntax
@@ -206,6 +210,16 @@ public interface MaterialMatcher {
 
     @Override
     public Builder add(MaterialMatcher matcher) {
+      // Already part of the matcher in form of material, can ignore
+      if (matcher instanceof Singular s && materials.contains(s.getMaterial())) return this;
+      if (matcher instanceof SingularMaterialMatcher
+          || matcher instanceof MultipleMaterialMatcher) {
+        Set<Material> toAdd = matcher.getMaterials();
+        materials.addAll(toAdd);
+        // Ignore any matcher already handled by our generic material list
+        matchers.removeIf(m -> m instanceof Singular s && toAdd.contains(s.getMaterial()));
+        return this;
+      }
       matchers.add(matcher);
       return this;
     }

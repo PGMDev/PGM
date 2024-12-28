@@ -89,12 +89,6 @@ public class FeatureFilterParser extends FilterParser {
     return new DenyFilter(parseChild(el));
   }
 
-  // Override with a version that only accepts a single child filter
-  @MethodParser("not")
-  public Filter parseNot(Element el) throws InvalidXMLException {
-    return new InverseFilter(parseChild(el));
-  }
-
   private static final Pattern INLINE_VARIABLE =
       Pattern.compile("(%VAR%)(?:\\[(\\d+)])?\\s*=\\s*(%RANGE%|%NUM%)"
           .replace("%VAR%", VariablesModule.Factory.VARIABLE_ID.pattern())

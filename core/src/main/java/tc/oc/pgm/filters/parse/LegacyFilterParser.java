@@ -10,7 +10,9 @@ import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
+import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.operator.FilterNode;
+import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -110,6 +112,12 @@ public class LegacyFilterParser extends FilterParser {
     } else {
       return this.parseAll(el);
     }
+  }
+
+  // Legacy not allows for multiple children and is an implicit and
+  @MethodParser("not")
+  public Filter parseNot(Element el) throws InvalidXMLException {
+    return new InverseFilter(AnyFilter.of(parseChildren(el)));
   }
 
   // Removed in proto 1.4 to avoid conflict with <block> region

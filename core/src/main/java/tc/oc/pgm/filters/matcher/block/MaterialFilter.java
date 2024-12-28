@@ -17,6 +17,10 @@ public class MaterialFilter extends TypedFilter.Impl<MaterialQuery> {
     this.pattern = pattern;
   }
 
+  public MaterialMatcher getPattern() {
+    return pattern;
+  }
+
   @Override
   public Class<? extends MaterialQuery> queryType() {
     return MaterialQuery.class;

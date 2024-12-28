@@ -17,7 +17,6 @@ import tc.oc.pgm.util.bukkit.Sounds;
 public class Broadcast implements Comparable<Broadcast> {
   public enum Type {
     TIP(translatable("misc.tip", NamedTextColor.BLUE), Sounds.TIP),
-
     ALERT(translatable("misc.alert", NamedTextColor.YELLOW), Sounds.ALERT);
 
     final Component prefix;

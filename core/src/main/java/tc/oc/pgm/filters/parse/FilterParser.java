@@ -66,6 +66,7 @@ import tc.oc.pgm.filters.modifier.PlayerQueryModifier;
 import tc.oc.pgm.filters.modifier.SameTeamQueryModifier;
 import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
+import tc.oc.pgm.filters.operator.FilterWrapper;
 import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.operator.OneFilter;
 import tc.oc.pgm.filters.operator.TeamFilterAdapter;
@@ -220,22 +221,22 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("any")
   public Filter parseAny(Element el) throws InvalidXMLException {
-    return new AnyFilter(parseChildren(el));
+    return FilterWrapper.of(el, AnyFilter.of(parseChildren(el)));
   }
 
   @MethodParser("all")
   public Filter parseAll(Element el) throws InvalidXMLException {
-    return new AllFilter(parseChildren(el));
+    return FilterWrapper.of(el, AllFilter.of(parseChildren(el)));
   }
 
   @MethodParser("one")
   public Filter parseOne(Element el) throws InvalidXMLException {
-    return new OneFilter(parseChildren(el));
+    return FilterWrapper.of(el, OneFilter.of(parseChildren(el)));
   }
 
   @MethodParser("not")
   public Filter parseNot(Element el) throws InvalidXMLException {
-    return new InverseFilter(AnyFilter.of(parseChildren(el)));
+    return new InverseFilter(parseChild(el));
   }
 
   @MethodParser("team")

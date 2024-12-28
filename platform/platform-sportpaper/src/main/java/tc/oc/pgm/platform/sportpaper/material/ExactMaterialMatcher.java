@@ -8,7 +8,7 @@ import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 @SuppressWarnings("deprecation")
-public class ExactMaterialMatcher implements MaterialMatcher {
+public class ExactMaterialMatcher implements MaterialMatcher.Singular {
   private final Material material;
   private final byte data;
 
@@ -20,6 +20,11 @@ public class ExactMaterialMatcher implements MaterialMatcher {
   @Override
   public Set<Material> getMaterials() {
     return Set.of(material);
+  }
+
+  @Override
+  public Material getMaterial() {
+    return material;
   }
 
   @Override

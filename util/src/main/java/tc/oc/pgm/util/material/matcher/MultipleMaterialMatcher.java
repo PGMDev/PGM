@@ -55,4 +55,9 @@ public class MultipleMaterialMatcher implements MaterialMatcher {
       default -> new MultipleMaterialMatcher(materials);
     };
   }
+
+  @Override
+  public String toString() {
+    return "MultipleMaterialMatcher{" + "materials=" + materials + '}';
+  }
 }
