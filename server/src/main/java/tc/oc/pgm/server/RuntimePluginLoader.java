@@ -1,8 +1,6 @@
 package tc.oc.pgm.server;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.reflect.ReflectionUtils.readField;
-import static tc.oc.pgm.util.reflect.ReflectionUtils.setField;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -27,11 +25,13 @@ import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
+import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 /**
- * A {@link PluginLoader} that allows for {@link Plugin}s to be loaded at runtime without a {@link
- * File}.
+ * A {@link PluginLoader} that allows for {@link Plugin}s to be loaded at runtime without a
+ * {@link File}.
  */
+@SuppressWarnings({"deprecation", "unchecked"})
 public class RuntimePluginLoader implements PluginLoader {
 
   private final Server server;
@@ -42,22 +42,20 @@ public class RuntimePluginLoader implements PluginLoader {
     this.loader = new JavaPluginLoader(server);
   }
 
-  @SuppressWarnings("unchecked")
   public Plugin loadPlugin(PluginDescriptionFile plugin) throws UnknownDependencyException {
     final SimplePluginManager manager = (SimplePluginManager) server.getPluginManager();
     try {
       final File file = new File("plugins", plugin.getName());
       final Class[] init =
           new Class[] {JavaPluginLoader.class, PluginDescriptionFile.class, File.class, File.class};
-      final JavaPlugin instance =
-          (JavaPlugin)
-              Class.forName(plugin.getMain())
-                  .getConstructor(init)
-                  .newInstance(loader, plugin, file, file);
-      setField(instance, this, JavaPlugin.class.getDeclaredField("loader"));
+      final JavaPlugin instance = (JavaPlugin) Class.forName(plugin.getMain())
+          .getConstructor(init)
+          .newInstance(loader, plugin, file, file);
+      ReflectionUtils.setField(instance, this, JavaPlugin.class.getDeclaredField("loader"));
 
-      readField(SimplePluginManager.class, manager, List.class, "plugins").add(instance);
-      readField(SimplePluginManager.class, manager, Map.class, "lookupNames")
+      ReflectionUtils.readField(SimplePluginManager.class, manager, List.class, "plugins")
+          .add(instance);
+      ReflectionUtils.readField(SimplePluginManager.class, manager, Map.class, "lookupNames")
           .put(instance.getName().toLowerCase(), instance);
 
       return instance;

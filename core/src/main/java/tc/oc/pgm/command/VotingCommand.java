@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.api.Permissions.DEV;
 import static tc.oc.pgm.api.map.Phase.DEVELOPMENT;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import java.util.List;
@@ -23,14 +24,12 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.VotingPool;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
 import tc.oc.pgm.rotation.vote.VotePoolOptions;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -44,7 +43,6 @@ public class VotingCommand {
       Audience viewer,
       CommandSender sender,
       MapOrder mapOrder,
-      Match match,
       @Argument("map") @Greedy MapInfo map) {
     if (PGM.get().getConfiguration().enforceDevPhase()
         && DEVELOPMENT.equals(map.getPhase())
@@ -55,10 +53,7 @@ public class VotingCommand {
     VotePoolOptions vote = getVoteOptions(mapOrder);
 
     Component addMessage = translatable(
-        "vote.add",
-        NamedTextColor.GRAY,
-        UsernameFormatUtils.formatStaffName(sender, match),
-        map.getStyledName(MapNameStyle.COLOR));
+        "vote.add", NamedTextColor.GRAY, player(sender), map.getStyledName(MapNameStyle.COLOR));
 
     if (vote.isMapAdded(map)) {
       viewer.sendWarning(addMessage);
@@ -79,14 +74,13 @@ public class VotingCommand {
       Audience viewer,
       CommandSender sender,
       MapOrder mapOrder,
-      Match match,
       @Argument("map") @Greedy MapInfo map) {
     VotePoolOptions vote = getVoteOptions(mapOrder);
     if (vote.removeMap(map)) {
       ChatManager.broadcastAdminMessage(translatable(
           "vote.remove",
           NamedTextColor.GRAY,
-          UsernameFormatUtils.formatStaffName(sender, match),
+          player(sender),
           map.getStyledName(MapNameStyle.COLOR)));
     } else {
       viewer.sendWarning(translatable("map.notFound"));
@@ -96,21 +90,18 @@ public class VotingCommand {
   @Command("mode")
   @CommandDescription("Toggle the voting mode between replace and override")
   @Permission(Permissions.SETNEXT)
-  public void mode(CommandSender sender, MapOrder mapOrder, Match match) {
+  public void mode(CommandSender sender, MapOrder mapOrder) {
     VotePoolOptions vote = getVoteOptions(mapOrder);
     Component voteModeName = translatable(
         vote.toggleMode() ? "vote.mode.replace" : "vote.mode.create", NamedTextColor.LIGHT_PURPLE);
-    ChatManager.broadcastAdminMessage(translatable(
-        "vote.toggle",
-        NamedTextColor.GRAY,
-        UsernameFormatUtils.formatStaffName(sender, match),
-        voteModeName));
+    ChatManager.broadcastAdminMessage(
+        translatable("vote.toggle", NamedTextColor.GRAY, player(sender), voteModeName));
   }
 
   @Command("clear")
   @CommandDescription("Clear all custom map selections from the next vote")
   @Permission(Permissions.SETNEXT)
-  public void clearMaps(Audience viewer, CommandSender sender, Match match, MapOrder mapOrder) {
+  public void clearMaps(Audience viewer, CommandSender sender, MapOrder mapOrder) {
     VotePoolOptions vote = getVoteOptions(mapOrder);
 
     List<Component> maps = vote.getCustomVoteMaps().stream()
@@ -119,7 +110,7 @@ public class VotingCommand {
     Component clearedMsg = translatable(
         "vote.remove",
         NamedTextColor.GRAY,
-        UsernameFormatUtils.formatStaffName(sender, match),
+        player(sender),
         TextFormatter.list(maps, NamedTextColor.GRAY));
 
     vote.clearMaps();
@@ -177,18 +168,9 @@ public class VotingCommand {
   }
 
   public static VotePoolOptions getVoteOptions(MapOrder mapOrder) {
-    if (mapOrder instanceof MapPoolManager) {
-      MapPoolManager manager = (MapPoolManager) mapOrder;
-      if (manager.getActiveMapPool() instanceof VotingPool) {
-        VotingPool votePool = (VotingPool) manager.getActiveMapPool();
-        if (votePool.getCurrentPoll() != null) {
-          throw exception("vote.modify.disallow");
-        }
-        return manager.getVoteOptions();
-      }
-      throw exception("vote.disabled");
-    }
-
-    throw exception("pool.mapPoolsDisabled");
+    if (!(mapOrder instanceof MapPoolManager manager)) throw exception("pool.mapPoolsDisabled");
+    if (!(manager.getActiveMapPool() instanceof VotingPool pool)) throw exception("vote.disabled");
+    if (pool.getCurrentPoll() != null) throw exception("vote.modify.disallow");
+    return manager.getVoteOptions();
   }
 }

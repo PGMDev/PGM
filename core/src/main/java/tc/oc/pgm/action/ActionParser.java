@@ -138,7 +138,7 @@ public class ActionParser {
     return action;
   }
 
-  @SuppressWarnings("rawtypes, unchecked")
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private void validate(
       Action<?> action, FeatureValidation<ActionDefinition<?>> validation, Node node)
       throws InvalidXMLException {

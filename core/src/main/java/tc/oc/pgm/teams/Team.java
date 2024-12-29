@@ -222,7 +222,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
     } else {
       // Subtract all players who cannot be kicked
       JoinMatchModule jmm = join();
-      slots -=
+      slots -= (int)
           this.getPlayers().stream().filter(pl -> !jmm.canBePriorityKicked(pl)).count();
     }
     return Math.max(0, slots);

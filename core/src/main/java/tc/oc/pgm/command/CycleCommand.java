@@ -46,7 +46,7 @@ public final class CycleCommand {
         throw exception("map.setNext.notDev");
       }
       mapOrder.setNextMap(map);
-      MapOrderCommand.sendSetNextMessage(map, sender, match);
+      MapOrderCommand.sendSetNextMessage(map, sender);
     }
 
     match.needModule(CycleMatchModule.class).startCountdown(duration);

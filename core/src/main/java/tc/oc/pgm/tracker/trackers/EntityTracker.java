@@ -38,15 +38,12 @@ public class EntityTracker implements Listener {
   }
 
   public PhysicalInfo createEntity(Entity entity, @Nullable ParticipantState owner) {
-    if (entity instanceof ThrownPotion) {
-      return new ThrownPotionInfo((ThrownPotion) entity, owner);
-    } else if (entity instanceof FallingBlock) {
-      return new FallingBlockInfo((FallingBlock) entity, owner);
-    } else if (entity instanceof LivingEntity) {
-      return new MobInfo((LivingEntity) entity, owner);
-    } else {
-      return new EntityInfo(entity, owner);
-    }
+    return switch (entity) {
+      case ThrownPotion thrownPotion -> new ThrownPotionInfo(thrownPotion, owner);
+      case FallingBlock fallingBlock -> new FallingBlockInfo(fallingBlock, owner);
+      case LivingEntity livingEntity -> new MobInfo(livingEntity, owner);
+      default -> new EntityInfo(entity, owner);
+    };
   }
 
   public PhysicalInfo resolveEntity(Entity entity) {

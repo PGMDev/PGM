@@ -231,10 +231,8 @@ public class MatchTabView extends TabView implements Listener {
       int mostRows = 0;
       for (int x = 0; x < teamsPerColumn && teamIt.hasNext(); x++) {
         Team team = teamIt.next();
-        mostRows =
-            Math.max(
-                mostRows,
-                divideRoundingUp(team.getPlayers().size(), getColumnsForTeam(team, teams)));
+        mostRows = Math.max(
+            mostRows, divideRoundingUp(team.getPlayers().size(), getColumnsForTeam(team, teams)));
       }
 
       biggestTeamColumn += 2 + mostRows;
@@ -245,7 +243,7 @@ public class MatchTabView extends TabView implements Listener {
   private int getColumnsForTeam(Team team, Collection<Team> teams) {
     if (teams.size() < getWidth()) {
       float cols = (float) team.getMaxPlayers() * getWidth() / match.getMaxPlayers();
-      if (cols % 1 == 0.5 && cols > ((float) getWidth() / teams.size())) cols -= 0.5;
+      if (cols % 1 == 0.5 && cols > ((float) getWidth() / teams.size())) cols -= 0.5f;
       return Math.max(1, Math.min(Math.round(cols), getWidth() - teams.size() + 1));
     } else {
       return 1;

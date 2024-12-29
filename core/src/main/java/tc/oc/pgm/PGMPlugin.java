@@ -458,10 +458,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
         cause = xmlErr.getCause();
         message = xmlErr.getMessage();
 
-        if (cause instanceof SyntaxException && xmlErr.getNode() != null) {
+        if (cause instanceof SyntaxException se && xmlErr.getNode() != null) {
           String value = xmlErr.getNode().getValue();
 
-          SyntaxException se = (SyntaxException) cause;
           int start = se.getStartIdx();
           if (start == -1 || start > value.length()) start = value.length();
           int end = se.getEndIdx();
@@ -510,7 +509,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     private @Nullable <E> E tryException(Class<E> type, @Nullable Throwable thrown) {
       if (thrown == null) return null;
-      return type.isInstance(thrown) ? (E) thrown : tryException(type, thrown.getCause());
+      return type.isInstance(thrown) ? type.cast(thrown) : tryException(type, thrown.getCause());
     }
 
     @Override

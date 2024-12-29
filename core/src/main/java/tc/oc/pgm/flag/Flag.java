@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
 import com.google.common.collect.ImmutableSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import net.kyori.adventure.sound.Sound;
@@ -26,7 +27,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.query.LocationQuery;
@@ -37,7 +37,6 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.post.PostDefinition;
@@ -58,6 +57,7 @@ import tc.oc.pgm.regions.PointRegion;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.inventory.ItemBuilder;
@@ -101,22 +101,20 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     }
 
     Banner banner = null;
-    pointLoop:
-    for (PointProvider returnPoint : definition.getDefaultPost().getFallback().getReturnPoints()) {
-      Region region = returnPoint.getRegion();
-      if (region instanceof PointRegion) {
+    for (PointProvider point : definition.getDefaultPost().getFallback().getReturnPoints()) {
+      if (point.getRegion() instanceof PointRegion r) {
         // Do not require PointRegions to be at the exact center of the block.
         // It might make sense to just override PointRegion.getBlockVectors() to
         // always do this, but it does technically violate the contract of that method.
-        banner = toBanner(
-            ((PointRegion) region).getPosition().toLocation(match.getWorld()).getBlock());
-        if (banner != null) break pointLoop;
+        banner = toBanner(r.getPosition().toLocation(match.getWorld()).getBlock());
       } else {
-        for (BlockVector pos : returnPoint.getRegion().getBlockVectors()) {
-          banner = toBanner(pos.toLocation(match.getWorld()).getBlock());
-          if (banner != null) break pointLoop;
-        }
+        banner = StreamUtils.of(point.getRegion().getBlockVectors())
+            .map(pos -> toBanner(pos.toLocation(match.getWorld()).getBlock()))
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
       }
+      if (banner != null) break;
     }
 
     if (banner == null) {

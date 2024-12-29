@@ -11,7 +11,14 @@ public class ActionScopeValidation implements FeatureValidation<ActionDefinition
   private static final Map<Class<?>, ActionScopeValidation> INSTANCES = new HashMap<>();
 
   public static ActionScopeValidation of(Class<?> scope) {
-    return INSTANCES.computeIfAbsent(scope, ActionScopeValidation::new);
+    ActionScopeValidation validation = INSTANCES.get(scope);
+    if (validation != null) return validation;
+    synchronized (INSTANCES) {
+      validation = INSTANCES.get(scope);
+      if (validation != null) return validation;
+      INSTANCES.put(scope, validation = new ActionScopeValidation(scope));
+      return validation;
+    }
   }
 
   private final Class<?> scope;

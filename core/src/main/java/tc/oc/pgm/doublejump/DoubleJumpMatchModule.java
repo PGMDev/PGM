@@ -31,10 +31,10 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
   private static final Sound ZOMBIE_INFECT =
       parse(Sound::valueOf, "ZOMBIE_INFECT", "ENTITY_ZOMBIE_INFECT");
 
-  private class Jumper {
-    final Player player;
-    final DoubleJumpKit kit;
-    float charge;
+  private static class Jumper {
+    private final Player player;
+    private final DoubleJumpKit kit;
+    private float charge;
 
     private Jumper(Player player, DoubleJumpKit kit) {
       this.player = player;

@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.UnsafeValues;
 import org.bukkit.craftbukkit.legacy.CraftLegacy;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.ItemMaterialData;
@@ -19,7 +18,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-@SuppressWarnings({"deprecation", "UnstableApiUsage"})
+@SuppressWarnings({"deprecation", "removal", "UnstableApiUsage"})
 class ModernMaterialParser {
 
   private static final UnsafeValues UNSAFE = Bukkit.getUnsafe();
@@ -128,7 +127,8 @@ class ModernMaterialParser {
 
   private static Material upgrade(Material material, short data) {
     if (material.isLegacy()) {
-      var newMat = UNSAFE.fromLegacy(new MaterialData(material, (byte) data), true);
+      var newMat =
+          UNSAFE.fromLegacy(new org.bukkit.material.MaterialData(material, (byte) data), true);
       // If material+data is invalid, do fromLegacy with just material
       return newMat.isAir() ? UNSAFE.fromLegacy(material) : newMat;
     }

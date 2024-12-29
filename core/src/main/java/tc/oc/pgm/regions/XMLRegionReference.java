@@ -132,11 +132,6 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   }
 
   @Override
-  public Class<? extends LocationQuery> queryType() {
-    return LocationQuery.class;
-  }
-
-  @Override
   public Stream<BlockVector> getBlockPositions() {
     return get().getBlockPositions();
   }

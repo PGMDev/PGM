@@ -51,12 +51,9 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder("MonumentWool{");
-    sb.append("id=").append(this.getId());
-    sb.append(",owner=").append(this.owner.getNameLegacy());
-    sb.append(",definition=").append(this.definition);
-    sb.append('}');
-    return sb.toString();
+    return "MonumentWool{" + "id=" + this.getId() + ",owner="
+        + this.owner.getNameLegacy() + ",definition="
+        + this.definition + '}';
   }
 
   // Remove @Nullable

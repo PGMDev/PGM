@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 
+@SuppressWarnings("deprecation")
 public final class TextParserTest {
 
   @ParameterizedTest
@@ -203,7 +204,8 @@ public final class TextParserTest {
   void testParseEnumInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(TextException.class, () -> parseEnum(text, ChatColor.class)).getMessage());
+        assertThrows(TextException.class, () -> parseEnum(text, ChatColor.class))
+            .getMessage());
   }
 
   @ParameterizedTest

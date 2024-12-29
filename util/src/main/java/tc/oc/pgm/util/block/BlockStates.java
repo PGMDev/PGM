@@ -39,16 +39,4 @@ public interface BlockStates {
     materialData.applyTo(state);
     return state;
   }
-
-  static String format(BlockState state) {
-    return "BlockState{pos=("
-        + state.getX()
-        + ", "
-        + state.getY()
-        + ", "
-        + state.getZ()
-        + ") world="
-        + state.getData()
-        + "}";
-  }
 }

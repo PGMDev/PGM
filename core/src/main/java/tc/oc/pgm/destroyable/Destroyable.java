@@ -382,11 +382,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return changeInfo;
   }
 
-  @Override
-  protected void playTouchEffects(ParticipantState toucher) {
-    // We make our own touch sounds
-  }
-
   /**
    * Test if the given block change is allowed by this Destroyable
    *

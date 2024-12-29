@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.api.Permissions.DEV;
 import static tc.oc.pgm.api.map.Phase.DEVELOPMENT;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import net.kyori.adventure.text.Component;
@@ -22,11 +23,9 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 
 public final class MapOrderCommand {
@@ -51,7 +50,6 @@ public final class MapOrderCommand {
       Audience viewer,
       CommandSender sender,
       MapOrder mapOrder,
-      Match match,
       @Flag(value = "force", aliases = "f") boolean force,
       @Flag(value = "reset", aliases = "r") boolean reset,
       @Argument("map") @Default(CURRENT) @FlagYielding MapInfo map) {
@@ -69,11 +67,8 @@ public final class MapOrderCommand {
       if (mapOrder.getNextMap() != null) {
         Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR);
         mapOrder.setNextMap(null);
-        ChatManager.broadcastAdminMessage(translatable(
-            "map.setNext.revert",
-            NamedTextColor.GRAY,
-            UsernameFormatUtils.formatStaffName(sender, match),
-            mapName));
+        ChatManager.broadcastAdminMessage(
+            translatable("map.setNext.revert", NamedTextColor.GRAY, player(sender), mapName));
       } else {
         viewer.sendWarning(translatable("map.noNextMap"));
       }
@@ -87,15 +82,12 @@ public final class MapOrderCommand {
       viewer.sendWarning(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.GREEN));
     }
 
-    sendSetNextMessage(map, sender, match);
+    sendSetNextMessage(map, sender);
   }
 
-  public static void sendSetNextMessage(@NotNull MapInfo map, CommandSender sender, Match match) {
+  public static void sendSetNextMessage(@NotNull MapInfo map, CommandSender sender) {
     Component mapName = text(map.getName(), NamedTextColor.GOLD);
-    ChatManager.broadcastAdminMessage(translatable(
-        "map.setNext",
-        NamedTextColor.GRAY,
-        UsernameFormatUtils.formatStaffName(sender, match),
-        mapName));
+    ChatManager.broadcastAdminMessage(
+        translatable("map.setNext", NamedTextColor.GRAY, player(sender), mapName));
   }
 }

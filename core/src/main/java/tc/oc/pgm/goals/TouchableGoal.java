@@ -19,7 +19,6 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
@@ -142,7 +141,6 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
     getMatch().callEvent(event);
     sendTouchMessage(toucher, !event.getCancelToucherMessage());
-    playTouchEffects(toucher);
   }
 
   public void resetTouches() {
@@ -212,13 +210,6 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
         toucher.sendMessage(translatable("objective.credit.future", text(this.getName())));
       }
     }
-  }
-
-  protected void playTouchEffects(@Nullable ParticipantState toucher) {
-    if (toucher == null || !hasShowOption(ShowOption.SHOW_EFFECTS)) return;
-
-    MatchPlayer onlineToucher = toucher.getPlayer().orElse(null);
-    if (onlineToucher == null) return;
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

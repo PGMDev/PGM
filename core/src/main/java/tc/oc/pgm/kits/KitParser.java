@@ -588,6 +588,7 @@ public abstract class KitParser {
       case HIDE_UNBREAKABLE -> "unbreakable";
       case HIDE_DESTROYS -> "can-destroy";
       case HIDE_PLACED_ON -> "can-place-on";
+        //noinspection UnnecessaryDefault: newer versions do have extra branches
       default -> {
         if (flag == InventoryUtils.HIDE_ADDITIONAL_FLAG) yield "other";
         yield flag.name().replace("HIDE_", "").toLowerCase().replace("_", "-");

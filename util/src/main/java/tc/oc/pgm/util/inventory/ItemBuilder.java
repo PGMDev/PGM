@@ -79,8 +79,7 @@ public class ItemBuilder {
   public ItemBuilder lore(@Nullable CommandSender viewer, Component... lore) {
     meta()
         .setLore(Lists.transform(
-            Arrays.asList(lore),
-            (component) -> TextTranslations.translateLegacy(component, viewer)));
+            Arrays.asList(lore), component -> TextTranslations.translateLegacy(component, viewer)));
     return this;
   }
 

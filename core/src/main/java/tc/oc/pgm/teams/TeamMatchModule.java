@@ -51,15 +51,7 @@ import tc.oc.pgm.util.bukkit.Sounds;
 @ListenerScope(MatchScope.LOADED)
 public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
-  class NeedMorePlayers implements UnreadyReason {
-    final @Nullable Team team;
-    final int players;
-
-    NeedMorePlayers(@Nullable Team team, int players) {
-      this.team = team;
-      this.players = players;
-    }
-
+  record NeedMorePlayers(@Nullable Team team, int players) implements UnreadyReason {
     @Override
     public Component getReason() {
       if (team != null) {
@@ -83,13 +75,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     public boolean canForceStart() {
       return true;
     }
-
-    @Override
-    public String toString() {
-      return getClass().getSimpleName() + "{players=" + players + " team=" + team + "}";
-    }
   }
-  ;
 
   public static class TeamJoinResult implements JoinResult {
     private final JoinResultOption status;

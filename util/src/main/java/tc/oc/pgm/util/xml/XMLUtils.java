@@ -612,7 +612,7 @@ public final class XMLUtils {
   public static Duration parseTickDuration(Node node, String text) throws InvalidXMLException {
     if ("oo".equals(text)) return TimeUtils.INFINITE_DURATION;
     try {
-      return Duration.ofMillis(Integer.parseInt(text) * 50);
+      return Duration.ofMillis(Integer.parseInt(text) * 50L);
     } catch (NumberFormatException e) {
       return parseDuration(node);
     }
@@ -916,7 +916,7 @@ public final class XMLUtils {
 
   public static String getNormalizedNullableText(Element el) {
     String text = el.getTextNormalize();
-    if (text == null || "".equals(text)) {
+    if (text == null || text.isEmpty()) {
       return null;
     } else {
       return text;

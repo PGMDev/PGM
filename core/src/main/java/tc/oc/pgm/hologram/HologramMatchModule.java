@@ -7,6 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.util.Vector;
@@ -17,7 +18,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 
 @ListenerScope(MatchScope.LOADED)
-public class HologramMatchModule implements MatchModule {
+public class HologramMatchModule implements MatchModule, Listener {
 
   private final Set<Hologram> labelEntities = new HashSet<>();
   private final Match match;

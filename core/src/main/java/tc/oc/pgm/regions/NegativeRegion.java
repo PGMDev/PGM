@@ -17,11 +17,6 @@ public class NegativeRegion implements RegionDefinition {
   }
 
   @Override
-  public boolean isBlockBounded() {
-    return false;
-  }
-
-  @Override
   public Bounds getBounds() {
     throw new UnsupportedOperationException("NegativeRegion is unbounded");
   }

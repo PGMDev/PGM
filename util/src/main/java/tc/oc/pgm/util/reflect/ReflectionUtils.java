@@ -76,26 +76,16 @@ public final class ReflectionUtils {
 
   public static <T> T readField(Class<?> parent, @Nullable Object obj, Class<T> type, String name) {
     try {
-      return type.cast(readField(obj, parent.getDeclaredField(name)));
-    } catch (NoSuchFieldException e) {
+      var field = parent.getDeclaredField(name);
+      field.setAccessible(true);
+      return type.cast(field.get(obj));
+    } catch (NoSuchFieldException | IllegalAccessException e) {
       throw new RuntimeException(e);
     }
   }
 
   public static <T> T readStaticField(Class<?> parent, Class<T> type, String name) {
     return readField(parent, null, type, name);
-  }
-
-  public static Object readField(@Nullable Object obj, Field field) {
-    final boolean wasAccessible = field.isAccessible();
-    try {
-      field.setAccessible(true);
-      return field.get(obj);
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } finally {
-      field.setAccessible(wasAccessible);
-    }
   }
 
   public static void setField(Class<?> parent, Object base, Object value, String fieldName) {

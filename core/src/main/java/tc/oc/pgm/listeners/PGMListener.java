@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -53,7 +54,6 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeavePartyEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.material.Materials;
@@ -178,10 +178,8 @@ public class PGMListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearActiveEnderPearls(final PlayerDeathEvent event) {
-    for (Entity entity : event.getEntity().getWorld().getEntitiesByClass(EnderPearl.class)) {
-      if (((EnderPearl) entity).getShooter() == event.getEntity()) {
-        entity.remove();
-      }
+    for (EnderPearl entity : event.getEntity().getWorld().getEntitiesByClass(EnderPearl.class)) {
+      if (entity.getShooter() == event.getEntity()) entity.remove();
     }
   }
 
@@ -316,8 +314,7 @@ public class PGMListener implements Listener {
     // Send feedback to staff, alerting them that the map pool has changed by force
     if (event.isForced()) {
       Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
-      Component staffName =
-          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
+      Component staffName = player(event.getSender());
       Component matchLimit = text()
           .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
           .append(space())

@@ -229,25 +229,6 @@ public final class TextTranslations {
     return keysFound;
   }
 
-  private static java.util.Locale parseLocale(String locale) {
-    try {
-      final String[] split = locale.split("[-_]");
-      switch (split.length) {
-        case 1: // language
-          return new java.util.Locale(split[0]);
-        case 2: // language and country
-          return new java.util.Locale(split[0], split[1]);
-        case 3: // language, country, and variant
-          return new java.util.Locale(split[0], split[1], split[2]);
-      }
-    } catch (IllegalArgumentException e) {
-      // ignore
-    }
-
-    // bad locale sent?
-    return java.util.Locale.US;
-  }
-
   public static Locale getLocale(@Nullable Pointered viewer) {
     if (viewer == null) return SOURCE_LOCALE;
     return viewer.get(Identity.LOCALE).orElse(SOURCE_LOCALE);

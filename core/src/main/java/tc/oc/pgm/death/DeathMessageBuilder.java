@@ -111,11 +111,7 @@ public class DeathMessageBuilder {
 
   /** Return a new key built from the current key with the given tokens appended */
   String append(String... tokens) {
-    String newKey = key;
-    for (String token : tokens) {
-      newKey += '.' + token;
-    }
-    return newKey;
+    return key + (tokens.length == 0 ? "" : '.' + String.join(".", tokens));
   }
 
   /**

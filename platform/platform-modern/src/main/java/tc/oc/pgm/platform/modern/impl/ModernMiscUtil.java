@@ -39,11 +39,6 @@ import tc.oc.pgm.util.platform.Supports;
 @Supports(value = PAPER, minVersion = "1.20.6")
 public class ModernMiscUtil implements MiscUtils {
   @Override
-  public boolean yield(Event event) {
-    return false;
-  }
-
-  @Override
   public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
     // TODO: PLATFORM 1.20 no support for extra fields in server ping
     return new JsonObject();

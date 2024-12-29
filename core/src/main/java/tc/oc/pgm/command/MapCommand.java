@@ -88,13 +88,9 @@ public final class MapCommand {
     search = search.filter(map -> chosenPhases.contains(map.getPhase()));
 
     if (author != null) {
-      String query = author;
-
-      List<MapInfo> collect = search.collect(Collectors.toList());
-      boolean exactMatch =
-          collect.stream().anyMatch((suggestion) -> matchesAuthor(suggestion, query, true));
-      search = collect.stream()
-          .filter((mapSuggestion -> matchesAuthor(mapSuggestion, query, exactMatch)));
+      List<MapInfo> collect = search.toList();
+      boolean exactMatch = collect.stream().anyMatch(map -> matchesAuthor(map, author, true));
+      search = collect.stream().filter(map -> matchesAuthor(map, author, exactMatch));
     }
 
     Set<MapInfo> maps = search.collect(Collectors.toCollection(TreeSet::new));

@@ -24,7 +24,7 @@ public final class PlayerComponent implements RenderableComponent {
   public static final Component UNKNOWN =
       translatable("misc.unknown", PlayerRenderer.OFFLINE_COLOR, TextDecoration.ITALIC);
   public static final Component CONSOLE =
-      translatable("misc.console", PlayerRenderer.OFFLINE_COLOR);
+      translatable("misc.console", PlayerRenderer.OFFLINE_COLOR, TextDecoration.ITALIC);
   public static final PlayerComponent UNKNOWN_PLAYER =
       new PlayerComponent(null, new PlayerData(null, null, NameStyle.SIMPLE_COLOR), Style.empty());
 
@@ -49,9 +49,13 @@ public final class PlayerComponent implements RenderableComponent {
     return PGM.get().getDatastore().getUsername(playerId).getName(style);
   }
 
+  public static Component player(CommandSender sender) {
+    return player(sender, NameStyle.FANCY);
+  }
+
   public static Component player(CommandSender sender, @NotNull NameStyle style) {
     if (sender == null) return UNKNOWN_PLAYER;
-    if (sender instanceof Player) return player((Player) sender, style);
+    if (sender instanceof Player p) return player(p, style);
     return CONSOLE;
   }
 

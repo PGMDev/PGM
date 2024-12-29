@@ -53,13 +53,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     ChatColor.DARK_RED
   };
 
-  class NeedMorePlayers implements UnreadyReason {
-    final int players;
-
-    NeedMorePlayers(int players) {
-      this.players = players;
-    }
-
+  record NeedMorePlayers(int players) implements UnreadyReason {
     @Override
     public Component getReason() {
       if (players == 1) {
@@ -73,13 +67,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     public boolean canForceStart() {
       return true;
     }
-
-    @Override
-    public String toString() {
-      return getClass().getSimpleName() + "{players=" + players + "}";
-    }
   }
-  ;
 
   private final Match match;
   private final FreeForAllOptions options;

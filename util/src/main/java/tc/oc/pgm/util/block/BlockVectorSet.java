@@ -168,12 +168,12 @@ public class BlockVectorSet implements Set<BlockVector> {
   }
 
   public BlockVector chooseRandom(Random random) {
-    // The Trove set uses a sparse array, so there isn't really any
-    // faster way to do this, not even by messing with Trove internals.
+    // The FastUtil set uses a sparse array, so there isn't really any
+    // faster way to do this, not even by messing with FastUtil internals.
     final LongIterator iterator = set.iterator();
     long encoded = 0;
     for (int n = random.nextInt(size()); n >= 0; n--) {
-      encoded = iterator.next();
+      encoded = iterator.nextLong();
     }
     return BlockVectors.decodePos(encoded);
   }

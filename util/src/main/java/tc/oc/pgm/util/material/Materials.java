@@ -71,7 +71,6 @@ public interface Materials {
    */
   static int materialId(String text) {
     return switch (text.length()) {
-      default -> -1;
       case 1 -> Character.digit(text.charAt(0), 10);
       case 2 -> {
         int a = Character.digit(text.charAt(0), 10);
@@ -86,6 +85,7 @@ public interface Materials {
         int c = Character.digit(text.charAt(2), 10);
         yield Math.min(b, c) == -1 ? -1 : ((a * 10) + b) * 10 + c;
       }
+      default -> -1;
     };
   }
 
@@ -134,6 +134,7 @@ public interface Materials {
     return isSolid(material.getItemType());
   }
 
+  @SuppressWarnings("deprecation")
   static boolean isSolid(BlockState block) {
     return isSolid(block.getType());
   }
@@ -150,6 +151,7 @@ public interface Materials {
     return isWater(location.getBlock().getType());
   }
 
+  @SuppressWarnings("deprecation")
   static boolean isWater(BlockState block) {
     return isWater(block.getType());
   }
@@ -166,6 +168,7 @@ public interface Materials {
     return isLava(location.getBlock().getType());
   }
 
+  @SuppressWarnings("deprecation")
   static boolean isLava(BlockState block) {
     return isLava(block.getType());
   }
@@ -207,18 +210,11 @@ public interface Materials {
   }
 
   static Material materialInBucket(Material bucket) {
-    switch (bucket) {
-      case BUCKET:
-      case MILK_BUCKET:
-        return Material.AIR;
-
-      case LAVA_BUCKET:
-        return Material.LAVA;
-      case WATER_BUCKET:
-        return Material.WATER;
-
-      default:
-        throw new IllegalArgumentException(bucket + " is not a bucket");
-    }
+    return switch (bucket) {
+      case BUCKET, MILK_BUCKET -> Material.AIR;
+      case LAVA_BUCKET -> Material.LAVA;
+      case WATER_BUCKET -> Material.WATER;
+      default -> throw new IllegalArgumentException(bucket + " is not a bucket");
+    };
   }
 }

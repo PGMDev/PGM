@@ -25,7 +25,7 @@ public void sendMatchEnd(MatchPlayer player, String winnerName, int points) {
   player.sendMessage(
     TranslatableComponent.of("match.end.notifyWinner",
       TextComponent.of(winnerName, TextColor.GOLD),
-      TextComponent.of(points, TextColor.GREEN)
+      TextComponent.of(points, TextColor.GREEN),
       TextColor.AQUA));
 }
 ```

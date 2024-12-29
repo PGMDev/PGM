@@ -98,6 +98,7 @@ public class SpNMSHacks implements NMSHacks {
   @Override
   public Inventory createFakeInventory(Player viewer, Inventory realInventory) {
     if (realInventory.hasCustomName()) {
+      //noinspection deprecation
       return realInventory instanceof DoubleChestInventory
           ? Bukkit.createInventory(viewer, realInventory.getSize(), realInventory.getName())
           : Bukkit.createInventory(viewer, realInventory.getType(), realInventory.getName());

@@ -14,8 +14,8 @@ public interface MapInclude {
   long getLastModified();
 
   /**
-   * Get a collection of {@link Content} which can be merged into an existing {@link Document}. If
-   * the underlying file has changed, it will re-load the xml.
+   * Get a collection of {@link Content} which can be merged into an existing
+   * {@link org.jdom2.Document}. If the underlying file has changed, it will re-load the xml.
    *
    * @return a collection of {@link Content}
    */

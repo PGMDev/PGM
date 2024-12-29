@@ -61,13 +61,14 @@ class SpMaterialParser {
     }
   }
 
-  public interface Adapter<T> {
+  interface Adapter<T> {
     Adapter<MaterialData> BUKKIT = new Adapter<>() {
       @Override
       public MaterialData visit(Material material) {
         return new MaterialData(material);
       }
 
+      @SuppressWarnings("deprecation")
       @Override
       public MaterialData visit(Material material, short data) {
         return new MaterialData(material, (byte) data);

@@ -44,11 +44,8 @@ public class ModernListener implements Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onPlayerOnGround(EntityPoseChangeEvent event) {
-    var entity = event.getEntity();
-    if (entity instanceof Player p) {
-      var pgmEvent = new PlayerOnGroundEvent(p, p.isOnGround());
-      handleCall(pgmEvent, event);
-    }
+    if (event.getEntity() instanceof Player p)
+      handleCall(new PlayerOnGroundEvent(p, p.isOnGround()), event);
   }
 
   @EventHandler(ignoreCancelled = true)
