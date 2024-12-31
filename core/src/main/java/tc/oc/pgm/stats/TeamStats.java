@@ -7,6 +7,7 @@ public class TeamStats {
 
   private int teamKills = 0;
   private int teamDeaths = 0;
+  private int teamAssists = 0;
   private double damageDone = 0;
   private double damageTaken = 0;
   private double bowDamage = 0;
@@ -22,6 +23,7 @@ public class TeamStats {
     for (PlayerStats stats : playerStats) {
       teamKills += stats.getKills();
       teamDeaths += stats.getDeaths();
+      teamAssists += stats.getAssists();
       damageDone += stats.getDamageDone();
       damageTaken += stats.getDamageTaken();
       bowDamage += stats.getBowDamage();
@@ -40,6 +42,10 @@ public class TeamStats {
 
   public int getTeamDeaths() {
     return teamDeaths;
+  }
+
+  public int getTeamAssists() {
+    return teamAssists;
   }
 
   public double getDamageDone() {

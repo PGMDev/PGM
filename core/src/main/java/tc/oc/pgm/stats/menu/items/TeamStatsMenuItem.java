@@ -70,7 +70,8 @@ public class TeamStatsMenuItem implements MenuItem {
         NamedTextColor.GRAY,
         number(stats.getTeamKills(), NamedTextColor.GREEN),
         number(stats.getTeamDeaths(), NamedTextColor.RED),
-        number(stats.getTeamKD(), NamedTextColor.GREEN));
+        number(stats.getTeamKD(), NamedTextColor.GREEN),
+        number(stats.getTeamAssists(), NamedTextColor.GREEN));
 
     Component damageDealtLore = translatable(
         "match.stats.damage.dealt",

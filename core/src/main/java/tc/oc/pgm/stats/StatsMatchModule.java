@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
@@ -50,7 +49,6 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -238,57 +236,27 @@ public class StatsMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerDeath(MatchPlayerDeathEvent event) {
     MatchPlayer victim = event.getVictim();
-    MatchPlayer murderer = null;
+    getPlayerStat(victim).onDeath(victim);
 
-    if (event.getKiller() != null)
-      murderer = event.getKiller().getParty().getPlayer(event.getKiller().getId());
+    if (event.isChallengeKill()) {
+      MatchPlayerState killer = event.getKiller();
+      assert killer != null;
+      PlayerStats murdererStats = getPlayerStat(killer);
+      if (event.getDamageInfo() instanceof ProjectileInfo projectile)
+        murdererStats.setLongestBowKill(victim.getLocation().distance(projectile.getOrigin()));
+      murdererStats.onMurder(killer.getPlayer().orElse(null));
+    }
 
-    PlayerStats victimStats = getPlayerStat(victim);
-
-    victimStats.onDeath();
-
-    sendPlayerStats(victim, victimStats);
-
-    if (murderer != null
-        && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.ALLY
-        && PlayerRelation.get(victim.getParticipantState(), murderer) != PlayerRelation.SELF) {
-
-      PlayerStats murdererStats = getPlayerStat(murderer);
-
-      if (event.getDamageInfo() instanceof ProjectileInfo) {
-        murdererStats.setLongestBowKill(victim
-            .getState()
-            .getLocation()
-            .distance(((ProjectileInfo) event.getDamageInfo()).getOrigin()));
-      }
-
-      murdererStats.onMurder();
-
-      sendPlayerStats(murderer, murdererStats);
+    if (event.isChallengeAssist()) {
+      MatchPlayerState assister = event.getAssister();
+      assert assister != null;
+      getPlayerStat(assister).onAssist(assister.getPlayer().orElse(null));
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onParticipationStop(PlayerParticipationStopEvent event) {
     getPlayerStat(event.getPlayer()).onTeamSwitch();
-  }
-
-  private void sendPlayerStats(MatchPlayer player, PlayerStats stats) {
-    if (player.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) return;
-    if (stats.getHotbarTask() != null && !stats.getHotbarTask().isDone()) {
-      stats.getHotbarTask().cancel(true);
-    }
-    stats.putHotbarTaskCache(sendLongHotbarMessage(player, stats.getBasicStatsMessage()));
-  }
-
-  private Future<?> sendLongHotbarMessage(MatchPlayer player, Component message) {
-    Future<?> task = match
-        .getExecutor(MatchScope.LOADED)
-        .scheduleWithFixedDelay(() -> player.sendActionBar(message), 0, 1, TimeUnit.SECONDS);
-
-    match.getExecutor(MatchScope.LOADED).schedule(() -> task.cancel(true), 4, TimeUnit.SECONDS);
-
-    return task;
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -319,6 +287,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     Pair<UUID, Integer> bestKills = null;
     Pair<UUID, Integer> bestStreaks = null;
     Pair<UUID, Integer> bestDeaths = null;
+    Pair<UUID, Integer> bestAssists = null;
     Pair<UUID, Integer> bestBowShots = null;
     Pair<UUID, Double> bestDamage = null;
 
@@ -328,6 +297,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       bestKills = getBest(bestKills, uuid, s.getKills());
       bestStreaks = getBest(bestStreaks, uuid, s.getMaxKillstreak());
       bestDeaths = getBest(bestDeaths, uuid, s.getDeaths());
+      bestAssists = getBest(bestAssists, uuid, s.getAssists());
       bestBowShots = getBest(bestBowShots, uuid, s.getLongestBowKill());
       bestDamage = getBest(bestDamage, uuid, s.getDamageDone());
     }
@@ -337,6 +307,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       best.add(getMessage("match.stats.kills", bestKills, NamedTextColor.GREEN));
       best.add(getMessage("match.stats.killstreak", bestStreaks, NamedTextColor.GREEN));
       best.add(getMessage("match.stats.deaths", bestDeaths, NamedTextColor.RED));
+      best.add(getMessage("match.stats.assists", bestAssists, NamedTextColor.GREEN));
 
       if (bestBowShots.getRight() > 0)
         best.add(getMessage("match.stats.bowshot", bestBowShots, NamedTextColor.YELLOW));
@@ -363,7 +334,8 @@ public class StatsMatchModule implements MatchModule, Listener {
 
       if (event.isShowOwn() && stats != null) {
         Component ksHover = translatable(
-            "match.stats.killstreak.concise", number(stats.getKillstreak(), NamedTextColor.GREEN));
+            "match.stats.killstreak.concise",
+            number(stats.getMaxKillstreak(), NamedTextColor.GREEN));
 
         viewer.sendMessage(translatable(
             "match.stats.own",
@@ -371,7 +343,8 @@ public class StatsMatchModule implements MatchModule, Listener {
             number(stats.getMaxKillstreak(), NamedTextColor.GREEN).hoverEvent(showText(ksHover)),
             number(stats.getDeaths(), NamedTextColor.RED),
             number(stats.getKD(), NamedTextColor.GREEN),
-            damageComponent(stats.getDamageDone(), NamedTextColor.GREEN)));
+            damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
+            number(stats.getAssists(), NamedTextColor.GREEN)));
       }
 
       giveVerboseStatsItem(viewer, false);

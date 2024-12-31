@@ -122,6 +122,11 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
     return PlayerRelation.get(getVictim().getParticipantState(), getKiller());
   }
 
+  /** Get the relationship between the victim and assister */
+  public final PlayerRelation getAssistRelation() {
+    return PlayerRelation.get(getVictim().getParticipantState(), getAssister());
+  }
+
   /**
    * Get whether the death was caused by a teammate.
    *
@@ -141,6 +146,15 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
   }
 
   /**
+   * Get whether the assist was caused by an enemy.
+   *
+   * @return Whether the assist was from an enemy.
+   */
+  public final boolean isEnemyAssist() {
+    return PlayerRelation.ENEMY == getAssistRelation();
+  }
+
+  /**
    * Get whether the {@link MatchPlayer} killed themselves.
    *
    * @return Whether the death was suicide.
@@ -149,22 +163,31 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
     return PlayerRelation.SELF == getRelation();
   }
 
-  /**
-   * Get whether the victim and killer are the same {@link MatchPlayer}.
-   *
-   * @return
-   */
+  /** Get whether the victim and killer are the same {@link MatchPlayer}. */
   public final boolean isSelfKill() {
     return getKiller() != null && getKiller().isPlayer(getVictim());
   }
 
+  public final boolean isSelfAssist() {
+    return getAssister() != null && getAssister().isPlayer(getVictim());
+  }
+
   /**
-   * Get whether the death was from an enemy and it was no caused by suicide.
+   * Get whether the death was from an enemy and it was not caused by suicide.
    *
    * @return Whether the death was actually "challenging."
    */
   public final boolean isChallengeKill() {
     return isEnemyKill() && !isSelfKill();
+  }
+
+  /**
+   * Get whether the assist was from an enemy and it was not caused by suicide.
+   *
+   * @return Whether the assist was actually "challenging."
+   */
+  public final boolean isChallengeAssist() {
+    return isEnemyAssist() && !isSelfAssist();
   }
 
   private static final HandlerList handlers = new HandlerList();

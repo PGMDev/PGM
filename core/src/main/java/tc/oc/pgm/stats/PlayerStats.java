@@ -6,8 +6,14 @@ import static tc.oc.pgm.util.text.NumberComponent.number;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.setting.SettingKey;
+import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.util.Audience;
 
 /** A wrapper for stat info belonging to a {@link tc.oc.pgm.api.player.MatchPlayer} */
 public class PlayerStats {
@@ -22,6 +28,7 @@ public class PlayerStats {
   // K/D
   private int kills;
   private int deaths;
+  private int assists;
   private int killstreak; // Current killstreak
   private int killstreakMax; // The highest killstreak reached this match
 
@@ -53,7 +60,7 @@ public class PlayerStats {
 
   // The task responsible for displaying the stats over the hotbar
   // See StatsMatchModule#sendLongHotbarMessage
-  private Future<?> hotbarTaskCache;
+  private Future<?> hotbarTask;
 
   public PlayerStats() {
     this(null, null);
@@ -68,17 +75,25 @@ public class PlayerStats {
 
   // Methods to update the stats, should only be accessed by StatsMatchModule
 
-  protected void onMurder() {
+  protected void onMurder(MatchPlayer player) {
     kills++;
     killstreak++;
     if (killstreak > killstreakMax) killstreakMax = killstreak;
-    if (parent != null) parent.onMurder();
+    if (parent != null) parent.onMurder(null);
+    sendPlayerStats(player);
   }
 
-  protected void onDeath() {
+  protected void onDeath(MatchPlayer player) {
     deaths++;
     killstreak = 0;
-    if (parent != null) parent.onDeath();
+    if (parent != null) parent.onDeath(null);
+    sendPlayerStats(player);
+  }
+
+  protected void onAssist(MatchPlayer player) {
+    assists++;
+    if (parent != null) parent.onAssist(null);
+    sendPlayerStats(player);
   }
 
   protected void onDamage(double damage, boolean bow) {
@@ -148,9 +163,7 @@ public class PlayerStats {
   }
 
   protected void setLongestBowKill(double distance) {
-    if (distance > longestBowKill) {
-      longestBowKill = (int) Math.round(distance);
-    }
+    if (distance > longestBowKill) longestBowKill = (int) Math.round(distance);
     if (parent != null) parent.setLongestBowKill(distance);
   }
 
@@ -173,7 +186,8 @@ public class PlayerStats {
         number(kills, NamedTextColor.GREEN),
         number(killstreak, NamedTextColor.GREEN),
         number(deaths, NamedTextColor.RED),
-        number(getKD(), NamedTextColor.GREEN));
+        number(getKD(), NamedTextColor.GREEN),
+        number(assists, NamedTextColor.GREEN));
   }
 
   // Getters, both raw stats and some handy calculations
@@ -194,6 +208,10 @@ public class PlayerStats {
 
   public int getDeaths() {
     return deaths;
+  }
+
+  public int getAssists() {
+    return assists;
   }
 
   public int getKillstreak() {
@@ -264,12 +282,18 @@ public class PlayerStats {
     return longestFlagHold;
   }
 
-  public Future<?> getHotbarTask() {
-    return hotbarTaskCache;
+  private void setHotbarTask(Future<?> task) {
+    if (hotbarTask != null && !hotbarTask.isDone()) hotbarTask.cancel(true);
+    hotbarTask = task;
   }
 
-  public void putHotbarTaskCache(Future<?> task) {
-    hotbarTaskCache = task;
+  public void sendPlayerStats(MatchPlayer player) {
+    if (player == null) return;
+    if (player.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) return;
+    setHotbarTask(player
+        .getMatch()
+        .getExecutor(MatchScope.LOADED)
+        .scheduleWithFixedDelay(new HotbarStatsRunner(player), 0, 1, TimeUnit.SECONDS));
   }
 
   public Component getPlayerComponent() {
@@ -297,6 +321,23 @@ public class PlayerStats {
   }
 
   public Duration getActiveSessionDuration() {
-    return (inTime == null) ? Duration.ZERO : Duration.between(inTime, Instant.now());
+    return inTime == null ? Duration.ZERO : Duration.between(inTime, Instant.now());
+  }
+
+  protected class HotbarStatsRunner implements Runnable {
+    private final Audience audience;
+    private final Component message;
+    private int remaining = 4;
+
+    private HotbarStatsRunner(Audience audience) {
+      this.audience = audience;
+      this.message = getBasicStatsMessage();
+    }
+
+    @Override
+    public void run() {
+      audience.sendActionBar(message);
+      if (remaining-- < 0) setHotbarTask(null);
+    }
   }
 }

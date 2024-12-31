@@ -59,7 +59,8 @@ public class PlayerStatsMenuItem implements MenuItem {
         GRAY,
         number(stats.getKills(), NamedTextColor.GREEN),
         number(stats.getDeaths(), NamedTextColor.RED),
-        number(stats.getKD(), NamedTextColor.GREEN));
+        number(stats.getKD(), NamedTextColor.GREEN),
+        number(stats.getAssists(), NamedTextColor.GREEN));
     Component killstreakLore = translatable(
         "match.stats.killstreak.concise",
         GRAY,
