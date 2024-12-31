@@ -1,19 +1,24 @@
 package tc.oc.pgm.stats.menu.items;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.JoinConfiguration.separator;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
+import static tc.oc.pgm.stats.StatType.*;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
+import com.google.common.collect.Lists;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -22,6 +27,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.PlayerStats;
 import tc.oc.pgm.util.material.Materials;
@@ -32,10 +38,15 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a player's stats via player head & lore * */
 public class PlayerStatsMenuItem implements MenuItem {
+  private static final JoinConfiguration TWO_SPACES = separator(text("  "));
 
   private final UUID uuid;
   private final PlayerStats stats;
   private final Skin skin;
+
+  public PlayerStatsMenuItem(MatchPlayer player, PlayerStats stats) {
+    this(player.getId(), stats, PLAYER_UTILS.getPlayerSkin(player.getBukkit()));
+  }
 
   public PlayerStatsMenuItem(UUID uuid, PlayerStats stats, Skin skin) {
     this.uuid = uuid;
@@ -52,66 +63,42 @@ public class PlayerStatsMenuItem implements MenuItem {
 
   @Override
   public List<String> getLore(Player player) {
-    List<String> lore = new ArrayList<>();
+    List<Component> lore = new ArrayList<>();
 
-    Component statLore = translatable(
-        "match.stats.concise",
-        GRAY,
-        number(stats.getKills(), NamedTextColor.GREEN),
-        number(stats.getDeaths(), NamedTextColor.RED),
-        number(stats.getKD(), NamedTextColor.GREEN),
-        number(stats.getAssists(), NamedTextColor.GREEN));
-    Component killstreakLore = translatable(
-        "match.stats.killstreak.concise",
-        GRAY,
-        number(stats.getMaxKillstreak(), NamedTextColor.GREEN));
-    Component damageDealtLore = translatable(
+    lore.add(stats.spaceSeparated(KILLS, DEATHS, KILL_DEATH_RATIO));
+    lore.add(stats.spaceSeparated(ASSISTS, KILL_STREAK));
+    lore.add(translatable(
         "match.stats.damage.dealt",
-        GRAY,
         damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
-        damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
-    Component damageReceivedLore = translatable(
+        damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW)));
+    lore.add(translatable(
         "match.stats.damage.received",
-        GRAY,
         damageComponent(stats.getDamageTaken(), NamedTextColor.RED),
-        damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD));
-    Component bowLore = translatable(
+        damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD)));
+    lore.add(translatable(
         "match.stats.bow",
-        GRAY,
         number(stats.getShotsHit(), NamedTextColor.YELLOW),
         number(stats.getShotsTaken(), NamedTextColor.YELLOW),
-        number(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%')));
+        number(stats.getArrowAccuracy(), NamedTextColor.YELLOW).append(text('%'))));
 
-    lore.add(TextTranslations.translateLegacy(statLore, player));
-    lore.add(TextTranslations.translateLegacy(killstreakLore, player));
-    lore.add(TextTranslations.translateLegacy(damageDealtLore, player));
-    lore.add(TextTranslations.translateLegacy(damageReceivedLore, player));
-    lore.add(TextTranslations.translateLegacy(bowLore, player));
-
-    if (!optionalStat(
-        lore, stats.getFlagsCaptured(), "match.stats.flagsCaptured.concise", player)) {
+    if (!optionalStat(lore, stats.getFlagsCaptured(), "match.stats.flagsCaptured.concise")) {
       if (!stats.getLongestFlagHold().equals(Duration.ZERO)) {
-        lore.add(null);
-        lore.add(TextTranslations.translateLegacy(
-            translatable(
-                "match.stats.flaghold.concise",
-                GRAY,
-                TemporalComponent.briefNaturalApproximate(stats.getLongestFlagHold())
-                    .color(NamedTextColor.AQUA)
-                    .decoration(TextDecoration.BOLD, true)),
-            player));
+        lore.add(empty());
+        lore.add(translatable(
+            "match.stats.flaghold.concise",
+            TemporalComponent.duration(stats.getLongestFlagHold(), NamedTextColor.AQUA)
+                .decoration(TextDecoration.BOLD, true)));
       }
     }
-    optionalStat(lore, stats.getDestroyablePiecesBroken(), "match.stats.broken.concise", player);
+    optionalStat(lore, stats.getDestroyablePiecesBroken(), "match.stats.broken.concise");
 
-    return lore;
+    return Lists.transform(lore, c -> TextTranslations.translateLegacy(c.color(GRAY), player));
   }
 
-  private boolean optionalStat(List<String> lore, Number stat, String key, Player player) {
+  private boolean optionalStat(List<Component> lore, Number stat, String key) {
     if (stat.doubleValue() > 0) {
-      lore.add(null);
-      Component loreComponent = translatable(key, GRAY, number(stat, NamedTextColor.AQUA));
-      lore.add(TextTranslations.translateLegacy(loreComponent, player));
+      lore.add(empty());
+      lore.add(translatable(key, number(stat, NamedTextColor.AQUA)));
       return true;
     }
     return false;

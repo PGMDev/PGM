@@ -1,7 +1,10 @@
 package tc.oc.pgm.stats;
 
-import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.text.NumberComponent.number;
+import static tc.oc.pgm.stats.StatType.ASSISTS;
+import static tc.oc.pgm.stats.StatType.DEATHS;
+import static tc.oc.pgm.stats.StatType.KILLS;
+import static tc.oc.pgm.stats.StatType.KILL_DEATH_RATIO;
+import static tc.oc.pgm.stats.StatType.KILL_STREAK;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -16,7 +19,7 @@ import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.util.Audience;
 
 /** A wrapper for stat info belonging to a {@link tc.oc.pgm.api.player.MatchPlayer} */
-public class PlayerStats {
+public class PlayerStats implements StatHolder {
 
   // A reference to the players global stats to be incremented along with team based stats
   private final PlayerStats parent;
@@ -180,17 +183,24 @@ public class PlayerStats {
   // Makes a simple stat message for this player that fits in one line
 
   public Component getBasicStatsMessage() {
-    return translatable(
-        "match.stats",
-        NamedTextColor.GRAY,
-        number(kills, NamedTextColor.GREEN),
-        number(killstreak, NamedTextColor.GREEN),
-        number(deaths, NamedTextColor.RED),
-        number(getKD(), NamedTextColor.GREEN),
-        number(assists, NamedTextColor.GREEN));
+    return pipeSeparated(KILLS, DEATHS, ASSISTS, KILL_STREAK, KILL_DEATH_RATIO)
+        .color(NamedTextColor.GRAY);
   }
 
   // Getters, both raw stats and some handy calculations
+  @Override
+  public Number getStat(StatType type) {
+    return switch (type) {
+      case KILLS -> kills;
+      case DEATHS -> deaths;
+      case ASSISTS -> assists;
+      case KILL_STREAK -> killstreak;
+      case BEST_KILL_STREAK -> killstreakMax;
+      case KILL_DEATH_RATIO -> getKD();
+      case LONGEST_BOW_SHOT -> longestBowKill;
+      case DAMAGE -> damageDone;
+    };
+  }
 
   public double getKD() {
     return kills / Math.max(1d, deaths);

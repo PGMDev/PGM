@@ -30,13 +30,12 @@ public final class StatsCommand {
     if (match.isFinished()
         && PGM.get().getConfiguration().showVerboseStats()
         && match.hasModule(TeamMatchModule.class)) { // Should not try to trigger on FFA
-      stats.giveVerboseStatsItem(player, true);
+      stats.openStatsMenu(player);
     } else if (player.getSettings().getValue(SettingKey.STATS).equals(SettingValue.STATS_ON)) {
-      audience.sendMessage(
-          TextFormatter.horizontalLineHeading(
-              sender,
-              translatable("match.stats.you", NamedTextColor.DARK_GREEN),
-              NamedTextColor.WHITE));
+      audience.sendMessage(TextFormatter.horizontalLineHeading(
+          sender,
+          translatable("match.stats.you", NamedTextColor.DARK_GREEN),
+          NamedTextColor.WHITE));
       audience.sendMessage(stats.getBasicStatsMessage(player.getId()));
     } else {
       throw exception("match.stats.disabled");

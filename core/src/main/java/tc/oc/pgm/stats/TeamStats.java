@@ -3,11 +3,10 @@ package tc.oc.pgm.stats;
 import java.util.Collection;
 
 // Holds calculated total stats for a single team
-public class TeamStats {
+public class TeamStats implements StatHolder {
 
   private int teamKills = 0;
   private int teamDeaths = 0;
-  private int teamAssists = 0;
   private double damageDone = 0;
   private double damageTaken = 0;
   private double bowDamage = 0;
@@ -23,7 +22,6 @@ public class TeamStats {
     for (PlayerStats stats : playerStats) {
       teamKills += stats.getKills();
       teamDeaths += stats.getDeaths();
-      teamAssists += stats.getAssists();
       damageDone += stats.getDamageDone();
       damageTaken += stats.getDamageTaken();
       bowDamage += stats.getBowDamage();
@@ -36,16 +34,23 @@ public class TeamStats {
     teamBowAcc = shotsTaken == 0 ? Double.NaN : shotsHit / (shotsTaken / (double) 100);
   }
 
+  @Override
+  public Number getStat(StatType type) {
+    return switch (type) {
+      case KILLS -> teamKills;
+      case DEATHS -> teamDeaths;
+      case KILL_DEATH_RATIO -> teamKD;
+      case DAMAGE -> damageDone;
+      default -> Double.NaN;
+    };
+  }
+
   public int getTeamKills() {
     return teamKills;
   }
 
   public int getTeamDeaths() {
     return teamDeaths;
-  }
-
-  public int getTeamAssists() {
-    return teamAssists;
   }
 
   public double getDamageDone() {

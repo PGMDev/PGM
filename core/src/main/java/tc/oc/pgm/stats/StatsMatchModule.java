@@ -1,30 +1,31 @@
 package tc.oc.pgm.stats;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static net.kyori.adventure.text.event.HoverEvent.showText;
-import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
+import static tc.oc.pgm.util.text.TextFormatter.list;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -70,11 +71,13 @@ import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.stats.menu.StatsMainMenu;
 import tc.oc.pgm.stats.menu.items.PlayerStatsMenuItem;
 import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
+import tc.oc.pgm.stats.menu.items.VerboseStatsMenuItem;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.pgm.util.Pair;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.player.PlayerComponent;
+import tc.oc.pgm.util.text.RenderableComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.wool.MonumentWool;
@@ -129,12 +132,12 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     // End time tracking for old party
     if (event.getOldParty() instanceof Competitor) {
-      computeTeamStatsIfAbsent(event.getPlayer().getId(), event.getOldParty()).endParticipation();
+      getPlayerTeamStats(event.getPlayer().getId(), event.getOldParty()).endParticipation();
     }
 
     // When joining a party that's playing, start time tracking
     if (event.getNewParty() instanceof Competitor) {
-      computeTeamStatsIfAbsent(event.getPlayer().getId(), event.getNewParty()).startParticipation();
+      getPlayerTeamStats(event.getPlayer().getId(), event.getNewParty()).startParticipation();
     }
   }
 
@@ -267,7 +270,9 @@ public class StatsMatchModule implements MatchModule, Listener {
     // when the inventory GUI is created. If usernames needs to be resolved using the mojang api
     // (UsernameResolver) it can take some time, and we cant really know how long.
     UsernameResolvers.startBatch();
-    this.getOfflinePlayersWithStats().forEach(id -> PGM.get().getDatastore().getUsername(id));
+    allPlayerStats.keySet().stream()
+        .filter(id -> match.getPlayer(id) == null)
+        .forEach(id -> PGM.get().getDatastore().getUsername(id));
     UsernameResolvers.endBatch();
 
     // Schedule displaying stats after match end
@@ -281,45 +286,25 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onStatsDisplay(MatchStatsEvent event) {
-    if (allPlayerStats.isEmpty()) return;
+    if (allPlayerStats.isEmpty() || (!event.isShowOwn() && !event.isShowBest())) return;
 
-    // Gather all player stats from this match
-    Pair<UUID, Integer> bestKills = null;
-    Pair<UUID, Integer> bestStreaks = null;
-    Pair<UUID, Integer> bestDeaths = null;
-    Pair<UUID, Integer> bestAssists = null;
-    Pair<UUID, Integer> bestBowShots = null;
-    Pair<UUID, Double> bestDamage = null;
+    // Gather aggregated player stats from this match
+    List<AggStat<?>> stats = new ArrayList<>();
+    stats.add(new AggStat<>(StatType.KILLS, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.DEATHS, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.ASSISTS, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.BEST_KILL_STREAK, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.LONGEST_BOW_SHOT, 0, new HashSet<>()));
+    if (verboseStats) stats.add(new AggStat<>(StatType.DAMAGE, 0d, new HashSet<>()));
 
-    for (Map.Entry<UUID, PlayerStats> mapEntry : allPlayerStats.entrySet()) {
-      UUID uuid = mapEntry.getKey();
-      PlayerStats s = mapEntry.getValue();
-      bestKills = getBest(bestKills, uuid, s.getKills());
-      bestStreaks = getBest(bestStreaks, uuid, s.getMaxKillstreak());
-      bestDeaths = getBest(bestDeaths, uuid, s.getDeaths());
-      bestAssists = getBest(bestAssists, uuid, s.getAssists());
-      bestBowShots = getBest(bestBowShots, uuid, s.getLongestBowKill());
-      bestDamage = getBest(bestDamage, uuid, s.getDamageDone());
-    }
+    allPlayerStats.forEach((uuid, s) -> stats.replaceAll(stat -> stat.track(uuid, s)));
 
-    List<Component> best = new ArrayList<>();
-    if (event.isShowBest()) {
-      best.add(getMessage("match.stats.kills", bestKills, NamedTextColor.GREEN));
-      best.add(getMessage("match.stats.killstreak", bestStreaks, NamedTextColor.GREEN));
-      best.add(getMessage("match.stats.deaths", bestDeaths, NamedTextColor.RED));
-      best.add(getMessage("match.stats.assists", bestAssists, NamedTextColor.GREEN));
+    var best = stats.stream()
+        .filter(agg -> agg.value().doubleValue() > 0)
+        .map(stat -> getMessage(stat, event.isShowBest(), event.isShowOwn()))
+        .toList();
 
-      if (bestBowShots.getRight() > 0)
-        best.add(getMessage("match.stats.bowshot", bestBowShots, NamedTextColor.YELLOW));
-
-      if (verboseStats) {
-        best.add(translatable(
-            "match.stats.damage",
-            player(bestDamage.getLeft(), NameStyle.VERBOSE),
-            damageComponent(bestDamage.getRight(), NamedTextColor.GREEN)));
-      }
-    }
-
+    var item = new VerboseStatsMenuItem();
     for (MatchPlayer viewer : match.getPlayers()) {
       if (viewer.getSettings().getValue(SettingKey.STATS) == SettingValue.STATS_OFF) continue;
 
@@ -329,25 +314,7 @@ public class StatsMatchModule implements MatchModule, Listener {
           NamedTextColor.WHITE));
 
       best.forEach(viewer::sendMessage);
-
-      PlayerStats stats = getPlayerStat(viewer);
-
-      if (event.isShowOwn() && stats != null) {
-        Component ksHover = translatable(
-            "match.stats.killstreak.concise",
-            number(stats.getMaxKillstreak(), NamedTextColor.GREEN));
-
-        viewer.sendMessage(translatable(
-            "match.stats.own",
-            number(stats.getKills(), NamedTextColor.GREEN),
-            number(stats.getMaxKillstreak(), NamedTextColor.GREEN).hoverEvent(showText(ksHover)),
-            number(stats.getDeaths(), NamedTextColor.RED),
-            number(stats.getKD(), NamedTextColor.GREEN),
-            damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
-            number(stats.getAssists(), NamedTextColor.GREEN)));
-      }
-
-      giveVerboseStatsItem(viewer, false);
+      viewer.getInventory().setItem(verboseItemSlot, item.createItem(viewer.getBukkit()));
     }
   }
 
@@ -358,47 +325,59 @@ public class StatsMatchModule implements MatchModule, Listener {
     Action action = event.getAction();
     if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
       MatchPlayer player = match.getPlayer(event.getPlayer());
-      if (player != null) giveVerboseStatsItem(player, true);
+      if (player != null) openStatsMenu(player);
     }
   }
 
-  public PlayerStatsMenuItem getPlayerStatsItem(MatchPlayer player) {
-    return new PlayerStatsMenuItem(
-        player.getId(),
-        this.getGlobalPlayerStat(player),
-        PLAYER_UTILS.getPlayerSkin(player.getBukkit()));
-  }
-
-  public void giveVerboseStatsItem(MatchPlayer player, boolean forceOpen) {
+  public void openStatsMenu(MatchPlayer player) {
     if (!verboseStats) return;
-    final Collection<Competitor> competitors = match.getSortedCompetitors();
-
     if (teams == null) {
-      teams = Lists.newArrayList();
+      var competitors = match.getSortedCompetitors();
+      teams = new ArrayList<>(competitors.size());
       for (Competitor competitor : competitors) {
-        if (competitor instanceof Team t) {
+        MatchPlayer tribute;
+        if (competitor instanceof Team t)
           teams.add(new TeamStatsMenuItem(match, competitor, stats.row(t)));
-        } else if (competitor instanceof Tribute t) {
-          MatchPlayer tribute = t.getPlayer();
-          if (tribute != null) teams.add(getPlayerStatsItem(tribute));
-        }
+        else if (competitor instanceof Tribute t && (tribute = t.getPlayer()) != null)
+          teams.add(new PlayerStatsMenuItem(tribute, getGlobalPlayerStat(tribute)));
       }
     }
-
-    StatsMainMenu menu = new StatsMainMenu(player, teams, this);
-    player.getInventory().setItem(verboseItemSlot, menu.getItem());
-    if (forceOpen) menu.open();
+    new StatsMainMenu(player, teams, this).open();
   }
 
-  private <T extends Comparable<T>> Pair<UUID, T> getBest(Pair<UUID, T> curr, UUID uuid, T alt) {
-    return curr != null && curr.getRight().compareTo(alt) >= 0 ? curr : Pair.of(uuid, alt);
+  private Component getMessage(AggStat<?> agg, boolean best, boolean own) {
+    Component who = empty();
+    if (best)
+      who = translatable("misc.authorship", agg.type.makeNumber(agg.value), credit(agg.players));
+    if (own)
+      who = who.append((RenderableComponent) v -> {
+        if (!(v instanceof Player p)) return empty();
+        if (agg.players.contains(p.getUniqueId()) || hasNoStats(p.getUniqueId())) return empty();
+        var number = agg.type.makeNumber(getGlobalPlayerStat(p.getUniqueId()).getStat(agg.type));
+        return !best ? number : text("   ").append(translatable("match.stats.you.short", number));
+      });
+    return translatable(agg.type.key, who);
   }
 
-  Component getMessage(String messageKey, Pair<UUID, ? extends Number> mapEntry, TextColor color) {
-    return translatable(
-        messageKey,
-        player(mapEntry.getLeft(), NameStyle.VERBOSE),
-        number(mapEntry.getRight(), color));
+  private Component credit(Set<UUID> players) {
+    if (players.size() >= 10)
+      return translatable("objective.credit.many", NamedTextColor.GRAY, TextDecoration.ITALIC);
+
+    var list = list(Collections2.transform(players, this::getPlayerComponent), null);
+    if (players.size() > 3)
+      return translatable("match.stats.severalPlayers", NamedTextColor.GRAY, TextDecoration.ITALIC)
+          .hoverEvent(list);
+    return list;
+  }
+
+  private Component getPlayerComponent(UUID uuid) {
+    var player = player(uuid, NameStyle.VERBOSE);
+    if (player != PlayerComponent.UNKNOWN_PLAYER && player != PlayerComponent.UNKNOWN)
+      return player;
+    return stats.column(uuid).values().stream()
+        .max(Comparator.comparing(PlayerStats::getTimePlayed))
+        .map(PlayerStats::getPlayerComponent)
+        .orElse(player);
   }
 
   /** Formats raw damage to damage relative to the amount of hearths the player would have broken */
@@ -407,20 +386,12 @@ public class StatsMatchModule implements MatchModule, Listener {
     return number(hearts, color).append(HEART_SYMBOL);
   }
 
-  private Stream<UUID> getOfflinePlayersWithStats() {
-    return allPlayerStats.keySet().stream().filter(id -> match.getPlayer(id) == null);
-  }
-
   @Deprecated
   public final PlayerStats getPlayerStat(UUID uuid) {
     return getGlobalPlayerStat(uuid);
   }
 
-  private void putNewPlayer(UUID player) {
-    allPlayerStats.put(player, new PlayerStats());
-  }
-
-  private PlayerStats computeTeamStatsIfAbsent(UUID id, Party party) {
+  private PlayerStats getPlayerTeamStats(UUID id, Party party) {
     // Only players on a team have team specific stats
     PlayerStats globalStats = getGlobalPlayerStat(id);
     if (!(party instanceof Team team)) return globalStats;
@@ -439,7 +410,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   public boolean hasNoStats(UUID player) {
-    return allPlayerStats.get(player) == null;
+    return !allPlayerStats.containsKey(player);
   }
 
   public final PlayerStats getGlobalPlayerStat(MatchPlayer player) {
@@ -448,20 +419,19 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   // Creates a new PlayerStat if the player does not have one yet
   public final PlayerStats getGlobalPlayerStat(UUID uuid) {
-    if (hasNoStats(uuid)) putNewPlayer(uuid);
-    return allPlayerStats.get(uuid);
+    return allPlayerStats.computeIfAbsent(uuid, k -> new PlayerStats());
   }
 
   public final PlayerStats getPlayerStat(ParticipantState player) {
-    return computeTeamStatsIfAbsent(player.getId(), player.getParty());
+    return getPlayerTeamStats(player.getId(), player.getParty());
   }
 
   public final PlayerStats getPlayerStat(MatchPlayer player) {
-    return computeTeamStatsIfAbsent(player.getId(), player.getParty());
+    return getPlayerTeamStats(player.getId(), player.getParty());
   }
 
   private PlayerStats getPlayerStat(MatchPlayerState playerState) {
-    return computeTeamStatsIfAbsent(playerState.getId(), playerState.getParty());
+    return getPlayerTeamStats(playerState.getId(), playerState.getParty());
   }
 
   public Component getBasicStatsMessage(UUID player) {
@@ -491,5 +461,17 @@ public class StatsMatchModule implements MatchModule, Listener {
     }
 
     return primaryTeam.getKey();
+  }
+
+  private record AggStat<T extends Number & Comparable<T>>(
+      StatType type, T value, Set<UUID> players) {
+    public AggStat<T> track(UUID uuid, StatHolder stat) {
+      T newVal = (T) stat.getStat(type);
+      int cmp = value.compareTo(newVal);
+      if (cmp > 0) return this;
+      if (cmp < 0) players.clear();
+      players.add(uuid);
+      return cmp == 0 ? this : new AggStat<>(type, newVal, players);
+    }
   }
 }

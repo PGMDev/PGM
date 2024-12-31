@@ -2,9 +2,12 @@ package tc.oc.pgm.stats.menu.items;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
+import static tc.oc.pgm.stats.StatType.DEATHS;
+import static tc.oc.pgm.stats.StatType.KILLS;
+import static tc.oc.pgm.stats.StatType.KILL_DEATH_RATIO;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
-import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 
 import com.google.common.collect.Lists;
@@ -63,39 +66,24 @@ public class TeamStatsMenuItem implements MenuItem {
 
   @Override
   public List<String> getLore(Player player) {
-    List<String> lore = Lists.newArrayList();
+    List<Component> lore = Lists.newArrayList();
 
-    Component statLore = translatable(
-        "match.stats.concise",
-        NamedTextColor.GRAY,
-        number(stats.getTeamKills(), NamedTextColor.GREEN),
-        number(stats.getTeamDeaths(), NamedTextColor.RED),
-        number(stats.getTeamKD(), NamedTextColor.GREEN),
-        number(stats.getTeamAssists(), NamedTextColor.GREEN));
-
-    Component damageDealtLore = translatable(
+    lore.add(stats.spaceSeparated(KILLS, DEATHS, KILL_DEATH_RATIO));
+    lore.add(translatable(
         "match.stats.damage.dealt",
-        NamedTextColor.GRAY,
         damageComponent(stats.getDamageDone(), NamedTextColor.GREEN),
-        damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW));
-    Component damageReceivedLore = translatable(
+        damageComponent(stats.getBowDamage(), NamedTextColor.YELLOW)));
+    lore.add(translatable(
         "match.stats.damage.received",
-        NamedTextColor.GRAY,
         damageComponent(stats.getDamageTaken(), NamedTextColor.RED),
-        damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD));
-    Component bowLore = translatable(
+        damageComponent(stats.getBowDamageTaken(), NamedTextColor.GOLD)));
+    lore.add(translatable(
         "match.stats.bow",
-        NamedTextColor.GRAY,
         number(stats.getShotsHit(), NamedTextColor.YELLOW),
         number(stats.getShotsTaken(), NamedTextColor.YELLOW),
-        number(stats.getTeamBowAcc(), NamedTextColor.YELLOW).append(text('%')));
+        number(stats.getTeamBowAcc(), NamedTextColor.YELLOW).append(text('%'))));
 
-    lore.add(TextTranslations.translateLegacy(statLore, player));
-    lore.add(TextTranslations.translateLegacy(damageDealtLore, player));
-    lore.add(TextTranslations.translateLegacy(damageReceivedLore, player));
-    lore.add(TextTranslations.translateLegacy(bowLore, player));
-
-    return lore;
+    return Lists.transform(lore, c -> TextTranslations.translateLegacy(c.color(GRAY), player));
   }
 
   @Override

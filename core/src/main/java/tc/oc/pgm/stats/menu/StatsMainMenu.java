@@ -13,6 +13,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.menu.MenuItem;
 import tc.oc.pgm.menu.PagedInventoryMenu;
 import tc.oc.pgm.stats.StatsMatchModule;
+import tc.oc.pgm.stats.menu.items.PlayerStatsMenuItem;
 import tc.oc.pgm.stats.menu.items.TeamStatsMenuItem;
 import tc.oc.pgm.stats.menu.items.VerboseStatsMenuItem;
 
@@ -59,7 +60,11 @@ public class StatsMainMenu extends PagedInventoryMenu {
 
   @Override
   public void init(Player player, InventoryContents contents) {
-    contents.set(0, 4, stats.getPlayerStatsItem(getViewer()).getClickableItem(getBukkit()));
+    contents.set(
+        0,
+        4,
+        new PlayerStatsMenuItem(getViewer(), stats.getGlobalPlayerStat(player.getUniqueId()))
+            .getClickableItem(getBukkit()));
 
     // Use pagination when too many teams are present
     if (teams.size() > MAX_FANCY_SLOTS) {
