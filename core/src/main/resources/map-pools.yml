@@ -34,6 +34,8 @@ pools:
     vote-options: 5
     # Voted pool only: modify how score behaves
     score:
+      # If score should be persisted across server restarts
+      persist: true
       # How much score should maps start with by default.
       default: 0.2
       # How much score decreases/increases after each match. Null to be proportional to amount of maps.
@@ -47,6 +49,14 @@ pools:
       # After the map plays, reset the score to:
       # Supports a formula with play_minutes
       after-playing: 0
+
+    # Voted pool only: make maps be excluded from votes if they recently played for long
+    cooldown:
+      # How long in minutes until a match is considered long. -1 to disable the mechanic
+      min-length: 30
+      # How many minutes of the same map per day is acceptable.
+      # Eg: if set to 30, a match lasting 45min will put the map in cooldown for 1d 12h
+      minutes-per-day: 30
 
     # Voted pools support modifiers which come in the form of a formula (does not affect any other type of pool).
     #

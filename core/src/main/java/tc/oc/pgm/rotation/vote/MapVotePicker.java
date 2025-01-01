@@ -120,7 +120,8 @@ public class MapVotePicker {
    */
   public double getWeight(@Nullable List<MapInfo> selected, @NotNull MapInfo map, VoteData data) {
     if ((selected != null && selected.contains(map))
-        || data.getScore() <= constants.scoreMinToVote()) return 0;
+        || data.getScore() <= constants.scoreMinToVote()
+        || data.isOnCooldown(constants)) return 0;
 
     var context = new MapVoteContext(
         data.getScore(),

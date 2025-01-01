@@ -71,6 +71,7 @@ public class VotePoolOptions {
 
   public Map<MapInfo, VoteData> getCustomVoteMapsWeighted() {
     return customVoteMaps.keySet().stream()
-        .collect(Collectors.toMap(map -> map, score -> new VoteData(1, VotingPool.DEFAULT_SCORE)));
+        .collect(Collectors.toMap(
+            map -> map, map -> VoteData.of(1, VotingPool.DEFAULT_SCORE, map, false)));
   }
 }

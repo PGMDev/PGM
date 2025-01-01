@@ -53,6 +53,10 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     return new ExpFormula<>(exp, context);
   }
 
+  default <R> Formula<R> map(java.util.function.Function<R, T> mapper) {
+    return v -> apply(mapper.apply(v));
+  }
+
   /** Shorthand for {@link #applyAsDouble} */
   default double apply(T value) {
     return applyAsDouble(value);
