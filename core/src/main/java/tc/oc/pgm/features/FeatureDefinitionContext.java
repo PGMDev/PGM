@@ -217,7 +217,10 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
 
     public void validate() throws InvalidXMLException {
       if (definition != null) validation.validate(definition, node);
-      if (reference != null) validation.validate(reference.get(), node);
+      if (reference != null) {
+        if (!reference.isResolved()) reference.resolve();
+        validation.validate(reference.get(), node);
+      }
     }
   }
 }
