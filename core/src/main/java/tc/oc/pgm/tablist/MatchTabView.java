@@ -3,9 +3,10 @@ package tc.oc.pgm.tablist;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -134,14 +135,16 @@ public class MatchTabView extends TabView implements Listener {
       if (tmm != null) {
         teams.sort(teamOrder);
 
-        int participantRows = getMinimumParticipantRows(teams);
+        int participantRows = getMinimumParticipantRows();
         observerRows = getObserverRows(observingPlayers, observingStaff, participantRows);
         participantRows = availableRows - observerRows;
 
         int y1 = this.getHeader();
-        Iterator<Team> teamIt = teams.iterator();
+        ListIterator<Team> teamIt = teams.listIterator();
         while (teamIt.hasNext()) {
           int y2 = y1;
+          int[] sizes = makeTeamSizes(teamIt.nextIndex());
+
           for (int x1 = 0; x1 < getWidth(); ) {
             if (!teamIt.hasNext()) {
               fillEmpty(x1, this.getWidth(), y1, y2);
@@ -149,7 +152,7 @@ public class MatchTabView extends TabView implements Listener {
             }
 
             Team team = teamIt.next();
-            int columnsForTeam = getColumnsForTeam(team, teams);
+            int columnsForTeam = getColumnsForTeam(team, sizes);
             int currY2 = participantRows + getHeader(); // Default to max height
             // Size tightly vertically when teams don't use multiple columns
             if (columnsForTeam == 1) currY2 = Math.min(y1 + team.getPlayers().size() + 2, currY2);
@@ -222,17 +225,18 @@ public class MatchTabView extends TabView implements Listener {
     super.render();
   }
 
-  private int getMinimumParticipantRows(Collection<Team> teams) {
+  private int getMinimumParticipantRows() {
     int teamsPerColumn = Math.min(this.getWidth(), teams.size());
 
     int biggestTeamColumn = 0;
-    Iterator<Team> teamIt = teams.iterator();
+    ListIterator<Team> teamIt = teams.listIterator();
     while (teamIt.hasNext()) {
       int mostRows = 0;
+      int[] sizes = makeTeamSizes(teamIt.nextIndex());
       for (int x = 0; x < teamsPerColumn && teamIt.hasNext(); x++) {
         Team team = teamIt.next();
         mostRows = Math.max(
-            mostRows, divideRoundingUp(team.getPlayers().size(), getColumnsForTeam(team, teams)));
+            mostRows, divideRoundingUp(team.getPlayers().size(), getColumnsForTeam(team, sizes)));
       }
 
       biggestTeamColumn += 2 + mostRows;
@@ -240,14 +244,28 @@ public class MatchTabView extends TabView implements Listener {
     return biggestTeamColumn;
   }
 
-  private int getColumnsForTeam(Team team, Collection<Team> teams) {
-    if (teams.size() < getWidth()) {
-      float cols = (float) team.getMaxPlayers() * getWidth() / match.getMaxPlayers();
-      if (cols % 1 == 0.5 && cols > ((float) getWidth() / teams.size())) cols -= 0.5f;
-      return Math.max(1, Math.min(Math.round(cols), getWidth() - teams.size() + 1));
-    } else {
-      return 1;
-    }
+  private int getSize(Team team) {
+    int players = team.getPlayers().size();
+    // Once a team is reasonably above max overfill, start using that instead
+    return players > (team.getMaxOverfill() + 2) ? players : team.getMaxPlayers();
+  }
+
+  private int[] makeTeamSizes(int nextIdx) {
+    int[] sizes = new int[Math.min(teams.size() - nextIdx, getWidth())];
+    for (int i = 0; i < sizes.length; i++) sizes[i] = getSize(teams.get(nextIdx + i));
+    Arrays.sort(sizes);
+    return sizes;
+  }
+
+  private int getColumnsForTeam(Team team, int[] sizes) {
+    return switch (sizes.length) {
+      case 0, 1 -> getWidth();
+        // Two team split closer to 3-1 than to 2-2, then do that split
+      case 2 -> sizes[1] * 0.6f > sizes[0] ? getSize(team) == sizes[0] ? 1 : 3 : 2;
+        // If one out of 3 teams is bigger, give that 2 columns
+      case 3 -> sizes[2] > sizes[1] && getSize(team) == sizes[2] ? 2 : 1;
+      default -> 1;
+    };
   }
 
   private int getObserverRows(int observers, int observingStaff, int participantRows) {
