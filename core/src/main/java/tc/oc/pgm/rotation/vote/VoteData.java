@@ -44,12 +44,17 @@ public class VoteData {
     return mapData.score();
   }
 
-  public boolean isOnCooldown(VotingPool.VoteConstants constants) {
-    long duration = mapData.lastDuration().toMinutes();
-    if (constants.minCooldown() == -1 || constants.minCooldown() > duration) return false;
-    long cooldownSeconds = duration * SECONDS_PER_DAY / constants.minutesPerDay();
+  public Duration remainingCooldown(VotingPool.VoteConstants constants) {
+    long lastMins = mapData.lastDuration().toMinutes();
+    if (constants.minCooldown() == -1 || constants.minCooldown() > lastMins) return Duration.ZERO;
+    long cooldownSeconds = lastMins * SECONDS_PER_DAY / constants.minutesPerDay();
 
-    return Instant.now().isAfter(mapData.lastPlayed().plusSeconds(cooldownSeconds));
+    var cd = Duration.between(Instant.now(), mapData.lastPlayed().plusSeconds(cooldownSeconds));
+    return cd.isNegative() ? Duration.ZERO : cd;
+  }
+
+  public boolean isOnCooldown(VotingPool.VoteConstants constants) {
+    return remainingCooldown(constants).isPositive();
   }
 
   public void tickScore(VotingPool.VoteConstants constants) {

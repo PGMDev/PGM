@@ -4,6 +4,8 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static tc.oc.pgm.util.text.TemporalComponent.duration;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import java.text.DecimalFormat;
@@ -17,7 +19,6 @@ import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.command.CommandSender;
 import org.incendo.cloud.annotation.specifier.FlagYielding;
@@ -41,7 +42,9 @@ import tc.oc.pgm.rotation.pools.Rotation;
 import tc.oc.pgm.rotation.pools.VotingPool;
 import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.LiquidMetal;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -62,13 +65,20 @@ public final class MapPoolCommand {
       @Flag(value = "score", aliases = "s") boolean scores,
       @Flag(value = "chance", aliases = "c") boolean chance,
       @Flag(value = "order", aliases = "o") boolean order,
-      @Flag(value = "all", aliases = "a") boolean all) {
+      @Flag(value = "all", aliases = "a") boolean all,
+      @Flag(value = "name", aliases = "n") String name) {
     // Default to current pool
     if (mapPool == null) mapPool = poolManager.getActiveMapPool();
 
     if (mapPool == null || (type != null && mapPool.getType() != type))
       throw exception("pool.noPoolMatch");
     List<MapInfo> maps = mapPool.getMaps();
+    if (name != null) {
+      String normalized = StringUtils.normalize(name);
+      maps = maps.stream()
+          .filter(mi -> LiquidMetal.match(mi.getNormalizedName(), normalized))
+          .toList();
+    }
 
     int resultsPerPage = all ? maps.size() : 8;
     int pages = all ? 1 : (maps.size() + resultsPerPage - 1) / resultsPerPage;
@@ -76,18 +86,17 @@ public final class MapPoolCommand {
     Component mapPoolComponent = TextFormatter.paginate(
         text()
             .append(translatable("pool.name"))
-            .append(text(" (", NamedTextColor.DARK_AQUA))
-            .append(text(mapPool.getName(), NamedTextColor.AQUA))
-            .append(text(")", NamedTextColor.DARK_AQUA))
+            .append(text(" (", DARK_AQUA))
+            .append(text(mapPool.getName(), AQUA))
+            .append(text(")", DARK_AQUA))
             .build(),
         page,
         pages,
-        NamedTextColor.DARK_AQUA,
-        NamedTextColor.AQUA,
+        DARK_AQUA,
+        AQUA,
         false);
 
-    Component title =
-        TextFormatter.horizontalLineHeading(source, mapPoolComponent, NamedTextColor.BLUE, 250);
+    Component title = TextFormatter.horizontalLineHeading(source, mapPoolComponent, BLUE, 250);
 
     VotingPool votes =
         (scores || chance) && mapPool instanceof VotingPool ? (VotingPool) mapPool : null;
@@ -115,16 +124,18 @@ public final class MapPoolCommand {
       @Override
       public Component format(MapInfo map, int index) {
         index++;
-        TextComponent.Builder entry = text()
-            .append(text(
-                index + ". ", nextPos == index ? NamedTextColor.DARK_AQUA : NamedTextColor.WHITE));
-        if (votes != null && scores)
-          entry.append(
-              text(SCORE_FORMAT.format(votes.getMapScore(map)) + " ", NamedTextColor.YELLOW));
-        if (votes != null && chance)
-          entry.append(text(SCORE_FORMAT.format(chances.get(map)) + " ", NamedTextColor.YELLOW));
-        entry.append(map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS));
-        return entry.build();
+        TextComponent.Builder r =
+            text().append(text(index + ". ", nextPos == index ? DARK_AQUA : WHITE));
+        if (votes != null) {
+          var cd = votes.getVoteData(map).remainingCooldown(votes.constants);
+          if (cd.isPositive()) r.append(duration(cd, RED).color(YELLOW)).appendSpace();
+          else {
+            if (scores) r.append(text(SCORE_FORMAT.format(votes.getMapScore(map)) + " ", YELLOW));
+            if (chance) r.append(text(SCORE_FORMAT.format(chances.get(map)) + " ", YELLOW));
+          }
+        }
+        r.append(map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS));
+        return r.build();
       }
     }.display(sender, maps, page);
   }
@@ -151,45 +162,36 @@ public final class MapPoolCommand {
     int resultsPerPage = 8;
     int pages = (mapPools.size() + resultsPerPage - 1) / resultsPerPage;
 
-    Component paginated = TextFormatter.paginate(
-        translatable("pool.title"),
-        page,
-        pages,
-        NamedTextColor.DARK_AQUA,
-        NamedTextColor.AQUA,
-        true);
+    Component paginated =
+        TextFormatter.paginate(translatable("pool.title"), page, pages, DARK_AQUA, AQUA, true);
 
-    Component formattedTitle =
-        TextFormatter.horizontalLineHeading(source, paginated, NamedTextColor.BLUE);
+    Component formattedTitle = TextFormatter.horizontalLineHeading(source, paginated, BLUE);
 
     new PrettyPaginatedComponentResults<MapPool>(formattedTitle, resultsPerPage) {
       @Override
       public Component format(MapPool mapPool, int index) {
-        Component arrow = text(
-            "» ",
-            poolManager.getActiveMapPool().equals(mapPool)
-                ? NamedTextColor.GREEN
-                : NamedTextColor.WHITE);
+        Component arrow =
+            text("» ", poolManager.getActiveMapPool().equals(mapPool) ? GREEN : WHITE);
 
         Component maps = text()
-            .append(text(" (", NamedTextColor.DARK_AQUA))
-            .append(translatable("map.title", NamedTextColor.DARK_GREEN))
-            .append(text(": ", NamedTextColor.DARK_GREEN))
-            .append(text(mapPool.getMaps().size(), NamedTextColor.WHITE))
-            .append(text(")", NamedTextColor.DARK_AQUA))
+            .append(text(" (", DARK_AQUA))
+            .append(translatable("map.title", DARK_GREEN))
+            .append(text(": ", DARK_GREEN))
+            .append(text(mapPool.getMaps().size(), WHITE))
+            .append(text(")", DARK_AQUA))
             .build();
 
         Component players = text()
-            .append(text(" (", NamedTextColor.DARK_AQUA))
-            .append(translatable("match.info.players", NamedTextColor.AQUA))
-            .append(text(": ", NamedTextColor.AQUA))
-            .append(text(mapPool.getPlayers(), NamedTextColor.WHITE))
-            .append(text(")", NamedTextColor.DARK_AQUA))
+            .append(text(" (", DARK_AQUA))
+            .append(translatable("match.info.players", AQUA))
+            .append(text(": ", AQUA))
+            .append(text(mapPool.getPlayers(), WHITE))
+            .append(text(")", DARK_AQUA))
             .build();
 
         return text()
             .append(arrow)
-            .append(text(mapPool.getName(), NamedTextColor.GOLD))
+            .append(text(mapPool.getName(), GOLD))
             .append(maps)
             .append(mapPool.isDynamic() ? players : empty())
             .build();
@@ -214,10 +216,8 @@ public final class MapPoolCommand {
     if (newPool == null) throw exception("pool.noPoolMatch");
 
     if (newPool.equals(poolManager.getActiveMapPool())) {
-      sender.sendMessage(translatable(
-          "pool.matching",
-          NamedTextColor.GRAY,
-          text(newPool.getName(), NamedTextColor.LIGHT_PURPLE)));
+      sender.sendMessage(
+          translatable("pool.matching", GRAY, text(newPool.getName(), LIGHT_PURPLE)));
       return;
     }
 
@@ -259,13 +259,12 @@ public final class MapPoolCommand {
     ((Rotation) pool).advance(positions);
 
     Component message = text()
-        .append(text("[", NamedTextColor.WHITE))
-        .append(translatable("pool.name", NamedTextColor.GOLD))
-        .append(text("] [", NamedTextColor.WHITE))
-        .append(text(pool.getName(), NamedTextColor.AQUA))
-        .append(text("]", NamedTextColor.WHITE))
-        .append(
-            translatable("pool.skip", NamedTextColor.GREEN, text(positions, NamedTextColor.AQUA)))
+        .append(text("[", WHITE))
+        .append(translatable("pool.name", GOLD))
+        .append(text("] [", WHITE))
+        .append(text(pool.getName(), AQUA))
+        .append(text("]", WHITE))
+        .append(translatable("pool.skip", GREEN, text(positions, AQUA)))
         .build();
 
     sender.sendMessage(message);
@@ -281,7 +280,7 @@ public final class MapPoolCommand {
     boolean voteResult = poll.toggleVote(map, player);
     Component voteAction = translatable(
         voteResult ? "vote.for" : "vote.abstain",
-        voteResult ? NamedTextColor.GREEN : NamedTextColor.RED,
+        voteResult ? GREEN : RED,
         map.getStyledName(MapNameStyle.COLOR));
     player.sendMessage(voteAction);
     poll.sendBook(player, forceOpen);
@@ -309,7 +308,18 @@ public final class MapPoolCommand {
       if (poolManager.getActiveMapPool().getType() != MapPoolType.ORDERED)
         throw exception("pool.noRotation");
 
-      pool(sender, source, poolManager, page, MapPoolType.ORDERED, null, false, false, false, all);
+      pool(
+          sender,
+          source,
+          poolManager,
+          page,
+          MapPoolType.ORDERED,
+          null,
+          false,
+          false,
+          false,
+          all,
+          null);
     });
   }
 
@@ -382,13 +392,11 @@ public final class MapPoolCommand {
   private TextException alternativeUsage(String[] rawArgs, String replace) {
     rawArgs[0] = "/" + replace;
     String altCommand = String.join(" ", rawArgs);
-    Component cmd =
-        text(altCommand).color(NamedTextColor.YELLOW).decorate(TextDecoration.UNDERLINED);
+    Component cmd = text(altCommand).color(YELLOW).decorate(TextDecoration.UNDERLINED);
 
     return exception(
         "command.alternativeUsage",
-        cmd.hoverEvent(
-                showText(translatable("command.clickToRun", cmd).color(NamedTextColor.GREEN)))
+        cmd.hoverEvent(showText(translatable("command.clickToRun", cmd).color(GREEN)))
             .clickEvent(ClickEvent.runCommand(altCommand)));
   }
 }

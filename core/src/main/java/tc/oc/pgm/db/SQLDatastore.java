@@ -310,9 +310,9 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
           while (result.next()) {
             String id = result.getString(1);
             var map = maps.computeIfAbsent(id, k -> new SQLMapData(id, -1));
-            map.lastPlayed = Instant.ofEpochMilli(result.getLong(1));
-            map.lastDuration = Duration.ofMillis(result.getLong(2));
-            map.score = result.getDouble(3);
+            map.lastPlayed = Instant.ofEpochMilli(result.getLong(2));
+            map.lastDuration = Duration.ofMillis(result.getLong(3));
+            map.score = result.getDouble(4);
           }
         }
       }
