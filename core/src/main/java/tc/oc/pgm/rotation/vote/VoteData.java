@@ -8,6 +8,7 @@ import tc.oc.pgm.api.map.MapData;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.rotation.pools.VotingPool;
+import tc.oc.pgm.util.TimeUtils;
 
 public class VoteData {
   private static final long SECONDS_PER_DAY = Duration.of(1, ChronoUnit.DAYS).toSeconds();
@@ -33,7 +34,7 @@ public class VoteData {
   }
 
   public void onMatchEnd(Match match, VotingPool.VoteConstants constants) {
-    mapData.saveMatch(match, constants.scoreAfterPlay().apply(match));
+    mapData.saveMatch(getDuration(match, constants), constants.scoreAfterPlay().apply(match));
   }
 
   public double getWeight() {
@@ -59,6 +60,12 @@ public class VoteData {
 
   public void tickScore(VotingPool.VoteConstants constants) {
     mapData.setScore(constants.tickScore(getScore()), false);
+  }
+
+  protected Duration getDuration(Match match, VotingPool.VoteConstants c) {
+    var duration = match.getDuration();
+    // Prevent saving with lower duration if it somehow plays during cooldown
+    return isOnCooldown(c) ? TimeUtils.max(mapData.lastDuration(), duration) : duration;
   }
 
   static class Local extends VoteData {
@@ -92,7 +99,8 @@ public class VoteData {
       // If this data starts being used later, we'll run into no maps available!
       // For this reason, store (non-negative) scores as a low value instead
       mapData.saveMatch(
-          match, score < 0 ? score : Math.max(score, c.scoreMinToVote()) + c.scoreRise());
+          getDuration(match, c),
+          score < 0 ? score : Math.max(score, c.scoreMinToVote()) + c.scoreRise());
     }
   }
 }

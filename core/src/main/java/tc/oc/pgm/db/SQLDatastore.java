@@ -22,7 +22,6 @@ import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.map.MapData;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.Username;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
@@ -332,10 +331,9 @@ public class SQLDatastore extends ThreadSafeConnection implements Datastore {
     }
 
     @Override
-    public void saveMatch(Match match, double score) {
-      this.score = score;
+    public void saveMatch(Duration duration, double score) {
       this.lastPlayed = Instant.now();
-      this.lastDuration = match.getDuration();
+      this.lastDuration = duration;
       this.score = score;
       submitQuery(new UpdateQuery());
     }

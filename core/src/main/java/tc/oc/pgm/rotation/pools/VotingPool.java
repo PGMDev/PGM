@@ -114,8 +114,7 @@ public class VotingPool extends MapPool {
 
   @Override
   public MapInfo popNextMap() {
-    if (currentPoll == null) return getRandom();
-
+    if (currentPoll == null) return mapPicker.getMap(List.of(), mapScores);
     MapInfo map = currentPoll.finishVote();
     updateScores(currentPoll.getVotes());
     manager.getVoteOptions().clearMaps();

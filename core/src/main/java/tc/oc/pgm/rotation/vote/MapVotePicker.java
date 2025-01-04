@@ -98,7 +98,7 @@ public class MapVotePicker {
     return selected;
   }
 
-  protected MapInfo getMap(List<MapInfo> selected, Map<MapInfo, VoteData> mapScores) {
+  public MapInfo getMap(List<MapInfo> selected, Map<MapInfo, VoteData> mapScores) {
     NavigableMap<Double, MapInfo> cumulativeScores = new TreeMap<>();
     double maxWeight = 0;
     for (Map.Entry<MapInfo, VoteData> map : mapScores.entrySet()) {
