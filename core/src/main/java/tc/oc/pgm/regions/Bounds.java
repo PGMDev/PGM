@@ -237,12 +237,7 @@ public class Bounds implements Cloneable {
   }
 
   public Iterable<BlockVector> getBlocks() {
-    return new Iterable<BlockVector>() {
-      @Override
-      public Iterator<BlockVector> iterator() {
-        return getBlockIterator();
-      }
-    };
+    return this::getBlockIterator;
   }
 
   @Override

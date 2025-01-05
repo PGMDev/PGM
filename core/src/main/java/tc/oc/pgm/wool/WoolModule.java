@@ -98,45 +98,37 @@ public class WoolModule implements MapModule<WoolMatchModule> {
         ShowOptions options = ShowOptions.parse(factory.getFilters(), woolEl);
         Boolean required = XMLUtils.parseBoolean(woolEl.getAttribute("required"), null);
 
-        ProximityMetric woolProximityMetric =
-            ProximityMetric.parse(
-                woolEl, "wool", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
-        ProximityMetric monumentProximityMetric =
-            ProximityMetric.parse(
-                woolEl, "monument", new ProximityMetric(ProximityMetric.Type.CLOSEST_BLOCK, false));
+        ProximityMetric woolProximityMetric = ProximityMetric.parse(
+            woolEl, "wool", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
+        ProximityMetric monumentProximityMetric = ProximityMetric.parse(
+            woolEl, "monument", new ProximityMetric(ProximityMetric.Type.CLOSEST_BLOCK, false));
 
         Vector location;
         if (factory.getProto().isOlderThan(MapProtos.WOOL_LOCATIONS)) {
           // The default location is at infinity, so players/blocks are always an infinite distance
           // from it
-          location =
-              new Vector(
-                  Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+          location = new Vector(
+              Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         } else {
           location = XMLUtils.parseVector(XMLUtils.getRequiredAttribute(woolEl, "location"));
         }
 
-        MonumentWoolFactory wool =
-            new MonumentWoolFactory(
-                id,
-                required,
-                options,
-                team,
-                woolProximityMetric,
-                monumentProximityMetric,
-                color,
-                location,
-                placement,
-                craftable);
+        MonumentWoolFactory wool = new MonumentWoolFactory(
+            id,
+            required,
+            options,
+            team,
+            woolProximityMetric,
+            monumentProximityMetric,
+            color,
+            location,
+            placement,
+            craftable);
         factory.getFeatures().addFeature(woolEl, wool);
         woolFactories.put(team, wool);
       }
 
-      if (woolFactories.size() > 0) {
-        return new WoolModule(woolFactories);
-      } else {
-        return null;
-      }
+      return woolFactories.isEmpty() ? null : new WoolModule(woolFactories);
     }
   }
 }

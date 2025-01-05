@@ -140,14 +140,11 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
     if (y != null) halves.add(new HalfspaceRegion(new Vector(0, y, 0), new Vector(0, dir, 0)));
     if (z != null) halves.add(new HalfspaceRegion(new Vector(0, 0, z), new Vector(0, 0, dir)));
 
-    switch (halves.size()) {
-      case 0:
-        throw new InvalidXMLException("Expected at least one of x, y, or z attributes", el);
-      case 1:
-        return halves.get(0);
-      default:
-        return new Intersect((Region[]) halves.toArray());
-    }
+    return switch (halves.size()) {
+      case 0 -> throw new InvalidXMLException("Expected at least one of x, y, or z attributes", el);
+      case 1 -> halves.getFirst();
+      default -> new Intersect(halves.toArray(Region[]::new));
+    };
   }
 
   @MethodParser("below")
@@ -301,6 +298,7 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
     Vector max = parser.vector(el, "max").attr().required();
     boolean relative = parser.parseBool(el, "relative").attr().orFalse();
     validate(child, BlockBoundedValidation.INSTANCE, new Node(el));
+    validate(child, StaticValidation.INSTANCE, new Node(el));
     return new ResizedRegion(child, min, max, relative);
   }
 

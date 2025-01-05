@@ -4,7 +4,6 @@ import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
 
 import com.google.common.collect.ImmutableRangeMap;
 import com.google.common.collect.Range;
-import com.google.common.collect.RangeMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -82,8 +81,9 @@ public class Renewable implements Listener, Tickable {
     return snapshotMatchModule;
   }
 
-  boolean isOriginalRenewable(BlockVector pos) {
-    if (!definition.region.contains(pos)) return false;
+  boolean isOriginalRenewable(Block block) {
+    if (!definition.region.contains(block)) return false;
+    BlockVector pos = BlockVectors.position(block);
     Filter.QueryResponse response = renewableCache.get(pos);
     if (response == null) {
       response = definition.renewableBlocks.query(new BlockQuery(snapshot().getOriginalBlock(pos)));
@@ -91,8 +91,9 @@ public class Renewable implements Listener, Tickable {
     return response.isAllowed();
   }
 
-  boolean isOriginalShuffleable(BlockVector pos) {
-    if (!definition.region.contains(pos)) return false;
+  boolean isOriginalShuffleable(Block block) {
+    if (!definition.region.contains(block)) return false;
+    BlockVector pos = BlockVectors.position(block);
     Filter.QueryResponse response = shuffleableCache.get(pos);
     if (response == null) {
       response =
@@ -113,7 +114,7 @@ public class Renewable implements Listener, Tickable {
       }
     }
 
-    if (isOriginalShuffleable(BlockVectors.position(newState))) {
+    if (isOriginalShuffleable(event.getBlock())) {
       if (definition.shuffleableBlocks.query(new BlockQuery(oldState)).isAllowed()) {
         shuffleableMaterialDeficit.increment(oldState, 1);
       }
@@ -158,17 +159,17 @@ public class Renewable implements Listener, Tickable {
 
   boolean isNew(BlockState currentState) {
     // If original block does not match renewable rule, block is new
-    BlockVector pos = BlockVectors.position(currentState);
-    if (!isOriginalRenewable(pos)) return true;
+    if (!isOriginalRenewable(currentState.getBlock())) return true;
 
     // If original and current world are both shuffleable, block is new
     MaterialData currentMaterial = MaterialData.block(currentState);
-    if (isOriginalShuffleable(pos)
+    if (isOriginalShuffleable(currentState.getBlock())
         && definition.shuffleableBlocks.query(new BlockQuery(currentState)).isAllowed())
       return true;
 
     // If current world matches original, block is new
-    if (currentMaterial.equals(snapshot().getOriginalMaterial(pos))) return true;
+    if (currentMaterial.equals(snapshot().getOriginalMaterial(BlockVectors.position(currentState))))
+      return true;
 
     // Otherwise, block is not new (can be renewed)
     return false;
@@ -225,8 +226,7 @@ public class Renewable implements Listener, Tickable {
   }
 
   BlockMaterialData chooseShuffledMaterial() {
-    ImmutableRangeMap.Builder<Double, BlockMaterialData> weightsBuilder =
-        ImmutableRangeMap.builder();
+    var weightsBuilder = ImmutableRangeMap.<Double, BlockMaterialData>builder();
     double sum = 0d;
     for (BlockMaterialData material : shuffleableMaterialDeficit.materials()) {
       double weight = shuffleableMaterialDeficit.get(material);
@@ -235,13 +235,13 @@ public class Renewable implements Listener, Tickable {
         sum += weight;
       }
     }
-    RangeMap<Double, BlockMaterialData> weights = weightsBuilder.build();
+    var weights = weightsBuilder.build();
     return weights.get(match.getRandom().nextDouble() * sum);
   }
 
   boolean renew(BlockVector pos) {
     BlockMaterialData material;
-    if (isOriginalShuffleable(pos)) {
+    if (isOriginalShuffleable(BlockVectors.blockAt(match.getWorld(), pos))) {
       // If position is shuffled, first try to find a nearby shuffleable block to swap with.
       // This helps to make shuffling less predictable when the world deficit is small or
       // out of proportion to the original distribution of world.

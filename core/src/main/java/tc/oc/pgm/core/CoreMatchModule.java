@@ -16,7 +16,6 @@ import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -64,9 +63,10 @@ public class CoreMatchModule implements MatchModule, Listener {
     if (event.getWorld() != this.match.getWorld()) return;
 
     if (Materials.isLava(event.getNewState().getType())) {
-      Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
+      var blockVector = BlockVectors.center(event.getNewState());
       // Vector ensuring it's inside leak region if it's above
-      Vector minVector = blockVector.clone().setY(0.5);
+      var minVector = blockVector.clone();
+      minVector.setY(0.5);
       for (Core core : this.cores) {
         if (core.hasLeaked() || !core.getLeakRegion().contains(minVector)) continue;
 
@@ -90,7 +90,7 @@ public class CoreMatchModule implements MatchModule, Listener {
     if (event.getWorld() != this.match.getWorld()) return;
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
 
-    Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
+    var blockVector = BlockVectors.center(event.getNewState());
 
     for (Core core : this.cores) {
       if (!core.hasLeaked() && core.getCasingRegion().contains(blockVector)) {
@@ -134,7 +134,7 @@ public class CoreMatchModule implements MatchModule, Listener {
     Block block = event.getBlock();
     if (block.getWorld() != this.match.getWorld()) return;
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
-    Vector center = BlockVectors.center(block).toVector();
+    var center = BlockVectors.center(block);
 
     for (Core core : this.cores) {
       if (!core.hasLeaked()
@@ -150,7 +150,7 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void lavaProtection(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
+    var blockVector = BlockVectors.center(event.getNewState());
     for (Core core : this.cores) {
       if (core.getLavaRegion().contains(blockVector)) {
         event.setCancelled(true);

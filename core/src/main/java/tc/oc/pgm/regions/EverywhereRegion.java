@@ -4,7 +4,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
 /** Wherever you go, here you are */
-public class EverywhereRegion implements RegionDefinition {
+public class EverywhereRegion implements RegionDefinition.HardStatic {
   public static final EverywhereRegion INSTANCE = new EverywhereRegion();
 
   private EverywhereRegion() {}

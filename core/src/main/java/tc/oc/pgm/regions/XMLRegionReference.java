@@ -14,6 +14,7 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.LocationQuery;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
@@ -21,7 +22,8 @@ import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.xml.Node;
 
-public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> implements Region {
+public class XMLRegionReference extends XMLFeatureReference<RegionDefinition>
+    implements Region.Static {
 
   public XMLRegionReference(
       FeatureDefinitionContext context,
@@ -33,7 +35,7 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
 
   @Override
   public boolean contains(Vector point) {
-    return get().contains(point);
+    return getStatic().contains(point);
   }
 
   @Override
@@ -43,7 +45,7 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
 
   @Override
   public boolean contains(BlockVector pos) {
-    return get().contains(pos);
+    return getStatic().contains(pos);
   }
 
   @Override
@@ -72,17 +74,7 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   }
 
   @Override
-  public boolean enters(Vector from, Vector to) {
-    return get().enters(from, to);
-  }
-
-  @Override
   public boolean exits(Location from, Location to) {
-    return get().exits(from, to);
-  }
-
-  @Override
-  public boolean exits(Vector from, Vector to) {
     return get().exits(from, to);
   }
 
@@ -102,6 +94,31 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   }
 
   @Override
+  public boolean isStatic() {
+    return get().isStatic();
+  }
+
+  @Override
+  public Region.Static getStatic() {
+    return get().getStatic();
+  }
+
+  @Override
+  public Region.Static getStaticImpl(Match match) {
+    return get().getStaticImpl(match);
+  }
+
+  @Override
+  public Region.Static getStatic(Match match) {
+    return get().getStatic(match);
+  }
+
+  @Override
+  public Region.Static getStatic(World world) {
+    return get().getStatic(world);
+  }
+
+  @Override
   public Bounds getBounds() {
     return get().getBounds();
   }
@@ -113,12 +130,12 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
 
   @Override
   public Iterator<BlockVector> getBlockVectorIterator() {
-    return get().getBlockVectorIterator();
+    return getStatic().getBlockVectorIterator();
   }
 
   @Override
   public Iterable<BlockVector> getBlockVectors() {
-    return get().getBlockVectors();
+    return getStatic().getBlockVectors();
   }
 
   @Override
@@ -129,11 +146,6 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition> im
   @Override
   public boolean matches(LocationQuery query) {
     return get().matches(query);
-  }
-
-  @Override
-  public Stream<BlockVector> getBlockPositions() {
-    return get().getBlockPositions();
   }
 
   @Override

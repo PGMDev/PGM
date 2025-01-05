@@ -32,6 +32,10 @@ public interface BlockVectors {
       Materials.LILY_PAD,
       parse(Material::valueOf, "CAKE_BLOCK", "CAKE"));
 
+  static BlockVector position(Block block) {
+    return new BlockVector(block.getX(), block.getY(), block.getZ());
+  }
+
   static BlockVector position(BlockState block) {
     return new BlockVector(block.getX(), block.getY(), block.getZ());
   }

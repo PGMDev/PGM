@@ -27,7 +27,6 @@ import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter.QueryResponse;
@@ -135,8 +134,8 @@ public class RegionMatchModule implements MatchModule, Listener {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    Vector from = event.getBlockFrom().toVector();
-    Vector to = event.getBlockTo().toVector();
+    var from = event.getBlockFrom();
+    var to = event.getBlockTo();
     Query query = new tc.oc.pgm.filters.query.PlayerQuery(event, player);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.EFFECT)) {
@@ -170,7 +169,7 @@ public class RegionMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void checkBlockTransform(final BlockTransformEvent event) {
-    Vector pos = BlockVectors.center(event.getNewState()).toVector();
+    var pos = BlockVectors.center(event.getNewState());
     ParticipantState actor = this.getActor(event);
 
     BlockState againstBlock = null;

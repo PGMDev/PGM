@@ -2,9 +2,10 @@ package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.util.math.TransformMatrix;
 
-public class ResizedRegion extends TransformedRegion {
+public class ResizedRegion extends TransformedRegion implements RegionDefinition.HardStatic {
   private final Vector min, max;
   private final boolean relative;
   private TransformMatrix matrix;

@@ -17,7 +17,9 @@ import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.kits.Kit;
@@ -46,7 +48,7 @@ public class BlockDropsRuleSet {
   }
 
   /** Return the subset of rules that may act on the given region */
-  public BlockDropsRuleSet subsetAffecting(FiniteBlockRegion region) {
+  public BlockDropsRuleSet subsetAffecting(Match match, FiniteBlockRegion region) {
     ImmutableList.Builder<BlockDropsRule> subset = ImmutableList.builder();
     for (BlockDropsRule rule : this.rules) {
       if (rule.region == null) {
@@ -54,10 +56,11 @@ public class BlockDropsRuleSet {
         continue;
       }
 
-      if (Bounds.disjoint(rule.region.getBounds(), region.getBounds())) continue;
+      Region.Static staticReg = region.getStatic(match);
+      if (Bounds.disjoint(staticReg.getBounds(), region.getBounds())) continue;
 
       for (BlockVector block : region.getBlockVectors()) {
-        if (rule.region.contains(block)) {
+        if (staticReg.contains(block)) {
           subset.add(rule);
           break;
         }

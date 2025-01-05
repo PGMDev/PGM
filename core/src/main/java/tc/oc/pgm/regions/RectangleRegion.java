@@ -3,7 +3,7 @@ package tc.oc.pgm.regions;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class RectangleRegion implements RegionDefinition {
+public class RectangleRegion implements RegionDefinition.HardStatic {
   protected final double minX;
   protected final double minZ;
   protected final double maxX;

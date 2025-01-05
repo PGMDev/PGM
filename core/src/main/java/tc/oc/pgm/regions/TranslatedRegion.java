@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 
 /** Region adaptor that applies a translation. */
@@ -29,5 +30,10 @@ public class TranslatedRegion extends TransformedRegion {
   @Override
   protected Bounds getTransformedBounds() {
     return this.region.getBounds().translate(this.offset);
+  }
+
+  @Override
+  public Region.Static getStaticImpl(Match match) {
+    return new TranslatedRegion(region.getStatic(match), offset);
   }
 }

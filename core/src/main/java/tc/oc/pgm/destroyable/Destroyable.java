@@ -120,7 +120,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     BlockDropsMatchModule bdmm = match.getModule(BlockDropsMatchModule.class);
     if (bdmm != null) {
-      this.blockDropsRuleSet = bdmm.getRuleSet().subsetAffecting(this.blockRegion);
+      this.blockDropsRuleSet = bdmm.getRuleSet().subsetAffecting(match, this.blockRegion);
     }
 
     this.recalculateHealth();

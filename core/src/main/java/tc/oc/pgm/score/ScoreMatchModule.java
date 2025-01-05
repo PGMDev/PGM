@@ -22,7 +22,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
@@ -212,8 +211,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null || !player.canInteract() || player.getBukkit().isDead()) return;
 
-    Vector from = event.getBlockFrom().toVector();
-    Vector to = event.getBlockTo().toVector();
+    var from = event.getBlockFrom();
+    var to = event.getBlockTo();
 
     for (ScoreBox box : this.scoreBoxes) {
       if (box.getRegion().enters(from, to) && box.canScore(player)) {

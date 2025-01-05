@@ -3,7 +3,7 @@ package tc.oc.pgm.regions;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class SectorRegion implements RegionDefinition {
+public class SectorRegion implements RegionDefinition.HardStatic {
   protected final double x, z;
   protected final double startAngle;
   protected final double endAngle;

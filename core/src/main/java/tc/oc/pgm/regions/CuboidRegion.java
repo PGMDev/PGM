@@ -4,11 +4,15 @@ import java.util.Random;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class CuboidRegion implements RegionDefinition {
-  private final Bounds bounds;
+public class CuboidRegion implements RegionDefinition.HardStatic {
+  protected final Bounds bounds;
 
   public CuboidRegion(Vector pos1, Vector pos2) {
-    this.bounds = new Bounds(Vector.getMinimum(pos1, pos2), Vector.getMaximum(pos1, pos2));
+    this(new Bounds(Vector.getMinimum(pos1, pos2), Vector.getMaximum(pos1, pos2)));
+  }
+
+  private CuboidRegion(Bounds bounds) {
+    this.bounds = bounds;
   }
 
   @Override
@@ -45,6 +49,24 @@ public class CuboidRegion implements RegionDefinition {
 
   private double randomRange(Random random, double min, double max) {
     return (max - min) * random.nextDouble() + min;
+  }
+
+  public Mutable asMutableCopy() {
+    return new Mutable(this.bounds.clone());
+  }
+
+  public static class Mutable extends CuboidRegion {
+    public Mutable(Bounds bounds) {
+      super(bounds);
+    }
+
+    public Vector getMutableMin() {
+      return bounds.min;
+    }
+
+    public Vector getMutableMax() {
+      return bounds.max;
+    }
   }
 
   @Override

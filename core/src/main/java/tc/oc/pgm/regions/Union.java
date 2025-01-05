@@ -1,10 +1,11 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class Union implements RegionDefinition {
+public class Union implements RegionDefinition.Static {
   private final Region[] regions;
 
   public Union(Region... regions) {
@@ -24,7 +25,7 @@ public class Union implements RegionDefinition {
   @Override
   public boolean contains(Vector point) {
     for (Region region : this.regions) {
-      if (region.contains(point)) {
+      if (region.getStatic().contains(point)) {
         return true;
       }
     }
@@ -42,6 +43,16 @@ public class Union implements RegionDefinition {
   }
 
   @Override
+  public boolean isStatic() {
+    for (Region region : this.regions) {
+      if (!region.isStatic()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
   public boolean isEmpty() {
     for (Region region : this.regions) {
       if (!region.isEmpty()) {
@@ -49,6 +60,15 @@ public class Union implements RegionDefinition {
       }
     }
     return true;
+  }
+
+  @Override
+  public Region.Static getStaticImpl(Match match) {
+    Region[] regions = new Region[this.regions.length];
+    for (int i = 0; i < this.regions.length; i++) {
+      regions[i] = this.regions[i].getStatic(match);
+    }
+    return new Union(regions);
   }
 
   @Override

@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,7 +24,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -37,7 +37,6 @@ import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.util.block.BlockVectors;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -165,7 +164,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (this.match.getWorld() != event.getWorld()) return;
 
     Entry<Team, MonumentWool> woolEntry =
-        this.findMonumentWool(BlockVectors.center(event.getNewState()).toVector());
+        this.findMonumentWool(event.getNewState().getBlock());
     if (woolEntry == null) return;
 
     MonumentWool wool = woolEntry.getValue();
@@ -227,9 +226,9 @@ public class WoolMatchModule implements MatchModule, Listener {
     }
   }
 
-  private Entry<Team, MonumentWool> findMonumentWool(Vector point) {
+  private Entry<Team, MonumentWool> findMonumentWool(Block block) {
     for (Entry<Team, MonumentWool> woolEntry : this.wools.entries()) {
-      if (woolEntry.getValue().getDefinition().getPlacementRegion().contains(point)) {
+      if (woolEntry.getValue().getDefinition().getPlacementRegion().contains(block)) {
         return woolEntry;
       }
     }

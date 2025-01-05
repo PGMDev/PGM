@@ -15,28 +15,54 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.LocationQuery;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.matcher.TypedFilter;
 import tc.oc.pgm.regions.Bounds;
-import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 /** Represents an arbitrary region in a Bukkit world. */
 public interface Region extends TypedFilter<LocationQuery> {
-  /** Test if the region contains the given point */
-  boolean contains(Vector point);
+  /** Static regions are ones which do not change depending on the world/match */
+  interface Static extends Region {
+    /** Test if the region contains the given point */
+    boolean contains(Vector point);
 
-  /** Test if the region contains the given point */
-  default boolean contains(Location point) {
-    return this.contains(point.toVector());
+    /** Test if the region contains the given point */
+    default boolean contains(Location point) {
+      return this.contains(point.toVector());
+    }
+
+    /** Test if the region contains the center of the given block */
+    default boolean contains(BlockVector blockPos) {
+      return this.contains((Vector) BlockVectors.center(blockPos));
+    }
+
+    /**
+     * Iterate over all the blocks inside this region.
+     *
+     * @throws UnsupportedOperationException if the region's blocks are not enumerable
+     */
+    default Iterator<BlockVector> getBlockVectorIterator() {
+      return Iterators.filter(this.getBounds().getBlockIterator(), this::contains);
+    }
+
+    default Iterable<BlockVector> getBlockVectors() {
+      return this::getBlockVectorIterator;
+    }
+
+    @Override
+    default Static getStatic() {
+      if (isStatic()) return this;
+      throw new UnsupportedOperationException("Can't get static for non-static region");
+    }
   }
 
-  /** Test if the region contains the center of the given block */
-  default boolean contains(BlockVector blockPos) {
-    return this.contains((Vector) BlockVectors.center(blockPos));
-  }
+  /** Test if the region contains the given point */
+  boolean contains(Location point);
 
   /** Test if the region contains the center of the given block */
   default boolean contains(Block block) {
@@ -50,7 +76,7 @@ public interface Region extends TypedFilter<LocationQuery> {
 
   /** Test if the region contains the given entity */
   default boolean contains(Entity entity) {
-    return this.contains(entity.getLocation().toVector());
+    return this.contains(entity.getLocation());
   }
 
   /** Test if the region contains the queried location */
@@ -63,24 +89,35 @@ public interface Region extends TypedFilter<LocationQuery> {
     return !this.contains(from) && this.contains(to);
   }
 
-  /** Test if moving from the first point to the second crosses into the region */
-  default boolean enters(Vector from, Vector to) {
-    return !this.contains(from) && this.contains(to);
-  }
-
   /** Test if moving from the first point to the second crosses out of the region */
   default boolean exits(Location from, Location to) {
-    return this.contains(from) && !this.contains(to);
-  }
-
-  /** Test if moving from the first point to the second crosses out of the region */
-  default boolean exits(Vector from, Vector to) {
     return this.contains(from) && !this.contains(to);
   }
 
   /** Can this region generate evenly distributed random points? */
   default boolean canGetRandom() {
     return false;
+  }
+
+  default boolean isStatic() {
+    return false;
+  }
+
+  default Static getStatic() {
+    if (this.isStatic() && this instanceof Static s) return s;
+    throw new UnsupportedOperationException("Can't get static for non-static region");
+  }
+
+  Static getStaticImpl(Match match);
+
+  default Static getStatic(Match match) {
+    if (isStatic()) return getStatic();
+    return getStaticImpl(match);
+  }
+
+  default Static getStatic(World world) {
+    if (isStatic()) return getStatic();
+    return getStaticImpl(PGM.get().getMatchManager().getMatch(world));
   }
 
   /**
@@ -126,26 +163,9 @@ public interface Region extends TypedFilter<LocationQuery> {
     return contains(query);
   }
 
-  /**
-   * Iterate over all the blocks inside this region.
-   *
-   * @throws UnsupportedOperationException if the region's blocks are not enumerable
-   */
-  default Iterator<BlockVector> getBlockVectorIterator() {
-    return Iterators.filter(this.getBounds().getBlockIterator(), this::contains);
-  }
-
-  default Iterable<BlockVector> getBlockVectors() {
-    return this::getBlockVectorIterator;
-  }
-
-  default Stream<BlockVector> getBlockPositions() {
-    return StreamUtils.of(getBlockVectorIterator());
-  }
-
   default Iterable<Block> getBlocks(World world) {
-    return () ->
-        Iterators.transform(getBlockVectorIterator(), pos -> BlockVectors.blockAt(world, pos));
+    return () -> Iterators.transform(
+        getStatic(world).getBlockVectorIterator(), pos -> BlockVectors.blockAt(world, pos));
   }
 
   default Stream<ChunkVector> getChunkPositions() {

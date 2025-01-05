@@ -97,6 +97,7 @@ public class WorldSnapshot {
    * @param region the region to get block states from
    */
   public Iterable<BlockData> getMaterials(Region region) {
-    return () -> MaterialData.iterator(chunkSnapshots, region.getBlockVectorIterator());
+    return () ->
+        MaterialData.iterator(chunkSnapshots, region.getStatic(world).getBlockVectorIterator());
   }
 }

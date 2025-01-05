@@ -104,7 +104,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     } catch (InvalidXMLException e) {
       throw new MapException(source, info, e.getMessage(), e);
     } catch (ModuleLoadException e) {
-      throw new MapException(source, info, e.getFullMessage(), e);
+      throw new MapException(source, info, e.getMessage(), e);
     } catch (JDOMParseException e) {
       // Set base uri so when error is displayed it shows what XML caused the issue
       Document d = e.getPartialDocument();

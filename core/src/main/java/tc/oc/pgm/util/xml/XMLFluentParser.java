@@ -52,7 +52,6 @@ public class XMLFluentParser {
     this.filters = factory.getFilters();
     this.regions = factory.getRegions();
     this.kits = factory.getKits();
-    this.variables = factory.needModule(VariablesModule.class);
   }
 
   public BoolBuilder parseBool(Element el, String... prop) {
@@ -171,6 +170,7 @@ public class XMLFluentParser {
 
   public <T extends Filterable<?>> Builder<Formula<T>, ?> formula(
       Class<T> clazz, Element el, String... prop) {
+    if (variables == null) this.variables = factory.needModule(VariablesModule.class);
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Formula<T> parse(Node node) {

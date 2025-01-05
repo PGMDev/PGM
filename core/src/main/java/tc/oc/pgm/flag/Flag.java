@@ -108,8 +108,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
         // always do this, but it does technically violate the contract of that method.
         banner = toBanner(r.getPosition().toLocation(match.getWorld()).getBlock());
       } else {
-        banner = StreamUtils.of(point.getRegion().getBlockVectors())
-            .map(pos -> toBanner(pos.toLocation(match.getWorld()).getBlock()))
+        banner = StreamUtils.of(point.getRegion().getBlocks(match.getWorld()))
+            .map(Flag::toBanner)
             .filter(Objects::nonNull)
             .findFirst()
             .orElse(null);
