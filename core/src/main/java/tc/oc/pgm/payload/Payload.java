@@ -17,6 +17,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.ControlPoint;
 import tc.oc.pgm.payload.track.Track;
+import tc.oc.pgm.regions.EmptyRegion;
 
 public class Payload extends ControlPoint {
 
@@ -64,7 +65,7 @@ public class Payload extends ControlPoint {
 
   @Override
   public Region getCaptureRegion() {
-    return captureRegion;
+    return captureRegion == null ? EmptyRegion.INSTANCE : captureRegion;
   }
 
   public Vector getCenterPoint() {
