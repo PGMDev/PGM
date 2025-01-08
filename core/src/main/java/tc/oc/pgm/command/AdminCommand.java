@@ -15,6 +15,7 @@ public final class AdminCommand {
   @Permission(Permissions.RELOAD)
   public void pgm() {
     PGM.get().reloadConfig();
+    PGM.get().getDatastore().refreshMapData();
   }
 
   @Command("loadnewmaps|findnewmaps|newmaps")
