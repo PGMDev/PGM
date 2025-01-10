@@ -7,12 +7,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.MapModule;
@@ -124,7 +122,6 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     }
   }
 
-  @Nullable
   @Override
   public VariablesMatchModule createMatchModule(Match match) throws ModuleLoadException {
     return new VariablesMatchModule(match, context);
@@ -132,10 +129,6 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
   public static class Factory implements MapModuleFactory<VariablesModule> {
 
-    // The limitation is due to them being used in exp4j formulas for.
-    public static final Pattern VARIABLE_ID = Pattern.compile("[A-Za-z_]\\w*");
-
-    @Nullable
     @Override
     public VariablesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {

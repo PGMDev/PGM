@@ -4,6 +4,7 @@ import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 
@@ -76,7 +77,12 @@ public abstract class TransformedRegion implements RegionDefinition.Static {
    */
   @Override
   public Vector getRandom(Random random) {
-    return this.transform(this.region.getRandom(random));
+    return this.transform(this.region.getStatic().getRandom(random));
+  }
+
+  @Override
+  public Vector getRandom(Match match) {
+    return this.transform(this.region.getRandom(match));
   }
 
   protected abstract Vector transform(Vector point);

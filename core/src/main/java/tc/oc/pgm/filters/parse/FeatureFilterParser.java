@@ -28,7 +28,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.Variable;
-import tc.oc.pgm.variables.VariablesModule;
+import tc.oc.pgm.variables.VariableParser;
 
 public class FeatureFilterParser extends FilterParser {
 
@@ -91,7 +91,7 @@ public class FeatureFilterParser extends FilterParser {
 
   private static final Pattern INLINE_VARIABLE =
       Pattern.compile("(%VAR%)(?:\\[(\\d+)])?\\s*=\\s*(%RANGE%|%NUM%)"
-          .replace("%VAR%", VariablesModule.Factory.VARIABLE_ID.pattern())
+          .replace("%VAR%", VariableParser.VARIABLE_ID.pattern())
           .replace("%RANGE%", XMLUtils.RANGE_DOTTED.pattern())
           .replace("%NUM%", "-?\\d*\\.?\\d+"));
 

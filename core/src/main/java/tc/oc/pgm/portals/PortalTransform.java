@@ -115,16 +115,16 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
     }
   }
 
-  static PortalTransform regional(Optional<Region> from, Region to) {
+  static PortalTransform regional(Optional<Region.Static> from, Region.Static to) {
     return new Regional(from, to);
   }
 
   class Regional implements PortalTransform {
     private final Random random;
-    private final Optional<Region> from;
-    private final Region to;
+    private final Optional<Region.Static> from;
+    private final Region.Static to;
 
-    private Regional(Optional<Region> from, Region to) {
+    private Regional(Optional<Region.Static> from, Region.Static to) {
       this.from = assertNotNull(from);
       this.to = assertNotNull(to);
       this.random = new Random();

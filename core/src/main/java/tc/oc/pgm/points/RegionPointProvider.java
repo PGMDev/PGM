@@ -37,7 +37,7 @@ public class RegionPointProvider implements PointProvider {
 
   @Override
   public Location getPoint(Match match, @Nullable Entity entity) {
-    Vector pos = this.region.getRandom(match.getRandom());
+    Vector pos = this.region.getRandom(match);
     PointProviderLocation location =
         makeSafe(new PointProviderLocation(match.getWorld(), pos.getX(), pos.getY(), pos.getZ()));
 

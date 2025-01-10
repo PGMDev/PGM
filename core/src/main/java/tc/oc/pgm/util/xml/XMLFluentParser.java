@@ -9,6 +9,7 @@ import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -124,8 +125,12 @@ public class XMLFluentParser {
     return new FilterBuilder(filters, el, prop);
   }
 
-  public RegionBuilder region(Element el, String... prop) {
-    return new RegionBuilder(regions, el, prop);
+  public RegionBuilder<Region> region(Element el, String... prop) {
+    return new RegionBuilder.OfRegion(regions, el, prop);
+  }
+
+  public RegionBuilder<Region.Static> staticRegion(Element el, String... prop) {
+    return new RegionBuilder.OfStatic(regions, el, prop);
   }
 
   public ItemBuilder item(Element el, String... prop) {

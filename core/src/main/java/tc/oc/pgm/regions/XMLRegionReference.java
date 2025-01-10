@@ -85,7 +85,12 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition>
 
   @Override
   public Vector getRandom(Random random) {
-    return get().getRandom(random);
+    return getStatic().getRandom(random);
+  }
+
+  @Override
+  public Vector getRandom(Match match) {
+    return get().getRandom(match);
   }
 
   @Override

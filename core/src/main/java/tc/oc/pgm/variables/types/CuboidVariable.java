@@ -112,6 +112,11 @@ public class CuboidVariable extends AbstractVariable<Match>
     return cuboid.isBlockBounded();
   }
 
+  @Override
+  public boolean canGetRandom() {
+    return cuboid.canGetRandom();
+  }
+
   public enum Component {
     MIN_X,
     MIN_Y,

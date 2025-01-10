@@ -32,10 +32,8 @@ import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.regions.RFAContext;
 import tc.oc.pgm.regions.RFAScope;
-import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionFilterApplication;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.TranslatedRegion;
 import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -70,36 +68,34 @@ public class PortalModule implements MapModule<PortalMatchModule> {
     @Override
     public PortalModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
+      var parser = factory.getParser();
       Set<Portal> portals = Sets.newHashSet();
-      RegionParser regionParser = factory.getRegions();
       RFAContext.Builder rfaContext = factory.getModule(RegionModule.class).getRFAContextBuilder();
 
       for (Element portalEl : XMLUtils.flattenElements(doc.getRootElement(), "portals", "portal")) {
 
-        PortalTransform transform =
-            PortalTransform.piecewise(
-                parseDoubleProvider(portalEl, "x", RelativeDoubleProvider.ZERO),
-                parseDoubleProvider(portalEl, "y", RelativeDoubleProvider.ZERO),
-                parseDoubleProvider(portalEl, "z", RelativeDoubleProvider.ZERO),
-                parseDoubleProvider(portalEl, "yaw", RelativeDoubleProvider.ZERO),
-                parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO));
+        PortalTransform transform = PortalTransform.piecewise(
+            parseDoubleProvider(portalEl, "x", RelativeDoubleProvider.ZERO),
+            parseDoubleProvider(portalEl, "y", RelativeDoubleProvider.ZERO),
+            parseDoubleProvider(portalEl, "z", RelativeDoubleProvider.ZERO),
+            parseDoubleProvider(portalEl, "yaw", RelativeDoubleProvider.ZERO),
+            parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO));
 
-        Region entrance;
+        Region.Static entrance;
         if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
-          entrance = regionParser.parseChildren(portalEl);
+          entrance = parser.staticRegion(portalEl).children().orNull();
         } else {
-          entrance = regionParser.parseRegionProperty(portalEl, "region");
+          entrance = parser.staticRegion(portalEl, "region").orNull();
         }
 
-        Region exit =
-            regionParser.parseProperty(portalEl, "destination", RandomPointsValidation.INSTANCE);
+        Region.Static exit =
+            parser.staticRegion(portalEl, "destination").randomPoints().orNull();
 
         if (exit != null) {
           // If there is an explicit exit region, create a transform for it and combine
           // it with the piecewise transform (so angle transforms are still applied).
-          transform =
-              PortalTransform.concatenate(
-                  transform, PortalTransform.regional(Optional.ofNullable(entrance), exit));
+          transform = PortalTransform.concatenate(
+              transform, PortalTransform.regional(Optional.ofNullable(entrance), exit));
         } else if (entrance != null && transform.invertible()) {
           // If no exit region is specified, but there is an entrance region, and the
           // piecewise transform is invertible, infer the exit region from the entrance region.
@@ -132,15 +128,12 @@ public class PortalModule implements MapModule<PortalMatchModule> {
         }
 
         // Figure out the forward trigger, from the dynamic filters or entrance region
-        Filter forwardFinal =
-            Stream.of(forward, transit, entrance)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElseThrow(
-                    () ->
-                        new InvalidXMLException(
-                            "Portal must have an entrance region, or one of 'forward' or 'transit' properties",
-                            portalEl));
+        Filter forwardFinal = Stream.of(forward, transit, entrance)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElseThrow(() -> new InvalidXMLException(
+                "Portal must have an entrance region, or one of 'forward' or 'transit' properties",
+                portalEl));
 
         // Figure out the (optional) reverse trigger, from dynamic filters or exit region
         Filter inverseTransit = transit != null ? new InverseFilter(transit) : null;
@@ -150,10 +143,9 @@ public class PortalModule implements MapModule<PortalMatchModule> {
 
         // Portal is always bidirectional if a reverse dynamic filter is specified,
         // otherwise it must be enabled explicitly.
-        final boolean bidirectional =
-            reverse != null
-                || transit != null
-                || XMLUtils.parseBoolean(portalEl.getAttribute("bidirectional"), false);
+        final boolean bidirectional = reverse != null
+            || transit != null
+            || XMLUtils.parseBoolean(portalEl.getAttribute("bidirectional"), false);
         if (bidirectional && !transform.invertible()) {
           throw new InvalidXMLException(
               "Bidirectional portal must have an invertible transform", portalEl);
@@ -185,20 +177,19 @@ public class PortalModule implements MapModule<PortalMatchModule> {
         factory.getFeatures().addFeature(portalEl, portal);
 
         if (bidirectional) {
-          Portal inversePortal =
-              new Portal(
-                  reverseFinal.orElse(null),
-                  transform.inverse(),
-                  participantFilter,
-                  observerFilter,
-                  sound,
-                  smooth);
+          Portal inversePortal = new Portal(
+              reverseFinal.orElse(null),
+              transform.inverse(),
+              participantFilter,
+              observerFilter,
+              sound,
+              smooth);
           portals.add(inversePortal);
           factory.getFeatures().addFeature(portalEl, inversePortal);
         }
       }
 
-      return (portals.size() == 0) ? null : new PortalModule(portals);
+      return portals.isEmpty() ? null : new PortalModule(portals);
     }
 
     /**
@@ -207,15 +198,13 @@ public class PortalModule implements MapModule<PortalMatchModule> {
      * <p>The region is extended up by 2m to allow for the height of the player.
      */
     private static void protectRegion(RFAContext.Builder rfaContext, Region region) {
-      region =
-          Union.of(
-              region,
-              TranslatedRegion.translate(region, new Vector(0, 1, 0)),
-              TranslatedRegion.translate(region, new Vector(0, 2, 0)));
+      region = Union.of(
+          region,
+          TranslatedRegion.translate(region, new Vector(0, 1, 0)),
+          TranslatedRegion.translate(region, new Vector(0, 2, 0)));
 
-      rfaContext.prepend(
-          new RegionFilterApplication(
-              RFAScope.BLOCK_PLACE, region, StaticFilter.DENY, PROTECT_MESSAGE, false));
+      rfaContext.prepend(new RegionFilterApplication(
+          RFAScope.BLOCK_PLACE, region, StaticFilter.DENY, PROTECT_MESSAGE, false));
     }
 
     private static DoubleProvider parseDoubleProvider(

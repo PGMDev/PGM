@@ -13,9 +13,11 @@ public class Union implements RegionDefinition.Static {
   }
 
   public static Region of(Region... regions) {
-    return regions.length == 0
-        ? EmptyRegion.INSTANCE
-        : regions.length == 1 ? regions[0] : new Union(regions);
+    return switch (regions.length) {
+      case 0 -> EmptyRegion.INSTANCE;
+      case 1 -> regions[0];
+      default -> new Union(regions);
+    };
   }
 
   public Region[] getRegions() {

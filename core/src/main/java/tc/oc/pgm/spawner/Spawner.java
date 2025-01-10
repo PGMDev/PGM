@@ -50,7 +50,7 @@ public class Spawner implements Listener, Tickable {
     if (match.getTick().tick - lastTick >= currentDelay) {
       for (Spawnable spawnable : definition.objects) {
         final Location location =
-            definition.spawnRegion.getRandom(match.getRandom()).toLocation(match.getWorld());
+            definition.spawnRegion.getRandom(match).toLocation(match.getWorld());
         spawnable.spawn(location, match);
         EFFECTS.spawnFlame(match.getWorld(), location);
         spawnedEntities += spawnable.getSpawnCount();
@@ -65,10 +65,8 @@ public class Spawner implements Listener, Tickable {
     } else {
       long maxDelay = TimeUtils.toTicks(definition.maxDelay);
       long minDelay = TimeUtils.toTicks(definition.minDelay);
-      currentDelay =
-          (long)
-              (match.getRandom().nextDouble() * (maxDelay - minDelay)
-                  + minDelay); // Picks a random tick duration between minDelay and maxDelay
+      currentDelay = (long) (match.getRandom().nextDouble() * (maxDelay - minDelay)
+          + minDelay); // Picks a random tick duration between minDelay and maxDelay
     }
     lastTick = match.getTick().tick;
   }

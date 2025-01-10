@@ -42,6 +42,18 @@ public interface Region extends TypedFilter<LocationQuery> {
     }
 
     /**
+     * Gets a random point contained within this region.
+     *
+     * @param match to use.
+     * @return Random point within this region.
+     * @throws UnsupportedOperationException if this region cannot generate random points
+     */
+    default Vector getRandom(Random match) {
+      throw new UnsupportedOperationException(
+          "Cannot generate a random point in " + this.getClass().getSimpleName());
+    }
+
+    /**
      * Iterate over all the blocks inside this region.
      *
      * @throws UnsupportedOperationException if the region's blocks are not enumerable
@@ -123,13 +135,12 @@ public interface Region extends TypedFilter<LocationQuery> {
   /**
    * Gets a random point contained within this region.
    *
-   * @param random Random generator to use.
+   * @param match to use.
    * @return Random point within this region.
    * @throws UnsupportedOperationException if this region cannot generate random points
    */
-  default Vector getRandom(Random random) {
-    throw new UnsupportedOperationException(
-        "Cannot generate a random point in " + this.getClass().getSimpleName());
+  default Vector getRandom(Match match) {
+    return getStatic(match).getRandom(match.getRandom());
   }
 
   /** Does this region contain a finite number of blocks? */

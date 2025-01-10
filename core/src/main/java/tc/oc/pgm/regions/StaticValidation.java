@@ -10,8 +10,10 @@ public class StaticValidation implements FeatureValidation<RegionDefinition> {
 
   @Override
   public void validate(RegionDefinition definition, Node node) throws InvalidXMLException {
-    if (!definition.isStatic()) {
-      throw new InvalidXMLException("Cannot use non-static region here", node);
-    }
+    if (!definition.isStatic()) throw makeException(node);
+  }
+
+  public static InvalidXMLException makeException(Node node) {
+    return new InvalidXMLException("Cannot use non-static region here", node);
   }
 }
