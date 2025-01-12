@@ -6,6 +6,7 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.mojang.datafixers.util.Pair;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
@@ -97,6 +98,14 @@ public class ModernEntityPackets implements EntityPackets {
   }
 
   @Override
+  public Packet updateHeadRotation(int entityId, Location location) {
+    PacketContainer packet = PlPacket.PL.createPacket(PacketType.Play.Server.ENTITY_HEAD_ROTATION);
+    packet.getIntegers().write(0, entityId);
+    packet.getBytes().write(0, (byte) (location.getYaw() * 256 / 360));
+    return new PlPacket(packet);
+  }
+
+  @Override
   public Packet entityMount(int entityId, int vehicleId) {
     PacketContainer packet = PlPacket.PL.createPacket(PacketType.Play.Server.MOUNT);
 
@@ -104,6 +113,17 @@ public class ModernEntityPackets implements EntityPackets {
     packet.getIntegerArrays().write(0, new int[] {entityId});
 
     return new PlPacket(packet);
+  }
+
+  @Override
+  public Packet entityEquipment(
+      int entityId, ItemStack helmet, ItemStack chest, ItemStack legs, ItemStack feet) {
+    List<Pair<EquipmentSlot, net.minecraft.world.item.ItemStack>> e = new ArrayList<>();
+    if (helmet != null) e.add(Pair.of(EquipmentSlot.HEAD, CraftItemStack.asNMSCopy(helmet)));
+    if (chest != null) e.add(Pair.of(EquipmentSlot.CHEST, CraftItemStack.asNMSCopy(chest)));
+    if (legs != null) e.add(Pair.of(EquipmentSlot.LEGS, CraftItemStack.asNMSCopy(legs)));
+    if (feet != null) e.add(Pair.of(EquipmentSlot.FEET, CraftItemStack.asNMSCopy(feet)));
+    return new ModernPacket<>(new ClientboundSetEquipmentPacket(entityId, e));
   }
 
   @Override
