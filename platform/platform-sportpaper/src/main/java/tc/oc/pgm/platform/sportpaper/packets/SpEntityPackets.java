@@ -2,10 +2,14 @@ package tc.oc.pgm.platform.sportpaper.packets;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.server.v1_8_R3.DataWatcher;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.PacketPlayOutAttachEntity;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityEquipment;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityHeadRotation;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityMetadata;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityTeleport;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntity;
@@ -82,15 +86,38 @@ public class SpEntityPackets implements EntityPackets {
         true)); // On Ground + Height Correction
   }
 
+  private static final EntityMock ENTITY_MOCK = new EntityMock();
+
+  @Override
+  public Packet updateHeadRotation(int entityId, Location location) {
+    return new SpPacket<>(new PacketPlayOutEntityHeadRotation(
+        ENTITY_MOCK.withId(entityId), (byte) (location.getYaw() * 256.0F / 360.0F)));
+  }
+
   @Override
   public Packet entityMount(int entityId, int vehicleId) {
     return new SpPacket<>(new PacketPlayOutAttachEntity(entityId, vehicleId, false));
   }
 
   @Override
+  public Packet entityEquipment(
+      int entityId, ItemStack helmet, ItemStack chest, ItemStack legs, ItemStack feet) {
+    List<Packet> packets = new ArrayList<>();
+    if (helmet != null) packets.add(makeEquipment(entityId, EquipmentSlot.HEAD, helmet));
+    if (chest != null) packets.add(makeEquipment(entityId, EquipmentSlot.CHEST, chest));
+    if (legs != null) packets.add(makeEquipment(entityId, EquipmentSlot.LEGS, legs));
+    if (feet != null) packets.add(makeEquipment(entityId, EquipmentSlot.FEET, feet));
+    return Packet.of(packets.toArray(Packet[]::new));
+  }
+
+  @Override
   public Packet entityHeadEquipment(int entityId, ItemStack helmet) {
-    return new SpPacket<>(new PacketPlayOutEntityEquipment(
-        entityId, EquipmentSlot.HEAD.ordinal(), CraftItemStack.asNMSCopy(helmet)));
+    return makeEquipment(entityId, EquipmentSlot.HEAD, helmet);
+  }
+
+  private Packet makeEquipment(int entityId, EquipmentSlot slot, ItemStack item) {
+    return new SpPacket<>(
+        new PacketPlayOutEntityEquipment(entityId, slot.ordinal(), CraftItemStack.asNMSCopy(item)));
   }
 
   @Override
@@ -99,5 +126,32 @@ public class SpEntityPackets implements EntityPackets {
         entityId,
         ((CraftEntity) entity).getHandle().getDataWatcher(),
         complete)); // true = all values, false = only dirty values
+  }
+
+  private static class EntityMock extends net.minecraft.server.v1_8_R3.Entity {
+    private int id;
+
+    public EntityMock() {
+      super(null);
+    }
+
+    @Override
+    public int getId() {
+      return id;
+    }
+
+    public EntityMock withId(int id) {
+      this.id = id;
+      return this;
+    }
+
+    @Override
+    protected void h() {}
+
+    @Override
+    protected void a(NBTTagCompound nbtTagCompound) {}
+
+    @Override
+    protected void b(NBTTagCompound nbtTagCompound) {}
   }
 }

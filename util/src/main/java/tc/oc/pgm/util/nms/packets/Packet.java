@@ -15,14 +15,11 @@ public interface Packet {
   }
 
   static Packet of(Packet... packets) {
-    switch (packets.length) {
-      case 0:
-        return NoOpPacket.INSTANCE;
-      case 1:
-        return packets[0];
-      default:
-        return new CompoundPacket(packets);
-    }
+    return switch (packets.length) {
+      case 0 -> NoOpPacket.INSTANCE;
+      case 1 -> packets[0];
+      default -> new CompoundPacket(packets);
+    };
   }
 
   class NoOpPacket implements Packet {

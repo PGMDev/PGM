@@ -1,13 +1,19 @@
 package tc.oc.pgm.util.nms.packets;
 
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
+import java.util.List;
+import java.util.UUID;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 
 public interface EntityPackets {
 
@@ -48,6 +54,38 @@ public interface EntityPackets {
     }
   }
 
+  default FakeEntity fakePlayer(Player original, ChatColor color) {
+    UUID uuid = UUID.randomUUID();
+    String team = uuid.toString().substring(0, 16);
+    // Add a reset to differentiate it from the real player name
+    String playerName = color + original.getName();
+    return new FakeEntity.Impl(allocateEntityId()) {
+      @Override
+      public Packet spawn(Location location, Vector velocity) {
+        var tabInfo = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
+        tabInfo.addPlayerInfo(uuid, playerName, 0, PLAYER_UTILS.getPlayerSkin(original), null);
+
+        return Packet.of(
+            tabInfo,
+            TAB_PACKETS.spawnPlayerPacket(entityId(), uuid, location, original),
+            TAB_PACKETS.teamCreatePacket(
+                team, team, color + "", "", false, false, List.of(playerName)));
+      }
+
+      @Override
+      public Packet teleport(Location location) {
+        return Packet.of(super.teleport(location), updateHeadRotation(entityId(), location));
+      }
+
+      @Override
+      public Packet destroy() {
+        var info = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.REMOVE_PLAYER);
+        info.addPlayerInfo(uuid);
+        return Packet.of(info, super.destroy(), TAB_PACKETS.teamRemovePacket(team));
+      }
+    };
+  }
+
   Packet spawnArmorStand(Location loc, int entityId, Vector velocity);
 
   Packet spawnWitherSkull(Location location, int entityId, Vector velocity);
@@ -56,7 +94,12 @@ public interface EntityPackets {
 
   Packet teleportEntityPacket(int entityId, Location location);
 
+  Packet updateHeadRotation(int entityId, Location location);
+
   Packet entityMount(int entityId, int vehicleId);
+
+  Packet entityEquipment(
+      int entityId, ItemStack helmet, ItemStack chest, ItemStack leggings, ItemStack boots);
 
   Packet entityHeadEquipment(int entityId, ItemStack helmet);
 

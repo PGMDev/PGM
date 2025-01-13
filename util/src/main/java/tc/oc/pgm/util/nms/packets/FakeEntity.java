@@ -35,6 +35,10 @@ public interface FakeEntity {
     return ENTITIES.entityHeadEquipment(entityId(), item);
   }
 
+  default Packet wear(ItemStack head, ItemStack chest, ItemStack legs, ItemStack boots) {
+    return ENTITIES.entityEquipment(entityId(), head, chest, legs, boots);
+  }
+
   abstract class Impl implements FakeEntity {
     private final int entityId;
 
