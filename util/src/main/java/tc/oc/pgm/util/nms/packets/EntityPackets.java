@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 
 public interface EntityPackets {
@@ -57,8 +58,9 @@ public interface EntityPackets {
   default FakeEntity fakePlayer(Player original, ChatColor color) {
     UUID uuid = UUID.randomUUID();
     String team = uuid.toString().substring(0, 16);
-    // Add a reset to differentiate it from the real player name
-    String playerName = color + original.getName();
+    // Add color to void matching real name. Cut to avoid exceeding 16 chars
+    String playerName = color + StringUtils.substring(original.getName(), 0, 14);
+    String suffix = StringUtils.substring(original.getName(), 14, 16);
     return new FakeEntity.Impl(allocateEntityId()) {
       @Override
       public Packet spawn(Location location, Vector velocity) {
@@ -69,7 +71,7 @@ public interface EntityPackets {
             tabInfo,
             TAB_PACKETS.spawnPlayerPacket(entityId(), uuid, location, original),
             TAB_PACKETS.teamCreatePacket(
-                team, team, color + "", "", false, false, List.of(playerName)));
+                team, team, color + "", suffix, false, false, List.of(playerName)));
       }
 
       @Override
