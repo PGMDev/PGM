@@ -4,7 +4,6 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
-import java.util.stream.Collectors;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.shops.menu.Category;
@@ -33,7 +32,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
   public List<Category> getVisibleCategories(MatchPlayer player) {
     return categories.stream()
         .filter(c -> c.getFilter().query(player).isAllowed())
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public void purchase(Icon icon, MatchPlayer buyer) {
