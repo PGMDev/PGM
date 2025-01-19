@@ -24,7 +24,7 @@ import tc.oc.pgm.variables.types.CuboidVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
 import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
-import tc.oc.pgm.variables.types.PlayerLocationVariable;
+import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
@@ -117,8 +117,8 @@ public class VariableParser {
   @MethodParser("player-location")
   public Variable<MatchPlayer> parsePlayerLocation(Element el) throws InvalidXMLException {
     var component =
-        XMLUtils.parseEnum(Node.fromAttr(el, "component"), PlayerLocationVariable.Component.class);
-    return PlayerLocationVariable.INSTANCES.get(component);
+        XMLUtils.parseEnum(Node.fromAttr(el, "component"), PlayerVariable.Component.class);
+    return PlayerVariable.of(component);
   }
 
   @MethodParser("cuboid")

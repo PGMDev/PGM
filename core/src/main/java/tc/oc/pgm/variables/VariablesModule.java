@@ -26,7 +26,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
-import tc.oc.pgm.variables.types.PlayerLocationVariable;
+import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
 
@@ -142,9 +142,9 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         features.addFeature(null, "score", ScoreVariable.INSTANCE);
         features.addFeature(null, "timelimit", TimeLimitVariable.INSTANCE);
         features.addFeature(null, "maxbuildheight", MaxBuildVariable.INSTANCE);
-        for (var entry : PlayerLocationVariable.INSTANCES.entrySet()) {
-          String key = "player." + entry.getKey().name().toLowerCase(Locale.ROOT);
-          features.addFeature(null, key, entry.getValue());
+        for (var component : PlayerVariable.Component.values()) {
+          String key = "player." + component.name().toLowerCase(Locale.ROOT);
+          features.addFeature(null, key, PlayerVariable.of(component));
         }
       }
 
