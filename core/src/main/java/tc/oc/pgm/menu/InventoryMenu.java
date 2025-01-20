@@ -57,6 +57,10 @@ public abstract class InventoryMenu implements InventoryProvider {
     inventory.open(getBukkit());
   }
 
+  public void close() {
+    inventory.close(getBukkit());
+  }
+
   public Player getBukkit() {
     return viewer.getBukkit();
   }
