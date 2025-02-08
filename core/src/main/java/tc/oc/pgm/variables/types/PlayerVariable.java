@@ -81,8 +81,7 @@ public class PlayerVariable extends AbstractVariable<MatchPlayer> {
     PLACE_Y(p -> intersection(p, i -> i.getPlaceAt().getY())),
     PLACE_Z(p -> intersection(p, i -> i.getPlaceAt().getZ())),
     HAS_TARGET(p -> intersection(p) == null ? 0 : 1),
-    HEALTH(
-        Damageable::getHealth, (p, h) -> p.setHealth(Math.max(0, Math.min(p.getMaxHealth(), h)))),
+    HEALTH(Damageable::getHealth, (p, h) -> p.setHealth(Math.clamp(h, 0.1f, p.getMaxHealth()))),
     MAX_HEALTH(Damageable::getMaxHealth, (p, h) -> p.setMaxHealth(Math.max(0.1f, h))),
     FOOD(Player::getFoodLevel, (p, f) -> p.setFoodLevel((int) f)),
     SATURATION(Player::getSaturation, (p, s) -> p.setSaturation((float) s)),
