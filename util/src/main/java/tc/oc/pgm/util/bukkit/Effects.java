@@ -1,12 +1,10 @@
 package tc.oc.pgm.util.bukkit;
 
-import java.util.concurrent.ScheduledExecutorService;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
@@ -29,5 +27,5 @@ public interface Effects {
 
   void blockBreak(Location location, BlockMaterialData material);
 
-  void renderRegion(Player player, Vector min, Vector max, ScheduledExecutorService executor);
+  void spawnFlame(Player player, Location loc, float x, float y, float z, int amt);
 }
