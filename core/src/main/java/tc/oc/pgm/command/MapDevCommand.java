@@ -3,26 +3,36 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
+import static tc.oc.pgm.util.text.TextException.exception;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.util.Vector;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.CommandDescription;
 import org.incendo.cloud.annotations.Default;
 import org.incendo.cloud.annotations.Flag;
 import org.incendo.cloud.annotations.Permission;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
+import tc.oc.pgm.util.block.BlockFaces;
+import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.bukkit.Effects;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariablesMatchModule;
@@ -109,5 +119,43 @@ public class MapDevCommand {
         .append(text(filter.query(target) + "", NamedTextColor.AQUA))
         .append(text(" to ", NamedTextColor.YELLOW))
         .append(target.getName()));
+  }
+
+  @Command("region <region>")
+  @CommandDescription("Visualize a region")
+  @Permission(Permissions.DEBUG)
+  public void visualizeRegion(MatchPlayer viewer, @Argument("region") Region region) {
+    var pl = viewer.getBukkit();
+    var world = pl.getWorld();
+    var reg = region.getStatic(world);
+    if (!reg.getBounds().isBlockFinite()) {
+      throw exception("Region is not finite");
+    }
+
+    var block = MaterialData.block(Material.GLASS);
+
+    PGM.get().getAsyncExecutor().execute(() -> reg.getBlockVectors().forEach(bv -> {
+      var b = BlockVectors.blockAt(world, bv);
+      for (var dir : BlockFaces.NEIGHBORS) {
+        if (!reg.contains(b.getRelative(dir))) {
+          block.sendBlockChange(pl, b.getLocation());
+          break;
+        }
+      }
+    }));
+
+    PGM.get()
+        .getAsyncExecutor()
+        .schedule(
+            () -> reg.getBlockVectors().forEach(bv -> {
+              var b = BlockVectors.blockAt(world, bv);
+              MaterialData.block(b).sendBlockChange(pl, b.getLocation());
+            }),
+            15,
+            TimeUnit.SECONDS);
+
+    var bounds = region.getStatic(pl.getWorld()).getBounds();
+    Vector min = bounds.getMin(), max = bounds.getMax();
+    Effects.EFFECTS.renderRegion(pl, min, max, PGM.get().getExecutor());
   }
 }
