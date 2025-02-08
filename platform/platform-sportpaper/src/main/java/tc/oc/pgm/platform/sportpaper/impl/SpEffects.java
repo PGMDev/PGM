@@ -104,6 +104,11 @@ public class SpEffects implements Effects {
     location.getWorld().playEffect(location, Effect.STEP_SOUND, material.encoded());
   }
 
+  @Override
+  public void spawnFlame(Player player, Location loc, float x, float y, float z, int amt) {
+    player.spigot().playEffect(loc, Effect.FLAME, 0, 0, x, y, z, 0, amt, 256);
+  }
+
   private float rgbToParticle(int rgb) {
     return Math.max(0.001f, (rgb / 255.0f));
   }

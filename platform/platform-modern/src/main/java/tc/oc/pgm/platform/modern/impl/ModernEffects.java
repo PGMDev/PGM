@@ -79,4 +79,9 @@ public class ModernEffects implements Effects {
         .getWorld()
         .playEffect(location, Effect.STEP_SOUND, ((ModernBlockMaterialData) material).getBlock());
   }
+
+  @Override
+  public void spawnFlame(Player player, Location loc, float x, float y, float z, int amt) {
+    player.spawnParticle(Particle.FLAME, loc, amt, x, y, z, 0, null, true);
+  }
 }

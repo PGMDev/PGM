@@ -26,4 +26,6 @@ public interface Effects {
   void explosion(Player player, Location location);
 
   void blockBreak(Location location, BlockMaterialData material);
+
+  void spawnFlame(Player player, Location loc, float x, float y, float z, int amt);
 }
