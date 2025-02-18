@@ -1,34 +1,56 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.text;
+
 import java.text.MessageFormat;
+import java.util.Map;
+import java.util.function.Function;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.VirtualComponent;
+import net.kyori.adventure.text.VirtualComponentRenderer;
 import net.kyori.adventure.text.renderer.TranslatableComponentRenderer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ComponentRenderer extends TranslatableComponentRenderer<Pointered> {
 
   public static final ComponentRenderer RENDERER = new ComponentRenderer();
+  private final Map<Class<?>, Function<Pointered, Object>> contextFactory = Map.of(
+      CommandSender.class,
+          p -> p.get(Identity.UUID)
+              .<CommandSender>map(Bukkit::getPlayer)
+              .orElse(Bukkit.getConsoleSender()),
+      Player.class, p -> p.get(Identity.UUID).map(Bukkit::getPlayer).orElse(null));
 
   private ComponentRenderer() {}
 
   @Override
-  public @NotNull Component render(@NotNull Component component, @NotNull Pointered context) {
-    if (component instanceof RenderableComponent) {
-      CommandSender sender =
-          context
-              .get(Identity.UUID)
-              .<CommandSender>map(Bukkit::getPlayer)
-              .orElse(Bukkit.getConsoleSender());
-      component = ((RenderableComponent) component).render(sender);
-    }
+  protected @NotNull Component renderVirtual(
+      @NotNull VirtualComponent vc, @NotNull Pointered pointer) {
+    var factory = contextFactory.get(vc.contextType());
+    if (factory == null)
+      throw new UnsupportedOperationException("Contest type not supported: " + vc.contextType());
 
-    return super.render(component, context);
+    Component rendered = doRender(vc, factory.apply(pointer));
+    var style = vc.style();
+    if (!style.isEmpty()) rendered = rendered.style(rendered.style().merge(style));
+    return rendered;
+  }
+
+  private static <T> Component doRender(VirtualComponent vc, T context) {
+    if (context == null) return text(vc.renderer().fallbackString());
+
+    if (!vc.contextType().isInstance(context))
+      throw new IllegalArgumentException("Wrong context type for virtual component: " + vc);
+
+    //noinspection unchecked
+    return ((VirtualComponentRenderer<? super T>) vc.renderer()).apply(context).asComponent();
   }
 
   @Override
