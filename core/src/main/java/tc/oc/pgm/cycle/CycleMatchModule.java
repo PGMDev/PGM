@@ -47,7 +47,7 @@ public class CycleMatchModule implements MatchModule, Listener {
   public void onPartyChange(PlayerPartyChangeEvent event) {
     if (event.wasParticipating()
         && match.isRunning()
-        && match.getParticipants().size() < PGM.get().getConfiguration().getMinimumPlayers()) {
+        && match.getParticipants().isEmpty()) {
       match.getLogger().info("Cycling due to empty match");
       match.finish();
       startCountdown(null);
