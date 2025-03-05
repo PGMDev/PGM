@@ -18,6 +18,7 @@ repositories {
     maven("https://repo.pgm.fyi/snapshots") // Sportpaper & other pgm-specific stuff
     maven("https://repo.dmulloy2.net/repository/public/") // ProtocolLib repo
     maven("https://repo.papermc.io/repository/maven-public/") // Paper builds & paperweight plugin
+    maven("https://jitpack.io") // Backup: jitpack
 }
 
 dependencies {
@@ -37,7 +38,10 @@ dependencies {
     api("org.reflections:reflections:0.10.2")
 
     // Optional plugin deps
-    compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
+    // Official repository is giving 403 when running on gh actions, switch to jitpack for now
+    //  See: https://github.com/dmulloy2/ProtocolLib/issues/3353#issuecomment-2701859137
+    // compileOnly("com.comphenix.protocol:ProtocolLib:5.3.0")
+    compileOnly("com.github.dmulloy2:ProtocolLib:5.3.0") // Sourced from jitpack
     compileOnly("com.viaversion:viaversion-api:5.0.0")
 
     // Minecraft includes these (or equivalents)
