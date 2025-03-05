@@ -24,6 +24,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.VictoryCondition;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.classes.PlayerClass;
@@ -74,6 +75,7 @@ import tc.oc.pgm.command.parsers.PartyParser;
 import tc.oc.pgm.command.parsers.PhasesParser;
 import tc.oc.pgm.command.parsers.PlayerClassParser;
 import tc.oc.pgm.command.parsers.PlayerParser;
+import tc.oc.pgm.command.parsers.RegionParser;
 import tc.oc.pgm.command.parsers.RotationParser;
 import tc.oc.pgm.command.parsers.SettingValueParser;
 import tc.oc.pgm.command.parsers.TeamParser;
@@ -192,6 +194,7 @@ public class PGMCommandGraph extends CommandGraph<PGM> {
         TypeFactory.parameterizedClass(Optional.class, VictoryCondition.class),
         new VictoryConditionParser());
     registerParser(Filter.class, FilterParser::new);
+    registerParser(Region.class, RegionParser::new);
     registerParser(SettingKey.class, new EnumParser<>(SettingKey.class, CommandKeys.SETTING_KEY));
     registerParser(SettingValue.class, new SettingValueParser());
     registerParser(Phase.Phases.class, PhasesParser::new);
