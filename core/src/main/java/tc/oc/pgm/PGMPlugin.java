@@ -49,6 +49,7 @@ import tc.oc.pgm.integrations.SimpleVanishIntegration;
 import tc.oc.pgm.listeners.AntiGriefListener;
 import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.FormattingListener;
+import tc.oc.pgm.listeners.InitialMatchLoader;
 import tc.oc.pgm.listeners.JoinLeaveAnnouncer;
 import tc.oc.pgm.listeners.MatchAnnouncer;
 import tc.oc.pgm.listeners.MotdListener;
@@ -393,6 +394,8 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new ServerPingDataListener(matchManager, mapOrder, getLogger()));
     registerEvents(new JoinLeaveAnnouncer(matchManager));
     registerEvents(chatManager);
+
+    registerEvents(new InitialMatchLoader(this, matchManager));
   }
 
   private boolean loadInitialMaps() {
