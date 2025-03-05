@@ -2,12 +2,15 @@ package tc.oc.pgm.util.listener;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
@@ -18,6 +21,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public class AfkTracker implements Listener {
 
@@ -36,7 +40,20 @@ public class AfkTracker implements Listener {
   }
 
   private void track(Player player) {
-    getActivity(player).lastActive = now;
+    softTrack(player, 1000);
+  }
+
+  private void softTrack(Player player, int amt) {
+    var activity = getActivity(player);
+    // Soft activity timed out, reset
+    if (activity.softActive.until(now, ChronoUnit.SECONDS) >= 5) {
+      activity.softActive = now;
+      activity.softCount = 0;
+    }
+    if ((activity.softCount += amt) > 15) {
+      activity.lastActive = activity.softActive = now;
+      activity.softCount = 0;
+    }
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
@@ -46,10 +63,17 @@ public class AfkTracker implements Listener {
 
   @EventHandler
   public void onPlayerMove(PlayerMoveEvent event) {
-    if (event.getFrom().getYaw() != event.getTo().getYaw()
-        && event.getFrom().getPitch() != event.getTo().getPitch()) {
-      track(event.getPlayer());
-    }
+    if (event.getFrom().getYaw() == event.getTo().getYaw()
+        || event.getFrom().getPitch() == event.getTo().getPitch()) return;
+    softTrack(event.getPlayer(), 3);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerCoarseMove(PlayerCoarseMoveEvent event) {
+    // Ignore just falling or jumping
+    Location to = event.getBlockTo(), from = event.getBlockFrom();
+    if (to.getBlockX() == from.getBlockX() && to.getBlockZ() == from.getBlockZ()) return;
+    softTrack(event.getPlayer(), 1);
   }
 
   @EventHandler
@@ -64,26 +88,32 @@ public class AfkTracker implements Listener {
 
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
+    // Ignore standing on pressure plates, only track right/left click
+    if (event.getAction() == Action.PHYSICAL) return;
     track(event.getPlayer());
   }
 
   @EventHandler
   public void onInventoryOpen(InventoryOpenEvent event) {
-    if (event.getPlayer() instanceof Player) track((Player) event.getPlayer());
+    // Don't full track, as pgm could make you open stuff like team picker while afk
+    if (event.getPlayer() instanceof Player p) softTrack(p, 3);
   }
 
   @EventHandler
   public void onInventoryClick(InventoryClickEvent event) {
-    if (event.getWhoClicked() instanceof Player) track((Player) event.getWhoClicked());
+    if (event.getWhoClicked() instanceof Player p) track(p);
   }
 
   @EventHandler
   public void onInventoryClose(InventoryCloseEvent event) {
-    if (event.getPlayer() instanceof Player) track((Player) event.getPlayer());
+    // Don't full track, as pgm closes any inventory on cycle
+    if (event.getPlayer() instanceof Player p) softTrack(p, 3);
   }
 
   public class Activity {
     private Instant lastActive = now;
+    private Instant softActive = now;
+    private int softCount = 0;
 
     public Instant getLastActive() {
       return lastActive;
