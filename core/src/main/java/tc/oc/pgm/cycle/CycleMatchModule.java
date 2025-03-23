@@ -49,9 +49,7 @@ public class CycleMatchModule implements MatchModule, Listener {
         && match.isRunning()
         && match.getParticipants().size()
             < PGM.get().getConfiguration().getMinimumPlayersMaintain()) {
-      match
-          .getLogger()
-          .info("Ending match due to an insufficient number of players.");
+      match.getLogger().info("Ending match due to an insufficient number of players.");
       match.finish();
       startCountdown(null);
     }
