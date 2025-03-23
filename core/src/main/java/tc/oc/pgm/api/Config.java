@@ -331,6 +331,13 @@ public interface Config {
   }
 
   /**
+   * Get the number of players needed to keep a match running.
+   *
+   * @return number of players
+   */
+  long getMinimumPlayersMaintain();
+
+  /**
    * Gets if extra votes are allowed based on the "pgm.vote.extra.#" permission.
    *
    * @return {@code true} if extra votes are enabled, {@code false} otherwise.
