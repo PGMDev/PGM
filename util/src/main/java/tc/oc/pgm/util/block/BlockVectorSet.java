@@ -157,6 +157,10 @@ public class BlockVectorSet implements Set<BlockVector> {
     this.set.clear();
   }
 
+  public LongSet getLongSet() {
+    return this.set;
+  }
+
   @Override
   public Object[] toArray() {
     throw new UnsupportedOperationException();

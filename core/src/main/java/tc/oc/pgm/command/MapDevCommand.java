@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+import static tc.oc.pgm.util.nms.PlayerUtils.*;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import java.util.List;
@@ -20,6 +21,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
@@ -32,9 +34,11 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.regions.RegionMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.block.BlockFaces;
+import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
@@ -136,7 +140,9 @@ public class MapDevCommand {
     if (!reg.getBounds().isBlockFinite()) {
       throw exception("Region is not finite");
     }
-    new DisplayRunner(pl, reg);
+
+    var maxBuild = viewer.getMatch().moduleRequire(RegionMatchModule.class).getMaxBuildHeight();
+    new DisplayRunner(pl, reg, maxBuild == null ? 255 : maxBuild);
   }
 
   private static class DisplayRunner implements Runnable {
@@ -145,8 +151,8 @@ public class MapDevCommand {
     private static final float COUNT_MUL = 0.1f;
 
     private final Player player;
-    private final Region.Static region;
     private final Location loc;
+    private final BlockVectorSet border = new BlockVectorSet();
 
     private final float[][] directions;
     private final double[][] edges, vertices;
@@ -154,9 +160,8 @@ public class MapDevCommand {
     private final Future<?> task;
     private int ticks = 150;
 
-    private DisplayRunner(Player player, Region.Static region) {
+    private DisplayRunner(Player player, Region.Static region, int maxHeight) {
       this.player = player;
-      this.region = region;
       this.loc = new Location(player.getWorld(), 0, 0, 0);
 
       var bounds = region.getBounds();
@@ -201,15 +206,18 @@ public class MapDevCommand {
         {max.getX(), max.getY(), max.getZ()},
       };
 
+      BlockVector cached = new BlockVector();
       region.getBlockVectors().forEach(bv -> {
-        var b = BlockVectors.blockAt(loc.getWorld(), bv);
+        if (bv.getY() > maxHeight) return;
         for (var dir : BlockFaces.NEIGHBORS) {
-          if (!region.contains(b.getRelative(dir))) {
-            GLASS.sendBlockChange(player, b.getLocation());
-            break;
-          }
+          BlockVectors.getRelative(bv, dir, cached);
+          if (region.contains(cached)) continue;
+          border.add(bv);
+          break;
         }
       });
+
+      PLAYER_UTILS.sendMultiBlockPacket(player, border, GLASS);
 
       task = PGM.get().getExecutor().scheduleWithFixedDelay(this, 0, 100, TimeUnit.MILLISECONDS);
     }
@@ -218,8 +226,7 @@ public class MapDevCommand {
     public void run() {
       if (ticks-- < 0) {
         task.cancel(true);
-        region.getBlocks(player.getWorld()).forEach(b -> MaterialData.block(b)
-            .sendBlockChange(player, b.getLocation()));
+        PLAYER_UTILS.sendMultiBlockPacket(player, border, null);
         return;
       }
       for (int i = 0; i < edges.length; i++) {

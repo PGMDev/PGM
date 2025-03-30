@@ -15,6 +15,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.material.Materials;
 
 public interface BlockVectors {
@@ -74,6 +75,14 @@ public interface BlockVectors {
     return world.getBlockAt(vector.getBlockX(), vector.getBlockY(), vector.getBlockZ());
   }
 
+  static BlockVector getRelative(BlockVector base, BlockFace dir, @Nullable BlockVector out) {
+    if (out == null) out = new BlockVector();
+    out.setX(base.getX() + dir.getModX());
+    out.setY(base.getY() + dir.getModY());
+    out.setZ(base.getZ() + dir.getModZ());
+    return out;
+  }
+
   /** BlockVector encoding API - pack a BlockVector into a single long */
   int SHIFT = 21;
 
@@ -81,7 +90,7 @@ public interface BlockVectors {
   long SIGN_MASK = 1 << (SHIFT - 1);
 
   /** Decode a single component from the packed coordinates */
-  static long unpack(long packed, int shift) {
+  private static long unpack(long packed, int shift) {
     packed >>= shift;
 
     // Sign extension
@@ -97,6 +106,12 @@ public interface BlockVectors {
   static BlockVector decodePos(long encoded) {
     return new BlockVector(
         unpack(encoded, 0), unpack(encoded, SHIFT), unpack(encoded, SHIFT + SHIFT));
+  }
+
+  static void decodeInto(long encoded, Location loc) {
+    loc.setX(unpack(encoded, 0));
+    loc.setY(unpack(encoded, SHIFT));
+    loc.setZ(unpack(encoded, SHIFT + SHIFT));
   }
 
   static final long ENCODED_NULL_POS = Long.MIN_VALUE;

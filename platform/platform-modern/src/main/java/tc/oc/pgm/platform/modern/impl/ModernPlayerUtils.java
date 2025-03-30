@@ -3,25 +3,40 @@ package tc.oc.pgm.platform.modern.impl;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.longs.LongIterator;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.platform.modern.material.ModernBlockData;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.platform.modern.util.Skins;
+import tc.oc.pgm.util.block.BlockVectorSet;
+import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
@@ -161,5 +176,47 @@ public class ModernPlayerUtils implements PlayerUtils {
     if (set) player.setMetadata(key, TRUE);
     else player.removeMetadata(key, BukkitUtils.getPlugin());
     return true;
+  }
+
+  @Override
+  public void sendMultiBlockPacket(
+      Player player, BlockVectorSet positions, @Nullable BlockMaterialData data) {
+    LongSet set = positions.getLongSet();
+    BlockData toSend = data instanceof ModernBlockData modern ? modern.getBlock() : null;
+
+    // A no-allocation implementation of a transform from BlockVectorSet to Map<Position, BlockData>
+    player.sendMultiBlockChange(new AbstractMap<Location, BlockData>() {
+      @Override
+      public @NotNull Set<Entry<Location, BlockData>> entrySet() {
+        return new AbstractSet<>() {
+          @Override
+          public Iterator<Entry<Location, BlockData>> iterator() {
+            return new Iterator<>() {
+              private final LongIterator iterator = set.iterator();
+              private final Location cachedLoc = player.getLocation();
+              private final Map.Entry<Location, BlockData> cachedEntry =
+                  new MutablePair<>(cachedLoc, toSend);
+
+              @Override
+              public boolean hasNext() {
+                return iterator.hasNext();
+              }
+
+              @Override
+              public Entry<Location, BlockData> next() {
+                BlockVectors.decodeInto(iterator.nextLong(), cachedLoc);
+                if (toSend == null) cachedEntry.setValue(cachedLoc.getBlock().getBlockData());
+                return cachedEntry;
+              }
+            };
+          }
+
+          @Override
+          public int size() {
+            return set.size();
+          }
+        };
+      }
+    });
   }
 }

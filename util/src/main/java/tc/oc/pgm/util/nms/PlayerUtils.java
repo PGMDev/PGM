@@ -5,7 +5,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.block.BlockVectorSet;
+import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.block.RayBlockIntersection;
+import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.skin.Skin;
 
@@ -46,4 +51,15 @@ public interface PlayerUtils {
   void setPotionParticles(Player player, boolean enabled);
 
   RayBlockIntersection getTargetedBlock(Player player);
+
+  default void sendMultiBlockPacket(
+      Player player, BlockVectorSet positions, @Nullable BlockMaterialData data) {
+    var location = player.getLocation();
+
+    positions.getLongSet().forEach((long encoded) -> {
+      BlockVectors.decodeInto(encoded, location);
+      (data != null ? data : MaterialData.block(location.getBlock()))
+          .sendBlockChange(player, location);
+    });
+  }
 }
