@@ -10,7 +10,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.util.named.NameStyle;
 
-public record ScoreConfig(
+public record ScoreDefinition(
     int scoreLimit,
     int deathScore,
     int killScore,

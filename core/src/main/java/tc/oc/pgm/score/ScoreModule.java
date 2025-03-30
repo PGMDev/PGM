@@ -37,11 +37,11 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
   private static final MapTag SCORE_TAG = new MapTag("deathmatch", Gamemode.DEATHMATCH, false);
   private static final MapTag BOX_TAG = new MapTag("scorebox", "Scorebox");
 
-  private final @NotNull ScoreConfig config;
+  private final @NotNull ScoreDefinition config;
   private final @NotNull Set<ScoreBoxDefinition> scoreBoxDefinitions;
 
   public ScoreModule(
-      @NotNull ScoreConfig config, @NotNull Set<ScoreBoxDefinition> scoreBoxDefinitions) {
+      @NotNull ScoreDefinition config, @NotNull Set<ScoreBoxDefinition> scoreBoxDefinitions) {
     assertNotNull(config, "score config");
     assertNotNull(scoreBoxDefinitions, "score box factories");
 
@@ -50,7 +50,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
   }
 
   @NotNull
-  public ScoreConfig getConfig() {
+  public ScoreDefinition getConfig() {
     return config;
   }
 
@@ -100,7 +100,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
       int killScore = 0;
       int mercyLimit = -1;
       int mercyLimitMin = -1;
-      var display = ScoreConfig.Display.NUMERICAL;
+      var display = ScoreDefinition.Display.NUMERICAL;
       Filter sbFilter = StaticFilter.ALLOW;
       ImmutableSet.Builder<ScoreBoxDefinition> scoreBoxes = ImmutableSet.builder();
 
@@ -120,7 +120,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
           mercyLimitMin = parser.parseInt(mercyEl, "min").attr().optional(-1);
         }
 
-        display = parser.parseEnum(ScoreConfig.Display.class, el, "display").optional(display);
+        display = parser.parseEnum(ScoreDefinition.Display.class, el, "display").optional(display);
 
         sbFilter = parser.filter(el, "scoreboard-filter").dynamic(Party.class).orAllow();
 
@@ -144,7 +144,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
         }
       }
 
-      var config = new ScoreConfig(
+      var config = new ScoreDefinition(
           scoreLimit, deathScore, killScore, mercyLimit, mercyLimitMin, display, sbFilter);
       return new ScoreModule(config, scoreBoxes.build());
     }

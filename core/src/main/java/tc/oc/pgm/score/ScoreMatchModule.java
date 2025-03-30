@@ -47,13 +47,13 @@ import tc.oc.pgm.util.text.TextFormatter;
 public class ScoreMatchModule implements MatchModule, Listener {
 
   private final Match match;
-  private final ScoreConfig config;
+  private final ScoreDefinition config;
   private final Set<ScoreBox> scoreBoxes;
   private final Map<UUID, Double> contributions = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private MercyRule mercyRule;
 
-  public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
+  public ScoreMatchModule(Match match, ScoreDefinition config, Set<ScoreBox> scoreBoxes) {
     this.match = match;
     this.config = config;
     this.scoreBoxes = scoreBoxes;
@@ -70,7 +70,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
     match.addVictoryCondition(new ScoreVictoryCondition());
   }
 
-  public ScoreConfig.Display getDisplay() {
+  public ScoreDefinition.Display getDisplay() {
     return config.display();
   }
 
@@ -94,6 +94,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
     }
 
     return this.config.scoreLimit();
+  }
+
+  public ScoreDefinition getDefinition() {
+    return this.config;
   }
 
   public Map<Competitor, Double> getScores() {

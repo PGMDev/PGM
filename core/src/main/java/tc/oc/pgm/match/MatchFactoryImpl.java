@@ -145,6 +145,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
   @Override
   public Match get() throws InterruptedException, ExecutionException {
+    await();
     return get(0, TimeUnit.MILLISECONDS);
   }
 

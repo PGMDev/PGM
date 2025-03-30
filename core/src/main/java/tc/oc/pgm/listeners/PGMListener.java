@@ -3,14 +3,10 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -24,7 +20,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -75,48 +70,9 @@ public class PGMListener implements Listener {
   private final Plugin parent;
   private final MatchManager mm;
 
-  // Single-write, multi-read lock used to create the first match
-  private final ReentrantReadWriteLock lock;
-
   public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
-    this.lock = new ReentrantReadWriteLock();
-  }
-
-  @EventHandler(ignoreCancelled = true)
-  public void onPrePlayerLogin(final AsyncPlayerPreLoginEvent event) {
-    if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED
-        || mm.getMatches().hasNext()) return;
-
-    // Create the match when the first player joins
-    if (lock.writeLock().tryLock()) {
-      // If the server is suspended, need to release so match can be created
-      NMS_HACKS.resumeServer();
-
-      try {
-        mm.createMatch(null).get();
-      } catch (InterruptedException | ExecutionException e) {
-        e.printStackTrace();
-      } finally {
-        lock.writeLock().unlock();
-      }
-    }
-
-    // If a match is being created, wait until its done
-    try {
-      lock.readLock().tryLock(15, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } finally {
-      lock.readLock().unlock();
-    }
-
-    if (!mm.getMatches().hasNext()) {
-      event.disallow(
-          AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          TextTranslations.translate("misc.incorrectWorld"));
-    }
   }
 
   @EventHandler
