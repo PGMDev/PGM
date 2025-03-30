@@ -59,7 +59,7 @@ public interface Materials {
   // A set of item types which, when used to interact with the match environment by non-playing
   // users, can potentially cause client-server de-sync
   MaterialMatcher FORBIDDEN_OBSERVER_TYPES = MaterialMatcher.builder()
-      .addAll(m -> DOOR_ITEMS.matches(m))
+      .add(DOOR_ITEMS)
       .addAll(Materials.LILY_PAD, Material.BUCKET, Material.LAVA_BUCKET, Material.WATER_BUCKET)
       .build();
 
