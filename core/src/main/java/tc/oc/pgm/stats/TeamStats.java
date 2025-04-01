@@ -35,7 +35,7 @@ public class TeamStats implements StatHolder {
   }
 
   @Override
-  public Number getStat(StatType type) {
+  public Number getStat(StatType.Builtin type) {
     return switch (type) {
       case KILLS -> teamKills;
       case DEATHS -> teamDeaths;

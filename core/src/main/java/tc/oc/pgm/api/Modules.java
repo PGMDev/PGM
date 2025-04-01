@@ -123,6 +123,7 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.stats.StatsMatchModule;
+import tc.oc.pgm.stats.StatsModule;
 import tc.oc.pgm.structure.StructureMatchModule;
 import tc.oc.pgm.structure.StructureModule;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -219,7 +220,6 @@ public final class Modules {
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
     register(ObserverToolsMatchModule.class, new ObserverToolsMatchModule.Factory());
     register(FireworkMatchModule.class, FireworkMatchModule::new);
-    register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
     register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
     register(PlayerTimeMatchModule.class, PlayerTimeMatchModule::new);
@@ -246,6 +246,7 @@ public final class Modules {
     register(RegionModule.class, RegionMatchModule.class, new RegionModule.Factory());
     register(FilterModule.class, FilterMatchModule.class, new FilterModule.Factory());
     register(SpawnModule.class, SpawnMatchModule.class, new SpawnModule.Factory());
+    register(StatsModule.class, StatsMatchModule.class, new StatsModule.Factory());
     register(CoreModule.class, CoreMatchModule.class, new CoreModule.Factory());
     register(WoolModule.class, WoolMatchModule.class, new WoolModule.Factory());
     register(ScoreModule.class, ScoreMatchModule.class, new ScoreModule.Factory());

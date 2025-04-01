@@ -93,6 +93,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final Match match;
   private final Map<UUID, PlayerStats> allPlayerStats = new HashMap<>();
   private final Table<Team, UUID, PlayerStats> stats = HashBasedTable.create();
+  private final List<StatType.OfFormula> formulaStats;
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
   private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
@@ -102,8 +103,9 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private List<MenuItem> teams;
 
-  public StatsMatchModule(Match match) {
+  public StatsMatchModule(Match match, List<StatType.OfFormula> formulaStats) {
     this.match = match;
+    this.formulaStats = formulaStats;
   }
 
   public Map<UUID, PlayerStats> getStats() {
@@ -290,14 +292,20 @@ public class StatsMatchModule implements MatchModule, Listener {
 
     // Gather aggregated player stats from this match
     List<AggStat<?>> stats = new ArrayList<>();
-    stats.add(new AggStat<>(StatType.KILLS, 0, new HashSet<>()));
-    stats.add(new AggStat<>(StatType.DEATHS, 0, new HashSet<>()));
-    stats.add(new AggStat<>(StatType.ASSISTS, 0, new HashSet<>()));
-    stats.add(new AggStat<>(StatType.BEST_KILL_STREAK, 0, new HashSet<>()));
-    stats.add(new AggStat<>(StatType.LONGEST_BOW_SHOT, 0, new HashSet<>()));
-    if (verboseStats) stats.add(new AggStat<>(StatType.DAMAGE, 0d, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.Builtin.KILLS, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.Builtin.DEATHS, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.Builtin.ASSISTS, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.Builtin.BEST_KILL_STREAK, 0, new HashSet<>()));
+    stats.add(new AggStat<>(StatType.Builtin.LONGEST_BOW_SHOT, 0, new HashSet<>()));
+    if (verboseStats) stats.add(new AggStat<>(StatType.Builtin.DAMAGE, 0d, new HashSet<>()));
+    for (StatType.OfFormula formulaStat : formulaStats) {
+      stats.add(new AggStat<>(formulaStat, 0d, new HashSet<>()));
+    }
 
-    allPlayerStats.forEach((uuid, s) -> stats.replaceAll(stat -> stat.track(uuid, s)));
+    allPlayerStats.forEach((uuid, s) -> {
+      MatchPlayer player = match.getPlayer(uuid);
+      stats.replaceAll(stat -> stat.track(uuid, player, s));
+    });
 
     var best = stats.stream()
         .filter(agg -> agg.value().doubleValue() > 0)
@@ -353,10 +361,13 @@ public class StatsMatchModule implements MatchModule, Listener {
       who = who.append((RenderableComponent) v -> {
         if (!(v instanceof Player p)) return empty();
         if (agg.players.contains(p.getUniqueId()) || hasNoStats(p.getUniqueId())) return empty();
-        var number = agg.type.makeNumber(getGlobalPlayerStat(p.getUniqueId()).getStat(agg.type));
+        var value = getStatValue(
+            agg.type, match.getPlayer(p.getUniqueId()), getGlobalPlayerStat(p.getUniqueId()));
+        if (value == null) return empty();
+        var number = agg.type.makeNumber(value);
         return !best ? number : text("   ").append(translatable("match.stats.you.short", number));
       });
-    return translatable(agg.type.key, who);
+    return agg.type.component(who);
   }
 
   private Component credit(Set<UUID> players) {
@@ -465,13 +476,23 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private record AggStat<T extends Number & Comparable<T>>(
       StatType type, T value, Set<UUID> players) {
-    public AggStat<T> track(UUID uuid, StatHolder stat) {
-      T newVal = (T) stat.getStat(type);
+    public AggStat<T> track(UUID uuid, MatchPlayer player, StatHolder stat) {
+      T newVal = (T) getStatValue(type, player, stat);
+      if (newVal == null) return this;
       int cmp = value.compareTo(newVal);
       if (cmp > 0) return this;
       if (cmp < 0) players.clear();
       players.add(uuid);
       return cmp == 0 ? this : new AggStat<>(type, newVal, players);
     }
+  }
+
+  private static Number getStatValue(StatType<?> statType, MatchPlayer player, StatHolder stat) {
+    return switch (statType) {
+      case StatType.Builtin builtin -> stat.getStat(builtin);
+      case StatType.OfFormula formulaStats -> player != null
+          ? formulaStats.formula().apply(player)
+          : null;
+    };
   }
 }

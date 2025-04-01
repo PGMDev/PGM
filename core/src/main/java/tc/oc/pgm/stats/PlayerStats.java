@@ -1,10 +1,10 @@
 package tc.oc.pgm.stats;
 
-import static tc.oc.pgm.stats.StatType.ASSISTS;
-import static tc.oc.pgm.stats.StatType.DEATHS;
-import static tc.oc.pgm.stats.StatType.KILLS;
-import static tc.oc.pgm.stats.StatType.KILL_DEATH_RATIO;
-import static tc.oc.pgm.stats.StatType.KILL_STREAK;
+import static tc.oc.pgm.stats.StatType.Builtin.ASSISTS;
+import static tc.oc.pgm.stats.StatType.Builtin.DEATHS;
+import static tc.oc.pgm.stats.StatType.Builtin.KILLS;
+import static tc.oc.pgm.stats.StatType.Builtin.KILL_DEATH_RATIO;
+import static tc.oc.pgm.stats.StatType.Builtin.KILL_STREAK;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -189,7 +189,7 @@ public class PlayerStats implements StatHolder {
 
   // Getters, both raw stats and some handy calculations
   @Override
-  public Number getStat(StatType type) {
+  public Number getStat(StatType.Builtin type) {
     return switch (type) {
       case KILLS -> kills;
       case DEATHS -> deaths;

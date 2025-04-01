@@ -1,6 +1,8 @@
 package tc.oc.pgm.util.xml;
 
 import java.time.Duration;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
@@ -18,6 +20,7 @@ import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.xml.parsers.BoolBuilder;
 import tc.oc.pgm.util.xml.parsers.Builder;
@@ -135,6 +138,24 @@ public class XMLFluentParser {
 
   public ItemBuilder item(Element el, String... prop) {
     return new ItemBuilder(kits, el, prop);
+  }
+
+  public Builder.Generic<Component> component(Element el, String... prop) {
+    return new Builder.Generic<Component>(el, prop) {
+      @Override
+      protected Component parse(Node node) throws InvalidXMLException {
+        return XMLUtils.parseFormattedText(node);
+      }
+    };
+  }
+
+  public Builder.Generic<TextColor> textColor(Element el, String... prop) {
+    return new Builder.Generic<TextColor>(el, prop) {
+      @Override
+      protected TextColor parse(Node node) throws InvalidXMLException {
+        return TextFormatter.convert(XMLUtils.parseChatColor(node));
+      }
+    };
   }
 
   public Builder.Generic<Kit> kit(Element el, String... prop) {

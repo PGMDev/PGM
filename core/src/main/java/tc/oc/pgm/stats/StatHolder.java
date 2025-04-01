@@ -11,17 +11,17 @@ public interface StatHolder {
   JoinConfiguration PIPE = separator(text("  |  "));
   JoinConfiguration SPACES = separator(text("  "));
 
-  Number getStat(StatType type);
+  Number getStat(StatType.Builtin type);
 
-  default Component pipeSeparated(StatType... types) {
+  default Component pipeSeparated(StatType.Builtin... types) {
     return getComponent(PIPE, types);
   }
 
-  default Component spaceSeparated(StatType... types) {
+  default Component spaceSeparated(StatType.Builtin... types) {
     return getComponent(SPACES, types);
   }
 
-  default Component getComponent(JoinConfiguration joining, StatType... types) {
+  default Component getComponent(JoinConfiguration joining, StatType.Builtin... types) {
     Component[] children = new Component[types.length];
     for (int i = 0; i < types.length; i++) children[i] = types[i].component(this);
     return join(joining, children);

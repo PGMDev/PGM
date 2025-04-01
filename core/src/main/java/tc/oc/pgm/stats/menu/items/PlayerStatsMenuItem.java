@@ -5,7 +5,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.JoinConfiguration.separator;
 import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
-import static tc.oc.pgm.stats.StatType.*;
+import static tc.oc.pgm.stats.StatType.Builtin.*;
 import static tc.oc.pgm.stats.StatsMatchModule.damageComponent;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
