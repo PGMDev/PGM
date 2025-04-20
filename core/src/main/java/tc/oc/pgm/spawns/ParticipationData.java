@@ -58,7 +58,7 @@ class ParticipationData {
       // Explicitly forgive switching to un-stack
       if (wasStacked && !newTeam.isStacked()) return null;
 
-      return TimePenalty.STACKED;
+      return TimePenalty.SWITCH;
     }
   }
 }

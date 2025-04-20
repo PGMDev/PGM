@@ -59,6 +59,9 @@ eula.txt
 *.sh
 *.bat
 
+# Sqlite databases (eg: community)
+*.sql
+
 # PGM generated files
 match-*/
 maps.zip
