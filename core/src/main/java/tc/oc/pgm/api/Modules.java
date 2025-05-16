@@ -94,6 +94,7 @@ import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
 import tc.oc.pgm.modules.ToolRepairModule;
+import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.picker.PickerMatchModule;
@@ -225,6 +226,7 @@ public final class Modules {
     register(PlayerTimeMatchModule.class, PlayerTimeMatchModule::new);
     register(SpectateMatchModule.class, SpectateMatchModule::new);
     register(DamageHistoryMatchModule.class, DamageHistoryMatchModule::new);
+    register(WeatherMatchModule.class, WeatherMatchModule::new);
 
     register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
