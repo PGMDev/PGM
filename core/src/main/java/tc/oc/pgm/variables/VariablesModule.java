@@ -29,7 +29,6 @@ import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
-import tc.oc.pgm.variables.types.WorldTimeVariable;
 
 public class VariablesModule implements MapModule<VariablesMatchModule> {
 
@@ -143,7 +142,8 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         features.addFeature(null, "score", ScoreVariable.INSTANCE);
         features.addFeature(null, "timelimit", TimeLimitVariable.INSTANCE);
         features.addFeature(null, "maxbuildheight", MaxBuildVariable.INSTANCE);
-        features.addFeature(null, "worldtime", WorldTimeVariable.INSTANCE);
+        // TODO: support fallback feature ids being overriden without being a breaking change
+        // features.addFeature(null, "worldtime", WorldTimeVariable.INSTANCE);
         for (var component : PlayerVariable.Component.values()) {
           String key = "player." + component.name().toLowerCase(Locale.ROOT);
           features.addFeature(null, key, PlayerVariable.of(component));
