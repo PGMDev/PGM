@@ -28,6 +28,7 @@ import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
+import tc.oc.pgm.variables.types.WorldTimeVariable;
 
 public class VariableParser {
   // The limitation is due to them being used in exp4j formulas for.
@@ -130,5 +131,10 @@ public class VariableParser {
       factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
     }
     return variable;
+  }
+
+  @MethodParser("worldtime")
+  public Variable<Match> parseWorldTime(Element el) {
+    return WorldTimeVariable.INSTANCE;
   }
 }

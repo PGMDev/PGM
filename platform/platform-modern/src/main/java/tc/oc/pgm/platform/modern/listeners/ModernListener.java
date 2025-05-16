@@ -13,10 +13,12 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
@@ -96,5 +98,12 @@ public class ModernListener implements Listener {
   @EventHandler
   public void onMatchLoad(WorldLoadEvent event) {
     event.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onPlayerTeleport(final PlayerTeleportEvent event) {
+    switch (event.getCause()) {
+      case NETHER_PORTAL, END_PORTAL -> event.setCancelled(true);
+    }
   }
 }

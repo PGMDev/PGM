@@ -142,6 +142,8 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         features.addFeature(null, "score", ScoreVariable.INSTANCE);
         features.addFeature(null, "timelimit", TimeLimitVariable.INSTANCE);
         features.addFeature(null, "maxbuildheight", MaxBuildVariable.INSTANCE);
+        // TODO: support fallback feature ids being overriden without being a breaking change
+        // features.addFeature(null, "worldtime", WorldTimeVariable.INSTANCE);
         for (var component : PlayerVariable.Component.values()) {
           String key = "player." + component.name().toLowerCase(Locale.ROOT);
           features.addFeature(null, key, PlayerVariable.of(component));
