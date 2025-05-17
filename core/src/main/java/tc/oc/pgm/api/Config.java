@@ -118,6 +118,13 @@ public interface Config {
   long getMatchLimit();
 
   /**
+   * If a map pool vote should be started even when the server restarts.
+   *
+   * @return If a vote should be started.
+   */
+  boolean shouldPollMapOnRestart();
+
+  /**
    * Gets the minimum number of players for a match to start.
    *
    * @return A minimum number of players, disabled if non-positive.

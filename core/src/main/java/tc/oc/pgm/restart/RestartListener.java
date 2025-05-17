@@ -1,9 +1,7 @@
 package tc.oc.pgm.restart;
 
-import java.time.Duration;
 import java.util.Iterator;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -24,47 +22,44 @@ public class RestartListener implements Listener {
   private final Logger logger;
 
   private long matchCount;
-  private @Nullable RequestRestartEvent.Deferral deferral;
+
+  private @Nullable RequestRestartEvent.Deferral playingDeferral;
+
+  static RestartListener instance;
 
   public RestartListener(PGM plugin, MatchManager matchManager) {
     this.plugin = plugin;
     this.matchManager = matchManager;
     this.logger = ClassLogger.get(plugin.getLogger(), getClass());
+    instance = this;
+  }
+
+  public static RestartListener getInstance() {
+    return instance;
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onRequestRestart(RequestRestartEvent event) {
+    // Don't do a countdown if there's nobody online
+    if (this.plugin.getServer().getOnlinePlayers().isEmpty()) return;
+
+    Iterator<Match> iterator = matchManager.getMatches();
+    Match match = iterator.hasNext() ? iterator.next() : null;
+    if (match == null) return;
+
+    if (match.isRunning()) {
+      this.playingDeferral = event.defer(this.plugin);
+      attemptMatchEnd(match);
+    }
   }
 
   private void attemptMatchEnd(Match match) {
-    if (this.deferral == null) return;
+    if (playingDeferral == null) return;
 
     if (match.isRunning()) {
       if (match.getParticipants().isEmpty()) {
         this.logger.info("Ending empty match due to restart request");
         match.finish();
-      }
-    }
-  }
-
-  @EventHandler
-  public void onRequestRestart(RequestRestartEvent event) {
-    if (this.plugin.getServer().getOnlinePlayers().isEmpty()) {
-      Bukkit.getServer().shutdown();
-    } else {
-      Iterator<Match> iterator = matchManager.getMatches();
-      Match match = iterator.hasNext() ? iterator.next() : null;
-      if (match != null) {
-        this.deferral = event.defer(this.plugin);
-        if (match.isRunning()) {
-          attemptMatchEnd(match);
-        } else {
-          SingleCountdownContext ctx = (SingleCountdownContext) match.getCountdown();
-          ctx.cancelAll();
-
-          Duration countdownTime =
-              RestartManager.getCountdown() != null
-                  ? RestartManager.getCountdown()
-                  : PGM.get().getConfiguration().getRestartTime();
-          this.logger.info("Starting restart countdown from " + countdownTime);
-          ctx.start(new RestartCountdown(match), countdownTime);
-        }
       }
     }
   }
@@ -79,15 +74,15 @@ public class RestartListener implements Listener {
         this.logger.info("Cancelling restart countdown");
         ctx.cancelAll();
       }
-      this.deferral = null;
     }
-    RestartManager.cancelRestart();
+    RestartManager.getInstance().cancelRestart();
   }
 
   @EventHandler(priority = EventPriority.LOW)
   public void onMatchEnd(MatchFinishEvent event) {
-    if (RestartManager.isQueued()) {
-      this.plugin.getServer().getPluginManager().callEvent(new RequestRestartEvent());
+    if (this.playingDeferral != null) {
+      this.playingDeferral.remove();
+      this.playingDeferral = null;
     }
   }
 
@@ -100,7 +95,7 @@ public class RestartListener implements Listener {
   public void onMatchLoad(MatchLoadEvent event) {
     long matchLimit = plugin.getConfiguration().getMatchLimit();
     if (++matchCount >= matchLimit && matchLimit > 0) {
-      RestartManager.queueRestart("Reached match limit of " + matchLimit);
+      RestartManager.getInstance().queueRestart("Reached match limit of " + matchLimit);
     }
   }
 }

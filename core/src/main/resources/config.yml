@@ -62,6 +62,7 @@ countdown:
 restart:
   uptime: "1d"    # Queues a restart after this amount of time has elapsed.
   match-limit: 60 # Queues a restart after this amount of matches.
+  poll-map-on-restart: false # If a map poll should be triggered during restarts
 
 # Changes behaviour when players try to /join a match.
 join:

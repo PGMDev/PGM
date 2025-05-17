@@ -11,7 +11,6 @@ import org.incendo.cloud.annotations.Flag;
 import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
-import tc.oc.pgm.restart.RequestRestartEvent;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.util.Audience;
 
@@ -25,8 +24,6 @@ public final class RestartCommand {
       Match match,
       @Argument("duration") Duration duration,
       @Flag(value = "force", aliases = "f") boolean force) {
-    RestartManager.queueRestart("Restart requested via /queuerestart command", duration);
-
     if (force && match.isRunning()) {
       match.finish();
     }
@@ -37,6 +34,7 @@ public final class RestartCommand {
       audience.sendMessage(translatable("admin.queueRestart.restartingNow", NamedTextColor.GREEN));
     }
 
-    match.callEvent(new RequestRestartEvent());
+    RestartManager.getInstance()
+        .queueRestart("Restart requested via /queuerestart command", duration);
   }
 }

@@ -140,6 +140,10 @@ public class VotingPool extends MapPool {
     tickScores(match);
   }
 
+  public void startMapPoll(Match match) {
+    currentPoll = new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
+  }
+
   @Override
   public void matchEnded(Match match) {
     tickScores(match);
@@ -149,11 +153,13 @@ public class VotingPool extends MapPool {
             () -> {
               // Start poll here, to avoid starting it if you set next another map.
               if (manager.getOverriderMap() != null) return;
-              // If there is a restart queued, don't start a vote
-              if (RestartManager.isQueued()) return;
 
-              currentPoll =
-                  new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
+              // If there is a restart queued, don't start a vote unless stated in config
+              if (RestartManager.getInstance().isQueued()
+                  && !RestartManager.getInstance().isDeferred()
+                  && !PGM.get().getConfiguration().shouldPollMapOnRestart()) return;
+
+              startMapPoll(match);
             },
             5,
             TimeUnit.SECONDS);

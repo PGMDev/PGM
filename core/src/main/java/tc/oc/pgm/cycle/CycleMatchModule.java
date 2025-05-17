@@ -59,7 +59,7 @@ public class CycleMatchModule implements MatchModule, Listener {
     final Match match = event.getMatch();
     mapOrder.matchEnded(match);
 
-    if (!RestartManager.isQueued()) {
+    if (!RestartManager.getInstance().isQueued()) {
       Duration duration = mapOrder.getCycleTime();
 
       if (!duration.isNegative()) {

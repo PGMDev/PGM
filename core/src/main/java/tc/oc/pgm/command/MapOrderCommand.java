@@ -53,7 +53,7 @@ public final class MapOrderCommand {
       @Flag(value = "force", aliases = "f") boolean force,
       @Flag(value = "reset", aliases = "r") boolean reset,
       @Argument("map") @Default(CURRENT) @FlagYielding MapInfo map) {
-    if (RestartManager.isQueued() && !force) {
+    if (RestartManager.getInstance().isQueued() && !force) {
       throw exception("map.setNext.confirm");
     }
 
@@ -77,8 +77,8 @@ public final class MapOrderCommand {
 
     mapOrder.setNextMap(map);
 
-    if (RestartManager.isQueued()) {
-      RestartManager.cancelRestart();
+    if (RestartManager.getInstance().isQueued()) {
+      RestartManager.getInstance().cancelRestart();
       viewer.sendWarning(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.GREEN));
     }
 

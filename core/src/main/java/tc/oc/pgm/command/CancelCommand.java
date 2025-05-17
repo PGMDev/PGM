@@ -25,7 +25,7 @@ public final class CancelCommand {
   @CommandDescription("Cancels all countdowns")
   @Permission(Permissions.STOP)
   public void cancel(CommandSender sender, Audience audience, Match match) {
-    if (RestartManager.isQueued()) {
+    if (RestartManager.getInstance().isQueued()) {
       match.callEvent(new CancelRestartEvent());
       audience.sendMessage(translatable("admin.cancelRestart.restartUnqueued", NamedTextColor.RED));
       return;
