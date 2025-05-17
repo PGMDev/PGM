@@ -28,7 +28,7 @@ public class WeatherMatchModule implements MatchModule, Listener {
     this.shouldChange = shouldChange;
   }
 
-  public void setWeather(Enum state) {
+  public void setWeather(WeatherMatchModule.WeatherType state) {
     shouldChange = true;
     World world = match.getWorld();
     switch (state) {
@@ -52,14 +52,14 @@ public class WeatherMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onWeatherChange(final WeatherChangeEvent event) {
-    if ((match.getWorld() != event.getWorld()) || !shouldChange) {
+    if ((match.getWorld() == event.getWorld()) && !shouldChange) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onThunderChange(ThunderChangeEvent event) {
-    if ((match.getWorld() != event.getWorld()) || !shouldChange) {
+    if ((match.getWorld() == event.getWorld()) && !shouldChange) {
       event.setCancelled(true);
     }
   }

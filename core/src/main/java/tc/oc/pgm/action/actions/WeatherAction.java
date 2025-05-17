@@ -5,9 +5,9 @@ import tc.oc.pgm.modules.WeatherMatchModule;
 
 public class WeatherAction extends AbstractAction<Match> {
 
-  private final Enum state;
+  private final WeatherMatchModule.WeatherType state;
 
-  public WeatherAction(Enum state) {
+  public WeatherAction(WeatherMatchModule.WeatherType state) {
     super(Match.class);
     this.state = state;
   }
