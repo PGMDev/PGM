@@ -66,7 +66,7 @@ restart:
 # Changes behaviour when players try to /join a match.
 join:
   min-players: 1      # Minimum number of players before a match can start.
-  min-players-maintain: 1 # Minimum number of players that a match should maintain before PGM ends the match
+  end-empty-matches: true # Should the match be ended when there are no players?
   anytime: true       # Can players join after a match has started?
   balance: true       # Can players be moved to make teams more balanced?
   queue: false        # Should players be put in a queue before joining the match?

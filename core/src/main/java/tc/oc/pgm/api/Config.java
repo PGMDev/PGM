@@ -331,11 +331,12 @@ public interface Config {
   }
 
   /**
-   * Get the number of players needed to keep a match running.
+   * Should we end the match if there are no players?
    *
-   * @return number of players
+   * @return {@code true} if the match should end when there are no participating players,
+   *     {@code false} if not
    */
-  long getMinimumPlayersMaintain();
+  boolean allowEndingEmptyMatches();
 
   /**
    * Gets if extra votes are allowed based on the "pgm.vote.extra.#" permission.
