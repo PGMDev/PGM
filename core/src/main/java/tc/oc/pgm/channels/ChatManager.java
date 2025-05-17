@@ -126,7 +126,14 @@ public class ChatManager implements Listener {
 
   private <T> boolean processChannelMessage(
       Channel<T> channel, MatchPlayer sender, CommandContext<CommandSender> context) {
-    if (!channel.canSendMessage(sender)) throw noPermission();
+    if (!channel.canSendMessage(sender)) {
+      if (sender.getSettings().getValue(SettingKey.CHAT).equals(SettingValue.CHAT_ADMIN)) {
+        sender.getSettings().resetValue(SettingKey.CHAT);
+        SettingKey.CHAT.update(sender);
+      }
+      throw noPermission();
+    }
+
     throwMuted(sender);
 
     T target = channel.getTarget(sender, context);
