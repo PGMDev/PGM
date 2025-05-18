@@ -25,41 +25,36 @@ public class WeatherMatchModule implements MatchModule, Listener {
 
   public WeatherMatchModule(Match match) {
     this.match = match;
-    this.shouldChange = shouldChange;
   }
 
   public void setWeather(WeatherMatchModule.WeatherType state) {
     shouldChange = true;
     World world = match.getWorld();
     switch (state) {
-      case WeatherType.CLEAR:
-        world.setStorm(false);
-        break;
-      case WeatherType.RAIN:
+      case WeatherType.CLEAR -> world.setStorm(false);
+      case WeatherType.RAIN -> {
         world.setStorm(true);
         world.setThundering(false);
         world.setThunderDuration(0);
-        break;
-      case WeatherType.THUNDER:
+      }
+      case WeatherType.THUNDER -> {
         world.setStorm(true);
         world.setThundering(true);
-        break;
-      default:
-        break;
+      }
     }
     shouldChange = false;
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onWeatherChange(final WeatherChangeEvent event) {
-    if ((match.getWorld() == event.getWorld()) && !shouldChange) {
+    if (match.getWorld() == event.getWorld() && !shouldChange) {
       event.setCancelled(true);
     }
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onThunderChange(ThunderChangeEvent event) {
-    if ((match.getWorld() == event.getWorld()) && !shouldChange) {
+    if (match.getWorld() == event.getWorld() && !shouldChange) {
       event.setCancelled(true);
     }
   }

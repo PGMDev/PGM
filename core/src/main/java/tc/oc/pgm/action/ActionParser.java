@@ -445,7 +445,7 @@ public class ActionParser {
 
   @MethodParser("weather")
   public WeatherAction parseWeather(Element el, Class<?> scope) throws InvalidXMLException {
-    return new WeatherAction(
+    return WeatherAction.of(
         parser.parseEnum(WeatherMatchModule.WeatherType.class, el, "state").required());
   }
 }
