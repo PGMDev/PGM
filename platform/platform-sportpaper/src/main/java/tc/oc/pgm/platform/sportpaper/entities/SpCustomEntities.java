@@ -16,6 +16,6 @@ public class SpCustomEntities implements CustomEntities {
         org.bukkit.entity.FallingBlock fallingBlock = blockMaterialData.spawnFallingBlock(loc);
         fallingBlock.setVelocity(velocity);
 
-        return new tc.oc.pgm.platform.sportpaper.entities.FallingBlock(blockMaterialData.spawnFallingBlock(loc));
+        return new tc.oc.pgm.platform.sportpaper.entities.FallingBlock(fallingBlock);
     }
 }
