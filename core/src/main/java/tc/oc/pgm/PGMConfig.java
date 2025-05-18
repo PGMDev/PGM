@@ -197,7 +197,7 @@ public final class PGMConfig implements Config {
     this.maxExtraVotes = parseInteger(config.getString("votes.max-extra-votes", "5"));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
-    this.endEmptyMatches = config.getBoolean("join.end-empty-matches", true);
+    this.endEmptyMatches = config.getBoolean("join.end-empty-matches", minPlayers > 0);
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
     this.priorityKick = parseBoolean(config.getString("join.priority-kick", "true"));
     this.balanceJoin = parseBoolean(config.getString("join.balance", "true"));
