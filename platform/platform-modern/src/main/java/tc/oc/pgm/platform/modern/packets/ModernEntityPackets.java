@@ -21,13 +21,9 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.util.CraftVector;
-import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.platform.modern.entities.DisplayEntity;
-import tc.oc.pgm.util.material.BlockMaterialData;
-import tc.oc.pgm.util.nms.entities.BlockEntity;
 import tc.oc.pgm.util.nms.packets.EntityPackets;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.platform.Supports;
@@ -42,12 +38,6 @@ public class ModernEntityPackets implements EntityPackets {
       new EntityDataAccessor<>(0, EntityDataSerializers.BYTE);
   private static final EntityDataAccessor<Integer> ENTITY_AIR =
       new EntityDataAccessor<>(1, EntityDataSerializers.INT);
-
-  @Override
-  public BlockEntity spawnBlockEntity(Location loc, BlockMaterialData blockMaterialData) {
-    final Entity entity = loc.getWorld().spawn(loc, BlockDisplay.class);
-    return new DisplayEntity(entity);
-  }
 
   @Override
   public Packet spawnArmorStand(Location loc, int entityId, Vector velocity) {

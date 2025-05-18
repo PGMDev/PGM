@@ -90,8 +90,6 @@ public interface EntityPackets {
     };
   }
 
-  BlockEntity spawnBlockEntity(Location loc, BlockMaterialData blockMaterialData);
-
   Packet spawnArmorStand(Location loc, int entityId, Vector velocity);
 
   Packet spawnWitherSkull(Location location, int entityId, Vector velocity);

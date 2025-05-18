@@ -1,7 +1,7 @@
 package tc.oc.pgm.projectile;
 
 import static tc.oc.pgm.util.Assert.assertTrue;
-import static tc.oc.pgm.util.nms.Packets.ENTITIES;
+import static tc.oc.pgm.util.nms.Entities.CUSTOM_ENTITIES;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -136,65 +136,60 @@ public class ProjectileMatchModule implements MatchModule, Listener {
                     ce.entityType() == ProjectileDefinition.ProjectileEntity.CustomEntityType.BLOCK) {
               loc.setPitch(0);
               loc.setYaw(0);
-              blockEntity = ENTITIES.spawnBlockEntity(loc, projectileDefinition.blockMaterial);
-              projectile = blockEntity.entity();
+              blockEntity = CUSTOM_ENTITIES.spawnBlockEntity(loc, projectileDefinition.blockMaterial, ce.size());
             } else if (projectileDefinition.projectile instanceof ProjectileDefinition.ProjectileEntity.RealEntity re) {
               projectile =
                       player.getWorld().spawn(loc, re.entityType());
             }
           }
-          projectile.setVelocity(velocity);
+          if (projectile != null) {
+            projectile.setVelocity(velocity);
+            projectile.setMetadata(
+                    "projectileDefinition", new FixedMetadataValue(PGM.get(), projectileDefinition));
+          }
         }
         if (projectileDefinition.power != null && projectile instanceof Explosive) {
           ((Explosive) projectile).setYield(projectileDefinition.power);
         }
         if (blockEntity != null && blockEntity.isDisplayEntity()) {
-          Location loc = player.getEyeLocation();
-
-          blockEntity.align(loc.getPitch(), loc.getYaw(), projectileDefinition.scale);
-
-          blockEntity.setBlock(projectileDefinition.blockMaterial.getItemType());
-
           final Vector normalizedDirection = player.getLocation().getDirection().normalize();
           final LinearProjectilePath linearProjectilePath = new LinearProjectilePath(
             normalizedDirection, projectileDefinition.velocity
           );
-          final Location initialLocation = projectile.getLocation();
+          final Location initialLocation = blockEntity.getLocation();
 
           BlockEntity finalBlockEntity = blockEntity;
-          Entity finalProjectile = projectile;
+          ProjectileDefinition.ProjectileEntity.CustomEntity ce =
+                  (ProjectileDefinition.ProjectileEntity.CustomEntity) projectileDefinition.projectile;
           runFixedTimesAtPeriod(
               match.getExecutor(MatchScope.RUNNING),
               new BooleanSupplier() {
                 private int progress = 0;
 
-
                 @Override
                 public boolean getAsBoolean() {
                   finalBlockEntity.setTeleportationDuration(1);
 
-                  Location currentLocation = finalProjectile.getLocation();
+                  Location currentLocation = finalBlockEntity.getLocation();
                   Location incrementingLocation = currentLocation.clone();
                   Location newLocation = calculateTo(initialLocation, linearProjectilePath, ++progress);
 
-                  finalProjectile.teleport(newLocation);
-                  if (projectileDefinition.damage != null || projectileDefinition.solidBlockCollision) {
+                  finalBlockEntity.teleport(newLocation);
+                  if (projectileDefinition.damage != null || ce.solidBlockCollision()) {
                     while (currentLocation.distanceSquared(incrementingLocation) < currentLocation.distanceSquared(newLocation)) {
-                      if (blockDisplayCollision(projectileDefinition, player, incrementingLocation)) {
+                      if (blockDisplayCollision(projectileDefinition, ce, player, incrementingLocation)) {
                         return true;
                       }
-                      incrementingLocation.add(normalizedDirection.clone().multiply(projectileDefinition.scale));
+                      incrementingLocation.add(normalizedDirection.clone().multiply(ce.size()));
                     }
-                    return blockDisplayCollision(projectileDefinition, player, incrementingLocation);
+                    return blockDisplayCollision(projectileDefinition, ce, player, incrementingLocation);
                   }
                   return false;
                 }
               },
-              1L, projectileDefinition.maxTravelTime.toMillis(), projectile::remove
+              1L, ce.maxTravelTime().toMillis(), blockEntity::remove
           );
         }
-        projectile.setMetadata(
-            "projectileDefinition", new FixedMetadataValue(PGM.get(), projectileDefinition));
       } finally {
         launchingDefinition.remove();
       }
@@ -202,7 +197,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       // If the entity implements Projectile, it will have already generated a
       // ProjectileLaunchEvent.
       // Otherwise, we fire our custom event.
-      if (!realProjectile) {
+      if (!realProjectile && projectile != null) {
         EntityLaunchEvent launchEvent = new EntityLaunchEvent(projectile, event.getPlayer());
         match.callEvent(launchEvent);
         if (launchEvent.isCancelled()) {
@@ -221,9 +216,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     }
   }
 
-  private boolean blockDisplayCollision(ProjectileDefinition projectileDefinition, Player player, Location location) {
+  private boolean blockDisplayCollision(ProjectileDefinition projectileDefinition, ProjectileDefinition.ProjectileEntity.CustomEntity ce, Player player, Location location) {
     if (projectileDefinition.damage != null) {
-      Collection<Entity> nearbyEntities = location.getNearbyEntities(0.5 * projectileDefinition.scale, 0.5 * projectileDefinition.scale, 0.5 * projectileDefinition.scale);
+      Collection<Entity> nearbyEntities = location.getNearbyEntities(0.5 * ce.size(), 0.5 * ce.size(), 0.5 * ce.size());
       if (!nearbyEntities.isEmpty()) {
         Party playerParty = PGM.get().getMatchManager().getPlayer(player).getParty();
         for (Entity entity : nearbyEntities) {
@@ -236,9 +231,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
         }
       }
     }
-    if (projectileDefinition.solidBlockCollision) {
-      double posScale = 0.5 * projectileDefinition.scale;
-      double negScale = -0.5 * projectileDefinition.scale;
+    if (ce.solidBlockCollision()) {
+      double posScale = 0.5 * ce.size();
+      double negScale = -0.5 * ce.size();
 
       Block b1 = location.clone().add(negScale, negScale, negScale).getBlock();
       Block b2 = location.clone().add(posScale, negScale, negScale).getBlock();

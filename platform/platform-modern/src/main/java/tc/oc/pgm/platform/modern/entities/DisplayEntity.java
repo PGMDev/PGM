@@ -1,5 +1,6 @@
 package tc.oc.pgm.platform.modern.entities;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
@@ -14,25 +15,12 @@ public record DisplayEntity(Entity entity) implements BlockEntity {
         return true;
     }
 
-    public void align(float pitch, float yaw, float scale) {
-        final Matrix4f translation = new Matrix4f().translate(
-                new Vector3f(
-                        -0.5f * scale,
-                        -0.5f * scale,
-                        -0.5f * scale
-                ));
+    public Location getLocation() {
+        return entity.getLocation();
+    }
 
-        final Matrix4f rotationMatrix = new Matrix4f();
-        final Quaternionf rotation = new Quaternionf();
-        rotation.rotateLocalX((float) Math.toRadians(-1 * pitch));
-        rotation.rotateLocalY((float) Math.toRadians(180 - yaw));
-        rotation.get(rotationMatrix);
-
-        final Matrix4f scaleMatrix = new Matrix4f().scale(scale);
-        final Matrix4f transformationMatrix = rotationMatrix.mul(translation.mul(scaleMatrix));
-        ((BlockDisplay) entity).setTransformationMatrix(
-                transformationMatrix
-        );
+    public void teleport(Location loc) {
+        entity.teleport(loc);
     }
 
     @Override
@@ -43,5 +31,10 @@ public record DisplayEntity(Entity entity) implements BlockEntity {
     @Override
     public void setTeleportationDuration(int duration) {
         ((BlockDisplay) entity).setTeleportDuration(duration);
+    }
+
+    @Override
+    public void remove() {
+        entity.remove();
     }
 }

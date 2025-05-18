@@ -118,7 +118,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
             parser.parseBool(el, "solid-block-collision").orTrue(),
             parser.duration(el, "max-travel-time").optional(Duration.ofSeconds(1))
         );
-        default -> new ProjectileDefinition.ProjectileEntity.RealEntity(XMLUtils.parseEntityType(el));
+        default -> new ProjectileDefinition.ProjectileEntity.RealEntity(XMLUtils.parseEntityTypeAttribute(el, attributeName, def));
       };
     }
   }

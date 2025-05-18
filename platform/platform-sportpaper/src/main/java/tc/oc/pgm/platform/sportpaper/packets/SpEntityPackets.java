@@ -22,8 +22,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.util.material.BlockMaterialData;
-import tc.oc.pgm.util.nms.entities.BlockEntity;
 import tc.oc.pgm.util.nms.packets.EntityPackets;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.platform.Supports;
@@ -32,11 +30,6 @@ import tc.oc.pgm.util.platform.Supports;
 public class SpEntityPackets implements EntityPackets {
 
   private static final int WITHER_SKULL = 66;
-
-  @Override
-  public BlockEntity spawnBlockEntity(Location loc, BlockMaterialData blockMaterialData) {
-    return new tc.oc.pgm.platform.sportpaper.entities.FallingBlock(blockMaterialData.spawnFallingBlock(loc));
-  }
 
   @Override
   public Packet spawnArmorStand(Location loc, int entityId, Vector velocity) {
