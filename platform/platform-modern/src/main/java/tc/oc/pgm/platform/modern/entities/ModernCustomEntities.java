@@ -2,6 +2,7 @@ package tc.oc.pgm.platform.modern.entities;
 
 import org.bukkit.Location;
 import org.bukkit.entity.BlockDisplay;
+import org.bukkit.util.Vector;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -15,7 +16,7 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 @Supports(value = PAPER, minVersion = "1.20.6")
 public class ModernCustomEntities implements CustomEntities {
     @Override
-    public BlockEntity spawnBlockEntity(Location loc, BlockMaterialData blockMaterialData, float size) {
+    public BlockEntity spawnBlockEntity(Location loc, BlockMaterialData blockMaterialData, float size, Vector velocity) {
         Location initialLoc = loc.clone();
         loc.setPitch(0);
         loc.setYaw(0);
@@ -23,7 +24,6 @@ public class ModernCustomEntities implements CustomEntities {
         final BlockDisplay entity = loc.getWorld().spawn(loc, BlockDisplay.class);
         DisplayEntity blockEntity = new DisplayEntity(entity);
         blockEntity.setBlock(blockMaterialData.getItemType());
-//        blockEntity.align(initialLoc.getPitch(), initialLoc.getYaw(), size);
 
         final Matrix4f translation = new Matrix4f().translate(
                 new Vector3f(

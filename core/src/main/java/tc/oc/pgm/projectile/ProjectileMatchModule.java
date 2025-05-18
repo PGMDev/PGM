@@ -136,7 +136,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
                     ce.entityType() == ProjectileDefinition.ProjectileEntity.CustomEntityType.BLOCK) {
               loc.setPitch(0);
               loc.setYaw(0);
-              blockEntity = CUSTOM_ENTITIES.spawnBlockEntity(loc, projectileDefinition.blockMaterial, ce.size());
+              blockEntity = CUSTOM_ENTITIES.spawnBlockEntity(loc, projectileDefinition.blockMaterial, ce.size(), velocity);
             } else if (projectileDefinition.projectile instanceof ProjectileDefinition.ProjectileEntity.RealEntity re) {
               projectile =
                       player.getWorld().spawn(loc, re.entityType());
