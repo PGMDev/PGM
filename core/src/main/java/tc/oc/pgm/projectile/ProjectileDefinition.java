@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.util.material.BlockMaterialData;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
   protected @Nullable String name;
@@ -54,31 +53,22 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
     this.blockMaterial = blockMaterial;
   }
 
-  public sealed interface ProjectileEntity permits ProjectileEntity.RealEntity, ProjectileEntity.CustomEntity {
+  public sealed interface ProjectileEntity permits RealEntity, BlockEntityType {
+    boolean requiresBlockMaterial();
+  }
 
-    boolean acceptsBlockMaterial();
-
-    record RealEntity(Class<? extends Entity> entityType) implements ProjectileEntity {
-      @Override
-      public boolean acceptsBlockMaterial() {
-        return entityType.isAssignableFrom(FallingBlock.class) || NMSHacks.NMS_HACKS.isBlockDisplayEntity(entityType);
-      }
+  record RealEntity(Class<? extends Entity> entityType) implements ProjectileEntity {
+    @Override
+    public boolean requiresBlockMaterial() {
+      return FallingBlock.class.isAssignableFrom(entityType);
     }
+  }
 
-    record CustomEntity(
-      CustomEntityType entityType,
-      float size,
-      boolean solidBlockCollision,
-      Duration maxTravelTime
-    ) implements ProjectileEntity {
-      @Override
-      public boolean acceptsBlockMaterial() {
-        return entityType == ProjectileDefinition.ProjectileEntity.CustomEntityType.BLOCK;
-      }
-    }
-
-    enum CustomEntityType {
-      BLOCK
+  record BlockEntityType(float size, boolean solidBlockCollision, Duration maxTravelTime)
+      implements ProjectileEntity {
+    @Override
+    public boolean requiresBlockMaterial() {
+      return true;
     }
   }
 

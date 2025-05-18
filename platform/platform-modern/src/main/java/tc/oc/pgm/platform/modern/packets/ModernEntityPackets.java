@@ -1,5 +1,8 @@
 package tc.oc.pgm.platform.modern.packets;
 
+import static net.minecraft.world.entity.Entity.FLAG_INVISIBLE;
+import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.mojang.datafixers.util.Pair;
@@ -27,9 +30,6 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.util.nms.packets.EntityPackets;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.platform.Supports;
-
-import static net.minecraft.world.entity.Entity.FLAG_INVISIBLE;
-import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 @Supports(value = PAPER, minVersion = "1.20.6")
 public class ModernEntityPackets implements EntityPackets {

@@ -1,18 +1,13 @@
 package tc.oc.pgm.projectile;
 
 import static tc.oc.pgm.util.Assert.assertTrue;
-import static tc.oc.pgm.util.nms.Entities.CUSTOM_ENTITIES;
 
 import com.google.common.collect.ImmutableSet;
-
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -54,12 +49,12 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
-import tc.oc.pgm.projectile.path.LinearProjectilePath;
-import tc.oc.pgm.projectile.path.ProjectilePath;
+import tc.oc.pgm.util.MatchPlayers;
+import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.bukkit.entities.BlockEntity;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.nms.entities.BlockEntity;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule implements MatchModule, Listener {
@@ -91,195 +86,78 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     ParticipantState playerState = match.getParticipantState(player);
     if (playerState == null) return;
 
-    ProjectileDefinition projectileDefinition =
-        this.getProjectileDefinition(player.getItemInHand());
+    var definition = this.getProjectileDefinition(player.getItemInHand());
 
-    if (projectileDefinition != null
-        && isValidProjectileAction(event.getAction(), projectileDefinition.clickAction)) {
-      // Prevent the original projectile from being fired
-      event.setCancelled(true);
+    if (definition == null || !isValidProjectileAction(event.getAction(), definition.clickAction))
+      return;
 
-      if (this.isCooldownActive(player, projectileDefinition)) return;
+    // Prevent the original projectile from being fired
+    event.setCancelled(true);
 
-      var projType = projectileDefinition.projectile;
-      boolean realProjectile = projType instanceof ProjectileDefinition.ProjectileEntity.RealEntity re
-              && Projectile.class.isAssignableFrom(re.entityType());
-      if (projectileDefinition.projectile instanceof ProjectileDefinition.ProjectileEntity.RealEntity) {
-        realProjectile = Projectile.class.isAssignableFrom(
-            ((ProjectileDefinition.ProjectileEntity.RealEntity) projectileDefinition.projectile).entityType()
-        );
-      }
-      Vector velocity =
-          player.getEyeLocation().getDirection().multiply(projectileDefinition.velocity);
-      Entity projectile = null;
-      BlockEntity blockEntity = null;
-      try {
-        assertTrue(launchingDefinition.get() == null, "nested projectile launch");
-        launchingDefinition.set(projectileDefinition);
-        if (realProjectile) {
-          projectile = player.launchProjectile(
-            (((ProjectileDefinition.ProjectileEntity.RealEntity) projectileDefinition.projectile).entityType())
-              .asSubclass(Projectile.class),
-              velocity
-          );
-          if (projectile instanceof Fireball fireball && projectileDefinition.precise) {
-            NMSHacks.NMS_HACKS.setFireballDirection(fireball, velocity);
-          }
-        } else {
-          if ((projectileDefinition.projectile instanceof ProjectileDefinition.ProjectileEntity.RealEntity) &&
-                  FallingBlock.class.isAssignableFrom((((ProjectileDefinition.ProjectileEntity.RealEntity) projectileDefinition.projectile).entityType()))) {
-            projectile =
-                projectileDefinition.blockMaterial.spawnFallingBlock(player.getEyeLocation());
+    if (this.isCooldownActive(player, definition)) return;
+
+    var projType = definition.projectile;
+    boolean needsEvent = true;
+    Vector velocity = player.getEyeLocation().getDirection().multiply(definition.velocity);
+    Entity projectile = null;
+    try {
+      assertTrue(launchingDefinition.get() == null, "nested projectile launch");
+      launchingDefinition.set(definition);
+      switch (projType) {
+        case ProjectileDefinition.RealEntity(Class<? extends Entity> entityType) -> {
+          if (Projectile.class.isAssignableFrom(entityType)) {
+            needsEvent = false;
+
+            projectile = player.launchProjectile(entityType.asSubclass(Projectile.class), velocity);
+            if (projectile instanceof Fireball fireball && definition.precise) {
+              NMSHacks.NMS_HACKS.setFireballDirection(fireball, velocity);
+            }
           } else {
-            Location loc = player.getEyeLocation();
-            if ((projectileDefinition.projectile instanceof ProjectileDefinition.ProjectileEntity.CustomEntity ce) &&
-                    ce.entityType() == ProjectileDefinition.ProjectileEntity.CustomEntityType.BLOCK) {
-              loc.setPitch(0);
-              loc.setYaw(0);
-              blockEntity = CUSTOM_ENTITIES.spawnBlockEntity(loc, projectileDefinition.blockMaterial, ce.size(), velocity);
-            } else if (projectileDefinition.projectile instanceof ProjectileDefinition.ProjectileEntity.RealEntity re) {
-              projectile =
-                      player.getWorld().spawn(loc, re.entityType());
+            if (FallingBlock.class.isAssignableFrom(entityType)) {
+              projectile = definition.blockMaterial.spawnFallingBlock(player.getEyeLocation());
+            } else {
+              projectile = player.getWorld().spawn(player.getEyeLocation(), entityType);
             }
-          }
-          if (projectile != null) {
             projectile.setVelocity(velocity);
-            projectile.setMetadata(
-                    "projectileDefinition", new FixedMetadataValue(PGM.get(), projectileDefinition));
           }
         }
-        if (projectileDefinition.power != null && projectile instanceof Explosive) {
-          ((Explosive) projectile).setYield(projectileDefinition.power);
-        }
-        if (blockEntity != null && blockEntity.isDisplayEntity()) {
-          final Vector normalizedDirection = player.getLocation().getDirection().normalize();
-          final LinearProjectilePath linearProjectilePath = new LinearProjectilePath(
-            normalizedDirection, projectileDefinition.velocity
-          );
-          final Location initialLocation = blockEntity.getLocation();
-
-          BlockEntity finalBlockEntity = blockEntity;
-          ProjectileDefinition.ProjectileEntity.CustomEntity ce =
-                  (ProjectileDefinition.ProjectileEntity.CustomEntity) projectileDefinition.projectile;
-          runFixedTimesAtPeriod(
-              match.getExecutor(MatchScope.RUNNING),
-              new BooleanSupplier() {
-                private int progress = 0;
-
-                @Override
-                public boolean getAsBoolean() {
-                  finalBlockEntity.setTeleportationDuration(1);
-
-                  Location currentLocation = finalBlockEntity.getLocation();
-                  Location incrementingLocation = currentLocation.clone();
-                  Location newLocation = calculateTo(initialLocation, linearProjectilePath, ++progress);
-
-                  finalBlockEntity.teleport(newLocation);
-                  if (projectileDefinition.damage != null || ce.solidBlockCollision()) {
-                    while (currentLocation.distanceSquared(incrementingLocation) < currentLocation.distanceSquared(newLocation)) {
-                      if (blockDisplayCollision(projectileDefinition, ce, player, incrementingLocation)) {
-                        return true;
-                      }
-                      incrementingLocation.add(normalizedDirection.clone().multiply(ce.size()));
-                    }
-                    return blockDisplayCollision(projectileDefinition, ce, player, incrementingLocation);
-                  }
-                  return false;
-                }
-              },
-              1L, ce.maxTravelTime().toMillis(), blockEntity::remove
-          );
-        }
-      } finally {
-        launchingDefinition.remove();
-      }
-
-      // If the entity implements Projectile, it will have already generated a
-      // ProjectileLaunchEvent.
-      // Otherwise, we fire our custom event.
-      if (!realProjectile && projectile != null) {
-        EntityLaunchEvent launchEvent = new EntityLaunchEvent(projectile, event.getPlayer());
-        match.callEvent(launchEvent);
-        if (launchEvent.isCancelled()) {
-          projectile.remove();
-          return;
+        case ProjectileDefinition.BlockEntityType ce -> {
+          var be = BlockEntity.spawnBlockEntity(
+              player.getEyeLocation(), definition.blockMaterial, ce.size(), velocity);
+          new BlockRunner(definition, be, player, player.getEyeLocation());
         }
       }
 
-      if (projectileDefinition.throwable) {
-        InventoryUtils.consumeItem(event);
+      if (definition.power != null && projectile instanceof Explosive) {
+        ((Explosive) projectile).setYield(definition.power);
       }
+      if (projectile != null) {
+        projectile.setMetadata(
+            "projectileDefinition", new FixedMetadataValue(PGM.get(), definition));
+      }
+    } finally {
+      launchingDefinition.remove();
+    }
 
-      if (projectileDefinition.coolDown != null) {
-        startCooldown(player, projectileDefinition);
+    // If the entity implements Projectile, it will have already generated a
+    // ProjectileLaunchEvent.
+    // Otherwise, we fire our custom event.
+    if (needsEvent && projectile != null) {
+      EntityLaunchEvent launchEvent = new EntityLaunchEvent(projectile, event.getPlayer());
+      match.callEvent(launchEvent);
+      if (launchEvent.isCancelled()) {
+        projectile.remove();
+        return;
       }
     }
-  }
 
-  private boolean blockDisplayCollision(ProjectileDefinition projectileDefinition, ProjectileDefinition.ProjectileEntity.CustomEntity ce, Player player, Location location) {
-    if (projectileDefinition.damage != null) {
-      Collection<Entity> nearbyEntities = location.getNearbyEntities(0.5 * ce.size(), 0.5 * ce.size(), 0.5 * ce.size());
-      if (!nearbyEntities.isEmpty()) {
-        Party playerParty = PGM.get().getMatchManager().getPlayer(player).getParty();
-        for (Entity entity : nearbyEntities) {
-          if (entity instanceof Player) {
-            if (playerParty != PGM.get().getMatchManager().getPlayer(((Player) entity)).getParty()) {
-              ((Player) entity).damage(projectileDefinition.damage, player);
-              return true;
-            }
-          }
-        }
-      }
+    if (definition.throwable) {
+      InventoryUtils.consumeItem(event);
     }
-    if (ce.solidBlockCollision()) {
-      double posScale = 0.5 * ce.size();
-      double negScale = -0.5 * ce.size();
 
-      Block b1 = location.clone().add(negScale, negScale, negScale).getBlock();
-      Block b2 = location.clone().add(posScale, negScale, negScale).getBlock();
-      Block b3 = location.clone().add(negScale, posScale, negScale).getBlock();
-      Block b4 = location.clone().add(posScale, posScale, negScale).getBlock();
-      Block b5 = location.clone().add(negScale, negScale, posScale).getBlock();
-      Block b6 = location.clone().add(posScale, negScale, posScale).getBlock();
-      Block b7 = location.clone().add(negScale, posScale, posScale).getBlock();
-      Block b8 = location.clone().add(posScale, posScale, posScale).getBlock();
-
-      return b1.getType().isSolid() || b2.getType().isSolid() || b3.getType().isSolid() || b4.getType().isSolid() || b5.getType().isSolid() || b6.getType().isSolid() || b7.getType().isSolid() || b8.getType().isSolid();
+    if (definition.coolDown != null) {
+      startCooldown(player, definition);
     }
-    return false;
-  }
-
-  // For entities which need their velocity simulated
-  private Location calculateTo(
-          final Location entityLocation,
-          final ProjectilePath path,
-          final int progress) {
-    return entityLocation.clone().add(path.getPositionAtProgress(progress));
-  }
-
-  private static void runFixedTimesAtPeriod(
-    final ScheduledExecutorService scheduledExecutorService, final BooleanSupplier runnable,
-    final long periodTicks, final long upperBoundMillis,
-    final Runnable finishHandler
-  ) {
-    final ScheduledFuture<?>[] ref = new ScheduledFuture[2];
-    final ScheduledFuture<?> mainTask = scheduledExecutorService.scheduleAtFixedRate(
-        () -> {
-          final boolean shouldCancel = runnable.getAsBoolean();
-          if (shouldCancel) {
-            ref[0].cancel(true);
-            ref[1].cancel(true);
-            finishHandler.run();
-          }
-        }, 0L, periodTicks * 50L, TimeUnit.MILLISECONDS
-    );
-    final ScheduledFuture<?> cleanupTask = scheduledExecutorService.schedule(() -> {
-      if (ref[0].isCancelled()) return;
-      ref[0].cancel(true);
-      finishHandler.run();
-    }, upperBoundMillis, TimeUnit.MILLISECONDS);
-    ref[0] = mainTask;
-    ref[1] = cleanupTask;
   }
 
   @EventHandler
@@ -428,5 +306,110 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   public boolean isCooldownActive(Player player, ProjectileDefinition definition) {
     ProjectileCooldowns playerCooldowns = projectileCooldowns.get(player.getUniqueId());
     return (playerCooldowns != null && playerCooldowns.isActive(definition));
+  }
+
+  private class BlockRunner {
+    private final ProjectileDefinition definition;
+    private final BlockEntity blockEntity;
+    private final Player player;
+    private final Party shooterParty;
+    private final ProjectileDefinition.BlockEntityType ce;
+    private final Location currentLocation;
+    private final Vector increment;
+    private final Vector substep;
+    private final int substeps;
+    private final Future<?> runner;
+    private int remainingTime;
+
+    public BlockRunner(
+        ProjectileDefinition definition,
+        BlockEntity blockEntity,
+        Player player,
+        Location spawnLocation) {
+      this.definition = definition;
+      this.blockEntity = blockEntity;
+      this.player = player;
+      this.shooterParty = Objects.requireNonNull(match.getPlayer(player)).getParty();
+      this.ce = (ProjectileDefinition.BlockEntityType) definition.projectile;
+
+      this.currentLocation = spawnLocation;
+
+      var normalizedDirection = currentLocation.getDirection().normalize();
+      this.increment = normalizedDirection.multiply(definition.velocity);
+      this.substeps = Math.max(1, (int) (definition.velocity / ce.size()));
+      this.substep = increment.clone().divide(new Vector(substeps, substeps, substeps));
+
+      this.remainingTime = (int) TimeUtils.toTicks(ce.maxTravelTime());
+      this.runner = match
+          .getExecutor(MatchScope.RUNNING)
+          .scheduleAtFixedRate(this::tick, 0L, 50L, TimeUnit.MILLISECONDS);
+    }
+
+    public void tick() {
+      if (remainingTime-- <= 0) {
+        cancel();
+        return;
+      }
+      if (definition.damage != null || ce.solidBlockCollision()) {
+        Location substepLoc = currentLocation.clone();
+        for (int i = substeps; i > 0; i--) {
+          substepLoc.add(substep);
+          if (!blockDisplayCollision(substepLoc)) continue;
+          cancel();
+          return;
+        }
+      }
+
+      currentLocation.add(increment);
+      blockEntity.teleport(currentLocation);
+    }
+
+    private void cancel() {
+      this.runner.cancel(true);
+      blockEntity.remove();
+    }
+
+    private boolean blockDisplayCollision(Location location) {
+      double radius = 0.5 * ce.size();
+      // Make location be center of the entity instead of feet
+      location.setY(location.getY() + radius);
+
+      if (definition.damage != null) {
+        for (Player victim : location.getNearbyPlayers(0.5 * ce.size())) {
+          var mpVictim = match.getPlayer(victim);
+          if (MatchPlayers.canInteract(mpVictim) && mpVictim.getParty() != shooterParty) {
+            victim.damage(definition.damage, player);
+            return true;
+          }
+        }
+      }
+      if (ce.solidBlockCollision()) {
+
+        int x1 = (int) Math.floor(location.getX() - radius);
+        int y1 = (int) Math.floor(location.getY());
+        int z1 = (int) Math.floor(location.getZ() - radius);
+
+        int x2 = (int) Math.floor(location.getX() + radius);
+        int y2 = (int) Math.floor(location.getY() + ce.size());
+        int z2 = (int) Math.floor(location.getZ() + radius);
+
+        Location loc = location.clone();
+
+        for (int x = x1; x <= x2; ++x) {
+          loc.setX(x);
+          for (int y = y1; y <= y2; ++y) {
+            loc.setY(y);
+            for (int z = z1; z <= z2; ++z) {
+              loc.setZ(z);
+              if (loc.getBlock().getType().isSolid()) return true;
+            }
+          }
+        }
+      }
+
+      // revert back to normal
+      location.setY(location.getY() - radius);
+      return false;
+    }
   }
 }
