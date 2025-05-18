@@ -37,7 +37,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
@@ -149,11 +148,6 @@ public class EventFilterMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPortalCreate(final PortalCreateEvent event) {
-    cancelAlways(event, event.getWorld());
-  }
-
-  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-  public void onWeatherChange(final WeatherChangeEvent event) {
     cancelAlways(event, event.getWorld());
   }
 

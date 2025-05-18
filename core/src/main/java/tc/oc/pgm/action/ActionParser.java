@@ -36,6 +36,7 @@ import tc.oc.pgm.action.actions.SoundAction;
 import tc.oc.pgm.action.actions.TakePaymentAction;
 import tc.oc.pgm.action.actions.TeleportAction;
 import tc.oc.pgm.action.actions.VelocityAction;
+import tc.oc.pgm.action.actions.WeatherAction;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
@@ -50,6 +51,7 @@ import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
 import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
@@ -439,5 +441,11 @@ public class ActionParser {
     var update = parser.parseBool(el, "update").orTrue();
 
     return new PasteStructureAction<>(scope, xFormula, yFormula, zFormula, structure, update);
+  }
+
+  @MethodParser("weather")
+  public WeatherAction parseWeather(Element el, Class<?> scope) throws InvalidXMLException {
+    return WeatherAction.of(
+        parser.parseEnum(WeatherMatchModule.WeatherType.class, el, "state").required());
   }
 }
