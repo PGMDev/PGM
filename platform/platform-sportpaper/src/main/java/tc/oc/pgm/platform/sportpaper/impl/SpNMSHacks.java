@@ -225,9 +225,4 @@ public class SpNMSHacks implements NMSHacks {
   public int allocateEntityId() {
     return Bukkit.allocateEntityId();
   }
-
-  @Override
-  public boolean isBlockDisplayEntity(Class<? extends Entity> entity) {
-    return false;
-  }
 }

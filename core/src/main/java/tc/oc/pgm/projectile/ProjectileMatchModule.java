@@ -122,9 +122,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
           }
         }
         case ProjectileDefinition.BlockEntityType ce -> {
-          var be = BlockEntity.spawnBlockEntity(
-              player.getEyeLocation(), definition.blockMaterial, ce.size(), velocity);
-          new BlockRunner(definition, be, player, player.getEyeLocation());
+          Location loc = player.getEyeLocation();
+          var be = BlockEntity.spawnBlockEntity(loc, definition.blockMaterial, ce.size(), velocity);
+          new BlockRunner(definition, be, player, loc);
         }
       }
 
@@ -371,11 +371,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
 
     private boolean blockDisplayCollision(Location location) {
       double radius = 0.5 * ce.size();
-      // Make location be center of the entity instead of feet
-      location.setY(location.getY() + radius);
 
       if (definition.damage != null) {
-        for (Player victim : location.getNearbyPlayers(0.5 * ce.size())) {
+        for (Player victim : location.getNearbyPlayers(radius)) {
           var mpVictim = match.getPlayer(victim);
           if (MatchPlayers.canInteract(mpVictim) && mpVictim.getParty() != shooterParty) {
             victim.damage(definition.damage, player);
@@ -384,13 +382,12 @@ public class ProjectileMatchModule implements MatchModule, Listener {
         }
       }
       if (ce.solidBlockCollision()) {
-
         int x1 = (int) Math.floor(location.getX() - radius);
-        int y1 = (int) Math.floor(location.getY());
+        int y1 = (int) Math.floor(location.getY() - radius);
         int z1 = (int) Math.floor(location.getZ() - radius);
 
         int x2 = (int) Math.floor(location.getX() + radius);
-        int y2 = (int) Math.floor(location.getY() + ce.size());
+        int y2 = (int) Math.floor(location.getY() + radius);
         int z2 = (int) Math.floor(location.getZ() + radius);
 
         Location loc = location.clone();
@@ -407,8 +404,6 @@ public class ProjectileMatchModule implements MatchModule, Listener {
         }
       }
 
-      // revert back to normal
-      location.setY(location.getY() - radius);
       return false;
     }
   }
