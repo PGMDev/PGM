@@ -331,6 +331,14 @@ public interface Config {
   }
 
   /**
+   * Should we end the match if there are no players?
+   *
+   * @return {@code true} if the match should end when there are no participating players,
+   *     {@code false} if not
+   */
+  boolean allowEndingEmptyMatches();
+
+  /**
    * Gets if extra votes are allowed based on the "pgm.vote.extra.#" permission.
    *
    * @return {@code true} if extra votes are enabled, {@code false} otherwise.

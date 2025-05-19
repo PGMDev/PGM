@@ -90,6 +90,7 @@ public final class PGMConfig implements Config {
 
   // join.*
   private final long minPlayers;
+  private final boolean endEmptyMatches;
   private final boolean limitJoin;
   private final boolean priorityKick;
   private final boolean balanceJoin;
@@ -196,6 +197,7 @@ public final class PGMConfig implements Config {
     this.maxExtraVotes = parseInteger(config.getString("votes.max-extra-votes", "5"));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
+    this.endEmptyMatches = config.getBoolean("join.end-empty-matches", minPlayers > 0);
     this.limitJoin = parseBoolean(config.getString("join.limit", "true"));
     this.priorityKick = parseBoolean(config.getString("join.priority-kick", "true"));
     this.balanceJoin = parseBoolean(config.getString("join.balance", "true"));
@@ -581,6 +583,11 @@ public final class PGMConfig implements Config {
   @Override
   public Duration getTimePenalty(TimePenalty penalty) {
     return timePenalties.get(penalty);
+  }
+
+  @Override
+  public boolean allowEndingEmptyMatches() {
+    return this.endEmptyMatches;
   }
 
   @Override
