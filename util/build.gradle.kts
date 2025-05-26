@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.1-SNAPSHOT")
-    testImplementation("io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT")
+    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.4-SNAPSHOT")
+    testImplementation("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
 }
 
