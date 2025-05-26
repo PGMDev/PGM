@@ -41,7 +41,7 @@ import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.4")
 public class ModernPlayerUtils implements PlayerUtils {
 
   private static final FixedMetadataValue TRUE =
@@ -133,7 +133,7 @@ public class ModernPlayerUtils implements PlayerUtils {
 
   @Override
   public float getKnockbackReduction(Player player) {
-    var attr = player.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+    var attr = player.getAttribute(Attribute.KNOCKBACK_RESISTANCE);
     return attr != null ? (float) attr.getValue() : 0;
   }
 
@@ -159,7 +159,7 @@ public class ModernPlayerUtils implements PlayerUtils {
 
   @Override
   public RayBlockIntersection getTargetedBlock(Player player) {
-    var attr = player.getAttribute(Attribute.PLAYER_BLOCK_INTERACTION_RANGE);
+    var attr = player.getAttribute(Attribute.BLOCK_INTERACTION_RANGE);
     double range = attr == null ? 3.5 : attr.getValue();
     var result = player.rayTraceBlocks(range);
     if (result != null) {

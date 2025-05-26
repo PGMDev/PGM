@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import org.bukkit.Location;
+import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -39,7 +40,7 @@ import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.4")
 public class ModernMiscUtil implements MiscUtils {
   @Override
   public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
@@ -81,8 +82,7 @@ public class ModernMiscUtil implements MiscUtils {
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
     var world = ((CraftWorld) loc.getWorld()).getHandle();
     var potion = new net.minecraft.world.entity.projectile.ThrownPotion(
-        world, loc.getX(), loc.getY(), loc.getZ());
-    potion.setItem(CraftItemStack.asNMSCopy(item));
+        world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
     world.addFreshEntity(potion);
     return (ThrownPotion) potion.getBukkitEntity();
   }
@@ -107,7 +107,7 @@ public class ModernMiscUtil implements MiscUtils {
 
   @Override
   public Key getSound(Sound enumConstant) {
-    return enumConstant.key();
+    return Registry.SOUNDS.getKey(enumConstant);
   }
 
   @Override

@@ -16,7 +16,7 @@ public class Attributes {
     }
   }
 
-  private static Attribute parse(String... names) {
+  public static Attribute parse(String... names) {
     Attribute type = BukkitUtils.parse(Attribute::valueOf, names);
     for (String name : names) {
       BY_NAME.put(StringUtils.simplify(name), type);

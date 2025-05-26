@@ -76,7 +76,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.4")
 public class ModernNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
@@ -138,7 +138,7 @@ public class ModernNMSHacks implements NMSHacks {
     var nmsBlock = CraftMagicNumbers.getBlock(material);
     var chunk = craftChunk.getHandle(ChunkStatus.FULL);
 
-    int baseY = chunk.getMinBuildHeight();
+    int baseY = chunk.getMinY();
     for (int i = 0; i < chunk.getSections().length; i++) {
       var section = chunk.getSections()[i];
       if (section == null || section.hasOnlyAir()) continue;
@@ -267,13 +267,13 @@ public class ModernNMSHacks implements NMSHacks {
     WorldLoader.DataLoadContext worldloader_a = console.worldLoader;
     RegistryAccess.Frozen iregistrycustom_dimension = worldloader_a.datapackDimensions();
     net.minecraft.core.Registry<LevelStem> iregistry =
-        iregistrycustom_dimension.registryOrThrow(Registries.LEVEL_STEM);
+        iregistrycustom_dimension.lookupOrThrow(Registries.LEVEL_STEM);
     LevelDataAndDimensions leveldataanddimensions = LevelStorageSource.getLevelDataAndDimensions(
         dynamic, worldloader_a.dataConfiguration(), iregistry, worldloader_a.datapackWorldgen());
     worlddata = (PrimaryLevelData) leveldataanddimensions.worldData();
 
     iregistrycustom_dimension = leveldataanddimensions.dimensions().dimensionsRegistryAccess();
-    iregistry = iregistrycustom_dimension.registryOrThrow(Registries.LEVEL_STEM);
+    iregistry = iregistrycustom_dimension.lookupOrThrow(Registries.LEVEL_STEM);
 
     worlddata.customDimensions = iregistry;
     worlddata.checkName(name);
@@ -284,7 +284,7 @@ public class ModernNMSHacks implements NMSHacks {
         BiomeManager.obfuscateSeed(worlddata.worldGenOptions().seed()); // Paper - use world seed
 
     List<CustomSpawner> list = List.of();
-    LevelStem worlddimension = iregistry.get(actualDimension);
+    LevelStem worlddimension = iregistry.getValue(actualDimension);
 
     WorldInfo worldInfo = new CraftWorldInfo(
         worlddata,
@@ -300,8 +300,8 @@ public class ModernNMSHacks implements NMSHacks {
     // If the world is 1.17 or older, replace dimension type
     boolean isOld = worldinfo.levelVersion().minecraftVersion().getVersion() <= 2730;
     if (isOld && actualDimension == LevelStem.OVERWORLD) {
-      var dimReg = console.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE);
-      var dimHolder = dimReg.getHolderOrThrow(PgmBootstrap.LEGACY_OVERWORLD);
+      var dimReg = console.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
+      var dimHolder = dimReg.getOrThrow(PgmBootstrap.LEGACY_OVERWORLD);
 
       worlddimension = new LevelStem(dimHolder, worlddimension.generator());
     }
@@ -337,7 +337,7 @@ public class ModernNMSHacks implements NMSHacks {
 
     console.addLevel(internal);
     console.initWorld(internal, worlddata, worlddata, worlddata.worldGenOptions());
-    internal.setSpawnSettings(true, true);
+    internal.setSpawnSettings(true);
     console.prepareLevels(internal.getChunkSource().chunkMap.progressListener, internal);
     server.getPluginManager().callEvent(new WorldLoadEvent(internal.getWorld()));
     return internal.getWorld();
@@ -373,7 +373,7 @@ public class ModernNMSHacks implements NMSHacks {
   @Override
   public void postToMainThread(Plugin plugin, boolean priority, Runnable task) {
     DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
-    server.tell(new TickTask(server.getTickCount(), () -> {
+    server.schedule(new TickTask(server.getTickCount(), () -> {
       try {
         task.run();
       } catch (Throwable t) {

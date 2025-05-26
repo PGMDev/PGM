@@ -40,7 +40,7 @@ import tc.oc.pgm.util.nms.packets.TabPackets;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.4")
 public class ModernTabPackets implements TabPackets {
 
   @Override
@@ -167,7 +167,8 @@ public class ModernTabPackets implements TabPackets {
 
       packet
           .entries()
-          .add(new Entry(uuid, profile, true, ping, GameType.SURVIVAL, nmsComponent, null));
+          .add(new Entry(
+              uuid, profile, true, ping, GameType.SURVIVAL, nmsComponent, true, -1, null));
     }
 
     @Override
