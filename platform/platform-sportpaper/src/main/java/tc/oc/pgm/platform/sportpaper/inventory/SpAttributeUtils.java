@@ -80,4 +80,19 @@ public class SpAttributeUtils implements AttributeUtils {
       meta.getAttributeModifiers(attr).clear();
     }
   }
+
+  @Override
+  public String getAttributeName(Attribute attribute) {
+    return attribute.name();
+  }
+
+  @Override
+  public Attribute getAttributeValue(String name) {
+    return Attribute.valueOf(name);
+  }
+
+  @Override
+  public Attribute[] getAttributeValues() {
+    return Attribute.values();
+  }
 }

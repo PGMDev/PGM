@@ -18,7 +18,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-@Supports(value = PAPER, minVersion = "1.21.1")
+@Supports(value = PAPER, minVersion = "1.21.5")
 @SuppressWarnings("UnstableApiUsage")
 public class ModernAttributeUtil implements AttributeUtils {
 
@@ -99,5 +99,23 @@ public class ModernAttributeUtil implements AttributeUtils {
     if (attributes != null && !attributes.isEmpty()) {
       attributes.keySet().forEach(meta::removeAttributeModifier);
     }
+  }
+
+  @Override
+  public String getAttributeName(Attribute attribute) {
+    // TODO: non-deprecated solution
+    return attribute.name();
+  }
+
+  @Override
+  public Attribute getAttributeValue(String name) {
+    // TODO: non-deprecated solution
+    return Attribute.valueOf(name);
+  }
+
+  @Override
+  public Attribute[] getAttributeValues() {
+    // TODO: non-deprecated solution
+    return Attribute.values();
   }
 }
