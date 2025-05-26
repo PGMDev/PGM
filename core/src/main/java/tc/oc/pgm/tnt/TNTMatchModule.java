@@ -1,11 +1,9 @@
 package tc.oc.pgm.tnt;
 
-import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
-
 import java.util.Random;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
@@ -24,7 +22,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
@@ -72,8 +72,6 @@ public class TNTMatchModule implements MatchModule, Listener {
     }
   }
 
-  private static final Sound FUSE_SOUND = parse(Sound::valueOf, "FUSE", "ENTITY_TNT_PRIMED");
-
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleInstantActivation(BlockPlaceEvent event) {
     if (this.properties.instantIgnite && event.getBlock().getType() == Material.TNT) {
@@ -92,7 +90,8 @@ public class TNTMatchModule implements MatchModule, Listener {
 
       if (callPrimeEvent(tnt, event.getPlayer())) {
         event.setCancelled(true); // Allow the block to be placed if priming is cancelled
-        world.playSound(tnt.getLocation(), FUSE_SOUND, 1, 1);
+        Audience.empty()
+            .playSound(Sounds.TNT_FUSE, (Sound.Emitter) tnt.getLocation()); // Is this even right
         InventoryUtils.consumeItem(event, event.getPlayer());
       }
     }

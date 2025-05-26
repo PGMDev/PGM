@@ -1,12 +1,10 @@
 package tc.oc.pgm.util.listener;
 
-import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
 
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,14 +14,13 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.*;
+import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.ItemTransferEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 
 /** A listener that calls {@link ItemTransferEvent} and {@link PlayerItemTransferEvent}. */
 public class ItemTransferListener implements Listener {
-  private static final Sound ITEM_PICKUP =
-      parse(Sound::valueOf, "ITEM_PICKUP", "ENTITY_ITEM_PICKUP");
-
   // Track players dropping an item stack from within an inventory GUI
   private boolean ignoreNextDropEvent;
   private boolean collectToCursor;
@@ -56,13 +53,19 @@ public class ItemTransferListener implements Listener {
       event.setCancelled(true);
       if (quantity > 0) {
         ItemStack stack = event.getItem().getItemStack().clone();
+        Player player = event.getPlayer();
         stack.setAmount(stack.getAmount() - quantity);
         event.getItem().setItemStack(stack);
 
         stack = stack.clone();
         stack.setAmount(quantity);
-        event.getPlayer().getInventory().addItem(stack);
-        event.getPlayer().playSound(event.getPlayer().getLocation(), ITEM_PICKUP, 1, 1);
+        player.getInventory().addItem(stack);
+        Audience.get(player)
+            .playSound(
+                Sounds.ITEM_PICKUP,
+                player.getLocation().getX(),
+                player.getLocation().getY(),
+                player.getLocation().getZ());
       }
     }
   }

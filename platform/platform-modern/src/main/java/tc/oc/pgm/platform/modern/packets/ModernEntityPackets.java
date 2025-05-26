@@ -31,7 +31,7 @@ import tc.oc.pgm.util.nms.packets.EntityPackets;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.5")
 public class ModernEntityPackets implements EntityPackets {
 
   private static final EntityDataAccessor<Byte> ENTITY_FLAGS =
@@ -52,7 +52,7 @@ public class ModernEntityPackets implements EntityPackets {
             loc.getYaw(),
             EntityType.ARMOR_STAND,
             0,
-            CraftVector.toNMS(velocity),
+            CraftVector.toVec3(velocity),
             0),
         new ClientboundSetEntityDataPacket(
             entityId,
@@ -74,7 +74,7 @@ public class ModernEntityPackets implements EntityPackets {
         loc.getYaw(),
         EntityType.WITHER_SKULL,
         0,
-        CraftVector.toNMS(velocity),
+        CraftVector.toVec3(velocity),
         0));
   }
 

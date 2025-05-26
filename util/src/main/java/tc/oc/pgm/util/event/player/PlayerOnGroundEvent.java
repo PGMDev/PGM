@@ -1,18 +1,23 @@
 package tc.oc.pgm.util.event.player;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
 import tc.oc.pgm.util.event.SportPaper;
 
 @SportPaper
-public class PlayerOnGroundEvent extends PlayerEvent {
+public class PlayerOnGroundEvent extends Event {
   private static final HandlerList handlers = new HandlerList();
+  private final Player player;
   private final boolean onGround;
 
   public PlayerOnGroundEvent(final Player player, boolean onGround) {
-    super(player);
+    this.player = player;
     this.onGround = onGround;
+  }
+
+  public Player getPlayer() {
+    return player;
   }
 
   /**

@@ -3,8 +3,8 @@ package tc.oc.pgm.util.event.player;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
 import tc.oc.pgm.util.event.SportPaper;
 
 /**
@@ -12,14 +12,19 @@ import tc.oc.pgm.util.event.SportPaper;
  * cancelling it prevents all further effects of the right-click.
  */
 @SportPaper
-public class PlayerAttackEntityEvent extends PlayerEvent implements Cancellable {
+public class PlayerAttackEntityEvent extends Event implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
+  private final Player player;
   protected Entity clickedEntity;
   boolean cancelled = false;
 
-  public PlayerAttackEntityEvent(final Player who, final Entity clickedEntity) {
-    super(who);
+  public PlayerAttackEntityEvent(final Player player, final Entity clickedEntity) {
+    this.player = player;
     this.clickedEntity = clickedEntity;
+  }
+
+  public Player getPlayer() {
+    return player;
   }
 
   public boolean isCancelled() {

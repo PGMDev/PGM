@@ -1,16 +1,22 @@
 package tc.oc.pgm.util.event.entity;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.entity.EntityEvent;
 import tc.oc.pgm.util.event.SportPaper;
 
 /** Called when a burning entity is extinguished. */
 @SportPaper
-public class EntityExtinguishEvent extends EntityEvent {
+public class EntityExtinguishEvent extends Event {
 
-  public EntityExtinguishEvent(Entity combustee) {
-    super(combustee);
+  private final Entity entity;
+
+  public EntityExtinguishEvent(Entity entity) {
+    this.entity = entity;
+  }
+
+  public Entity getEntity() {
+    return entity;
   }
 
   @Override

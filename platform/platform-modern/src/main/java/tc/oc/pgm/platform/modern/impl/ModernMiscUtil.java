@@ -40,7 +40,7 @@ import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.4")
+@Supports(value = PAPER, minVersion = "1.21.5")
 public class ModernMiscUtil implements MiscUtils {
   @Override
   public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
@@ -81,7 +81,7 @@ public class ModernMiscUtil implements MiscUtils {
   @Override
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
     var world = ((CraftWorld) loc.getWorld()).getHandle();
-    var potion = new net.minecraft.world.entity.projectile.ThrownPotion(
+    var potion = new net.minecraft.world.entity.projectile.ThrownSplashPotion(
         world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
     world.addFreshEntity(potion);
     return (ThrownPotion) potion.getBukkitEntity();
@@ -98,7 +98,7 @@ public class ModernMiscUtil implements MiscUtils {
     long MAX_HEAP = 104857600L;
     try {
       var root = NbtIo.readCompressed(levelDat, NbtAccounter.create(MAX_HEAP));
-      return NbtUtils.getDataVersion(root.getCompound("Data"), -1);
+      return NbtUtils.getDataVersion(root.getCompoundOrEmpty("Data"), -1);
     } catch (Throwable ignored) {
       // In case we cannot read the level.dat file, return a constant
       return -1;
@@ -108,6 +108,12 @@ public class ModernMiscUtil implements MiscUtils {
   @Override
   public Key getSound(Sound enumConstant) {
     return Registry.SOUNDS.getKey(enumConstant);
+  }
+
+  @Override
+  public Sound getSoundValue(String name) {
+    // TODO: non-deprecated solution
+    return Sound.valueOf(name);
   }
 
   @Override

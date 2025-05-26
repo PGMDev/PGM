@@ -59,6 +59,8 @@ public interface MiscUtils {
 
   Key getSound(Sound constant);
 
+  Sound getSoundValue(String name);
+
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
 
   boolean isPowerEnchanted(Projectile proj);

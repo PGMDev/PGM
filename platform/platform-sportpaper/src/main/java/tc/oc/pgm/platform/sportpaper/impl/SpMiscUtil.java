@@ -114,6 +114,11 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
+  public Sound getSoundValue(String name) {
+    return Sound.valueOf(name);
+  }
+
+  @Override
   public boolean isPowerEnchanted(Projectile proj) {
     // Arrows with damage > 2 are from power bows.
     return proj instanceof Arrow arrow && arrow.spigot().getDamage() > 2.0D;
