@@ -23,15 +23,15 @@ repositories {
 
 dependencies {
     api("org.jdom:jdom2:2.0.6.1")
-    api("net.kyori:adventure-api:4.18.0")
-    api("net.kyori:adventure-text-serializer-plain:4.18.0")
-    api("net.kyori:adventure-platform-bukkit:4.3.4")
+    api("net.kyori:adventure-api:4.21.0")
+    api("net.kyori:adventure-text-serializer-plain:4.21.0")
+    api("net.kyori:adventure-platform-bukkit:4.4.0")
     api("org.incendo:cloud-core:2.0.0")
     api("org.incendo:cloud-annotations:2.0.0")
     api("org.incendo:cloud-paper:2.0.0-beta.10")
     api("org.incendo:cloud-minecraft-extras:2.0.0-beta.10")
     api("me.lucko:commodore:2.2")
-    api("fr.mrmicky:fastboard:2.1.3")
+    api("fr.mrmicky:fastboard:2.1.4")
     api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
     api("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r") { exclude("*") }
     api("net.objecthunter:exp4j:0.4.9-pgm")
