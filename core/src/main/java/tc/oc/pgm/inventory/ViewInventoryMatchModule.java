@@ -339,9 +339,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
             ChatColor.LIGHT_PURPLE + TextTranslations.translate("preview.doubleJump", viewer));
       }
 
-      // TODO: fix
-      AttributeInstance knockbackAttribute = matchHolder.getAttribute(
-          Attributes.parse("GENERIC_KNOCKBACK_RESISTANCE", "KNOCKBACK_RESISTANCE"));
+      AttributeInstance knockbackAttribute =
+          matchHolder.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
       if (knockbackAttribute != null) {
         double knockbackResistance = knockbackAttribute.getValue();
         if (knockbackResistance > 0) {

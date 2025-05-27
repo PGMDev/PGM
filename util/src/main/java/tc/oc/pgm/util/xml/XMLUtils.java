@@ -1047,9 +1047,6 @@ public final class XMLUtils {
     var attribute = Attributes.getByName(text);
     if (attribute != null) return attribute;
 
-    attribute = Attributes.getByName("generic" + text);
-    if (attribute != null) return attribute;
-
     throw new InvalidXMLException("Unknown attribute '" + text + "'", node);
   }
 
