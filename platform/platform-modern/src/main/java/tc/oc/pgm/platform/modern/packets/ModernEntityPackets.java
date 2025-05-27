@@ -85,12 +85,12 @@ public class ModernEntityPackets implements EntityPackets {
 
   @Override
   public Packet teleportEntityPacket(int entityId, Location location) {
-    PacketContainer packet = PlPacket.PL.createPacket(PacketType.Play.Server.ENTITY_TELEPORT);
+    PacketContainer packet = PlPacket.PL.createPacket(PacketType.Play.Server.REL_ENTITY_MOVE_LOOK);
 
     packet.getIntegers().write(0, entityId);
-    packet.getDoubles().write(0, location.getX());
-    packet.getDoubles().write(1, location.getY());
-    packet.getDoubles().write(2, location.getZ());
+    packet.getShorts().write(0, (short) location.getX());
+    packet.getShorts().write(1, (short) location.getY());
+    packet.getShorts().write(2, (short) location.getZ());
     packet.getBytes().write(0, (byte) (location.getYaw() * 256 / 360));
     packet.getBytes().write(1, (byte) (location.getPitch() * 256 / 360));
 
