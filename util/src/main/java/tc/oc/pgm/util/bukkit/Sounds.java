@@ -3,6 +3,8 @@ package tc.oc.pgm.util.bukkit;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.entity.Player;
+import tc.oc.pgm.util.Audience;
 
 public interface Sounds {
   Sound ADMIN_CHAT = sound("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP", 1f, 0.7f);
@@ -66,5 +68,9 @@ public interface Sounds {
         Sound.Source.MASTER,
         volume,
         pitch);
+  }
+
+  static void play(Player player, Sound sound) {
+    Audience.get(player).playSound(sound);
   }
 }

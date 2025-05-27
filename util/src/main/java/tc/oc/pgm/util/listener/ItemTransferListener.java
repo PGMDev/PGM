@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.*;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.ItemTransferEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -60,12 +59,7 @@ public class ItemTransferListener implements Listener {
         stack = stack.clone();
         stack.setAmount(quantity);
         player.getInventory().addItem(stack);
-        Audience.get(player)
-            .playSound(
-                Sounds.ITEM_PICKUP,
-                player.getLocation().getX(),
-                player.getLocation().getY(),
-                player.getLocation().getZ());
+        Sounds.play(player, Sounds.ITEM_PICKUP);
       }
     }
   }

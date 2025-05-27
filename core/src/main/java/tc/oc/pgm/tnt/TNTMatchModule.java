@@ -1,7 +1,6 @@
 package tc.oc.pgm.tnt;
 
 import java.util.Random;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -22,7 +21,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
@@ -90,8 +88,11 @@ public class TNTMatchModule implements MatchModule, Listener {
 
       if (callPrimeEvent(tnt, event.getPlayer())) {
         event.setCancelled(true); // Allow the block to be placed if priming is cancelled
-        Audience.empty()
-            .playSound(Sounds.TNT_FUSE, (Sound.Emitter) tnt.getLocation()); // Is this even right
+        match.playSound(
+            Sounds.TNT_FUSE,
+            tnt.getLocation().getX(),
+            tnt.getLocation().getX(),
+            tnt.getLocation().getY());
         InventoryUtils.consumeItem(event, event.getPlayer());
       }
     }

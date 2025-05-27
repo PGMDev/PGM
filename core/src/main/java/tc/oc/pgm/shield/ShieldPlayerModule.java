@@ -10,7 +10,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Sounds;
@@ -68,12 +67,7 @@ public class ShieldPlayerModule implements Tickable {
       logger.fine("Recharging shield: shield=" + shieldHealth + " delta=" + delta);
       shieldHealth = parameters.maxHealth;
       addAbsorption(delta);
-      Audience.get(bukkit)
-          .playSound(
-              Sounds.SHIELD_RECHARGE,
-              bukkit.getLocation().getX(),
-              bukkit.getLocation().getY(),
-              bukkit.getLocation().getZ());
+      player.playSound(Sounds.SHIELD_RECHARGE);
     }
   }
 
