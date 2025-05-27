@@ -34,6 +34,17 @@ public class EntityTypes {
   public static final EntityType ARMOR_STAND = EntityType.ARMOR_STAND;
   public static final EntityType MINECART_COMMAND =
       parse("MINECART_COMMAND", "COMMAND_BLOCK_MINECART");
+  public static final EntityType BOAT = parse(
+      "BOAT",
+      "ACACIA_BOAT",
+      "BIRCH_BOAT",
+      "CHERRY_BOAT",
+      "DARK_OAK_BOAT",
+      "JUNGLE_BOAT",
+      "MANGROVE_BOAT",
+      "OAK_BOAT",
+      "PALE_OAK_BOAT",
+      "SPRUCE_BOAT");
   public static final EntityType MINECART = EntityType.MINECART;
   public static final EntityType MINECART_CHEST = parse("MINECART_CHEST", "CHEST_MINECART");
   public static final EntityType MINECART_FURNACE = parse("MINECART_FURNACE", "FURNACE_MINECART");
