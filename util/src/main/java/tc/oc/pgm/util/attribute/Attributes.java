@@ -26,7 +26,7 @@ public class Attributes {
   public static Attribute FOLLOW_RANGE =
       parse("generic.followRange", "followRange", "follow_range");
   public static Attribute KNOCKBACK_RESISTANCE =
-      parse("generic.knockbackResistance", "knocbackResistance", "knockback_resistance");
+      parse("generic.knockbackResistance", "knockbackResistance", "knockback_resistance");
   public static Attribute MOVEMENT_SPEED =
       parse("generic.movementSpeed", "movementSpeed", "movement_speed");
   public static Attribute FLYING_SPEED =

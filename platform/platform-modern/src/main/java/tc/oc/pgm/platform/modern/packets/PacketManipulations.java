@@ -18,6 +18,7 @@ import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
 import tc.oc.pgm.platform.modern.util.Packets;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
+@SuppressWarnings("unchecked")
 public class PacketManipulations implements PacketSender {
 
   public static final String HIDE_PARTICLES_KEY = "hideParticles";

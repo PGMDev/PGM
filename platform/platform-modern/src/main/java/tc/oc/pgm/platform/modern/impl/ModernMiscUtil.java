@@ -59,7 +59,7 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
-  @SuppressWarnings({"deprecation", "UnstableApiUsage"})
+  @SuppressWarnings({"removal", "UnstableApiUsage"})
   public PlayerDeathEvent createDeathEvent(
       Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg) {
     return new PlayerDeathEvent(
@@ -107,13 +107,17 @@ public class ModernMiscUtil implements MiscUtils {
 
   @Override
   public Key getSound(Sound enumConstant) {
-    return Registry.SOUNDS.getKey(enumConstant);
+    return Registry.SOUND_EVENT.getKey(enumConstant);
   }
 
   @Override
   public Sound getSoundValue(String name) {
-    // TODO: non-deprecated solution
-    return Sound.valueOf(name);
+    // From Paper, most reliable option
+    try {
+      return (Sound) Sound.class.getField(name).get(null);
+    } catch (IllegalAccessException | NoSuchFieldException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override

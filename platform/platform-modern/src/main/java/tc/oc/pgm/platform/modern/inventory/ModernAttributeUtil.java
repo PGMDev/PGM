@@ -2,9 +2,12 @@ package tc.oc.pgm.platform.modern.inventory;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
+import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
@@ -103,19 +106,19 @@ public class ModernAttributeUtil implements AttributeUtils {
 
   @Override
   public String getAttributeName(Attribute attribute) {
-    // TODO: non-deprecated solution
-    return attribute.name();
+    return attribute.key().toString();
   }
 
   @Override
   public Attribute getAttributeValue(String name) {
-    // TODO: non-deprecated solution
-    return Attribute.valueOf(name);
+    // Get from lower case as Paper does
+    return Registry.ATTRIBUTE.get(
+        Objects.requireNonNull(NamespacedKey.fromString(name.toLowerCase())));
   }
 
   @Override
   public Attribute[] getAttributeValues() {
-    // TODO: non-deprecated solution
-    return Attribute.values();
+    // From Paper
+    return Lists.newArrayList(Registry.ATTRIBUTE).toArray(new Attribute[0]);
   }
 }
