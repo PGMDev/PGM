@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.platform.modern.dfu.PGMDataFixer;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PgmBootstrap implements PluginBootstrap {
@@ -35,5 +36,8 @@ public class PgmBootstrap implements PluginBootstrap {
         throw new RuntimeException(ex);
       }
     });
+
+    // Paper 1.21.5 uses DFU to upgrade worlds, hook into that instead
+    PGMDataFixer.hookMojangDFU();
   }
 }

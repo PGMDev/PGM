@@ -14,7 +14,6 @@ public class LegacyOverworldFix extends DataFix {
   @Override
   protected TypeRewriteRule makeRule() {
     var chunkType = getInputSchema().getType(References.CHUNK);
-
     var outputChunkType = getOutputSchema().getType(References.CHUNK);
 
     return this.fixTypeEverywhereTyped(
@@ -29,7 +28,8 @@ public class LegacyOverworldFix extends DataFix {
             var dimension = chunkCtx.get("dimension").asString().result().orElse("");
 
             if ("minecraft:overworld".equals(dimension)) {
-              chunkCtx.set("dimension", chunkCtx.createString("pgm:legacy_overworld"));
+              var newCtx = chunkCtx.set("dimension", chunkCtx.createString("pgm:legacy_overworld"));
+              return chunkData.set("__context", newCtx);
             }
           }
 
