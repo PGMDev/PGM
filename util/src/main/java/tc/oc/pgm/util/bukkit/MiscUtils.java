@@ -57,9 +57,9 @@ public interface MiscUtils {
 
   int getWorldDataVersion(Path levelDat);
 
-  Key getSound(Sound constant);
+  Key getSoundKey(Sound constant);
 
-  Sound getSoundValue(String name);
+  Sound getSound(String name);
 
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
 

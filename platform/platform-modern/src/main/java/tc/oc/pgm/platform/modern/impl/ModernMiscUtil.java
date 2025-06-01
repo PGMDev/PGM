@@ -106,12 +106,12 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
-  public Key getSound(Sound enumConstant) {
+  public Key getSoundKey(Sound enumConstant) {
     return Registry.SOUND_EVENT.getKey(enumConstant);
   }
 
   @Override
-  public Sound getSoundValue(String name) {
+  public Sound getSound(String name) {
     // From Paper, most reliable option
     try {
       return (Sound) Sound.class.getField(name).get(null);

@@ -109,12 +109,12 @@ public class SpMiscUtil implements MiscUtils {
 
   @Override
   @SuppressWarnings("PatternValidation")
-  public Key getSound(Sound enumConstant) {
+  public Key getSoundKey(Sound enumConstant) {
     return key(CraftSound.getSound(enumConstant));
   }
 
   @Override
-  public Sound getSoundValue(String name) {
+  public Sound getSound(String name) {
     return Sound.valueOf(name);
   }
 
