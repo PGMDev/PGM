@@ -2,30 +2,25 @@ package tc.oc.pgm.util.event.block;
 
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.BlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.event.SportPaper;
 
 /** Called when an entity is dispensed from a block. */
 @SportPaper
-public class BlockDispenseEntityEvent extends Event {
-  private final Block block;
+public class BlockDispenseEntityEvent extends BlockEvent {
   private ItemStack item;
   private Vector velocity;
   private final Entity entity;
 
   public BlockDispenseEntityEvent(
       final Block block, final ItemStack dispensed, final Vector velocity, final Entity entity) {
-    this.block = block;
+    super(block);
     this.item = dispensed;
     this.velocity = velocity;
     this.entity = entity;
-  }
-
-  public Block getBlock() {
-    return block;
   }
 
   public ItemStack getItem() {

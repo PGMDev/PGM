@@ -3,26 +3,21 @@ package tc.oc.pgm.util.event.entity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.entity.EntityEvent;
 
-public class ExplosionPrimeEvent extends Event implements Cancellable {
+public class ExplosionPrimeEvent extends EntityEvent implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
 
-  private final Entity entity;
   private boolean cancel;
   private float radius;
   private boolean fire;
 
-  public ExplosionPrimeEvent(Entity entity, float radius, boolean fire) {
-    this.entity = entity;
+  public ExplosionPrimeEvent(Entity what, float radius, boolean fire) {
+    super(what);
     this.cancel = false;
     this.radius = radius;
     this.fire = fire;
-  }
-
-  public Entity getEntity() {
-    return entity;
   }
 
   public ExplosionPrimeEvent(Explosive explosive) {

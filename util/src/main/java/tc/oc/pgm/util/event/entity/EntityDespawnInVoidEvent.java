@@ -1,8 +1,8 @@
 package tc.oc.pgm.util.event.entity;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.entity.EntityEvent;
 import tc.oc.pgm.util.event.SportPaper;
 
 /**
@@ -10,16 +10,11 @@ import tc.oc.pgm.util.event.SportPaper;
  * blocks into the void.
  */
 @SportPaper
-public class EntityDespawnInVoidEvent extends Event {
-  private final Entity entity;
+public class EntityDespawnInVoidEvent extends EntityEvent {
   private static final HandlerList handlers = new HandlerList();
 
-  public EntityDespawnInVoidEvent(Entity entity) {
-    this.entity = entity;
-  }
-
-  public Entity getEntity() {
-    return entity;
+  public EntityDespawnInVoidEvent(Entity what) {
+    super(what);
   }
 
   public static HandlerList getHandlerList() {

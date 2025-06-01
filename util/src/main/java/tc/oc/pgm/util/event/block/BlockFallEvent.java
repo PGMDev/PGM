@@ -3,24 +3,19 @@ package tc.oc.pgm.util.event.block;
 import org.bukkit.block.Block;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.BlockEvent;
 import tc.oc.pgm.util.event.SportPaper;
 
 @SportPaper
-public class BlockFallEvent extends Event implements Cancellable {
+public class BlockFallEvent extends BlockEvent implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
-  private final Block block;
   private final FallingBlock fallingBlock;
   private boolean cancelled = false;
 
   public BlockFallEvent(final Block block, final FallingBlock fallingBlock) {
-    this.block = block;
+    super(block);
     this.fallingBlock = fallingBlock;
-  }
-
-  public Block getBlock() {
-    return block;
   }
 
   public FallingBlock getEntity() {

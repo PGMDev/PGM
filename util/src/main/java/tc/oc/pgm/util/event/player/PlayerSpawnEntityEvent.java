@@ -2,26 +2,21 @@ package tc.oc.pgm.util.event.player;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.event.SportPaper;
 
 @SportPaper
-public class PlayerSpawnEntityEvent extends Event {
+public class PlayerSpawnEntityEvent extends PlayerEvent {
   private static final HandlerList handlers = new HandlerList();
-  private final Player player;
   private final Entity what;
   private final ItemStack item;
 
-  public PlayerSpawnEntityEvent(final Player player, final Entity what, final ItemStack item) {
-    this.player = player;
+  public PlayerSpawnEntityEvent(final Player who, final Entity what, final ItemStack item) {
+    super(who);
     this.what = what;
     this.item = item;
-  }
-
-  public Player getPlayer() {
-    return player;
   }
 
   /**
