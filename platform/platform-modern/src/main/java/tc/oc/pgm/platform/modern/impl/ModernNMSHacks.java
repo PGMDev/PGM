@@ -69,6 +69,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.platform.modern.PgmBootstrap;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
+import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -297,8 +298,9 @@ public class ModernNMSHacks implements NMSHacks {
       biomeProvider = generator.getDefaultBiomeProvider(worldInfo);
     }
 
-    // If the world is 1.17 or older, replace dimension type
-    boolean isOld = worldinfo.levelVersion().minecraftVersion().getVersion() <= 2730;
+    // If the world is < 1.18-exp.1, replace dimension type
+    boolean isOld =
+        worldinfo.levelVersion().minecraftVersion().getVersion() < DataVersions.V1_18_EXP_1;
     if (isOld && actualDimension == LevelStem.OVERWORLD) {
       var dimReg = console.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
       var dimHolder = dimReg.getOrThrow(PgmBootstrap.LEGACY_OVERWORLD);

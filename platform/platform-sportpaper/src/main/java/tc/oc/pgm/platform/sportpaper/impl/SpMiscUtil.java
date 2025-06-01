@@ -33,6 +33,7 @@ import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
+import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
@@ -100,10 +101,10 @@ public class SpMiscUtil implements MiscUtils {
       var dataTag = NBTCompressedStreamTools.a(Files.newInputStream(levelDat)).getCompound("Data");
       return dataTag.hasKeyOfType("DataVersion", NBT_TAG_ANY_NUMERIC)
           ? dataTag.getInt("DataVersion")
-          : -1;
+          : DataVersions.LEGACY;
     } catch (Throwable ignored) {
       // In case we cannot read the level.dat file, return a constant
-      return -1;
+      return DataVersions.LEGACY;
     }
   }
 

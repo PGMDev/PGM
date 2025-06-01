@@ -39,6 +39,7 @@ import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
+import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.Version;
@@ -357,8 +358,6 @@ public class MapInfoImpl implements MapInfo {
   }
 
   private class VariantData implements VariantInfo {
-    // taken from https://minecraft.wiki/w/Data_version#Java_Edition
-    private static final int MAP_DATA_VERSION_1_13 = 1519;
     private static final Version VERSION_1_13 = new Version(1, 13, 0);
     private final String variantId;
     private final String mapName;
@@ -449,7 +448,7 @@ public class MapInfoImpl implements MapInfo {
       var levelDat = (world != null ? sourceDir.resolve(world) : sourceDir).resolve("level.dat");
 
       var mapDataVersion = MISC_UTILS.getWorldDataVersion(levelDat);
-      if (mapDataVersion >= MAP_DATA_VERSION_1_13) return VERSION_1_13;
+      if (mapDataVersion >= DataVersions.V1_13) return VERSION_1_13;
       return null;
     }
   }
