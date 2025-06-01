@@ -1,7 +1,5 @@
 package tc.oc.pgm.kits;
 
-import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
-
 import java.util.List;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -49,12 +47,12 @@ public class ClearItemsKit extends AbstractKit {
     }
     if (this.items) {
       player.getBukkit().getInventory().clear();
-      INVENTORY_VIEW.setCursor(player.getBukkit().getOpenInventory(), null);
+      player.getBukkit().getOpenInventory().setCursor(null);
       InventoryView openInventory = player.getBukkit().getOpenInventory();
-      InventoryType type = openInventory == null ? null : INVENTORY_VIEW.getType(openInventory);
+      InventoryType type = openInventory == null ? null : openInventory.getType();
       if (type != null
           && (type.equals(InventoryType.CRAFTING) || type.equals(InventoryType.WORKBENCH))) {
-        Inventory topInventory = INVENTORY_VIEW.getTopInventory(openInventory);
+        Inventory topInventory = openInventory.getTopInventory();
         if (topInventory != null) {
           topInventory.clear();
         }

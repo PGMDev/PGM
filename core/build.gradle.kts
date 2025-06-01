@@ -83,6 +83,7 @@ tasks {
             expand(
                 "name" to project.name,
                 "description" to project.description,
+                "apiVersion" to "1.21.5",
                 "mainClass" to "tc.oc.pgm.PGMPlugin",
                 "version" to project.version,
                 "commitHash" to project.latestCommitHash(),

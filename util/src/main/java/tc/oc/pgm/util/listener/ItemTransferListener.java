@@ -1,7 +1,5 @@
 package tc.oc.pgm.util.listener;
 
-import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
-
 import java.util.Map;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -42,7 +40,7 @@ public class ItemTransferListener implements Listener {
         event.getItem().getItemStack(),
         event.getItem(),
         initialQuantity,
-        INVENTORY_VIEW.getCursor(event.getPlayer().getOpenInventory()));
+        event.getPlayer().getOpenInventory().getCursor());
 
     callEvent(transferEvent);
 
@@ -341,7 +339,7 @@ public class ItemTransferListener implements Listener {
 
             otherItem = item.clone();
             otherItem.setAmount(quantity);
-            INVENTORY_VIEW.setCursor(event.getView(), otherItem);
+            event.getView().setCursor(otherItem);
             break;
 
           case PLACE_ALL:
@@ -349,7 +347,7 @@ public class ItemTransferListener implements Listener {
           case PLACE_ONE:
             otherItem = event.getCursor();
             otherItem.setAmount(otherItem.getAmount() - quantity);
-            INVENTORY_VIEW.setCursor(event.getView(), otherItem);
+            event.getView().setCursor(otherItem);
 
             item = event.getCurrentItem();
             if (item == null || item.getType() == Material.AIR) {
@@ -365,7 +363,7 @@ public class ItemTransferListener implements Listener {
           case DROP_ONE_CURSOR:
             otherItem = event.getCursor();
             otherItem.setAmount(otherItem.getAmount() - quantity);
-            INVENTORY_VIEW.setCursor(event.getView(), otherItem);
+            event.getView().setCursor(otherItem);
 
             item = otherItem.clone();
             item.setAmount(quantity);
@@ -453,7 +451,7 @@ public class ItemTransferListener implements Listener {
           stack,
           event.getItemDrop(),
           initialQuantity,
-          INVENTORY_VIEW.getCursor(event.getPlayer().getOpenInventory()));
+          event.getPlayer().getOpenInventory().getCursor());
       callEvent(transferEvent);
 
       if (!transferEvent.isCancelled() && transferEvent.getQuantity() < initialQuantity) {
@@ -487,7 +485,7 @@ public class ItemTransferListener implements Listener {
 
       ItemStack cursor = event.getCursor().clone();
       var view = event.getView();
-      var topInventory = INVENTORY_VIEW.getTopInventory(view);
+      var topInventory = view.getTopInventory();
       int totalSize = getViewSize(view, topInventory);
 
       for (int pass = 0; pass < 2; pass++) {
@@ -497,7 +495,7 @@ public class ItemTransferListener implements Listener {
             break;
           }
 
-          ItemStack stack = INVENTORY_VIEW.getItem(view, rawSlot);
+          ItemStack stack = view.getItem(rawSlot);
           // First pass takes incomplete stacks, second pass takes complete ones
           if (cursor.isSimilar(stack)
               && ((pass == 0 && stack.getAmount() < stack.getMaxStackSize())
@@ -534,7 +532,7 @@ public class ItemTransferListener implements Listener {
               // Collect items from this stack to the cursor
               cursor.setAmount(cursor.getAmount() + quantity);
               if (quantity == stack.getAmount()) {
-                INVENTORY_VIEW.setItem(view, rawSlot, null);
+                view.setItem(rawSlot, null);
               } else {
                 stack.setAmount(stack.getAmount() - quantity);
               }
@@ -543,7 +541,7 @@ public class ItemTransferListener implements Listener {
         }
       }
 
-      INVENTORY_VIEW.setCursor(view, cursor);
+      view.setCursor(cursor);
       player.updateInventory();
     }
   }
@@ -553,7 +551,7 @@ public class ItemTransferListener implements Listener {
     // you try to later try to view.getItem(slot) with the highest numbers as they're not part of
     // the view. As a workaround, only use countSlots() when in the player's view (ie: the 2x2
     // Crafting view), otherwise hard-code the 36 slots of 9x4.
-    if (top.getType().equals(InventoryType.CRAFTING)) return INVENTORY_VIEW.countSlots(view);
+    if (top.getType().equals(InventoryType.CRAFTING)) return view.countSlots();
     return top.getSize() + 36;
   }
 
@@ -611,19 +609,19 @@ public class ItemTransferListener implements Listener {
   }
 
   private static Inventory getLocalInventory(final InventoryView view, final int rawSlot) {
-    final int cookedSlot = INVENTORY_VIEW.convertSlot(view, rawSlot);
+    final int cookedSlot = view.convertSlot(rawSlot);
     if (cookedSlot == rawSlot) {
-      return INVENTORY_VIEW.getTopInventory(view);
+      return view.getTopInventory();
     } else {
-      return INVENTORY_VIEW.getBottomInventory(view);
+      return view.getBottomInventory();
     }
   }
 
   private static Inventory getOtherInventory(final InventoryView view, final Inventory inventory) {
-    if (INVENTORY_VIEW.getTopInventory(view) == inventory) {
-      return INVENTORY_VIEW.getBottomInventory(view);
+    if (view.getTopInventory() == inventory) {
+      return view.getBottomInventory();
     } else {
-      return INVENTORY_VIEW.getTopInventory(view);
+      return view.getTopInventory();
     }
   }
 
