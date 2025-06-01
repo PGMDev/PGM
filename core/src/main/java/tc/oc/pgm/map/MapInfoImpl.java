@@ -113,13 +113,14 @@ public class MapInfoImpl implements MapInfo {
 
   @NotNull
   private Map<String, VariantInfo> createVariantMap(Element root) throws InvalidXMLException {
-    Map<String, VariantInfo> variants = new LinkedHashMap<>();
-    variants.put(DEFAULT_VARIANT, new VariantData(root, null));
+    LinkedHashMap<String, VariantInfo> variants = new LinkedHashMap<>();
     for (Element el : root.getChildren("variant")) {
       VariantData vd = new VariantData(root, el);
       if (variants.put(vd.variantId, vd) != null)
         throw new InvalidXMLException("Duplicate variant ids are not allowed", el);
     }
+    if (!variants.containsKey(DEFAULT_VARIANT))
+      variants.putFirst(DEFAULT_VARIANT, new VariantData(root, null));
     return ImmutableMap.copyOf(variants);
   }
 
@@ -366,32 +367,34 @@ public class MapInfoImpl implements MapInfo {
     private final String world;
     private final Range<Version> serverVersions;
 
-    public VariantData(Element root, @Nullable Element variantEl) throws InvalidXMLException {
+    public VariantData(Element root, @Nullable Element el) throws InvalidXMLException {
       String name = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
       String slug = assertNotNull(root).getChildTextNormalize("slug");
       Node minVer = Node.fromAttr(root, "min-server-version");
       Node maxVer = Node.fromAttr(root, "max-server-version");
 
-      if (variantEl == null) {
-        this.variantId = DEFAULT_VARIANT;
+      this.variantId = el == null ? DEFAULT_VARIANT : XMLUtils.parseRequiredId(el);
+
+      // Default is not allowed to change the name, nor override, nor slug
+      if (DEFAULT_VARIANT.equals(variantId)) {
         this.mapName = name;
-        this.world = null;
       } else {
-        this.variantId = XMLUtils.parseRequiredId(variantEl);
-        if (DEFAULT_VARIANT.equals(variantId))
-          throw new InvalidXMLException("Variant id must not be 'default'", variantEl);
+        boolean override = XMLUtils.parseBoolean(Node.fromAttr(el, "override"), false);
+        this.mapName = (override ? "" : name + ": ") + el.getTextNormalize();
 
-        boolean override = XMLUtils.parseBoolean(Node.fromAttr(variantEl, "override"), false);
-        this.mapName = (override ? "" : name + ": ") + variantEl.getTextNormalize();
-        this.world = variantEl.getAttributeValue("world");
-
-        String variantSlug = variantEl.getAttributeValue("slug");
+        String variantSlug = el.getAttributeValue("slug");
         if (variantSlug != null) slug = variantSlug;
         else if (override) slug = null;
         else if (slug != null) slug += "_" + variantId;
+      }
 
-        minVer = fallback(Node.fromAttr(variantEl, "min-server-version"), minVer);
-        maxVer = fallback(Node.fromAttr(variantEl, "max-server-version"), maxVer);
+      // Default however, is allowed to override world and/or server versions
+      if (el == null) {
+        this.world = null;
+      } else {
+        this.world = el.getAttributeValue("world");
+        minVer = fallback(Node.fromAttr(el, "min-server-version"), minVer);
+        maxVer = fallback(Node.fromAttr(el, "max-server-version"), maxVer);
       }
       this.customId = slug != null;
       this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
