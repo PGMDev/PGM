@@ -4,6 +4,7 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.NamespacedKey;
@@ -113,7 +114,7 @@ public class ModernAttributeUtil implements AttributeUtils {
   public Attribute getAttributeValue(String name) {
     // Get from lower case as Paper does
     return Registry.ATTRIBUTE.get(
-        Objects.requireNonNull(NamespacedKey.fromString(name.toLowerCase())));
+        Objects.requireNonNull(NamespacedKey.fromString(name.toLowerCase(Locale.ROOT))));
   }
 
   @Override
