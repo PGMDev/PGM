@@ -63,8 +63,7 @@ public interface Sounds {
   static Sound sound(String legacyConstant, String modernConstant, float volume, float pitch) {
     // Sound.sound due to a compiler bug
     return Sound.sound(
-        MISC_UTILS.getSoundKey(
-            BukkitUtils.parse(MISC_UTILS::getSound, legacyConstant, modernConstant)),
+        BukkitUtils.parse(MISC_UTILS::getSoundKey, legacyConstant, modernConstant),
         Sound.Source.MASTER,
         volume,
         pitch);

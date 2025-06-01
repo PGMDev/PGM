@@ -6,7 +6,6 @@ import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -57,9 +56,7 @@ public interface MiscUtils {
 
   int getWorldDataVersion(Path levelDat);
 
-  Key getSoundKey(Sound constant);
-
-  Sound getSound(String name);
+  Key getSoundKey(String name);
 
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
 
