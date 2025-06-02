@@ -15,7 +15,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 @Supports(SPORTPAPER)
-public class SpAttributeUtils implements AttributeUtils {
+public class SpAttributeUtil implements AttributeUtils {
 
   @Override
   public AttributeModifier parseModifier(Element el) throws InvalidXMLException {
@@ -79,20 +79,5 @@ public class SpAttributeUtils implements AttributeUtils {
     for (String attr : meta.getModifiedAttributes()) {
       meta.getAttributeModifiers(attr).clear();
     }
-  }
-
-  @Override
-  public String getAttributeName(Attribute attribute) {
-    return attribute.name();
-  }
-
-  @Override
-  public Attribute getAttributeValue(String name) {
-    return Attribute.valueOf(name);
-  }
-
-  @Override
-  public Attribute[] getAttributeValues() {
-    return Attribute.values();
   }
 }

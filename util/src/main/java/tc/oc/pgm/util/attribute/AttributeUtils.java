@@ -39,10 +39,4 @@ public interface AttributeUtils {
   void stripAttributes(ItemMeta meta);
 
   interface SimpleAttributeModifier extends Comparable<SimpleAttributeModifier> {}
-
-  String getAttributeName(Attribute attribute);
-
-  Attribute getAttributeValue(String name);
-
-  Attribute[] getAttributeValues();
 }

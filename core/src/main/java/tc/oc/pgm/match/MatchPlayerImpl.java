@@ -1,7 +1,6 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.Packets.ENTITIES;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
@@ -295,7 +294,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       }
     }
 
-    for (Attribute attribute : ATTRIBUTE_UTILS.getAttributeValues()) {
+    for (Attribute attribute : Attribute.values()) {
       AttributeInstance attributes = getAttribute(attribute);
       if (attributes == null) continue;
 

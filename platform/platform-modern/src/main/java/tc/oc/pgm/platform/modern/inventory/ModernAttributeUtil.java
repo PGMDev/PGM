@@ -2,13 +2,9 @@ package tc.oc.pgm.platform.modern.inventory;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
@@ -22,7 +18,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-@Supports(value = PAPER, minVersion = "1.21.5")
+@Supports(value = PAPER, minVersion = "1.21.1")
 @SuppressWarnings("UnstableApiUsage")
 public class ModernAttributeUtil implements AttributeUtils {
 
@@ -103,23 +99,5 @@ public class ModernAttributeUtil implements AttributeUtils {
     if (attributes != null && !attributes.isEmpty()) {
       attributes.keySet().forEach(meta::removeAttributeModifier);
     }
-  }
-
-  @Override
-  public String getAttributeName(Attribute attribute) {
-    return attribute.key().toString();
-  }
-
-  @Override
-  public Attribute getAttributeValue(String name) {
-    // Get from lower case as Paper does
-    return Registry.ATTRIBUTE.get(
-        Objects.requireNonNull(NamespacedKey.fromString(name.toLowerCase(Locale.ROOT))));
-  }
-
-  @Override
-  public Attribute[] getAttributeValues() {
-    // From Paper
-    return Lists.newArrayList(Registry.ATTRIBUTE).toArray(new Attribute[0]);
   }
 }

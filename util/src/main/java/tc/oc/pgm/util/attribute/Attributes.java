@@ -1,7 +1,5 @@
 package tc.oc.pgm.util.attribute;
 
-import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.attribute.Attribute;
@@ -11,8 +9,7 @@ import tc.oc.pgm.util.platform.Platform;
 
 public class Attributes {
 
-  private static final Map<String, Attribute> BY_NAME =
-      new HashMap<>(ATTRIBUTE_UTILS.getAttributeValues().length);
+  private static final Map<String, Attribute> BY_NAME = new HashMap<>(Attribute.values().length);
 
   static {
     parse("GENERIC_MAX_HEALTH", "MAX_HEALTH");
@@ -29,9 +26,8 @@ public class Attributes {
       parse("GENERIC_LUCK", "LUCK");
     }
 
-    for (Attribute value : ATTRIBUTE_UTILS.getAttributeValues()) {
-      if (value != null)
-        BY_NAME.put(StringUtils.simplify(ATTRIBUTE_UTILS.getAttributeName(value)), value);
+    for (Attribute value : Attribute.values()) {
+      if (value != null) BY_NAME.put(StringUtils.simplify(value.name()), value);
     }
   }
 
@@ -39,7 +35,7 @@ public class Attributes {
       parse("GENERIC_KNOCKBACK_RESISTANCE", "KNOCKBACK_RESISTANCE");
 
   private static Attribute parse(String... names) {
-    Attribute type = BukkitUtils.parse(ATTRIBUTE_UTILS::getAttributeValue, names);
+    Attribute type = BukkitUtils.parse(Attribute::valueOf, names);
     for (String name : names) {
       BY_NAME.put(StringUtils.simplify(name), type);
     }
