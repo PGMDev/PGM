@@ -5,6 +5,7 @@ import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
 import io.papermc.paper.plugin.entrypoint.classloader.PaperPluginClassLoader;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.plugin.manager.PaperPluginManagerImpl;
 import io.papermc.paper.plugin.provider.classloader.PaperClassLoaderStorage;
 import io.papermc.paper.plugin.provider.configuration.PaperPluginMeta;
 import java.io.IOException;
@@ -16,12 +17,12 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.PluginClassLoader;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.platform.modern.dfu.PGMDataFixer;
-import tc.oc.pgm.platform.modern.util.PGMClassLoader;
-import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PgmBootstrap implements PluginBootstrap {
@@ -79,18 +80,23 @@ public class PgmBootstrap implements PluginBootstrap {
         Collections.emptyList());
 
     try {
+      // Unregister the bootstrap classloader to make sure the PluginClassLoader below:
+      // - doesn't loop into itself, causing a stack overflow
+      // - is used by 3rd-party integration plugins to load PGM classes
+      PaperClassLoaderStorage.instance().unregisterClassloader(ourClassLoader);
+
       var jar = new JarFile(context.getPluginSource().toFile());
-      var url = context.getPluginSource().toUri().toURL();
-      var classLoader = new PGMClassLoader(url, jar, descriptor);
+      var classLoader = new PluginClassLoader(
+          ourClassLoader.getParent(),
+          descriptor,
+          context.getDataDirectory().toFile(),
+          context.getPluginSource().toFile(),
+          ourClassLoader,
+          jar,
+          PaperPluginManagerImpl.getInstance());
 
-      // Silence Paper warning about an unregistered class loader
-      PaperClassLoaderStorage.instance().registerUnsafePlugin(classLoader);
-
-      var pluginClass = Class.forName(pluginMeta.getMainClass(), true, classLoader);
-      var constructor = ReflectionUtils.getConstructor(pluginClass);
-
-      return (JavaPlugin) ReflectionUtils.callConstructor(constructor);
-    } catch (ClassNotFoundException | IOException e) {
+      return Objects.requireNonNull(classLoader.getPlugin());
+    } catch (IOException | InvalidPluginException e) {
       throw new RuntimeException(e);
     }
   }
