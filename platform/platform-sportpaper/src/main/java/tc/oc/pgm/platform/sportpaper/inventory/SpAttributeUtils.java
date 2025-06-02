@@ -15,7 +15,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 @Supports(SPORTPAPER)
-public class SpAttributeUtil implements AttributeUtils {
+public class SpAttributeUtils implements AttributeUtils {
 
   @Override
   public AttributeModifier parseModifier(Element el) throws InvalidXMLException {
