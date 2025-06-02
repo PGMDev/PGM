@@ -268,7 +268,7 @@ public class ItemTransferListener implements Listener {
         break;
 
       case PLACE_ALL: // left-click with cursor stack on empty slot or matching stack with enough
-        // space
+      // space
       case DROP_ALL_CURSOR: // left-click outside of window with cursor stack
         initialQuantity = event.getCursor().getAmount();
         break;

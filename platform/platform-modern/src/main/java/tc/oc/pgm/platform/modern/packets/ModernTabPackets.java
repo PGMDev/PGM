@@ -99,12 +99,14 @@ public class ModernTabPackets implements TabPackets {
             yield ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(
                 team, operation == TeamPacketOperation.CREATE);
           }
-          case REMOVE -> ClientboundSetPlayerTeamPacket.createRemovePacket(
-              new PlayerTeam(null, name));
-          case JOIN -> ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
-              new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.ADD);
-          case LEAVE -> ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
-              new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.REMOVE);
+          case REMOVE ->
+            ClientboundSetPlayerTeamPacket.createRemovePacket(new PlayerTeam(null, name));
+          case JOIN ->
+            ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
+                new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.ADD);
+          case LEAVE ->
+            ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
+                new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.REMOVE);
         });
   }
 

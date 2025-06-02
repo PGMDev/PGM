@@ -224,8 +224,8 @@ public class ModernNMSHacks implements NMSHacks {
           case NORMAL -> LevelStem.OVERWORLD;
           case NETHER -> LevelStem.NETHER;
           case THE_END -> LevelStem.END;
-          default -> throw new IllegalArgumentException(
-              "Illegal dimension (" + creator.environment() + ")");
+          default ->
+            throw new IllegalArgumentException("Illegal dimension (" + creator.environment() + ")");
         };
 
     LevelStorageSource.LevelStorageAccess worldSession;

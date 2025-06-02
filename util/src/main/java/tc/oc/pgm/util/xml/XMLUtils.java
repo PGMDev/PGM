@@ -1061,8 +1061,8 @@ public final class XMLUtils {
       case "add" -> AttributeModifier.Operation.ADD_NUMBER;
       case "base" -> AttributeModifier.Operation.ADD_SCALAR;
       case "multiply" -> AttributeModifier.Operation.MULTIPLY_SCALAR_1;
-      default -> throw new InvalidXMLException(
-          "Unknown attribute modifier operation '" + text + "'", node);
+      default ->
+        throw new InvalidXMLException("Unknown attribute modifier operation '" + text + "'", node);
     };
   }
 
