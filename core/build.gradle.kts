@@ -22,6 +22,7 @@ tasks.named<ShadowJar>("shadowJar") {
     archiveFileName = "PGM.jar"
     archiveClassifier.set("")
     destinationDirectory = rootProject.projectDir.resolve("build/libs")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     minimize {
         // Exclude from minimization as they're required at runtime
