@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.platform.Platform;
 
 public interface Sounds {
   Sound ADMIN_CHAT = sound("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP", 1f, 0.7f);
@@ -63,7 +64,7 @@ public interface Sounds {
   static Sound sound(String legacyConstant, String modernConstant, float volume, float pitch) {
     // Sound.sound due to a compiler bug
     return Sound.sound(
-        BukkitUtils.parse(MISC_UTILS::getSoundKey, legacyConstant, modernConstant),
+        MISC_UTILS.getSoundKey(Platform.isModern() ? modernConstant : legacyConstant),
         Sound.Source.MASTER,
         volume,
         pitch);

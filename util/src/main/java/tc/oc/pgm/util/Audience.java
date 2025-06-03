@@ -10,9 +10,11 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
@@ -65,5 +67,9 @@ public interface Audience extends ForwardingAudience.Single {
     return Collectors.collectingAndThen(
         Collectors.toCollection(ArrayList::new),
         audiences -> get(Collections.unmodifiableCollection(audiences)));
+  }
+
+  default void playSound(Sound sound, Location location) {
+    this.playSound(sound, location.getX(), location.getY(), location.getZ());
   }
 }

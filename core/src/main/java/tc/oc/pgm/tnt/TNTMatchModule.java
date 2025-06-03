@@ -88,11 +88,7 @@ public class TNTMatchModule implements MatchModule, Listener {
 
       if (callPrimeEvent(tnt, event.getPlayer())) {
         event.setCancelled(true); // Allow the block to be placed if priming is cancelled
-        match.playSound(
-            Sounds.TNT_FUSE,
-            tnt.getLocation().getX(),
-            tnt.getLocation().getX(),
-            tnt.getLocation().getY());
+        match.playSound(Sounds.TNT_FUSE, tnt.getLocation());
         InventoryUtils.consumeItem(event, event.getPlayer());
       }
     }
