@@ -32,6 +32,10 @@ public interface Audience extends ForwardingAudience.Single {
     playSound(Sounds.WARNING);
   }
 
+  default void playSound(Sound sound, Location location) {
+    this.playSound(sound, location.getX(), location.getY(), location.getZ());
+  }
+
   BukkitAudiences PROVIDER = BukkitAudiences.builder(BukkitUtils.getPlugin())
       .componentRenderer(ComponentRenderer.RENDERER)
       .build();
@@ -67,9 +71,5 @@ public interface Audience extends ForwardingAudience.Single {
     return Collectors.collectingAndThen(
         Collectors.toCollection(ArrayList::new),
         audiences -> get(Collections.unmodifiableCollection(audiences)));
-  }
-
-  default void playSound(Sound sound, Location location) {
-    this.playSound(sound, location.getX(), location.getY(), location.getZ());
   }
 }
