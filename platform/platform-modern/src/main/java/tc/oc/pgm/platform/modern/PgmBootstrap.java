@@ -10,8 +10,10 @@ import io.papermc.paper.plugin.provider.classloader.PaperClassLoaderStorage;
 import io.papermc.paper.plugin.provider.configuration.PaperPluginMeta;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.jar.JarFile;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -49,7 +51,7 @@ public class PgmBootstrap implements PluginBootstrap {
     });
 
     // Paper 1.21.5 uses DFU to upgrade worlds, hook into that instead
-    PGMDataFixer.hookMojangDFU();
+    new PGMDataFixer().hookMojangDFU();
   }
 
   @Override
@@ -66,7 +68,7 @@ public class PgmBootstrap implements PluginBootstrap {
         pluginMeta.getPluginSoftDependencies(),
         pluginMeta.getLoadBeforePlugins(),
         pluginMeta.getVersion(),
-        Collections.emptyMap(),
+        Map.of(),
         pluginMeta.getDescription(),
         pluginMeta.getAuthors(),
         pluginMeta.getContributors(),
@@ -75,9 +77,9 @@ public class PgmBootstrap implements PluginBootstrap {
         pluginMeta.getLoadOrder(),
         pluginMeta.getPermissions(),
         pluginMeta.getPermissionDefault(),
-        Collections.emptySet(),
+        Set.of(),
         pluginMeta.getAPIVersion(),
-        Collections.emptyList());
+        List.of());
 
     try {
       // Unregister the bootstrap classloader to make sure the PluginClassLoader below:

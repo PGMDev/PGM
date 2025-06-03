@@ -15,24 +15,25 @@ import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 public class PGMDataFixer {
-  private static final DataFixerUpper DATA_FIXER = (DataFixerUpper) DataFixers.getDataFixer();
-  private static final IntSortedSet DFU_FIXER_VERSIONS = ReflectionUtils.readField(
+  private final DataFixerUpper DATA_FIXER = (DataFixerUpper) DataFixers.getDataFixer();
+
+  private final IntSortedSet DFU_FIXER_VERSIONS = ReflectionUtils.readField(
       DataFixerUpper.class, DATA_FIXER, IntSortedSet.class, "fixerVersions");
 
   @SuppressWarnings("unchecked")
-  private static final Int2ObjectSortedMap<Schema> DFU_SCHEMAS = ReflectionUtils.readField(
+  private final Int2ObjectSortedMap<Schema> DFU_SCHEMAS = ReflectionUtils.readField(
       DataFixerUpper.class, DATA_FIXER, Int2ObjectSortedMap.class, "schemas");
 
   @SuppressWarnings("unchecked")
-  private static final List<DataFix> DFU_FIXER_LIST =
+  private final List<DataFix> DFU_FIXER_LIST =
       ReflectionUtils.readField(DataFixerUpper.class, DATA_FIXER, List.class, "globalList");
 
-  private static Schema getSchemaForDataVersion(int dataVersion) {
+  private Schema getSchemaForDataVersion(int dataVersion) {
     return DFU_SCHEMAS.get(
         DataFixUtils.makeKey(dataVersion, 0)); // The data version is the versioning key
   }
 
-  private static void registerDataFix(DataFix dataFix) {
+  private void registerDataFix(DataFix dataFix) {
     var insertionIdx = Collections.binarySearch(
         DFU_FIXER_LIST, dataFix, Comparator.comparingInt(DataFix::getVersionKey));
     if (insertionIdx < 0) insertionIdx = -(insertionIdx + 1);
@@ -40,13 +41,13 @@ public class PGMDataFixer {
     DFU_FIXER_VERSIONS.add(dataFix.getVersionKey());
   }
 
-  private static void injectDataFix(int dataVersion, Function<Schema, DataFix> createDataFix) {
+  private void injectDataFix(int dataVersion, Function<Schema, DataFix> createDataFix) {
     var schema = getSchemaForDataVersion(dataVersion);
     var dataFix = createDataFix.apply(schema);
     registerDataFix(dataFix);
   }
 
-  public static void hookMojangDFU() {
+  public void hookMojangDFU() {
     injectDataFix(DataVersions.V1_18_EXP_1, LegacyOverworldFix::new);
   }
 }
