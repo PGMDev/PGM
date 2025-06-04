@@ -8,21 +8,11 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.server.v1_8_R3.ChunkSection;
-import net.minecraft.server.v1_8_R3.EntityArrow;
-import net.minecraft.server.v1_8_R3.EntityFireball;
-import net.minecraft.server.v1_8_R3.EntityFireworks;
-import net.minecraft.server.v1_8_R3.IBlockData;
-import net.minecraft.server.v1_8_R3.IDataManager;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.ServerNBTManager;
-import net.minecraft.server.v1_8_R3.WorldData;
-import net.minecraft.server.v1_8_R3.WorldServer;
-import org.bukkit.Bukkit;
+import net.minecraft.server.v1_8_R3.*;
+import org.bukkit.*;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -98,7 +88,6 @@ public class SpNMSHacks implements NMSHacks {
   @Override
   public Inventory createFakeInventory(Player viewer, Inventory realInventory) {
     if (realInventory.hasCustomName()) {
-      //noinspection deprecation
       return realInventory instanceof DoubleChestInventory
           ? Bukkit.createInventory(viewer, realInventory.getSize(), realInventory.getName())
           : Bukkit.createInventory(viewer, realInventory.getType(), realInventory.getName());
@@ -228,5 +217,46 @@ public class SpNMSHacks implements NMSHacks {
   @Override
   public int allocateEntityId() {
     return Bukkit.allocateEntityId();
+  }
+
+  @Override
+  public Object getBlockNBT(Block block) {
+    TileEntity tile = ((CraftWorld) block.getWorld())
+        .getHandle()
+        .getTileEntity(new BlockPosition(block.getX(), block.getY(), block.getZ()));
+    if (tile == null) return null;
+
+    NBTTagCompound tag = new NBTTagCompound();
+    tile.b(tag); // Save
+    return tag;
+  }
+
+  @Override
+  public void setBlockNBT(Block block, Object tag) {
+    if (!(tag instanceof NBTTagCompound)) return;
+
+    WorldServer world = ((CraftWorld) block.getWorld()).getHandle();
+    BlockPosition pos = new BlockPosition(block.getX(), block.getY(), block.getZ());
+    NBTTagCompound compound = (NBTTagCompound) tag;
+
+    compound.setInt("x", pos.getX());
+    compound.setInt("y", pos.getY());
+    compound.setInt("z", pos.getZ());
+
+    TileEntity tile = world.getTileEntity(pos);
+    if (tile == null) {
+      // Force block update to trigger tile entity re-creation
+      IBlockData blockData = world.getType(pos);
+      world.setTypeAndData(pos, Blocks.AIR.getBlockData(), 0); // Clear block
+      world.setTypeAndData(pos, blockData, 3); // Restore block
+
+      tile = world.getTileEntity(pos);
+      if (tile == null) {
+        return;
+      }
+    }
+
+    tile.a(compound); // Load NBT
+    tile.update();
   }
 }

@@ -15,8 +15,11 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtException;
 import net.minecraft.nbt.ReportedNbtException;
 import net.minecraft.resources.ResourceKey;
@@ -31,6 +34,8 @@ import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.LevelStem;
@@ -38,12 +43,7 @@ import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.validation.ContentValidationException;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.Nameable;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.CraftServer;
@@ -52,10 +52,7 @@ import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.entity.CraftFirework;
 import org.bukkit.craftbukkit.generator.CraftWorldInfo;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Fireball;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.world.WorldLoadEvent;
@@ -392,5 +389,37 @@ public class ModernNMSHacks implements NMSHacks {
   @Override
   public int allocateEntityId() {
     return Bukkit.getUnsafe().nextEntityId();
+  }
+
+  @Override
+  public Object getBlockNBT(Block block) {
+    ServerLevel level = ((CraftWorld) block.getWorld()).getHandle();
+    BlockPos pos = new BlockPos(block.getX(), block.getY(), block.getZ());
+    BlockEntity be = level.getBlockEntity(pos);
+
+    if (be == null) return null;
+
+    CompoundTag tag = be.saveWithFullMetadata(level.registryAccess());
+    return tag;
+  }
+
+  @Override
+  public void setBlockNBT(Block block, Object tag) {
+    if (!(tag instanceof CompoundTag nbt)) return;
+
+    ServerLevel level = ((CraftWorld) block.getWorld()).getHandle();
+    BlockPos pos = new BlockPos(block.getX(), block.getY(), block.getZ());
+    BlockState state = level.getBlockState(pos);
+
+    BlockEntity existing = level.getBlockEntity(pos);
+    if (existing != null) {
+      level.removeBlockEntity(pos);
+    }
+
+    HolderLookup.Provider registryLookup = level.registryAccess();
+    BlockEntity loaded = BlockEntity.loadStatic(pos, state, nbt, registryLookup);
+    if (loaded != null) {
+      level.setBlockEntity(loaded);
+    }
   }
 }

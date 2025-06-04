@@ -57,4 +57,8 @@ public interface NMSHacks {
   int getMaxWorldSize(World world);
 
   int allocateEntityId();
+
+  Object getBlockNBT(Block block);
+
+  void setBlockNBT(Block block, Object tag);
 }
