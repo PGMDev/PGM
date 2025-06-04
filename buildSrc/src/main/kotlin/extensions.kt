@@ -7,10 +7,8 @@ fun Project.latestCommitHash(): String {
 }
 
 fun Project.runGitCommand(args: List<String>): String {
-    val byteOut = ByteArrayOutputStream()
-    exec {
-        commandLine = listOf("git") + args
-        standardOutput = byteOut
-    }
-    return byteOut.toString(Charsets.UTF_8.name()).trim()
+    return providers.exec {
+        commandLine("git")
+        args(args)
+    }.standardOutput.asText.get().trim()
 }
