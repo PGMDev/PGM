@@ -33,7 +33,7 @@ dependencies {
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.4")
     api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
-    api("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r") { exclude("*") }
+    api("org.eclipse.jgit:org.eclipse.jgit:7.2.1.202505142326-r") { exclude("*") }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
