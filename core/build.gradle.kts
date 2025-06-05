@@ -49,6 +49,7 @@ tasks.named<ShadowJar>("shadowJar") {
     pgmRelocate("org.slf4j")
 
     exclude("META-INF/**")
+    exclude("OSGI-INF/")
     exclude("**/*.html")
     exclude("javax/**") // Unsure why this is even added
 
