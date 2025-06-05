@@ -78,17 +78,20 @@ publishing {
     }
 }
 
+val pluginProperties = mapOf(
+    "name" to project.name,
+    "description" to project.description,
+    "apiVersion" to "1.21.5",
+    "mainClass" to "tc.oc.pgm.PGMPlugin",
+    "version" to project.version,
+    "commitHash" to project.latestCommitHash(),
+    "url" to "https://pgm.dev/"
+)
+
 tasks {
     processResources {
         filesMatching(listOf("plugin.yml", "paper-plugin.yml")) {
-            expand(
-                "name" to project.name,
-                "description" to project.description,
-                "apiVersion" to "1.21.5",
-                "mainClass" to "tc.oc.pgm.PGMPlugin",
-                "version" to project.version,
-                "commitHash" to project.latestCommitHash(),
-                "url" to "https://pgm.dev/")
+            expand(pluginProperties)
         }
     }
 
