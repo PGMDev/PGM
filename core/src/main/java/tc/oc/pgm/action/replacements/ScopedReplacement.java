@@ -4,6 +4,8 @@ import java.util.function.Function;
 import net.kyori.adventure.text.ComponentLike;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 
 public abstract class ScopedReplacement<S extends Filterable<?>> implements Replacement {
   private final Class<S> scope;
@@ -13,8 +15,14 @@ public abstract class ScopedReplacement<S extends Filterable<?>> implements Repl
   }
 
   @Override
-  public boolean canUse(Class<? extends Filterable<?>> filterable) {
-    return Filterables.isAssignable(filterable, scope);
+  public void validate(Class<? extends Filterable<?>> filterable, Node node)
+      throws InvalidXMLException {
+    if (!Filterables.isAssignable(filterable, scope)) {
+      throw new InvalidXMLException(
+          "Wrong replacement scope, got " + filterable.getSimpleName() + " but expected "
+              + scope.getSimpleName() + " or lower",
+          node);
+    }
   }
 
   protected abstract ComponentLike getImpl(S ctx);

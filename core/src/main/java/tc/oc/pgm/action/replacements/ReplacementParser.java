@@ -50,7 +50,10 @@ public class ReplacementParser {
     Method parser = getParserFor(el);
     if (parser != null) {
       try {
-        return (Replacement) parser.invoke(this, el, scope);
+        var replacement = (Replacement) parser.invoke(this, el, scope);
+        if (scope != null)
+          replacement.validate(scope, new Node(el));
+        return replacement;
       } catch (Exception e) {
         throw InvalidXMLException.coerce(e, new Node(el));
       }
@@ -71,9 +74,12 @@ public class ReplacementParser {
       throws InvalidXMLException {
     if (scope == null) return Filterables.parse(Node.fromRequiredAttr(el, "scope"));
     Node node = Node.fromAttr(el, "scope");
-    if (node != null && !Filterables.isAssignable(Filterables.parse(node), scope))
+    // Narrower replacements cannot be used with broader scope
+    if (node != null && !Filterables.isAssignable(scope, Filterables.parse(node)))
       throw new InvalidXMLException(
-          "Wrong scope defined for replacement, scope must be " + scope.getSimpleName(), el);
+          "Wrong scope defined for replacement, scope must be " + scope.getSimpleName()
+              + " or higher",
+          el);
     return scope;
   }
 
@@ -106,6 +112,8 @@ public class ReplacementParser {
   public <T extends Filterable<?>> Replacement parseSwitch(Element el, Class<T> scope)
       throws InvalidXMLException {
     scope = parseScope(el, scope);
+    record SwitchBranch(Component result, Range<Double> valueRange, Filter filter) {}
+
     var formula = parser.formula(scope, el, "value").orNull();
     var fallback = parser.component(el, "fallback").child().optional(empty());
     var children = el.getChildren("case");
@@ -149,16 +157,6 @@ public class ReplacementParser {
       throw new InvalidXMLException(
           "References to replacements at the root level are not allowed", el);
 
-    Replacement replacement = features.resolve(new Node(el), Replacement.class);
-
-    if (!replacement.canUse(scope)) {
-      throw new InvalidXMLException(
-          replacement.getClass().getSimpleName() + " cannot be used with " + scope.getSimpleName(),
-          el);
-    }
-
-    return replacement;
+    return features.resolve(new Node(el), Replacement.class);
   }
-
-  public record SwitchBranch(Component result, Range<Double> valueRange, Filter filter) {}
 }
