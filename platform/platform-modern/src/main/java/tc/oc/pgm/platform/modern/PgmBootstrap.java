@@ -1,5 +1,8 @@
 package tc.oc.pgm.platform.modern;
 
+import ca.spottedleaf.dataconverter.converters.DataConverter;
+import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
+import ca.spottedleaf.dataconverter.types.MapType;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
@@ -24,7 +27,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.PluginClassLoader;
 import org.jetbrains.annotations.NotNull;
-import tc.oc.pgm.platform.modern.dfu.PGMDataFixer;
+import tc.oc.pgm.util.DataVersions;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PgmBootstrap implements PluginBootstrap {
@@ -50,8 +53,20 @@ public class PgmBootstrap implements PluginBootstrap {
       }
     });
 
-    // Paper 1.21.5 uses DFU to upgrade worlds, hook into that instead
-    new PGMDataFixer().hookMojangDFU();
+    // Set legacy maps to the datapack-provided legacy overworld dimension
+    MCTypeRegistry.CHUNK.addStructureConverter(new DataConverter<>(DataVersions.V1_18_EXP_1) {
+      @Override
+      public MapType convert(MapType data, final long sourceVersion, final long toVersion) {
+        final MapType level = data.getMap("Level");
+        if (level == null) return data;
+        final MapType context = data.getMap("__context"); // Passed through by ChunkStorage
+        if (context == null) return data;
+        if ("minecraft:overworld".equals(context.getString("dimension", ""))) {
+          context.setString("dimension", "pgm:legacy_overworld");
+        }
+        return data;
+      }
+    });
   }
 
   @Override

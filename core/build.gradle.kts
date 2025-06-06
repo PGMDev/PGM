@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.5-SNAPSHOT")
+    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.6-SNAPSHOT")
 
     implementation(project(":util"))
     runtimeOnly(project(":platform-sportpaper")) { exclude("*") }
@@ -82,7 +82,7 @@ publishing {
 val pluginProperties = mapOf(
     "name" to project.name,
     "description" to project.description,
-    "apiVersion" to "1.21.5",
+    "apiVersion" to "1.21.6",
     "mainClass" to "tc.oc.pgm.PGMPlugin",
     "version" to project.version,
     "commitHash" to project.latestCommitHash(),

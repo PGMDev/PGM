@@ -77,7 +77,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.21.4")
+@Supports(value = PAPER, minVersion = "1.21.6")
 public class ModernNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
@@ -104,7 +104,7 @@ public class ModernNMSHacks implements NMSHacks {
 
   @Override
   public void setFireballDirection(Fireball entity, Vector direction) {
-    entity.setPower(direction.multiply(0.1D));
+    entity.setAcceleration(direction.multiply(0.1D));
   }
 
   @Override
@@ -300,7 +300,7 @@ public class ModernNMSHacks implements NMSHacks {
 
     // If the world is < 1.18-exp.1, replace dimension type
     boolean isOld =
-        worldinfo.levelVersion().minecraftVersion().getVersion() < DataVersions.V1_18_EXP_1;
+        worldinfo.levelVersion().minecraftVersion().version() < DataVersions.V1_18_EXP_1;
     if (isOld && actualDimension == LevelStem.OVERWORLD) {
       var dimReg = console.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
       var dimHolder = dimReg.getOrThrow(PgmBootstrap.LEGACY_OVERWORLD);

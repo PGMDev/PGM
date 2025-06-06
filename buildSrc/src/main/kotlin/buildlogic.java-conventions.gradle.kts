@@ -31,7 +31,7 @@ dependencies {
     api("org.incendo:cloud-paper:2.0.0-beta.10")
     api("org.incendo:cloud-minecraft-extras:2.0.0-beta.10")
     api("me.lucko:commodore:2.2")
-    api("fr.mrmicky:fastboard:2.1.4")
+    api("fr.mrmicky:fastboard:2.1.5")
     api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
     api("org.eclipse.jgit:org.eclipse.jgit:7.2.1.202505142326-r") { exclude("*") }
     api("net.objecthunter:exp4j:0.4.9-pgm")
