@@ -51,8 +51,7 @@ public class ReplacementParser {
     if (parser != null) {
       try {
         var replacement = (Replacement) parser.invoke(this, el, scope);
-        if (scope != null)
-          replacement.validate(scope, new Node(el));
+        if (scope != null) replacement.validate(scope, new Node(el));
         return replacement;
       } catch (Exception e) {
         throw InvalidXMLException.coerce(e, new Node(el));
