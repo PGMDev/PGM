@@ -9,6 +9,7 @@ public class BlitzConfig {
 
   private final int lives;
   private final boolean broadcastLives;
+  private final boolean lightning;
   private final Filter filter;
   private final Filter scoreboardFilter;
   private final Filter joinFilter;
@@ -16,6 +17,7 @@ public class BlitzConfig {
   public BlitzConfig(
       int lives,
       boolean broadcastLives,
+      boolean lightning,
       Filter filter,
       Filter scoreboardFilter,
       Filter joinFilter) {
@@ -23,6 +25,7 @@ public class BlitzConfig {
 
     this.lives = lives;
     this.broadcastLives = broadcastLives;
+    this.lightning = lightning;
     this.filter = filter;
     this.scoreboardFilter = scoreboardFilter;
     this.joinFilter = joinFilter;
@@ -39,6 +42,10 @@ public class BlitzConfig {
 
   public boolean getBroadcastLives() {
     return this.broadcastLives;
+  }
+
+  public boolean getLightning() {
+    return this.lightning;
   }
 
   public Filter getFilter() {
