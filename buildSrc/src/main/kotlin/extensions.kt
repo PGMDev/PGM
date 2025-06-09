@@ -1,5 +1,4 @@
 import org.gradle.api.Project
-import java.io.ByteArrayOutputStream
 
 
 fun Project.latestCommitHash(): String {
