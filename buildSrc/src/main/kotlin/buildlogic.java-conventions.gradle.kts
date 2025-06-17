@@ -23,8 +23,8 @@ repositories {
 
 dependencies {
     api("org.jdom:jdom2:2.0.6.1")
-    api("net.kyori:adventure-api:4.21.0")
-    api("net.kyori:adventure-text-serializer-plain:4.21.0")
+    api("net.kyori:adventure-api:4.22.0")
+    api("net.kyori:adventure-text-serializer-plain:4.22.0")
     api("net.kyori:adventure-platform-bukkit:4.4.0")
     api("org.incendo:cloud-core:2.0.0")
     api("org.incendo:cloud-annotations:2.0.0")
@@ -33,7 +33,7 @@ dependencies {
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
     api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
-    api("org.eclipse.jgit:org.eclipse.jgit:7.2.1.202505142326-r") { exclude("*") }
+    api("org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r") { exclude("*") }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
@@ -68,7 +68,7 @@ spotless {
     ratchetFrom = "origin/dev"
     java {
         removeUnusedImports()
-        palantirJavaFormat("2.67.0").style("GOOGLE").formatJavadoc(true)
+        palantirJavaFormat("2.68.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 
