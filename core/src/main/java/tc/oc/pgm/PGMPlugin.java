@@ -81,8 +81,8 @@ import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
-import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 import tc.oc.pgm.util.usernames.BukkitUsernameResolver;
+import tc.oc.pgm.util.usernames.MojangUsernameResolver;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
@@ -172,7 +172,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     UsernameResolvers.setResolvers(
         new BukkitUsernameResolver(),
         new SqlUsernameResolver((SQLDatastore) datastore),
-        new ApiUsernameResolver());
+        new MojangUsernameResolver());
 
     datastore = new CacheDatastore(datastore);
 
