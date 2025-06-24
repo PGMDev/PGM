@@ -1,7 +1,5 @@
 package tc.oc.pgm.listeners;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
@@ -14,7 +12,6 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -35,26 +32,18 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.LegacyFormatUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
 public class MatchAnnouncer implements Listener {
-
-  private static final Sound SOUND_MATCH_START =
-      sound(key("note.pling"), Sound.Source.MASTER, 1f, 1.59f);
-  private static final Sound SOUND_MATCH_WIN =
-      sound(key("mob.wither.death"), Sound.Source.MASTER, 1f, 1f);
-  private static final Sound SOUND_MATCH_LOSE =
-      sound(key("mob.wither.spawn"), Sound.Source.MASTER, 1f, 1f);
-
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchLoad(final MatchLoadEvent event) {
     final Match match = event.getMatch();
     match
         .getExecutor(MatchScope.LOADED)
-        .scheduleWithFixedDelay(
-            () -> match.getPlayers().forEach(this::sendCurrentlyPlaying), 0, 5, TimeUnit.MINUTES);
+        .scheduleWithFixedDelay(() -> sendCurrentlyPlaying(match), 0, 5, TimeUnit.MINUTES);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -64,9 +53,10 @@ public class MatchAnnouncer implements Listener {
     match.sendMessage(translatable("broadcast.matchStart", NamedTextColor.GREEN));
 
     Component go = translatable("broadcast.go", NamedTextColor.GREEN);
-    match.showTitle(title(go, empty(), Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(15))));
+    match.showTitle(
+        title(go, empty(), Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(15))));
 
-    match.playSound(SOUND_MATCH_START);
+    match.playSound(Sounds.MATCH_START);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -82,30 +72,29 @@ public class MatchAnnouncer implements Listener {
         title = translatable("broadcast.gameOver");
       } else {
         if (singleWinner) {
-          title =
-              translatable(
-                  Iterables.getOnlyElement(winners).isNamePlural()
-                      ? "broadcast.gameOver.teamWinners"
-                      : "broadcast.gameOver.teamWinner",
-                  TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
+          title = translatable(
+              Iterables.getOnlyElement(winners).isNamePlural()
+                  ? "broadcast.gameOver.teamWinners"
+                  : "broadcast.gameOver.teamWinner",
+              TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
         }
 
         // Use stream here instead of #contains to avoid unchecked cast
         if (winners.stream().anyMatch(w -> w == viewer.getParty())) {
           // Winner
-          viewer.playSound(SOUND_MATCH_WIN);
+          viewer.playSound(Sounds.MATCH_WIN);
           if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamWon", NamedTextColor.GREEN);
           }
         } else if (viewer.getParty() instanceof Competitor) {
           // Loser
-          viewer.playSound(SOUND_MATCH_LOSE);
+          viewer.playSound(Sounds.MATCH_LOSE);
           if (singleWinner && viewer.getParty() instanceof Team) {
             subtitle = translatable("broadcast.gameOver.teamLost", NamedTextColor.RED);
           }
         } else {
           // Observer
-          viewer.playSound(SOUND_MATCH_WIN);
+          viewer.playSound(Sounds.MATCH_WIN);
         }
       }
 
@@ -155,13 +144,11 @@ public class MatchAnnouncer implements Listener {
 
     Collection<Contributor> authors = mapInfo.getAuthors();
     if (!authors.isEmpty()) {
-      viewer.sendMessage(
-          space()
-              .append(
-                  translatable(
-                      "misc.createdBy",
-                      NamedTextColor.GRAY,
-                      TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
+      viewer.sendMessage(space()
+          .append(translatable(
+              "misc.createdBy",
+              NamedTextColor.GRAY,
+              TextFormatter.nameList(authors, NameStyle.FANCY, NamedTextColor.GRAY))));
     }
 
     // Send extra info from other plugins
@@ -172,11 +159,10 @@ public class MatchAnnouncer implements Listener {
     viewer.sendMessage(TextFormatter.horizontalLine(NamedTextColor.WHITE, 200));
   }
 
-  private void sendCurrentlyPlaying(MatchPlayer viewer) {
-    viewer.sendMessage(
-        translatable(
-            "misc.playing",
-            NamedTextColor.DARK_PURPLE,
-            viewer.getMatch().getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
+  private void sendCurrentlyPlaying(Match match) {
+    match.sendMessage(translatable(
+        "misc.playing",
+        NamedTextColor.DARK_PURPLE,
+        match.getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 }

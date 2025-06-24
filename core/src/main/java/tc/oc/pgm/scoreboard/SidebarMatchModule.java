@@ -1,10 +1,10 @@
 package tc.oc.pgm.scoreboard;
 
+import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import fr.mrmicky.fastboard.FastBoard;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +32,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.destroyable.Destroyable;
+import tc.oc.pgm.events.CountdownCancelEvent;
+import tc.oc.pgm.events.CountdownStartEvent;
 import tc.oc.pgm.events.FeatureChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
@@ -47,9 +49,13 @@ import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.events.TeamRespawnsChangeEvent;
+import tc.oc.pgm.timelimit.TimeLimitCountdown;
+import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.concurrent.RateLimiter;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
+import tc.oc.pgm.util.platform.Platform;
 
 @ListenerScope(MatchScope.LOADED)
 public class SidebarMatchModule implements MatchModule, Listener {
@@ -88,12 +94,20 @@ public class SidebarMatchModule implements MatchModule, Listener {
     this.title = renderer.renderTitle();
   }
 
-  private void addSidebar(MatchPlayer player) {
-    FastBoard sidebar = new FastBoard(player.getBukkit());
+  private FastBoard addSidebar(MatchPlayer player) {
+    FastBoard sidebar = new FastBoard(player.getBukkit()) {
+      @Override
+      public boolean hasLinesMaxLength() {
+        return (Platform.isModern())
+            ? player.getProtocolVersion() < ViaUtils.VERSION_1_13
+            : super.hasLinesMaxLength();
+      }
+    };
     // Only render the title once, since it does not change during the match.
     sidebar.updateTitle(renderer.renderTitle(title, player));
 
     sidebars.put(player.getId(), sidebar);
+    return sidebar;
   }
 
   @Override
@@ -107,28 +121,16 @@ public class SidebarMatchModule implements MatchModule, Listener {
     match
         .needModule(GoalMatchModule.class)
         .getGoals()
-        .forEach(
-            goal ->
-                fmm.onChange(
-                    Match.class,
-                    goal.getScoreboardFilter(),
-                    (m, v) -> this.renderSidebarDebounce()));
+        .forEach(goal -> fmm.onChange(
+            Match.class, goal.getScoreboardFilter(), (m, v) -> this.renderSidebarDebounce()));
     match
         .moduleOptional(ScoreMatchModule.class)
-        .ifPresent(
-            smm ->
-                fmm.onChange(
-                    Party.class,
-                    smm.getScoreboardFilter(),
-                    (p, v) -> this.renderSidebarDebounce()));
+        .ifPresent(smm -> fmm.onChange(
+            Party.class, smm.getScoreboardFilter(), (p, v) -> this.renderSidebarDebounce()));
     match
         .moduleOptional(BlitzMatchModule.class)
-        .ifPresent(
-            bmm ->
-                fmm.onChange(
-                    Party.class,
-                    bmm.getScoreboardFilter(),
-                    (p, v) -> this.renderSidebarDebounce()));
+        .ifPresent(bmm -> fmm.onChange(
+            Party.class, bmm.getScoreboardFilter(), (p, v) -> this.renderSidebarDebounce()));
   }
 
   @Override
@@ -155,8 +157,15 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void addPlayer(PlayerJoinMatchEvent event) {
-    addSidebar(event.getPlayer());
+    FastBoard sidebar = addSidebar(event.getPlayer());
     renderSidebarDebounce();
+    // After match end we stop updating sidebars for lag reasons.
+    // That causes newly joined players to have nothing if we don't explicitly render for them.
+    if (match.isFinished()) {
+      var player = event.getPlayer();
+      var rows = renderer.renderSidebar(player.getParty());
+      sidebar.updateLines(Collections2.transform(rows, r -> renderer.renderRow(r, player)));
+    }
   }
 
   @EventHandler
@@ -207,9 +216,22 @@ public class SidebarMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void goalProximityChange(final GoalProximityChangeEvent event) {
-    if (PGM.get().getConfiguration().showProximity()) {
+    boolean willUseProx = match.moduleRequire(TimeLimitMatchModule.class).willUseProximity();
+    if (PGM.get().getConfiguration().showProximity(willUseProx)) {
       renderSidebarDebounce();
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void timelimitToggle(final CountdownStartEvent event) {
+    if (!(event.getCountdown() instanceof TimeLimitCountdown)) return;
+    renderSidebarDebounce();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void timelimitToggle(final CountdownCancelEvent event) {
+    if (!(event.getCountdown() instanceof TimeLimitCountdown)) return;
+    renderSidebarDebounce();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -244,18 +266,16 @@ public class SidebarMatchModule implements MatchModule, Listener {
   private void renderSidebarDebounce() {
     // Debounced render
     if (this.renderTask == null || renderTask.isDone()) {
-      Runnable render =
-          () -> {
-            rateLimit.beforeTask();
-            SidebarMatchModule.this.renderTask = null;
-            SidebarMatchModule.this.renderSidebar();
-            rateLimit.afterTask();
-          };
+      Runnable render = () -> {
+        rateLimit.beforeTask();
+        SidebarMatchModule.this.renderTask = null;
+        SidebarMatchModule.this.renderSidebar();
+        rateLimit.afterTask();
+      };
 
-      this.renderTask =
-          match
-              .getExecutor(MatchScope.LOADED)
-              .schedule(render, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
+      this.renderTask = match
+          .getExecutor(MatchScope.LOADED)
+          .schedule(render, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
     }
   }
 
@@ -267,13 +287,7 @@ public class SidebarMatchModule implements MatchModule, Listener {
       if (sidebar == null) continue;
 
       List<Component> rows = cache.computeIfAbsent(player.getParty(), renderer::renderSidebar);
-
-      List<String> result = new ArrayList<>(rows.size());
-      for (Component row : rows) {
-        result.add(renderer.renderRow(row, player));
-      }
-
-      sidebar.updateLines(result);
+      sidebar.updateLines(Collections2.transform(rows, r -> renderer.renderRow(r, player)));
     }
   }
 
@@ -303,11 +317,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
     private BlinkTask(Goal<?> goal, float rateHz, @Nullable Duration duration) {
       this.goal = goal;
       this.intervalTicks = (long) (10f / rateHz);
-      this.task =
-          match
-              .getExecutor(MatchScope.RUNNING)
-              .scheduleWithFixedDelay(
-                  this, 0, intervalTicks * TimeUtils.TICK, TimeUnit.MILLISECONDS);
+      this.task = match
+          .getExecutor(MatchScope.RUNNING)
+          .scheduleWithFixedDelay(this, 0, intervalTicks * TimeUtils.TICK, TimeUnit.MILLISECONDS);
 
       this.reset(duration);
     }

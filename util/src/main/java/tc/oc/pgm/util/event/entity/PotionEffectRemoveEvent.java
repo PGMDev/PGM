@@ -1,6 +1,6 @@
 package tc.oc.pgm.util.event.entity;
 
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.potion.PotionEffect;
@@ -12,7 +12,7 @@ public class PotionEffectRemoveEvent extends PotionEffectEvent implements Cancel
 
   private boolean cancelled;
 
-  public PotionEffectRemoveEvent(LivingEntity entity, PotionEffect effect) {
+  public PotionEffectRemoveEvent(Entity entity, PotionEffect effect) {
     super(entity, effect);
   }
 

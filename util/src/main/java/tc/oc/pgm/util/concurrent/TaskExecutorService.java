@@ -17,6 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.TimeUtils;
 
 /** An executor service that is backed by a runnable executor. */
@@ -64,7 +65,7 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
     if (!isShutdown()) shutdown();
     List<Runnable> pending = ImmutableList.copyOf(tasks);
 
-    for (Task<?> task : tasks) {
+    for (var task : tasks) {
       task.cancel(true);
     }
 
@@ -234,49 +235,35 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
 
     @Override
     public boolean complete(V value) {
-      return complete(value, null);
+      return !periodic && cleanup(super.complete(value));
     }
 
     @Override
     public boolean completeExceptionally(Throwable ex) {
-      return complete(null, ex);
+      return cleanup(super.completeExceptionally(ex));
     }
 
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
-      if (super.cancel(mayInterruptIfRunning)) {
-        tasks.remove(this);
-        if (terminated != null) {
-          terminated.countDown();
-        }
-        cancelTask(taskId);
-        return true;
-      }
-
-      return false;
+      return cleanup(super.cancel(mayInterruptIfRunning));
     }
 
     @Override
-    public long getDelay(TimeUnit unit) {
+    public long getDelay(@NotNull TimeUnit unit) {
       return 0;
     }
 
     @Override
-    public int compareTo(Delayed o) {
-      if (!(o instanceof Task)) return 0;
-      return isDone() ? 1 : 0;
+    public int compareTo(@NotNull Delayed other) {
+      if (!(other instanceof Task<?> ot)) return -1;
+      return Integer.compare(taskId, ot.taskId);
     }
 
-    private boolean complete(V value, Throwable ex) {
-      boolean done = false;
-
-      if (!periodic && value != null) {
-        done = super.complete(value);
-      } else if (ex != null) {
-        done = super.completeExceptionally(ex);
-      }
-
-      return !done || cancel(true);
+    private boolean cleanup(boolean triggered) {
+      if (terminated != null) terminated.countDown();
+      cancelTask(taskId);
+      tasks.remove(this);
+      return triggered;
     }
   }
 }

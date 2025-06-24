@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** @see InventoryMenu * */
@@ -28,6 +29,11 @@ public interface MenuItem {
 
   /** Gets the {@link Material} of this item */
   Material getMaterial(Player player);
+
+  /** Durability on the item */
+  default short getData() {
+    return 0;
+  }
 
   /**
    * Action that should be performed once item is clicked
@@ -72,12 +78,11 @@ public interface MenuItem {
   }
 
   default ItemStack createItem(Player player) {
-    ItemStack stack = new ItemStack(getMaterial(player));
+    ItemStack stack = MaterialData.item(getMaterial(player), getData()).toItemStack(1);
     ItemMeta meta = stack.getItemMeta();
 
-    meta.setDisplayName(
-        TextTranslations.translateLegacy(
-            getDisplayName().decoration(TextDecoration.BOLD, true), player));
+    meta.setDisplayName(TextTranslations.translateLegacy(
+        getDisplayName().decoration(TextDecoration.BOLD, true), player));
     meta.setLore(getLore(player));
     meta.addItemFlags(ItemFlag.values());
 

@@ -5,10 +5,10 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapTag;
@@ -18,6 +18,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blockdrops.BlockDropsModule;
+import tc.oc.pgm.destroyable.DestroyableFactory.SparksType;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
@@ -29,7 +30,7 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -37,7 +38,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class DestroyableModule implements MapModule<DestroyableMatchModule> {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("dtm", "monument", "Destroy the Monument", true, false));
+      ImmutableList.of(new MapTag("monument", Gamemode.DESTROY_THE_MONUMENT, false));
   protected final List<DestroyableFactory> destroyableFactories;
 
   public DestroyableModule(List<DestroyableFactory> destroyableFactories) {
@@ -84,11 +85,8 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
       List<DestroyableFactory> destroyables = Lists.newArrayList();
       RegionParser regionParser = context.getRegions();
 
-      for (Element destroyableEl :
-          XMLUtils.flattenElements(
-              doc.getRootElement(),
-              ImmutableSet.of("destroyables"),
-              ImmutableSet.of("destroyable"))) {
+      for (Element destroyableEl : XMLUtils.flattenElements(
+          doc.getRootElement(), ImmutableSet.of("destroyables"), ImmutableSet.of("destroyable"))) {
         TeamFactory owner =
             Teams.getTeam(new Node(XMLUtils.getRequiredAttribute(destroyableEl, "owner")), context);
         String name = XMLUtils.getRequiredAttribute(destroyableEl, "name").getValue();
@@ -105,15 +103,15 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
           region = regionParser.parseChildren(destroyableEl);
           regionParser.validate(region, BlockBoundedValidation.INSTANCE, new Node(destroyableEl));
         } else {
-          region =
-              regionParser.parseRequiredProperty(
-                  destroyableEl, "region", BlockBoundedValidation.INSTANCE);
+          region = regionParser.parseRequiredProperty(
+              destroyableEl, "region", BlockBoundedValidation.INSTANCE);
         }
 
         String id = destroyableEl.getAttributeValue("id");
-        Set<SingleMaterialMatcher> materials =
-            XMLUtils.parseMaterialPatternSet(
-                Node.fromRequiredAttr(destroyableEl, "materials", "material"));
+        MaterialMatcher materials = MaterialMatcher.builder()
+            .multiPattern()
+            .parse(Node.fromRequiredAttr(destroyableEl, "materials", "material"))
+            .build();
 
         ImmutableSet<Mode> modeSet;
         Node modes = Node.fromAttr(destroyableEl, "modes");
@@ -130,29 +128,28 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
 
         boolean showProgress =
             XMLUtils.parseBoolean(destroyableEl.getAttribute("show-progress"), false);
-        boolean sparks = XMLUtils.parseBoolean(destroyableEl.getAttribute("sparks"), false);
+        SparksType sparks = XMLUtils.parseEnum(
+            Node.fromAttr(destroyableEl, "sparks"), SparksType.class, SparksType.NONE);
         boolean repairable = XMLUtils.parseBoolean(destroyableEl.getAttribute("repairable"), true);
         ShowOptions options = ShowOptions.parse(context.getFilters(), destroyableEl);
         Boolean required = XMLUtils.parseBoolean(destroyableEl.getAttribute("required"), null);
-        ProximityMetric proximityMetric =
-            ProximityMetric.parse(
-                destroyableEl, new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
+        ProximityMetric proximityMetric = ProximityMetric.parse(
+            destroyableEl, new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
 
-        DestroyableFactory factory =
-            new DestroyableFactory(
-                id,
-                name,
-                required,
-                options,
-                owner,
-                proximityMetric,
-                region,
-                materials,
-                destructionRequired,
-                modeSet,
-                showProgress,
-                sparks,
-                repairable);
+        DestroyableFactory factory = new DestroyableFactory(
+            id,
+            name,
+            required,
+            options,
+            owner,
+            proximityMetric,
+            region,
+            materials,
+            destructionRequired,
+            modeSet,
+            showProgress,
+            sparks,
+            repairable);
 
         context.getFeatures().addFeature(destroyableEl, factory);
         destroyables.add(factory);

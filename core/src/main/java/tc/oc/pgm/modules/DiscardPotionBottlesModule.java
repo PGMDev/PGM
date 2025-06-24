@@ -13,7 +13,7 @@ public class DiscardPotionBottlesModule implements MapModule<DiscardPotionBottle
 
   @Override
   public DiscardPotionBottlesMatchModule createMatchModule(Match match) {
-    return new DiscardPotionBottlesMatchModule(match);
+    return new DiscardPotionBottlesMatchModule();
   }
 
   public static class Factory implements MapModuleFactory<DiscardPotionBottlesModule> {

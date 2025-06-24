@@ -1,5 +1,8 @@
 package tc.oc.pgm.util.inventory;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
+
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import net.kyori.adventure.text.Component;
@@ -10,9 +13,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Dye;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wool;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -49,12 +49,6 @@ public class ItemBuilder {
     return this;
   }
 
-  public ItemBuilder material(MaterialData material) {
-    item.setType(material.getItemType());
-    item.setData(material);
-    return this;
-  }
-
   public ItemBuilder amount(int amount) {
     item.setAmount(amount);
     return this;
@@ -84,10 +78,8 @@ public class ItemBuilder {
 
   public ItemBuilder lore(@Nullable CommandSender viewer, Component... lore) {
     meta()
-        .setLore(
-            Lists.transform(
-                Arrays.asList(lore),
-                (component) -> TextTranslations.translateLegacy(component, viewer)));
+        .setLore(Lists.transform(
+            Arrays.asList(lore), component -> TextTranslations.translateLegacy(component, viewer)));
     return this;
   }
 
@@ -97,7 +89,7 @@ public class ItemBuilder {
   }
 
   public ItemBuilder unbreakable(boolean unbreakable) {
-    meta().spigot().setUnbreakable(unbreakable);
+    INVENTORY_UTILS.setUnbreakable(item, unbreakable);
     return this;
   }
 
@@ -107,22 +99,7 @@ public class ItemBuilder {
   }
 
   public ItemBuilder color(DyeColor color) {
-    final Material type = item.getType();
-    switch (type) {
-      case INK_SACK:
-        item.setData(new Dye(color));
-        break;
-
-      case WOOL:
-        item.setData(new Wool(color));
-        break;
-
-      default:
-        // banners/other colored blocks
-        item.setData(new MaterialData(type, color.getWoolData()));
-        break;
-    }
-    item.setDurability(item.getData().getData());
+    COLOR_UTILS.setColor(item, color);
     return this;
   }
 }

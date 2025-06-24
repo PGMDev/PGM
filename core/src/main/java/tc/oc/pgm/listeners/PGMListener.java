@@ -3,11 +3,10 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -21,7 +20,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -45,15 +43,16 @@ import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeavePartyEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -71,48 +70,9 @@ public class PGMListener implements Listener {
   private final Plugin parent;
   private final MatchManager mm;
 
-  // Single-write, multi-read lock used to create the first match
-  private final ReentrantReadWriteLock lock;
-
   public PGMListener(Plugin parent, MatchManager mm) {
     this.parent = parent;
     this.mm = mm;
-    this.lock = new ReentrantReadWriteLock();
-  }
-
-  @EventHandler(ignoreCancelled = true)
-  public void onPrePlayerLogin(final AsyncPlayerPreLoginEvent event) {
-    if (event.getLoginResult() != AsyncPlayerPreLoginEvent.Result.ALLOWED
-        || mm.getMatches().hasNext()) return;
-
-    // Create the match when the first player joins
-    if (lock.writeLock().tryLock()) {
-      // If the server is suspended, need to release so match can be created
-      NMSHacks.resumeServer();
-
-      try {
-        mm.createMatch(null).get();
-      } catch (InterruptedException | ExecutionException e) {
-        e.printStackTrace();
-      } finally {
-        lock.writeLock().unlock();
-      }
-    }
-
-    // If a match is being created, wait until its done
-    try {
-      lock.readLock().tryLock(15, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    } finally {
-      lock.readLock().unlock();
-    }
-
-    if (!mm.getMatches().hasNext()) {
-      event.disallow(
-          AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-          TextTranslations.translate("misc.incorrectWorld"));
-    }
   }
 
   @EventHandler
@@ -140,10 +100,9 @@ public class PGMListener implements Listener {
               ChatColor.RED + TextTranslations.translate("misc.incorrectWorld", event.getPlayer()));
       this.parent
           .getLogger()
-          .info(
-              "Had to kick player "
-                  + event.getPlayer().getName()
-                  + " due to them spawning in the incorrect world");
+          .info("Had to kick player "
+              + event.getPlayer().getName()
+              + " due to them spawning in the incorrect world");
       return;
     }
 
@@ -161,7 +120,7 @@ public class PGMListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void protect36(final PlayerInteractEvent event) {
     if (event.getClickedBlock() != null) {
-      if (event.getClickedBlock().getType() == Material.PISTON_MOVING_PIECE) {
+      if (event.getClickedBlock().getType() == Materials.MOVING_PISTON) {
         event.setCancelled(true);
       }
     }
@@ -170,15 +129,13 @@ public class PGMListener implements Listener {
   // sometimes arrows stuck in players persist through deaths
   @EventHandler
   public void fixStuckArrows(final PlayerRespawnEvent event) {
-    NMSHacks.clearArrowsInPlayer(event.getPlayer());
+    PLAYER_UTILS.clearArrowsInPlayer(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void clearActiveEnderPearls(final PlayerDeathEvent event) {
-    for (Entity entity : event.getEntity().getWorld().getEntitiesByClass(EnderPearl.class)) {
-      if (((EnderPearl) entity).getShooter() == event.getEntity()) {
-        entity.remove();
-      }
+    for (EnderPearl entity : event.getEntity().getWorld().getEntitiesByClass(EnderPearl.class)) {
+      if (entity.getShooter() == event.getEntity()) entity.remove();
     }
   }
 
@@ -202,7 +159,7 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void lockFireTick(final MatchLoadEvent event) {
+  public void initGamerules(final MatchLoadEvent event) {
     setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
   }
 
@@ -220,7 +177,7 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void lockFireTick(final MatchFinishEvent event) {
+  public void postGamerules(final MatchFinishEvent event) {
     setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
   }
 
@@ -286,8 +243,8 @@ public class PGMListener implements Listener {
   public void nerfFishing(PlayerFishEvent event) {
     if (event.getCaught() instanceof Item) {
       Item caught = (Item) event.getCaught();
-      if (caught.getItemStack().getType() != Material.RAW_FISH) {
-        caught.setItemStack(new ItemStack(Material.RAW_FISH));
+      if (caught.getItemStack().getType() != Materials.RAW_FISH) {
+        caught.setItemStack(new ItemStack(Materials.RAW_FISH));
       }
     }
   }
@@ -313,24 +270,19 @@ public class PGMListener implements Listener {
     // Send feedback to staff, alerting them that the map pool has changed by force
     if (event.isForced()) {
       Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
-      Component staffName =
-          UsernameFormatUtils.formatStaffName(event.getSender(), event.getMatch());
-      Component matchLimit =
-          text()
-              .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
-              .append(space())
-              .append(
-                  translatable(
-                      "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""),
-                      NamedTextColor.GRAY))
-              .build();
+      Component staffName = player(event.getSender());
+      Component matchLimit = text()
+          .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
+          .append(space())
+          .append(translatable(
+              "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""), NamedTextColor.GRAY))
+          .build();
 
       // No limit
       Component forced = translatable("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
-        Component time =
-            TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
-                .color(NamedTextColor.GREEN);
+        Component time = TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
+            .color(NamedTextColor.GREEN);
 
         // If time & match limit are present, display both
         if (event.getMatchLimit() != 0) {
@@ -345,22 +297,20 @@ public class PGMListener implements Listener {
         forced = translatable("pool.change.forceTimed", poolName, matchLimit, staffName);
       }
 
-      ChatDispatcher.broadcastAdminChatMessage(forced.color(NamedTextColor.GRAY), event.getMatch());
+      ChatManager.broadcastAdminMessage(forced.color(NamedTextColor.GRAY));
     }
 
     // Broadcast map pool changes due to size
     if (event.getNewPool().isDynamic()) {
-      Component broadcast =
-          text()
-              .append(text("[", NamedTextColor.WHITE))
-              .append(translatable("pool.name", NamedTextColor.GOLD))
-              .append(text("] ", NamedTextColor.WHITE))
-              .append(
-                  translatable(
-                      "pool.change",
-                      NamedTextColor.GREEN,
-                      text(event.getNewPool().getName(), NamedTextColor.AQUA)))
-              .build();
+      Component broadcast = text()
+          .append(text("[", NamedTextColor.WHITE))
+          .append(translatable("pool.name", NamedTextColor.GOLD))
+          .append(text("] ", NamedTextColor.WHITE))
+          .append(translatable(
+              "pool.change",
+              NamedTextColor.GREEN,
+              text(event.getNewPool().getName(), NamedTextColor.AQUA)))
+          .build();
 
       event.getMatch().sendMessage(broadcast);
     }
@@ -369,7 +319,10 @@ public class PGMListener implements Listener {
   @EventHandler // We only need to store skins for the post match stats
   public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
     final MatchPlayer player = event.getPlayer();
-    PGM.get().getDatastore().setSkin(player.getId(), NMSHacks.getPlayerSkin(player.getBukkit()));
+    Skin playerSkin = PLAYER_UTILS.getPlayerSkin(player.getBukkit());
+    if (playerSkin != null) {
+      PGM.get().getDatastore().setSkin(player.getId(), playerSkin);
+    }
   }
 
   public void setGameRule(MatchLoadEvent event, String gameRule, boolean gameRuleValue) {

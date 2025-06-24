@@ -1,6 +1,7 @@
 package tc.oc.pgm.kits;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.Set;
 import org.bukkit.Material;
@@ -28,6 +29,7 @@ import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.event.ItemTransferEvent;
+import tc.oc.pgm.util.inventory.Slot;
 
 @ListenerScope(MatchScope.RUNNING)
 public class KitMatchModule implements MatchModule, Listener {
@@ -56,16 +58,13 @@ public class KitMatchModule implements MatchModule, Listener {
           fmm.onRise(MatchPlayer.class, kitRule.getFilter(), kitRule.getKit()::remove);
           break;
         case LEND:
-          fmm.onChange(
-              MatchPlayer.class,
-              kitRule.getFilter(),
-              (player, response) -> {
-                if (response) {
-                  player.applyKit(kitRule.getKit(), true);
-                } else {
-                  kitRule.getKit().remove(player);
-                }
-              });
+          fmm.onChange(MatchPlayer.class, kitRule.getFilter(), (player, response) -> {
+            if (response) {
+              player.applyKit(kitRule.getKit(), true);
+            } else {
+              kitRule.getKit().remove(player);
+            }
+          });
           break;
       }
     }
@@ -147,15 +146,7 @@ public class KitMatchModule implements MatchModule, Listener {
     if (event.getEntity().getShooter() instanceof Player) {
       Grenade grenade = Grenade.get(event.getEntity());
       if (grenade != null) {
-        event
-            .getEntity()
-            .getWorld()
-            .createExplosion(
-                event.getEntity(),
-                event.getEntity().getLocation(),
-                grenade.power,
-                grenade.fire,
-                grenade.destroy);
+        MISC_UTILS.createExplosion(event.getEntity(), grenade.power, grenade.fire, grenade.destroy);
         event.getEntity().remove();
       }
     }
@@ -188,7 +179,7 @@ public class KitMatchModule implements MatchModule, Listener {
     final ItemStack item = event.getPlayer().getItemInHand();
     if (ItemTags.INFINITE.has(item)) {
       // infinite block contains -1 items, giving -1 items sets the amount back to -1
-      item.setAmount(-1);
+      item.setAmount(ItemKit.INFINITE_STACK_SIZE);
     }
   }
 }

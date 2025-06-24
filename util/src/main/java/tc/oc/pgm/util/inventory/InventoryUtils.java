@@ -12,16 +12,28 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.platform.Platform;
 
 public final class InventoryUtils {
+  public static final InventoryUtilsPlatform INVENTORY_UTILS =
+      Platform.get(InventoryUtilsPlatform.class);
+
+  public static final ItemFlag HIDE_ADDITIONAL_FLAG =
+      BukkitUtils.parse(ItemFlag::valueOf, "HIDE_POTION_EFFECTS", "HIDE_ADDITIONAL_TOOLTIP");
+
   private InventoryUtils() {}
 
   public static boolean isNothing(ItemStack stack) {
@@ -40,7 +52,7 @@ public final class InventoryUtils {
     if (stack.getType() != Material.POTION || newEffects.isEmpty()) return;
     PotionMeta meta = (PotionMeta) stack.getItemMeta();
 
-    Set<PotionEffect> defaultEffects = new HashSet<>(Potion.fromItemStack(stack).getEffects());
+    Set<PotionEffect> defaultEffects = new HashSet<>(INVENTORY_UTILS.getPotionEffects(stack));
     Collection<PotionEffect> existingEffects;
 
     if (meta.hasCustomEffects()) {
@@ -81,12 +93,11 @@ public final class InventoryUtils {
       PotionMeta meta = (PotionMeta) potion.getItemMeta();
       if (meta.hasCustomEffects()) {
         return meta.getCustomEffects();
-      } else {
-        return Potion.fromItemStack(potion).getEffects();
+      } else if (potion.getType() == Material.POTION) { // Sanity check, SpawnablePotionBukkit
+        return INVENTORY_UTILS.getPotionEffects(potion);
       }
-    } else {
-      return Collections.emptyList();
     }
+    return Collections.emptyList();
   }
 
   public static @Nullable PotionEffectType getPrimaryEffectType(ItemStack potion) {
@@ -144,19 +155,45 @@ public final class InventoryUtils {
     return stack;
   }
 
-  public static void openVillager(Villager villager, Player viewer) throws Throwable {
-    // An exception can be thrown if the Villager's NBT is invalid
-    // or if the server does not support for this patch.
-    // TODO: Newer versions of Bukkit can use HumanEntity#openMerchant(Merchant, boolean)
-    viewer.openMerchantCopy(villager);
+  public static void consumeItem(PlayerEvent event) {
+    consumeItem(event, event.getPlayer());
   }
 
-  public static void consumeItem(Player player) {
-    ItemStack itemInHand = player.getItemInHand();
-    if (itemInHand.getAmount() > 1) {
-      itemInHand.setAmount(itemInHand.getAmount() - 1);
+  public static void consumeItem(Event event, Player player) {
+    PlayerInventory inv = player.getInventory();
+    EquipmentSlot hand = INVENTORY_UTILS.getUsedHand(event);
+    ItemStack inHand = inv.getItem(hand);
+    if (inHand.getAmount() == 1) {
+      inHand = null;
     } else {
-      player.setItemInHand(null);
+      inHand.setAmount(inHand.getAmount() - 1);
     }
+    inv.setItem(hand, inHand);
+  }
+
+  public interface InventoryUtilsPlatform {
+    Collection<PotionEffect> getPotionEffects(ItemStack item);
+
+    boolean isUnbreakable(ItemMeta item);
+
+    default void setUnbreakable(ItemStack item, boolean unbreakable) {
+      setUnbreakable(item.getItemMeta(), unbreakable);
+    }
+
+    void setUnbreakable(ItemMeta meta, boolean unbreakable);
+
+    boolean openVillager(Villager villager, Player viewer);
+
+    ItemStack craftItemCopy(ItemStack item);
+
+    EquipmentSlot getUsedHand(Event event);
+
+    void setCanDestroy(ItemMeta itemMeta, Set<Material> materials);
+
+    Set<Material> getCanDestroy(ItemMeta itemMeta);
+
+    void setCanPlaceOn(ItemMeta itemMeta, Set<Material> materials);
+
+    Set<Material> getCanPlaceOn(ItemMeta itemMeta);
   }
 }

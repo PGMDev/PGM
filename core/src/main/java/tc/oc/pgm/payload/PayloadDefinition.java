@@ -14,6 +14,7 @@ public class PayloadDefinition extends ControlPointDefinition {
 
   private final BlockVector location;
   private final double radius;
+  private final boolean showBeam;
   private final Filter displayFilter;
 
   public PayloadDefinition(
@@ -44,6 +45,7 @@ public class PayloadDefinition extends ControlPointDefinition {
       boolean progress,
       BlockVector location,
       double radius,
+      boolean showBeam,
       Filter displayFilter) {
     super(
         id,
@@ -73,6 +75,7 @@ public class PayloadDefinition extends ControlPointDefinition {
         progress);
     this.location = location;
     this.radius = radius;
+    this.showBeam = showBeam;
     this.displayFilter = displayFilter;
   }
 
@@ -82,6 +85,10 @@ public class PayloadDefinition extends ControlPointDefinition {
 
   public double getRadius() {
     return radius;
+  }
+
+  public boolean showBeam() {
+    return showBeam;
   }
 
   public Filter getDisplayFilter() {

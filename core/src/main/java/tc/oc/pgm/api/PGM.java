@@ -11,8 +11,10 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.namedecorations.NameDecorationRegistry;
 import tc.oc.pgm.tablist.MatchTabManager;
+import tc.oc.pgm.util.listener.AfkTracker;
 
 /** PvP Game Manager (aka. PGM), the global {@link Plugin} to manage PvP games. */
 public interface PGM extends Plugin {
@@ -39,6 +41,10 @@ public interface PGM extends Plugin {
   ScheduledExecutorService getAsyncExecutor();
 
   InventoryManager getInventoryManager();
+
+  AfkTracker getAfkTracker();
+
+  ChatManager getChatManager();
 
   AtomicReference<PGM> GLOBAL = new AtomicReference<>(null);
 

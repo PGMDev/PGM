@@ -1,20 +1,24 @@
 package tc.oc.pgm.util.material.matcher;
 
+import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class CompoundMaterialMatcher implements MaterialMatcher {
 
-  private final Collection<MaterialMatcher> children;
-  private @Nullable Collection<Material> materials;
+  private final List<MaterialMatcher> children;
+  private @Nullable Set<Material> materials;
 
-  public CompoundMaterialMatcher(Collection<MaterialMatcher> children) {
+  private CompoundMaterialMatcher(List<MaterialMatcher> children) {
     this.children = children;
   }
 
@@ -43,7 +47,7 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Collection<Material> getMaterials() {
+  public Set<Material> getMaterials() {
     if (materials == null) {
       Set<Material> materialSet = EnumSet.noneOf(Material.class);
       for (MaterialMatcher child : children) {
@@ -54,13 +58,23 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
     return materials;
   }
 
-  public static MaterialMatcher of(Collection<MaterialMatcher> matchers) {
-    if (matchers.isEmpty()) {
-      return NoMaterialMatcher.INSTANCE;
-    } else if (matchers.size() == 1) {
-      return matchers.iterator().next();
-    } else {
-      return new CompoundMaterialMatcher(matchers);
-    }
+  @Override
+  public Set<BlockMaterialData> getPossibleBlocks() {
+    Set<BlockMaterialData> result = new HashSet<>(children.size());
+    for (MaterialMatcher child : children) result.addAll(child.getPossibleBlocks());
+    return result;
+  }
+
+  public static MaterialMatcher of(Collection<? extends MaterialMatcher> matchers) {
+    return switch (matchers.size()) {
+      case 0 -> NoMaterialMatcher.INSTANCE;
+      case 1 -> matchers.iterator().next();
+      default -> new CompoundMaterialMatcher(ImmutableList.copyOf(matchers));
+    };
+  }
+
+  @Override
+  public String toString() {
+    return "CompoundMaterialMatcher{" + "children=" + children + '}';
   }
 }

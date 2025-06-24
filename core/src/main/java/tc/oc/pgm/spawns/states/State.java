@@ -22,6 +22,8 @@ public abstract class State {
   protected final MatchPlayer player;
   protected final Player bukkit;
 
+  protected StatePermissions permission = null;
+
   private boolean entered, exited;
 
   public State(SpawnMatchModule smm, MatchPlayer player) {
@@ -41,6 +43,8 @@ public abstract class State {
       throw new IllegalStateException("Tried to enter already entered state " + this);
     }
     entered = true;
+
+    if (permission != null) permission.givePermission(player);
   }
 
   /**
@@ -50,6 +54,8 @@ public abstract class State {
    *     nested within each other.
    */
   public void leaveState(List<Event> events) {
+    if (permission != null) permission.revokePermission(player);
+
     if (!entered) {
       throw new IllegalStateException("Tried to leave state before entering " + this);
     } else if (exited) {

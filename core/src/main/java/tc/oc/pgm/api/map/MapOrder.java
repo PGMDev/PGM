@@ -34,7 +34,7 @@ public interface MapOrder {
   void setNextMap(MapInfo map);
 
   /**
-   * Returns the duration used for cycles in {@link CycleMatchModule}.
+   * Returns the duration used for cycles in {@link tc.oc.pgm.cycle.CycleMatchModule}.
    *
    * @return The cycle duration
    */

@@ -1,13 +1,12 @@
 package tc.oc.pgm.util.xml;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.jdom2.Attribute;
-import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.located.Located;
 import org.jetbrains.annotations.Nullable;
@@ -73,15 +72,26 @@ public class Node {
     return (Element) this.node;
   }
 
-  public Document getDocument() {
+  public String getDocumentPath() {
     if (this.node instanceof Attribute) {
-      return ((Attribute) this.node).getDocument();
+      return getDocumentPath(getAttribute().getParent());
     } else {
-      return ((Element) this.node).getDocument();
+      return getDocumentPath(getElement());
     }
   }
 
+  private static String getDocumentPath(Element el) {
+    InheritingElement inheritingEl = (InheritingElement) el;
+
+    String original = inheritingEl.getOriginalUri();
+    String current = inheritingEl.getDocument().getBaseURI();
+    return current + (original == null || current.equals(original) ? "" : original);
+  }
+
   private static String describe(Element el) {
+    Element parent = el.getParentElement();
+    if (parent != null && !parent.isRootElement())
+      return "'" + parent.getName() + "' > '" + el.getName() + "' element";
     return "'" + el.getName() + "' element";
   }
 
@@ -161,8 +171,7 @@ public class Node {
    * useful for properties that are allowed as either refs or direct children.
    */
   public static Node fromAttrOrSelf(Element el, String... aliases) throws InvalidXMLException {
-    Node node = null;
-    for (String alias : aliases) node = wrapUnique(node, true, alias, el.getAttribute(alias));
+    Node node = fromAttr(el, aliases);
     return node != null ? node : new Node(el);
   }
 
@@ -180,11 +189,8 @@ public class Node {
 
   public static List<Node> fromChildren(List<Node> nodes, Element el, String... aliases)
       throws InvalidXMLException {
-    Set<String> aliasSet = Sets.newHashSet(aliases);
-    for (Element child : el.getChildren()) {
-      if (aliasSet.contains(child.getName())) {
-        nodes.add(new Node(child));
-      }
+    for (Element child : ((InheritingElement) el).getChildren(Sets.newHashSet(aliases))) {
+      nodes.add(new Node(child));
     }
     return nodes;
   }
@@ -229,6 +235,38 @@ public class Node {
     if (node == null) {
       throw new InvalidXMLException(
           "attribute or child element '" + aliases[0] + "' is required", el);
+    }
+    return node;
+  }
+
+  public static @Nullable Node from(
+      boolean attr, boolean child, boolean self, boolean required, Element el, String... aliases)
+      throws InvalidXMLException {
+    assertTrue(el != null || !required, "Cannot request required from null element");
+    assertTrue(!child || !self, "Child and self are mutually exclusive");
+    if (el == null) return null;
+    Node node = null;
+
+    if (attr) {
+      if (child) node = Node.fromChildOrAttr(el, aliases);
+      else if (self) node = Node.fromAttrOrSelf(el, aliases);
+      else node = Node.fromAttr(el, aliases);
+    } else {
+      if (child) node = Node.fromNullable(XMLUtils.getUniqueChild(el, aliases));
+      else if (self) node = Node.fromNullable(el);
+    }
+
+    if (required && node == null) {
+      if (attr) {
+        if (child)
+          throw new InvalidXMLException(
+              "attribute or child element '" + aliases[0] + "' is required", el);
+        else throw new InvalidXMLException("attribute '" + aliases[0] + "' is required", el);
+      } else {
+        if (child)
+          throw new InvalidXMLException("child element '" + aliases[0] + "' is required", el);
+        else throw new IllegalStateException();
+      }
     }
     return node;
   }

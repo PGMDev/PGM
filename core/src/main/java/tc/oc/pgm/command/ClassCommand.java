@@ -4,13 +4,13 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.specifier.Greedy;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.incendo.cloud.annotation.specifier.Greedy;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
@@ -18,7 +18,7 @@ import tc.oc.pgm.util.text.TextFormatter;
 
 public final class ClassCommand {
 
-  @CommandMethod("class|selectclass|c|cl [class]")
+  @Command("class|selectclass|c|cl [class]")
   @CommandDescription("Select your class")
   public void classSelect(
       ClassMatchModule classes,
@@ -46,7 +46,7 @@ public final class ClassCommand {
     }
   }
 
-  @CommandMethod("classlist|classes|listclasses|cls")
+  @Command("classlist|classes|listclasses|cls")
   @CommandDescription("List all available classes")
   public void classList(ClassMatchModule classes, MatchPlayer player) {
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());

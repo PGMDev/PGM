@@ -13,6 +13,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 /** Countdown to team huddle, or match start if huddle is disabled */
 public class StartCountdown extends PreMatchCountdown {
@@ -81,7 +82,7 @@ public class StartCountdown extends PreMatchCountdown {
       }
 
       if (this.balanceWarningSent) {
-        this.getMatch().playSound(COUNT_SOUND);
+        this.getMatch().playSound(Sounds.MATCH_COUNTDOWN);
       }
     }
   }

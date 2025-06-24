@@ -1,38 +1,54 @@
 package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
-import cloud.commandframework.annotations.specifier.Greedy;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotation.specifier.Greedy;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.Permissions;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.PrettyPaginatedComponentResults;
 import tc.oc.pgm.util.text.TextFormatter;
 
-@CommandMethod("action|actions")
+@Command("action|actions")
 public class ActionCommand {
 
-  @CommandMethod("list|page [page]")
-  @CommandDescription("Inspect variables for a player")
-  @CommandPermission(Permissions.GAMEPLAY)
-  public void showActions(
+  @Command("[page]")
+  @CommandDescription("List available exposed actions")
+  @Permission(Permissions.GAMEPLAY)
+  public void fallback(
       Audience audience,
       CommandSender sender,
       ActionMatchModule amm,
-      @Argument(value = "page", defaultValue = "1") int page,
+      @Argument("page") @Default("1") int page,
+      @Flag(value = "query", aliases = "q") String query,
+      @Flag(value = "all", aliases = "a") boolean all) {
+    list(audience, sender, amm, page, query, all);
+  }
+
+  @Command("list|page [page]")
+  @CommandDescription("List available exposed actions")
+  @Permission(Permissions.GAMEPLAY)
+  public void list(
+      Audience audience,
+      CommandSender sender,
+      ActionMatchModule amm,
+      @Argument("page") @Default("1") int page,
       @Flag(value = "query", aliases = "q") String query,
       @Flag(value = "all", aliases = "a") boolean all) {
 
@@ -59,21 +75,25 @@ public class ActionCommand {
         (v, i) -> text((i + 1) + ". ").append(text(v.getId(), NamedTextColor.AQUA)));
   }
 
-  @CommandMethod("trigger [action]")
+  @Command("trigger <action> [target]")
   @CommandDescription("Trigger a specific action")
-  @CommandPermission(Permissions.GAMEPLAY)
-  public void triggerAction(
-      Audience audience, Match match, @Argument("action") @Greedy ExposedAction action) {
-    action.trigger(match);
+  @Permission(Permissions.GAMEPLAY)
+  public <T extends Filterable<?>> void triggerAction(
+      Audience audience,
+      @Argument("action") @Greedy ExposedAction action,
+      @Argument("target") @Default(CURRENT) MatchPlayer target) {
+    action.trigger(target);
     audience.sendMessage(text("Triggered " + action.getId()));
   }
 
-  @CommandMethod("untrigger [action]")
+  @Command("untrigger <action> [target]")
   @CommandDescription("Untrigger a specific action")
-  @CommandPermission(Permissions.GAMEPLAY)
-  public void untriggerAction(
-      Audience audience, Match match, @Argument("action") @Greedy ExposedAction action) {
-    action.untrigger(match);
+  @Permission(Permissions.GAMEPLAY)
+  public <T extends Filterable<?>> void untriggerAction(
+      Audience audience,
+      @Argument("action") @Greedy ExposedAction action,
+      @Argument("target") @Default(CURRENT) MatchPlayer target) {
+    action.untrigger(target);
     audience.sendMessage(text("Untriggered " + action.getId()));
   }
 }

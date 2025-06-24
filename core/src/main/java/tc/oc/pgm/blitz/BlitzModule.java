@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -26,7 +27,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class BlitzModule implements MapModule<BlitzMatchModule> {
 
   private static final Collection<MapTag> TAGS =
-      ImmutableList.of(new MapTag("blitz", "Blitz", true, true));
+      ImmutableList.of(new MapTag("blitz", Gamemode.BLITZ, true));
   private final BlitzConfig config;
 
   public BlitzModule(BlitzConfig config) {

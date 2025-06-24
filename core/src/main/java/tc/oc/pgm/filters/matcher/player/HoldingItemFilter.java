@@ -4,7 +4,11 @@ import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.stream.Stream;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.bukkit.event.player.PlayerEditBookEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
+import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -23,7 +27,11 @@ public class HoldingItemFilter extends ParticipantItemFilter {
         PlayerItemHeldEvent.class,
         PlayerItemTransferEvent.class,
         ApplyKitEvent.class,
-        PlayerItemBreakEvent.class);
+        PlayerItemBreakEvent.class,
+        PlayerBucketFillEvent.class,
+        PlayerBucketEmptyEvent.class,
+        PlayerItemConsumeEvent.class,
+        PlayerEditBookEvent.class);
   }
 
   @Override

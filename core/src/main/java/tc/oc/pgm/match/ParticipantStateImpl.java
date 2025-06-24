@@ -18,4 +18,9 @@ public class ParticipantStateImpl extends MatchPlayerStateImpl implements Partic
   public @NotNull Competitor getParty() {
     return (Competitor) super.getParty();
   }
+
+  @Override
+  public boolean canInteract() {
+    return !isDead() && getParty().isParticipating();
+  }
 }

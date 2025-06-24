@@ -1,10 +1,6 @@
 package tc.oc.pgm.spawns.states;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
-
 import java.util.List;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
@@ -21,12 +17,14 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.killreward.KillRewardMatchModule;
+import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 /** Player is alive and participating */
 public class Alive extends Participating {
@@ -73,6 +71,11 @@ public class Alive extends Participating {
     player.setGameMode(GameMode.SURVIVAL);
     bukkit.setAllowFlight(false);
 
+    // Apply player kit
+    for (Kit kit : smm.getPlayerKits()) {
+      player.applyKit(kit, false);
+    }
+
     // Apply spawn kit
     spawn.applyKit(player);
 
@@ -108,7 +111,7 @@ public class Alive extends Participating {
     super.onEvent(event);
 
     if (event.getNewParty() instanceof Competitor) {
-      transition(new Joining(smm, player));
+      transition(new Joining(smm, player, smm.getJoinPenalty(event), true));
     } else {
       transition(new Observing(smm, player, true, true));
     }
@@ -162,25 +165,13 @@ public class Alive extends Participating {
 
     for (MatchPlayer listener : player.getMatch().getPlayers()) {
       if (listener == player) {
-        // Own death is normal pitch, full volume
-        listener.playSound(sound(key("mob.irongolem.death"), Sound.Source.MASTER, 1, 1));
+        listener.playSound(Sounds.DEATH_OWN);
       } else if (killer != null && killer.isPlayer(listener)) {
-        // Kill is higher pitch, quieter
-        listener.playSound(sound(key("mob.irongolem.death"), Sound.Source.MASTER, 0.75f, 4f / 3f));
+        listener.playSound(Sounds.DEATH_KILLED);
       } else if (listener.getParty() == player.getParty()) {
-        // Ally death is a shorter sound
-        listener.playSound(
-            sound(key("mob.irongolem.hit"), Sound.Source.MASTER, 1, 1),
-            death.getX(),
-            death.getY(),
-            death.getZ());
+        listener.playSound(Sounds.DEATH_ALLY, death.getX(), death.getY(), death.getZ());
       } else {
-        // Enemy death is higher pitch
-        listener.playSound(
-            sound(key("mob.irongolem.hit"), Sound.Source.MASTER, 1, 4f / 3f),
-            death.getX(),
-            death.getY(),
-            death.getZ());
+        listener.playSound(Sounds.DEATH_ENEMY, death.getX(), death.getY(), death.getZ());
       }
     }
   }

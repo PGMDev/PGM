@@ -8,6 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.match.MatchPhase;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchPhaseChangeEvent;
 
@@ -37,23 +38,25 @@ public class MotdListener implements Listener {
 
   @EventHandler
   public void onLoad(MatchLoadEvent event) {
+    phaseColor = getPhaseColor(event.getMatch().getPhase());
     mapName = event.getMatch().getMap().getName();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onStateChange(MatchPhaseChangeEvent event) {
-    switch (event.getNewPhase()) {
+    phaseColor = getPhaseColor(event.getNewPhase());
+  }
+
+  private ChatColor getPhaseColor(MatchPhase phase) {
+    switch (phase) {
       case STARTING:
-        phaseColor = ChatColor.YELLOW;
-        break;
+        return ChatColor.YELLOW;
       case RUNNING:
-        phaseColor = ChatColor.GREEN;
-        break;
+        return ChatColor.GREEN;
       case FINISHED:
-        phaseColor = ChatColor.RED;
-        break;
+        return ChatColor.RED;
       default:
-        phaseColor = ChatColor.GRAY;
+        return ChatColor.GRAY;
     }
   }
 }

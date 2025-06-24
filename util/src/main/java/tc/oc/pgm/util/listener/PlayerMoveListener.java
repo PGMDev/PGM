@@ -141,13 +141,9 @@ public class PlayerMoveListener implements Listener {
     } else {
       newLoc = BlockVectors.center(event.getFrom()).subtract(new Vector(0, 0.5, 0));
       if (newLoc.getBlock() != null) {
-        switch (newLoc.getBlock().getType()) {
-          case STEP:
-          case WOOD_STEP:
-            newLoc.add(new Vector(0, 0.5, 0));
-            break;
-          default:
-            break;
+        String name = newLoc.getBlock().getType().name();
+        if (name.endsWith("SLAB") || name.endsWith("STEP")) {
+          newLoc.add(new Vector(0, 0.5, 0));
         }
       }
     }
@@ -172,6 +168,12 @@ public class PlayerMoveListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerTeleportMonitor(final PlayerTeleportEvent event) {
     this.handleMovementMonitor(event);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerQuit(final PlayerQuitEvent event) {
+    // Faster & predictable cleanup even if player object fails to GC
+    this.lastToLocation.remove(event.getPlayer());
   }
 
   private void handleMovementMonitor(PlayerMoveEvent event) {

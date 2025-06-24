@@ -1,7 +1,5 @@
 package tc.oc.pgm.score;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
@@ -16,7 +14,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,7 +22,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -34,15 +31,15 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerParticipationStartEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 
@@ -50,21 +47,21 @@ import tc.oc.pgm.util.text.TextFormatter;
 public class ScoreMatchModule implements MatchModule, Listener {
 
   private final Match match;
-  private final ScoreConfig config;
+  private final ScoreDefinition config;
   private final Set<ScoreBox> scoreBoxes;
   private final Map<UUID, Double> contributions = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private final Map<Competitor, Double> scores = new DefaultMapAdapter<>(new HashMap<>(), 0d);
   private MercyRule mercyRule;
 
-  public ScoreMatchModule(Match match, ScoreConfig config, Set<ScoreBox> scoreBoxes) {
+  public ScoreMatchModule(Match match, ScoreDefinition config, Set<ScoreBox> scoreBoxes) {
     this.match = match;
     this.config = config;
     this.scoreBoxes = scoreBoxes;
     this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
 
-    if (this.config.mercyLimit > 0) {
+    if (this.config.mercyLimit() > 0) {
       this.mercyRule =
-          new MercyRule(this, config.scoreLimit, config.mercyLimit, config.mercyLimitMin);
+          new MercyRule(this, config.scoreLimit(), config.mercyLimit(), config.mercyLimitMin());
     }
   }
 
@@ -73,8 +70,12 @@ public class ScoreMatchModule implements MatchModule, Listener {
     match.addVictoryCondition(new ScoreVictoryCondition());
   }
 
+  public ScoreDefinition.Display getDisplay() {
+    return config.display();
+  }
+
   public boolean hasScoreLimit() {
-    return this.config.scoreLimit > 0 || hasMercyRule();
+    return this.config.scoreLimit() > 0 || hasMercyRule();
   }
 
   public boolean hasMercyRule() {
@@ -82,7 +83,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
   }
 
   public Filter getScoreboardFilter() {
-    return this.config.scoreboardFilter;
+    return this.config.scoreboardFilter();
   }
 
   public int getScoreLimit() {
@@ -92,14 +93,18 @@ public class ScoreMatchModule implements MatchModule, Listener {
       return this.mercyRule.getScoreLimit();
     }
 
-    return this.config.scoreLimit;
+    return this.config.scoreLimit();
+  }
+
+  public ScoreDefinition getDefinition() {
+    return this.config;
   }
 
   public Map<Competitor, Double> getScores() {
     return this.scores;
   }
 
-  public double getScore(Competitor competitor) {
+  public double getScore(@NotNull Competitor competitor) {
     return this.scores.get(competitor);
   }
 
@@ -108,48 +113,39 @@ public class ScoreMatchModule implements MatchModule, Listener {
     List<Component> scoreMessages = Lists.newArrayList();
     final FreeForAllMatchModule ffamm = match.getModule(FreeForAllMatchModule.class);
     if (ffamm != null) {
-      scoreMessages =
-          this.scores.entrySet().stream()
-              .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-              .limit(10)
-              .map(
-                  x ->
-                      text()
-                          .append(x.getKey().getName(NameStyle.VERBOSE))
-                          .append(text(": ", NamedTextColor.GRAY))
-                          .append(text((int) x.getValue().doubleValue()))
-                          .color(NamedTextColor.WHITE)
-                          .build())
-              .collect(Collectors.toList());
+      scoreMessages = this.scores.entrySet().stream()
+          .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+          .limit(10)
+          .map(x -> text()
+              .append(x.getKey().getName(NameStyle.VERBOSE))
+              .append(text(": ", NamedTextColor.GRAY))
+              .append(text((int) x.getValue().doubleValue()))
+              .color(NamedTextColor.WHITE)
+              .build())
+          .collect(Collectors.toList());
     } else {
 
       for (Entry<Competitor, Double> scorePair : this.scores.entrySet()) {
-        scoreMessages.add(
-            text(
-                ((int) scorePair.getValue().doubleValue()),
-                TextFormatter.convert(scorePair.getKey().getColor())));
+        scoreMessages.add(text(
+            ((int) scorePair.getValue().doubleValue()),
+            TextFormatter.convert(scorePair.getKey().getColor())));
       }
     }
-    TextComponent returnMessage =
-        text()
-            .append(translatable("match.info.score").color(NamedTextColor.DARK_AQUA))
-            .append(text(": ", NamedTextColor.DARK_AQUA))
-            .append(TextFormatter.list(scoreMessages, NamedTextColor.GRAY))
-            .build();
+    TextComponent returnMessage = text()
+        .append(translatable("match.info.score").color(NamedTextColor.DARK_AQUA))
+        .append(text(": ", NamedTextColor.DARK_AQUA))
+        .append(TextFormatter.list(scoreMessages, NamedTextColor.GRAY))
+        .build();
     if (matchPlayer != null && matchPlayer.getCompetitor() != null && ffamm != null) {
-      returnMessage =
-          returnMessage.append(
-              text()
-                  .color(NamedTextColor.GRAY)
-                  .append(text(" | ", NamedTextColor.GRAY))
-                  .append(translatable("match.info.you"))
-                  .append(text(": "))
-                  .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
-                  .append(
-                      text(
-                          (int) scores.get(matchPlayer.getCompetitor()).doubleValue(),
-                          NamedTextColor.WHITE))
-                  .build());
+      returnMessage = returnMessage.append(text()
+          .color(NamedTextColor.GRAY)
+          .append(text(" | ", NamedTextColor.GRAY))
+          .append(translatable("match.info.you"))
+          .append(text(": "))
+          .color(TextFormatter.convert(matchPlayer.getCompetitor().getColor()))
+          .append(text(
+              (int) scores.get(matchPlayer.getCompetitor()).doubleValue(), NamedTextColor.WHITE))
+          .build());
     }
     return returnMessage;
   }
@@ -158,8 +154,8 @@ public class ScoreMatchModule implements MatchModule, Listener {
   public Component getStatusMessage(MatchPlayer matchPlayer) {
     Component message = this.getScoreMessage(matchPlayer);
 
-    if (this.config.scoreLimit > 0) {
-      message = message.append(text("  [" + this.config.scoreLimit + "]", NamedTextColor.GRAY));
+    if (this.config.scoreLimit() > 0) {
+      message = message.append(text("  [" + this.config.scoreLimit() + "]", NamedTextColor.GRAY));
     }
     return message;
   }
@@ -171,18 +167,24 @@ public class ScoreMatchModule implements MatchModule, Listener {
     // add +1 to killer's team if it was a kill, otherwise -1 to victim's team
     if (event.isChallengeKill()) {
       this.incrementScore(
-          event.getKiller().getId(), event.getKiller().getParty(), this.config.killScore);
+          event.getKiller().getId(),
+          event.getKiller().getParty(),
+          this.config.killScore(),
+          ScoreCause.KILL);
     } else {
       this.incrementScore(
-          event.getVictim().getId(), event.getVictim().getCompetitor(), -this.config.deathScore);
+          event.getVictim().getId(),
+          event.getVictim().getCompetitor(),
+          -this.config.deathScore(),
+          ScoreCause.DEATH);
     }
   }
 
   private double redeemItems(ScoreBox box, ItemStack stack) {
     if (stack == null) return 0;
     double points = 0;
-    for (Entry<SingleMaterialMatcher, Double> entry : box.getRedeemables().entrySet()) {
-      if (entry.getKey().matches(stack.getData())) {
+    for (Entry<MaterialMatcher, Double> entry : box.getRedeemables().entrySet()) {
+      if (entry.getKey().matches(stack)) {
         points += entry.getValue() * stack.getAmount();
         stack.setAmount(0);
       }
@@ -219,22 +221,16 @@ public class ScoreMatchModule implements MatchModule, Listener {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null || !player.canInteract() || player.getBukkit().isDead()) return;
 
-    ParticipantState playerState = player.getParticipantState();
-    Vector from = event.getBlockFrom().toVector();
-    Vector to = event.getBlockTo().toVector();
+    var from = event.getBlockFrom();
+    var to = event.getBlockTo();
 
     for (ScoreBox box : this.scoreBoxes) {
-      if (box.getRegion().enters(from, to) && box.canScore(playerState)) {
-        if (box.isCoolingDown(playerState)) {
+      if (box.getRegion().enters(from, to) && box.canScore(player)) {
+        if (box.isCoolingDown(player)) {
           match
               .getLogger()
-              .warning(
-                  playerState.getId()
-                      + " tried to score multiple times in one second (from="
-                      + from
-                      + " to="
-                      + to
-                      + ")");
+              .warning("%s tried to score multiple times in under a second (from=%s to=%s)"
+                  .formatted(player.getId(), from, to));
         } else {
           this.playerScore(box, player, box.getScore() + redeemItems(box, player.getInventory()));
         }
@@ -251,16 +247,13 @@ public class ScoreMatchModule implements MatchModule, Listener {
     for (final ScoreBox box : this.scoreBoxes) {
       if (!box.getRedeemables().isEmpty()
           && box.getRegion().contains(player.getBukkit())
-          && box.canScore(player.getParticipantState())) {
-        match
-            .getExecutor(MatchScope.RUNNING)
-            .execute(
-                () -> {
-                  if (player.getBukkit().isOnline()) {
-                    double points = redeemItems(box, player.getInventory());
-                    ScoreMatchModule.this.playerScore(box, player, points);
-                  }
-                });
+          && box.canScore(player)) {
+        match.getExecutor(MatchScope.RUNNING).execute(() -> {
+          if (player.getBukkit().isOnline()) {
+            double points = redeemItems(box, player.getInventory());
+            ScoreMatchModule.this.playerScore(box, player, points);
+          }
+        });
       }
     }
   }
@@ -278,57 +271,61 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     if (points == 0) return;
 
-    this.incrementScore(player.getId(), player.getCompetitor(), points);
-    box.setLastScoreTime(player.getState(), Instant.now());
+    this.incrementScore(player.getId(), player.getCompetitor(), points, ScoreCause.SCOREBOX);
+    box.setLastScoreTime(player, Instant.now());
 
     int wholePoints = (int) points;
     if (wholePoints < 1 || box.isSilent()) return;
 
-    match.sendMessage(
+    match.sendMessage(translatable(
+        "scorebox.scored",
+        player.getName(NameStyle.COLOR),
         translatable(
-            "scorebox.scored",
-            player.getName(NameStyle.COLOR),
-            translatable(
-                wholePoints == 1 ? "misc.point" : "misc.points",
-                text(wholePoints, NamedTextColor.DARK_AQUA)),
-            player.getParty().getName()));
-    player.playSound(sound(key("random.levelup"), Sound.Source.MASTER, 1, 1));
+            wholePoints == 1 ? "misc.point" : "misc.points",
+            text(wholePoints, NamedTextColor.DARK_AQUA)),
+        player.getParty().getName()));
+    player.playSound(Sounds.SCORE);
   }
 
-  public void incrementScore(UUID player, Competitor competitor, double amount) {
+  public void incrementScore(UUID player, Competitor competitor, double amount, ScoreCause cause) {
     double contribution = contributions.get(player) + amount;
     contributions.put(player, contribution);
-    incrementScore(competitor, amount);
+    incrementScore(competitor, amount, cause);
 
     MatchPlayer mp = match.getPlayer(player);
     if (mp == null) return;
 
-    match.callEvent(new MatchPlayerScoreEvent(mp, amount));
+    match.callEvent(new MatchPlayerScoreEvent(mp, amount, cause));
 
     if (contribution <= PGM.get().getConfiguration().getGriefScore()) {
       // wait until the next tick to do this so stat recording and other stuff works
-      match
-          .getExecutor(MatchScope.RUNNING)
-          .execute(
-              () -> {
-                if (mp.getParty() instanceof Competitor) {
-                  match.setParty(mp, match.getDefaultParty());
-                  mp.sendWarning(translatable("join.err.teamGrief", NamedTextColor.RED));
-                }
-              });
+      match.getExecutor(MatchScope.RUNNING).execute(() -> {
+        if (mp.getParty() instanceof Competitor) {
+          match.setParty(mp, match.getDefaultParty());
+          mp.sendWarning(translatable("join.err.teamGrief", NamedTextColor.RED));
+        }
+      });
     }
   }
 
-  public void incrementScore(Competitor competitor, double amount) {
+  public void setScore(@NotNull Competitor competitor, double value, ScoreCause cause) {
+    double curr = getScore(competitor);
+    if (curr != value) setScore(competitor, curr, value, cause);
+  }
+
+  public void incrementScore(Competitor competitor, double amount, ScoreCause cause) {
     double oldScore = this.scores.get(competitor);
     double newScore = oldScore + amount;
+    setScore(competitor, oldScore, newScore, cause);
+  }
 
-    if (this.config.scoreLimit > 0 && newScore > this.config.scoreLimit) {
-      newScore = this.config.scoreLimit;
+  private void setScore(Competitor competitor, double oldScore, double newScore, ScoreCause cause) {
+    if (this.config.scoreLimit() > 0 && newScore > this.config.scoreLimit()) {
+      newScore = this.config.scoreLimit();
     }
 
     CompetitorScoreChangeEvent event =
-        new CompetitorScoreChangeEvent(competitor, oldScore, newScore);
+        new CompetitorScoreChangeEvent(competitor, oldScore, newScore, cause);
     this.match.callEvent(event);
 
     this.scores.put(competitor, event.getNewScore());

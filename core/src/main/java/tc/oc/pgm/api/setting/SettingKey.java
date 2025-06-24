@@ -9,9 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.modules.PlayerTimeMatchModule;
 import tc.oc.pgm.util.Aliased;
+import tc.oc.pgm.util.material.Materials;
 
 /**
  * A toggleable setting with various possible {@link SettingValue}s.
@@ -19,39 +21,41 @@ import tc.oc.pgm.util.Aliased;
  * @see SettingValue
  */
 public enum SettingKey implements Aliased {
-  CHAT(
-      "chat",
-      Material.SIGN,
-      CHAT_TEAM,
-      CHAT_GLOBAL,
-      CHAT_ADMIN), // Changes the default chat channel
+  CHAT("chat", Materials.SIGN, CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN) {
+    @Override
+    public void update(MatchPlayer player) {
+      PGM.get().getChatManager().setChannel(player, player.getSettings().getValue(CHAT));
+    }
+  }, // Changes the default chat channel
   DEATH(
       Arrays.asList("death", "dms"),
-      Material.SKULL_ITEM,
+      Materials.SKULL,
       DEATH_ALL,
       DEATH_OWN,
-      DEATH_FRIENDS), // Changes which death messages are seen
+      DEATH_FRIENDS,
+      DEATH_SQUAD), // Changes which death messages are seen
   PICKER(
       "picker",
       Material.LEATHER_HELMET,
       PICKER_AUTO,
       PICKER_ON,
-      PICKER_OFF), // Changes when the picker is displayed
+      PICKER_OFF,
+      PICKER_MANUAL), // Changes when the picker is displayed
   JOIN(
       Arrays.asList("join", "jms"),
-      Material.WOOD_DOOR,
+      Materials.WOOD_DOOR,
       JOIN_ON,
       JOIN_FRIENDS,
       JOIN_OFF), // Changes if join messages are seen
   MESSAGE(
       Arrays.asList("message", "dm"),
-      Material.BOOK_AND_QUILL,
+      Materials.BOOK_AND_QUILL,
       MESSAGE_ON,
       MESSAGE_FRIEND,
       MESSAGE_OFF), // Changes if direct messages are accepted
   OBSERVERS(
       Arrays.asList("observers", "obs"),
-      Material.EYE_OF_ENDER,
+      Materials.EYE_OF_ENDER,
       OBSERVERS_ON,
       OBSERVERS_FRIEND,
       OBSERVERS_OFF) {
@@ -64,6 +68,7 @@ public enum SettingKey implements Aliased {
       "sounds",
       Material.NOTE_BLOCK,
       SOUNDS_ALL,
+      SOUNDS_CHAT,
       SOUNDS_DM,
       SOUNDS_NONE), // Changes when sounds are played
   VOTE(
@@ -74,16 +79,15 @@ public enum SettingKey implements Aliased {
   STATS("stats", Material.PAPER, STATS_ON, STATS_OFF), // Changes if stats are tracked
   EFFECTS(
       "effects",
-      Material.FIREWORK,
+      Materials.FIREWORK,
       EFFECTS_ON,
       EFFECTS_OFF), // Changes if special particle effects are shown
-  TIME(Arrays.asList("time", "theme"), Material.WATCH, TIME_AUTO, TIME_DARK, TIME_LIGHT) {
+  TIME(Arrays.asList("time", "theme"), Materials.WATCH, TIME_AUTO, TIME_DARK, TIME_LIGHT) {
     @Override
     public void update(MatchPlayer player) {
       PlayerTimeMatchModule.updatePlayerTime(player);
     }
   }; // Changes player preference for time of day
-  ;
 
   private final List<String> aliases;
   private final SettingValue[] values;

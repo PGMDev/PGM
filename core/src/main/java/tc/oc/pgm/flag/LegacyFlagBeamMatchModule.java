@@ -1,6 +1,7 @@
 package tc.oc.pgm.flag;
 
 import static java.util.stream.IntStream.range;
+import static tc.oc.pgm.util.nms.Packets.ENTITIES;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -15,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,7 +36,8 @@ import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
 import tc.oc.pgm.flag.state.Spawned;
 import tc.oc.pgm.util.inventory.ItemBuilder;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.nms.packets.FakeEntity;
 
 @ListenerScope(MatchScope.LOADED)
 public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
@@ -133,23 +134,24 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
 
   class Beam {
     private final Flag flag;
-    private final NMSHacks.FakeEntity base, legacyBase;
-    private final List<NMSHacks.FakeEntity> segments;
+    private final FakeEntity base, legacyBase;
+    private final List<FakeEntity> segments;
 
     private final Set<MatchPlayer> viewers = new HashSet<>();
 
     Beam(Flag flag) {
       this.flag = flag;
 
-      ItemStack wool = new ItemBuilder().material(Material.WOOL).color(flag.getDyeColor()).build();
-      this.base = new NMSHacks.FakeArmorStand(match.getWorld(), wool);
-      this.legacyBase = new NMSHacks.FakeWitherSkull(match.getWorld());
-      this.segments =
-          range(0, 64) // ~100 blocks is the height which the particles appear to be reasonably
-              // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
-              // to reduce load on the client
-              .mapToObj(i -> new NMSHacks.FakeArmorStand(match.getWorld(), wool))
-              .collect(Collectors.toList());
+      ItemStack wool =
+          new ItemBuilder().material(Materials.WOOL).color(flag.getDyeColor()).build();
+      this.base = ENTITIES.fakeArmorStand(wool);
+      this.legacyBase = ENTITIES.fakeWitherSkull();
+      this.segments = range(
+              0, 64) // ~100 blocks is the height which the particles appear to be reasonably
+          // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
+          // to reduce load on the client
+          .mapToObj(i -> ENTITIES.fakeArmorStand(wool))
+          .collect(Collectors.toList());
     }
 
     Optional<MatchPlayer> carrier() {
@@ -159,17 +161,18 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     }
 
     Optional<Location> location() {
-      if (!flag.getLocation().isPresent()) {
-        return Optional.empty();
-      }
-
-      Location location = flag.getLocation().get().clone();
-      location.setPitch(0f);
-      location.setYaw(0f);
-      return Optional.of(location);
+      return flag.getLocation();
     }
 
-    private NMSHacks.FakeEntity base(MatchPlayer player) {
+    Location toBaseLocation(Location loc) {
+      loc = loc.clone().add(0, 2.75, 0);
+      if (loc.getY() < -64) loc.setY(-64);
+      loc.setPitch(0f);
+      loc.setYaw(0f);
+      return loc;
+    }
+
+    private FakeEntity base(MatchPlayer player) {
       return player.isLegacy() ? legacyBase : base;
     }
 
@@ -187,15 +190,16 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
       Player bukkit = player.getBukkit();
       spawn(bukkit, base(player));
       segments.forEach(segment -> spawn(bukkit, segment));
-      range(1, segments.size())
-          .forEachOrdered(i -> segments.get(i - 1).ride(bukkit, segments.get(i).entity()));
-      base(player).ride(bukkit, segments.get(0).entity());
+      for (int i = 1; i < segments.size(); i++) {
+        segments.get(i - 1).ride(segments.get(i).entityId()).send(bukkit);
+      }
+      base(player).ride(segments.getFirst().entityId()).send(bukkit);
 
       update(player);
     }
 
-    private void spawn(Player player, NMSHacks.FakeEntity entity) {
-      location().ifPresent(l -> entity.spawn(player, l));
+    private void spawn(Player player, FakeEntity entity) {
+      location().ifPresent(l -> entity.spawn(toBaseLocation(l)).send(player));
     }
 
     public void update() {
@@ -203,14 +207,11 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     }
 
     public void update(MatchPlayer player) {
-      Location loc =
-          carrier().map(c -> c.getBukkit().getLocation()).orElseGet(() -> location().orElse(null));
-      if (loc == null) return;
-      loc = loc.clone().add(0, 2.75, 0);
-      if (loc.getY() < -64) loc.setY(-64);
-      loc.setPitch(0f);
-      loc.setYaw(0f);
-      base(player).teleport(player.getBukkit(), loc);
+      carrier()
+          .map(MatchPlayer::getLocation)
+          .or(this::location)
+          .map(this::toBaseLocation)
+          .ifPresent(loc -> base(player).teleport(loc).send(player.getBukkit()));
     }
 
     public void hide() {
@@ -221,8 +222,10 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
     private void hide(MatchPlayer player) {
       if (!viewers.remove(player)) return;
       Player bukkit = player.getBukkit();
-      for (int i = segments.size() - 1; i >= 0; i--) segments.get(i).destroy(bukkit);
-      base(player).destroy(bukkit);
+      for (int i = segments.size() - 1; i >= 0; i--) {
+        segments.get(i).destroy().send(bukkit);
+      }
+      base(player).destroy().send(bukkit);
     }
   }
 }

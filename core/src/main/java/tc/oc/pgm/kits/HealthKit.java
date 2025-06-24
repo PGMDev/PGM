@@ -16,6 +16,10 @@ public class HealthKit extends AbstractKit {
     this.halfHearts = halfHearts;
   }
 
+  public int getHalfHearts() {
+    return halfHearts;
+  }
+
   /** The force flag allows the kit to decrease the player's health */
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {

@@ -2,6 +2,10 @@
 target/
 dependency-reduced-pom.xml
 
+# Gradle generated files
+build/
+.gradle
+
 # Mac OSX generated files
 .DS_Store
 
@@ -51,6 +55,12 @@ world_the_end/
 wepif.yml
 crash-reports/
 eula.txt
+# Startup scripts
+*.sh
+*.bat
+
+# Sqlite databases (eg: community)
+*.sql
 
 # PGM generated files
 match-*/
@@ -58,4 +68,7 @@ maps.zip
 maps/
 maps-default/
 default-maps/
+
+# Allow alternative server folders
+server-*/*
 

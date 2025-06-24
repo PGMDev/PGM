@@ -26,7 +26,7 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
   private final List<PendingValidation<?>> validations = new ArrayList<>();
 
   public static String parseId(Element node) {
-    return node.getAttributeValue("id");
+    return node == null ? null : node.getAttributeValue("id");
   }
 
   /** Return the XML element associated with the given feature */
@@ -54,19 +54,18 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
    */
   public void addFeature(@Nullable Element node, @Nullable String id, FeatureDefinition definition)
       throws InvalidXMLException {
-    if (definitions.add(definition)) {
-      if (id != null) {
-        FeatureDefinition old = this.store.put(id, definition);
-        if (old != null && old != definition) {
-          this.store.put(id, old);
-          throw new InvalidXMLException(
-              "The ID '" + id + "' is already in use by a different feature", node);
-        }
+    definitions.add(definition);
+    if (id != null) {
+      FeatureDefinition old = this.store.put(id, definition);
+      if (old != null && old != definition) {
+        this.store.put(id, old);
+        throw new InvalidXMLException(
+            "The ID '" + id + "' is already in use by a different feature", node);
       }
+    }
 
-      if (node != null) {
-        definitionNodes.put(definition, node);
-      }
+    if (node != null) {
+      definitionNodes.put(definition, node);
     }
   }
 
@@ -218,7 +217,10 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
 
     public void validate() throws InvalidXMLException {
       if (definition != null) validation.validate(definition, node);
-      if (reference != null) validation.validate(reference.get(), node);
+      if (reference != null) {
+        if (!reference.isResolved()) reference.resolve();
+        validation.validate(reference.get(), node);
+      }
     }
   }
 }

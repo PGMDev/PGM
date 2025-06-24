@@ -6,7 +6,7 @@ import java.util.Random;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class CylindricalRegion implements RegionDefinition {
+public class CylindricalRegion implements RegionDefinition.HardStatic {
   private final Vector base;
   private final double radius;
   private final double radiusSq;

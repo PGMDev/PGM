@@ -1,9 +1,10 @@
 package tc.oc.pgm.api.party;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -95,7 +96,7 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
    */
   ChatColor getColor();
 
-  TextColor getTextColor();
+  NamedTextColor getTextColor();
 
   /**
    * Gets the {@link Color} of the party.
@@ -126,26 +127,18 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
   boolean isAutomatic();
 
   /**
-   * Tests if the party is a {@link Competitor}.
+   * Tests if the party is a {@link Competitor} &amp; match is running.
    *
-   * @return if the party is a competitor
-   * @deprecated {@code x instanceof Competitor}
+   * @return if the party is currently competing
    */
-  @Deprecated
-  default boolean isParticipating() {
-    return this instanceof Competitor;
-  }
+  boolean isParticipating();
 
   /**
-   * Tests if the party is not a {@link Competitor}.
+   * Tests if the party is not participating in the match.
    *
-   * @return if the party is not a competitor
-   * @deprecated {@code !(x instanceof Competitor)}
+   * @return if the party observer, or match isn't running
    */
-  @Deprecated
-  default boolean isObserving() {
-    return !this.isParticipating();
-  }
+  boolean isObserving();
 
   @Override
   @Nullable
@@ -156,6 +149,20 @@ public interface Party extends Audience, Named, Filterable<PartyQuery>, PartyQue
   @Override
   default Collection<? extends Filterable<? extends PlayerQuery>> getFilterableChildren() {
     return this.getPlayers();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  default <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(
+      Class<R> type) {
+    Collection<R> result = new ArrayList<>();
+    if (type.isAssignableFrom(Party.class)) {
+      result.add((R) this);
+    }
+    if (type.isAssignableFrom(MatchPlayer.class)) {
+      result.addAll((Collection<? extends R>) getPlayers());
+    }
+    return result;
   }
 
   @Override

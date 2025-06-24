@@ -5,14 +5,15 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.event.Event;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.material.MaterialData;
 
 public class MaterialQuery extends Query implements tc.oc.pgm.api.filter.query.MaterialQuery {
 
   private final MaterialData material;
 
-  public MaterialQuery(@Nullable Event event, MaterialData material) {
+  // Use MaterialQuery#get for a cached instance
+  private MaterialQuery(@Nullable Event event, MaterialData material) {
     super(event);
     this.material = assertNotNull(material);
   }

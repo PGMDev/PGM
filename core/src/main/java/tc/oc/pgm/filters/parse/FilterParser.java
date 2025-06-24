@@ -9,17 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
+import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.classes.ClassModule;
@@ -48,8 +46,6 @@ import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
 import tc.oc.pgm.filters.matcher.party.ScoreFilter;
-import tc.oc.pgm.filters.matcher.party.TeamFilter;
-import tc.oc.pgm.filters.matcher.party.TeamVariableFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingItemFilter;
@@ -65,10 +61,11 @@ import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerStateFilter;
 import tc.oc.pgm.filters.matcher.player.WearingItemFilter;
 import tc.oc.pgm.filters.modifier.LocationQueryModifier;
-import tc.oc.pgm.filters.modifier.PlayerBlockQueryModifier;
+import tc.oc.pgm.filters.modifier.PlayerQueryModifier;
 import tc.oc.pgm.filters.modifier.SameTeamQueryModifier;
 import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
+import tc.oc.pgm.filters.operator.FilterWrapper;
 import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.operator.OneFilter;
 import tc.oc.pgm.filters.operator.TeamFilterAdapter;
@@ -82,26 +79,31 @@ import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.teams.TeamFactory;
-import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.XMLParser;
+import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.collection.ContextStore;
+import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.math.OffsetVector;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
-import tc.oc.pgm.variables.VariableDefinition;
+import tc.oc.pgm.variables.Variable;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
   protected final Map<String, Method> methodParsers;
   protected final MapFactory factory;
+  protected final XMLFluentParser parser;
   protected final FeatureDefinitionContext features;
 
   public FilterParser(MapFactory factory) {
     this.factory = factory;
+    this.parser = factory.getParser();
     this.features = factory.getFeatures();
 
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
@@ -120,9 +122,9 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   public abstract ContextStore<? super Filter> getUsedContext();
 
   /**
-   * The top-level method for parsing an individual filter element. This method should call {@link
-   * #parseDynamic} at some point, and should also take care of adding the filter to whatever type
-   * of context is in use.
+   * The top-level method for parsing an individual filter element. This method should call
+   * {@link #parseDynamic} at some point, and should also take care of adding the filter to whatever
+   * type of context is in use.
    */
   public abstract Filter parse(Element el) throws InvalidXMLException;
 
@@ -132,8 +134,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   /**
-   * Return the filter referenced by the given name/id, and assume it appears in the given {@link
-   * Node} for error reporting purposes.
+   * Return the filter referenced by the given name/id, and assume it appears in the given
+   * {@link Node} for error reporting purposes.
    */
   public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
 
@@ -189,8 +191,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   /**
-   * Return a list containing any and all of the following: - A filter reference in an attribute of
-   * the given name - Inline filters inside child tags of the given name
+   * @param name the attribute/child name
+   * @return list with all filters defined as either attribute or child named {@param name}
    */
   public List<Filter> parseFiltersProperty(Element el, String name) throws InvalidXMLException {
     List<Filter> filters = new ArrayList<>();
@@ -217,27 +219,27 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("any")
   public Filter parseAny(Element el) throws InvalidXMLException {
-    return new AnyFilter(parseChildren(el));
+    return FilterWrapper.of(el, AnyFilter.of(parseChildren(el)));
   }
 
   @MethodParser("all")
   public Filter parseAll(Element el) throws InvalidXMLException {
-    return new AllFilter(parseChildren(el));
+    return FilterWrapper.of(el, AllFilter.of(parseChildren(el)));
   }
 
   @MethodParser("one")
   public Filter parseOne(Element el) throws InvalidXMLException {
-    return new OneFilter(parseChildren(el));
+    return FilterWrapper.of(el, OneFilter.of(parseChildren(el)));
   }
 
   @MethodParser("not")
   public Filter parseNot(Element el) throws InvalidXMLException {
-    return new InverseFilter(AnyFilter.of(parseChildren(el)));
+    return new InverseFilter(parseChild(el));
   }
 
   @MethodParser("team")
-  public TeamFilter parseTeam(Element el) throws InvalidXMLException {
-    return new TeamFilter(Teams.getTeamRef(new Node(el), this.factory));
+  public Filter parseTeam(Element el) throws InvalidXMLException {
+    return FilterWrapper.of(el, parseReference(new Node(el)));
   }
 
   @MethodParser("same-team")
@@ -284,17 +286,21 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("material")
   public MaterialFilter parseMaterial(Element el) throws InvalidXMLException {
-    return new MaterialFilter(XMLUtils.parseMaterialPattern(el));
+    return new MaterialFilter(MaterialMatcher.builder().parse(new Node(el)).build());
   }
 
   @MethodParser("void")
   public VoidFilter parseVoid(Element el) throws InvalidXMLException {
-    return new VoidFilter();
+    return VoidFilter.INSTANCE;
   }
 
   @MethodParser("entity")
   public EntityTypeFilter parseEntity(Element el) throws InvalidXMLException {
-    return new EntityTypeFilter(XMLUtils.parseEnum(el, EntityType.class, "entity type"));
+    var type = EntityTypes.getByName(el.getTextNormalize());
+    if (type == null)
+      throw new InvalidXMLException("Could not find entity type: " + el.getTextNormalize(), el);
+
+    return new EntityTypeFilter(type);
   }
 
   @MethodParser("mob")
@@ -308,8 +314,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("spawn")
   public SpawnReasonFilter parseSpawnReason(Element el) throws InvalidXMLException {
-    return new SpawnReasonFilter(
-        XMLUtils.parseEnum(new Node(el), SpawnReason.class, "spawn reason"));
+    return new SpawnReasonFilter(XMLUtils.parseEnum(new Node(el), SpawnReason.class));
   }
 
   @MethodParser("kill-streak")
@@ -359,27 +364,27 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("crouching")
   public PlayerMovementFilter parseCrouching(Element el) throws InvalidXMLException {
-    return new PlayerMovementFilter(false, true);
+    return PlayerMovementFilter.CROUCHING;
   }
 
   @MethodParser("walking")
   public PlayerMovementFilter parseWalking(Element el) throws InvalidXMLException {
-    return new PlayerMovementFilter(false, false);
+    return PlayerMovementFilter.WALKING;
   }
 
   @MethodParser("sprinting")
   public PlayerMovementFilter parseSprinting(Element el) throws InvalidXMLException {
-    return new PlayerMovementFilter(true, false);
+    return PlayerMovementFilter.SPRINTING;
   }
 
   @MethodParser("flying")
   public FlyingFilter parseFlying(Element el) throws InvalidXMLException {
-    return new FlyingFilter();
+    return FlyingFilter.INSTANCE;
   }
 
   @MethodParser("can-fly")
   public CanFlyFilter parseCanFly(Element el) throws InvalidXMLException {
-    return new CanFlyFilter();
+    return CanFlyFilter.INSTANCE;
   }
 
   @MethodParser("grounded")
@@ -399,9 +404,9 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   private Filter parseExplicitTeam(Element el, CompetitorFilter filter) throws InvalidXMLException {
     final boolean any = XMLUtils.parseBoolean(el.getAttribute("any"), false);
-    final Optional<XMLFeatureReference<TeamFactory>> team =
-        Optional.ofNullable(Node.fromAttr(el, "team"))
-            .map(n -> features.createReference(n, TeamFactory.class));
+    final Optional<XMLFeatureReference<TeamFactory>> team = Optional.ofNullable(
+            Node.fromAttr(el, "team"))
+        .map(n -> features.createReference(n, TeamFactory.class));
 
     if (any && team.isPresent())
       throw new InvalidXMLException("Cannot combine attributes 'team' and 'any'", el);
@@ -464,13 +469,12 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("cause")
   public CauseFilter parseCause(Element el) throws InvalidXMLException {
-    return new CauseFilter(XMLUtils.parseEnum(el, CauseFilter.Cause.class, "cause filter"));
+    return new CauseFilter(XMLUtils.parseEnum(el, CauseFilter.Cause.class));
   }
 
   @MethodParser("relation")
   public RelationFilter parseRelation(Element el) throws InvalidXMLException {
-    return new RelationFilter(
-        XMLUtils.parseEnum(el, PlayerRelation.class, "player relation filter"));
+    return new RelationFilter(XMLUtils.parseEnum(el, PlayerRelation.class));
   }
 
   @MethodParser("carrying")
@@ -500,9 +504,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     } else if (maxDuration == null) {
       duration = Range.atLeast((int) (minDuration.getSeconds() * 20));
     } else {
-      duration =
-          Range.closed(
-              (int) (minDuration.getSeconds() * 20), (int) (maxDuration.getSeconds() * 20));
+      duration = Range.closed(
+          (int) (minDuration.getSeconds() * 20), (int) (maxDuration.getSeconds() * 20));
     }
     boolean amplifier = Node.fromAttr(el, "amplifier") != null;
     return new EffectFilter(XMLUtils.parsePotionEffect(el), duration, amplifier);
@@ -567,88 +570,50 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("match-phase")
   public Filter parseMatchPhase(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter(el.getValue(), el);
+    return switch (el.getTextNormalize()) {
+      case "running" -> MatchPhaseFilter.RUNNING;
+      case "finished" -> MatchPhaseFilter.FINISHED;
+      case "starting" -> MatchPhaseFilter.STARTING;
+      case "idle" -> MatchPhaseFilter.IDLE;
+      case "started" -> MatchPhaseFilter.STARTED;
+      default -> throw new InvalidXMLException("Invalid or no match state found", el);
+    };
   }
 
   @MethodParser("match-started")
   public Filter parseMatchStarted(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter("started", el);
+    return MatchPhaseFilter.STARTED;
   }
 
   @MethodParser("match-running")
   public Filter parseMatchRunning(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter("running", el);
+    return MatchPhaseFilter.RUNNING;
   }
 
   @MethodParser("match-finished")
   public Filter parseMatchFinished(Element el) throws InvalidXMLException {
-    return parseMatchPhaseFilter("finished", el);
-  }
-
-  private Filter parseMatchPhaseFilter(String matchState, Element el) throws InvalidXMLException {
-
-    switch (matchState) {
-      case "running":
-        return MatchPhaseFilter.RUNNING;
-      case "finished":
-        return MatchPhaseFilter.FINISHED;
-      case "starting":
-        return MatchPhaseFilter.STARTING;
-      case "idle":
-        return MatchPhaseFilter.IDLE;
-      case "started":
-        return MatchPhaseFilter.STARTED;
-    }
-
-    throw new InvalidXMLException("Invalid or no match state found", el);
+    return MatchPhaseFilter.FINISHED;
   }
 
   // Methods for parsing QueryModifiers
 
   @MethodParser("offset")
-  public LocationQueryModifier parseOffsetFilter(Element el) throws InvalidXMLException {
-    String value = el.getAttributeValue("vector");
-    if (value == null) throw new InvalidXMLException("No vector provided", el);
-    // Check vector format
-    Vector vector = XMLUtils.parseVector(new Node(el), value.replaceAll("[\\^~]", ""));
+  public Filter parseOffsetFilter(Element el) throws InvalidXMLException {
+    OffsetVector vector = XMLUtils.parseOffsetVector(Node.fromRequiredAttr(el, "vector"));
+    Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"));
 
-    String[] coords = value.split("\\s*,\\s*");
-
-    boolean[] relative = new boolean[3];
-
-    Boolean local = null;
-    for (int i = 0; i < coords.length; i++) {
-      String coord = coords[i];
-
-      if (local == null) {
-        local = coord.startsWith("^");
-      }
-
-      if (coord.startsWith("^") != local)
-        throw new InvalidXMLException("Cannot mix world & local coordinates", el);
-
-      relative[i] = coord.startsWith("~");
-    }
-
-    if (local == null) throw new InvalidXMLException("No coordinates provided", el);
-
-    if (local) {
-      return new LocationQueryModifier.Local(parseChild(el), vector);
-    } else {
-      return new LocationQueryModifier.World(parseChild(el), vector, relative);
-    }
+    return LocationQueryModifier.of(child, vector);
   }
 
   @MethodParser("player")
-  public PlayerBlockQueryModifier parsePlayerFilter(Element el) throws InvalidXMLException {
-    return new PlayerBlockQueryModifier(parseChild(el));
+  public PlayerQueryModifier parsePlayerFilter(Element el) throws InvalidXMLException {
+    return new PlayerQueryModifier(parseChild(el));
   }
 
   @MethodParser("players")
   public PlayerCountFilter parsePlayerCountFilter(Element el) throws InvalidXMLException {
-    Filter child =
-        parseProperty(
-            Node.fromAttrOrSelf(el, "filter"), StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
+    Filter child = parseProperty(
+        Node.fromAttrOrSelf(el, "filter"), StaticFilter.ALLOW, DynamicFilterValidation.PLAYER);
 
     return new PlayerCountFilter(
         child,
@@ -659,13 +624,26 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("variable")
   public Filter parseVariableFilter(Element el) throws InvalidXMLException {
-    VariableDefinition<?> varDef =
-        features.resolve(Node.fromRequiredAttr(el, "var"), VariableDefinition.class);
     Range<Double> range = XMLUtils.parseNumericRange(new Node(el), Double.class);
 
-    if (varDef.getScope() == Party.class)
-      return parseExplicitTeam(el, new TeamVariableFilter(varDef, range));
-    else return new VariableFilter(varDef, range);
+    Filter filter;
+    if (el.getAttribute("var") != null) {
+      Variable<?> varDef = parser.variable(el, "var").required();
+      Integer index = varDef.isIndexed() ? parser.parseInt(el, "index").required() : null;
+
+      filter = VariableFilter.of(varDef, index, range, new Node(el));
+    } else if (el.getAttribute("value") != null) {
+      var scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
+      var formula = parser.formula(scope, el, "value").attr().required();
+
+      filter = VariableFilter.of(formula, scope, range);
+    } else {
+      throw new InvalidXMLException("Expected one of 'var' or 'value'", el);
+    }
+
+    return filter instanceof CompetitorFilter
+        ? parseExplicitTeam(el, (CompetitorFilter) filter)
+        : filter;
   }
 
   @MethodParser("blocks")

@@ -6,17 +6,18 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 import static tc.oc.pgm.util.text.TextException.exception;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.specifier.Range;
 import java.time.Duration;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang.WordUtils;
+import org.incendo.cloud.annotation.specifier.Range;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Default;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
@@ -27,36 +28,32 @@ import tc.oc.pgm.modes.ObjectiveModesMatchModule;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.text.TextFormatter;
 
-@CommandMethod("mode|modes")
+@Command("mode|modes")
 public final class ModeCommand {
 
-  @CommandMethod("next")
+  @Command("next")
   @CommandDescription("Show the next objective mode")
   public void next(Audience audience, ObjectiveModesMatchModule modes) {
     List<ModeChangeCountdown> countdowns = modes.getActiveCountdowns();
 
     if (countdowns.isEmpty()) throwNoResults();
 
-    TextComponent.Builder builder =
-        text().append(translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
+    TextComponent.Builder builder = text()
+        .append(translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
 
     ModeChangeCountdown next = countdowns.get(0);
     Duration timeLeft = modes.getCountdown().getTimeLeft(next);
 
     if (timeLeft == null) {
-      builder.append(text(next.getMode().getPreformattedMaterialName(), NamedTextColor.GOLD));
+      builder.append(text(next.getMode().getLegacyName(), NamedTextColor.GOLD));
     } else if (timeLeft.getSeconds() >= 0) {
-      builder.append(
-          text(
-                  WordUtils.capitalize(next.getMode().getPreformattedMaterialName()),
-                  NamedTextColor.GOLD)
-              .append(space())
-              .append(text("(", NamedTextColor.AQUA))
-              .append(
-                  new ModesPaginatedResult(modes)
-                      .formatSingleCountdown(next)
-                      .color(NamedTextColor.AQUA))
-              .append(text(")", NamedTextColor.AQUA)));
+      builder.append(text(WordUtils.capitalize(next.getMode().getLegacyName()), NamedTextColor.GOLD)
+          .append(space())
+          .append(text("(", NamedTextColor.AQUA))
+          .append(new ModesPaginatedResult(modes)
+              .formatSingleCountdown(next)
+              .color(NamedTextColor.AQUA))
+          .append(text(")", NamedTextColor.AQUA)));
     } else {
       throwNoResults();
     }
@@ -64,30 +61,38 @@ public final class ModeCommand {
     audience.sendMessage(builder.build());
   }
 
-  @CommandMethod("list|page [page]")
+  @Command("[page]")
+  @CommandDescription("List all objective modes")
+  public void fallback(
+      Audience audience,
+      ObjectiveModesMatchModule modes,
+      @Argument("page") @Default("1") @Range(min = "1") int page) {
+    list(audience, modes, page);
+  }
+
+  @Command("list|page [page]")
   @CommandDescription("List all objective modes")
   public void list(
       Audience audience,
       ObjectiveModesMatchModule modes,
-      @Argument(value = "page", defaultValue = "1") @Range(min = "1") int page) {
+      @Argument("page") @Default("1") @Range(min = "1") int page) {
     List<ModeChangeCountdown> modeList = modes.getSortedCountdowns(true);
     int resultsPerPage = 8;
     int pages = (modeList.size() + resultsPerPage - 1) / resultsPerPage;
-    Component header =
-        TextFormatter.paginate(
-            translatable("command.monumentModes"),
-            page,
-            pages,
-            NamedTextColor.DARK_AQUA,
-            NamedTextColor.AQUA,
-            true);
+    Component header = TextFormatter.paginate(
+        translatable("command.monumentModes"),
+        page,
+        pages,
+        NamedTextColor.DARK_AQUA,
+        NamedTextColor.AQUA,
+        true);
 
     new ModesPaginatedResult(header, resultsPerPage, modes).display(audience, modeList, page);
   }
 
-  @CommandMethod("push <time>")
+  @Command("push <time>")
   @CommandDescription("Reschedule all objective modes with active countdowns")
-  @CommandPermission(Permissions.GAMEPLAY)
+  @Permission(Permissions.GAMEPLAY)
   public void push(
       Audience audience,
       Match match,
@@ -112,7 +117,8 @@ public final class ModeCommand {
     TextComponent.Builder builder =
         text().append(translatable("command.modesPushed", NamedTextColor.GOLD).append(space()));
     if (duration.isNegative()) {
-      builder.append(translatable("command.modesPushedBack", NamedTextColor.GOLD).append(space()));
+      builder.append(
+          translatable("command.modesPushedBack", NamedTextColor.GOLD).append(space()));
     } else {
       builder.append(
           translatable("command.modesPushedForwards", NamedTextColor.GOLD).append(space()));
@@ -124,15 +130,15 @@ public final class ModeCommand {
     audience.sendMessage(builder);
   }
 
-  @CommandMethod("start <mode> [time]")
+  @Command("start <mode> [time]")
   @CommandDescription("Starts an objective mode")
-  @CommandPermission(Permissions.GAMEPLAY)
+  @Permission(Permissions.GAMEPLAY)
   public void start(
       Audience audience,
       Match match,
       ObjectiveModesMatchModule modes,
       @Argument("mode") Mode mode,
-      @Argument(value = "time", defaultValue = "0s") Duration time) {
+      @Argument("time") @Default("0s") Duration time) {
     if (!match.isRunning()) throwMatchNotStarted();
     if (time.isNegative()) throwInvalidNumber(time.toString());
 
@@ -142,12 +148,10 @@ public final class ModeCommand {
     context.cancel(countdown);
     context.start(countdown, time);
 
-    TextComponent.Builder builder =
-        text()
-            .append(
-                translatable("command.selectedModePushed", mode.getComponentName())
-                    .color(NamedTextColor.GOLD)
-                    .append(space()));
+    TextComponent.Builder builder = text()
+        .append(translatable("command.selectedModePushed", mode.getComponentName())
+            .color(NamedTextColor.GOLD)
+            .append(space()));
     builder.append(clock(Math.abs(time.getSeconds())).color(NamedTextColor.AQUA));
     audience.sendMessage(builder);
   }

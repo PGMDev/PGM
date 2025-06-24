@@ -1,6 +1,7 @@
 package tc.oc.pgm.damage;
 
 import com.google.common.collect.SetMultimap;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,6 +19,7 @@ import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DisableDamageMatchModule implements MatchModule, Listener {
@@ -33,18 +35,12 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
   private static DamageCause getBlockDamageCause(Block block) {
     if (block == null) {
       return DamageCause.CONTACT;
+    } else if (Materials.isLava(block.getType())) {
+      return DamageCause.LAVA;
+    } else if (Material.FIRE == block.getType()) {
+      return DamageCause.FIRE;
     }
-    switch (block.getType()) {
-      case LAVA:
-      case STATIONARY_LAVA:
-        return DamageCause.LAVA;
-
-      case FIRE:
-        return DamageCause.FIRE;
-
-      default:
-        return DamageCause.CONTACT;
-    }
+    return DamageCause.CONTACT;
   }
 
   private boolean canDamage(

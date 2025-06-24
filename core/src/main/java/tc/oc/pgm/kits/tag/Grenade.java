@@ -63,9 +63,7 @@ public class Grenade {
   }
 
   public static @Nullable Grenade get(Metadatable entity) {
-    return entity.hasMetadata(METADATA_KEY)
-        ? (Grenade) MetadataUtils.getMetadata(entity, METADATA_KEY, PGM.get()).value()
-        : null;
+    return MetadataUtils.getMetadataValue(entity, METADATA_KEY, PGM.get());
   }
 
   public void set(Plugin plugin, Metadatable entity) {

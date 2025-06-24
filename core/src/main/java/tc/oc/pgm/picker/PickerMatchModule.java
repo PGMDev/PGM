@@ -1,10 +1,10 @@
 package tc.oc.pgm.picker;
 
 import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
+import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -15,11 +15,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -31,7 +29,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -63,8 +60,11 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.bukkit.Enchantments;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -107,8 +107,8 @@ public class PickerMatchModule implements MatchModule, Listener {
       this.material = material;
     }
 
-    public boolean matches(MaterialData material) {
-      return this.material.equals(material.getItemType());
+    public boolean matches(ItemStack item) {
+      return this.material.equals(item.getType());
     }
   }
 
@@ -132,6 +132,8 @@ public class PickerMatchModule implements MatchModule, Listener {
         return false;
       case PICKER_ON: // When on always show the GUI
         return true;
+      case PICKER_MANUAL: // Only show the GUI when right clicked
+        return playerTriggered;
       default: // Display after map cycle, but check perms when clicking button.
         return !playerTriggered || hasPermission || hasClasses;
     }
@@ -143,10 +145,9 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private boolean canAutoJoin(MatchPlayer joining) {
-    JoinResult result =
-        match
-            .needModule(JoinMatchModule.class)
-            .queryJoin(joining, JoinRequest.fromPlayer(joining, null));
+    JoinResult result = match
+        .needModule(JoinMatchModule.class)
+        .queryJoin(joining, JoinRequest.fromPlayer(joining, null));
     return result.isSuccess() || result.getOption() == JoinResultOption.FULL;
   }
 
@@ -238,10 +239,8 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
 
     meta.setDisplayName(OPEN_BUTTON_PREFIX + TextTranslations.translate(key, player.getBukkit()));
-    meta.setLore(
-        Lists.newArrayList(
-            ChatColor.DARK_PURPLE
-                + TextTranslations.translate("picker.tooltip", player.getBukkit())));
+    meta.setLore(Lists.newArrayList(
+        ChatColor.DARK_PURPLE + TextTranslations.translate("picker.tooltip", player.getBukkit())));
 
     // Color the leather helmet to match player team
     if (player != null
@@ -262,10 +261,8 @@ public class PickerMatchModule implements MatchModule, Listener {
     ItemMeta meta = stack.getItemMeta();
     meta.setDisplayName(
         OPEN_BUTTON_PREFIX + TextTranslations.translate("picker.title.leave", player.getBukkit()));
-    meta.setLore(
-        Lists.newArrayList(
-            ChatColor.DARK_PURPLE
-                + TextTranslations.translate("picker.tooltipObserver", player.getBukkit())));
+    meta.setLore(Lists.newArrayList(ChatColor.DARK_PURPLE
+        + TextTranslations.translate("picker.tooltipObserver", player.getBukkit())));
 
     stack.setItemMeta(meta);
     return stack;
@@ -300,14 +297,11 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (!settingEnabled(player, false)) return;
 
     if (canOpenWindow(player)) {
-      match
-          .getExecutor(MatchScope.LOADED)
-          .execute(
-              () -> {
-                if (player.getBukkit().isOnline()) {
-                  showWindow(player);
-                }
-              });
+      match.getExecutor(MatchScope.LOADED).execute(() -> {
+        if (player.getBukkit().isOnline()) {
+          showWindow(player);
+        }
+      });
     }
   }
 
@@ -333,7 +327,7 @@ public class PickerMatchModule implements MatchModule, Listener {
       this.handleInventoryClick(
           player,
           ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()),
-          event.getCurrentItem().getData());
+          event.getCurrentItem());
       event.setCancelled(true);
     }
   }
@@ -496,7 +490,7 @@ public class PickerMatchModule implements MatchModule, Listener {
    */
   private @Nullable Inventory getOpenWindow(MatchPlayer player) {
     if (picking.contains(player)) {
-      return player.getBukkit().getOpenInventory().getTopInventory();
+      return INVENTORY_VIEW.getTopInventory(player.getBukkit().getOpenInventory());
     }
     return null;
   }
@@ -511,13 +505,10 @@ public class PickerMatchModule implements MatchModule, Listener {
   /** Open a new window for the given player displaying the given contents */
   private Inventory openWindow(MatchPlayer player, ItemStack[] contents) {
     closeWindow(player);
-    Inventory inv =
-        PGM.get()
-            .getServer()
-            .createInventory(
-                player.getBukkit(),
-                contents.length,
-                StringUtils.truncate(getWindowTitle(player), 32));
+    Inventory inv = PGM.get()
+        .getServer()
+        .createInventory(
+            player.getBukkit(), contents.length, StringUtils.truncate(getWindowTitle(player), 32));
     inv.setContents(contents);
     player.getBukkit().openInventory(inv);
     picking.add(player);
@@ -580,7 +571,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     meta.setDisplayName(
         (cls.canUse(viewer.getBukkit()) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
     if (match.getModule(ClassMatchModule.class).getSelectedClass(viewer.getId()).equals(cls)) {
-      meta.addEnchant(Enchantment.ARROW_INFINITE, 1, true);
+      meta.addEnchant(Enchantments.INFINITY, 1, true);
     }
 
     List<String> lore = Lists.newArrayList();
@@ -592,9 +583,8 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
 
     if (!cls.canUse(viewer.getBukkit())) {
-      lore.add(
-          ChatColor.RED
-              + TextTranslations.translate("class.picker.restricted", viewer.getBukkit()));
+      lore.add(ChatColor.RED
+          + TextTranslations.translate("class.picker.restricted", viewer.getBukkit()));
     }
 
     meta.setLore(lore);
@@ -607,16 +597,14 @@ public class PickerMatchModule implements MatchModule, Listener {
     ItemStack autojoin = new ItemStack(Button.AUTO_JOIN.material);
 
     ItemMeta autojoinMeta = autojoin.getItemMeta();
-    autojoinMeta.setDisplayName(
-        ChatColor.GRAY.toString()
-            + ChatColor.BOLD
-            + TextTranslations.translate("picker.autoJoin.displayName", viewer.getBukkit()));
-    autojoinMeta.setLore(
-        Lists.newArrayList(
-            this.getTeamSizeDescription(
-                viewer.getMatch().getParticipants().size(), viewer.getMatch().getMaxPlayers()),
-            ChatColor.AQUA
-                + TextTranslations.translate("picker.autoJoin.tooltip", viewer.getBukkit())));
+    autojoinMeta.setDisplayName(ChatColor.GRAY.toString()
+        + ChatColor.BOLD
+        + TextTranslations.translate("picker.autoJoin.displayName", viewer.getBukkit()));
+    autojoinMeta.setLore(Lists.newArrayList(
+        this.getTeamSizeDescription(
+            viewer.getMatch().getParticipants().size(), viewer.getMatch().getMaxPlayers()),
+        ChatColor.AQUA
+            + TextTranslations.translate("picker.autoJoin.tooltip", viewer.getBukkit())));
     autojoin.setItemMeta(autojoinMeta);
 
     return autojoin;
@@ -634,27 +622,23 @@ public class PickerMatchModule implements MatchModule, Listener {
     if (result instanceof JoinResultOption) {
       switch ((JoinResultOption) result) {
         default:
-          lore.add(
-              ChatColor.GREEN
-                  + TextTranslations.translate("picker.clickToJoin", player.getBukkit()));
+          lore.add(ChatColor.GREEN
+              + TextTranslations.translate("picker.clickToJoin", player.getBukkit()));
           break;
 
         case REJOINED:
-          lore.add(
-              ChatColor.GREEN
-                  + TextTranslations.translate("picker.clickToRejoin", player.getBukkit()));
+          lore.add(ChatColor.GREEN
+              + TextTranslations.translate("picker.clickToRejoin", player.getBukkit()));
           break;
 
         case CHOICE_DENIED:
-          lore.add(
-              ChatColor.GOLD
-                  + TextTranslations.translate("picker.noPermissions", player.getBukkit()));
+          lore.add(ChatColor.GOLD
+              + TextTranslations.translate("picker.noPermissions", player.getBukkit()));
           break;
 
         case FULL:
-          lore.add(
-              ChatColor.DARK_RED
-                  + TextTranslations.translate("picker.capacity", player.getBukkit()));
+          lore.add(ChatColor.DARK_RED
+              + TextTranslations.translate("picker.capacity", player.getBukkit()));
           break;
       }
     }
@@ -678,22 +662,21 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private void handleInventoryClick(
-      final MatchPlayer player, final String name, final MaterialData material) {
-    player.playSound(sound(key("random.click"), Sound.Source.MASTER, 1, 2));
+      final MatchPlayer player, final String name, final ItemStack item) {
+    player.playSound(Sounds.INVENTORY_CLICK);
 
     if (hasClasses) {
       ClassMatchModule cmm = player.getMatch().needModule(ClassMatchModule.class);
       PlayerClass cls = cmm.getPlayerClass(name);
 
-      if (cls != null && cls.getIcon().equals(material)) {
+      if (cls != null && cls.getIcon().equals(MaterialData.item(item))) {
         if (!cls.canUse(player.getBukkit())) return;
 
         if (cls != cmm.getSelectedClass(player.getId())) {
           if (cmm.getCanChangeClass(player.getId())) {
             cmm.setPlayerClass(player.getId(), cls);
-            player.sendMessage(
-                translatable(
-                    "match.class.ok", NamedTextColor.GOLD, text(name, NamedTextColor.GREEN)));
+            player.sendMessage(translatable(
+                "match.class.ok", NamedTextColor.GOLD, text(name, NamedTextColor.GREEN)));
             scheduleRefresh(player);
           } else {
             player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));
@@ -709,18 +692,18 @@ public class PickerMatchModule implements MatchModule, Listener {
       }
     }
 
-    if (hasTeams && Button.TEAM_JOIN.matches(material)) {
+    if (hasTeams && Button.TEAM_JOIN.matches(item)) {
       Team team = player.getMatch().needModule(TeamMatchModule.class).getTeam(name);
       if (team != null) {
         this.scheduleClose(player);
         this.scheduleJoin(player, team);
       }
 
-    } else if (Button.AUTO_JOIN.matches(material)) {
+    } else if (Button.AUTO_JOIN.matches(item)) {
       this.scheduleClose(player);
       this.scheduleJoin(player, null);
 
-    } else if (Button.LEAVE.matches(material)) {
+    } else if (Button.LEAVE.matches(item)) {
       this.scheduleClose(player);
       this.scheduleLeave(player);
     }
@@ -729,43 +712,34 @@ public class PickerMatchModule implements MatchModule, Listener {
   private void scheduleClose(final MatchPlayer player) {
     final Player bukkit = player.getBukkit();
 
-    match
-        .getExecutor(MatchScope.LOADED)
-        .execute(
-            () -> {
-              if (bukkit.isOnline()) {
-                bukkit.getOpenInventory().getTopInventory().clear();
-                bukkit.closeInventory();
-              }
-            });
+    match.getExecutor(MatchScope.LOADED).execute(() -> {
+      if (bukkit.isOnline()) {
+        INVENTORY_VIEW.getTopInventory(bukkit.getOpenInventory()).clear();
+        bukkit.closeInventory();
+      }
+    });
   }
 
   private void scheduleJoin(final MatchPlayer player, @Nullable final Team team) {
     if (team == player.getParty() || (team == null && hasJoined(player))) return;
 
     final Player bukkit = player.getBukkit();
-    match
-        .getExecutor(MatchScope.LOADED)
-        .execute(
-            () -> {
-              if (bukkit.isOnline()) {
-                match.needModule(JoinMatchModule.class).join(player, team);
-              }
-            });
+    match.getExecutor(MatchScope.LOADED).execute(() -> {
+      if (bukkit.isOnline()) {
+        match.needModule(JoinMatchModule.class).join(player, team);
+      }
+    });
   }
 
   private void scheduleLeave(final MatchPlayer player) {
     if (!hasJoined(player)) return;
 
     final Player bukkit = player.getBukkit();
-    match
-        .getExecutor(MatchScope.LOADED)
-        .execute(
-            () -> {
-              if (bukkit.isOnline()) {
-                match.needModule(JoinMatchModule.class).leave(player, JoinRequest.empty());
-              }
-            });
+    match.getExecutor(MatchScope.LOADED).execute(() -> {
+      if (bukkit.isOnline()) {
+        match.needModule(JoinMatchModule.class).leave(player, JoinRequest.empty());
+      }
+    });
   }
 
   private void scheduleRefresh(final MatchPlayer viewer) {

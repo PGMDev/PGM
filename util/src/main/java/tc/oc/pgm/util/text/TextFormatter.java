@@ -7,9 +7,8 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -21,6 +20,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.LegacyFormatUtils;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.named.Named;
 
@@ -41,25 +41,22 @@ public final class TextFormatter {
    */
   public static Component list(Collection<? extends Component> texts, TextColor color) {
     final List<? extends Component> textList =
-        texts instanceof List ? (List) texts : new LinkedList<>(texts);
-    switch (textList.size()) {
-      case 0:
-        return empty();
-      case 1:
-        return textList.get(0).colorIfAbsent(color);
-      case 2:
-        return translatable("misc.list.pair", color, textList);
-      default:
-        final Iterator<? extends Component> textIterator = textList.iterator();
-        Component a =
-            translatable("misc.list.start", color, textIterator.next(), textIterator.next());
-        Component b = textIterator.next();
-        while (textIterator.hasNext()) {
+        texts instanceof List ? (List<? extends Component>) texts : new ArrayList<>(texts);
+    return switch (textList.size()) {
+      case 0 -> empty();
+      case 1 -> textList.getFirst().colorIfAbsent(color);
+      case 2 -> translatable("misc.list.pair", color, textList);
+      default -> {
+        var it = textList.iterator();
+        Component a = translatable("misc.list.start", color, it.next(), it.next());
+        Component b = it.next();
+        while (it.hasNext()) {
           a = translatable("misc.list.middle", color, a, b);
-          b = textIterator.next();
+          b = it.next();
         }
-        return translatable("misc.list.end", color, a, b);
-    }
+        yield translatable("misc.list.end", color, a, b);
+      }
+    };
   }
 
   /**
@@ -98,11 +95,11 @@ public final class TextFormatter {
         .append(text)
         .append(space())
         .append(text("(", mainColor))
-        .append(
-            translatable(
-                    simple ? "command.simplePageHeader" : "command.pageHeader",
-                    NamedTextColor.DARK_AQUA)
-                .args(text(page, pageColor), text(pages, pageColor)))
+        .append(translatable(
+            simple ? "command.simplePageHeader" : "command.pageHeader",
+            mainColor,
+            text(page, pageColor),
+            text(pages, pageColor)))
         .append(text(")", mainColor))
         .build();
   }
@@ -162,44 +159,24 @@ public final class TextFormatter {
   /*
    * Convert ChatColor -> TextColor
    */
-  public static NamedTextColor convert(Enum<?> color) {
-    NamedTextColor textColor = NamedTextColor.WHITE;
-    try {
-      textColor = NamedTextColor.NAMES.value(color.name().toLowerCase());
-    } catch (IllegalArgumentException e) {
-      // If not found use default
-    }
-    return textColor;
+  public static NamedTextColor convert(ChatColor color) {
+    return NamedTextColor.namedColor(BukkitUtils.colorOf(color).asRGB());
   }
 
-  public static TextFormat convertFormat(Enum<?> color) {
-    TextFormat textColor = NamedTextColor.WHITE;
-    try {
-      textColor = NamedTextColor.NAMES.value(color.name().toLowerCase());
-    } catch (IllegalArgumentException e) {
-      // If not found use default
-      if ((color instanceof ChatColor) && convertDecoration((ChatColor) color) != null) {
-        textColor = convertDecoration((ChatColor) color);
-      }
-    }
-    return textColor;
+  public static TextFormat convertFormat(ChatColor color) {
+    TextFormat decoration = convertDecoration(color);
+    return decoration != null ? decoration : convert(color);
   }
 
   @Nullable
   public static TextDecoration convertDecoration(ChatColor color) {
-    switch (color) {
-      case BOLD:
-        return TextDecoration.BOLD;
-      case ITALIC:
-        return TextDecoration.ITALIC;
-      case MAGIC:
-        return TextDecoration.OBFUSCATED;
-      case STRIKETHROUGH:
-        return TextDecoration.STRIKETHROUGH;
-      case UNDERLINE:
-        return TextDecoration.UNDERLINED;
-      default:
-        return null;
-    }
+    return switch (color) {
+      case BOLD -> TextDecoration.BOLD;
+      case ITALIC -> TextDecoration.ITALIC;
+      case MAGIC -> TextDecoration.OBFUSCATED;
+      case STRIKETHROUGH -> TextDecoration.STRIKETHROUGH;
+      case UNDERLINE -> TextDecoration.UNDERLINED;
+      default -> null;
+    };
   }
 }

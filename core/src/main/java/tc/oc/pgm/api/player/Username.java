@@ -22,11 +22,4 @@ public interface Username extends Named {
   @Override
   @Nullable
   String getNameLegacy();
-
-  /**
-   * Change the username of the player.
-   *
-   * @param name The new username or null.
-   */
-  void setName(@Nullable String name);
 }

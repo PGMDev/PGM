@@ -1,52 +1,67 @@
 package tc.oc.pgm.variables;
 
-import java.util.HashMap;
-import java.util.Map;
-import tc.oc.pgm.api.feature.Feature;
-import tc.oc.pgm.filters.FilterMatchModule;
+import java.util.Collection;
+import java.util.Optional;
+import tc.oc.pgm.api.feature.FeatureDefinition;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.Filterable;
 
-public class Variable<T extends Filterable<?>> implements Feature<VariableDefinition<T>> {
+public interface Variable<T extends Filterable<?>> extends FeatureDefinition {
 
-  private final VariableDefinition<T> definition;
-  private final Map<T, Double> values;
+  double getValue(Filterable<?> context);
 
-  public Variable(VariableDefinition<T> definition) {
-    this.definition = definition;
-    this.values = new HashMap<>();
+  void setValue(Filterable<?> context, double value);
+
+  Class<T> getScope();
+
+  default boolean isDynamic() {
+    return false;
   }
 
-  @Override
-  public String getId() {
-    return definition.getId();
+  default boolean isIndexed() {
+    return false;
   }
 
-  @Override
-  public VariableDefinition<T> getDefinition() {
-    return definition;
+  default boolean isReadonly() {
+    return false;
   }
 
-  public double getValue(Filterable<?> context) {
-    return values.computeIfAbsent(getAncestor(context), k -> definition.getDefault());
+  default boolean isExclusive() {
+    return false;
   }
 
-  public void setValue(Filterable<?> context, double value) {
-    T ctx = getAncestor(context);
-    values.put(ctx, value);
-    // For performance reasons, let's avoid launching an event for every variable change
-    context.getMatch().needModule(FilterMatchModule.class).invalidate(ctx);
+  default void load(Match match) {}
+
+  /**
+   * Variable that has indexing, ie: arrays Note: you must always check {@link #isIndexed} to know
+   * if it actually is an indexed variable or not.
+   *
+   * @param <T> The filter type of this variable
+   */
+  interface Indexed<T extends Filterable<?>> extends Variable<T> {
+
+    @Override
+    default boolean isIndexed() {
+      return true;
+    }
+
+    double getValue(Filterable<?> context, int idx);
+
+    void setValue(Filterable<?> context, int idx, double value);
+
+    int size();
   }
 
-  private T getAncestor(Filterable<?> context) {
-    T filterable = context.getFilterableAncestor(definition.getScope());
-    if (filterable != null) return filterable;
+  interface Exclusive<T extends Filterable<?>> extends Variable<T> {
+    @Override
+    default boolean isExclusive() {
+      return getCardinality() != null;
+    }
 
-    throw new IllegalStateException(
-        "Wrong variable scope for '"
-            + getId()
-            + "', expected "
-            + definition.getScope().getSimpleName()
-            + " which cannot be found in "
-            + context.getClass().getSimpleName());
+    Integer getCardinality();
+
+    Optional<T> getHolder(Filterable<?> context);
+
+    Collection<T> getHolders(Filterable<?> context);
   }
 }

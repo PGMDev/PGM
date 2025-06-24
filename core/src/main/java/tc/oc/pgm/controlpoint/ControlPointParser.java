@@ -1,9 +1,10 @@
 package tc.oc.pgm.controlpoint;
 
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
@@ -12,11 +13,10 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.StaticFilter;
-import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.goals.ShowOptions;
-import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.payload.PayloadDefinition;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.EverywhereRegion;
@@ -24,14 +24,14 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class ControlPointParser {
-  private static final Filter VISUAL_MATERIALS =
-      AnyFilter.of(
-          ItemModifier.COLOR_AFFECTED.stream().map(BlockFilter::new).collect(Collectors.toList()));
+  private static final Filter VISUAL_MATERIALS = new MaterialFilter(
+      MaterialMatcher.builder().addAll(COLOR_UTILS::isColorAffected).build());
 
   public enum Type {
     HILL,
@@ -46,19 +46,15 @@ public abstract class ControlPointParser {
     RegionParser regionParser = factory.getRegions();
     FilterParser filterParser = factory.getFilters();
 
-    Region captureRegion =
-        type == Type.PAYLOAD
-            ? EverywhereRegion.INSTANCE
-            : regionParser.parseProperty(
-                Node.fromRequiredChildOrAttr(el, "capture-region", "capture"));
-    Region progressDisplayRegion =
-        regionParser.parseProperty(
-            Node.fromChildOrAttr(el, "progress-display-region", "progress"),
-            BlockBoundedValidation.INSTANCE);
-    Region ownerDisplayRegion =
-        regionParser.parseProperty(
-            Node.fromChildOrAttr(el, "owner-display-region", "captured"),
-            BlockBoundedValidation.INSTANCE);
+    Region captureRegion = type == Type.PAYLOAD
+        ? EverywhereRegion.INSTANCE
+        : regionParser.parseProperty(Node.fromRequiredChildOrAttr(el, "capture-region", "capture"));
+    Region progressDisplayRegion = regionParser.parseProperty(
+        Node.fromChildOrAttr(el, "progress-display-region", "progress"),
+        BlockBoundedValidation.INSTANCE);
+    Region ownerDisplayRegion = regionParser.parseProperty(
+        Node.fromChildOrAttr(el, "owner-display-region", "captured"),
+        BlockBoundedValidation.INSTANCE);
 
     Filter captureFilter = filterParser.parseFilterProperty(el, "capture-filter");
     Filter playerFilter = filterParser.parseFilterProperty(el, "player-filter");
@@ -99,12 +95,10 @@ public abstract class ControlPointParser {
     boolean pd = type == Type.PAYLOAD;
 
     if (attrIncremental == null) {
-      recoveryRate =
-          XMLUtils.parseNumber(
-              attrRecovery, Double.class, koth || pd ? 1D : Double.POSITIVE_INFINITY);
-      decayRate =
-          XMLUtils.parseNumber(
-              attrDecay, Double.class, koth || pd ? 0.0 : Double.POSITIVE_INFINITY);
+      recoveryRate = XMLUtils.parseNumber(
+          attrRecovery, Double.class, koth || pd ? 1D : Double.POSITIVE_INFINITY);
+      decayRate = XMLUtils.parseNumber(
+          attrDecay, Double.class, koth || pd ? 0.0 : Double.POSITIVE_INFINITY);
       ownedDecayRate = XMLUtils.parseNumber(attrOwnedDecay, Double.class, 0.0);
     } else {
       if (attrDecay != null || attrRecovery != null || attrOwnedDecay != null)
@@ -131,24 +125,22 @@ public abstract class ControlPointParser {
         XMLUtils.parseNumber(el.getAttribute("points"), Float.class, pd ? 0f : 1f);
     float pointsOwner =
         XMLUtils.parseNumber(el.getAttribute("owner-points"), Float.class, pd ? 1f : 0f);
-    float pointsGrowth =
-        XMLUtils.parseNumber(
-            el.getAttribute("points-growth"), Float.class, Float.POSITIVE_INFINITY);
+    float pointsGrowth = XMLUtils.parseNumber(
+        el.getAttribute("points-growth"), Float.class, Float.POSITIVE_INFINITY);
     boolean showProgress = XMLUtils.parseBoolean(el.getAttribute("show-progress"), koth || pd);
     ShowOptions options = ShowOptions.parse(filterParser, el);
     Boolean required = XMLUtils.parseBoolean(el.getAttribute("required"), null);
 
-    ControlPointDefinition.CaptureCondition captureCondition =
-        XMLUtils.parseEnum(
-            Node.fromAttr(el, "capture-rule"),
-            ControlPointDefinition.CaptureCondition.class,
-            "capture rule",
-            ControlPointDefinition.CaptureCondition.EXCLUSIVE);
+    ControlPointDefinition.CaptureCondition captureCondition = XMLUtils.parseEnum(
+        Node.fromAttr(el, "capture-rule"),
+        ControlPointDefinition.CaptureCondition.class,
+        ControlPointDefinition.CaptureCondition.EXCLUSIVE);
 
     if (pd) {
       BlockVector location =
           BlockVectors.center(XMLUtils.parseVector(Node.fromRequiredAttr(el, "location")));
       double radius = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "radius"), Double.class);
+      boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
       Filter displayFilter =
           filterParser.parseFilterProperty(el, "display-filter", StaticFilter.ALLOW);
       return new PayloadDefinition(
@@ -179,6 +171,7 @@ public abstract class ControlPointParser {
           showProgress,
           location,
           radius,
+          showBeam,
           displayFilter);
     }
 

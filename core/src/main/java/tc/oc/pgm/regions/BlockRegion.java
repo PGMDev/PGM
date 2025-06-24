@@ -4,7 +4,7 @@ import java.util.Random;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class BlockRegion implements RegionDefinition {
+public class BlockRegion implements RegionDefinition.HardStatic {
   protected final Vector location;
 
   public BlockRegion(Vector block) {

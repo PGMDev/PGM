@@ -1,7 +1,5 @@
 package tc.oc.pgm.goals;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.logging.Logger;
@@ -19,6 +17,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 /** Basic {@link Goal} implementation with fields for the definition and match */
 public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
@@ -28,11 +27,6 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
 
   public static final Component SYMBOL_INCOMPLETE = text("\u2715"); // ✕
   public static final Component SYMBOL_COMPLETE = text("\u2714"); // ✔
-
-  protected static final Sound GOOD_SOUND =
-      sound(key("portal.travel"), Sound.Source.MASTER, 0.7f, 2f);
-  protected static final Sound BAD_SOUND =
-      sound(key("mob.blaze.death"), Sound.Source.MASTER, 0.8f, 0.8f);
 
   protected final Logger logger;
   protected final T definition;
@@ -86,7 +80,7 @@ public abstract class SimpleGoal<T extends GoalDefinition> implements Goal<T> {
 
   @Override
   public Sound getCompletionSound(boolean isGood) {
-    return isGood ? GOOD_SOUND : BAD_SOUND;
+    return isGood ? Sounds.OBJECTIVE_GOOD : Sounds.OBJECTIVE_BAD;
   }
 
   @Override

@@ -5,6 +5,8 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.title.Title.title;
 import static tc.oc.pgm.util.TimeUtils.fromTicks;
+import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
+import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import java.time.Duration;
 import java.util.ArrayDeque;
@@ -41,15 +43,15 @@ import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalEvent;
-import tc.oc.pgm.kits.ArmorType;
 import tc.oc.pgm.kits.Kit;
+import tc.oc.pgm.score.ScoreCause;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.inventory.ArmorType;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** State of a flag when a player has picked it up and is wearing the banner on their head. */
 public class Carried extends Spawned implements Missing {
@@ -61,7 +63,7 @@ public class Carried extends Spawned implements Missing {
   protected @Nullable Component lastMessage;
 
   private static final int DROP_QUEUE_SIZE = 100;
-  private Deque<Location> dropLocations = new ArrayDeque<>(DROP_QUEUE_SIZE);
+  private final Deque<Location> dropLocations = new ArrayDeque<>(DROP_QUEUE_SIZE);
 
   public Carried(Flag flag, Post post, MatchPlayer carrier, Location dropLocation) {
     super(flag, post);
@@ -85,15 +87,14 @@ public class Carried extends Spawned implements Missing {
     if (isCarrying(player)) {
       final Query query = new PlayerStateQuery(player);
       return flag.getNets().stream()
-          .flatMap(
-              net -> {
-                if (net.getCaptureFilter().query(query).isAllowed()) {
-                  return Stream.of(
-                      net.getProximityLocation().toLocation(flag.getMatch().getWorld()));
-                } else {
-                  return Stream.empty();
-                }
-              })
+          .flatMap(net -> {
+            if (net.getCaptureFilter().query(query).isAllowed()) {
+              return Stream.of(
+                  net.getProximityLocation().toLocation(flag.getMatch().getWorld()));
+            } else {
+              return Stream.empty();
+            }
+          })
           .collect(Collectors.toList());
     } else {
       return super.getProximityLocations(player);
@@ -115,7 +116,7 @@ public class Carried extends Spawned implements Missing {
     PGM.get()
         .getExecutor()
         .schedule(
-            () -> NMSHacks.sendLegacyWearing(carrier.getBukkit(), 4, flag.getLegacyBannerItem()),
+            () -> PLAYERS.sendLegacyHelmet(carrier.getBukkit(), flag.getLegacyBannerItem()),
             50L,
             TimeUnit.MILLISECONDS);
 
@@ -127,11 +128,10 @@ public class Carried extends Spawned implements Missing {
       if (postName != null) { // The post needs a name in order to display the message.
         this.flag
             .getMatch()
-            .sendMessage(
-                translatable(
-                    "flag.willRespawn.next",
-                    this.flag.getComponentName(),
-                    text(postName, NamedTextColor.AQUA)));
+            .sendMessage(translatable(
+                "flag.willRespawn.next",
+                this.flag.getComponentName(),
+                text(postName, NamedTextColor.AQUA)));
       }
     }
   }
@@ -176,11 +176,10 @@ public class Carried extends Spawned implements Missing {
       if (this.deniedByNet.getDenyMessage() != null) {
         message = this.deniedByNet.getDenyMessage();
       } else if (this.deniedByFlag != null) {
-        message =
-            translatable(
-                "flag.captureDenied.byFlag",
-                this.flag.getComponentName(),
-                this.deniedByFlag.getComponentName());
+        message = translatable(
+            "flag.captureDenied.byFlag",
+            this.flag.getComponentName(),
+            this.deniedByFlag.getComponentName());
       } else {
         message = translatable("flag.captureDenied", this.flag.getComponentName());
       }
@@ -199,14 +198,15 @@ public class Carried extends Spawned implements Missing {
     if (!message.equals(this.lastMessage)) {
       this.lastMessage = message;
       this.carrier.showTitle(
-          title(empty(), message, Title.Times.of(Duration.ZERO, fromTicks(5), fromTicks(35))));
+          title(empty(), message, Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(35))));
     }
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
     if (smm != null && this.flag.getDefinition().getPointsPerSecond() != 0) {
       smm.incrementScore(
           this.getBeneficiary(this.flag.getDefinition().getOwner()),
-          this.flag.getDefinition().getPointsPerSecond() / 20D);
+          this.flag.getDefinition().getPointsPerSecond() / 20D,
+          ScoreCause.FLAG_CARRIED_TICK);
     }
   }
 
@@ -242,11 +242,10 @@ public class Carried extends Spawned implements Missing {
 
     this.flag
         .getMatch()
-        .sendMessage(
-            translatable(
-                "flag.capture.player",
-                this.flag.getComponentName(),
-                this.carrier.getName(NameStyle.COLOR)));
+        .sendMessage(translatable(
+            "flag.capture.player",
+            this.flag.getComponentName(),
+            this.carrier.getName(NameStyle.COLOR)));
 
     this.flag.resetTouches(this.carrier.getCompetitor());
     this.flag.resetProximity(this.carrier.getCompetitor());
@@ -254,13 +253,17 @@ public class Carried extends Spawned implements Missing {
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
     if (smm != null) {
       if (net.getPointsPerCapture() != 0) {
-        smm.incrementScore(this.getBeneficiary(net.getOwner()), net.getPointsPerCapture());
+        smm.incrementScore(
+            this.getBeneficiary(net.getOwner()),
+            net.getPointsPerCapture(),
+            ScoreCause.FLAG_CAPTURE);
       }
 
       if (this.flag.getDefinition().getPointsPerCapture() != 0) {
         smm.incrementScore(
             this.getBeneficiary(this.flag.getDefinition().getOwner()),
-            this.flag.getDefinition().getPointsPerCapture());
+            this.flag.getDefinition().getPointsPerCapture(),
+            ScoreCause.FLAG_CAPTURE);
       }
     }
 
@@ -313,18 +316,13 @@ public class Carried extends Spawned implements Missing {
   @Override
   public void onEvent(InventoryClickEvent event) {
     super.onEvent(event);
-    if (this.isCarrier(event.getWhoClicked())
-        && event.getSlot() == ArmorType.HELMET.inventorySlot()) {
+    if (isCarrier(event.getWhoClicked()) && event.getSlot() == ArmorType.HELMET.inventorySlot()) {
       event.setCancelled(true);
-      event.getView().setCursor(null);
+      INVENTORY_VIEW.setCursor(event.getView(), null);
       event.setCurrentItem(null);
-      this.flag
-          .getMatch()
-          .getExecutor(MatchScope.RUNNING)
-          .execute(
-              () -> {
-                if (isCurrent()) dropFlag();
-              });
+      this.flag.getMatch().getExecutor(MatchScope.RUNNING).execute(() -> {
+        if (isCurrent()) dropFlag();
+      });
     }
   }
 

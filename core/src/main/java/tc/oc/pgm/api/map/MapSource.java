@@ -5,13 +5,14 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
+import tc.oc.pgm.map.source.MapRoot;
 
 /** A source where {@link MapInfo} documents and files are downloaded. */
 public interface MapSource {
   Path FILE = Paths.get("map.xml");
+  String DEFAULT_VARIANT = "default";
 
   /**
    * Get a unique identifier for the source, should be human-readable.
@@ -23,10 +24,9 @@ public interface MapSource {
   /**
    * The variant of the map this is for
    *
-   * @return the variant the source, null for the parent source
+   * @return the variant the source, DEFAULT_VARIANT for the parent source
    */
-  @Nullable
-  String getVariant();
+  String getVariantId();
 
   /**
    * A copy of the map source, tailored to a specific variant
@@ -39,10 +39,11 @@ public interface MapSource {
   /**
    * Download the {@link org.bukkit.World} files to a local directory.
    *
+   * @param folder subfolder to download, null for parent
    * @param dir An existent, but empty directory.
    * @throws MapMissingException If an error occurs while creating the files.
    */
-  void downloadTo(File dir) throws MapMissingException;
+  void downloadTo(String folder, File dir) throws MapMissingException;
 
   /**
    * Get an {@link InputStream} of the map's xml document.
@@ -66,4 +67,20 @@ public interface MapSource {
    * @param include The {@link MapInclude}
    */
   void setIncludes(Collection<MapInclude> include);
+
+  MapRoot getRoot();
+
+  Path getRelativeDir();
+
+  default Path getRelativeXml() {
+    return getRelativeDir().resolve(FILE);
+  }
+
+  default Path getAbsoluteDir() {
+    return getRoot().getBase().resolve(getRelativeDir());
+  }
+
+  default Path getAbsoluteXml() {
+    return getAbsoluteDir().resolve(FILE);
+  }
 }

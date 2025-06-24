@@ -1,10 +1,12 @@
 package tc.oc.pgm.regions;
 
+import org.bukkit.Location;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class Complement implements RegionDefinition {
+public class Complement implements RegionDefinition.Static {
   private final Region original;
   private final Region subtracted;
 
@@ -15,12 +17,28 @@ public class Complement implements RegionDefinition {
 
   @Override
   public boolean contains(Vector point) {
+    return this.original.getStatic().contains(point)
+        && !this.subtracted.getStatic().contains(point);
+  }
+
+  @Override
+  public boolean contains(Location point) {
     return this.original.contains(point) && !this.subtracted.contains(point);
   }
 
   @Override
   public boolean isBlockBounded() {
     return this.original.isBlockBounded();
+  }
+
+  @Override
+  public Region.Static getStaticImpl(Match match) {
+    return new Complement(original.getStatic(match), subtracted.getStatic(match));
+  }
+
+  @Override
+  public boolean isStatic() {
+    return original.isStatic() && subtracted.isStatic();
   }
 
   @Override

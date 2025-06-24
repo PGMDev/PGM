@@ -1,16 +1,24 @@
 package tc.oc.pgm.teams;
 
+import java.util.Collection;
+import java.util.Collections;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.event.Event;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.filters.matcher.TypedFilter;
 
 /** Immutable class to represent a team in a map that is not tied to any specific match. */
 @FeatureInfo(name = "team")
-public class TeamFactory extends SelfIdentifyingFeatureDefinition {
+public class TeamFactory extends SelfIdentifyingFeatureDefinition
+    implements TypedFilter<PartyQuery> {
   protected final String defaultName;
   protected final boolean defaultNamePlural;
   protected final ChatColor defaultColor;
@@ -135,5 +143,22 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition {
 
   public NameTagVisibility getNameTagVisibility() {
     return nameTagVisibility;
+  }
+
+  // Filter implementation:
+  @Override
+  public Class<? extends PartyQuery> queryType() {
+    return PartyQuery.class;
+  }
+
+  @Override
+  public boolean matches(PartyQuery query) {
+    final Party party = query.getParty();
+    return party instanceof Team team && team.isInstance(this);
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return Collections.singleton(PlayerPartyChangeEvent.class);
   }
 }

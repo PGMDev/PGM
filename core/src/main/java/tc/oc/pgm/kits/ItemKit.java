@@ -12,8 +12,10 @@ import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.inventory.Slot;
 
 public class ItemKit implements KitDefinition {
+  public static final int INFINITE_STACK_SIZE = 99;
 
   protected final ImmutableMap<Slot, ItemStack> slotItems;
   protected final ImmutableList<ItemStack> freeItems;

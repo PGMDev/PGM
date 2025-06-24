@@ -14,15 +14,15 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.FilterModule;
-import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
-import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class KillRewardModule implements MapModule<KillRewardMatchModule> {
@@ -55,25 +55,35 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
       final Optional<ItemModifyModule> itemModifier =
           Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
+      var parser = factory.getParser();
+
       // Must allow top-level children for legacy support
-      for (Element elKillReward :
-          XMLUtils.flattenElements(
-              doc.getRootElement(),
-              ImmutableSet.of("kill-rewards", "killrewards"),
-              ImmutableSet.of("kill-reward", "killreward"),
-              0)) {
+      for (Element elKillReward : XMLUtils.flattenElements(
+          doc.getRootElement(),
+          ImmutableSet.of("kill-rewards", "killrewards"),
+          ImmutableSet.of("kill-reward", "killreward"),
+          0)) {
         ImmutableList.Builder<ItemStack> items = ImmutableList.builder();
         for (Element itemEl : elKillReward.getChildren("item")) {
-          final ItemStack itemStack = factory.getKits().parseItem(itemEl, false);
+          final ItemStack itemStack = parser.item(itemEl).required();
           itemModifier.ifPresent(imm -> imm.applyRules(itemStack));
           items.add(itemStack);
         }
 
-        Filter filter =
-            factory.getFilters().parseFilterProperty(elKillReward, "filter", StaticFilter.ALLOW);
-        Kit kit = factory.getKits().parseKitProperty(elKillReward, "kit", KitNode.EMPTY);
+        Filter filter = parser.filter(elKillReward, "filter").orAllow();
 
-        rewards.add(new KillReward(items.build(), filter, kit));
+        var kit = parser
+            .action(MatchPlayer.class, elKillReward, "action")
+            .validate((a, n) -> {
+              if (Node.fromChildOrAttr(elKillReward, "kit") != null)
+                throw new InvalidXMLException("Cannot have both 'kit' and 'action'", n);
+            })
+            .optional(() -> parser.kit(elKillReward, "kit").optional(KitNode.EMPTY));
+
+        var victimAction =
+            parser.action(MatchPlayer.class, elKillReward, "victim-action").optional(KitNode.EMPTY);
+
+        rewards.add(new KillReward(items.build(), filter, kit, victimAction));
       }
 
       ImmutableList<KillReward> list = rewards.build();

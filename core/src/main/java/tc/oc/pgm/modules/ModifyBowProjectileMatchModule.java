@@ -1,10 +1,9 @@
 package tc.oc.pgm.modules;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import java.util.Set;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -30,7 +29,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
@@ -40,9 +39,6 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
   private final float velocityMod;
   private final Set<PotionEffect> potionEffects;
   private final Filter pickupFilter;
-
-  private static final Sound PROJECTILE_SOUND =
-      sound(key("random.successful_hit"), Sound.Source.MASTER, 0.18f, 0.45f);
 
   public ModifyBowProjectileMatchModule(
       Match match,
@@ -93,7 +89,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
         newProjectile.setMetadata(
             "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
         newProjectile.setMetadata(
-            "damage", new FixedMetadataValue(plugin, arrow.spigot().getDamage()));
+            "damage", new FixedMetadataValue(plugin, MISC_UTILS.getArrowDamage(arrow)));
       }
     }
 
@@ -110,9 +106,9 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
       // If the custom projectile replaced an arrow, recreate some effects specific to arrows
       if (projectile.hasMetadata("damage")) {
-        boolean critical = MetadataUtils.getMetadata(projectile, "critical", PGM.get()).asBoolean();
-        int knockback = MetadataUtils.getMetadata(projectile, "knockback", PGM.get()).asInt();
-        double damage = MetadataUtils.getMetadata(projectile, "damage", PGM.get()).asDouble();
+        boolean critical = MetadataUtils.getMetadataValue(projectile, "critical", PGM.get());
+        int knockback = MetadataUtils.getMetadataValue(projectile, "knockback", PGM.get());
+        double damage = MetadataUtils.getMetadataValue(projectile, "damage", PGM.get());
         double speed = projectile.getVelocity().length();
 
         // Reproduce the damage calculation from nms.EntityArrow with the addition of our modifier
@@ -130,10 +126,8 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
         // Reproduce the knockback calculation for punch bows
         if (knockback > 0) {
           Vector projectileVelocity = projectile.getVelocity();
-          double horizontalSpeed =
-              Math.sqrt(
-                  projectileVelocity.getX() * projectileVelocity.getX()
-                      + projectileVelocity.getZ() * projectileVelocity.getZ());
+          double horizontalSpeed = Math.sqrt(projectileVelocity.getX() * projectileVelocity.getX()
+              + projectileVelocity.getZ() * projectileVelocity.getZ());
           Vector velocity = event.getEntity().getVelocity();
           velocity.setX(
               velocity.getX() + projectileVelocity.getX() * knockback * 0.6 / horizontalSpeed);
@@ -151,7 +145,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
             Player bukkitShooter = (Player) customProjectile.getShooter();
             MatchPlayer shooter = match.getPlayer(bukkitShooter);
             if (shooter != null && event.getEntity() != null) {
-              shooter.playSound(PROJECTILE_SOUND);
+              shooter.playSound(Sounds.PROJECTILE_HIT);
             }
           }
         }
@@ -168,7 +162,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void preventArrowPickup(PlayerPickupItemEvent event) {
-    if (!NMSHacks.isCraftItemArrowEntity(event.getItem())) {
+    if (!NMS_HACKS.isCraftItemArrowEntity(event)) {
       return;
     }
     Filter.QueryResponse response =

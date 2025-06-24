@@ -2,6 +2,7 @@ package tc.oc.pgm.fireworks;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
@@ -24,7 +25,9 @@ import org.bukkit.entity.Firework;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -42,6 +45,7 @@ import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.regions.Bounds;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.LOADED)
@@ -55,6 +59,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
   private static final int ITERATION_COUNT = 5; // Amount of times rockets are launched
   private static final int ROCKET_POWER =
       2; // Power applied to rockets (how high they go), 1 = low, 2 = medium, 3 = high
+
+  private static final EntityType FIREWORK_ENTITY =
+      parse(EntityType::valueOf, "FIREWORK", "FIREWORK_ROCKET");
 
   public static List<FireworkEffect.Type> FIREWORK_TYPES =
       ImmutableList.<FireworkEffect.Type>builder()
@@ -89,10 +96,9 @@ public class FireworkMatchModule implements MatchModule, Listener {
     public FireworkRunner(Match match, Collection<Competitor> winners) {
       this.match = match;
       this.winners = winners;
-      this.colors =
-          winners.stream()
-              .map(winner -> BukkitUtils.colorOf(winner.getColor()))
-              .collect(Collectors.toSet());
+      this.colors = winners.stream()
+          .map(winner -> BukkitUtils.colorOf(winner.getColor()))
+          .collect(Collectors.toSet());
     }
 
     @Override
@@ -108,15 +114,14 @@ public class FireworkMatchModule implements MatchModule, Listener {
 
           Type type = FIREWORK_TYPES.get(match.getRandom().nextInt(FIREWORK_TYPES.size()));
 
-          FireworkEffect effect =
-              FireworkEffect.builder()
-                  .with(type)
-                  .withFlicker()
-                  .withColor(this.colors)
-                  .withFade(Color.BLACK)
-                  .build();
+          FireworkEffect effect = FireworkEffect.builder()
+              .with(type)
+              .withFlicker()
+              .withColor(this.colors)
+              .withFade(Color.BLACK)
+              .build();
 
-          spawnFirework(player.getBukkit().getLocation(), effect, ROCKET_POWER);
+          spawnFirework(player.getLocation(), effect, ROCKET_POWER);
         }
       }
       this.iterations++;
@@ -208,16 +213,22 @@ public class FireworkMatchModule implements MatchModule, Listener {
     }
   }
 
+  private static final String FIREWORK_METADATA = "pgm-custom-firework";
+
+  @EventHandler
+  public void onPlayerDamage(EntityDamageByEntityEvent event) {
+    if (event.getDamager().hasMetadata(FIREWORK_METADATA)) event.setCancelled(true);
+  }
+
   public void spawnFireworkDisplay(
       Location center, Color color, int count, double radius, int power) {
     if (Double.isInfinite(radius)) return;
-    FireworkEffect effect =
-        FireworkEffect.builder()
-            .with(Type.BURST)
-            .withFlicker()
-            .withColor(color)
-            .withFade(Color.BLACK)
-            .build();
+    FireworkEffect effect = FireworkEffect.builder()
+        .with(Type.BURST)
+        .withFlicker()
+        .withColor(color)
+        .withFade(Color.BLACK)
+        .build();
 
     for (int i = 0; i < count; i++) {
       double angle = 2 * Math.PI / count * i;
@@ -242,12 +253,13 @@ public class FireworkMatchModule implements MatchModule, Listener {
     assertNotNull(effect, "firework effect");
     assertTrue(power >= 0, "power must be positive");
 
-    FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Material.FIREWORK);
+    FireworkMeta meta = (FireworkMeta) Bukkit.getItemFactory().getItemMeta(Materials.FIREWORK);
     meta.setPower(power);
     meta.addEffect(effect);
 
-    Firework firework = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+    Firework firework = (Firework) location.getWorld().spawnEntity(location, FIREWORK_ENTITY);
     firework.setFireworkMeta(meta);
+    firework.setMetadata(FIREWORK_METADATA, new FixedMetadataValue(PGM.get(), true));
 
     return firework;
   }

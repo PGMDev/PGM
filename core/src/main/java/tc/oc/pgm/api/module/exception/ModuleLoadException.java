@@ -9,7 +9,7 @@ public class ModuleLoadException extends RuntimeException {
   private final @Nullable Class<? extends Module> key;
 
   public ModuleLoadException(Class<? extends Module> key, String message, Throwable cause) {
-    super(message, cause);
+    super(getFullMessage(message, key), cause);
     this.key = key;
   }
 
@@ -17,8 +17,8 @@ public class ModuleLoadException extends RuntimeException {
     return key;
   }
 
-  public String getFullMessage() {
-    return getMessage() + (key != null ? " @ " + key.getSimpleName() : "");
+  public static String getFullMessage(String message, Class<? extends Module> key) {
+    return message + (key != null ? " @ " + key.getSimpleName() : "");
   }
 
   public ModuleLoadException(Class<? extends Module> key, String message) {

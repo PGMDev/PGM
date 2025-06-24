@@ -1,14 +1,11 @@
 package tc.oc.pgm.listeners;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.player.PlayerComponent.player;
+import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -31,10 +28,13 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.MinecraftComponent;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -44,8 +44,6 @@ public class AntiGriefListener implements Listener {
 
   private static final Material DEFUSE_ITEM = Material.SHEARS;
   private static final int DEFUSE_SLOT = 4;
-
-  private static final Sound DEFUSE_SOUND = sound(key("random.fizz"), Sound.Source.MASTER, 1, 1);
 
   private final MatchManager mm;
 
@@ -78,8 +76,7 @@ public class AntiGriefListener implements Listener {
 
     // check water
     Block block = entity.getLocation().getBlock();
-    if (block != null
-        && (block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER)) {
+    if (block != null && Materials.isWater(block.getType())) {
       clicker.sendMessage(translatable("moderation.defuse.water", NamedTextColor.RED));
       return;
     }
@@ -96,25 +93,21 @@ public class AntiGriefListener implements Listener {
             entity,
             translatable("moderation.defuse.player", NamedTextColor.RED, owner.getName()));
 
-        ChatDispatcher.broadcastAdminChatMessage(
-            translatable(
-                "moderation.defuse.alert.player",
-                NamedTextColor.GRAY,
-                clicker.getName(),
-                owner.getName(),
-                MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)),
-            clicker.getMatch());
+        ChatManager.broadcastAdminMessage(translatable(
+            "moderation.defuse.alert.player",
+            NamedTextColor.GRAY,
+            clicker.getName(),
+            owner.getName(),
+            MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)));
       } else {
         this.notifyDefuse(
             clicker, entity, translatable("moderation.defuse.world", NamedTextColor.RED));
 
-        ChatDispatcher.broadcastAdminChatMessage(
-            translatable(
-                "moderation.defuse.alert.world",
-                NamedTextColor.GRAY,
-                clicker.getName(),
-                MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)),
-            clicker.getMatch());
+        ChatManager.broadcastAdminMessage(translatable(
+            "moderation.defuse.alert.world",
+            NamedTextColor.GRAY,
+            clicker.getName(),
+            MinecraftComponent.entity(entity.getType()).color(NamedTextColor.DARK_RED)));
       }
     }
   }
@@ -124,7 +117,7 @@ public class AntiGriefListener implements Listener {
     clicker
         .getMatch()
         .playSound(
-            DEFUSE_SOUND,
+            Sounds.DEFUSE,
             entity.getLocation().getX(),
             entity.getLocation().getY(),
             entity.getLocation().getZ());
@@ -150,10 +143,9 @@ public class AntiGriefListener implements Listener {
   private void obsTntDefuse(MatchPlayer player, Location loc) {
     List<ParticipantState> owners = this.removeTnt(loc, 5.0);
     if (owners != null && !owners.isEmpty()) {
-      player.sendMessage(
-          translatable(
-              "moderation.defuse.player",
-              TextFormatter.nameList(owners, NameStyle.COLOR, NamedTextColor.WHITE)));
+      player.sendMessage(translatable(
+          "moderation.defuse.player",
+          TextFormatter.nameList(owners, NameStyle.COLOR, NamedTextColor.WHITE)));
     }
   }
 
@@ -195,16 +187,13 @@ public class AntiGriefListener implements Listener {
 
     // TODO: Update information if locale changes
     ItemMeta meta = shears.getItemMeta();
-    meta.setDisplayName(
-        ChatColor.RED
-            + ChatColor.BOLD.toString()
-            + TextTranslations.translate(
-                "moderation.defuse.displayName", event.getPlayer().getBukkit()));
-    meta.setLore(
-        Collections.singletonList(
-            ChatColor.GRAY
-                + TextTranslations.translate(
-                    "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
+    meta.setDisplayName(ChatColor.RED
+        + ChatColor.BOLD.toString()
+        + TextTranslations.translate(
+            "moderation.defuse.displayName", event.getPlayer().getBukkit()));
+    meta.setLore(Collections.singletonList(ChatColor.GRAY
+        + TextTranslations.translate(
+            "moderation.defuse.tooltip", event.getPlayer().getBukkit())));
     shears.setItemMeta(meta);
 
     event.getPlayer().getBukkit().getInventory().setItem(DEFUSE_SLOT, shears);
@@ -214,13 +203,12 @@ public class AntiGriefListener implements Listener {
   public void cloneCraftingWindow(final PlayerInteractEvent event) {
     if (!event.isCancelled()
         && event.getAction() == Action.RIGHT_CLICK_BLOCK
-        && event.getPlayer().getOpenInventory().getType()
-            == InventoryType.CRAFTING /* nothing open */) {
+        && INVENTORY_VIEW.getType(event.getPlayer().getOpenInventory()) == InventoryType.CRAFTING) {
       Block block = event.getClickedBlock();
       if (block != null
-          && block.getType() == Material.WORKBENCH
+          && block.getType() == Materials.WORKBENCH
           && !event.getPlayer().isSneaking()) {
-        // create the window ourself
+        // create the window ourselves
         event.setCancelled(true);
         event.getPlayer().openWorkbench(null, true); // doesn't check reachable
       }

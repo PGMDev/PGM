@@ -1,17 +1,13 @@
 package tc.oc.pgm.consumable;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionModule;
-import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -19,20 +15,20 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ConsumableModule implements MapModule<ConsumableMatchModule> {
 
-  private final ImmutableSet<ConsumableDefinition> consumableDefinitions;
+  private final ImmutableMap<String, ConsumableDefinition> consumables;
 
-  private ConsumableModule(ImmutableSet<ConsumableDefinition> consumableDefinitions) {
-    this.consumableDefinitions = consumableDefinitions;
+  private ConsumableModule(ImmutableMap<String, ConsumableDefinition> consumables) {
+    this.consumables = consumables;
   }
 
   @Override
   public @Nullable ConsumableMatchModule createMatchModule(Match match) throws ModuleLoadException {
-    return new ConsumableMatchModule(match, consumableDefinitions);
+    return new ConsumableMatchModule(match, consumables);
   }
 
   public static class Factory implements MapModuleFactory<ConsumableModule> {
@@ -45,34 +41,39 @@ public class ConsumableModule implements MapModule<ConsumableMatchModule> {
     @Override
     public @Nullable ConsumableModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      ActionParser actionParser = new ActionParser(factory);
+      var parser = factory.getParser();
 
-      Set<ConsumableDefinition> consumableDefinitions = new HashSet<>();
+      var builder = ImmutableMap.<String, ConsumableDefinition>builder();
 
-      for (Element consumableElement :
+      for (Element el :
           XMLUtils.flattenElements(doc.getRootElement(), "consumables", "consumable")) {
-        String id = XMLUtils.getRequiredAttribute(consumableElement, "id").getValue();
-        boolean override = XMLUtils.parseBoolean(consumableElement.getAttribute("override"), true);
+        String id = XMLUtils.getRequiredAttribute(el, "id").getValue();
 
-        Node actionNode = Node.fromRequiredAttr(consumableElement, "action", "kit");
-        Action<? super MatchPlayer> action =
-            actionParser.parseReference(actionNode, MatchPlayer.class);
+        var action = parser.action(MatchPlayer.class, el, "action", "kit").required();
 
-        ConsumeCause cause =
-            XMLUtils.parseEnum(
-                Node.fromRequiredAttr(consumableElement, "on"),
-                ConsumeCause.class,
-                "consume cause");
+        ConsumeCause cause = parser.parseEnum(ConsumeCause.class, el, "on").required();
 
-        ConsumableDefinition consumableDefinition =
-            new ConsumableDefinition(id, action, cause, override);
+        boolean override = parser.parseBool(el, "override").optional(true);
+        boolean consume = computeConsume(parser, cause, override, el);
 
-        factory.getFeatures().addFeature(consumableElement, consumableDefinition);
-        consumableDefinitions.add(consumableDefinition);
+        var consumable = new ConsumableDefinition(id, action, cause, override, consume);
+
+        factory.getFeatures().addFeature(el, consumable);
+        builder.put(id, consumable);
       }
+      var built = builder.build();
 
-      if (consumableDefinitions.isEmpty()) return null;
-      return new ConsumableModule(ImmutableSet.copyOf(consumableDefinitions));
+      return built.isEmpty() ? null : new ConsumableModule(built);
+    }
+
+    private boolean computeConsume(
+        XMLFluentParser parser, ConsumeCause cause, boolean override, Element el)
+        throws InvalidXMLException {
+      if (cause == ConsumeCause.EAT) return override;
+      // When overriding can safely assume a true.
+      // When not overriding it may depend on vanilla behavior, force it to be specified
+      var consume = parser.parseBool(el, "consume");
+      return override ? consume.optional(true) : consume.required();
     }
   }
 }

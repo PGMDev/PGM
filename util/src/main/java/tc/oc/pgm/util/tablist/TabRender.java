@@ -1,40 +1,37 @@
 package tc.oc.pgm.util.tablist;
 
+import static tc.oc.pgm.util.nms.Packets.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.Audience;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
+import tc.oc.pgm.util.nms.packets.Packet;
+import tc.oc.pgm.util.nms.packets.TabPackets;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class TabRender {
   private final TabView view;
 
-  private final PacketPlayOutPlayerInfo removePacket;
-  private final PacketPlayOutPlayerInfo addPacket;
-  private final PacketPlayOutPlayerInfo updatePacket;
-  private final PacketPlayOutPlayerInfo updatePingPacket;
+  private final TabPackets.PlayerInfo removePacket;
+  private final TabPackets.PlayerInfo addPacket;
+  private final TabPackets.PlayerInfo updatePacket;
+  private final TabPackets.PlayerInfo updatePingPacket;
   private final List<Packet> deferredPackets;
 
   public TabRender(TabView view) {
     this.view = view;
 
-    this.removePacket =
-        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
-    this.addPacket =
-        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
+    this.removePacket = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.REMOVE_PLAYER);
+    this.addPacket = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
     this.updatePacket =
-        NMSHacks.createPlayerInfoPacket(
-            PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME);
-    this.updatePingPacket =
-        NMSHacks.createPlayerInfoPacket(
-            PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY);
+        TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.UPDATE_DISPLAY_NAME);
+    this.updatePingPacket = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.UPDATE_LATENCY);
     this.deferredPackets = new ArrayList<>();
   }
 
@@ -43,62 +40,53 @@ public class TabRender {
   }
 
   private void send(Packet packet) {
-    NMSHacks.sendPacket(this.view.getViewer(), packet);
+    packet.send(this.view.getViewer());
   }
 
-  private String getJson(TabEntry entry) {
-    return TextTranslations.toMinecraftGson(entry.getContent(this.view), this.view.getViewer());
+  private Component getJson(TabEntry entry) {
+    return TextTranslations.translate(entry.getContent(this.view), this.view.getViewer());
   }
 
   private void appendAddition(TabEntry entry, int index) {
-    String renderedDisplayName = this.getJson(entry);
-    NMSHacks.getPlayerInfoDataList(this.addPacket)
-        .add(
-            NMSHacks.playerListPacketData(
-                this.addPacket,
-                entry.getId(),
-                entry.getName(this.view),
-                entry.getGamemode(),
-                entry.getPing(),
-                entry.getSkin(this.view),
-                renderedDisplayName));
+    var renderedDisplayName = this.getJson(entry);
+    this.addPacket.addPlayerInfo(
+        entry.getId(),
+        entry.getName(this.view),
+        entry.getPing(),
+        entry.getSkin(this.view),
+        renderedDisplayName);
 
     // Due to a client bug, display name is ignored in ADD_PLAYER packets,
     // so we have to send an UPDATE_DISPLAY_NAME afterward.
-    NMSHacks.getPlayerInfoDataList(this.updatePacket)
-        .add(NMSHacks.playerListPacketData(this.updatePacket, entry.getId(), renderedDisplayName));
+    this.updatePacket.addPlayerInfo(entry.getId(), renderedDisplayName);
 
     this.updateFakeEntity(entry, true);
   }
 
   private void appendRemoval(TabEntry entry) {
-    NMSHacks.getPlayerInfoDataList(this.removePacket)
-        .add(NMSHacks.playerListPacketData(this.removePacket, entry.getId()));
+    this.removePacket.addPlayerInfo(entry.getId());
 
     int entityId = entry.getFakeEntityId(this.view);
     if (entityId >= 0) {
-      this.send(NMSHacks.destroyEntitiesPacket(entityId));
+      this.send(ENTITIES.destroyEntitiesPacket(entityId));
     }
   }
 
   private void leaveSlot(TabEntry entry, int index) {
-    this.send(
-        NMSHacks.teamLeavePacket(
-            this.teamName(index), Collections.singleton(entry.getName(this.view))));
+    this.send(TAB_PACKETS.teamLeavePacket(
+        this.teamName(index), Collections.singleton(entry.getName(this.view))));
   }
 
   private void joinSlot(TabEntry entry, int index) {
-    this.send(
-        NMSHacks.teamJoinPacket(
-            this.teamName(index), Collections.singleton(entry.getName(this.view))));
+    this.send(TAB_PACKETS.teamJoinPacket(
+        this.teamName(index), Collections.singleton(entry.getName(this.view))));
   }
 
   public void finish() {
-    if (!NMSHacks.getPlayerInfoDataList(this.removePacket).isEmpty()) this.send(this.removePacket);
-    if (!NMSHacks.getPlayerInfoDataList(this.addPacket).isEmpty()) this.send(this.addPacket);
-    if (!NMSHacks.getPlayerInfoDataList(this.updatePacket).isEmpty()) this.send(this.updatePacket);
-    if (!NMSHacks.getPlayerInfoDataList(this.updatePingPacket).isEmpty())
-      this.send(this.updatePingPacket);
+    if (this.removePacket.isNotEmpty()) this.send(this.removePacket);
+    if (this.addPacket.isNotEmpty()) this.send(this.addPacket);
+    if (this.updatePacket.isNotEmpty()) this.send(this.updatePacket);
+    if (this.updatePingPacket.isNotEmpty()) this.send(this.updatePingPacket);
 
     for (Packet packet : this.deferredPackets) {
       this.send(packet);
@@ -107,25 +95,18 @@ public class TabRender {
 
   public void changeSlot(TabEntry entry, int oldIndex, int newIndex) {
     Collection<String> names = Collections.singleton(entry.getName(this.view));
-    this.send(NMSHacks.teamJoinPacket(this.teamName(newIndex), names));
+    this.send(TAB_PACKETS.teamJoinPacket(this.teamName(newIndex), names));
   }
 
   public void createSlot(TabEntry entry, int index) {
     String teamName = this.teamName(index);
-    this.send(
-        NMSHacks.teamCreatePacket(
-            teamName,
-            teamName,
-            "",
-            "",
-            false,
-            false,
-            Collections.singleton(entry.getName(this.view))));
+    Collection<String> players = Collections.singleton(entry.getName(this.view));
+    this.send(TAB_PACKETS.teamCreatePacket(teamName, teamName, "", "", false, false, players));
     this.appendAddition(entry, index);
   }
 
   public void destroySlot(TabEntry entry, int index) {
-    this.send(NMSHacks.teamRemovePacket(this.teamName(index)));
+    this.send(TAB_PACKETS.teamRemovePacket(this.teamName(index)));
     this.appendRemoval(entry);
   }
 
@@ -145,13 +126,11 @@ public class TabRender {
   }
 
   public void updateEntry(TabEntry entry, int index) {
-    NMSHacks.getPlayerInfoDataList(this.updatePacket)
-        .add(NMSHacks.playerListPacketData(this.updatePacket, entry.getId(), this.getJson(entry)));
+    this.updatePacket.addPlayerInfo(entry.getId(), this.getJson(entry));
   }
 
   public void updatePing(TabEntry entry, int index) {
-    NMSHacks.getPlayerInfoDataList(this.updatePingPacket)
-        .add(NMSHacks.playerListPacketData(this.updatePingPacket, entry.getId(), entry.getPing()));
+    this.updatePingPacket.addPlayerInfo(entry.getId(), entry.getPing());
   }
 
   public void setHeaderFooter(Component header, Component footer) {
@@ -163,14 +142,13 @@ public class TabRender {
     if (player != null) {
       int entityId = entry.getFakeEntityId(this.view);
       if (create) {
-        this.deferredPackets.add(
-            NMSHacks.spawnPlayerPacket(
-                entityId,
-                entry.getId(),
-                new Location(this.view.getViewer().getWorld(), 0, Integer.MAX_VALUE / 2, 0, 0, 0),
-                player));
+        this.deferredPackets.add(TAB_PACKETS.spawnPlayerPacket(
+            entityId,
+            entry.getId(),
+            new Location(this.view.getViewer().getWorld(), 0, Integer.MAX_VALUE / 2d, 0, 0, 0),
+            player));
       } else {
-        this.deferredPackets.add(NMSHacks.entityMetadataPacket(entityId, player, true));
+        this.deferredPackets.add(ENTITIES.entityMetadataPacket(entityId, player, true));
       }
     }
   }

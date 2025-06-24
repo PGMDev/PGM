@@ -1,9 +1,9 @@
 package tc.oc.pgm.command.parsers;
 
-import cloud.commandframework.context.CommandContext;
 import java.util.Arrays;
 import java.util.stream.Stream;
 import org.bukkit.command.CommandSender;
+import org.incendo.cloud.context.CommandContext;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.command.util.CommandKeys;

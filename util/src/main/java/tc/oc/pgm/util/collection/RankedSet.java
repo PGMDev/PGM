@@ -3,9 +3,8 @@ package tc.oc.pgm.util.collection;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ForwardingSet;
-import gnu.trove.impl.Constants;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.*;
 
 /**
@@ -27,8 +26,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
   private final Comparator<E> comparator;
   private final Set<E> set;
   private final List<E> list = new ArrayList<>();
-  private final TObjectIntMap<E> rankByElement =
-      new TObjectIntHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
+  private final Object2IntMap<E> rankByElement = new Object2IntOpenHashMap<>();
   private final List<Set<E>> ranks = new ArrayList<>();
   private boolean sorted;
 
@@ -38,7 +36,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
   }
 
   public RankedSet(Comparator<E> comparator) {
-    this(new HashSet<E>(), comparator);
+    this(new HashSet<>(), comparator);
   }
 
   @Override
@@ -49,7 +47,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
   private boolean freshenRanking() {
     if (sorted) return false;
 
-    Collections.sort(list, comparator);
+    list.sort(comparator);
 
     if (!list.isEmpty()) {
       Set<E> rank = null;
@@ -79,7 +77,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
    */
   public int getPosition(E e) {
     freshenRanking();
-    return rankByElement.get(e);
+    return rankByElement.getInt(e);
   }
 
   /**
@@ -88,7 +86,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
    */
   public Set<E> getRank(int rank) {
     freshenRanking();
-    return rank < ranks.size() ? ranks.get(rank) : Collections.<E>emptySet();
+    return rank < ranks.size() ? ranks.get(rank) : Collections.emptySet();
   }
 
   /** Iterate in ranking order */

@@ -16,7 +16,6 @@ import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -31,6 +30,8 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 import tc.oc.pgm.util.block.BlockVectors;
+import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
 public class CoreMatchModule implements MatchModule, Listener {
@@ -61,10 +62,11 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void leakCheck(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    if (event.getNewState().getType() == Material.STATIONARY_LAVA) {
-      Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
+    if (Materials.isLava(event.getNewState().getType())) {
+      var blockVector = BlockVectors.center(event.getNewState());
       // Vector ensuring it's inside leak region if it's above
-      Vector minVector = blockVector.clone().setY(0.5);
+      var minVector = blockVector.clone();
+      minVector.setY(0.5);
       for (Core core : this.cores) {
         if (core.hasLeaked() || !core.getLeakRegion().contains(minVector)) continue;
 
@@ -76,9 +78,8 @@ public class CoreMatchModule implements MatchModule, Listener {
           // core has leaked
           core.markLeaked();
           this.match.callEvent(new CoreLeakEvent(this.match, core, event.getNewState()));
-          this.match.callEvent(
-              new GoalCompleteEvent(
-                  this.match, core, core.getOwner(), false, core.getContributions()));
+          this.match.callEvent(new GoalCompleteEvent(
+              this.match, core, core.getOwner(), false, core.getContributions()));
         }
       }
     }
@@ -89,7 +90,7 @@ public class CoreMatchModule implements MatchModule, Listener {
     if (event.getWorld() != this.match.getWorld()) return;
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
 
-    Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
+    var blockVector = BlockVectors.center(event.getNewState());
 
     for (Core core : this.cores) {
       if (!core.hasLeaked() && core.getCasingRegion().contains(blockVector)) {
@@ -99,7 +100,7 @@ public class CoreMatchModule implements MatchModule, Listener {
 
             if (team == core.getOwner()) {
               event.setCancelled(translatable("objective.damageOwn", core.getComponentName()));
-            } else if (event.getOldState().getData().equals(core.getMaterial())) {
+            } else if (core.isCoreMaterial(MaterialData.block(event.getOldState()))) {
               this.match.callEvent(new CoreBlockBreakEvent(core, player, event.getOldState()));
               core.touch(player);
 
@@ -109,8 +110,9 @@ public class CoreMatchModule implements MatchModule, Listener {
               }
             }
           } else if (event.getCause() instanceof EntityExplodeEvent) {
-            // this is a temp fix until there is a tracker for placed minecarts (only dispensed are
-            // tracked right now)
+            // If the platform doesn't provide enough data to tell
+            // who owns the TNT minecart that blew up the core, cancel the
+            // event to prevent possible team griefing
             if (((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
               event.setCancelled(true);
             }
@@ -132,7 +134,7 @@ public class CoreMatchModule implements MatchModule, Listener {
     Block block = event.getBlock();
     if (block.getWorld() != this.match.getWorld()) return;
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
-    Vector center = BlockVectors.center(block).toVector();
+    var center = BlockVectors.center(block);
 
     for (Core core : this.cores) {
       if (!core.hasLeaked()
@@ -148,7 +150,7 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void lavaProtection(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    Vector blockVector = BlockVectors.center(event.getNewState()).toVector();
+    var blockVector = BlockVectors.center(event.getNewState());
     for (Core core : this.cores) {
       if (core.getLavaRegion().contains(blockVector)) {
         event.setCancelled(true);
@@ -159,7 +161,7 @@ public class CoreMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onObjectiveModeSwitch(final ObjectiveModeChangeEvent event) {
     for (Core core : this.cores) {
-      if (core.getModes() == null || core.getModes().contains(event.getMode())) {
+      if (core.isAffectedBy(event.getMode())) {
         core.replaceBlocks(event.getMode().getMaterialData());
         // if at least one of the cores are visible, the mode change message will be sent
         if (core.hasShowOption(ShowOption.SHOW_MESSAGES)) {

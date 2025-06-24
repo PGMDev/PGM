@@ -8,6 +8,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public class FlyingFilter extends ParticipantFilter {
+  public static final FlyingFilter INSTANCE = new FlyingFilter();
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {

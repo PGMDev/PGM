@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.event.entity;
 
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.potion.PotionEffect;
@@ -10,7 +11,7 @@ public abstract class PotionEffectEvent extends EntityEvent {
 
   private final PotionEffect effect;
 
-  public PotionEffectEvent(LivingEntity what, PotionEffect effect) {
+  public PotionEffectEvent(Entity what, PotionEffect effect) {
     super(what);
     this.effect = effect;
   }

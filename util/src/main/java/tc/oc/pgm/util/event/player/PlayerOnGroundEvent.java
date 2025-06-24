@@ -8,7 +8,7 @@ import tc.oc.pgm.util.event.SportPaper;
 @SportPaper
 public class PlayerOnGroundEvent extends PlayerEvent {
   private static final HandlerList handlers = new HandlerList();
-  private boolean onGround;
+  private final boolean onGround;
 
   public PlayerOnGroundEvent(final Player player, boolean onGround) {
     super(player);

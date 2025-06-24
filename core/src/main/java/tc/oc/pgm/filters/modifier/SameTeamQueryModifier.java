@@ -9,7 +9,7 @@ import tc.oc.pgm.api.filter.query.PlayerQuery;
 public class SameTeamQueryModifier extends QueryModifier<PartyQuery, PartyQuery> {
 
   public SameTeamQueryModifier(Filter child) {
-    super(child, PartyQuery.class);
+    super(child, PartyQuery.class, PartyQuery.class);
   }
 
   @Nullable
@@ -19,10 +19,5 @@ public class SameTeamQueryModifier extends QueryModifier<PartyQuery, PartyQuery>
       query = new tc.oc.pgm.filters.query.PartyQuery(query.getEvent(), query.getParty());
     }
     return query;
-  }
-
-  @Override
-  public Class<? extends PartyQuery> queryType() {
-    return PartyQuery.class;
   }
 }

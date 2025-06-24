@@ -3,6 +3,7 @@ package tc.oc.pgm.spawns;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +18,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
+import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.points.PointParser;
 import tc.oc.pgm.regions.RegionModule;
@@ -34,9 +36,15 @@ public class SpawnModule implements MapModule<SpawnMatchModule> {
 
   protected final Spawn defaultSpawn;
   protected final List<Spawn> spawns;
+  protected final List<Kit> playerKits;
   protected final List<RespawnOptions> respawnOptions;
 
-  public SpawnModule(Spawn defaultSpawn, List<Spawn> spawns, List<RespawnOptions> respawnOptions) {
+  public SpawnModule(
+      Spawn defaultSpawn,
+      List<Spawn> spawns,
+      List<Kit> playerKits,
+      List<RespawnOptions> respawnOptions) {
+    this.playerKits = playerKits;
     assert defaultSpawn != null;
     this.defaultSpawn = defaultSpawn;
     this.spawns = spawns;
@@ -66,9 +74,14 @@ public class SpawnModule implements MapModule<SpawnMatchModule> {
       FilterParser filterParser = factory.getFilters();
       SpawnParser parser = new SpawnParser(factory, new PointParser(factory));
       List<Spawn> spawns = Lists.newArrayList();
+      List<Kit> playerKits = new ArrayList<>();
 
       for (Element spawnsEl : doc.getRootElement().getChildren("spawns")) {
         spawns.addAll(parser.parseChildren(spawnsEl, new SpawnAttributes()));
+        final Kit playerKit = factory.getKits().parseKitProperty(spawnsEl, "player-kit");
+        if (playerKit != null) {
+          playerKits.add(playerKit);
+        }
       }
 
       if (parser.getDefaultSpawn() == null) {
@@ -76,7 +89,7 @@ public class SpawnModule implements MapModule<SpawnMatchModule> {
       }
 
       return new SpawnModule(
-          parser.getDefaultSpawn(), spawns, parseRespawnOptions(doc, filterParser));
+          parser.getDefaultSpawn(), spawns, playerKits, parseRespawnOptions(doc, filterParser));
     }
 
     private List<RespawnOptions> parseRespawnOptions(Document doc, FilterParser filterParser)
@@ -89,12 +102,11 @@ public class SpawnModule implements MapModule<SpawnMatchModule> {
       }
       // Parse root children respawn elements, Keeps old syntax and gives a default spawn if all
       // others fail
-      respawnOptions.add(
-          getRespawnOptions(
-              doc.getRootElement().getChildren("respawn"),
-              doc.getRootElement().getChild("autorespawn") != null,
-              true,
-              filterParser));
+      respawnOptions.add(getRespawnOptions(
+          doc.getRootElement().getChildren("respawn"),
+          doc.getRootElement().getChild("autorespawn") != null,
+          true,
+          filterParser));
 
       return respawnOptions;
     }

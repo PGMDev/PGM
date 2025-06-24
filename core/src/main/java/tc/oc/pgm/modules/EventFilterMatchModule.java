@@ -26,6 +26,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -36,7 +37,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
-import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.PortalCreateEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
@@ -115,8 +115,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
   }
 
   boolean cancelUnlessInteracting(Cancellable event, MatchPlayerState player) {
-    return cancel(
-        event, !player.getParty().isParticipating(), player.getMatch().getWorld(), null, null);
+    return cancel(event, !player.canInteract(), player.getMatch().getWorld(), null, null);
   }
 
   ClickType convertClick(ClickType clickType, Player player) {
@@ -153,11 +152,6 @@ public class EventFilterMatchModule implements MatchModule, Listener {
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-  public void onWeatherChange(final WeatherChangeEvent event) {
-    cancelAlways(event, event.getWorld());
-  }
-
-  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onBedEnter(final PlayerBedEnterEvent event) {
     cancel(
         event,
@@ -187,9 +181,8 @@ public class EventFilterMatchModule implements MatchModule, Listener {
       ClickType clickType = convertClick(event.getAction(), event.getPlayer());
       if (clickType == null) return;
 
-      match.callEvent(
-          new ObserverInteractEvent(
-              player, clickType, event.getClickedBlock(), null, event.getItem()));
+      match.callEvent(new ObserverInteractEvent(
+          player, clickType, event.getClickedBlock(), null, event.getItem()));
     }
   }
 
@@ -207,13 +200,12 @@ public class EventFilterMatchModule implements MatchModule, Listener {
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    match.callEvent(
-        new ObserverInteractEvent(
-            player,
-            convertClick(ClickType.RIGHT, event.getPlayer()),
-            null,
-            event.getRightClicked(),
-            event.getPlayer().getItemInHand()));
+    match.callEvent(new ObserverInteractEvent(
+        player,
+        convertClick(ClickType.RIGHT, event.getPlayer()),
+        null,
+        event.getRightClicked(),
+        event.getPlayer().getItemInHand()));
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -302,13 +294,12 @@ public class EventFilterMatchModule implements MatchModule, Listener {
         MatchPlayer player = match.getPlayer(entityEvent.getDamager());
         if (player == null) return;
 
-        match.callEvent(
-            new ObserverInteractEvent(
-                player,
-                ClickType.LEFT,
-                null,
-                event.getEntity(),
-                player.getInventory().getItemInHand()));
+        match.callEvent(new ObserverInteractEvent(
+            player,
+            ClickType.LEFT,
+            null,
+            event.getEntity(),
+            player.getInventory().getItemInHand()));
       }
     }
   }
@@ -336,7 +327,8 @@ public class EventFilterMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onInventoryClick(final InventoryClickEvent event) {
-    if (!event.getInventory().equals(event.getWhoClicked().getInventory())) {
+    if (!event.getInventory().equals(event.getWhoClicked().getInventory())
+        && event.getInventory().getType() != InventoryType.CRAFTING) {
       cancelUnlessInteracting(event, event.getWhoClicked());
     }
   }

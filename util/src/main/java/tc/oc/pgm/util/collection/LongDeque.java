@@ -1,13 +1,12 @@
 package tc.oc.pgm.util.collection;
 
-import gnu.trove.TLongCollection;
-import gnu.trove.iterator.TLongIterator;
+import it.unimi.dsi.fastutil.longs.LongCollection;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import java.util.NoSuchElementException;
 
 /**
  * Minimal implementation of a FIFO queue of longs, stored efficiently in a primitive array. Does
- * not implement {@link gnu.trove.queue.TLongQueue} because it would be more trouble than its worth
- * to us.
+ * not implement any Queue interface because it would be more trouble than its worth to us.
  */
 public class LongDeque {
   public static final int DEFAULT_CAPACITY = 16;
@@ -105,10 +104,10 @@ public class LongDeque {
     addUnchecked(value);
   }
 
-  public void addAll(TLongCollection values) {
+  public void addAll(LongCollection values) {
     ensureCapacity(values.size());
-    for (TLongIterator iter = values.iterator(); iter.hasNext(); ) {
-      addUnchecked(iter.next());
+    for (LongIterator iter = values.iterator(); iter.hasNext(); ) {
+      addUnchecked(iter.nextLong());
     }
   }
 

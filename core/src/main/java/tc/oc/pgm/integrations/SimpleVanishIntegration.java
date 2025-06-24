@@ -159,7 +159,7 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.HIGHEST)
   public void onQuit(PlayerQuitEvent event) {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     // If player is vanished & joined via "vanish" subdomain. Remove vanish status on quit

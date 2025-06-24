@@ -9,13 +9,16 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.filters.matcher.block.BlockFilter;
+import tc.oc.pgm.filters.matcher.block.MaterialFilter;
+import tc.oc.pgm.filters.matcher.party.TeamFilter;
+import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.operator.FilterNode;
+import tc.oc.pgm.filters.operator.InverseFilter;
+import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
-import tc.oc.pgm.util.xml.XMLUtils;
 
 /** For proto < 1.4 */
 public class LegacyFilterParser extends FilterParser {
@@ -113,13 +116,25 @@ public class LegacyFilterParser extends FilterParser {
     }
   }
 
+  // Legacy has separate context, team wouldn't be found in the filter context.
+  @MethodParser("team")
+  public TeamFilter parseTeam(Element el) throws InvalidXMLException {
+    return new TeamFilter(Teams.getTeamRef(new Node(el), this.factory));
+  }
+
+  // Legacy not allows for multiple children and is an implicit and
+  @MethodParser("not")
+  public Filter parseNot(Element el) throws InvalidXMLException {
+    return new InverseFilter(AnyFilter.of(parseChildren(el)));
+  }
+
   // Removed in proto 1.4 to avoid conflict with <block> region
   @MethodParser("block")
-  public BlockFilter parseBlock(Element el) throws InvalidXMLException {
-    SingleMaterialMatcher pattern = XMLUtils.parseMaterialPattern(el);
-    if (!pattern.getMaterial().isBlock()) {
+  public Filter parseBlock(Element el) throws InvalidXMLException {
+    MaterialMatcher pattern = MaterialMatcher.parse(el);
+    if (!pattern.getMaterials().iterator().next().isBlock()) {
       throw new InvalidXMLException("Material is not a block", el);
     }
-    return new BlockFilter(pattern);
+    return new MaterialFilter(pattern);
   }
 }

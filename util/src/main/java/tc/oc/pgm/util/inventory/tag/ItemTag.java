@@ -2,9 +2,12 @@ package tc.oc.pgm.util.inventory.tag;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.platform.Platform;
 
 /** A persistent data holder for {@link ItemStack}s. */
 public interface ItemTag<T> {
+
+  Factory FACTORY = Platform.get(Factory.class);
 
   /**
    * Gets the value, or null if not present.
@@ -47,8 +50,7 @@ public interface ItemTag<T> {
    * @return An item tag.
    */
   static ItemTag<String> newString(String key) {
-    // TODO: Add an implementation that uses the 1.14+ org.bukkit.persistence API
-    return new LegacyItemTag();
+    return FACTORY.newString(key);
   }
 
   /**
@@ -58,6 +60,12 @@ public interface ItemTag<T> {
    * @return An item tag.
    */
   static ItemTag<Boolean> newBoolean(String key) {
-    return new BooleanItemTag(newString(key));
+    return FACTORY.newBoolean(key);
+  }
+
+  interface Factory {
+    ItemTag<String> newString(String key);
+
+    ItemTag<Boolean> newBoolean(String key);
   }
 }

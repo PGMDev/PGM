@@ -1,6 +1,7 @@
 package tc.oc.pgm.spawns.states;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import java.util.List;
@@ -10,7 +11,6 @@ import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -19,24 +19,27 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 /** Player is waiting to respawn after dying in-game */
 public class Dead extends Spawning {
   private static final long CORPSE_ROT_TICKS = 20;
 
   private static final PotionEffect CONFUSION =
-      new PotionEffect(PotionEffectType.CONFUSION, 100, 0, true, false);
+      new PotionEffect(PotionEffects.NAUSEA, 100, 0, true, false);
   private static final PotionEffect BLINDNESS_SHORT =
-      new PotionEffect(PotionEffectType.BLINDNESS, 21, 0, true, false);
+      new PotionEffect(PotionEffects.BLINDNESS, 21, 0, true, false);
   private static final PotionEffect BLINDNESS_LONG =
-      new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0, true, false);
+      new PotionEffect(PotionEffects.BLINDNESS, Integer.MAX_VALUE, 0, true, false);
 
   private boolean kitted, rotted;
 
   public Dead(SpawnMatchModule smm, MatchPlayer player) {
-    super(smm, player, player.getMatch().getTick().tick);
+    super(smm, player, player.getMatch().getTick().tick, 0);
+
+    // Allow stuff like /tp or /j
+    if (options.spectate) this.permission = new StatePermissions.Observer();
   }
 
   @Override
@@ -45,25 +48,22 @@ public class Dead extends Spawning {
 
     player.resetInventory();
 
-    if (player.isVisible()) NMSHacks.playDeathAnimation(player.getBukkit());
+    if (player.isVisible()) PLAYERS.playDeathAnimation(player.getBukkit());
 
     if (!options.spectate) player.setFrozen(true);
 
     // Show red vignette
-    NMSHacks.showBorderWarning(player.getBukkit(), true);
+    PLAYERS.showBorderWarning(player.getBukkit(), true);
 
     // Flash/wobble the screen. If we don't delay this then the client glitches out
     // when the player dies from a potion effect. I have no idea why it happens,
     // but this fixes it. We could investigate a better fix at some point.
-    smm.getMatch()
-        .getExecutor(MatchScope.LOADED)
-        .execute(
-            () -> {
-              if (isCurrent() && bukkit.isOnline()) {
-                bukkit.addPotionEffect(options.blackout ? BLINDNESS_LONG : BLINDNESS_SHORT, true);
-                bukkit.addPotionEffect(CONFUSION, true);
-              }
-            });
+    smm.getMatch().getExecutor(MatchScope.LOADED).execute(() -> {
+      if (isCurrent() && bukkit.isOnline()) {
+        bukkit.addPotionEffect(options.blackout ? BLINDNESS_LONG : BLINDNESS_SHORT, true);
+        bukkit.addPotionEffect(CONFUSION, true);
+      }
+    });
   }
 
   @Override
@@ -71,10 +71,10 @@ public class Dead extends Spawning {
     player.setFrozen(false);
     player.setDead(false);
 
-    NMSHacks.showBorderWarning(bukkit, false);
+    PLAYERS.showBorderWarning(bukkit, false);
 
-    bukkit.removePotionEffect(PotionEffectType.BLINDNESS);
-    bukkit.removePotionEffect(PotionEffectType.CONFUSION);
+    bukkit.removePotionEffect(PotionEffects.BLINDNESS);
+    bukkit.removePotionEffect(PotionEffects.NAUSEA);
 
     // If regular rotting didn't end, force-finish it to avoid client-side
     endRotting();
@@ -111,7 +111,10 @@ public class Dead extends Spawning {
   @Override
   public void onEvent(PlayerJoinPartyEvent event) {
     super.onEvent(event);
-    if (!(event.getNewParty() instanceof Competitor)) {
+
+    if (event.getNewParty() instanceof Competitor) {
+      transition(new Joining(smm, player, smm.getJoinPenalty(event), true));
+    } else {
       transition(new Observing(smm, player, true, false));
     }
   }

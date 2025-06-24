@@ -27,13 +27,20 @@ map:
     #
     # To enable the default maps, uncomment the repository below.
     # - uri: "https://github.com/PGMDev/Maps"
-    #  path: "maps-default"
+    #  path: "default-maps"
 
-  # A path to a map pools file, or empty to disable map pools.
-  pools: "map-pools.yml"
+  # A path to a map pools file, empty or commented-out to disable pools.
+  # pools: "map-pools.yml"
   
   # A path to the includes folder, or empty to disable map includes.
   includes: "includes"
+
+  # Show unused XML nodes as map errors. Helps with finding typos in xml.
+  show-unused-xml: true
+
+  # Only allow devs to set dev phase maps
+  enforce-dev-phase: false
+
 
 # Sets the duration of various countdowns.
 #
@@ -59,6 +66,7 @@ restart:
 # Changes behaviour when players try to /join a match.
 join:
   min-players: 1      # Minimum number of players before a match can start.
+  end-empty-matches: true # Should the match be ended when there are no players?
   anytime: true       # Can players join after a match has started?
   balance: true       # Can players be moved to make teams more balanced?
   queue: false        # Should players be put in a queue before joining the match?
@@ -67,15 +75,35 @@ join:
 
 # Changes various gameplay mechanics.
 gameplay:
-  refill-wool: true # Should wool in wool rooms be automatically refilled?
-  grief-score: -10 # Score under which players should be kept out of the match
+  refill-wool: true   # Should wool in wool rooms be automatically refilled?
+  grief-score: -10    # Score under which players should be kept out of the match
+  assist-percent: 0.3 # What percent of the damage is required for an assist 0.3 = 30% of max hp
+  time-penalties:
+    ffa-full-rejoin: 10s   # Rejoining on ffa when it's full
+    stacked: 30s           # Rejoining into a stacked team
+    full-rejoin: 30s       # Rejoining when your team was full and is still full
+    rejoin-multiplier: 10s # Increased penalty for every additional rejoin, up to max
+    rejoin-max: 30s        # Max time penalty for repeated rejoins
+    switch: 30s            # Plainly switching teams
+  
+# Changes map voting mechanics.
+votes:
+  # Players can gain extra votes based on the permission "pgm.vote.extra.#".
+  #
+  # Examples of granting extra votes:
+  #   "pgm.vote.extra.2" = double votes
+  #   "pgm.vote.extra.4" = quadruple votes
+  #
+  allow-extra-votes: true # Can players use extra votes based on their permissions?
+  max-extra-votes: 5      # Maximum number of extra votes allowed per player.
 
 # Toggles various user interfaces.
 ui:
   sidebar: true    # Enable the side bar?
   tablist: true    # Enable the tab list?
+  tablist-resize: false # Resize the tab list for 1.7 players? Requires ProtocolLib
   ping: false      # Should tab list show real ping?
-  proximity: false # Should the proximity of objectives be visible?
+  proximity: auto # Should the proximity of objectives be visible?
   fireworks: true  # Spawn fireworks after objectives are completed?
   participants-see-observers: true # Can participants see observers in the tab list?
   flag-beams: false # Should everyone see floating wool flag beams?

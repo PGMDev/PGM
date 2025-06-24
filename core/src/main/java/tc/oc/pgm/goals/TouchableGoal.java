@@ -19,8 +19,8 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
@@ -129,20 +129,18 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
       boolean firstForPlayer = touchingPlayers.add(toucher);
       boolean firstForPlayerLife = recentTouchingPlayers.add(toucher);
 
-      event =
-          new GoalTouchEvent(
-              this,
-              toucher.getParty(),
-              firstForCompetitor,
-              toucher,
-              firstForPlayer,
-              firstForPlayerLife,
-              getMatch().getTick().instant);
+      event = new GoalTouchEvent(
+          this,
+          toucher.getParty(),
+          firstForCompetitor,
+          toucher,
+          firstForPlayer,
+          firstForPlayerLife,
+          getMatch().getTick().instant);
     }
 
     getMatch().callEvent(event);
     sendTouchMessage(toucher, !event.getCancelToucherMessage());
-    playTouchEffects(toucher);
   }
 
   public void resetTouches() {
@@ -179,10 +177,12 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     return false;
   }
 
+  public boolean shouldShowTouched(@Nullable Competitor team) {
+    return team != null && !isCompleted(team) && hasTouched(team);
+  }
+
   public boolean shouldShowTouched(@Nullable Competitor team, Party viewer) {
-    return team != null
-        && !isCompleted(team)
-        && hasTouched(team)
+    return shouldShowTouched(team)
         && (team == viewer || showEnemyTouches() || viewer.isObserving());
   }
 
@@ -192,15 +192,13 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     Component message = getTouchMessage(toucher, false);
     Audience.console().sendMessage(message);
 
-    if (!showEnemyTouches()) {
-      message = text().append(toucher.getParty().getChatPrefix()).append(message).build();
-    }
-
-    for (MatchPlayer viewer : getMatch().getPlayers()) {
-      if (shouldShowTouched(toucher.getParty(), viewer.getParty())
-          && (toucher == null || !toucher.isPlayer(viewer))) {
-        viewer.sendMessage(message);
-      }
+    if (shouldShowTouched(toucher.getParty())) {
+      if (showEnemyTouches())
+        ChatManager.broadcastMessage(
+            message, viewer -> toucher == null || !toucher.isPlayer(viewer));
+      else
+        ChatManager.broadcastPartyMessage(
+            message, toucher.getParty(), viewer -> toucher == null || !toucher.isPlayer(viewer));
     }
 
     if (toucher != null) {
@@ -212,13 +210,6 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
         toucher.sendMessage(translatable("objective.credit.future", text(this.getName())));
       }
     }
-  }
-
-  protected void playTouchEffects(@Nullable ParticipantState toucher) {
-    if (toucher == null || !hasShowOption(ShowOption.SHOW_EFFECTS)) return;
-
-    MatchPlayer onlineToucher = toucher.getPlayer().orElse(null);
-    if (onlineToucher == null) return;
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

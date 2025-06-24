@@ -4,14 +4,11 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
@@ -22,7 +19,10 @@ import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
+import tc.oc.pgm.hologram.Hologram;
+import tc.oc.pgm.hologram.HologramMatchModule;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.material.Materials;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */
@@ -31,29 +31,31 @@ public abstract class Uncarried extends Spawned {
   protected final Location location;
   protected final BlockState oldBlock;
   protected final BlockState oldBase;
-  protected ArmorStand labelEntity;
+  protected final Hologram hologram;
   private @Nullable MatchPlayer pickingUp;
 
   public Uncarried(Flag flag, Post post, @Nullable Location location) {
     super(flag, post);
     if (location == null) location = flag.getReturnPoint(post);
-    this.location =
-        new Location(
-            location.getWorld(),
-            location.getBlockX() + 0.5,
-            location.getBlockY(),
-            location.getBlockZ() + 0.5,
-            location.getYaw(),
-            location.getPitch());
+    this.location = new Location(
+        location.getWorld(),
+        location.getBlockX() + 0.5,
+        location.getBlockY(),
+        location.getBlockZ() + 0.5,
+        location.getYaw(),
+        location.getPitch());
 
     Block block = this.location.getBlock();
-    if (block.getType() == Material.STANDING_BANNER) {
+    if (block.getState() instanceof Banner) {
       // Banner may already be here at match start
       this.oldBlock = BlockStates.cloneWithMaterial(block, Material.AIR);
     } else {
       this.oldBlock = block.getState();
     }
     this.oldBase = block.getRelative(BlockFace.DOWN).getState();
+    this.hologram = flag.getMatch()
+        .needModule(HologramMatchModule.class)
+        .createHologram(this.location.clone().add(0, 1.7, 0), flag.getComponentName(), false);
   }
 
   @Override
@@ -68,25 +70,15 @@ public abstract class Uncarried extends Spawned {
       oldBase.getBlock().setType(Material.ICE, false);
     }
 
-    if (!Materials.placeStanding(this.location, this.flag.getBannerMeta())) {
+    if (!flag.getBannerData().placeStanding(this.location)) {
       PGM.get().getGameLogger().severe("Failed to place banner at " + this.location);
     }
 
-    this.labelEntity =
-        this.location.getWorld().spawn(this.location.clone().add(0, 1.7, 0), ArmorStand.class);
-    this.labelEntity.setVisible(false);
-    this.labelEntity.setMarker(true);
-    this.labelEntity.setGravity(false);
-    this.labelEntity.setRemoveWhenFarAway(false);
-    this.labelEntity.setSmall(true);
-    this.labelEntity.setArms(false);
-    this.labelEntity.setBasePlate(false);
-    this.labelEntity.setCustomName(this.flag.getColoredName());
-    this.labelEntity.setCustomNameVisible(true);
+    this.hologram.show();
   }
 
   protected void breakBanner() {
-    this.labelEntity.remove();
+    this.hologram.hide();
     oldBase.update(true, false);
     oldBlock.update(true, false);
   }
@@ -125,7 +117,7 @@ public abstract class Uncarried extends Spawned {
       this.pickingUp = null;
     }
 
-    this.flag.playStatusSound(Flag.PICKUP_SOUND_OWN, Flag.PICKUP_SOUND);
+    this.flag.playStatusSound(Sounds.FLAG_PICKUP_OWN, Sounds.FLAG_PICKUP);
     this.flag.touch(carrier.getParticipantState());
 
     this.flag.transition(new Carried(this.flag, this.post, carrier, this.location));
@@ -182,20 +174,6 @@ public abstract class Uncarried extends Spawned {
       event.setCancelled(translatable("flag.cannotBreakFlag"));
     } else if (block.equals(flagBlock.getRelative(BlockFace.DOWN))) {
       event.setCancelled(translatable("flag.cannotBreakBlockUnder"));
-    }
-  }
-
-  @Override
-  public void onEvent(EntityDamageEvent event) {
-    super.onEvent(event);
-
-    if (event.getEntity() == this.labelEntity) {
-      event.setCancelled(true);
-
-      if (event instanceof EntityDamageByEntityEvent
-          && ((EntityDamageByEntityEvent) event).getDamager() instanceof Projectile) {
-        ((EntityDamageByEntityEvent) event).getDamager().remove();
-      }
     }
   }
 }

@@ -1,5 +1,7 @@
 package tc.oc.pgm.tnt;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,7 +16,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +26,8 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 
 @ListenerScope(MatchScope.RUNNING)
 public class TNTMatchModule implements MatchModule, Listener {
@@ -69,14 +72,15 @@ public class TNTMatchModule implements MatchModule, Listener {
     }
   }
 
+  private static final Sound FUSE_SOUND = parse(Sound::valueOf, "FUSE", "ENTITY_TNT_PRIMED");
+
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleInstantActivation(BlockPlaceEvent event) {
     if (this.properties.instantIgnite && event.getBlock().getType() == Material.TNT) {
       World world = event.getBlock().getWorld();
-      TNTPrimed tnt =
-          world.spawn(
-              event.getBlock().getLocation().clone().add(new Location(world, 0.5, 0.5, 0.5)),
-              TNTPrimed.class);
+      TNTPrimed tnt = world.spawn(
+          event.getBlock().getLocation().clone().add(new Location(world, 0.5, 0.5, 0.5)),
+          TNTPrimed.class);
 
       if (this.properties.fuse != null) {
         tnt.setFuseTicks(this.getFuseTicks());
@@ -88,14 +92,8 @@ public class TNTMatchModule implements MatchModule, Listener {
 
       if (callPrimeEvent(tnt, event.getPlayer())) {
         event.setCancelled(true); // Allow the block to be placed if priming is cancelled
-        world.playSound(tnt.getLocation(), Sound.FUSE, 1, 1);
-
-        ItemStack inHand = event.getPlayer().getItemInHand();
-        if (inHand.getAmount() == 1) {
-          event.getPlayer().setItemInHand(null);
-        } else {
-          inHand.setAmount(inHand.getAmount() - 1);
-        }
+        world.playSound(tnt.getLocation(), FUSE_SOUND, 1, 1);
+        InventoryUtils.consumeItem(event, event.getPlayer());
       }
     }
   }
@@ -149,18 +147,16 @@ public class TNTMatchModule implements MatchModule, Listener {
       for (int i = 0; i < tntCount; i++) {
         TNTPrimed tnt = match.getWorld().spawn(dispenser.getLocation(), TNTPrimed.class);
 
-        tnt.setFuseTicks(
-            10
-                + match
-                    .getRandom()
-                    .nextInt(10)); // between 0.5 and 1.0 seconds, same as vanilla TNT chaining
+        tnt.setFuseTicks(10
+            + match
+                .getRandom()
+                .nextInt(10)); // between 0.5 and 1.0 seconds, same as vanilla TNT chaining
 
         Random random = match.getRandom();
-        Vector velocity =
-            new Vector(
-                random.nextGaussian(),
-                random.nextGaussian(),
-                random.nextGaussian()); // uniform random direction
+        Vector velocity = new Vector(
+            random.nextGaussian(),
+            random.nextGaussian(),
+            random.nextGaussian()); // uniform random direction
         velocity.normalize().multiply(0.5 + 0.5 * random.nextDouble());
         tnt.setVelocity(velocity);
 

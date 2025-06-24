@@ -20,6 +20,8 @@ import tc.oc.pgm.broadcast.BroadcastMatchModule;
 import tc.oc.pgm.broadcast.BroadcastModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.ClassModule;
+import tc.oc.pgm.compass.CompassMatchModule;
+import tc.oc.pgm.compass.CompassModule;
 import tc.oc.pgm.consumable.ConsumableMatchModule;
 import tc.oc.pgm.consumable.ConsumableModule;
 import tc.oc.pgm.controlpoint.ControlPointMatchModule;
@@ -33,6 +35,7 @@ import tc.oc.pgm.damage.DamageMatchModule;
 import tc.oc.pgm.damage.DamageModule;
 import tc.oc.pgm.damage.DisableDamageMatchModule;
 import tc.oc.pgm.damage.DisableDamageModule;
+import tc.oc.pgm.damagehistory.DamageHistoryMatchModule;
 import tc.oc.pgm.death.DeathMessageMatchModule;
 import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.destroyable.DestroyableModule;
@@ -52,6 +55,7 @@ import tc.oc.pgm.flag.LegacyFlagBeamMatchModule;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.gamerules.GameRulesModule;
 import tc.oc.pgm.goals.GoalMatchModule;
+import tc.oc.pgm.hologram.HologramMatchModule;
 import tc.oc.pgm.hunger.HungerMatchModule;
 import tc.oc.pgm.hunger.HungerModule;
 import tc.oc.pgm.inventory.ViewInventoryMatchModule;
@@ -85,10 +89,12 @@ import tc.oc.pgm.modules.ModifyBowProjectileMatchModule;
 import tc.oc.pgm.modules.ModifyBowProjectileModule;
 import tc.oc.pgm.modules.MultiTradeMatchModule;
 import tc.oc.pgm.modules.PlayerTimeMatchModule;
+import tc.oc.pgm.modules.ProjectileTrailMatchModule;
 import tc.oc.pgm.modules.SoundsMatchModule;
 import tc.oc.pgm.modules.SpectateMatchModule;
 import tc.oc.pgm.modules.ToolRepairMatchModule;
 import tc.oc.pgm.modules.ToolRepairModule;
+import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.picker.PickerMatchModule;
@@ -118,6 +124,7 @@ import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.stats.StatsMatchModule;
+import tc.oc.pgm.stats.StatsModule;
 import tc.oc.pgm.structure.StructureMatchModule;
 import tc.oc.pgm.structure.StructureModule;
 import tc.oc.pgm.teams.TeamMatchModule;
@@ -214,14 +221,14 @@ public final class Modules {
     register(SoundsMatchModule.class, new SoundsMatchModule.Factory());
     register(ObserverToolsMatchModule.class, new ObserverToolsMatchModule.Factory());
     register(FireworkMatchModule.class, FireworkMatchModule::new);
-    register(StatsMatchModule.class, StatsMatchModule::new);
     register(MapmakerMatchModule.class, MapmakerMatchModule::new);
     register(TNTRenderMatchModule.class, TNTRenderMatchModule::new);
     register(PlayerTimeMatchModule.class, PlayerTimeMatchModule::new);
     register(SpectateMatchModule.class, SpectateMatchModule::new);
+    register(DamageHistoryMatchModule.class, DamageHistoryMatchModule::new);
+    register(WeatherMatchModule.class, WeatherMatchModule::new);
 
-    // FIXME: Disabled due to lag - look into future optimization
-    // register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
+    register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 
     // Modules that help older player versions
     register(LegacyFlagBeamMatchModule.class, new LegacyFlagBeamMatchModule.Factory());
@@ -241,11 +248,13 @@ public final class Modules {
     register(RegionModule.class, RegionMatchModule.class, new RegionModule.Factory());
     register(FilterModule.class, FilterMatchModule.class, new FilterModule.Factory());
     register(SpawnModule.class, SpawnMatchModule.class, new SpawnModule.Factory());
+    register(StatsModule.class, StatsMatchModule.class, new StatsModule.Factory());
     register(CoreModule.class, CoreMatchModule.class, new CoreModule.Factory());
     register(WoolModule.class, WoolMatchModule.class, new WoolModule.Factory());
     register(ScoreModule.class, ScoreMatchModule.class, new ScoreModule.Factory());
     register(KitModule.class, KitMatchModule.class, new KitModule.Factory());
     register(ActionModule.class, ActionMatchModule.class, new ActionModule.Factory());
+    register(CompassModule.class, CompassMatchModule.class, new CompassModule.Factory());
     register(
         ItemDestroyModule.class, ItemDestroyMatchModule.class, new ItemDestroyModule.Factory());
     register(ToolRepairModule.class, ToolRepairMatchModule.class, new ToolRepairModule.Factory());
@@ -315,5 +324,6 @@ public final class Modules {
 
     // MatchModules only used if required as a dependency by other modules
     registerDependencyOnly(SnapshotMatchModule.class, new SnapshotMatchModule.Factory());
+    registerDependencyOnly(HologramMatchModule.class, HologramMatchModule::new);
   }
 }

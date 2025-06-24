@@ -31,6 +31,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoadOrder;
 import org.fusesource.jansi.AnsiConsole;
 import org.spigotmc.SpigotConfig;
+import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 /**
  * Embedded {@link org.bukkit.Bukkit} server that natively runs plugins.
@@ -42,9 +43,8 @@ public class PGMServer extends DedicatedServer implements Runnable {
 
   public static void main(String[] args) throws InvalidDescriptionException {
     BasicConfigurator.configure();
-    new PGMServer(
-            new PluginDescriptionFile(
-                Thread.currentThread().getContextClassLoader().getResourceAsStream("plugin.yml")))
+    new PGMServer(new PluginDescriptionFile(
+            Thread.currentThread().getContextClassLoader().getResourceAsStream("plugin.yml")))
         .run();
   }
 
@@ -72,13 +72,10 @@ public class PGMServer extends DedicatedServer implements Runnable {
           }
         }.parse());
     this.plugins = plugins;
-    this.name =
-        super.getServerModName()
-            + " (with "
-            + Stream.of(plugins)
-                .map(PluginDescriptionFile::getName)
-                .collect(Collectors.joining(", "))
-            + ")";
+    this.name = super.getServerModName()
+        + " (with "
+        + Stream.of(plugins).map(PluginDescriptionFile::getName).collect(Collectors.joining(", "))
+        + ")";
   }
 
   @Override
@@ -127,7 +124,10 @@ public class PGMServer extends DedicatedServer implements Runnable {
 
     if (logger instanceof org.apache.logging.log4j.core.Logger) {
       final Iterator<org.apache.logging.log4j.core.Appender> appenders =
-          ((org.apache.logging.log4j.core.Logger) logger).getAppenders().values().iterator();
+          ((org.apache.logging.log4j.core.Logger) logger)
+              .getAppenders()
+              .values()
+              .iterator();
       while (appenders.hasNext()) {
         final org.apache.logging.log4j.core.Appender appender = appenders.next();
         if (appender instanceof ConsoleAppender) {
@@ -142,30 +142,24 @@ public class PGMServer extends DedicatedServer implements Runnable {
 
     BasicConfigurator.resetConfiguration();
 
-    try {
-      return (Logger) PGMServer.class.getField("LOGGER").get(PGMServer.class);
-    } catch (IllegalAccessException | NoSuchFieldException e) {
-      // No-op
-    }
-
-    return logger;
+    var actualLogger = ReflectionUtils.readStaticField(
+        DedicatedServer.class, org.apache.logging.log4j.Logger.class, "LOGGER");
+    return actualLogger != null ? actualLogger : logger;
   }
 
   protected void setupConsole() {
-    final Thread console =
-        new Thread(
-            () -> {
-              try {
-                while (!isStopped() && isRunning()) {
-                  final String command = reader.readLine(">", null);
-                  if (command != null && !command.trim().isEmpty()) {
-                    issueCommand(command, this);
-                  }
-                }
-              } catch (IOException io) {
-                safeShutdown();
-              }
-            });
+    final Thread console = new Thread(() -> {
+      try {
+        while (!isStopped() && isRunning()) {
+          final String command = reader.readLine(">", null);
+          if (command != null && !command.trim().isEmpty()) {
+            issueCommand(command, this);
+          }
+        }
+      } catch (IOException io) {
+        safeShutdown();
+      }
+    });
     console.setDaemon(true);
     console.start();
   }
@@ -232,10 +226,7 @@ public class PGMServer extends DedicatedServer implements Runnable {
     a(U(), U(), 0 /* seed */, WorldType.FLAT, "" /* generator */);
     final long duration = System.nanoTime() - start;
 
-    logger.info(
-        "Done ("
-            + String.format("%.3fs", (double) duration / 1.0E9D)
-            + ")! For help, type \"help\" or \"?\"");
+    logger.info("Done (%.3fs)! For help, type \"help\" or \"?\"", (double) duration / 1.0E9D);
   }
 
   protected void setupListener() throws IOException {

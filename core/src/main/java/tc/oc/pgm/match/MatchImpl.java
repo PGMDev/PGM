@@ -2,6 +2,7 @@ package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -19,7 +20,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -125,7 +125,7 @@ public class MatchImpl implements Match {
     this.world = new WeakReference<>(assertNotNull(world));
     this.matchModules = new ConcurrentHashMap<>();
 
-    this.clock = new WorldTickClock(world);
+    this.clock = new WorldTickClock(this);
     this.logger = ClassLogger.get(PGM.get().getLogger(), getClass());
     this.random = new Random();
     this.tickRandoms = new HashMap<>();
@@ -133,14 +133,14 @@ public class MatchImpl implements Match {
     this.state = new AtomicReference<>(MatchPhase.IDLE);
     this.start = new AtomicLong(0);
     this.end = new AtomicLong(0);
-    this.capacity =
-        new AtomicInteger(map.getInfo().getMaxPlayers().stream().mapToInt(i -> i).sum());
+    this.capacity = new AtomicInteger(
+        map.getInfo().getMaxPlayers().stream().mapToInt(i -> i).sum());
     this.executors = new EnumMap<>(MatchScope.class);
     this.listeners = new EnumMap<>(MatchScope.class);
     this.tickables = new EnumMap<>(MatchScope.class);
     for (MatchScope scope : MatchScope.values()) {
       executors.put(scope, new BukkitExecutorService(PGM.get(), false));
-      listeners.put(scope, new LinkedList<>());
+      listeners.put(scope, new LinkedHashSet<>());
       tickables.put(scope, new CopyOnWriteArraySet<>());
     }
     this.tick = new AtomicReference<>(null);
@@ -148,21 +148,17 @@ public class MatchImpl implements Match {
     this.players = new ConcurrentHashMap<>();
     this.partyChanges = new WeakHashMap<>();
     this.parties = new LinkedHashSet<>();
-    this.victory =
-        new RankedSet<>(
-            Comparator.<VictoryCondition, Boolean>comparing(
-                    vc -> !vc.isCompleted(this), Boolean::compare)
-                .thenComparing(VictoryCondition::getPriority));
+    this.victory = new RankedSet<>(Comparator.<VictoryCondition, Boolean>comparing(
+            vc -> !vc.isCompleted(this), Boolean::compare)
+        .thenComparing(VictoryCondition::getPriority));
     this.competitors = new HashSet<>();
-    this.winners =
-        new RankedSet<>(
-            (Competitor a, Competitor b) -> {
-              for (VictoryCondition condition : getVictoryConditions()) {
-                int result = condition.compare(a, b);
-                if (result != 0 || condition.isFinal(this)) return result;
-              }
-              return 0;
-            });
+    this.winners = new RankedSet<>((Competitor a, Competitor b) -> {
+      for (VictoryCondition condition : getVictoryConditions()) {
+        int result = condition.compare(a, b);
+        if (result != 0 || condition.isFinal(this)) return result;
+      }
+      return 0;
+    });
     this.queuedParticipants = new AtomicReference<>();
     this.observers = new ObserverParty(this);
     this.features = new MatchFeatureContext();
@@ -341,8 +337,10 @@ public class MatchImpl implements Match {
   }
 
   private void startListener(Listener listener) {
-    for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry :
-        PGM.get().getPluginLoader().createRegisteredListeners(listener, PGM.get()).entrySet()) {
+    for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : PGM.get()
+        .getPluginLoader()
+        .createRegisteredListeners(listener, PGM.get())
+        .entrySet()) {
       Class<? extends Event> eventClass = entry.getKey();
       HandlerList handlerList = Events.getEventListeners(eventClass);
 
@@ -407,7 +405,7 @@ public class MatchImpl implements Match {
 
   @Override
   public Collection<MatchPlayer> getPlayers() {
-    return ImmutableList.copyOf(players.values());
+    return Collections.unmodifiableCollection(players.values());
   }
 
   @Override
@@ -465,10 +463,9 @@ public class MatchImpl implements Match {
   @Override
   public boolean setParty(MatchPlayer player, Party party, @Nullable JoinRequest request) {
     if (request == null)
-      request =
-          party instanceof Team
-              ? JoinRequest.of((Team) party, JoinRequest.Flag.FORCE)
-              : JoinRequest.force();
+      request = party instanceof Team
+          ? JoinRequest.of((Team) party, JoinRequest.Flag.FORCE)
+          : JoinRequest.force();
     return setOrClearPlayerParty(player, assertNotNull(party), request);
   }
 
@@ -511,13 +508,12 @@ public class MatchImpl implements Match {
       // to detect nested calls for the same player, which we definitely do not want.
       Party nested = partyChanges.put(player, newParty);
       if (nested != null) {
-        throw new IllegalStateException(
-            "Nested party change: "
-                + player
-                + " tried to join "
-                + newParty
-                + " in the middle of joining "
-                + nested);
+        throw new IllegalStateException("Nested party change: "
+            + player
+            + " tried to join "
+            + newParty
+            + " in the middle of joining "
+            + nested);
       }
 
       if (oldParty instanceof Competitor) {
@@ -665,6 +661,16 @@ public class MatchImpl implements Match {
   }
 
   @Override
+  public int getCompetitorIndex(Competitor competitor) {
+    return winners.getPosition(competitor);
+  }
+
+  @Override
+  public void invalidateRanking() {
+    winners.invalidateRanking();
+  }
+
+  @Override
   public Collection<Competitor> getWinners() {
     winners.invalidateRanking();
     return ImmutableList.copyOf(winners.getRank(0));
@@ -750,8 +756,7 @@ public class MatchImpl implements Match {
         try {
           tickable.tick(MatchImpl.this, tick);
         } catch (Throwable t) {
-          logger.log(Level.SEVERE, "Could not tick " + tickable, t);
-          tickables.remove(tickable);
+          logger.log(Level.SEVERE, "Could not tick " + tickable + " in match #" + id, t);
         }
       }
     }
@@ -812,9 +817,8 @@ public class MatchImpl implements Match {
       matchModules.put(module.getClass(), module);
 
       if (module instanceof Listener && getListenerScope((Listener) module) == null) {
-        logger.warning(
-            module.getClass().getSimpleName()
-                + " implements Listener but is not annotated with @ListenerScope");
+        logger.warning(module.getClass().getSimpleName()
+            + " implements Listener but is not annotated with @ListenerScope");
       }
 
       if (module instanceof Listener) {
@@ -845,11 +849,11 @@ public class MatchImpl implements Match {
       }
 
       startListeners(MatchScope.LOADED);
-      startTickables(MatchScope.LOADED);
       addParty(observers);
-
       loaded.set(true);
       callEvent(new MatchLoadEvent(this));
+      // Start ticking after match load event ocurred
+      startTickables(MatchScope.LOADED);
     } catch (Throwable e) {
       e.printStackTrace();
       unload();
@@ -910,6 +914,7 @@ public class MatchImpl implements Match {
     if (world == null) return;
 
     final String worldName = world.getName();
+    NMS_HACKS.cleanupWorld(world);
     if (PGM.get().getServer().unloadWorld(worldName, false)) {
       logger.fine("Successfully unloaded " + worldName);
     } else {
@@ -937,17 +942,15 @@ public class MatchImpl implements Match {
   @Override
   @SuppressWarnings("unchecked")
   public <R extends Filterable<?>> Collection<? extends R> getFilterableDescendants(Class<R> type) {
-    final Collection<R> result = new LinkedList<>();
+    Collection<R> result = new ArrayList<>();
     if (type.isAssignableFrom(Match.class)) {
       result.add((R) this);
     }
-    if (Party.class.isAssignableFrom(type)) {
-      result.addAll(
-          (List<R>)
-              this.getParties().stream().filter(type::isInstance).collect(Collectors.toList()));
+    if (type.isAssignableFrom(Party.class)) {
+      result.addAll((Collection<? extends R>) getParties());
     }
     if (type.isAssignableFrom(MatchPlayer.class)) {
-      result.addAll((List<R>) this.getPlayers());
+      result.addAll((Collection<? extends R>) getPlayers());
     }
     return result;
   }

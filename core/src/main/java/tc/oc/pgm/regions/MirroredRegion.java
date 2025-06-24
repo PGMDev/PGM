@@ -1,6 +1,7 @@
 package tc.oc.pgm.regions;
 
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 
 public class MirroredRegion extends TransformedRegion {
@@ -19,6 +20,12 @@ public class MirroredRegion extends TransformedRegion {
     this.offset = this.normal.dot(origin);
   }
 
+  private MirroredRegion(Region region, Vector normal, double offset) {
+    super(region);
+    this.normal = normal;
+    this.offset = offset;
+  }
+
   @Override
   protected Vector transform(Vector point) {
     // FYI, reflection is 2x the projection of the point on the normal
@@ -29,5 +36,10 @@ public class MirroredRegion extends TransformedRegion {
   @Override
   protected Vector untransform(Vector point) {
     return this.transform(point);
+  }
+
+  @Override
+  public Region.Static getStaticImpl(Match match) {
+    return new MirroredRegion(region.getStatic(match), normal, offset);
   }
 }

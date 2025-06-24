@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.text.TextException.unknown;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ public class GitMapSourceFactory extends PathMapSourceFactory {
 
   public GitMapSourceFactory(
       Path base, @Nullable List<Path> children, URI uri, @Nullable String branch) {
-    super(base, children);
+    super(new MapRoot(base), children);
 
     final String user = uri.getUserInfo();
     if (user != null) {
@@ -44,6 +45,14 @@ public class GitMapSourceFactory extends PathMapSourceFactory {
     }
 
     this.git = openRepo(uri, branch);
+
+    this.paths =
+        new MapRoot(
+            base,
+            uri.getHost(),
+            uri.getPath().replaceFirst("/", ""),
+            createBaseUri(uri),
+            uri.getUserInfo() != null);
   }
 
   @Override
@@ -63,7 +72,7 @@ public class GitMapSourceFactory extends PathMapSourceFactory {
   }
 
   private Git openRepo(URI uri, @Nullable String branch) {
-    try (Git jgit = Git.open(base.toFile())) {
+    try (Git jgit = Git.open(paths.getBase().toFile())) {
       return jgit;
     } catch (RepositoryNotFoundException e) {
       return cloneRepo(uri, branch);
@@ -76,7 +85,7 @@ public class GitMapSourceFactory extends PathMapSourceFactory {
     Git git;
     final CloneCommand clone =
         Git.cloneRepository()
-            .setDirectory(base.toFile())
+            .setDirectory(paths.getBase().toFile())
             .setURI(uri.toString())
             .setCredentialsProvider(credentials)
             .setCloneAllBranches(false)
@@ -103,5 +112,24 @@ public class GitMapSourceFactory extends PathMapSourceFactory {
       throw unknown(e2);
     }
     return git;
+  }
+
+  private String createBaseUri(URI uri) {
+    try {
+      String path = uri.getPath();
+      path += (path.endsWith("/") ? "" : "/") + "blob/" + git.getRepository().getBranch() + "/";
+
+      // IMPORTANT: ensure user info is stripped
+      return new URI(uri.getScheme(), null, uri.getHost(), uri.getPort(), path, null, null)
+          .toString();
+    } catch (URISyntaxException | IOException e) {
+      PGM.get()
+          .getGameLogger()
+          .log(
+              Level.WARNING,
+              "Failed to create url for repository " + uri.getHost() + "/" + uri.getPath(),
+              e);
+      return null;
+    }
   }
 }

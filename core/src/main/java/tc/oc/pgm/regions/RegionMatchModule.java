@@ -1,16 +1,15 @@
 package tc.oc.pgm.regions;
 
 import static tc.oc.pgm.api.map.MapProtos.REGION_PRIORITY_VERSION;
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Hanging;
 import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LeashHitch;
-import org.bukkit.entity.Painting;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -28,7 +27,6 @@ import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter.QueryResponse;
@@ -47,11 +45,10 @@ import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.filters.query.Queries;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.util.MatchPlayers;
-import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(MatchScope.LOADED)
 public class RegionMatchModule implements MatchModule, Listener {
@@ -60,10 +57,21 @@ public class RegionMatchModule implements MatchModule, Listener {
   private final RFAContext rfaContext;
   private final boolean useRegionPriority;
 
-  public RegionMatchModule(Match match, RFAContext rfaContext) {
+  private Integer maxBuildHeight;
+
+  public RegionMatchModule(Match match, RFAContext rfaContext, Integer maxBuildHeight) {
     this.match = match;
     this.rfaContext = rfaContext;
     this.useRegionPriority = match.getMap().getProto().isNoOlderThan(REGION_PRIORITY_VERSION);
+    this.maxBuildHeight = maxBuildHeight;
+  }
+
+  public Integer getMaxBuildHeight() {
+    return maxBuildHeight;
+  }
+
+  public void setMaxBuildHeight(Integer maxBuildHeight) {
+    this.maxBuildHeight = maxBuildHeight;
   }
 
   protected void checkEnterLeave(
@@ -126,8 +134,8 @@ public class RegionMatchModule implements MatchModule, Listener {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    Vector from = event.getBlockFrom().toVector();
-    Vector to = event.getBlockTo().toVector();
+    var from = event.getBlockFrom();
+    var to = event.getBlockTo();
     Query query = new tc.oc.pgm.filters.query.PlayerQuery(event, player);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.EFFECT)) {
@@ -143,7 +151,7 @@ public class RegionMatchModule implements MatchModule, Listener {
         // Note: works on observers
         if (enters && rfa.velocity != null) {
           event.getPlayer().setVelocity(rfa.velocity);
-          NMSHacks.updateVelocity(event.getPlayer());
+          PLAYERS.updateVelocity(event.getPlayer());
         }
 
         if (rfa.kit != null && player.canInteract()) {
@@ -161,14 +169,15 @@ public class RegionMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void checkBlockTransform(final BlockTransformEvent event) {
-    Vector pos = BlockVectors.center(event.getNewState()).toVector();
+    var pos = BlockVectors.center(event.getNewState());
     ParticipantState actor = this.getActor(event);
 
     BlockState againstBlock = null;
     if (event.getCause() instanceof BlockPlaceEvent) {
       againstBlock = ((BlockPlaceEvent) event.getCause()).getBlockAgainst().getState();
     } else if (event.getCause() instanceof PlayerBucketEmptyEvent) {
-      againstBlock = ((PlayerBucketEmptyEvent) event.getCause()).getBlockClicked().getState();
+      againstBlock =
+          ((PlayerBucketEmptyEvent) event.getCause()).getBlockClicked().getState();
     }
 
     BlockQuery breakQuery = Queries.block(event, actor, event.getOldState());
@@ -241,7 +250,8 @@ public class RegionMatchModule implements MatchModule, Listener {
     MatchPlayer player = this.match.getParticipant(event.getPlayer());
     if (player == null) return;
 
-    PlayerBlockQuery query = new PlayerBlockQuery(event, player, event.getBlock().getState());
+    PlayerBlockQuery query =
+        new PlayerBlockQuery(event, player, event.getBlock().getState());
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_BREAK)) {
       if (rfa.earlyWarning && rfa.region.contains(event.getBlock())) {
@@ -263,13 +273,15 @@ public class RegionMatchModule implements MatchModule, Listener {
       Block block = event.getClickedBlock();
       if (block == null) return;
 
-      this.handleUse(event, block.getState(), this.match.getParticipant(event.getPlayer()));
+      this.handleUse(event, block.getState(), null, this.match.getParticipant(event.getPlayer()));
     }
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void checkHangingPlace(final HangingPlaceEvent event) {
-    this.handleHangingPlace(event, getHangingBlockState(event.getEntity()), event.getPlayer());
+    Hanging entity = event.getEntity();
+    Block block = entity.getLocation().getBlock();
+    this.handleHangingPlace(event, block, getHangingType(entity), event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -289,76 +301,73 @@ public class RegionMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void checkItemFrameRotate(PlayerInteractEntityEvent event) {
-    if (event.getRightClicked() instanceof ItemFrame) {
-      ItemFrame itemFrame = (ItemFrame) event.getRightClicked();
+    if (event.getRightClicked() instanceof ItemFrame itemFrame) {
       if (itemFrame.getItem() != null) {
         // If frame contains an item, right-click will rotate it, which is handled as a "use" event
         this.handleUse(
-            event, getHangingBlockState(itemFrame), this.match.getParticipant(event.getPlayer()));
+            event,
+            itemFrame.getLocation().getBlock().getState(),
+            getHangingType(itemFrame),
+            this.match.getParticipant(event.getPlayer()));
       } else if (event.getPlayer().getItemInHand() != null) {
         // If the frame is empty and it's right clicked with an item, this will place the item in
         // the frame,
         // which is handled as a "place" event, with the placed item as the block world
-        BlockState blockState =
-            BlockStates.cloneWithMaterial(
-                itemFrame.getLocation().getBlock(), event.getPlayer().getItemInHand().getData());
-        this.handleHangingPlace(event, blockState, event.getPlayer());
+        this.handleHangingPlace(
+            event,
+            itemFrame.getLocation().getBlock(),
+            MaterialData.item(event.getPlayer().getItemInHand()),
+            event.getPlayer());
       }
     }
   }
 
-  private void handleUse(Event event, BlockState blockState, @Nullable MatchPlayer player) {
+  private void handleUse(
+      Event event, BlockState blockState, @Nullable MaterialData md, @Nullable MatchPlayer player) {
     if (!MatchPlayers.canInteract(player)) return;
 
-    PlayerBlockQuery query = new PlayerBlockQuery(event, player, blockState);
+    PlayerBlockQuery query = new PlayerBlockQuery(event, player, blockState).withMaterial(md);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.USE)) {
-      if (rfa.region.contains(blockState)) {
-        if (processQuery(rfa, query)) {
-          if (query.getEvent() instanceof PlayerInteractEvent
-              && ((PlayerInteractEvent) query.getEvent()).isCancelled()) {
-            PlayerInteractEvent pie = (PlayerInteractEvent) query.getEvent();
-            pie.setCancelled(false);
-            pie.setUseItemInHand(Event.Result.ALLOW);
-            pie.setUseInteractedBlock(Event.Result.DENY);
+      if (rfa.region.contains(blockState) && processQuery(rfa, query)) {
+        if (query.getEvent() instanceof PlayerInteractEvent pie && pie.isCancelled()) {
+          pie.setCancelled(false);
+          pie.setUseItemInHand(Event.Result.ALLOW);
+          pie.setUseInteractedBlock(Event.Result.DENY);
 
-            if (rfa.message != null) {
-              player.sendWarning(rfa.message);
-            }
+          if (rfa.message != null) {
+            player.sendWarning(rfa.message);
           }
-          if (this.useRegionPriority || rfa.useRegionPriority) {
-            break;
-          }
+        }
+        if (this.useRegionPriority || rfa.useRegionPriority) {
+          break;
         }
       }
     }
   }
 
-  private void handleHangingPlace(Event event, BlockState blockState, Entity placer) {
-    Query query = makeBlockQuery(event, placer, blockState);
+  private void handleHangingPlace(Event event, Block block, MaterialData material, Entity placer) {
+    Query query = makeBlockQuery(event, placer, block, material);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_PLACE)) {
-      if (rfa.region.contains(blockState)) {
-        if (processQuery(rfa, query)) {
-          sendCancelMessage(rfa, query);
-          if (this.useRegionPriority || rfa.useRegionPriority) break;
-        }
+      if (rfa.region.contains(block) && processQuery(rfa, query)) {
+        sendCancelMessage(rfa, query);
+        if (this.useRegionPriority || rfa.useRegionPriority) break;
       }
     }
   }
 
   private void handleHangingBreak(Event event, Hanging hanging, Entity breaker) {
-    BlockState blockState = getHangingBlockState(hanging);
-    if (blockState == null) return;
+    MaterialData material = getHangingType(hanging);
+    if (material == null) return;
+    Block block = breaker.getLocation().getBlock();
 
-    Query query = makeBlockQuery(event, breaker, blockState);
+    Query query = makeBlockQuery(event, breaker, block, material);
 
     for (RegionFilterApplication rfa : this.rfaContext.get(RFAScope.BLOCK_BREAK)) {
-      if (rfa.region.contains(blockState)) {
-        if (processQuery(rfa, query)) {
-          sendCancelMessage(rfa, query);
-          if (this.useRegionPriority || rfa.useRegionPriority) break;
-        }
+      if (rfa.region.contains(block) && processQuery(rfa, query)) {
+        sendCancelMessage(rfa, query);
+        if (this.useRegionPriority || rfa.useRegionPriority) break;
       }
     }
   }
@@ -374,14 +383,14 @@ public class RegionMatchModule implements MatchModule, Listener {
     }
   }
 
-  private Query makeBlockQuery(Event event, Entity entity, BlockState block) {
+  private Query makeBlockQuery(Event event, Entity entity, Block block, MaterialData md) {
     if (entity instanceof Player) {
       MatchPlayer player = this.match.getPlayer((Player) entity);
       if (MatchPlayers.canInteract(player)) {
-        return new PlayerBlockQuery(event, player, block);
+        return new PlayerBlockQuery(event, player, block.getState()).withMaterial(md);
       }
     }
-    return new tc.oc.pgm.filters.query.BlockQuery(event, block);
+    return new tc.oc.pgm.filters.query.BlockQuery(event, block).withMaterial(md);
   }
 
   private ParticipantState getActor(BlockTransformEvent event) {
@@ -392,22 +401,8 @@ public class RegionMatchModule implements MatchModule, Listener {
     return ParticipantBlockTransformEvent.getPlayerState(event);
   }
 
-  private static BlockState getHangingBlockState(Hanging hanging) {
-    Block block = hanging.getLocation().getBlock();
-    Material type = getHangingType(hanging);
-    return type == null ? null : BlockStates.cloneWithMaterial(block, type);
-  }
-
-  private static Material getHangingType(Hanging hanging) {
-    if (hanging instanceof Painting) {
-      return Material.PAINTING;
-    } else if (hanging instanceof ItemFrame) {
-      return Material.ITEM_FRAME;
-    } else if (hanging instanceof LeashHitch) {
-      return Material.LEASH;
-    } else {
-      return null;
-    }
+  private static MaterialData getHangingType(Hanging hanging) {
+    return MATERIAL_UTILS.createItemData(hanging);
   }
 
   /**

@@ -40,4 +40,10 @@ public interface MapProtos {
 
   // Various changes to support dynamic filters
   Version DYNAMIC_FILTERS = new Version(1, 4, 2);
+
+  // Make several singletons have built-in default ids
+  Version FEATURE_SINGLETON_IDS = new Version(1, 5, 0);
+
+  // Several fixes to actions & scopes
+  Version ACTION_REVAMP = new Version(1, 5, 0);
 }

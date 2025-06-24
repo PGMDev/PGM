@@ -23,9 +23,9 @@ public class RegionPlayerTracker implements Listener {
   private final Set<MatchPlayer> players = Sets.newHashSet();
 
   // The region to check against
-  private Region region;
+  private Region.Static region;
   // A static filter players must match when entering
-  private @Nullable Filter staticFilter;
+  private final @Nullable Filter staticFilter;
 
   public RegionPlayerTracker(Match match, Region region) {
     this(match, region, null);
@@ -33,7 +33,7 @@ public class RegionPlayerTracker implements Listener {
 
   public RegionPlayerTracker(Match match, Region region, @Nullable Filter staticFilter) {
     this.match = match;
-    this.region = region;
+    this.region = region.getStatic(match);
     this.staticFilter = staticFilter;
   }
 
@@ -41,7 +41,7 @@ public class RegionPlayerTracker implements Listener {
     return this.players;
   }
 
-  public void setRegion(Region region) {
+  public void setRegion(Region.Static region) {
     this.region = region;
     for (MatchPlayer player : match.getPlayers()) {
       handlePlayerMove(player.getBukkit(), player.getLocation().toVector());

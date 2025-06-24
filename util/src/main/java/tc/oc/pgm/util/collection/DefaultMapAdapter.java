@@ -58,29 +58,16 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
 
   @Override
   public V get(Object key) {
-    V value = this.map.get(key);
-    if (value == null) {
-      value = this.defaultProvider.apply((K) key);
-      if (this.putDefault) this.map.put((K) key, value);
-    }
-    return value;
+    return this.putDefault ? getOrCreate((K) key) : getOrDefault((K) key);
   }
 
   public V getOrDefault(K key) {
     V value = this.map.get(key);
-    if (value == null) {
-      value = this.defaultProvider.apply(key);
-    }
-    return value;
+    return value != null ? value : this.defaultProvider.apply((K) key);
   }
 
   public V getOrCreate(K key) {
-    V value = this.map.get(key);
-    if (value == null) {
-      value = this.defaultProvider.apply(key);
-      this.map.put(key, value);
-    }
-    return value;
+    return this.map.computeIfAbsent(key, this.defaultProvider);
   }
 
   public V getOrNull(K key) {

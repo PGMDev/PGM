@@ -1,6 +1,5 @@
 package tc.oc.pgm.api.filter;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -10,9 +9,12 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
 public interface Filterables {
+  Class<Match> MATCH = Match.class;
+  Class<Party> PARTY = Party.class;
+  Class<MatchPlayer> PLAYER = MatchPlayer.class;
+
   /** {@link Filterable}s ordered from general to specific */
-  List<Class<? extends Filterable<?>>> SCOPES =
-      ImmutableList.of(Match.class, Party.class, MatchPlayer.class);
+  List<Class<? extends Filterable<?>>> SCOPES = List.of(MATCH, PARTY, PLAYER);
 
   /**
    * Return the "scope" of the given filter, which is the most general {@link Filterable} type that
@@ -46,15 +48,13 @@ public interface Filterables {
   // pgm classes
   @SuppressWarnings("unchecked")
   static <T extends Filterable<?>> Class<T> parse(Node node) throws InvalidXMLException {
-    switch (node.getValueNormalize()) {
-      case "player":
-        return (Class<T>) MatchPlayer.class;
-      case "team":
-        return (Class<T>) Party.class;
-      case "match":
-        return (Class<T>) Match.class;
-      default:
-        throw new InvalidXMLException("Unknown scope, must be one of: player, team, match", node);
-    }
+    return (Class<T>)
+        switch (node.getValueNormalize()) {
+          case "player" -> PLAYER;
+          case "team" -> PARTY;
+          case "match" -> MATCH;
+          default -> throw new InvalidXMLException(
+              "Unknown scope, must be one of: player, team, match", node);
+        };
   }
 }

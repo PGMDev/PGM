@@ -1,6 +1,7 @@
 package tc.oc.pgm.tracker.trackers;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -30,6 +31,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.material.Materials;
 
 /**
@@ -90,8 +92,7 @@ public class CombatLogTracker implements Listener {
   private static double getResistanceFactor(LivingEntity entity) {
     int amplifier = 0;
     for (PotionEffect effect : entity.getActivePotionEffects()) {
-      if (PotionEffectType.DAMAGE_RESISTANCE.equals(effect.getType())
-          && effect.getAmplifier() > amplifier) {
+      if (PotionEffects.RESISTANCE.equals(effect.getType()) && effect.getAmplifier() > amplifier) {
         amplifier = effect.getAmplifier();
       }
     }
@@ -159,16 +160,14 @@ public class CombatLogTracker implements Listener {
       // allowing the tracker to figure out the cause of death
       EntityDamageEvent damageEvent;
       if (imminentDeath.blockDamager != null) {
-        damageEvent =
-            new EntityDamageByBlockEvent(
-                imminentDeath.blockDamager,
-                player.getBukkit(),
-                imminentDeath.cause,
-                player.getBukkit().getHealth());
+        damageEvent = new EntityDamageByBlockEvent(
+            imminentDeath.blockDamager,
+            player.getBukkit(),
+            imminentDeath.cause,
+            player.getBukkit().getHealth());
       } else {
-        damageEvent =
-            new EntityDamageEvent(
-                player.getBukkit(), imminentDeath.cause, player.getBukkit().getHealth());
+        damageEvent = new EntityDamageEvent(
+            player.getBukkit(), imminentDeath.cause, player.getBukkit().getHealth());
       }
       match.callEvent(damageEvent);
 
@@ -189,13 +188,12 @@ public class CombatLogTracker implements Listener {
     }
 
     try {
-      currentDeathEvent =
-          new PlayerDeathEvent(
-              player.getBukkit(),
-              drops,
-              0,
-              player.getBukkit().getDisplayName() + " logged out to avoid death");
-      match.callEvent(currentDeathEvent);
+      currentDeathEvent = MISC_UTILS.createDeathEvent(
+          player.getBukkit(),
+          imminentDeath.cause,
+          drops,
+          player.getBukkit().getDisplayName() + " logged out to avoid death");
+      if (currentDeathEvent != null) match.callEvent(currentDeathEvent);
     } finally {
       currentDeathEvent = null;
     }
@@ -222,7 +220,8 @@ public class CombatLogTracker implements Listener {
    * Get the cause of the player's imminent death, or null if they are not about to die NOTE: not
    * idempotent, has the side effect of clearing the recentDamage cache
    */
-  public @Nullable ImminentDeath getImminentDeath(Player player) {
+  @Nullable
+  ImminentDeath getImminentDeath(Player player) {
     // If the player is already dead or in creative mode, we don't care
     if (player.isDead()
         || player.hasMetadata("isDead")
@@ -264,7 +263,7 @@ public class CombatLogTracker implements Listener {
                 || Materials.isLava(landingBlock.getType())) {
               // Break if the player hits a solid block or lava
               break;
-            } else if (landingBlock.getType() == Material.WEB) {
+            } else if (landingBlock.getType() == Materials.WEB) {
               // If they hit web, reset their fall distance, but assume they keep falling
               fallDistance = -1;
             }

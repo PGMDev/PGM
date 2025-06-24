@@ -25,6 +25,7 @@ import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
+import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
@@ -91,13 +92,12 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
     Integer oldProximity = proximity.remove(team);
     if (oldProximity != null) {
       getMatch()
-          .callEvent(
-              new GoalProximityChangeEvent(
-                  this,
-                  team,
-                  null,
-                  distanceFromDistanceSquared(oldProximity),
-                  Double.POSITIVE_INFINITY));
+          .callEvent(new GoalProximityChangeEvent(
+              this,
+              team,
+              null,
+              distanceFromDistanceSquared(oldProximity),
+              Double.POSITIVE_INFINITY));
     }
   }
 
@@ -145,13 +145,12 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
       if (newProximity < oldProximity) {
         proximity.put(player.getParty(), newProximity);
         getMatch()
-            .callEvent(
-                new GoalProximityChangeEvent(
-                    this,
-                    player.getParty(),
-                    location,
-                    distanceFromDistanceSquared(oldProximity),
-                    distanceFromDistanceSquared(newProximity)));
+            .callEvent(new GoalProximityChangeEvent(
+                this,
+                player.getParty(),
+                location,
+                distanceFromDistanceSquared(oldProximity),
+                distanceFromDistanceSquared(newProximity)));
         return true;
       }
     }
@@ -160,7 +159,9 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
 
   public boolean shouldShowProximity(@Nullable Competitor team, Party viewer) {
     return team != null
-        && PGM.get().getConfiguration().showProximity()
+        && PGM.get()
+            .getConfiguration()
+            .showProximity(match.moduleRequire(TimeLimitMatchModule.class).willUseProximity())
         && isProximityRelevant(team)
         && (viewer == team || viewer.isObserving());
   }

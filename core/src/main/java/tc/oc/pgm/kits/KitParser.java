@@ -1,5 +1,9 @@
 package tc.oc.pgm.kits;
 
+import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -25,6 +29,8 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -39,7 +45,6 @@ import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.Action;
-import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -54,30 +59,27 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.attribute.AttributeModifier;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.inventory.ArmorType;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.Slot;
+import tc.oc.pgm.util.material.ItemMaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.nms.NMSHacks;
+import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class KitParser {
+  private static final Set<String> ITEM_TYPES = Set.of("item", "book", "head", "firework");
+
   protected final MapFactory factory;
-  protected final Set<AttributeModifier> attributeModifiers = new HashSet<>();
   protected final Set<Kit> kits = new HashSet<>();
 
   public KitParser(MapFactory factory) {
     this.factory = factory;
-  }
-
-  /**
-   * Return all {@link AttributeModifier}s used by parsed {@link AttributeKit}s. We need to keep
-   * track of these so we can remove them from players.
-   */
-  public Set<AttributeModifier> getAttributeModifiers() {
-    return attributeModifiers;
   }
 
   public Set<Kit> getKits() {
@@ -161,7 +163,6 @@ public abstract class KitParser {
   }
 
   public KnockbackReductionKit parseKnockbackReductionKit(Element el) throws InvalidXMLException {
-    if (!BukkitUtils.isSportPaper()) return null;
     Element child = el.getChild("knockback-reduction");
     if (child == null) {
       return null;
@@ -209,9 +210,8 @@ public abstract class KitParser {
     org.jdom2.Attribute flySpeedAtt = el.getAttribute("fly-speed");
     float flySpeedMultiplier = 1;
     if (flySpeedAtt != null) {
-      flySpeedMultiplier =
-          XMLUtils.parseNumber(
-              el.getAttribute("fly-speed"), Float.class, Range.closed(FlyKit.MIN, FlyKit.MAX));
+      flySpeedMultiplier = XMLUtils.parseNumber(
+          el.getAttribute("fly-speed"), Float.class, Range.closed(FlyKit.MIN, FlyKit.MAX));
     }
 
     return new FlyKit(canFly, flying, flySpeedMultiplier);
@@ -249,7 +249,7 @@ public abstract class KitParser {
     Map<Slot, ItemStack> slotItems = Maps.newHashMap();
     List<ItemStack> freeItems = new ArrayList<>();
 
-    for (Element itemEl : el.getChildren()) {
+    for (Element itemEl : ((InheritingElement) el).getChildren(ITEM_TYPES)) {
       ItemStack item = this.parseItemStack(itemEl);
 
       if (item != null) {
@@ -276,22 +276,13 @@ public abstract class KitParser {
   }
 
   public @Nullable ItemStack parseItemStack(Element el) throws InvalidXMLException {
-    switch (el.getName()) {
-      case "item":
-        return parseItem(el, true);
-
-      case "book":
-        return parseBook(el);
-
-      case "head":
-        return parseHead(el);
-
-      case "firework":
-        return parseFirework(el);
-
-      default:
-        return null;
-    }
+    return switch (el.getName()) {
+      case "item" -> parseItem(el, true);
+      case "book" -> parseBook(el);
+      case "head" -> parseHead(el);
+      case "firework" -> parseFirework(el);
+      default -> null;
+    };
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
@@ -340,27 +331,25 @@ public abstract class KitParser {
   }
 
   public AttributeKit parseAttributeKit(Element el) throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = parseAttributeModifiers(el);
-    attributeModifiers.addAll(modifiers.values());
+    SetMultimap<Attribute, AttributeModifier> modifiers = parseAttributeModifiers(el);
     return modifiers.isEmpty() ? null : new AttributeKit(modifiers);
   }
 
-  public SetMultimap<String, AttributeModifier> parseAttributeModifiers(Element el)
+  public SetMultimap<Attribute, AttributeModifier> parseAttributeModifiers(Element el)
       throws InvalidXMLException {
-    SetMultimap<String, AttributeModifier> modifiers = HashMultimap.create();
+    SetMultimap<Attribute, AttributeModifier> modifiers = HashMultimap.create();
 
     Node attr = Node.fromAttr(el, "attribute", "attributes");
     if (attr != null) {
       for (String modifierText : Splitter.on(";").split(attr.getValue())) {
-        Map.Entry<String, AttributeModifier> mod =
-            XMLUtils.parseCompactAttributeModifier(attr, modifierText);
-        modifiers.put(mod.getKey(), mod.getValue());
+        var mod = XMLUtils.parseCompactAttributeModifier(attr, modifierText);
+        modifiers.put(mod.getLeft(), mod.getRight());
       }
     }
 
     for (Element elAttribute : el.getChildren("attribute")) {
-      Map.Entry<String, AttributeModifier> mod = XMLUtils.parseAttributeModifier(elAttribute);
-      modifiers.put(mod.getKey(), mod.getValue());
+      var mod = XMLUtils.parseAttributeModifier(elAttribute);
+      modifiers.put(mod.getLeft(), mod.getRight());
     }
 
     return modifiers;
@@ -369,23 +358,23 @@ public abstract class KitParser {
   public ItemStack parseBook(Element el) throws InvalidXMLException {
     ItemStack itemStack = parseItem(el, Material.WRITTEN_BOOK);
     BookMeta meta = (BookMeta) itemStack.getItemMeta();
-    meta.setTitle(BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "title").getText()));
-    meta.setAuthor(BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "author").getText()));
+    meta.setTitle(
+        BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "title").getText()));
+    meta.setAuthor(
+        BukkitUtils.colorize(XMLUtils.getRequiredUniqueChild(el, "author").getText()));
 
     Element elPages = el.getChild("pages");
     if (elPages != null) {
       for (Element elPage : elPages.getChildren("page")) {
         String text = elPage.getText();
         text = text.trim(); // Remove leading and trailing whitespace
-        text =
-            Pattern.compile("^[ \\t]+", Pattern.MULTILINE)
-                .matcher(text)
-                .replaceAll(""); // Remove indentation on each line
-        text =
-            Pattern.compile("^\\n", Pattern.MULTILINE)
-                .matcher(text)
-                .replaceAll(
-                    " \n"); // Add a space to blank lines, otherwise they vanish for unknown reasons
+        text = Pattern.compile("^[ \\t]+", Pattern.MULTILINE)
+            .matcher(text)
+            .replaceAll(""); // Remove indentation on each line
+        text = Pattern.compile("^\\n", Pattern.MULTILINE)
+            .matcher(text)
+            .replaceAll(
+                " \n"); // Add a space to blank lines, otherwise they vanish for unknown reasons
         text = BukkitUtils.colorize(text); // Color codes
         meta.addPage(text);
       }
@@ -396,9 +385,9 @@ public abstract class KitParser {
   }
 
   public ItemStack parseHead(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.SKULL_ITEM, (short) 3);
+    ItemStack itemStack = parseItem(el, MaterialData.item(Materials.PLAYER_HEAD, (short) 3));
     SkullMeta meta = (SkullMeta) itemStack.getItemMeta();
-    NMSHacks.setSkullMetaOwner(
+    NMS_HACKS.setSkullMetaOwner(
         meta,
         XMLUtils.parseUsername(Node.fromChildOrAttr(el, "name")),
         XMLUtils.parseUuid(Node.fromRequiredChildOrAttr(el, "uuid")),
@@ -408,14 +397,13 @@ public abstract class KitParser {
   }
 
   public ItemStack parseFirework(Element el) throws InvalidXMLException {
-    ItemStack itemStack = parseItem(el, Material.FIREWORK);
+    ItemStack itemStack = parseItem(el, Materials.FIREWORK);
     FireworkMeta meta = (FireworkMeta) itemStack.getItemMeta();
     int power = XMLUtils.parseNumber(Node.fromAttr(el, "power"), Integer.class, false, 1);
     meta.setPower(power);
 
     for (Element explosionEl : el.getChildren("explosion")) {
-      Type type =
-          XMLUtils.parseEnum(Node.fromAttr(explosionEl, "type"), Type.class, null, Type.BURST);
+      Type type = XMLUtils.parseEnum(Node.fromAttr(explosionEl, "type"), Type.class, Type.BURST);
       boolean flicker = XMLUtils.parseBoolean(Node.fromAttr(explosionEl, "flicker"), false);
       boolean trail = XMLUtils.parseBoolean(Node.fromAttr(explosionEl, "trail"), false);
 
@@ -426,14 +414,13 @@ public abstract class KitParser {
         throw new InvalidXMLException("At least one <color> must be defined", explosionEl);
       }
 
-      meta.addEffect(
-          FireworkEffect.builder()
-              .with(type)
-              .withColor(primary)
-              .withFade(fade)
-              .flicker(flicker)
-              .trail(trail)
-              .build());
+      meta.addEffect(FireworkEffect.builder()
+          .with(type)
+          .withColor(primary)
+          .withFade(fade)
+          .flicker(flicker)
+          .trail(trail)
+          .build());
     }
 
     itemStack.setItemMeta(meta);
@@ -471,11 +458,6 @@ public abstract class KitParser {
     boolean ignoreEnchantments =
         XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-enchantments"), ignoreMetadata);
 
-    if (ignoreMetadata && (!ignoreName || !ignoreEnchantments)) {
-      throw new InvalidXMLException(
-          "Cannot ignore metadata but respect name or enchantments", parent);
-    }
-
     return new ItemMatcher(
         stack, amount, ignoreDurability, ignoreMetadata, ignoreName, ignoreEnchantments);
   }
@@ -485,33 +467,34 @@ public abstract class KitParser {
 
     org.jdom2.Attribute attrMaterial = el.getAttribute("material");
     String name = attrMaterial != null ? attrMaterial.getValue() : el.getValue();
-    Material type = Materials.parseMaterial(name);
-    if (type == null || (type == Material.AIR && !allowAir)) {
+    short dmg = XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0);
+    var md = XMLUtils.parseItemMaterialData(new Node(el), name, dmg);
+
+    if (md == null || (md.getItemType() == Material.AIR && !allowAir)) {
       throw new InvalidXMLException("Invalid material type '" + name + "'", el);
     }
 
-    return parseItem(el, type);
+    return parseItem(el, md);
   }
 
   public ItemStack parseItem(Element el, Material type) throws InvalidXMLException {
     return parseItem(
-        el, type, XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0));
+        el,
+        MaterialData.item(
+            type, XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0)));
   }
 
-  public ItemStack parseItem(Element el, Material type, short damage) throws InvalidXMLException {
+  public ItemStack parseItem(Element el, ItemMaterialData material) throws InvalidXMLException {
     int amount = XMLUtils.parseNumber(Node.fromAttr(el, "amount"), Integer.class, true, 1);
 
     // amount returns max value of integer if "oo" is given as amount
-    if (amount == Integer.MAX_VALUE) amount = -1;
+    if (amount == Integer.MAX_VALUE) amount = ItemKit.INFINITE_STACK_SIZE;
 
     // must be CraftItemStack to keep track of NBT data
-    ItemStack itemStack = NMSHacks.craftItemCopy(new ItemStack(type, amount, damage));
+    ItemStack itemStack = INVENTORY_UTILS.craftItemCopy(material.toItemStack(amount));
 
-    if (itemStack.getType() != type) {
-      throw new InvalidXMLException("Invalid item/block", el);
-    }
-
-    if (amount == -1 && !itemStack.getType().isBlock()) {
+    // amount returns max value of integer if "oo" is given as amount
+    if (amount == ItemKit.INFINITE_STACK_SIZE && !itemStack.getType().isBlock()) {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }
 
@@ -533,15 +516,15 @@ public abstract class KitParser {
     }
 
     if (meta instanceof EnchantmentStorageMeta) {
-      for (Entry<Enchantment, Integer> enchant : parseEnchantments(el, "stored-").entrySet()) {
+      for (Entry<Enchantment, Integer> enchant :
+          parseEnchantments(el, "stored-").entrySet()) {
         ((EnchantmentStorageMeta) meta)
             .addStoredEnchant(enchant.getKey(), enchant.getValue(), true);
       }
     }
 
     List<PotionEffect> potions = parsePotions(el);
-    if (!potions.isEmpty() && meta instanceof PotionMeta) {
-      PotionMeta potionMeta = (PotionMeta) meta;
+    if (!potions.isEmpty() && meta instanceof PotionMeta potionMeta) {
 
       for (PotionEffect effect : potionMeta.getCustomEffects()) {
         potionMeta.removeCustomEffect(effect.getType());
@@ -552,7 +535,7 @@ public abstract class KitParser {
       }
     }
 
-    NMSHacks.applyAttributeModifiers(parseAttributeModifiers(el), meta);
+    ATTRIBUTE_UTILS.applyAttributeModifiers(parseAttributeModifiers(el), meta);
 
     String customName = el.getAttributeValue("name");
     if (customName != null) {
@@ -561,8 +544,7 @@ public abstract class KitParser {
       meta.setDisplayName("Grenade");
     }
 
-    if (meta instanceof LeatherArmorMeta) {
-      LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
+    if (meta instanceof LeatherArmorMeta armorMeta) {
       Node attrColor = Node.fromAttr(el, "color");
       if (attrColor != null) {
         armorMeta.setColor(XMLUtils.parseHexColor(attrColor));
@@ -583,36 +565,35 @@ public abstract class KitParser {
     }
 
     if (XMLUtils.parseBoolean(el.getAttribute("unbreakable"), false)) {
-      meta.spigot().setUnbreakable(true);
+      INVENTORY_UTILS.setUnbreakable(meta, true);
     }
 
     Element elCanDestroy = el.getChild("can-destroy");
     if (elCanDestroy != null) {
-      NMSHacks.setCanDestroy(meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
+      INVENTORY_UTILS.setCanDestroy(
+          meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
     }
 
     Element elCanPlaceOn = el.getChild("can-place-on");
     if (elCanPlaceOn != null) {
-      NMSHacks.setCanPlaceOn(meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
+      INVENTORY_UTILS.setCanPlaceOn(
+          meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
     }
   }
 
   String itemFlagName(ItemFlag flag) {
-    switch (flag) {
-      case HIDE_ATTRIBUTES:
-        return "attributes";
-      case HIDE_ENCHANTS:
-        return "enchantments";
-      case HIDE_UNBREAKABLE:
-        return "unbreakable";
-      case HIDE_DESTROYS:
-        return "can-destroy";
-      case HIDE_PLACED_ON:
-        return "can-place-on";
-      case HIDE_POTION_EFFECTS:
-        return "other";
-    }
-    throw new IllegalStateException("Unknown item flag " + flag);
+    return switch (flag) {
+      case HIDE_ATTRIBUTES -> "attributes";
+      case HIDE_ENCHANTS -> "enchantments";
+      case HIDE_UNBREAKABLE -> "unbreakable";
+      case HIDE_DESTROYS -> "can-destroy";
+      case HIDE_PLACED_ON -> "can-place-on";
+        //noinspection UnnecessaryDefault: newer versions do have extra branches
+      default -> {
+        if (flag == InventoryUtils.HIDE_ADDITIONAL_FLAG) yield "other";
+        yield flag.name().replace("HIDE_", "").toLowerCase().replace("_", "-");
+      }
+    };
   }
 
   public void parseCustomNBT(Element el, ItemStack itemStack) throws InvalidXMLException {
@@ -636,7 +617,7 @@ public abstract class KitParser {
       ItemTags.LOCKED.set(itemStack, true);
     }
 
-    if (itemStack.getAmount() == -1) {
+    if (itemStack.getAmount() == ItemKit.INFINITE_STACK_SIZE) {
       ItemTags.INFINITE.set(itemStack, true);
     }
 
@@ -739,12 +720,10 @@ public abstract class KitParser {
 
     if (child != null) {
       boolean enabled = XMLUtils.parseBoolean(child.getAttribute("enabled"), true);
-      float power =
-          XMLUtils.parseNumber(
-              child.getAttribute("power"), Float.class, DoubleJumpKit.DEFAULT_POWER);
-      Duration rechargeTime =
-          XMLUtils.parseDuration(
-              child.getAttribute("recharge-time"), DoubleJumpKit.DEFAULT_RECHARGE);
+      float power = XMLUtils.parseNumber(
+          child.getAttribute("power"), Float.class, DoubleJumpKit.DEFAULT_POWER);
+      Duration rechargeTime = XMLUtils.parseDuration(
+          child.getAttribute("recharge-time"), DoubleJumpKit.DEFAULT_RECHARGE);
       boolean rechargeInAir =
           XMLUtils.parseBoolean(child.getAttribute("recharge-before-landing"), false);
 
@@ -790,9 +769,8 @@ public abstract class KitParser {
     Element el = XMLUtils.getUniqueChild(parent, "shield");
     if (el == null) return null;
 
-    double health =
-        XMLUtils.parseNumber(
-            el.getAttribute("health"), Double.class, ShieldParameters.DEFAULT_HEALTH);
+    double health = XMLUtils.parseNumber(
+        el.getAttribute("health"), Double.class, ShieldParameters.DEFAULT_HEALTH);
     Duration rechargeDelay =
         XMLUtils.parseDuration(el.getAttribute("delay"), ShieldParameters.DEFAULT_DELAY);
     return new ShieldKit(new ShieldParameters(health, rechargeDelay));
@@ -828,10 +806,10 @@ public abstract class KitParser {
   public ActionKit parseActionKit(Element parent) throws InvalidXMLException {
     if (parent.getChildren("action").isEmpty()) return null;
 
-    ActionParser parser = new ActionParser(factory);
+    var parser = factory.getParser();
     ImmutableList.Builder<Action<? super MatchPlayer>> builder = ImmutableList.builder();
     for (Element action : parent.getChildren("action")) {
-      builder.add(parser.parse(action, MatchPlayer.class));
+      builder.add(parser.action(MatchPlayer.class, action).required());
     }
 
     return new ActionKit(builder.build());

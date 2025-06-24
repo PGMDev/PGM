@@ -2,7 +2,6 @@ package tc.oc.pgm.payload.track;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.material.MaterialData;
 import org.bukkit.material.Rails;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +42,7 @@ public enum RailDirection {
   }
 
   public static @Nullable RailDirection getRail(Block block) {
-    MaterialData md = block.getState().getMaterialData();
+    org.bukkit.material.MaterialData md = block.getState().getData();
     if (!(md instanceof Rails)) return null;
 
     byte data = md.getData();

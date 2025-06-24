@@ -1,0 +1,14 @@
+package tc.oc.pgm.score;
+
+public enum ScoreCause {
+  CONTROL_POINT_LOST,
+  CONTROL_POINT_OWNED,
+  CONTROL_POINT_TICK,
+  DEATH,
+  FLAG_CAPTURE,
+  FLAG_CARRIED_TICK,
+  FLAG_RETURNED_TICK,
+  KILL,
+  SCOREBOX,
+  VARIABLE
+}

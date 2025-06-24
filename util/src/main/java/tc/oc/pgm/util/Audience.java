@@ -1,7 +1,5 @@
 package tc.oc.pgm.util;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.ArrayList;
@@ -12,31 +10,29 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.text.ComponentRenderer;
 
 /** Receiver of chat messages, sounds, titles, and other media. */
 @FunctionalInterface
 public interface Audience extends ForwardingAudience.Single {
 
-  Sound WARNING_SOUND = sound(key("note.bass"), Sound.Source.MASTER, 1f, 0.75f);
   Component WARNING_MESSAGE = text(" \u26a0 ", NamedTextColor.YELLOW); // ⚠
 
   default void sendWarning(ComponentLike message) {
     sendMessage(WARNING_MESSAGE.append(message.asComponent().colorIfAbsent(NamedTextColor.RED)));
-    playSound(WARNING_SOUND);
+    playSound(Sounds.WARNING);
   }
 
-  BukkitAudiences PROVIDER =
-      BukkitAudiences.builder(BukkitUtils.getPlugin())
-          .componentRenderer(ComponentRenderer.RENDERER)
-          .build();
+  BukkitAudiences PROVIDER = BukkitAudiences.builder(BukkitUtils.getPlugin())
+      .componentRenderer(ComponentRenderer.RENDERER)
+      .build();
 
   static Audience console() {
     return PROVIDER::console;

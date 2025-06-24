@@ -1,24 +1,17 @@
 package tc.oc.pgm.util.tablist;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
 
-import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.server.v1_8_R3.Packet;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.nms.NMSHacks;
-import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
+import tc.oc.pgm.util.nms.packets.Packet;
+import tc.oc.pgm.util.nms.packets.TabPackets;
 
 /**
  * Render arbitrary strings to the TAB list AKA player list. Before this is used with a player,
@@ -40,9 +33,6 @@ public class TabDisplay {
   // Maximum number of columns that the player list will show
   public static final int MAX_WIDTH = 10;
 
-  // A no-space character for 1.7 clients
-  private static final String NO_SPACE = "\u1FFF";
-
   // Width and total size of the list
   private final int width, slots;
 
@@ -53,8 +43,8 @@ public class TabDisplay {
   private final Packet[] teamCreatePackets;
   private final Packet[] teamRemovePackets;
 
-  private final PacketPlayOutPlayerInfo listAddPacket;
-  private final PacketPlayOutPlayerInfo listRemovePacket;
+  private final TabPackets.PlayerInfo listAddPacket;
+  private final TabPackets.PlayerInfo listRemovePacket;
 
   public TabDisplay(Player viewer, int width) {
     // Number of columns is maxPlayers/rows rounded up
@@ -67,60 +57,27 @@ public class TabDisplay {
     this.teamCreatePackets = new Packet[this.slots];
     this.teamRemovePackets = new Packet[this.slots];
 
-    this.listAddPacket =
-        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER);
-    this.listRemovePacket =
-        NMSHacks.createPlayerInfoPacket(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER);
+    this.listAddPacket = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
+    this.listRemovePacket = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.REMOVE_PLAYER);
 
+    SlotBuilder slots = new SlotBuilder();
     for (int slot = 0; slot < this.slots; ++slot) {
-      Component playerName = this.slotName(slot);
-      String name = LegacyComponentSerializer.legacySection().serialize(playerName);
-      String renderedPlayerName = TextTranslations.toMinecraftGson(playerName, viewer);
+      String name = slots.getPlayerName(slot);
+      var renderedPlayerName = text(name);
 
       String teamName = this.slotTeamName(slot);
-      this.teamCreatePackets[slot] =
-          NMSHacks.teamCreatePacket(
-              teamName, teamName, "", "", false, false, Collections.singleton(name));
-      this.teamRemovePackets[slot] = NMSHacks.teamRemovePacket(teamName);
+      this.teamCreatePackets[slot] = TAB_PACKETS.teamCreatePacket(
+          teamName, teamName, "", "", false, false, Collections.singleton(name));
+      this.teamRemovePackets[slot] = TAB_PACKETS.teamRemovePacket(teamName);
       UUID uuid = UUID.randomUUID();
 
-      NMSHacks.getPlayerInfoDataList(listAddPacket)
-          .add(
-              NMSHacks.playerListPacketData(
-                  listAddPacket, uuid, name, GameMode.SURVIVAL, PING, null, renderedPlayerName));
-      NMSHacks.getPlayerInfoDataList(listRemovePacket)
-          .add(NMSHacks.playerListPacketData(listRemovePacket, uuid, renderedPlayerName));
+      listAddPacket.addPlayerInfo(uuid, name, PING, null, renderedPlayerName);
+      listRemovePacket.addPlayerInfo(uuid, renderedPlayerName);
     }
-  }
-
-  public int getWidth() {
-    return width;
   }
 
   private int slotIndex(int x, int y) {
     return y * this.width + x;
-  }
-
-  private static final List<NamedTextColor> COLORS =
-      Lists.newArrayList(NamedTextColor.NAMES.values());
-
-  /**
-   * Creates an unique, invisible name for the slot. Uses a combination of color-codes and an
-   * invisible character for 1.7 clients, in a hex-like conversion. If _ is the empty char, Slot 3
-   * (0x3) becomes §0_§3_, while Slot 25 (0x19) becomes §0_§9_§1_
-   *
-   * @param slot The slot to create a unique player name for
-   * @return The base component array of invisible characters
-   */
-  private Component slotName(int slot) {
-    TextComponent.Builder builder = text();
-    builder.append(text(NO_SPACE, NamedTextColor.BLACK)); // Avoid collision by adding a §0 on front
-
-    do {
-      builder.append(text(NO_SPACE, COLORS.get(slot % COLORS.size())));
-      slot /= COLORS.size();
-    } while (slot > 0);
-    return builder.build();
   }
 
   private String slotTeamName(int slot) {
@@ -133,8 +90,7 @@ public class TabDisplay {
 
       String[] split = StringUtils.splitIntoTeamPrefixAndSuffix(text);
       String name = this.slotTeamName(slot);
-      NMSHacks.sendPacket(
-          viewer, NMSHacks.teamUpdatePacket(name, name, split[0], split[1], false, false));
+      TAB_PACKETS.teamUpdatePacket(name, name, split[0], split[1], false, false).send(viewer);
     }
   }
 
@@ -144,22 +100,48 @@ public class TabDisplay {
   }
 
   public void setup() {
-    NMSHacks.sendPacket(viewer, this.listAddPacket);
+    this.listAddPacket.send(this.viewer);
     for (int slot = 0; slot < this.slots; ++slot) {
-      NMSHacks.sendPacket(viewer, this.teamCreatePackets[slot]);
+      this.teamCreatePackets[slot].send(viewer);
     }
 
     Arrays.fill(rendered, "");
 
     // Force removing and re-adding all players, because tab list is FIFO in 1.7, re-adding
     // players makes them append at the end
-    NMSHacks.removeAndAddAllTabPlayers(viewer);
+    TAB_PACKETS.removeAndAddAllTabPlayers(viewer);
   }
 
   public void tearDown() {
     for (int slot = 0; slot < this.slots; ++slot) {
-      NMSHacks.sendPacket(viewer, this.teamRemovePackets[slot]);
+      this.teamRemovePackets[slot].send(viewer);
     }
-    NMSHacks.sendPacket(viewer, this.listRemovePacket);
+    this.listRemovePacket.send(viewer);
+  }
+
+  private static class SlotBuilder {
+    private static final char COLOR_CODE = '§';
+    // A no-space character for 1.7 clients
+    private static final char NO_SPACE = '\u1FFF';
+    // Chat color amount
+    private static final int COLORS = 16;
+
+    private final char[] builder =
+        new char[] {COLOR_CODE, '0', NO_SPACE, COLOR_CODE, '0', NO_SPACE};
+
+    /**
+     * Creates an unique, invisible name for the slot. Uses a combination of color-codes and an
+     * invisible character for 1.7 clients, in a hex-like conversion. If _ is the empty char, Slot 3
+     * (0x03) becomes §0_§3_, while Slot 25 (0x19) becomes §1_§9_
+     *
+     * @param slot The slot to create a unique player name for
+     * @return The base component array of invisible characters
+     */
+    public String getPlayerName(int slot) {
+      assert slot < 0xFF; // Numbers higher than this are not supported.
+      builder[4] = Character.forDigit(slot % COLORS, COLORS);
+      builder[1] = Character.forDigit((slot / COLORS) % COLORS, COLORS);
+      return new String(builder);
+    }
   }
 }

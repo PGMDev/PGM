@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public class ContextStore<T> implements Iterable<Map.Entry<String, T>> {
   protected final Map<String, T> store = Maps.newTreeMap();
@@ -14,6 +15,10 @@ public class ContextStore<T> implements Iterable<Map.Entry<String, T>> {
   @Override
   public Iterator<Map.Entry<String, T>> iterator() {
     return this.store.entrySet().iterator();
+  }
+
+  public Stream<Map.Entry<String, T>> stream() {
+    return this.store.entrySet().stream();
   }
 
   public boolean contains(String name) {

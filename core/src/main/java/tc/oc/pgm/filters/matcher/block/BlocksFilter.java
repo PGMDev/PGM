@@ -28,7 +28,7 @@ public class BlocksFilter extends TypedFilter.Impl<LocationQuery>
 
   @Override
   public boolean matches(LocationQuery query) {
-    return query.reactor(this).region.contains(query);
+    return query.state(this).region.contains(query);
   }
 
   @Override
@@ -60,7 +60,8 @@ public class BlocksFilter extends TypedFilter.Impl<LocationQuery>
       return Union.of(result);
     }
 
-    return FiniteBlockRegion.fromWorld(region, match.getWorld(), filter, match.getMap().getProto());
+    return FiniteBlockRegion.fromWorld(
+        region, match.getWorld(), filter, match.getMap().getProto());
   }
 
   protected static final class Reactor extends ReactorFactory.Reactor {

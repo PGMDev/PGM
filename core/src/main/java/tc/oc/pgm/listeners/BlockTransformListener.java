@@ -1,5 +1,8 @@
 package tc.oc.pgm.listeners;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import java.lang.annotation.Retention;
@@ -39,14 +42,11 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.material.Door;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -67,6 +67,7 @@ import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
+import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.material.Materials;
 
 public class BlockTransformListener implements Listener {
@@ -93,62 +94,60 @@ public class BlockTransformListener implements Listener {
     // Find all the @EventWrapper methods in this class and register them at EVERY priority level.
     Stream.of(getClass().getMethods())
         .filter(method -> method.getAnnotation(EventWrapper.class) != null)
-        .forEach(
-            method -> {
-              final Class<? extends Event> eventClass =
-                  method.getParameterTypes()[0].asSubclass(Event.class);
+        .forEach(method -> {
+          final Class<? extends Event> eventClass =
+              method.getParameterTypes()[0].asSubclass(Event.class);
 
-              for (final EventPriority priority : EventPriority.values()) {
-                EventExecutor executor =
-                    new EventExecutor() {
-                      @Override
-                      public void execute(Listener listener, Event event) throws EventException {
-                        // REMOVED: Ignore the event if it was fron a non-Match world
-                        // if (event instanceof Physical
-                        //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld())
-                        // ==
-                        // null)
-                        //  return;
+          for (final EventPriority priority : EventPriority.values()) {
+            EventExecutor executor = new EventExecutor() {
+              @Override
+              public void execute(Listener listener, Event event) throws EventException {
+                // REMOVED: Ignore the event if it was fron a non-Match world
+                // if (event instanceof Physical
+                //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld())
+                // ==
+                // null)
+                //  return;
 
-                        if (!Events.isCancelled(event)) {
-                          // At the first priority level, call the event handler method.
-                          // If it decides to generate a BlockTransformEvent, it will be stored in
-                          // currentEvents.
-                          if (priority == EventPriority.LOWEST) {
-                            if (eventClass.isInstance(event)) {
-                              try {
-                                method.invoke(listener, event);
-                              } catch (InvocationTargetException ex) {
-                                throw new EventException(ex.getCause(), event);
-                              } catch (Throwable t) {
-                                throw new EventException(t, event);
-                              }
-                            }
-                          }
-                        }
-
-                        // Check for cached events and dispatch them at the current priority level
-                        // only.
-                        // The BTE needs to be dispatched even after it's cancelled, because we DO
-                        // have
-                        // listeners that depend on receiving cancelled events e.g. WoolMatchModule.
-                        for (BlockTransformEvent bte : currentEvents.get(event)) {
-                          Events.callEvent(bte, priority);
-                        }
-
-                        // After dispatching the last priority level, clean up the cached events and
-                        // do
-                        // post-event stuff.
-                        // This needs to happen even if the event is cancelled.
-                        if (priority == EventPriority.MONITOR) {
-                          finishCauseEvent(event);
-                        }
+                if (!Events.isCancelled(event)) {
+                  // At the first priority level, call the event handler method.
+                  // If it decides to generate a BlockTransformEvent, it will be stored in
+                  // currentEvents.
+                  if (priority == EventPriority.LOWEST) {
+                    if (eventClass.isInstance(event)) {
+                      try {
+                        method.invoke(listener, event);
+                      } catch (InvocationTargetException ex) {
+                        throw MISC_UTILS.createEventException(ex.getCause(), event);
+                      } catch (Throwable t) {
+                        throw MISC_UTILS.createEventException(t, event);
                       }
-                    };
+                    }
+                  }
+                }
 
-                pm.registerEvent(eventClass, this, priority, executor, plugin, false);
+                // Check for cached events and dispatch them at the current priority level
+                // only.
+                // The BTE needs to be dispatched even after it's cancelled, because we DO
+                // have
+                // listeners that depend on receiving cancelled events e.g. WoolMatchModule.
+                for (BlockTransformEvent bte : currentEvents.get(event)) {
+                  Events.callEvent(bte, priority);
+                }
+
+                // After dispatching the last priority level, clean up the cached events and
+                // do
+                // post-event stuff.
+                // This needs to happen even if the event is cancelled.
+                if (priority == EventPriority.MONITOR) {
+                  finishCauseEvent(event);
+                }
               }
-            });
+            };
+
+            pm.registerEvent(eventClass, this, priority, executor, plugin, false);
+          }
+        });
   }
 
   private void finishCauseEvent(Event causeEvent) {
@@ -175,14 +174,12 @@ public class BlockTransformListener implements Listener {
     BlockState oldState = event.getOldState().getBlock().getRelative(relative).getState();
     BlockState newState = event.getBlock().getRelative(relative).getState();
     BlockTransformEvent toCall;
-    if (event instanceof ParticipantBlockTransformEvent) {
+    if (event instanceof ParticipantBlockTransformEvent bte) {
+      toCall = new ParticipantBlockTransformEvent(
+          event.getCause(), oldState, newState, bte.getPlayerState());
+    } else if (event instanceof PlayerBlockTransformEvent bte) {
       toCall =
-          new ParticipantBlockTransformEvent(
-              event, oldState, newState, ((ParticipantBlockTransformEvent) event).getPlayerState());
-    } else if (event instanceof PlayerBlockTransformEvent) {
-      toCall =
-          new PlayerBlockTransformEvent(
-              event, oldState, newState, ((PlayerBlockTransformEvent) event).getPlayerState());
+          new PlayerBlockTransformEvent(event.getCause(), oldState, newState, bte.getPlayerState());
     } else {
       toCall = new BlockTransformEvent(event, oldState, newState);
     }
@@ -191,8 +188,8 @@ public class BlockTransformListener implements Listener {
 
   private void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
-      MaterialData oldData = event.getOldState().getData();
-      MaterialData newData = event.getNewState().getData();
+      org.bukkit.material.MaterialData oldData = event.getOldState().getData();
+      org.bukkit.material.MaterialData newData = event.getNewState().getData();
       if (oldData instanceof Door) {
         handleDoor(event, (Door) oldData);
       }
@@ -246,7 +243,6 @@ public class BlockTransformListener implements Listener {
     }
   }
 
-  @SuppressWarnings("deprecation")
   @EventWrapper
   public void onPlayerBucketEmpty(final PlayerBucketEmptyEvent event) {
     Block block = event.getBlockClicked().getRelative(event.getBlockFace());
@@ -300,14 +296,14 @@ public class BlockTransformListener implements Listener {
 
       // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
       // When lava flows into water, it creates stone or cobblestone
-      if (isWater(oldState.getType()) && isLava(newState.getType())) {
+      if (Materials.isWater(oldState.getType()) && Materials.isLava(newState.getType())) {
         newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
         newState.setRawData((byte) 0);
       }
 
       // For some reason, the newState has the data value of the old source.
       // This corrects for that manually.
-      if (isWater(newState.getType()) || isLava(newState.getType())) {
+      if (Materials.isWater(newState.getType()) || Materials.isLava(newState.getType())) {
         byte oldData = newState.getRawData();
         if (event.getFace() == BlockFace.DOWN) {
           // A data value of 8 (or higher) represents water flowing down
@@ -325,14 +321,6 @@ public class BlockTransformListener implements Listener {
       // Check for lava ownership
       this.callEvent(event, oldState, newState, Trackers.getOwner(event.getBlock()));
     }
-  }
-
-  private boolean isWater(Material material) {
-    return material == Material.WATER || material == Material.STATIONARY_WATER;
-  }
-
-  private boolean isLava(Material material) {
-    return material == Material.LAVA || material == Material.STATIONARY_LAVA;
   }
 
   @EventWrapper
@@ -451,7 +439,7 @@ public class BlockTransformListener implements Listener {
     // Add the pushed blocks at their destination
     for (Block block : blocks) {
       Block dest = block.getRelative(event.getDirection());
-      newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState().getData()));
+      newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState()));
     }
 
     // Add air blocks where a block is leaving, and no other block is replacing it
@@ -484,15 +472,24 @@ public class BlockTransformListener implements Listener {
     Map<Block, BlockState> newStates = new HashMap<>();
 
     // Add the arm of the piston, which will extend into the adjacent block.
-    PistonExtensionMaterial pistonExtension =
-        new PistonExtensionMaterial(Material.PISTON_EXTENSION);
-    pistonExtension.setFacingDirection(event.getDirection());
-    BlockState pistonExtensionState = event.getBlock().getRelative(event.getDirection()).getState();
-    pistonExtensionState.setType(pistonExtension.getItemType());
-    pistonExtensionState.setData(pistonExtension);
-    newStates.put(event.getBlock(), pistonExtensionState);
+    BlockState state = event.getBlock().getRelative(event.getDirection()).getState();
+    MATERIAL_UTILS
+        .fromLegacyBlock(Materials.PISTON_HEAD, getPistonDirectionByte(event.getDirection()))
+        .applyTo(state);
+    newStates.put(event.getBlock(), state);
 
     this.onPistonMove(event, event.getBlocks(), newStates);
+  }
+
+  private byte getPistonDirectionByte(BlockFace face) {
+    return switch (face) {
+      default -> 0; // down included
+      case UP -> 1;
+      case NORTH -> 2;
+      case SOUTH -> 3;
+      case WEST -> 4;
+      case EAST -> 5;
+    };
   }
 
   @EventWrapper
@@ -508,7 +505,7 @@ public class BlockTransformListener implements Listener {
     callEvent(
         event,
         event.getBlock().getState(),
-        BlockStates.cloneWithMaterial(event.getBlock(), event.getTo(), event.getData()),
+        BlockStates.cloneWithMaterial(event.getBlock(), MATERIAL_UTILS.getTo(event)),
         Trackers.getOwner(event.getEntity()));
   }
 
@@ -533,7 +530,8 @@ public class BlockTransformListener implements Listener {
   public void onDispenserDispense(final BlockDispenseEvent event) {
     if (Materials.isBucket(event.getItem())) {
       // Yes, the location the dispenser is facing is stored in "velocity" for some ungodly reason
-      Block targetBlock = event.getVelocity().toLocation(event.getBlock().getWorld()).getBlock();
+      Block targetBlock =
+          event.getVelocity().toLocation(event.getBlock().getWorld()).getBlock();
       Material contents = Materials.materialInBucket(event.getItem());
 
       if (Materials.isLiquid(contents) || (contents == Material.AIR && targetBlock.isLiquid())) {
@@ -548,18 +546,13 @@ public class BlockTransformListener implements Listener {
 
   @EventWrapper
   public void onBlockFall(BlockFallEvent event) {
-    this.callEvent(
-        new BlockTransformEvent(
-            event, event.getBlock().getState(), BlockStates.toAir(event.getBlock().getState())));
+    this.callEvent(new BlockTransformEvent(
+        event, event.getBlock().getState(), BlockStates.toAir(event.getBlock().getState())));
   }
 
   private static Material getTrampledType(Material newType) {
-    switch (newType) {
-      case SOIL:
-        return Material.DIRT;
-      default:
-        return null;
-    }
+    if (newType == Materials.SOIL) return Material.DIRT;
+    return null;
   }
 
   // --------------------------

@@ -1,5 +1,7 @@
 package tc.oc.pgm.crafting;
 
+import static tc.oc.pgm.util.bukkit.RecipeUtils.RECIPE_UTILS;
+
 import java.util.Set;
 import org.bukkit.World;
 import org.bukkit.event.EventHandler;
@@ -11,17 +13,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Recipe;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class CraftingMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Set<Recipe> customRecipes;
-  private final Set<SingleMaterialMatcher> disabledRecipes;
+  private final MaterialMatcher disabledRecipes;
 
   public CraftingMatchModule(
-      Match match, Set<Recipe> customRecipes, Set<SingleMaterialMatcher> disabledRecipes) {
+      Match match, Set<Recipe> customRecipes, MaterialMatcher disabledRecipes) {
     this.match = match;
     this.customRecipes = customRecipes;
     this.disabledRecipes = disabledRecipes;
@@ -31,7 +32,7 @@ public class CraftingMatchModule implements MatchModule, Listener {
   public void enable() {
     World world = match.getWorld();
     for (Recipe recipe : customRecipes) {
-      BukkitUtils.addRecipe(world, recipe);
+      RECIPE_UTILS.addRecipe(world, recipe);
     }
   }
 
@@ -40,7 +41,7 @@ public class CraftingMatchModule implements MatchModule, Listener {
     // Recipe changes affect all worlds on the server, so we make changes at match start/end
     // to avoid interfering with adjacent matches. If we wait until unload() to reset them,
     // the next match would already be loaded.
-    BukkitUtils.resetRecipes(match.getWorld());
+    RECIPE_UTILS.resetRecipes(match.getWorld());
   }
 
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -51,11 +52,6 @@ public class CraftingMatchModule implements MatchModule, Listener {
       return;
     }
 
-    for (SingleMaterialMatcher disabled : disabledRecipes) {
-      if (disabled.matches(result)) {
-        crafting.setResult(null);
-        break;
-      }
-    }
+    if (disabledRecipes.matches(result)) crafting.setResult(null);
   }
 }

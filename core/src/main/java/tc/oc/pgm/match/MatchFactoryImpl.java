@@ -1,6 +1,8 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
@@ -8,6 +10,7 @@ import java.io.File;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
@@ -21,8 +24,8 @@ import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
+import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
@@ -32,16 +35,18 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.FileUtils;
-import tc.oc.pgm.util.chunk.NullChunkGenerator;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
+import tc.oc.pgm.util.text.TextTranslations;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();
   private static final Difficulty[] difficulties = Difficulty.values();
   private static final World.Environment[] environments = World.Environment.values();
+
+  private static final String DUMMY_TEAM = "dummy";
 
   private final Stack<Stage> stages;
   private final Future<Match> future;
@@ -61,7 +66,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       // Match creation was cancelled, no need to show an error
       if (e.getCause() instanceof InterruptedException) throw e;
 
-      Throwable err = e.getCause();
+      Throwable err = Objects.requireNonNullElse(e.getCause(), e);
       PGM.get().getGameLogger().log(Level.SEVERE, err.getMessage(), err.getCause());
       throw e;
     }
@@ -140,6 +145,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
   @Override
   public Match get() throws InterruptedException, ExecutionException {
+    await();
     return get(0, TimeUnit.MILLISECONDS);
   }
 
@@ -217,10 +223,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private File getDirectory() {
       if (dir == null) {
-        dir =
-            new File(
-                PGM.get().getServer().getWorldContainer().getAbsoluteFile(),
-                "match-" + counter.getAndIncrement());
+        dir = new File(
+            PGM.get().getServer().getWorldContainer().getAbsoluteFile(),
+            "match-" + counter.getAndIncrement());
       }
       return dir;
     }
@@ -230,7 +235,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
       final File dir = getDirectory();
       if (dir.mkdirs()) {
-        map.getInfo().getSource().downloadTo(dir);
+        map.getInfo().getSource().downloadTo(map.getInfo().getWorldFolder(), dir);
       } else {
         throw new MapMissingException(dir.getPath(), "Unable to mkdirs world directory");
       }
@@ -262,18 +267,9 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getInfo().getWorld();
-      WorldCreator creator = NMSHacks.detectWorld(worldName);
-      if (creator == null) {
-        creator = new WorldCreator(worldName);
-      }
-      final World world =
-          PGM.get()
-              .getServer()
-              .createWorld(
-                  creator
-                      .environment(environments[info.getEnvironment()])
-                      .generator(info.hasTerrain() ? null : NullChunkGenerator.INSTANCE)
-                      .seed(info.hasTerrain() ? info.getSeed() : creator.seed()));
+      final World world = NMS_HACKS.createWorld(
+          worldName, info.getEnvironment(), info.hasTerrain(), info.getSeed());
+
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 
       world.setPVP(true);
@@ -360,22 +356,21 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
         for (Player player : Bukkit.getOnlinePlayers()) {
           if (viewer.canSee(player) && viewer != player) players.add(player.getName());
         }
-        NMSHacks.sendPacket(
-            viewer,
-            NMSHacks.teamCreatePacket(
-                "dummy", "dummy", ChatColor.AQUA.toString(), "", false, false, players));
+        String prefix = ChatColor.AQUA.toString();
+        TAB_PACKETS
+            .teamCreatePacket(DUMMY_TEAM, DUMMY_TEAM, prefix, "", false, false, players)
+            .send(viewer);
       }
 
       int tpPerSecond = Integer.MAX_VALUE;
       try {
-        tpPerSecond =
-            TextParser.parseInteger(
-                PGM.get()
-                    .getConfiguration()
-                    .getExperiments()
-                    .getOrDefault("match-teleports-per-second", "")
-                    .toString(),
-                Range.atLeast(1));
+        tpPerSecond = TextParser.parseInteger(
+            PGM.get()
+                .getConfiguration()
+                .getExperiments()
+                .getOrDefault("match-teleports-per-second", "")
+                .toString(),
+            Range.atLeast(1));
       } catch (TextException e) {
         // No-op, since an experimental feature
       }
@@ -384,27 +379,52 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() {
       // Create copy to avoid CME on mach unload
-      for (Match otherMatch : Lists.newArrayList(PGM.get().getMatchManager().getMatches())) {
-        if (match.equals(otherMatch)) continue;
+      int teleported = 0;
+      for (Match oldMatch : Lists.newArrayList(PGM.get().getMatchManager().getMatches())) {
+        if (match.equals(oldMatch)) continue;
 
-        int teleported = 0;
-        for (MatchPlayer player : otherMatch.getPlayers()) {
+        for (MatchPlayer player : oldMatch.getPlayers()) {
           if (teleported++ >= teleportsPerSecond) return this;
 
           final Player bukkit = player.getBukkit();
 
-          otherMatch.removePlayer(bukkit);
+          oldMatch.removePlayer(bukkit);
           match.addPlayer(bukkit);
         }
-        otherMatch.unload();
+
+        // Old match should be empty. TP or kick anyone still in the old world.
+        ensureEmpty(oldMatch.getWorld());
+
+        oldMatch.unload();
       }
 
       // After all players have been teleported, remove the dummy team
-      NMSHacks.sendPacket(NMSHacks.teamRemovePacket("dummy"));
+      TAB_PACKETS.teamRemovePacket(DUMMY_TEAM).broadcast();
 
       match.callEvent(new MatchAfterLoadEvent(match));
 
       return null;
+    }
+
+    private void ensureEmpty(World world) {
+      // No one left, we're good
+      if (world.getPlayerCount() <= 0) return;
+
+      var spawn = match.moduleRequire(SpawnMatchModule.class).getDefaultSpawn();
+      for (Player player : world.getPlayers()) {
+        var matchPlayer = match.getPlayer(player);
+        Location loc = matchPlayer == null ? null : spawn.getSpawn(matchPlayer);
+
+        if (loc != null) {
+          player.teleport(loc);
+        } else {
+          player.kickPlayer(
+              ChatColor.RED + TextTranslations.translate("misc.incorrectWorld", player));
+          PGM.get()
+              .getLogger()
+              .info("Kicked " + player.getName() + " due to not being in the right match");
+        }
+      }
     }
 
     @Override
@@ -428,13 +448,12 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   }
 
   private static <V> CompletableFuture<V> runAsyncThread(Callable<V> task) {
-    return CompletableFuture.supplyAsync(
-        () -> {
-          try {
-            return task.call();
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
-        });
+    return CompletableFuture.supplyAsync(() -> {
+      try {
+        return task.call();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 }

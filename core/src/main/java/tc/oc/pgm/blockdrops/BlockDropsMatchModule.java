@@ -1,5 +1,8 @@
 package tc.oc.pgm.blockdrops;
 
+import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
@@ -22,7 +25,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -36,7 +38,8 @@ import tc.oc.pgm.util.block.RayBlockIntersection;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
-import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(MatchScope.RUNNING)
 public class BlockDropsMatchModule implements MatchModule, Listener {
@@ -74,9 +77,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       return;
     }
 
-    BlockDrops drops =
-        this.ruleSet.getDrops(
-            event, event.getOldState(), ParticipantBlockTransformEvent.getPlayerState(event));
+    BlockDrops drops = this.ruleSet.getDrops(
+        event, event.getOldState(), ParticipantBlockTransformEvent.getPlayerState(event));
     if (drops != null) {
       event.setDrops(drops);
     }
@@ -106,7 +108,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   }
 
   private void dropItems(BlockDrops drops, MatchPlayer player, Location location, double yield) {
-    if (player == null || player.getBukkit().getGameMode() != GameMode.CREATIVE) {
+    if (player == null || player.getGameMode() != GameMode.CREATIVE) {
       Random random = match.getRandom();
       for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
         if (random.nextFloat() < yield * entry.getValue()) {
@@ -133,17 +135,12 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   private void replaceBlock(BlockDrops drops, Block block, MatchPlayer player) {
     if (drops.replacement != null) {
       EntityChangeBlockEvent event =
-          new EntityChangeBlockEvent(
-              player.getBukkit(),
-              block,
-              drops.replacement.getItemType(),
-              drops.replacement.getData());
+          MISC_UTILS.createEntityChangeBlockEvent(player.getBukkit(), block, drops.replacement);
       match.callEvent(event);
 
       if (!event.isCancelled()) {
         BlockState state = block.getState();
-        state.setType(drops.replacement.getItemType());
-        state.setData(drops.replacement);
+        drops.replacement.applyTo(state);
         state.update(true, true);
       }
     }
@@ -165,10 +162,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       final BlockState oldState = event.getOldState();
       final BlockState newState = event.getNewState();
       final Block block = event.getOldState().getBlock();
-      final int newTypeId = newState.getTypeId();
-      final byte newData = newState.getRawData();
 
-      block.setTypeIdAndData(newTypeId, newData, true);
+      MaterialData.block(newState).applyTo(block, true);
 
       float yield = 1f;
       boolean explosion = false;
@@ -184,20 +179,20 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
             && oldState.getType() != Material.AIR
             && match.getRandom().nextFloat() < drops.fallChance) {
 
-          FallingBlock fallingBlock =
-              match
-                  .getWorld()
-                  .spawnFallingBlock(
-                      block.getLocation(),
-                      event.getOldState().getType(),
-                      event.getOldState().getRawData());
+          FallingBlock fallingBlock = match
+              .getWorld()
+              .spawnFallingBlock(
+                  block.getLocation(),
+                  event.getOldState().getType(),
+                  event.getOldState().getRawData());
           fallingBlock.setDropItem(false);
 
           if (drops.landChance != null && match.getRandom().nextFloat() >= drops.landChance) {
             this.fallingBlocksThatWillNotLand.add(fallingBlock);
           }
 
-          Vector v = fallingBlock.getLocation().subtract(explodeEvent.getLocation()).toVector();
+          Vector v =
+              fallingBlock.getLocation().subtract(explodeEvent.getLocation()).toVector();
           double distance = v.length();
           v.normalize().multiply(BASE_FALL_SPEED * drops.fallSpeed / Math.max(1d, distance));
 
@@ -245,8 +240,8 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockFallInVoid(EntityDespawnInVoidEvent event) {
-    if (event.getEntity() instanceof FallingBlock) {
-      this.fallingBlocksThatWillNotLand.remove(event.getEntity());
+    if (event.getEntity() instanceof FallingBlock fb) {
+      this.fallingBlocksThatWillNotLand.remove(fb);
     }
   }
 
@@ -261,11 +256,11 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
         getRuleSet().getDrops(event, hit.getBlock().getState(), player.getParticipantState());
     if (drops == null) return;
 
-    MaterialData oldMaterial = hit.getBlock().getState().getData();
+    BlockMaterialData oldMaterial = MaterialData.block(hit.getBlock());
     replaceBlock(drops, hit.getBlock(), player);
     Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
 
-    Materials.playBreakEffect(location, oldMaterial);
+    EFFECTS.blockBreak(location, oldMaterial);
     dropObjects(drops, player, location, 1d, false);
   }
 
@@ -280,7 +275,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
 
     replaceBlock(drops, event.getBlock(), player);
 
-    Location location = player.getBukkit().getLocation();
+    Location location = player.getLocation();
     dropObjects(drops, player, location, 1d, false);
   }
 }

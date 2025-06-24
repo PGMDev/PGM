@@ -23,10 +23,6 @@ public class OvertimeCountdown extends TimeLimitCountdown {
     super(match, timeLimit);
   }
 
-  public @Nullable Duration getRemaining() {
-    return remaining;
-  }
-
   @Override
   protected TextColor urgencyColor() {
     long seconds = remaining.getSeconds();
@@ -78,12 +74,11 @@ public class OvertimeCountdown extends TimeLimitCountdown {
       overtimeStart = Instant.now();
       overtimeEnd = overtimeStart.plus(timeLimit.getMaxOvertime());
 
-      match.sendMessage(
-          translatable(
-              "broadcast.overtime.limit",
-              NamedTextColor.YELLOW,
-              TemporalComponent.briefNaturalApproximate(timeLimit.getMaxOvertime())
-                  .color(NamedTextColor.AQUA)));
+      match.sendMessage(translatable(
+          "broadcast.overtime.limit",
+          NamedTextColor.YELLOW,
+          TemporalComponent.briefNaturalApproximate(timeLimit.getMaxOvertime())
+              .color(NamedTextColor.AQUA)));
     }
   }
 

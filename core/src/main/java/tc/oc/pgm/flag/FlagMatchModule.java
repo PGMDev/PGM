@@ -4,13 +4,19 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.goals.GoalMatchModule;
 
-public class FlagMatchModule implements MatchModule {
+@ListenerScope(MatchScope.LOADED)
+public class FlagMatchModule implements MatchModule, Listener {
 
   private final ImmutableMap<PostDefinition, Post> posts;
   private final ImmutableMap<FlagDefinition, Flag> flags;
@@ -47,8 +53,8 @@ public class FlagMatchModule implements MatchModule {
     this.flags = flags.build();
   }
 
-  @Override
-  public void load() {
+  @EventHandler
+  public void onMatchLoad(MatchLoadEvent event) {
     for (Flag flag : this.flags.values()) {
       flag.load(this);
     }

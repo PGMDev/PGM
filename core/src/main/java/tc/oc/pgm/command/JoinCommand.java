@@ -1,11 +1,11 @@
 package tc.oc.pgm.command;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
-import cloud.commandframework.annotations.specifier.FlagYielding;
+import org.incendo.cloud.annotation.specifier.FlagYielding;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -15,9 +15,9 @@ import tc.oc.pgm.join.JoinRequest;
 
 public final class JoinCommand {
 
-  @CommandMethod("join|play [team]")
+  @Command("join|play [team]")
   @CommandDescription("Join the match")
-  @CommandPermission(Permissions.JOIN)
+  @Permission(Permissions.JOIN)
   public void join(
       JoinMatchModule joiner,
       MatchPlayer player,
@@ -35,9 +35,9 @@ public final class JoinCommand {
     }
   }
 
-  @CommandMethod("leave|obs|spectator|spec")
+  @Command("leave|obs|spectator|spec")
   @CommandDescription("Leave the match")
-  @CommandPermission(Permissions.LEAVE)
+  @Permission(Permissions.LEAVE)
   public void leave(JoinMatchModule joiner, MatchPlayer player) {
     joiner.leave(player, JoinRequest.empty());
   }

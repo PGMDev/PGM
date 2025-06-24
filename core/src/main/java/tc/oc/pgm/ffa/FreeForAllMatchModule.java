@@ -1,8 +1,5 @@
 package tc.oc.pgm.ffa;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
-import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -15,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -38,32 +34,26 @@ import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.QueuedParty;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.LOADED)
 public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler {
 
   // 10 different colors that tributes are allowed to have
-  private static final ChatColor[] COLORS =
-      new ChatColor[] {
-        ChatColor.RED,
-        ChatColor.BLUE,
-        ChatColor.GREEN,
-        ChatColor.YELLOW,
-        ChatColor.LIGHT_PURPLE,
-        ChatColor.GOLD,
-        ChatColor.DARK_GREEN,
-        ChatColor.DARK_AQUA,
-        ChatColor.DARK_PURPLE,
-        ChatColor.DARK_RED
-      };
+  private static final ChatColor[] COLORS = new ChatColor[] {
+    ChatColor.RED,
+    ChatColor.BLUE,
+    ChatColor.GREEN,
+    ChatColor.YELLOW,
+    ChatColor.LIGHT_PURPLE,
+    ChatColor.GOLD,
+    ChatColor.DARK_GREEN,
+    ChatColor.DARK_AQUA,
+    ChatColor.DARK_PURPLE,
+    ChatColor.DARK_RED
+  };
 
-  class NeedMorePlayers implements UnreadyReason {
-    final int players;
-
-    NeedMorePlayers(int players) {
-      this.players = players;
-    }
-
+  record NeedMorePlayers(int players) implements UnreadyReason {
     @Override
     public Component getReason() {
       if (players == 1) {
@@ -77,12 +67,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     public boolean canForceStart() {
       return true;
     }
-
-    @Override
-    public String toString() {
-      return getClass().getSimpleName() + "{players=" + players + "}";
-    }
-  };
+  }
 
   private final Match match;
   private final FreeForAllOptions options;
@@ -205,7 +190,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     MatchPlayer kickMe = kickable.get(match.getRandom().nextInt(kickable.size()));
 
     kickMe.sendWarning(translatable("leave.ok.priorityKick"));
-    kickMe.playSound(sound(key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
+    kickMe.playSound(Sounds.MATCH_KICK);
 
     match.setParty(kickMe, match.getDefaultParty());
 
@@ -253,7 +238,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     if (!result.isSuccess()) return false;
 
-    if (!match.setParty(joining, getTribute(joining))) {
+    if (!match.setParty(joining, getTribute(joining), request)) {
       return false;
     }
 

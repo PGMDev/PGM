@@ -69,6 +69,12 @@ public interface Config {
   @Nullable
   Path getIncludesDirectory();
 
+  /** @return If unused XML tags should be reported or ignored */
+  boolean showUnusedXml();
+
+  /** @return Should setting dev phase maps be restricted to Devs */
+  boolean enforceDevPhase();
+
   /**
    * Gets a duration to wait before starting a match.
    *
@@ -160,7 +166,17 @@ public interface Config {
    *
    * @return If proximity is visible.
    */
-  boolean showProximity();
+  default boolean showProximity() {
+    return showProximity(false);
+  }
+
+  /**
+   * Gets whether proximity metrics are visible to players.
+   *
+   * @param relevant If proximity is currently relevant (ie: an active time limit)
+   * @return If proximity is visible.
+   */
+  boolean showProximity(boolean relevant);
 
   /**
    * Gets whether the side bar is rendered.
@@ -207,6 +223,13 @@ public interface Config {
    * @return If the tab list is rendered.
    */
   boolean showTabList();
+
+  /**
+   * Gets whether the tab list should be resized to 4 rows for 1.7 players.
+   *
+   * @return If the tab list will be resized.
+   */
+  boolean resizeTabList();
 
   /**
    * Gets whether the tab list is should show real ping.
@@ -283,6 +306,51 @@ public interface Config {
    * @return The minimum score they must hold
    */
   int getGriefScore();
+
+  /**
+   * Gets the percentage of damage needed on a player to get an assist
+   *
+   * @return The percentage of damage required
+   */
+  float getAssistPercent();
+
+  /**
+   * Gets how long to penalize players for certain actions
+   *
+   * @return time to make them sit out for
+   */
+  Duration getTimePenalty(TimePenalty penalty);
+
+  enum TimePenalty {
+    FFA_FULL_REJOIN,
+    STACKED,
+    FULL_REJOIN,
+    REJOIN_MULTIPLIER,
+    REJOIN_MAX,
+    SWITCH
+  }
+
+  /**
+   * Should we end the match if there are no players?
+   *
+   * @return {@code true} if the match should end when there are no participating players,
+   *     {@code false} if not
+   */
+  boolean allowEndingEmptyMatches();
+
+  /**
+   * Gets if extra votes are allowed based on the "pgm.vote.extra.#" permission.
+   *
+   * @return {@code true} if extra votes are enabled, {@code false} otherwise.
+   */
+  boolean allowExtraVotes();
+
+  /**
+   * Gets the maximum number of extra votes a player can use.
+   *
+   * @return The maximum number of extra votes allowed per player.
+   */
+  int getMaxExtraVotes();
 
   /**
    * Gets a group of players, used for prefixes and player sorting.
@@ -385,18 +453,16 @@ public interface Config {
       if (getClickLink() != null && !getClickLink().isEmpty()) {
         if (addNewline) hover.append(newline());
 
-        Component clickLink =
-            translatable(
-                "chat.clickLink",
-                NamedTextColor.DARK_AQUA,
-                text(getClickLink(), NamedTextColor.AQUA, TextDecoration.UNDERLINED));
+        Component clickLink = translatable(
+            "chat.clickLink",
+            NamedTextColor.DARK_AQUA,
+            text(getClickLink(), NamedTextColor.AQUA, TextDecoration.UNDERLINED));
         hover.append(clickLink);
       }
 
-      TextComponent.Builder component =
-          text()
-              .append(text(prefix ? getPrefix() : getSuffix()))
-              .hoverEvent(showText(hover.build()));
+      TextComponent.Builder component = text()
+          .append(text(prefix ? getPrefix() : getSuffix()))
+          .hoverEvent(showText(hover.build()));
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
         component.clickEvent(openUrl(getClickLink()));

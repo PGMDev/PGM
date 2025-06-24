@@ -1,8 +1,8 @@
 package tc.oc.pgm.flag.state;
 
-import org.bukkit.Effect;
+import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -56,20 +56,7 @@ public abstract class Spawned extends BaseState {
     if (this.flag.getDefinition().showBeam()) {
       for (MatchPlayer player : flag.getMatch().getPlayers()) {
         if (this.canSeeParticles(player.getBukkit())) {
-          player
-              .getBukkit()
-              .spigot()
-              .playEffect(
-                  this.getLocation().clone().add(0, 56, 0),
-                  Effect.TILE_DUST,
-                  Material.WOOL.getId(),
-                  flag.getDyeColor().getWoolData(),
-                  0.15f, // radius on each axis of the particle ball
-                  24f,
-                  0.15f,
-                  0f, // initial horizontal velocity
-                  40, // number of particles
-                  200); // radius in blocks to show particles
+          EFFECTS.beam(player.getBukkit(), getLocation(), flag.getDyeColor());
         }
       }
     }

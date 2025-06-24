@@ -2,6 +2,7 @@ package tc.oc.pgm.api.map;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Map;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.Nullable;
@@ -9,23 +10,18 @@ import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
-/** Essential information about a map. */
-public interface MapInfo extends Comparable<MapInfo>, Cloneable {
+/** Basic information about a map. The most bare-bones part is in {@link VariantInfo} */
+public interface MapInfo extends VariantInfo.Forwarding, Comparable<MapInfo>, Cloneable {
+
+  /** @return The map variant info for this map */
+  VariantInfo getVariant();
 
   /**
-   * Get a unique id for the map.
+   * Get all the variants available for the map
    *
-   * @return A unique id.
+   * @return a map of variants by their variant id
    */
-  String getId();
-
-  /**
-   * The map variant this info represents
-   *
-   * @return A variant for the map, if any.
-   */
-  @Nullable
-  String getVariant();
+  Map<String, VariantInfo> getVariants();
 
   /**
    * Get the proto of the map's {@link org.jdom2.Document}.
@@ -41,13 +37,6 @@ public interface MapInfo extends Comparable<MapInfo>, Cloneable {
    * @return The version.
    */
   Version getVersion();
-
-  /**
-   * Get a unique, human-readable name for the map.
-   *
-   * @return A name, alphanumeric with spaces allowed.
-   */
-  String getName();
 
   /**
    * Get the maps' name, but normalized to standard english characters and lower case.

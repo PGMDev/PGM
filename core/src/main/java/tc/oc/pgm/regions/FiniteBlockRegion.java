@@ -3,15 +3,11 @@ package tc.oc.pgm.regions;
 import static tc.oc.pgm.api.map.MapProtos.REGION_FIX_VERSION;
 
 import com.google.common.base.Joiner;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
@@ -20,19 +16,19 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
-import tc.oc.pgm.filters.matcher.block.BlockFilter;
-import tc.oc.pgm.filters.operator.AnyFilter;
+import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.query.BlockQuery;
+import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.MaterialMatcher;
 
 /**
  * Region represented by a list of single blocks. This will check if a point is inside the block at
  * all.
  */
-public class FiniteBlockRegion implements RegionDefinition {
+public class FiniteBlockRegion implements RegionDefinition.HardStatic {
   private final BlockVectorSet positions;
   private final Bounds bounds;
 
@@ -96,11 +92,6 @@ public class FiniteBlockRegion implements RegionDefinition {
     return positions;
   }
 
-  @Override
-  public Stream<BlockVector> getBlockPositions() {
-    return positions.stream();
-  }
-
   public int getBlockVolume() {
     return positions.size();
   }
@@ -111,20 +102,8 @@ public class FiniteBlockRegion implements RegionDefinition {
   }
 
   public static FiniteBlockRegion fromWorld(
-      Region region, World world, @Nullable Version proto, SingleMaterialMatcher... materials) {
-    return fromWorld(region, world, Arrays.asList(materials), proto);
-  }
-
-  public static FiniteBlockRegion fromWorld(
-      Region region,
-      World world,
-      Collection<SingleMaterialMatcher> materials,
-      @Nullable Version proto) {
-    List<Filter> filters = new ArrayList<>(materials.size());
-    for (SingleMaterialMatcher materialPattern : materials) {
-      filters.add(new BlockFilter(materialPattern));
-    }
-    return fromWorld(region, world, AnyFilter.of(filters), proto);
+      Region region, World world, MaterialMatcher materials, @Nullable Version proto) {
+    return fromWorld(region, world, new MaterialFilter(materials), proto);
   }
 
   public static FiniteBlockRegion fromWorld(
@@ -142,10 +121,9 @@ public class FiniteBlockRegion implements RegionDefinition {
       region = new CuboidRegion(bounds.getMin(), bounds.getMax().add(new Vector(1, 1, 1)));
     }
 
-    return new FiniteBlockRegion(
-        region
-            .getBlockPositions()
-            .filter(pos -> filter.test(BlockVectors.blockAt(world, pos)))
-            .collect(Collectors.toCollection(BlockVectorSet::new)));
+    return new FiniteBlockRegion(StreamUtils.of(region.getBlocks(world))
+        .filter(filter)
+        .map(BlockVectors::position)
+        .collect(Collectors.toCollection(BlockVectorSet::new)));
   }
 }

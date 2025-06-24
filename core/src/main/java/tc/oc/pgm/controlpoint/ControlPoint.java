@@ -1,7 +1,5 @@
 package tc.oc.pgm.controlpoint;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.text;
 
 import java.time.Duration;
@@ -27,11 +25,13 @@ import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.SimpleGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
+import tc.oc.pgm.score.ScoreCause;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 
 public class ControlPoint extends SimpleGoal<ControlPointDefinition>
@@ -41,11 +41,6 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   public static final Component SYMBOL_CP_INCOMPLETE = text("\u29be"); // ⦾
   public static final Component SYMBOL_CP_COMPLETE = text("\u29bf"); // ⦿
-
-  protected static final Sound GOOD_SOUND =
-      sound(key("portal.travel"), Sound.Source.MASTER, 0.35f, 2f);
-  protected static final Sound BAD_SOUND =
-      sound(key("mob.blaze.death"), Sound.Source.MASTER, 0.4f, 0.8f);
 
   protected final RegionPlayerTracker playerTracker;
   protected final ControlPointBlockDisplay blockDisplay;
@@ -163,7 +158,7 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   @Override
   public Sound getCompletionSound(boolean isGood) {
-    return isGood ? GOOD_SOUND : BAD_SOUND;
+    return isGood ? Sounds.CONTROL_POINT_GOOD : Sounds.CONTROL_POINT_BAD;
   }
 
   /**
@@ -172,7 +167,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
    */
   @Override
   public double getCompletion() {
-    return this.capturingTime.toMillis() / (double) this.definition.getTimeToCapture().toMillis();
+    return this.capturingTime.toMillis()
+        / (double) this.definition.getTimeToCapture().toMillis();
   }
 
   @Override
@@ -280,7 +276,9 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
         float growth = this.getDefinition().getPointsGrowth();
         float rate = (float) (initial * Math.pow(2, seconds / growth));
         scoreMatchModule.incrementScore(
-            this.getControllingTeam(), rate * duration.toMillis() / 1000);
+            this.getControllingTeam(),
+            rate * duration.toMillis() / 1000,
+            ScoreCause.CONTROL_POINT_TICK);
       }
     }
   }
@@ -378,10 +376,15 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
       if (scoreMatchModule != null) {
         if (oldControllingTeam != null) {
           scoreMatchModule.incrementScore(
-              oldControllingTeam, getDefinition().getPointsOwner() * -1);
+              oldControllingTeam,
+              getDefinition().getPointsOwner() * -1,
+              ScoreCause.CONTROL_POINT_OWNED);
         }
         if (this.controllingTeam != null) {
-          scoreMatchModule.incrementScore(this.controllingTeam, getDefinition().getPointsOwner());
+          scoreMatchModule.incrementScore(
+              this.controllingTeam,
+              getDefinition().getPointsOwner(),
+              ScoreCause.CONTROL_POINT_LOST);
         }
       }
       if (this.controllingTeam == null) {
@@ -508,9 +511,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   /** Point being pulled back to current state (There is a lead on the point) */
   private void recover(Competitor dominantTeam, Duration dominantTime) {
-    dominantTime =
-        subtractCaptureTime(
-            Duration.ofMillis((long) (definition.getRecoveryRate() * dominantTime.toMillis())));
+    dominantTime = subtractCaptureTime(
+        Duration.ofMillis((long) (definition.getRecoveryRate() * dominantTime.toMillis())));
     if (dominantTime != null) {
       this.capturingTeam = null;
       if (dominantTeam != this.controllingTeam) {
@@ -526,9 +528,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   /** Point is being decayed back to its current state (Point is contested) */
   private void contestedDecay(Duration dominantTime) {
-    dominantTime =
-        subtractCaptureTime(
-            Duration.ofMillis((long) (definition.getContestedRate() * dominantTime.toMillis())));
+    dominantTime = subtractCaptureTime(
+        Duration.ofMillis((long) (definition.getContestedRate() * dominantTime.toMillis())));
     if (dominantTime != null) {
       this.capturingTeam = null;
     }
@@ -536,9 +537,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   /** Point is being decayed back to its current state (No lead on point) */
   private void decay(Duration dominantTime) {
-    dominantTime =
-        subtractCaptureTime(
-            Duration.ofMillis((long) (definition.getDecayRate() * dominantTime.toMillis())));
+    dominantTime = subtractCaptureTime(
+        Duration.ofMillis((long) (definition.getDecayRate() * dominantTime.toMillis())));
     if (dominantTime != null) {
       this.capturingTeam = null;
     }
@@ -546,9 +546,8 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
 
   /** Point is being decayed back to neutral (No lead on point) */
   private void ownedDecay(Duration dominantTime) {
-    dominantTime =
-        addCaptureTime(
-            Duration.ofMillis((long) (definition.getOwnedDecayRate() * dominantTime.toMillis())));
+    dominantTime = addCaptureTime(
+        Duration.ofMillis((long) (definition.getOwnedDecayRate() * dominantTime.toMillis())));
     if (dominantTime != null) {
       this.controllingTeam = null;
       this.capturingTeam = null;

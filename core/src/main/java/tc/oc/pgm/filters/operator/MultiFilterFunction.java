@@ -49,25 +49,19 @@ public abstract class MultiFilterFunction implements FilterDefinition {
   }
 
   public static Filter of(Function<Collection<Filter>, Filter> builder, Filter... filters) {
-    switch (filters.length) {
-      case 0:
-        return StaticFilter.ABSTAIN;
-      case 1:
-        return filters[0];
-      default:
-        return builder.apply(Arrays.asList(filters));
-    }
+    return switch (filters.length) {
+      case 0 -> StaticFilter.ABSTAIN;
+      case 1 -> filters[0];
+      default -> builder.apply(Arrays.asList(filters));
+    };
   }
 
   public static Filter of(
       Function<Collection<Filter>, Filter> builder, Collection<Filter> filters) {
-    switch (filters.size()) {
-      case 0:
-        return StaticFilter.ABSTAIN;
-      case 1:
-        return filters.iterator().next();
-      default:
-        return builder.apply(filters);
-    }
+    return switch (filters.size()) {
+      case 0 -> StaticFilter.ABSTAIN;
+      case 1 -> filters.iterator().next();
+      default -> builder.apply(filters);
+    };
   }
 }

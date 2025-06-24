@@ -1,5 +1,7 @@
 package tc.oc.pgm.doublejump;
 
+import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
+
 import java.util.Iterator;
 import java.util.Map;
 import org.bukkit.GameMode;
@@ -26,10 +28,13 @@ import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 @ListenerScope(MatchScope.RUNNING)
 public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
 
-  private class Jumper {
-    final Player player;
-    final DoubleJumpKit kit;
-    float charge;
+  private static final Sound ZOMBIE_INFECT =
+      parse(Sound::valueOf, "ZOMBIE_INFECT", "ENTITY_ZOMBIE_INFECT");
+
+  private static class Jumper {
+    private final Player player;
+    private final DoubleJumpKit kit;
+    private float charge;
 
     private Jumper(Player player, DoubleJumpKit kit) {
       this.player = player;
@@ -85,6 +90,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
       this.setCharge(jumper, 1f);
     } else {
       this.jumpers.remove(player);
+      this.removeCharge(player);
       this.refreshJump(player);
     }
   }
@@ -108,7 +114,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
       impulse.multiply(jumper.kit.power / 3f);
       event.getPlayer().setVelocity(impulse);
 
-      player.getWorld().playSound(player.getLocation(), Sound.ZOMBIE_INFECT, 0.5f, 1.8f);
+      player.getWorld().playSound(player.getLocation(), ZOMBIE_INFECT, 0.5f, 1.8f);
     }
   }
 
@@ -120,6 +126,10 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
         jumper.player.setExp(jumper.charge);
       }
     }
+  }
+
+  private void removeCharge(Player player) {
+    player.setExp(0f);
   }
 
   private void refreshJump(Player player) {

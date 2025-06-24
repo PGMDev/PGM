@@ -1,6 +1,7 @@
 package tc.oc.pgm.wool;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.wool.MonumentWoolFactory.WOOL;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
@@ -9,9 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.Component;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -23,7 +23,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
+import org.bukkit.inventory.Recipe;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -37,7 +37,6 @@ import tc.oc.pgm.goals.Contribution;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
-import tc.oc.pgm.util.block.BlockVectors;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -78,7 +77,7 @@ public class WoolMatchModule implements MatchModule, Listener {
   }
 
   private boolean isObjectiveWool(ItemStack stack) {
-    if (stack.getType() == Material.WOOL) {
+    if (WOOL.matches(stack.getType())) {
       for (MonumentWool wool : this.wools.values()) {
         if (wool.getDefinition().isObjectiveWool(stack)) return true;
       }
@@ -165,13 +164,13 @@ public class WoolMatchModule implements MatchModule, Listener {
     if (this.match.getWorld() != event.getWorld()) return;
 
     Entry<Team, MonumentWool> woolEntry =
-        this.findMonumentWool(BlockVectors.center(event.getNewState()).toVector());
+        this.findMonumentWool(event.getNewState().getBlock());
     if (woolEntry == null) return;
 
     MonumentWool wool = woolEntry.getValue();
 
     if (event.getNewState().getType() == Material.AIR) { // block is being destroyed
-      if (isValidWool(wool.getDyeColor(), event.getOldState())) {
+      if (wool.getDefinition().isObjectiveWool(event.getOldState())) {
         event.setCancelled(true);
       }
       return;
@@ -183,7 +182,7 @@ public class WoolMatchModule implements MatchModule, Listener {
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
     if (player != null) { // wool can only be placed by a player
       Component woolName = wool.getComponentName();
-      if (!isValidWool(wool.getDyeColor(), event.getNewState())) {
+      if (!wool.getDefinition().isObjectiveWool(event.getNewState())) {
         player.sendWarning(translatable("wool.wrongWool", woolName));
       } else if (wool.getOwner() != player.getParty()) {
         player.sendWarning(translatable("wool.wrongTeam", wool.getOwner().getName(), woolName));
@@ -192,26 +191,28 @@ public class WoolMatchModule implements MatchModule, Listener {
         wool.markPlaced();
         this.match.callEvent(new GoalStatusChangeEvent(match, wool, wool.getOwner()));
         this.match.callEvent(new PlayerWoolPlaceEvent(player, wool, event.getNewState()));
-        this.match.callEvent(
-            new GoalCompleteEvent(
-                this.match,
-                wool,
-                wool.getOwner(),
-                true,
-                ImmutableList.of(new Contribution(player, 1))));
+        this.match.callEvent(new GoalCompleteEvent(
+            this.match,
+            wool,
+            wool.getOwner(),
+            true,
+            ImmutableList.of(new Contribution(player, 1))));
       }
     }
   }
 
   @EventHandler
   public void handleWoolCrafting(PrepareItemCraftEvent event) {
-    ItemStack result = event.getRecipe().getResult();
+    Recipe recipe = event.getRecipe();
+    if (recipe == null) return;
+
+    ItemStack result = recipe.getResult();
     InventoryHolder holder = event.getInventory().getHolder();
 
     if (holder instanceof Player) {
       MatchPlayer playerHolder = this.match.getPlayer((Player) holder);
 
-      if (playerHolder != null && result != null && result.getType() == Material.WOOL) {
+      if (playerHolder != null && result != null && WOOL.matches(result.getType())) {
         for (MonumentWool wool : this.wools.values()) {
           if (wool.getDefinition().isObjectiveWool(result)) {
             if (!wool.getDefinition().isCraftable()) {
@@ -225,17 +226,12 @@ public class WoolMatchModule implements MatchModule, Listener {
     }
   }
 
-  private Entry<Team, MonumentWool> findMonumentWool(Vector point) {
+  private Entry<Team, MonumentWool> findMonumentWool(Block block) {
     for (Entry<Team, MonumentWool> woolEntry : this.wools.entries()) {
-      if (woolEntry.getValue().getDefinition().getPlacementRegion().contains(point)) {
+      if (woolEntry.getValue().getDefinition().getPlacementRegion().contains(block)) {
         return woolEntry;
       }
     }
     return null;
-  }
-
-  @SuppressWarnings("deprecation")
-  private static boolean isValidWool(DyeColor expectedColor, BlockState state) {
-    return state.getType() == Material.WOOL && expectedColor.getWoolData() == state.getRawData();
   }
 }

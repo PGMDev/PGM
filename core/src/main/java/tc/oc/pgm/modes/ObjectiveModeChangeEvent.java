@@ -2,7 +2,6 @@ package tc.oc.pgm.modes;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import java.util.Collection;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
@@ -10,6 +9,7 @@ import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.core.Core;
 import tc.oc.pgm.destroyable.Destroyable;
 import tc.oc.pgm.goals.GoalMatchModule;
+import tc.oc.pgm.goals.ModeChangeGoal;
 
 public class ObjectiveModeChangeEvent extends MatchEvent {
 
@@ -22,27 +22,30 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
     super(match);
     this.mode = mode;
     this.visible = false;
+    this.name = this.mode.getName(() -> {
+      ModeChangeGoal<?> objective = getMainObjective();
+      return objective == null || mode.getMaterialData() == null
+          ? mode.getLegacyName()
+          : objective.getModeChangeMessage(mode.getMaterialData().getItemType());
+    });
+  }
 
-    if (this.mode.getName() != null) {
-      this.name = this.mode.getName();
-    } else {
-      GoalMatchModule wins = getMatch().needModule(GoalMatchModule.class);
-      Collection<Core> cores = wins.getGoals(Core.class).values();
-      Collection<Destroyable> destroyables = wins.getGoals(Destroyable.class).values();
-
-      if (cores.size() > destroyables.size() && cores.size() > 0) {
-        this.name =
-            cores.iterator().next().getModeChangeMessage(this.mode.getMaterialData().getItemType());
-      } else if (destroyables.size() >= cores.size() && destroyables.size() > 0) {
-        this.name =
-            destroyables
-                .iterator()
-                .next()
-                .getModeChangeMessage(this.mode.getMaterialData().getItemType());
-      } else {
-        this.name = "Unknown Mode";
-      }
+  private ModeChangeGoal<?> getMainObjective() {
+    GoalMatchModule wins = getMatch().needModule(GoalMatchModule.class);
+    Destroyable lastDestroyable = null;
+    int affectedDestroyables = 0;
+    for (Destroyable destroyable : wins.getGoals(Destroyable.class).values()) {
+      if (!destroyable.isAffectedBy(mode)) continue;
+      affectedDestroyables++;
+      lastDestroyable = destroyable;
     }
+
+    int affectedCores = 0;
+    for (Core core : wins.getGoals(Core.class).values()) {
+      if (!core.isAffectedBy(mode)) continue;
+      if (++affectedCores > affectedDestroyables) return core;
+    }
+    return lastDestroyable;
   }
 
   public boolean isVisible() {

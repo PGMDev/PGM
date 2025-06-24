@@ -65,7 +65,7 @@ public class MonostableFilter extends SingleFilterFunction
 
   @Override
   public boolean matches(MatchQuery query) {
-    return query.reactor(this).matches(query);
+    return query.state(this).matches(query);
   }
 
   @Override
@@ -122,12 +122,11 @@ public class MonostableFilter extends SingleFilterFunction
     public void tick(Match match, Tick tick) {
       final Instant now = tick.instant;
 
-      endTimes.forEach(
-          (filterable, end) -> {
-            if (!now.isBefore(end) && lastTick.isBefore(end)) {
-              this.invalidate(filterable);
-            }
-          });
+      endTimes.forEach((filterable, end) -> {
+        if (!now.isBefore(end) && lastTick.isBefore(end)) {
+          this.invalidate(filterable);
+        }
+      });
       lastTick = now;
     }
   }
@@ -175,19 +174,18 @@ public class MonostableFilter extends SingleFilterFunction
 
       final Instant now = tick.instant;
 
-      endTimes.forEach(
-          (filterable, end) -> {
-            if (now.isBefore(end)) {
-              // If the entry is still valid, check if its elapsed time crossed a second
-              // boundary over the last tick, and update the boss bar if it did.
-              long oldSeconds = lastTick.until(end, ChronoUnit.SECONDS);
-              long newSeconds = now.until(end, ChronoUnit.SECONDS);
+      endTimes.forEach((filterable, end) -> {
+        if (now.isBefore(end)) {
+          // If the entry is still valid, check if its elapsed time crossed a second
+          // boundary over the last tick, and update the boss bar if it did.
+          long oldSeconds = lastTick.until(end, ChronoUnit.SECONDS);
+          long newSeconds = now.until(end, ChronoUnit.SECONDS);
 
-              // Round up as going from 4s to 3.95s should show 4s
-              if (oldSeconds != newSeconds)
-                updateBossBar(filterable, Duration.ofSeconds(newSeconds + 1));
-            }
-          });
+          // Round up as going from 4s to 3.95s should show 4s
+          if (oldSeconds != newSeconds)
+            updateBossBar(filterable, Duration.ofSeconds(newSeconds + 1));
+        }
+      });
 
       lastTick = now;
     }
@@ -195,10 +193,9 @@ public class MonostableFilter extends SingleFilterFunction
     private void createBossBar(Filterable<?> filterable) {
       Component message = getMessage(duration);
 
-      BossBar bar =
-          bars.computeIfAbsent(
-              filterable,
-              f -> BossBar.bossBar(message, 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
+      BossBar bar = bars.computeIfAbsent(
+          filterable,
+          f -> BossBar.bossBar(message, 1f, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS));
 
       bar.name(message).progress(1f);
       filterable.showBossBar(bar);
@@ -233,13 +230,15 @@ public class MonostableFilter extends SingleFilterFunction
     }
 
     private Component getMessage(Duration remaining) {
-      Component duration =
-          colons
-              ? clock(remaining).color(NamedTextColor.AQUA)
-              : seconds(remaining.getSeconds(), NamedTextColor.AQUA);
+      Component duration = colons
+          ? clock(remaining).color(NamedTextColor.AQUA)
+          : seconds(remaining.getSeconds(), NamedTextColor.AQUA);
 
-      return message.replaceText(
-          TextReplacementConfig.builder().once().matchLiteral("{0}").replacement(duration).build());
+      return message.replaceText(TextReplacementConfig.builder()
+          .once()
+          .matchLiteral("{0}")
+          .replacement(duration)
+          .build());
     }
 
     private float progress(Duration remaining) {

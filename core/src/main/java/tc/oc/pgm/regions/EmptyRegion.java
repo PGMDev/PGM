@@ -3,7 +3,7 @@ package tc.oc.pgm.regions;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class EmptyRegion implements RegionDefinition {
+public class EmptyRegion implements RegionDefinition.HardStatic {
   public static final EmptyRegion INSTANCE = new EmptyRegion();
 
   private EmptyRegion() {}

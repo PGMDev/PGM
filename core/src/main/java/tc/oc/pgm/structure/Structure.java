@@ -20,15 +20,14 @@ public class Structure implements Feature<StructureDefinition> {
 
     if (definition.includeAir()) this.region = definition.getRegion();
     else
-      this.region =
-          FiniteBlockRegion.fromWorld(
-              definition.getRegion(),
-              match.getWorld(),
-              b -> b.getType() != Material.AIR,
-              match.getMap().getProto());
+      this.region = FiniteBlockRegion.fromWorld(
+          definition.getRegion(),
+          match.getWorld(),
+          b -> b.getType() != Material.AIR,
+          match.getMap().getProto());
 
     snapshot.saveRegion(region);
-    if (definition.clearSource()) snapshot.removeBlocks(region, new BlockVector());
+    if (definition.clearSource()) snapshot.removeBlocks(region, new BlockVector(), false);
   }
 
   @Override
@@ -45,7 +44,12 @@ public class Structure implements Feature<StructureDefinition> {
     return region;
   }
 
-  public void place(BlockVector offset) {
-    snapshot.placeBlocks(region, offset);
+  public void place(BlockVector offset, boolean update) {
+    snapshot.placeBlocks(region, offset, update);
+  }
+
+  public void placeAbsolute(BlockVector vector, boolean update) {
+    vector.subtract(getRegion().getBounds().getBlockMin());
+    place(vector, update);
   }
 }

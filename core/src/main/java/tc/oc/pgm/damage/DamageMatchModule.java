@@ -1,5 +1,9 @@
 package tc.oc.pgm.damage;
 
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.CUSTOM;
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.ENTITY_ATTACK;
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.FIRE;
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.MAGIC;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.List;
@@ -20,6 +24,7 @@ import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -27,6 +32,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
@@ -47,9 +53,18 @@ public class DamageMatchModule implements MatchModule, Listener {
   private final Match match;
   private final List<Filter> filters;
 
-  public DamageMatchModule(Match match, List<Filter> filters) {
+  private final Action<? super MatchPlayer> attackerAction;
+  private final Action<? super MatchPlayer> victimAction;
+
+  public DamageMatchModule(
+      Match match,
+      List<Filter> filters,
+      Action<? super MatchPlayer> attackerAction,
+      Action<? super MatchPlayer> victimAction) {
     this.match = match;
     this.filters = filters;
+    this.attackerAction = attackerAction;
+    this.victimAction = victimAction;
   }
 
   TrackerMatchModule tracker() {
@@ -109,6 +124,12 @@ public class DamageMatchModule implements MatchModule, Listener {
     return tc.oc.pgm.filters.query.DamageQuery.victimDefault((Event) event, victim, damageInfo);
   }
 
+  /** Get a query for the given damage event, defaulting to attacker */
+  public DamageQuery getAttackerQuery(
+      @Nullable Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
+    return tc.oc.pgm.filters.query.DamageQuery.attackerDefault((Event) event, victim, damageInfo);
+  }
+
   /** Query the custom damage filters with the given damage event */
   public Filter.QueryResponse queryRules(
       @Nullable Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
@@ -149,13 +170,23 @@ public class DamageMatchModule implements MatchModule, Listener {
   }
 
   /** Query the given damage event and cancel it if the result was denied. */
-  public Filter.QueryResponse processDamageEvent(
+  public void processDamageEvent(
       Cancellable event, ParticipantState victim, DamageInfo damageInfo) {
-    Filter.QueryResponse response = queryDamage(assertNotNull(event), victim, damageInfo);
-    if (response.isDenied()) {
+    if (queryDamage(assertNotNull(event), victim, damageInfo).isDenied()) {
       event.setCancelled(true);
+    } else if (attackerAction != null || victimAction != null) {
+      MatchPlayerState attacker;
+      if (attackerAction != null && (attacker = damageInfo.getAttacker()) != null) {
+        attacker
+            .getPlayer()
+            .ifPresent(p -> attackerAction.trigger(p, getAttackerQuery(event, victim, damageInfo)));
+      }
+      if (victimAction != null) {
+        victim
+            .getPlayer()
+            .ifPresent(p -> victimAction.trigger(p, getQuery(event, victim, damageInfo)));
+      }
     }
-    return response;
   }
 
   /** Search the rider stack for a participant */
@@ -187,9 +218,7 @@ public class DamageMatchModule implements MatchModule, Listener {
     processDamageEvent(
         event,
         victim.getParticipantState(),
-        tracker()
-            .resolveDamage(
-                EntityDamageEvent.DamageCause.CUSTOM, event.getVehicle(), event.getAttacker()));
+        tracker().resolveDamage(CUSTOM, event.getVehicle(), event.getAttacker()));
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -197,12 +226,13 @@ public class DamageMatchModule implements MatchModule, Listener {
     MatchPlayer victim = getVictim(event.getEntity());
     if (victim == null) return;
 
-    processDamageEvent(
-        event,
-        victim.getParticipantState(),
-        tracker()
-            .resolveDamage(
-                EntityDamageEvent.DamageCause.FIRE, event.getEntity(), event.getCombuster()));
+    if (queryDamage(
+            event,
+            victim.getParticipantState(),
+            tracker().resolveDamage(FIRE, event.getEntity(), event.getCombuster()))
+        .isDenied()) {
+      event.setCancelled(true);
+    }
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -210,12 +240,13 @@ public class DamageMatchModule implements MatchModule, Listener {
     MatchPlayer victim = getVictim(event.getEntity());
     if (victim == null) return;
 
-    processDamageEvent(
-        event,
-        victim.getParticipantState(),
-        tracker()
-            .resolveDamage(
-                EntityDamageEvent.DamageCause.FIRE, event.getEntity(), event.getCombuster()));
+    if (queryDamage(
+            event,
+            victim.getParticipantState(),
+            tracker().resolveDamage(FIRE, event.getEntity(), event.getCombuster()))
+        .isDenied()) {
+      event.setCancelled(true);
+    }
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -225,8 +256,7 @@ public class DamageMatchModule implements MatchModule, Listener {
 
     for (LivingEntity entity : event.getAffectedEntities()) {
       ParticipantState victim = match.getParticipantState(entity);
-      DamageInfo damageInfo =
-          tracker().resolveDamage(EntityDamageEvent.DamageCause.MAGIC, entity, potion);
+      DamageInfo damageInfo = tracker().resolveDamage(MAGIC, entity, potion);
 
       if (victim != null && queryDamage(event, victim, damageInfo).isDenied()) {
         event.setIntensity(entity, 0);
@@ -250,11 +280,7 @@ public class DamageMatchModule implements MatchModule, Listener {
       if (victimState == null) return;
 
       DamageInfo damageInfo =
-          tracker()
-              .resolveDamage(
-                  EntityDamageEvent.DamageCause.ENTITY_ATTACK,
-                  event.getTarget(),
-                  event.getEntity());
+          tracker().resolveDamage(ENTITY_ATTACK, event.getTarget(), event.getEntity());
       if (queryHostile(victimState, damageInfo).isDenied()) {
         event.setCancelled(true);
       }

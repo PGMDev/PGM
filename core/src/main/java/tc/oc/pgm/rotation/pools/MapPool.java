@@ -3,11 +3,9 @@ package tc.oc.pgm.rotation.pools;
 import static tc.oc.pgm.util.text.TextParser.parseDuration;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.configuration.ConfigurationSection;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
@@ -26,7 +24,12 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
 
   protected final boolean dynamic;
 
-  MapPool(MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
+  MapPool(
+      MapPoolType type,
+      String name,
+      MapPoolManager manager,
+      ConfigurationSection section,
+      MapParser maps) {
     this(
         type,
         name,
@@ -35,7 +38,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
         section.getInt("players"),
         section.getBoolean("dynamic", true),
         parseDuration(section.getString("cycle-time", "-1s")),
-        buildMapList(section.getStringList("maps"), name));
+        maps.getMaps());
   }
 
   MapPool(
@@ -54,27 +57,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     this.players = players;
     this.dynamic = dynamic;
     this.cycleTime = cycleTime;
-    this.maps = maps;
-  }
-
-  private static List<MapInfo> buildMapList(List<String> mapNames, String poolName) {
-    if (mapNames == null) return new ArrayList<>();
-
-    List<MapInfo> mapList = new ArrayList<>(mapNames.size());
-
-    for (String mapName : mapNames) {
-      MapInfo map = PGM.get().getMapLibrary().getMap(mapName);
-      if (map != null) {
-        mapList.add(map);
-      } else {
-        PGM.get()
-            .getLogger()
-            .warning(
-                "[MapPool] [" + poolName + "] " + mapName + " not found in map repo. Ignoring...");
-      }
-    }
-
-    return Collections.unmodifiableList(mapList);
+    this.maps = Collections.unmodifiableList(maps);
   }
 
   public MapPoolType getType() {
@@ -123,7 +106,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
    *
    * @param match The match that is currently ending
    */
-  public void unloadPool(Match match) {};
+  public void unloadPool(Match match) {}
 
   @Override
   public int compareTo(MapPool o) {

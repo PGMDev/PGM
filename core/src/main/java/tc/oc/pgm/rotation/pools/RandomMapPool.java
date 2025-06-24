@@ -11,9 +11,13 @@ public class RandomMapPool extends MapPool {
   private final RandomMapOrder order;
 
   public RandomMapPool(
-      MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section) {
-    super(type, name, manager, section);
-    this.order = new RandomMapOrder(maps);
+      MapPoolType type,
+      String name,
+      MapPoolManager manager,
+      ConfigurationSection section,
+      MapParser maps) {
+    super(type, name, manager, section, maps);
+    this.order = new RandomMapOrder(this.maps);
   }
 
   @Override

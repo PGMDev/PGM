@@ -11,16 +11,20 @@ public class ConsumableDefinition extends SelfIdentifyingFeatureDefinition {
   private final ConsumeCause cause;
   /** If true, replaces vanilla behaviour, otherwise keeps vanilla behaviour */
   private final boolean override;
+  /** If the item should be consumed after use */
+  private final boolean consume;
 
   public ConsumableDefinition(
       @Nullable String id,
       Action<? super MatchPlayer> action,
       ConsumeCause cause,
-      boolean override) {
+      boolean override,
+      boolean consume) {
     super(id);
     this.action = action;
     this.cause = cause;
     this.override = override;
+    this.consume = consume;
   }
 
   public Action<? super MatchPlayer> getAction() {
@@ -33,5 +37,9 @@ public class ConsumableDefinition extends SelfIdentifyingFeatureDefinition {
 
   public boolean getOverride() {
     return override;
+  }
+
+  public boolean getConsume() {
+    return consume;
   }
 }

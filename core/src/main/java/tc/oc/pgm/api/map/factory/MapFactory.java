@@ -1,6 +1,5 @@
 package tc.oc.pgm.api.map.factory;
 
-import java.util.Collection;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
@@ -11,10 +10,17 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
-import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 
 /** A factory for creating {@link MapInfo}s and {@link MapContext}s. */
 public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
+
+  /**
+   * A parser able to parse most commonly required things, with a fluent interface.
+   *
+   * @return A {@link XMLFluentParser}
+   */
+  XMLFluentParser getParser();
 
   /**
    * Get the {@link RegionParser} for parsing region references.
@@ -59,11 +65,4 @@ public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
    * @throws MapException If there was an error loading the context.
    */
   MapContext load() throws MapException;
-
-  /**
-   * Get the map variants found in the map
-   *
-   * @return a collection of map variants, empty if no variants exist
-   */
-  Collection<String> getVariants() throws InvalidXMLException;
 }

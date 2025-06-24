@@ -2,12 +2,12 @@ package tc.oc.pgm.command.injectors;
 
 import static tc.oc.pgm.util.text.TextException.playerOnly;
 
-import cloud.commandframework.annotations.AnnotationAccessor;
-import cloud.commandframework.annotations.injection.ParameterInjector;
-import cloud.commandframework.context.CommandContext;
-import cloud.commandframework.exceptions.CommandExecutionException;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.incendo.cloud.context.CommandContext;
+import org.incendo.cloud.exception.CommandExecutionException;
+import org.incendo.cloud.injection.ParameterInjector;
+import org.incendo.cloud.util.annotation.AnnotationAccessor;
 import org.jetbrains.annotations.NotNull;
 
 public final class PlayerProvider implements ParameterInjector<CommandSender, Player> {
@@ -15,7 +15,7 @@ public final class PlayerProvider implements ParameterInjector<CommandSender, Pl
   @Override
   public Player create(
       CommandContext<CommandSender> context, @NotNull AnnotationAccessor annotations) {
-    CommandSender sender = context.getSender();
+    CommandSender sender = context.sender();
     if (sender instanceof Player) return (Player) sender;
 
     throw new CommandExecutionException(playerOnly());

@@ -10,6 +10,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
+import tc.oc.pgm.score.ScoreCause;
 import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.TeamMatchModule;
 
@@ -45,7 +46,8 @@ public class Returned extends Uncarried implements Runnable {
     if (smm != null && this.post.getOwner() != null && this.post.getPointsPerSecond() != 0) {
       smm.incrementScore(
           this.flag.getMatch().needModule(TeamMatchModule.class).getTeam(this.post.getOwner()),
-          this.post.getPointsPerSecond() / 20D);
+          this.post.getPointsPerSecond() / 20D,
+          ScoreCause.FLAG_RETURNED_TICK);
     }
   }
 

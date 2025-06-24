@@ -7,7 +7,6 @@ import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
@@ -15,7 +14,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,12 +34,18 @@ import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.material.matcher.SingleMaterialMatcher;
+import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 
 // TODO: Consider making Core extend Destroyable
 public class Core extends TouchableGoal<CoreFactory>
     implements IncrementalGoal<CoreFactory>, ModeChangeGoal<CoreFactory> {
+
+  private static final MaterialMatcher LAVA_BLOCKS =
+      MaterialMatcher.of(Material.LAVA, Materials.STILL_LAVA);
 
   protected final FiniteBlockRegion casingRegion;
   protected final FiniteBlockRegion lavaRegion;
@@ -49,7 +53,7 @@ public class Core extends TouchableGoal<CoreFactory>
   protected final int leakRequired;
   protected final boolean isShared;
 
-  protected MaterialData material;
+  protected MaterialMatcher material;
   protected int leak = 0;
   protected boolean leaked = false;
   protected Iterable<Location> proximityLocations;
@@ -61,25 +65,16 @@ public class Core extends TouchableGoal<CoreFactory>
 
     Region region = definition.getRegion();
 
-    this.casingRegion =
-        FiniteBlockRegion.fromWorld(
-            region,
-            match.getWorld(),
-            match.getMap().getProto(),
-            new SingleMaterialMatcher(this.material));
+    this.casingRegion = FiniteBlockRegion.fromWorld(
+        region, match.getWorld(), this.material, match.getMap().getProto());
     if (this.casingRegion.getBlockVolume() == 0) {
       match
           .getLogger()
           .warning("No casing world (" + this.material + ") found in core " + this.getName());
     }
 
-    this.lavaRegion =
-        FiniteBlockRegion.fromWorld(
-            region,
-            match.getWorld(),
-            match.getMap().getProto(),
-            new SingleMaterialMatcher(Material.LAVA, (byte) 0),
-            new SingleMaterialMatcher(Material.STATIONARY_LAVA, (byte) 0));
+    this.lavaRegion = FiniteBlockRegion.fromWorld(
+        region, match.getWorld(), LAVA_BLOCKS, match.getMap().getProto());
     if (this.lavaRegion.getBlockVolume() == 0) {
       match.getLogger().warning("No lava found in core " + this.getName());
     }
@@ -130,19 +125,20 @@ public class Core extends TouchableGoal<CoreFactory>
   @Override
   public Iterable<Location> getProximityLocations(ParticipantState player) {
     if (proximityLocations == null) {
-      proximityLocations =
-          Collections.singleton(
-              casingRegion.getBounds().getCenterPoint().toLocation(this.getMatch().getWorld()));
+      proximityLocations = Collections.singleton(
+          casingRegion.getBounds().getCenterPoint().toLocation(this.getMatch().getWorld()));
     }
     return proximityLocations;
   }
 
-  public ImmutableSet<Mode> getModes() {
-    return this.definition.getModes();
+  @Override
+  public boolean isAffectedBy(Mode mode) {
+    return mode.getMaterialData() != null
+        && (this.definition.getModes() == null || this.definition.getModes().contains(mode));
   }
 
-  public MaterialData getMaterial() {
-    return this.material;
+  public boolean isCoreMaterial(MaterialData material) {
+    return this.material.matches(material);
   }
 
   public FiniteBlockRegion getCasingRegion() {
@@ -209,7 +205,7 @@ public class Core extends TouchableGoal<CoreFactory>
     return StringUtils.percentage(this.getCompletion());
   }
 
-  @Nullable
+  @NotNull
   @Override
   public String renderPreciseCompletion() {
     return this.leak + "/" + this.leakRequired;
@@ -232,23 +228,21 @@ public class Core extends TouchableGoal<CoreFactory>
   }
 
   @Override
-  @SuppressWarnings("deprecation")
-  public void replaceBlocks(MaterialData newMaterial) {
+  public void replaceBlocks(BlockMaterialData newMaterial) {
     for (Block block : this.getCasingRegion().getBlocks(match.getWorld())) {
       if (this.isObjectiveMaterial(block)) {
-        block.setTypeIdAndData(newMaterial.getItemTypeId(), newMaterial.getData(), true);
+        newMaterial.applyTo(block, true);
       }
     }
-    this.material = newMaterial;
+    this.material = newMaterial.toMatcher();
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public boolean isObjectiveMaterial(Block block) {
-    return block.getType() == this.material.getItemType()
-        && block.getData() == this.material.getData();
+    return material.matches(block.getState());
   }
 
+  @Override
   public String getModeChangeMessage(Material material) {
     return ModeUtils.formatMaterial(material) + " CORE MODE";
   }

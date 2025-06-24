@@ -1,21 +1,23 @@
 package tc.oc.pgm.inventory;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
@@ -33,11 +35,11 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -52,10 +54,10 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.StringUtils;
-import tc.oc.pgm.util.attribute.Attribute;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextTranslations;
 
 @ListenerScope(MatchScope.LOADED)
@@ -63,8 +65,19 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   public static final Duration TICK = Duration.ofMillis(50);
 
-  protected final HashMap<String, InventoryTrackerEntry> monitoredInventories = new HashMap<>();
-  protected final HashMap<String, Instant> updateQueue = Maps.newHashMap();
+  private final Match match;
+
+  private final Map<Player, InventoryTrackerEntry> monitoredInventories;
+  private final Map<Player, Instant> updateQueue;
+
+  public ViewInventoryMatchModule(Match match) {
+    this.match = match;
+    this.monitoredInventories = new OnlinePlayerMapAdapter<>(PGM.get());
+    this.updateQueue = new OnlinePlayerMapAdapter<>(PGM.get());
+    match
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleWithFixedDelay(this::checkAllMonitoredInventories, 0, 1, TimeUnit.SECONDS);
+  }
 
   public static int getInventoryPreviewSlot(int inventorySlot) {
     if (inventorySlot < 9) {
@@ -77,40 +90,26 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     return inventorySlot; // default
   }
 
-  private final Match match;
-
-  public ViewInventoryMatchModule(Match match) {
-    this.match = match;
-    match
-        .getExecutor(MatchScope.RUNNING)
-        .scheduleWithFixedDelay(this::checkAllMonitoredInventories, 0, 1, TimeUnit.SECONDS);
-  }
-
   private void checkAllMonitoredInventories() {
     if (updateQueue.isEmpty()) return;
 
-    for (Iterator<Map.Entry<String, Instant>> iterator = updateQueue.entrySet().iterator();
-        iterator.hasNext(); ) {
-      Map.Entry<String, Instant> entry = iterator.next();
-      if (entry.getValue().isAfter(Instant.now())) continue;
-
-      Player player = Bukkit.getPlayerExact(entry.getKey());
-      if (player != null) {
-        checkMonitoredInventories(player);
+    updateQueue.entrySet().removeIf(entry -> {
+      if (!entry.getValue().isAfter(match.getTick().instant)) {
+        checkMonitoredInventories(entry.getKey());
+        return true;
       }
-
-      iterator.remove();
-    }
+      return false;
+    });
   }
 
   @EventHandler
   public void closeMonitoredInventory(final InventoryCloseEvent event) {
-    this.monitoredInventories.remove(event.getPlayer().getName());
+    this.monitoredInventories.remove((Player) event.getPlayer());
   }
 
   @EventHandler
   public void playerQuit(final PlayerPartyChangeEvent event) {
-    this.monitoredInventories.remove(event.getPlayer().getBukkit().getName());
+    this.monitoredInventories.remove(event.getPlayer().getBukkit());
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -130,7 +129,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       event.setCancelled(true);
 
       if (event.getClickedEntity() instanceof Villager) {
-        event.getPlayer().getBukkit().openMerchantCopy((Villager) event.getClickedEntity());
+        INVENTORY_UTILS.openVillager(
+            (Villager) event.getClickedEntity(), event.getPlayer().getBukkit());
         return;
       }
 
@@ -160,11 +160,10 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         inventory = event.getInventory();
       }
 
-      invLoop:
-      for (Map.Entry<String, InventoryTrackerEntry> entry :
-          new HashSet<>(
-              this.monitoredInventories.entrySet())) { // avoid ConcurrentModificationException
-        String pl = entry.getKey();
+      invLoop: // avoid ConcurrentModificationException by copying
+      for (Map.Entry<Player, InventoryTrackerEntry> entry :
+          new HashSet<>(this.monitoredInventories.entrySet())) {
+        Player pl = entry.getKey();
         InventoryTrackerEntry tracker = entry.getValue();
 
         // because a player can only be viewing one inventory at a time,
@@ -175,7 +174,10 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
           continue invLoop;
 
         for (int i = 0; i < inventory.getViewers().size(); i++) {
-          if (!inventory.getViewers().get(i).equals(tracker.getWatched().getViewers().get(i))) {
+          if (!inventory
+              .getViewers()
+              .get(i)
+              .equals(tracker.getWatched().getViewers().get(i))) {
             continue invLoop;
           }
         }
@@ -187,10 +189,9 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         }
 
         if (playerInventory) {
-          this.previewPlayerInventory(
-              Bukkit.getServer().getPlayerExact(pl), (PlayerInventory) inventory);
+          this.previewPlayerInventory(pl, (PlayerInventory) inventory);
         } else {
-          this.previewInventory(Bukkit.getServer().getPlayerExact(pl), inventory);
+          this.previewInventory(pl, inventory);
         }
       }
     }
@@ -270,25 +271,24 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
   }
 
   protected void scheduleCheck(Player updater) {
-    if (this.updateQueue.containsKey(updater.getName())) return;
-
-    this.updateQueue.put(updater.getName(), Instant.now().plus(TICK));
+    if (this.updateQueue.containsKey(updater)) return;
+    this.updateQueue.put(updater, match.getTick().instant.plus(TICK));
   }
 
   protected void checkMonitoredInventories(Player updater) {
-    for (Map.Entry<String, InventoryTrackerEntry> entry : this.monitoredInventories.entrySet()) {
-      String pl = entry.getKey();
+    for (Map.Entry<Player, InventoryTrackerEntry> entry : this.monitoredInventories.entrySet()) {
+      Player pl = entry.getKey();
       InventoryTrackerEntry tracker = entry.getValue();
 
+      InventoryHolder invHolder = tracker.getWatched().getHolder();
+
       if (tracker.isPlayerInventory()) {
-        Player holder = (Player) tracker.getPlayerInventory().getHolder();
-        if (updater.getName().equals(holder.getName())) {
-          this.previewPlayerInventory(
-              Bukkit.getServer().getPlayerExact(pl), tracker.getPlayerInventory());
+        Player holder = (Player) invHolder;
+        if (updater.equals(holder)) {
+          this.previewPlayerInventory(pl, tracker.getPlayerInventory());
         }
-      } else {
-        InventoryHolder holder = tracker.getWatched().getHolder();
-        this.previewInventory(Bukkit.getServer().getPlayerExact(pl), holder.getInventory());
+      } else if (invHolder != null) {
+        this.previewInventory(pl, invHolder.getInventory());
       }
     }
   }
@@ -301,9 +301,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     Player holder = (Player) inventory.getHolder();
     // Ensure that the title of the inventory is <= 32 characters long to appease Minecraft's
     // restrictions on inventory titles
-    String title =
-        StringUtils.substring(
-            TextTranslations.translateLegacy(player(holder, NameStyle.FANCY), viewer), 0, 32);
+    String title = StringUtils.substring(
+        TextTranslations.translateLegacy(player(holder, NameStyle.FANCY), viewer), 0, 32);
 
     Inventory preview = Bukkit.getServer().createInventory(viewer, 45, title);
 
@@ -320,10 +319,9 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         ItemStack lives = new ItemStack(Material.EGG, livesLeft);
         ItemMeta lifeMeta = lives.getItemMeta();
         String key = livesLeft == 1 ? "misc.life" : "misc.lives";
-        lifeMeta.setDisplayName(
-            ChatColor.GREEN
-                + TextTranslations.translate(
-                    key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN));
+        lifeMeta.setDisplayName(ChatColor.GREEN
+            + TextTranslations.translate(
+                key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN));
         lives.setItemMeta(lifeMeta);
         preview.setItem(4, lives);
       }
@@ -341,44 +339,39 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
             ChatColor.LIGHT_PURPLE + TextTranslations.translate("preview.doubleJump", viewer));
       }
 
-      double knockbackResistance =
-          matchHolder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE).getValue();
-      if (knockbackResistance > 0) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.knockbackResistance",
-                    viewer,
-                    (int) Math.ceil(knockbackResistance * 100)));
+      AttributeInstance knockbackAttribute =
+          matchHolder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+      if (knockbackAttribute != null) {
+        double knockbackResistance = knockbackAttribute.getValue();
+        if (knockbackResistance > 0) {
+          specialLore.add(ChatColor.LIGHT_PURPLE
+              + TextTranslations.translate("preview.knockbackResistance", viewer, (int)
+                  Math.ceil(knockbackResistance * 100)));
+        }
       }
 
-      double knockbackReduction = holder.getKnockbackReduction();
+      double knockbackReduction = PLAYER_UTILS.getKnockbackReduction(holder);
       if (knockbackReduction > 0) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.knockbackReduction",
-                    viewer,
-                    (int) Math.ceil(knockbackReduction * 100)));
+        specialLore.add(ChatColor.LIGHT_PURPLE
+            + TextTranslations.translate(
+                "preview.knockbackReduction", viewer, (int) Math.ceil(knockbackReduction * 100)));
       }
 
       double walkSpeed = holder.getWalkSpeed();
       if (walkSpeed != WalkSpeedKit.BUKKIT_DEFAULT) {
-        specialLore.add(
-            ChatColor.LIGHT_PURPLE
-                + TextTranslations.translate(
-                    "preview.walkSpeed",
-                    viewer,
-                    String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
+        specialLore.add(ChatColor.LIGHT_PURPLE
+            + TextTranslations.translate(
+                "preview.walkSpeed",
+                viewer,
+                String.format("%.1f", walkSpeed / WalkSpeedKit.BUKKIT_DEFAULT)));
       }
 
       if (!specialLore.isEmpty()) {
         ItemStack special = new ItemStack(Material.NETHER_STAR);
         ItemMeta specialMeta = special.getItemMeta();
-        specialMeta.setDisplayName(
-            ChatColor.AQUA.toString()
-                + ChatColor.ITALIC
-                + TextTranslations.translate("preview.specialAbilities", viewer));
+        specialMeta.setDisplayName(ChatColor.AQUA.toString()
+            + ChatColor.ITALIC
+            + TextTranslations.translate("preview.specialAbilities", viewer));
         specialMeta.setLore(specialLore);
         special.setItemMeta(specialMeta);
         preview.setItem(5, special);
@@ -389,18 +382,16 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     boolean hasPotions = holder.getActivePotionEffects().size() > 0;
     ItemStack potions = new ItemStack(hasPotions ? Material.POTION : Material.GLASS_BOTTLE);
     ItemMeta potionMeta = potions.getItemMeta();
-    potionMeta.setDisplayName(
-        ChatColor.AQUA.toString()
-            + ChatColor.ITALIC
-            + TextTranslations.translate("preview.potionEffects", viewer));
+    potionMeta.setDisplayName(ChatColor.AQUA.toString()
+        + ChatColor.ITALIC
+        + TextTranslations.translate("preview.potionEffects", viewer));
     List<String> lore = Lists.newArrayList();
     if (hasPotions) {
       for (PotionEffect effect : holder.getActivePotionEffects()) {
-        lore.add(
-            ChatColor.YELLOW
-                + BukkitUtils.potionEffectTypeName(effect.getType())
-                + " "
-                + (effect.getAmplifier() + 1));
+        lore.add(ChatColor.YELLOW
+            + BukkitUtils.potionEffectTypeName(effect.getType())
+            + " "
+            + (effect.getAmplifier() + 1));
       }
     } else {
       lore.add(ChatColor.YELLOW + TextTranslations.translate("preview.noPotionEffects", viewer));
@@ -412,21 +403,19 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     // hunger and health
     ItemStack hunger = new ItemStack(Material.COOKED_BEEF, holder.getFoodLevel());
     ItemMeta hungerMeta = hunger.getItemMeta();
-    hungerMeta.setDisplayName(
-        ChatColor.AQUA.toString()
-            + ChatColor.ITALIC
-            + TextTranslations.translate("preview.hungerLevel", viewer));
-    hungerMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+    hungerMeta.setDisplayName(ChatColor.AQUA.toString()
+        + ChatColor.ITALIC
+        + TextTranslations.translate("preview.hungerLevel", viewer));
+    hungerMeta.addItemFlags(InventoryUtils.HIDE_ADDITIONAL_FLAG);
     hunger.setItemMeta(hungerMeta);
     preview.setItem(7, hunger);
 
     ItemStack health = new ItemStack(Material.REDSTONE, (int) holder.getHealth());
     ItemMeta healthMeta = health.getItemMeta();
-    healthMeta.setDisplayName(
-        ChatColor.AQUA.toString()
-            + ChatColor.ITALIC
-            + TextTranslations.translate("preview.healthLevel", viewer));
-    healthMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+    healthMeta.setDisplayName(ChatColor.AQUA.toString()
+        + ChatColor.ITALIC
+        + TextTranslations.translate("preview.healthLevel", viewer));
+    healthMeta.addItemFlags(InventoryUtils.HIDE_ADDITIONAL_FLAG);
     health.setItemMeta(healthMeta);
     preview.setItem(8, health);
 
@@ -448,7 +437,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       previewPlayerInventory(viewer, (PlayerInventory) realInventory);
     } else {
       Inventory fakeInventory;
-      fakeInventory = NMSHacks.createFakeInventory(viewer, realInventory);
+      fakeInventory = NMS_HACKS.createFakeInventory(viewer, realInventory);
       fakeInventory.setContents(realInventory.getContents());
 
       this.showInventoryPreview(viewer, realInventory, fakeInventory);
@@ -461,14 +450,14 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       return;
     }
 
-    InventoryTrackerEntry entry = this.monitoredInventories.get(viewer.getName());
+    InventoryTrackerEntry entry = this.monitoredInventories.get(viewer);
     if (entry != null
         && entry.getWatched().equals(realInventory)
         && entry.getPreview().getSize() == fakeInventory.getSize()) {
       entry.getPreview().setContents(fakeInventory.getContents());
     } else {
       entry = new InventoryTrackerEntry(realInventory, fakeInventory);
-      this.monitoredInventories.put(viewer.getName(), entry);
+      this.monitoredInventories.put(viewer, entry);
       viewer.openInventory(fakeInventory);
     }
   }

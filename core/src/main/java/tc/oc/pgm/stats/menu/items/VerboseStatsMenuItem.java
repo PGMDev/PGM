@@ -2,7 +2,6 @@ package tc.oc.pgm.stats.menu.items;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,9 +22,8 @@ public class VerboseStatsMenuItem implements MenuItem {
 
   @Override
   public List<String> getLore(Player player) {
-    return Lists.newArrayList(
-        TextTranslations.translateLegacy(
-            translatable("setting.lore", NamedTextColor.GRAY), player));
+    return List.of(TextTranslations.translateLegacy(
+        translatable("setting.lore", NamedTextColor.GRAY), player));
   }
 
   @Override

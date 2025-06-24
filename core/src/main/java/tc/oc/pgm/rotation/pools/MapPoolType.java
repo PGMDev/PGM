@@ -40,9 +40,9 @@ public enum MapPoolType implements Aliased {
     MapPoolType type = of(typeStr);
     if (type == null) {
       PGM.get().getLogger().severe("Invalid map pool type for " + key + ": '" + typeStr + "'");
-      return new DisabledMapPool(manager, section, key);
+      return new DisabledMapPool(key, manager, section);
     }
-    return type.factory.build(type, key, manager, section);
+    return type.factory.build(type, key, manager, section, MapParser.parse(key, section));
   }
 
   @NotNull
@@ -53,6 +53,10 @@ public enum MapPoolType implements Aliased {
 
   private interface PoolFactory {
     MapPool build(
-        MapPoolType type, String name, MapPoolManager manager, ConfigurationSection section);
+        MapPoolType type,
+        String name,
+        MapPoolManager manager,
+        ConfigurationSection section,
+        MapParser maps);
   }
 }

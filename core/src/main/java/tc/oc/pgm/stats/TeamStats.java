@@ -1,10 +1,9 @@
 package tc.oc.pgm.stats;
 
-import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.api.player.MatchPlayer;
+import java.util.Collection;
 
 // Holds calculated total stats for a single team
-public class TeamStats {
+public class TeamStats implements StatHolder {
 
   private int teamKills = 0;
   private int teamDeaths = 0;
@@ -15,13 +14,12 @@ public class TeamStats {
   private int shotsTaken = 0;
   private int shotsHit = 0;
 
-  private double teamKD;
-  private double teamBowAcc;
+  private final double teamKD;
+  private final double teamBowAcc;
 
-  public TeamStats(Competitor team, StatsMatchModule statsModule) {
+  public TeamStats(Collection<PlayerStats> playerStats) {
 
-    for (MatchPlayer teamPlayer : team.getPlayers()) {
-      PlayerStats stats = statsModule.getPlayerStat(teamPlayer.getId());
+    for (PlayerStats stats : playerStats) {
       teamKills += stats.getKills();
       teamDeaths += stats.getDeaths();
       damageDone += stats.getDamageDone();
@@ -34,6 +32,17 @@ public class TeamStats {
 
     teamKD = teamDeaths == 0 ? teamKills : teamKills / (double) teamDeaths;
     teamBowAcc = shotsTaken == 0 ? Double.NaN : shotsHit / (shotsTaken / (double) 100);
+  }
+
+  @Override
+  public Number getStat(StatType.Builtin type) {
+    return switch (type) {
+      case KILLS -> teamKills;
+      case DEATHS -> teamDeaths;
+      case KILL_DEATH_RATIO -> teamKD;
+      case DAMAGE -> damageDone;
+      default -> Double.NaN;
+    };
   }
 
   public int getTeamKills() {

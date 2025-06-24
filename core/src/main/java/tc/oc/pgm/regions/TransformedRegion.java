@@ -1,12 +1,14 @@
 package tc.oc.pgm.regions;
 
 import java.util.Random;
+import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public abstract class TransformedRegion implements RegionDefinition {
+public abstract class TransformedRegion implements RegionDefinition.Static {
 
   protected final Region region;
   protected @Nullable Bounds bounds;
@@ -18,6 +20,11 @@ public abstract class TransformedRegion implements RegionDefinition {
   @Override
   public boolean isBlockBounded() {
     return this.region.isBlockBounded();
+  }
+
+  @Override
+  public boolean isStatic() {
+    return region.isStatic();
   }
 
   @Override
@@ -48,7 +55,14 @@ public abstract class TransformedRegion implements RegionDefinition {
 
   @Override
   public boolean contains(Vector point) {
-    return this.region.contains(this.untransform(point));
+    return this.region.getStatic().contains(this.untransform(point));
+  }
+
+  @Override
+  public boolean contains(Location point) {
+    if (isStatic()) return contains(point.toVector());
+    var vec = untransform(point.toVector());
+    return this.region.contains(new Location(point.getWorld(), vec.getX(), vec.getY(), vec.getZ()));
   }
 
   @Override
@@ -63,7 +77,12 @@ public abstract class TransformedRegion implements RegionDefinition {
    */
   @Override
   public Vector getRandom(Random random) {
-    return this.transform(this.region.getRandom(random));
+    return this.transform(this.region.getStatic().getRandom(random));
+  }
+
+  @Override
+  public Vector getRandom(Match match) {
+    return this.transform(this.region.getRandom(match));
   }
 
   protected abstract Vector transform(Vector point);

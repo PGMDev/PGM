@@ -10,11 +10,11 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.material.MaterialData;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.util.material.MaterialData;
 
 /**
  * A block query is canonically defined by a {@link World} and a set of integer block coordinates.
@@ -50,12 +50,22 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
     this(event, block.getWorld(), block.getX(), block.getY(), block.getZ());
   }
 
+  public BlockQuery(@Nullable Event event, Location loc) {
+    this(event, loc.getBlock());
+    this.location = loc;
+  }
+
   public BlockQuery(Block block) {
     this(null, block);
   }
 
   public BlockQuery(BlockState block) {
     this(null, block);
+  }
+
+  public BlockQuery withMaterial(MaterialData material) {
+    this.material = material;
+    return this;
   }
 
   @Override
@@ -77,7 +87,7 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   @Override
   public MaterialData getMaterial() {
     if (material == null) {
-      material = getBlock().getData();
+      material = MaterialData.block(getBlock());
     }
     return material;
   }
@@ -98,13 +108,16 @@ public class BlockQuery extends Query implements tc.oc.pgm.api.filter.query.Bloc
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof BlockQuery)) return false;
-    BlockQuery query = (BlockQuery) o;
-    return world.equals(query.world) && x == query.x && y == query.y && z == query.z;
+    if (!(o instanceof BlockQuery query)) return false;
+    return world.equals(query.world)
+        && x == query.x
+        && y == query.y
+        && z == query.z
+        && getMaterial() == query.getMaterial();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(world, x, y, z);
+    return Objects.hash(world, x, y, z, getMaterial());
   }
 }

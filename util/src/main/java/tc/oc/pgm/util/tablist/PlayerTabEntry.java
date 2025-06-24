@@ -1,13 +1,14 @@
 package tc.oc.pgm.util.tablist;
 
 import static net.kyori.adventure.text.Component.text;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.UUID;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.skin.Skin;
 
 /**
@@ -39,9 +40,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
     long parity = original.hashCode() & 1L;
     long mask = ~((1L << 32) | 1L);
     UUID uuid = randomUUIDVersion2();
-    uuid =
-        new UUID(
-            uuid.getMostSignificantBits() & mask, (uuid.getLeastSignificantBits() & mask) | parity);
+    uuid = new UUID(
+        uuid.getMostSignificantBits() & mask, (uuid.getLeastSignificantBits() & mask) | parity);
     return uuid;
   }
 
@@ -51,7 +51,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   public PlayerTabEntry(Player player) {
     super(randomUUIDVersion2SameDefaultSkin(player.getUniqueId()));
     this.player = player;
-    this.spareEntityId = NMSHacks.allocateEntityId();
+    this.spareEntityId = NMS_HACKS.allocateEntityId();
   }
 
   @Override
@@ -75,18 +75,12 @@ public class PlayerTabEntry extends DynamicTabEntry {
     if (viewer == null) {
       return null;
     }
-
-    // TODO: find different solution for non-SportPaper servers
-    return this.player.hasFakeSkin(viewer)
-        ? new Skin(
-            this.player.getFakeSkin(viewer).getData(),
-            this.player.getFakeSkin(viewer).getSignature())
-        : NMSHacks.getPlayerSkin(this.player);
+    return PLAYER_UTILS.getPlayerSkinForViewer(player, viewer);
   }
 
   @Override
   public int getPing() {
-    if (showPing) return NMSHacks.getPing(this.player);
+    if (showPing) return PLAYER_UTILS.getPing(this.player);
     return super.getPing();
   }
 

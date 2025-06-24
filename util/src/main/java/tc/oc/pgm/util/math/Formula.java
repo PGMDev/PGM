@@ -1,68 +1,106 @@
 package tc.oc.pgm.util.math;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Formula<T> extends ToDoubleFunction<T> {
-
-  Function BOUND =
-      new Function("bound", 3) {
-        @Override
-        public double apply(double... doubles) {
-          double val = doubles[0];
-          double min = doubles[1];
-          double max = doubles[2];
-          return Math.max(min, Math.min(val, max));
-        }
-      };
-
-  Function RANDOM =
-      new Function("random", 0) {
-        @Override
-        public double apply(double... doubles) {
-          return Math.random();
-        }
-      };
-
-  static <T extends Supplier<Map<String, Double>>> Formula<T> of(
-      String expression, Set<String> variables, Formula<T> fallback)
-      throws IllegalArgumentException {
+  /**
+   * Create a formula for a config, if there's a misconfiguration it logs and uses fallback
+   *
+   * @param expression The expression to parse
+   * @param variables The set of available variables in the formula
+   * @param fallback A fallback if no value is defined or parsing fails
+   * @return The formula if it parsed correctly, fallback if anything goes wrong
+   * @param <T> Type of expression context to use
+   */
+  static <T extends ExpressionContext> Formula<T> of(
+      String expression, Set<String> variables, Formula<T> fallback) {
     if (expression == null) return fallback;
 
-    return Formula.of(expression, variables, T::get);
+    try {
+      return Formula.of(expression, ContextFactory.ofStatic(variables));
+    } catch (IllegalArgumentException e) {
+      BukkitUtils.getPlugin()
+          .getLogger()
+          .log(Level.SEVERE, "Failed to load formula '" + expression + "' using fallback", e);
+      return fallback;
+    }
   }
 
-  static <T> Formula<T> of(String expression, Set<String> variables, ContextBuilder<T> context)
+  static <T> Formula<T> of(String expression, ContextFactory<T> context)
       throws IllegalArgumentException {
-
-    Expression exp =
-        new ExpressionBuilder(expression).variables(variables).functions(BOUND, RANDOM).build();
+    Expression exp = new ExpressionBuilder(expression)
+        .variables(context.getVariables())
+        .functions(AddedFunctions.ALL)
+        .functions(context.getArrays().stream()
+            .map(str -> new Function(str, 1) {
+              @Override
+              public double apply(double... doubles) {
+                throw new UnsupportedOperationException(
+                    "Cannot get array value without replacement!");
+              }
+            })
+            .collect(Collectors.toList()))
+        .build();
 
     return new ExpFormula<>(exp, context);
   }
 
+  default <R> Formula<R> map(java.util.function.Function<R, T> mapper) {
+    return v -> apply(mapper.apply(v));
+  }
+
+  /** Shorthand for {@link #applyAsDouble} */
+  default double apply(T value) {
+    return applyAsDouble(value);
+  }
+
   class ExpFormula<T> implements Formula<T> {
     private final Expression expression;
-    private final ContextBuilder<T> context;
+    private final ContextFactory<T> context;
 
-    private ExpFormula(Expression expression, ContextBuilder<T> context) {
+    private ExpFormula(Expression expression, ContextFactory<T> context) {
       this.expression = expression;
       this.context = context;
     }
 
     @Override
     public double applyAsDouble(T value) {
-      return expression.setVariables(context.getVariables(value)).evaluate();
+      return expression.setExpressionContext(context.withContext(value)).evaluate();
     }
   }
 
-  @FunctionalInterface
-  interface ContextBuilder<T> {
-    Map<String, Double> getVariables(T t);
+  interface ContextFactory<T> {
+    Set<String> getVariables();
+
+    Set<String> getArrays();
+
+    ExpressionContext withContext(T t);
+
+    static <T extends ExpressionContext> ContextFactory<T> ofStatic(Set<String> variables) {
+      return new ContextFactory<>() {
+        @Override
+        public ExpressionContext withContext(T t) {
+          return t;
+        }
+
+        @Override
+        public Set<String> getVariables() {
+          return variables;
+        }
+
+        @Override
+        public Set<String> getArrays() {
+          return Set.of();
+        }
+      };
+    }
   }
 }

@@ -6,8 +6,6 @@ import static tc.oc.pgm.util.text.TextParser.*;
 import com.google.common.collect.Range;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -19,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
 
+@SuppressWarnings("deprecation")
 public final class TextParserTest {
 
   @ParameterizedTest
@@ -205,7 +204,8 @@ public final class TextParserTest {
   void testParseEnumInvalid(String text) {
     assertEquals(
         "error.invalidFormat",
-        assertThrows(TextException.class, () -> parseEnum(text, ChatColor.class)).getMessage());
+        assertThrows(TextException.class, () -> parseEnum(text, ChatColor.class))
+            .getMessage());
   }
 
   @ParameterizedTest
@@ -231,18 +231,6 @@ public final class TextParserTest {
     assertEquals(
         "error.invalidFormat",
         assertThrows(TextException.class, () -> parseUri(text)).getMessage());
-  }
-
-  @ParameterizedTest
-  @ValueSource(strings = {"sqlite::memory:"})
-  void testParseSqlConnection(String text) throws SQLException {
-    final Connection connection = parseSqlConnection(text);
-
-    assertNotNull(connection);
-    assertFalse(connection.isClosed());
-
-    connection.close();
-    assertTrue(connection.isClosed());
   }
 
   @ParameterizedTest

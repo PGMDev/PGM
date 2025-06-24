@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Range;
@@ -15,6 +16,7 @@ import java.util.logging.Logger;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.Config;
@@ -26,7 +28,6 @@ import tc.oc.pgm.api.match.event.MatchUnloadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.ClassLogger;
-import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 
@@ -55,17 +56,16 @@ public class MatchManagerImpl implements MatchManager, Listener {
 
     long delaySecs = (config.getStartTime().getSeconds() + 1) / 2;
     try {
-      delaySecs =
-          TextParser.parseInteger(
-              config.getExperiments().getOrDefault("match-destroy-seconds", "").toString(),
-              Range.atLeast(0));
+      delaySecs = TextParser.parseInteger(
+          config.getExperiments().getOrDefault("match-destroy-seconds", "").toString(),
+          Range.atLeast(0));
     } catch (TextException e) {
       // No-op, since this is experimental
     }
     this.destroyDelaySecs = delaySecs;
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.LOWEST)
   public void onMatchLoad(MatchLoadEvent event) {
     final Match match = event.getMatch();
 
@@ -89,11 +89,12 @@ public class MatchManagerImpl implements MatchManager, Listener {
     matchByWorld.remove(assertNotNull(match.getWorld()).getName());
 
     PGM.get()
-        .getAsyncExecutor()
+        .getExecutor()
         .schedule(
             () -> {
               match.destroy();
-              logger.info("Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
+              logger.info(
+                  "Unloaded match-" + match.getId() + " (" + match.getMap().getId() + ")");
             },
             destroyDelaySecs,
             TimeUnit.SECONDS);
@@ -103,7 +104,8 @@ public class MatchManagerImpl implements MatchManager, Listener {
     final String name = world.getName();
     if (name.startsWith("match")) return;
 
-    NMSHacks.resetDimension(world);
+    NMS_HACKS.resetDimension(world);
+    NMS_HACKS.cleanupWorld(world);
 
     if (PGM.get().getServer().unloadWorld(name, false)) {
       logger.info("Unloaded non-match " + name);

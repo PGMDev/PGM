@@ -43,6 +43,16 @@ public final class Version implements Comparable<Version> {
   }
 
   /**
+   * Gets whether this version is less than or equal to another version.
+   *
+   * @param other Another version.
+   * @return If this version <= other version.
+   */
+  public boolean isNoNewerThan(Version other) {
+    return compareTo(other) <= 0;
+  }
+
+  /**
    * Gets whether this version is less than another version.
    *
    * @param other Another version.
@@ -50,6 +60,16 @@ public final class Version implements Comparable<Version> {
    */
   public boolean isOlderThan(Version other) {
     return compareTo(other) < 0;
+  }
+
+  /**
+   * Gets whether this version is greater than another version.
+   *
+   * @param other Another version.
+   * @return If this version > other version.
+   */
+  public boolean isNewerThan(Version other) {
+    return compareTo(other) > 0;
   }
 
   @Override

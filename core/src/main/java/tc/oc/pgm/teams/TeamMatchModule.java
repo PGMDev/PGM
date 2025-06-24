@@ -1,7 +1,5 @@
 package tc.oc.pgm.teams;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -17,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title.Times;
@@ -49,19 +46,12 @@ import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.LOADED)
 public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
-  class NeedMorePlayers implements UnreadyReason {
-    final @Nullable Team team;
-    final int players;
-
-    NeedMorePlayers(@Nullable Team team, int players) {
-      this.team = team;
-      this.players = players;
-    }
-
+  record NeedMorePlayers(@Nullable Team team, int players) implements UnreadyReason {
     @Override
     public Component getReason() {
       if (team != null) {
@@ -85,12 +75,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     public boolean canForceStart() {
       return true;
     }
-
-    @Override
-    public String toString() {
-      return getClass().getSimpleName() + "{players=" + players + " team=" + team + "}";
-    }
-  };
+  }
 
   public static class TeamJoinResult implements JoinResult {
     private final JoinResultOption status;
@@ -171,8 +156,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   protected void updateReadiness() {
     if (match.isRunning()) return;
 
-    final int playersQueued =
-        match.needModule(JoinMatchModule.class).getQueuedParticipants().getPlayers().size();
+    final int playersQueued = match
+        .needModule(JoinMatchModule.class)
+        .getQueuedParticipants()
+        .getPlayers()
+        .size();
     final int playersJoined = match.getParticipants().size();
 
     Team singleTeam = null;
@@ -287,9 +275,9 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   /**
-   * Get the least full participating team currently in the match (based on the {@link
-   * Team#getFullnessAfterJoin} result) that the given player can join, excluding any team that
-   * player is already on.
+   * Get the least full participating team currently in the match (based on the
+   * {@link Team#getFullnessAfterJoin} result) that the given player can join, excluding any team
+   * that player is already on.
    *
    * <p>If priority is true, then it will be assumed that players without "join full team"
    * privileges can be kicked from a team to make room for the joining player, though this will be
@@ -336,7 +324,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   @Override
   public JoinResult queryJoin(MatchPlayer joining, JoinRequest request) {
     if (request.has(JoinRequest.Flag.FORCE)) {
-      return new TeamJoinResult(JoinResultOption.JOINED, request.getTeam(), false);
+      return new TeamJoinResult(
+          JoinResultOption.JOINED,
+          request.getTeam() == null ? getEmptiestTeam() : request.getTeam(),
+          false);
     }
 
     final Team lastTeam = getLastTeam(joining.getId());
@@ -427,7 +418,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
         case FULL:
           if (teamResult.getTeam() != null) {
-            joining.sendWarning(translatable("join.err.full.team", teamResult.getTeam().getName()));
+            joining.sendWarning(
+                translatable("join.err.full.team", teamResult.getTeam().getName()));
           } else {
             joining.sendWarning(translatable("join.err.full"));
           }
@@ -520,11 +512,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     }
 
     // Give them the bad news
-    if (jmm.canBePriorityKicked(kickMe)) {
+    if (jmm.canPriorityKick(kickMe)) {
       kickMe.sendMessage(translatable("join.ok.moved", kickTo.getName()));
       kickMe.sendMessage(translatable("join.ok.moved.explanation"));
     } else {
-      kickMe.playSound(sound(key("mob.villager.hit"), Sound.Source.MASTER, 1, 1));
+      kickMe.playSound(Sounds.MATCH_KICK);
       if (forBalance) {
         kickMe.sendWarning(translatable("join.ok.moved", kickTo.getName()));
       } else {
@@ -553,11 +545,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       boolean title = event.getRequest().has(JoinRequest.Flag.SHOW_TITLE);
 
       if (title && !player.isLegacy()) {
-        player.showTitle(
-            title(
-                space(),
-                joinMsg,
-                Times.times(Ticks.duration(5), Ticks.duration(20), Ticks.duration(5))));
+        player.showTitle(title(
+            space(),
+            joinMsg,
+            Times.times(Ticks.duration(5), Ticks.duration(20), Ticks.duration(5))));
       } else {
         player.sendMessage(joinMsg);
       }

@@ -3,18 +3,19 @@ package tc.oc.pgm.map;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
-import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
 import tc.oc.pgm.api.Modules;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapSource;
+import tc.oc.pgm.api.map.VariantInfo;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -33,14 +34,17 @@ import tc.oc.pgm.regions.LegacyRegionParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.xml.DocumentWrapper;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 
 public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?>>
     implements MapFactory {
 
   private final Logger logger;
   private final MapSource source;
+  private final Map<String, VariantInfo> variants;
   private final MapIncludeProcessor includes;
   private Document document;
   private MapInfoImpl info;
@@ -48,11 +52,18 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   private FilterParser filters;
   private KitParser kits;
   private FeatureDefinitionContext features;
+  private XMLFluentParser parser;
 
-  public MapFactoryImpl(Logger logger, MapSource source, MapIncludeProcessor includes) {
+  public MapFactoryImpl(
+      Logger logger,
+      MapSource source,
+      Map<String, VariantInfo> variants,
+      MapIncludeProcessor includes) {
     super(Modules.MAP, Modules.MAP_DEPENDENCY_ONLY); // Don't copy, avoid N factory copies
-    this.logger = ClassLogger.get(assertNotNull(logger), getClass(), assertNotNull(source).getId());
+    this.logger =
+        ClassLogger.get(assertNotNull(logger), getClass(), assertNotNull(source).getId());
     this.source = source;
+    this.variants = variants;
     this.includes = includes;
   }
 
@@ -70,7 +81,13 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     try {
       document = MapFilePreprocessor.getDocument(source, includes);
 
-      info = new MapInfoImpl(source, document.getRootElement());
+      info = new MapInfoImpl(source, variants, document.getRootElement());
+
+      // We're not loading this map, return a dummy map context to allow variants to load, if needed
+      if (!info.isServerSupported()) {
+        return new MapContextImpl(info, List.of());
+      }
+
       try {
         loadAll();
       } catch (ModuleLoadException e) {
@@ -87,9 +104,13 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     } catch (InvalidXMLException e) {
       throw new MapException(source, info, e.getMessage(), e);
     } catch (ModuleLoadException e) {
-      throw new MapException(source, info, e.getFullMessage(), e);
+      throw new MapException(source, info, e.getMessage(), e);
     } catch (JDOMParseException e) {
-      final InvalidXMLException cause = InvalidXMLException.fromJDOM(e, source.getId());
+      // Set base uri so when error is displayed it shows what XML caused the issue
+      Document d = e.getPartialDocument();
+      if (d != null) d.setBaseURI(source.getId());
+
+      final InvalidXMLException cause = InvalidXMLException.fromJDOM(e);
       throw new MapException(source, info, cause.getMessage(), cause);
     } catch (Throwable t) {
       throw new MapException(source, info, "Unhandled " + t.getClass().getName(), t);
@@ -106,6 +127,15 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     for (MapModule<?> module : getModules()) {
       module.postParse(this, logger, document);
     }
+
+    if (PGM.get().getConfiguration().showUnusedXml()) {
+      ((DocumentWrapper) document).checkUnvisited(this::printUnvisitedNode);
+    }
+  }
+
+  private void printUnvisitedNode(Node node) {
+    InvalidXMLException ex = new InvalidXMLException("Unused node, maybe a typo?", node);
+    logger.log(Level.WARNING, ex.getMessage(), ex);
   }
 
   @Override
@@ -118,6 +148,16 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
 
   private boolean isLegacy() {
     return getProto().isOlderThan(MapProtos.FILTER_FEATURES);
+  }
+
+  @Override
+  public XMLFluentParser getParser() {
+    if (parser == null) {
+      parser = new XMLFluentParser(this);
+      // Calling init will cause more calls to getParser, that's why we need them separate
+      parser.init();
+    }
+    return parser;
   }
 
   @Override
@@ -150,20 +190,6 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
       features = new FeatureDefinitionContext();
     }
     return features;
-  }
-
-  @Override
-  public Collection<String> getVariants() throws InvalidXMLException {
-    Set<String> collect = new HashSet<>();
-    for (Element variant : document.getRootElement().getChildren("variant")) {
-      String id = XMLUtils.parseRequiredId(variant);
-      if ("default".equals(id))
-        throw new InvalidXMLException("Variant id must not be 'default'", variant);
-
-      if (!collect.add(id))
-        throw new InvalidXMLException("Duplicate variant ids are not allowed", variant);
-    }
-    return collect;
   }
 
   @Override

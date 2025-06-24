@@ -8,20 +8,23 @@ import tc.oc.pgm.api.party.VictoryCondition;
 
 public class TimeLimitMatchModule implements MatchModule {
   private final Match match;
-  private final TimeLimit defaultTimeLimit;
   private @Nullable TimeLimit timeLimit;
   private @Nullable TimeLimitCountdown countdown;
   private @Nullable OvertimeCountdown overtime;
+  private boolean willUseProximity;
   private boolean finished; // If Time limit ended this match
 
   public TimeLimitMatchModule(Match match, @Nullable TimeLimit timeLimit) {
     this.match = match;
-    this.defaultTimeLimit = timeLimit;
+    this.timeLimit = timeLimit;
+    this.willUseProximity = timeLimit != null && timeLimit.isProximityRelevant(false);
   }
 
   @Override
   public void load() {
-    setTimeLimit(defaultTimeLimit);
+    TimeLimit defaultTl = timeLimit;
+    this.timeLimit = null;
+    setTimeLimit(defaultTl);
   }
 
   @Override
@@ -39,6 +42,10 @@ public class TimeLimitMatchModule implements MatchModule {
 
   public @Nullable TimeLimit getTimeLimit() {
     return this.timeLimit;
+  }
+
+  public boolean willUseProximity() {
+    return this.willUseProximity;
   }
 
   public void setTimeLimit(@Nullable TimeLimit timeLimit) {
@@ -70,6 +77,7 @@ public class TimeLimitMatchModule implements MatchModule {
 
     // Match.finish() will cancel this, so we don't have to
     if (this.timeLimit != null && match.isRunning()) {
+      this.willUseProximity = timeLimit.isProximityRelevant(false);
       this.countdown = new TimeLimitCountdown(match, this.timeLimit);
       this.countdown.start();
     }
@@ -78,12 +86,14 @@ public class TimeLimitMatchModule implements MatchModule {
   public void startOvertime() {
     cancel();
     if (this.timeLimit != null && this.timeLimit.getOvertime() != null && match.isRunning()) {
+      this.willUseProximity = timeLimit.isProximityRelevant(true);
       this.overtime = new OvertimeCountdown(match, this.timeLimit);
       this.overtime.start();
     }
   }
 
   public void cancel() {
+    this.willUseProximity = false;
     if (this.countdown != null) {
       this.countdown.cancel();
       this.countdown = null;

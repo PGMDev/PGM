@@ -64,6 +64,12 @@ public class Bounds implements Cloneable {
     }
   }
 
+  public static boolean disjoint(Bounds a, Bounds b) {
+    Vector min = Vector.getMaximum(a.min, b.min);
+    Vector max = Vector.getMinimum(a.max, b.max);
+    return min.getX() >= max.getX() || min.getY() >= max.getY() || min.getZ() >= max.getZ();
+  }
+
   public static Bounds union(Bounds a, Bounds b) {
     if (a.contains(b)) {
       return a;
@@ -172,25 +178,29 @@ public class Bounds implements Cloneable {
         this.min.getZ() + size.getZ() * random.nextDouble());
   }
 
+  private static double roundDown(double value) {
+    return Math.ceil(value - 0.5d);
+  }
+
   public BlockVector getBlockMin() {
     return new BlockVector(
-        (int) this.min.getX() + 0.5d,
-        (int) Math.max(0, Math.min(255, this.min.getY() + 0.5d)),
-        (int) this.min.getZ() + 0.5d);
+        roundDown(min.getX()) + 0.5d,
+        Math.clamp(roundDown(min.getY()), 0, 255) + 0.5d,
+        roundDown(min.getZ()) + 0.5d);
   }
 
   public BlockVector getBlockMaxInside() {
     return new BlockVector(
-        (int) this.max.getX() - 0.5d,
-        (int) Math.max(0, Math.min(255, this.max.getY() - 0.5d)),
-        (int) this.max.getZ() - 0.5d);
+        Math.round(max.getX()) - 0.5d,
+        Math.clamp(Math.round(max.getY()), 1, 255) - 0.5,
+        Math.round(max.getZ()) - 0.5d);
   }
 
   public BlockVector getBlockMaxOutside() {
     return new BlockVector(
-        (int) this.max.getX() + 0.5d,
-        (int) Math.max(0, Math.min(256, this.max.getY() + 0.5d)),
-        (int) this.max.getZ() + 0.5d);
+        Math.round(max.getX()) + 0.5d,
+        Math.clamp(Math.round(max.getY()), 0, 255) + 0.5d,
+        Math.round(max.getZ()) + 0.5d);
   }
 
   public boolean containsBlock(BlockVector v) {
@@ -231,12 +241,7 @@ public class Bounds implements Cloneable {
   }
 
   public Iterable<BlockVector> getBlocks() {
-    return new Iterable<BlockVector>() {
-      @Override
-      public Iterator<BlockVector> iterator() {
-        return getBlockIterator();
-      }
-    };
+    return this::getBlockIterator;
   }
 
   @Override

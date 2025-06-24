@@ -6,28 +6,9 @@ import static tc.oc.pgm.util.text.TextException.playerOnly;
 import static tc.oc.pgm.util.text.TextException.unknown;
 import static tc.oc.pgm.util.text.TextException.usage;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.AnnotationParser;
-import cloud.commandframework.annotations.injection.ParameterInjector;
-import cloud.commandframework.annotations.injection.ParameterInjectorRegistry;
-import cloud.commandframework.arguments.parser.ArgumentParser;
-import cloud.commandframework.arguments.parser.ParserParameters;
-import cloud.commandframework.arguments.parser.ParserRegistry;
-import cloud.commandframework.arguments.parser.StandardParameters;
-import cloud.commandframework.bukkit.CloudBukkitCapabilities;
-import cloud.commandframework.exceptions.ArgumentParseException;
-import cloud.commandframework.exceptions.CommandExecutionException;
-import cloud.commandframework.exceptions.InvalidCommandSenderException;
-import cloud.commandframework.exceptions.InvalidSyntaxException;
-import cloud.commandframework.exceptions.NoPermissionException;
-import cloud.commandframework.exceptions.parsing.ParserException;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.extra.confirmation.CommandConfirmationManager;
-import cloud.commandframework.meta.CommandMeta;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
-import cloud.commandframework.paper.PaperCommandManager;
 import io.leangen.geantyref.TypeToken;
 import java.lang.reflect.Type;
+import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.kyori.adventure.text.Component;
@@ -35,15 +16,32 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
+import org.incendo.cloud.CommandManager;
+import org.incendo.cloud.annotations.AnnotationParser;
+import org.incendo.cloud.exception.ArgumentParseException;
+import org.incendo.cloud.exception.CommandExecutionException;
+import org.incendo.cloud.exception.InvalidCommandSenderException;
+import org.incendo.cloud.exception.InvalidSyntaxException;
+import org.incendo.cloud.exception.NoPermissionException;
+import org.incendo.cloud.exception.handling.ExceptionContext;
+import org.incendo.cloud.exception.parsing.ParserException;
+import org.incendo.cloud.execution.ExecutionCoordinator;
+import org.incendo.cloud.injection.ParameterInjector;
+import org.incendo.cloud.injection.ParameterInjectorRegistry;
+import org.incendo.cloud.minecraft.extras.MinecraftHelp;
+import org.incendo.cloud.paper.LegacyPaperCommandManager;
+import org.incendo.cloud.parser.ArgumentParser;
+import org.incendo.cloud.parser.ParserRegistry;
+import org.incendo.cloud.setting.ManagerSetting;
+import org.incendo.cloud.suggestion.FilteringSuggestionProcessor;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.Audience;
 
 public abstract class CommandGraph<P extends Plugin> {
 
   protected P plugin;
-  protected PaperCommandManager<CommandSender> manager;
+  protected CommandManager<CommandSender> manager;
   protected MinecraftHelp<CommandSender> minecraftHelp;
-  protected CommandConfirmationManager<CommandSender> confirmationManager;
   protected AnnotationParser<CommandSender> annotationParser;
 
   protected ParameterInjectorRegistry<CommandSender> injectors;
@@ -54,7 +52,6 @@ public abstract class CommandGraph<P extends Plugin> {
     this.manager = createCommandManager();
     this.minecraftHelp = createHelp();
     // Allows us to require certain commands to be confirmed before they can be executed
-    this.confirmationManager = createConfirmationManager();
     this.annotationParser = createAnnotationParser();
 
     // Utility
@@ -67,45 +64,26 @@ public abstract class CommandGraph<P extends Plugin> {
     registerCommands();
   }
 
-  protected PaperCommandManager<CommandSender> createCommandManager() throws Exception {
-    PaperCommandManager<CommandSender> manager =
-        PaperCommandManager.createNative(plugin, CommandExecutionCoordinator.simpleCoordinator());
+  protected CommandManager<CommandSender> createCommandManager() {
+    LegacyPaperCommandManager<CommandSender> manager =
+        LegacyPaperCommandManager.createNative(plugin, ExecutionCoordinator.simpleCoordinator());
 
-    manager.setSetting(CommandManager.ManagerSettings.LIBERAL_FLAG_PARSING, true);
+    manager.settings().set(ManagerSetting.LIBERAL_FLAG_PARSING, true);
 
-    // Register Brigadier mappings
-    if (manager.hasCapability(CloudBukkitCapabilities.BRIGADIER)) manager.registerBrigadier();
-
-    // Register asynchronous completions
-    if (manager.hasCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION))
-      manager.registerAsynchronousCompletions();
-
-    // Add the input queue to the context, this allows greedy suggestions to work on it
-    manager.registerCommandPreProcessor(
-        context ->
-            context.getCommandContext().store(CommandKeys.INPUT_QUEUE, context.getInputQueue()));
-
-    // By default, suggestions run by a filtered processor.
-    // By default, it prevents suggestions like "s" -> "Something" or "someh" -> "Something"
-    manager.commandSuggestionProcessor((cpc, strings) -> strings);
+    // Basic suggestion filtering processor which avoids suggesting flags when not applicable
+    manager.suggestionProcessor(new FilteringSuggestionProcessor<>(
+        FilteringSuggestionProcessor.Filter.Simple.contextFree((s, i) -> i.isEmpty()
+            || !s.startsWith("-")
+            || s.toLowerCase(Locale.ROOT).startsWith(i.toLowerCase(Locale.ROOT)))));
 
     return manager;
   }
 
   protected AnnotationParser<CommandSender> createAnnotationParser() {
-    final Function<ParserParameters, CommandMeta> commandMetaFunction =
-        p ->
-            CommandMeta.simple()
-                .with(
-                    CommandMeta.DESCRIPTION,
-                    p.get(StandardParameters.DESCRIPTION, "No description"))
-                .build();
-    return new AnnotationParser<>(manager, CommandSender.class, commandMetaFunction);
+    return new AnnotationParser<>(manager, CommandSender.class);
   }
 
   protected abstract MinecraftHelp<CommandSender> createHelp();
-
-  protected abstract CommandConfirmationManager<CommandSender> createConfirmationManager();
 
   protected abstract void setupInjectors();
 
@@ -150,23 +128,28 @@ public abstract class CommandGraph<P extends Plugin> {
 
   // Exception handling
   protected void setupExceptionHandlers() {
-    registerExceptionHandler(InvalidSyntaxException.class, e -> usage(e.getCorrectSyntax()));
+    registerExceptionHandler(InvalidSyntaxException.class, e -> usage(e.correctSyntax()));
     registerExceptionHandler(InvalidCommandSenderException.class, e -> playerOnly());
     registerExceptionHandler(NoPermissionException.class, e -> noPermission());
 
-    manager.registerExceptionHandler(ArgumentParseException.class, this::handleException);
-    manager.registerExceptionHandler(CommandExecutionException.class, this::handleException);
+    manager
+        .exceptionController()
+        .registerHandler(ArgumentParseException.class, this::handleException);
+    manager
+        .exceptionController()
+        .registerHandler(CommandExecutionException.class, this::handleException);
   }
 
   protected <E extends Exception> void registerExceptionHandler(
       Class<E> ex, Function<E, ComponentLike> toComponent) {
-    manager.registerExceptionHandler(
-        ex, (cs, e) -> Audience.get(cs).sendWarning(toComponent.apply(e)));
+    manager.exceptionController().registerHandler(ex, (c) -> Audience.get(
+            c.context().sender())
+        .sendWarning(toComponent.apply(c.exception())));
   }
 
-  protected <E extends Exception> void handleException(CommandSender cs, E e) {
-    Audience audience = Audience.get(cs);
-    Component message = getMessage(e);
+  protected <E extends Exception> void handleException(ExceptionContext<CommandSender, E> context) {
+    Audience audience = Audience.get(context.context().sender());
+    Component message = getMessage(context.exception());
     if (message != null) audience.sendWarning(message);
   }
 

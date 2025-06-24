@@ -1,9 +1,7 @@
 package tc.oc.pgm.listeners;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import java.util.Collection;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -12,6 +10,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.MatchManager;
@@ -19,6 +18,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.PlayerVanishEvent;
 import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
+import tc.oc.pgm.channels.ChatManager;
 
 public class JoinLeaveAnnouncer implements Listener {
 
@@ -73,43 +73,32 @@ public class JoinLeaveAnnouncer implements Listener {
 
   private void handleJoinLeave(MatchPlayer player, String key, JoinVisibility visibility) {
     boolean staff = visibility == JoinVisibility.STAFF;
+    Component component =
+        translatable(key + (staff ? ".quiet" : ""), NamedTextColor.YELLOW, player.getName());
 
-    Collection<MatchPlayer> viewers = player.getMatch().getPlayers();
-    for (MatchPlayer viewer : viewers) {
-      if (player.equals(viewer)) continue; // Never display own broadcast
+    ChatManager chatManager = PGM.get().getChatManager();
 
-      if (canView(viewer, player, visibility)) { // Check if viewer setting allows join/leaves
-
-        Component component =
-            translatable(key + (staff ? ".quiet" : ""), NamedTextColor.YELLOW, player.getName());
-
-        if (staff) {
-          component = text().append(ChatDispatcher.ADMIN_CHAT_PREFIX).append(component).build();
-        }
-
-        viewer.sendMessage(component);
-      }
-    }
+    (staff ? chatManager.getAdminChannel() : chatManager.getGlobalChannel())
+        .broadcastMessage(
+            component,
+            null,
+            viewer -> !player.equals(viewer) && canView(viewer, player, visibility));
   }
 
   private boolean canView(MatchPlayer viewer, MatchPlayer target, JoinVisibility visibility) {
     boolean isStaff = viewer.getBukkit().hasPermission(Permissions.STAFF);
 
     SettingValue option = viewer.getSettings().getValue(SettingKey.JOIN);
-    boolean allowed =
-        option.equals(SettingValue.JOIN_ON)
-            || areFriends(option, viewer.getBukkit(), target.getBukkit());
+    boolean allowed = option.equals(SettingValue.JOIN_ON)
+        || areFriends(option, viewer.getBukkit(), target.getBukkit());
 
     if (!allowed) return false;
 
-    switch (visibility) {
-      case NONSTAFF:
-        return !isStaff;
-      case STAFF:
-        return isStaff;
-      default:
-        return true;
-    }
+    return switch (visibility) {
+      case NONSTAFF -> !isStaff;
+      case STAFF -> isStaff;
+      default -> true;
+    };
   }
 
   private boolean areFriends(SettingValue value, Player a, Player b) {

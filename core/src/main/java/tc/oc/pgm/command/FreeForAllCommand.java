@@ -2,45 +2,68 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
 import com.google.common.collect.Range;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.CommandSender;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
-import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextParser;
 
-@CommandMethod("ffa|players")
+@Command("ffa|players")
 public final class FreeForAllCommand {
 
-  @CommandMethod("min <min-players>")
+  @Command("min <min-players>")
   @CommandDescription("Set the min players")
-  @CommandPermission(Permissions.RESIZE)
+  @Permission(Permissions.RESIZE)
   public void min(
-      Audience audience, FreeForAllMatchModule ffa, @Argument("min-players") int minPlayers) {
+      Match match,
+      CommandSender sender,
+      FreeForAllMatchModule ffa,
+      @Argument("min-players") int minPlayers) {
     TextParser.assertInRange(minPlayers, Range.atLeast(0));
 
     ffa.setMinPlayers(minPlayers);
-    sendResizedMessage(audience, "min", ffa.getMinPlayers());
+    sendResizedMessage(match, sender, "min", ffa.getMinPlayers());
   }
 
-  @CommandMethod("min reset")
+  @Command("min reset")
   @CommandDescription("Reset the min players")
-  @CommandPermission(Permissions.RESIZE)
-  public void min(Audience audience, FreeForAllMatchModule ffa) {
+  @Permission(Permissions.RESIZE)
+  public void min(Match match, CommandSender sender, FreeForAllMatchModule ffa) {
     ffa.setMinPlayers(null);
-    sendResizedMessage(audience, "min", ffa.getMinPlayers());
+    sendResizedMessage(match, sender, "min", ffa.getMinPlayers());
   }
 
-  @CommandMethod("max <max-players> [max-overfill]")
-  @CommandDescription("Set the max players")
-  @CommandPermission(Permissions.RESIZE)
+  @Command("scale <factor>")
+  @CommandDescription("Scale the max players by a given factor")
+  @Permission(Permissions.RESIZE)
   public void max(
-      Audience audience,
+      Match match,
+      CommandSender sender,
+      FreeForAllMatchModule ffa,
+      @Argument("factor") double scale) {
+    int maxOverfill = (int) (ffa.getMaxOverfill() * scale);
+    int maxSize = (int) (ffa.getMaxPlayers() * scale);
+    ffa.setMaxPlayers(maxSize, maxOverfill);
+
+    sendResizedMessage(match, sender, "max", ffa.getMaxPlayers());
+  }
+
+  @Command("max <max-players> [max-overfill]")
+  @CommandDescription("Set the max players")
+  @Permission(Permissions.RESIZE)
+  public void max(
+      Match match,
+      CommandSender sender,
       FreeForAllMatchModule ffa,
       @Argument("max-players") int maxPlayers,
       @Argument("max-overfill") Integer maxOverfill) {
@@ -51,22 +74,22 @@ public final class FreeForAllCommand {
 
     ffa.setMaxPlayers(maxPlayers, maxOverfill);
 
-    sendResizedMessage(audience, "max", ffa.getMaxPlayers());
+    sendResizedMessage(match, sender, "max", ffa.getMaxPlayers());
   }
 
-  @CommandMethod("max reset")
+  @Command("max reset")
   @CommandDescription("Reset the max players")
-  @CommandPermission(Permissions.RESIZE)
-  public void max(Audience audience, FreeForAllMatchModule ffa) {
+  @Permission(Permissions.RESIZE)
+  public void max(Match match, CommandSender sender, FreeForAllMatchModule ffa) {
     ffa.setMaxPlayers(null, null);
-    sendResizedMessage(audience, "max", ffa.getMaxPlayers());
+    sendResizedMessage(match, sender, "max", ffa.getMaxPlayers());
   }
 
-  private void sendResizedMessage(Audience audience, String type, int value) {
-    audience.sendMessage(
-        translatable(
-            "match.resize." + type,
-            translatable("match.info.players", NamedTextColor.YELLOW),
-            text(value, NamedTextColor.AQUA)));
+  private void sendResizedMessage(Match match, CommandSender sender, String type, int value) {
+    ChatManager.broadcastAdminMessage(translatable(
+        "match.resize.announce." + type,
+        player(sender, NameStyle.FANCY),
+        translatable("match.info.players", NamedTextColor.YELLOW),
+        text(value, NamedTextColor.AQUA)));
   }
 }

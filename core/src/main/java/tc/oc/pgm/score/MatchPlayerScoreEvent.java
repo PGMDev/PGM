@@ -9,14 +9,20 @@ public class MatchPlayerScoreEvent extends MatchPlayerEvent {
   private static final HandlerList handlers = new HandlerList();
 
   private final double score;
+  private final ScoreCause cause;
 
-  public MatchPlayerScoreEvent(MatchPlayer player, double score) {
+  public MatchPlayerScoreEvent(MatchPlayer player, double score, ScoreCause cause) {
     super(player);
     this.score = score;
+    this.cause = cause;
   }
 
   public double getScore() {
     return score;
+  }
+
+  public ScoreCause getCause() {
+    return cause;
   }
 
   @Override

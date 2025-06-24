@@ -1,8 +1,5 @@
 package tc.oc.pgm.modules;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.sound.Sound.sound;
-
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,6 +19,7 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.api.setting.SettingValue;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.wool.PlayerWoolPlaceEvent;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -33,9 +31,6 @@ public class SoundsMatchModule implements MatchModule, Listener {
       return new SoundsMatchModule();
     }
   }
-
-  private static final Sound RAINDROP_SOUND =
-      sound(key("random.levelup"), Sound.Source.MASTER, 1f, 1.5f);
 
   private void playSound(MatchPlayer player, Sound sound) {
     if (player.getSettings().getValue(SettingKey.SOUNDS).equals(SettingValue.SOUNDS_ALL)) {
@@ -56,25 +51,25 @@ public class SoundsMatchModule implements MatchModule, Listener {
     ParticipantState killer = event.getKiller();
     MatchPlayer victim = event.getVictim();
     if (killer != null && !killer.getParty().equals(victim.getParty())) {
-      playSound(killer, RAINDROP_SOUND);
+      playSound(killer, Sounds.RAINDROPS);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchFinish(MatchFinishEvent event) {
-    event.getWinners().forEach(player -> playSound(player, RAINDROP_SOUND));
+    event.getWinners().forEach(player -> playSound(player, Sounds.RAINDROPS));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onGoalTouch(GoalTouchEvent event) {
     ParticipantState player = event.getPlayer();
     if (player != null) {
-      playSound(player, RAINDROP_SOUND);
+      playSound(player, Sounds.RAINDROPS);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerWoolPlace(PlayerWoolPlaceEvent event) {
-    playSound(event.getPlayer(), RAINDROP_SOUND);
+    playSound(event.getPlayer(), Sounds.RAINDROPS);
   }
 }

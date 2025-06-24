@@ -4,12 +4,15 @@ import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
+import com.google.common.collect.ImmutableSet;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -27,6 +30,7 @@ import tc.oc.pgm.tracker.info.ItemInfo;
 import tc.oc.pgm.tracker.info.MobInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
+import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -107,11 +111,7 @@ public class DeathMessageBuilder {
 
   /** Return a new key built from the current key with the given tokens appended */
   String append(String... tokens) {
-    String newKey = key;
-    for (String token : tokens) {
-      newKey += '.' + token;
-    }
-    return newKey;
+    return key + (tokens.length == 0 ? "" : '.' + String.join(".", tokens));
   }
 
   /**
@@ -162,7 +162,8 @@ public class DeathMessageBuilder {
 
   boolean variant() {
     int count = 0;
-    for (; getAllKeys().contains(key + "." + count); count++) ;
+    for (; getAllKeys().contains(key + "." + count); count++)
+      ;
 
     if (count == 0) return false;
 
@@ -184,7 +185,7 @@ public class DeathMessageBuilder {
   }
 
   boolean potion(PotionInfo potionInfo) {
-    if (option("potion")) {
+    if (potionInfo.getPotionEffect() != null && option("potion")) {
       weapon = potionInfo.getName();
       return true;
     }
@@ -208,14 +209,12 @@ public class DeathMessageBuilder {
     return false;
   }
 
+  private static final Set<EntityType> IGNORED_ENTITIES =
+      ImmutableSet.of(EntityTypes.COMPLEX_PART, EntityTypes.ENDER_CRYSTAL, EntityTypes.UNKNOWN);
+
   boolean entity(EntityInfo entityInfo) {
     // Skip for entities that are weird and have no translations
-    switch (entityInfo.getEntityType()) {
-      case UNKNOWN:
-      case COMPLEX_PART:
-      case ENDER_CRYSTAL:
-        return false;
-    }
+    if (IGNORED_ENTITIES.contains(entityInfo.getEntityType())) return false;
 
     if (option("entity")) {
       weapon = entityInfo.getName();
@@ -399,7 +398,7 @@ public class DeathMessageBuilder {
         player();
       }
     } else if (cause instanceof DamageInfo) {
-      damage((DamageInfo) cause);
+      damage((DamageInfo) cause, fall.getOrigin());
     } else if (fall.getTo() == FallInfo.To.GROUND) {
       setDistance(Trackers.distanceFromRanged(fall, victim.getBukkit().getLocation()));
 
@@ -421,13 +420,13 @@ public class DeathMessageBuilder {
     }
   }
 
-  void damage(DamageInfo info) throws NoMessage {
+  void damage(DamageInfo info, Location location) throws NoMessage {
     if (info instanceof MeleeInfo) {
       melee((MeleeInfo) info);
     } else if (info instanceof ProjectileInfo) {
-      projectile((ProjectileInfo) info, victim.getBukkit().getLocation());
+      projectile((ProjectileInfo) info, location);
     } else if (info instanceof ExplosionInfo) {
-      explosion((ExplosionInfo) info, victim.getBukkit().getLocation());
+      explosion((ExplosionInfo) info, location);
     } else if (info instanceof FireInfo) {
       fire((FireInfo) info);
     } else if (info instanceof PotionInfo) {
@@ -457,7 +456,7 @@ public class DeathMessageBuilder {
 
     try {
       key = "death";
-      damage(damageInfo);
+      damage(damageInfo, victim.getBukkit().getLocation());
       variant();
       finish();
     } catch (NoMessage ex) {

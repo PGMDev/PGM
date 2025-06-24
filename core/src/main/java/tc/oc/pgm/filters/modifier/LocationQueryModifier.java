@@ -1,101 +1,107 @@
 package tc.oc.pgm.filters.modifier;
 
 import org.bukkit.Location;
-import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.filter.ReactorFactory;
+import tc.oc.pgm.api.filter.query.BlockQuery;
 import tc.oc.pgm.api.filter.query.LocationQuery;
-import tc.oc.pgm.filters.query.BlockQuery;
+import tc.oc.pgm.api.filter.query.MatchQuery;
+import tc.oc.pgm.api.filter.query.MaterialQuery;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.util.math.OffsetVector;
 
-public abstract class LocationQueryModifier extends QueryModifier<LocationQuery, LocationQuery> {
+public class LocationQueryModifier extends QueryModifier<LocationQuery, BlockQuery> {
 
-  LocationQueryModifier(Filter filter) {
-    super(filter, LocationQuery.class);
+  private final OffsetVector offset;
+
+  private LocationQueryModifier(Filter filter, OffsetVector offset) {
+    super(filter, LocationQuery.class, BlockQuery.class);
+    this.offset = offset;
   }
 
   @Override
-  public Class<? extends LocationQuery> queryType() {
-    return LocationQuery.class;
+  protected BlockQuery transformQuery(LocationQuery query) {
+    return new tc.oc.pgm.filters.query.BlockQuery(
+        query.getEvent(), offset.applyOffset(query.getLocation()));
+  }
+
+  public static Filter of(Filter child, OffsetVector offset) {
+    if (offset.isAbsolute()) return new Absolute(child, offset.getVector());
+    return new LocationQueryModifier(child, offset);
   }
 
   /**
-   * We transform all incoming {@link LocationQuery}s to this query before passing it onwards. This
-   * action might discard some information (entities, damage causes...) but the use of this modifier
-   * implies a need for checking the modified location for something else then the origin of the
-   * query.
+   * Specialization when the requested location is an absolute position. It can work without an
+   * initial location query, and becomes dynamic as long as the inner filter can respond to material
+   * queries.
    */
-  static final class BlockQueryCustomLocation extends BlockQuery {
+  private static class Absolute extends QueryModifier<MatchQuery, BlockQuery>
+      implements ReactorFactory<Absolute.Reactor> {
 
-    private final Location modifiedLocation;
+    private final Vector location;
 
-    public BlockQueryCustomLocation(@Nullable Event event, Location modifiedLocation) {
-      super(event, modifiedLocation.getBlock());
-      this.modifiedLocation = modifiedLocation;
-    }
-
-    /** This is the precise location, getBlock()#getLocation() and similar will NOT be precise */
-    @Override
-    public Location getLocation() {
-      return modifiedLocation;
-    }
-  }
-
-  /** Uses world coordinates (x, y, z) in either absolute or relative form */
-  public static class World extends LocationQueryModifier {
-
-    private final Vector coords;
-    private final boolean[] relative;
-
-    public World(Filter filter, Vector coords, boolean[] relative) {
-      super(filter);
-      this.coords = coords;
-      this.relative = relative;
+    private Absolute(Filter filter, Vector location) {
+      super(filter, MatchQuery.class, BlockQuery.class);
+      this.location = location;
     }
 
     @Override
-    protected BlockQueryCustomLocation transformQuery(LocationQuery query) {
-      Location origin = query.getLocation();
-      Location newLoc = origin.clone();
-      newLoc.setX(relative[0] ? origin.getX() + coords.getX() : coords.getX());
-      newLoc.setY(relative[1] ? origin.getY() + coords.getY() : coords.getY());
-      newLoc.setZ(relative[2] ? origin.getZ() + coords.getZ() : coords.getZ());
-
-      return new BlockQueryCustomLocation(query.getEvent(), newLoc);
-    }
-  }
-
-  /**
-   * Uses local coordinates (left, up, front), which are always relative. These coordinates are also
-   * known as caret notation or ^ΔSway ^ΔHeave ^ΔSurge
-   */
-  public static class Local extends LocationQueryModifier {
-    private final Vector coords;
-
-    public Local(Filter child, Vector coords) {
-      super(child);
-      this.coords = coords;
+    protected BlockQuery transformQuery(MatchQuery query) {
+      return new tc.oc.pgm.filters.query.BlockQuery(
+          query.getEvent(), location.toLocation(query.getMatch().getWorld()));
     }
 
     @Override
-    protected BlockQueryCustomLocation transformQuery(LocationQuery query) {
-      Location origin = query.getLocation();
-      double x = coords.getX();
-      double y = coords.getY();
-      double z = coords.getZ();
-      Vector dirZ = origin.getDirection().normalize();
-      Location newLoc = origin.clone().add(dirZ.multiply(z));
+    public boolean isDynamic() {
+      return filter.respondsTo(MaterialQuery.class);
+    }
 
-      float yaw = newLoc.getYaw() - 90;
-      Vector dirX = new Vector(-Math.sin(Math.toRadians(yaw)), 0, Math.cos(Math.toRadians(yaw)));
-      newLoc = newLoc.add(dirX.multiply(x));
+    @Override
+    public Reactor createReactor(Match match, FilterMatchModule fmm) {
+      return new Reactor(match, fmm);
+    }
 
-      float pitch = newLoc.getPitch() - 90;
-      Vector dirY =
-          new Vector(0, -Math.sin(Math.toRadians(pitch)), Math.cos(Math.toRadians(pitch)));
-      newLoc = newLoc.add(dirY.multiply(y));
+    private class Reactor extends ReactorFactory.Reactor implements Listener {
+      public Reactor(Match match, FilterMatchModule fmm) {
+        super(match, fmm);
+        match.addListener(this, MatchScope.RUNNING);
+      }
 
-      return new BlockQueryCustomLocation(query.getEvent(), newLoc);
+      private void invalidate(Location modified) {
+        if (modified.getBlockX() == location.getBlockX()
+            && modified.getBlockY() == location.getBlockY()
+            && modified.getBlockZ() == location.getBlockZ()) {
+          invalidate(Absolute.this, match);
+        }
+      }
+
+      @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+      public void onBlockTransform(BlockTransformEvent e) {
+        invalidate(e.getBlock().getLocation());
+      }
+
+      @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+      public void onBlockInteract(PlayerInteractEvent e) {
+        // Clicking on doors or trapdoors
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && e.hasBlock())
+          invalidate(e.getClickedBlock().getLocation());
+      }
+
+      @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+      public void onRedstoneChange(BlockRedstoneEvent e) {
+        // Buttons, pressure plates, or other redstone circuits changing
+        invalidate(e.getBlock().getLocation());
+      }
     }
   }
 }

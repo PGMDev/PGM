@@ -2,13 +2,13 @@ package tc.oc.pgm.command;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.Flag;
 import java.time.Duration;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.incendo.cloud.annotations.Argument;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
+import org.incendo.cloud.annotations.Flag;
+import org.incendo.cloud.annotations.Permission;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.restart.RequestRestartEvent;
@@ -17,9 +17,9 @@ import tc.oc.pgm.util.Audience;
 
 public final class RestartCommand {
 
-  @CommandMethod("restart|queuerestart|qr [duration]")
+  @Command("restart|queuerestart|qr [duration]")
   @CommandDescription("Restart the server")
-  @CommandPermission(Permissions.STOP)
+  @Permission(Permissions.STOP)
   public void restart(
       Audience audience,
       Match match,

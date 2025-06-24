@@ -44,7 +44,7 @@ public final class LiquidMetal {
    * @return the last index in {@param string} matches, or -1 if there's no match
    */
   public static int getIndexOf(String string, String abbreviation) {
-    if (abbreviation == null || abbreviation.length() == 0) return 0;
+    if (abbreviation == null || abbreviation.isEmpty()) return 0;
     if (abbreviation.length() > string.length()) return -1;
     Score score = new Score();
     int result = matchString(score, string, abbreviation);
@@ -59,7 +59,7 @@ public final class LiquidMetal {
    * @return a number between 0.0 and 1.0, 0 being no match and 1 being perfect match.
    */
   public static double score(String string, String abbreviation) {
-    if (abbreviation == null || abbreviation.length() == 0) return SCORE_TRAILING;
+    if (abbreviation == null || abbreviation.isEmpty()) return SCORE_TRAILING;
     if (abbreviation.length() > string.length()) return SCORE_NO_MATCH;
     Score score = new Score();
     int result = matchString(score, string, abbreviation);

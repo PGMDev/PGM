@@ -7,8 +7,6 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
-import cloud.commandframework.annotations.CommandDescription;
-import cloud.commandframework.annotations.CommandMethod;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -23,6 +21,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.incendo.cloud.annotations.Command;
+import org.incendo.cloud.annotations.CommandDescription;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
@@ -44,7 +44,7 @@ import tc.oc.pgm.util.text.TextTranslations;
 
 public final class MatchCommand {
 
-  @CommandMethod("match|matchinfo")
+  @Command("match|matchinfo")
   @CommandDescription("Show the match info")
   public void match(Audience viewer, CommandSender sender, Match match) {
     // indicates whether we have game information from the match yet

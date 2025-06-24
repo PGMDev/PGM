@@ -7,16 +7,19 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.party.Competitor;
@@ -59,11 +62,11 @@ public class GoalMatchModule implements MatchModule, Listener {
   }
 
   public Collection<Goal> getGoals() {
-    return goals;
+    return Collections.unmodifiableCollection(goals);
   }
 
   public Collection<Goal> getGoals(Competitor competitor) {
-    return goalsByCompetitor.get(competitor);
+    return Collections.unmodifiableCollection(goalsByCompetitor.get(competitor));
   }
 
   public Collection<Competitor> getCompetitors(Goal goal) {
@@ -91,10 +94,6 @@ public class GoalMatchModule implements MatchModule, Listener {
     }
 
     goals.add(goal);
-
-    for (Competitor competitor : match.getCompetitors()) {
-      addCompetitorGoal(competitor, goal);
-    }
   }
 
   private void addCompetitorGoal(Competitor competitor, Goal<?> goal) {
@@ -103,6 +102,15 @@ public class GoalMatchModule implements MatchModule, Listener {
 
       goalsByCompetitor.put(competitor, goal);
       competitorsByGoal.put(goal, competitor);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onMatchLoad(MatchLoadEvent event) {
+    for (Goal goal : goals) {
+      for (Competitor competitor : match.getCompetitors()) {
+        addCompetitorGoal(competitor, goal);
+      }
     }
   }
 
@@ -143,11 +151,11 @@ public class GoalMatchModule implements MatchModule, Listener {
     return progress;
   }
 
-  protected void updateProgress(Goal goal) {
+  protected void updateProgress(Goal<?> goal) {
     for (Competitor competitor : competitorsByGoal.get(goal)) {
       progressByCompetitor.put(competitor, new GoalProgress(competitor));
     }
-    match.calculateVictory();
+    match.invalidateRanking();
   }
 
   // TODO: These events will often be fired together.. debounce them somehow?

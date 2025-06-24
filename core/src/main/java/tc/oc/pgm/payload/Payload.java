@@ -1,9 +1,10 @@
 package tc.oc.pgm.payload;
 
+import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+
 import java.time.Duration;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Minecart;
@@ -16,6 +17,7 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.controlpoint.ControlPoint;
 import tc.oc.pgm.payload.track.Track;
+import tc.oc.pgm.regions.EmptyRegion;
 
 public class Payload extends ControlPoint {
 
@@ -63,7 +65,7 @@ public class Payload extends ControlPoint {
 
   @Override
   public Region getCaptureRegion() {
-    return captureRegion;
+    return captureRegion == null ? EmptyRegion.INSTANCE : captureRegion;
   }
 
   public Vector getCenterPoint() {
@@ -105,30 +107,17 @@ public class Payload extends ControlPoint {
       // Height between 0.2 and 0.8
       double height = 0.5d + 0.3d * Math.sin(0.1d * tick + 0.5d * i);
 
-      loc.set(
-          definition.getRadius() * Math.cos(angle),
-          height,
-          definition.getRadius() * Math.sin(angle));
+      loc.setX(definition.getRadius() * Math.cos(angle));
+      loc.setY(height);
+      loc.setZ(definition.getRadius() * Math.sin(angle));
       loc.add(position);
-      match
-          .getWorld()
-          .spigot()
-          .playEffect(
-              loc,
-              Effect.COLOURED_DUST,
-              0,
-              (byte) 0,
-              rgbToParticle(color.getRed()),
-              rgbToParticle(color.getGreen()),
-              rgbToParticle(color.getBlue()),
-              1,
-              0,
-              50);
+      EFFECTS.coloredDust(match.getWorld(), loc, color);
     }
-  }
 
-  private float rgbToParticle(int rgb) {
-    return (float) Math.max(0.001, rgb / 255.0);
+    if (definition.showBeam()) {
+      DyeColor dyeColor = display != null ? display.getDyeColor() : DyeColor.WHITE;
+      EFFECTS.beam(match.getWorld(), position.toLocation(match.getWorld()), dyeColor);
+    }
   }
 
   private void tickMinecart() {

@@ -8,7 +8,7 @@ import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.regions.Bounds;
 
 /** This is a region that is not immutable. The origin point of the cylinder can move. */
-public class PayloadRegion implements RegionDefinition {
+public class PayloadRegion implements RegionDefinition.HardStatic {
 
   private final Supplier<Vector> base;
   private final double radius;

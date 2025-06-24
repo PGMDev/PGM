@@ -1,5 +1,7 @@
 package tc.oc.pgm.tracker.trackers;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+
 import java.util.Map;
 import java.util.WeakHashMap;
 import org.bukkit.Material;
@@ -77,7 +79,7 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onEntityIgnite(EntityCombustByBlockEvent event) {
-    if (event.getDuration() == 0) return;
+    if (MISC_UTILS.getDurationTicks(event) == 0) return;
 
     ParticipantState owner = blocks().getOwner(event.getCombuster());
     if (owner != null) {
@@ -88,7 +90,7 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onEntityIgnite(EntityCombustByEntityEvent event) {
-    if (event.getDuration() == 0) return;
+    if (MISC_UTILS.getDurationTicks(event) == 0) return;
 
     FireInfo info = resolveBurning(event.getCombuster());
     if (info != null) {

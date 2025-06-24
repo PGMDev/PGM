@@ -21,8 +21,7 @@ public interface RailOffset {
     BlockFace face = getNext();
     Block next = current.getRelative(face);
 
-    if (!(next.getState().getMaterialData() instanceof Rails))
-      next = next.getRelative(BlockFace.DOWN);
+    if (!(next.getState().getData() instanceof Rails)) next = next.getRelative(BlockFace.DOWN);
 
     return next;
   }

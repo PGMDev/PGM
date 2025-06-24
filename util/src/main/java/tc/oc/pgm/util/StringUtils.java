@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import org.bukkit.ChatColor;
+import org.incendo.cloud.context.CommandInput;
 
 public final class StringUtils {
   public static final String FAKE_SPACE = "┈", SPACE = " ";
@@ -87,14 +88,21 @@ public final class StringUtils {
     return bestScore < 0.75 ? null : bestObj;
   }
 
-  public static String getSuggestion(String suggestion, String mustKeep) {
+  /**
+   * @param suggestion The text we want to suggest
+   * @param originalKeep Text sent by the client before the last space: "Golden┈Drought " or "Golden
+   *     Drought"
+   * @param textKeep Text version of the above: "Golden Drought "
+   * @return the suggestion cloud should receive to properly suggest what we want
+   */
+  public static String getSuggestion(String suggestion, String originalKeep, String textKeep) {
     // At least one of the two has no spaces, algorithm isn't needed.
-    if (mustKeep.length() > 1 && suggestion.contains(SPACE)) {
-      int matchIdx = LiquidMetal.getIndexOf(suggestion, mustKeep);
+    if (textKeep.length() > 1 && suggestion.contains(SPACE)) {
+      int matchIdx = LiquidMetal.getIndexOf(suggestion, textKeep);
 
       // Bad case, this can happen when input was normalized before search
       if (matchIdx == -1) {
-        int normalizedMatch = LiquidMetal.getIndexOf(suggestion, StringUtils.normalize(mustKeep));
+        int normalizedMatch = LiquidMetal.getIndexOf(suggestion, StringUtils.normalize(textKeep));
 
         // Keep until the end of the word, to compensate for removed chars in normalization.
         // This is FAR from ideal, but it's the edge-case of an edge-case.
@@ -107,7 +115,7 @@ public final class StringUtils {
       suggestion = suggestion.substring(matchIdx + 1);
     }
 
-    return textToSuggestion(suggestion);
+    return originalKeep + textToSuggestion(suggestion);
   }
 
   public static String textToSuggestion(String text) {
@@ -118,14 +126,17 @@ public final class StringUtils {
     return text.replace(FAKE_SPACE, SPACE);
   }
 
-  public static String getText(List<String> inputQueue) {
+  public static String getText(CommandInput inputQueue) {
     if (inputQueue.isEmpty()) return "";
-    return suggestionToText(String.join(SPACE, inputQueue));
+    return suggestionToText(inputQueue.remainingInput());
   }
 
-  public static String getMustKeepText(List<String> inputQueue) {
+  public static String getMustKeepArg(CommandInput inputQueue) {
     if (inputQueue.isEmpty()) return "";
-    return suggestionToText(String.join(SPACE, inputQueue.subList(0, inputQueue.size() - 1))) + " ";
+    String next = inputQueue.remainingInput();
+    int index = next.lastIndexOf(' ');
+    if (index == -1) return ""; // Nothing to keep
+    return next.substring(0, index + 1);
   }
 
   public static String truncate(String text, int length) {
@@ -136,7 +147,7 @@ public final class StringUtils {
     return text == null
         ? ""
         : Normalizer.normalize(text, Normalizer.Form.NFD)
-            .replaceAll("[^A-Za-z0-9 ]", "")
+            .replaceAll("[^A-Za-z0-9_ ]", "")
             .toLowerCase(Locale.ROOT);
   }
 
@@ -148,16 +159,19 @@ public final class StringUtils {
     return text.substring(Math.min(text.length(), begin), Math.min(text.length(), end));
   }
 
+  public static String simplify(String string) {
+    return string.toLowerCase(Locale.ROOT).replace(" ", "").replace("_", "").replace(".", "");
+  }
+
   public static List<String> complete(String prefix, Iterable<String> options) {
     final String prefixLower = prefix.toLowerCase();
     final int pos = prefixLower.lastIndexOf(' ');
     final List<String> matches = new ArrayList<>();
-    options.forEach(
-        option -> {
-          if (option.toLowerCase().startsWith(prefixLower)) {
-            matches.add(pos == -1 ? option : option.substring(pos + 1));
-          }
-        });
+    options.forEach(option -> {
+      if (option.toLowerCase().startsWith(prefixLower)) {
+        matches.add(pos == -1 ? option : option.substring(pos + 1));
+      }
+    });
     Collections.sort(matches);
     return matches;
   }

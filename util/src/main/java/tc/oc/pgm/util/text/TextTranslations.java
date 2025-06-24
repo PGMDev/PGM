@@ -5,9 +5,6 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Table;
 import com.google.common.collect.Tables;
@@ -32,12 +29,10 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.pointer.Pointered;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.Translator;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.Audience;
@@ -51,33 +46,13 @@ public final class TextTranslations {
 
   // Locale of the source code .properties files
   private static final Locale SOURCE_LOCALE = Locale.US;
-  // Cache locales to avoid allocating many locales per player & message
-  private static final LoadingCache<String, Locale> LOCALE_CACHE =
-      CacheBuilder.newBuilder()
-          .build(
-              new CacheLoader<String, Locale>() {
-                @Override
-                public Locale load(@NotNull String str) {
-                  return parseLocale(str);
-                }
-              });
 
   // A control to ensure that .properties are loaded in UTF-8 format
   private static final UTF8Control SOURCE_CONTROL = new UTF8Control();
 
   // A list of all .properties files to load
-  private static final List<String> SOURCE_NAMES =
-      ImmutableList.of(
-          "command",
-          "death",
-          "error",
-          "gamemode",
-          "join",
-          "map",
-          "match",
-          "misc",
-          "moderation",
-          "ui");
+  private static final List<String> SOURCE_NAMES = ImmutableList.of(
+      "command", "death", "error", "gamemode", "join", "map", "match", "misc", "moderation", "ui");
 
   private static SortedMap<String, Map<Locale, MessageFormat>> getTreeMap() {
     try {
@@ -120,20 +95,18 @@ public final class TextTranslations {
     loadKeys(Locale.getDefault());
     // Add this translator to the global registry (so components are auto-translated by the
     // platform)
-    GlobalTranslator.translator()
-        .addSource(
-            new Translator() {
-              @Override
-              public @NotNull Key name() {
-                return NAMESPACE;
-              }
+    GlobalTranslator.translator().addSource(new Translator() {
+      @Override
+      public @NotNull Key name() {
+        return NAMESPACE;
+      }
 
-              @Override
-              public @Nullable MessageFormat translate(
-                  final @NotNull String key, final @NotNull Locale locale) {
-                return TextTranslations.getNearestKey(locale, key);
-              }
-            });
+      @Override
+      public @Nullable MessageFormat translate(
+          final @NotNull String key, final @NotNull Locale locale) {
+        return TextTranslations.getNearestKey(locale, key);
+      }
+    });
   }
 
   /**
@@ -170,10 +143,9 @@ public final class TextTranslations {
 
     int maxScore = 0;
     for (Locale other : getLocales()) {
-      int score =
-          (locale.getLanguage().equals(other.getLanguage()) ? 3 : 0)
-              + (locale.getCountry().equals(other.getCountry()) ? 2 : 0)
-              + (locale.getVariant().equals(other.getVariant()) ? 1 : 0);
+      int score = (locale.getLanguage().equals(other.getLanguage()) ? 3 : 0)
+          + (locale.getCountry().equals(other.getCountry()) ? 2 : 0)
+          + (locale.getVariant().equals(other.getVariant()) ? 1 : 0);
       if (score > maxScore) {
         maxScore = score;
         nearest = other;
@@ -255,30 +227,6 @@ public final class TextTranslations {
     }
 
     return keysFound;
-  }
-
-  private static java.util.Locale parseLocale(String locale) {
-    try {
-      final String[] split = locale.split("[-_]");
-      switch (split.length) {
-        case 1: // language
-          return new java.util.Locale(split[0]);
-        case 2: // language and country
-          return new java.util.Locale(split[0], split[1]);
-        case 3: // language, country, and variant
-          return new java.util.Locale(split[0], split[1], split[2]);
-      }
-    } catch (IllegalArgumentException e) {
-      // ignore
-    }
-
-    // bad locale sent?
-    return java.util.Locale.US;
-  }
-
-  public static Locale getLocale(@Nullable CommandSender viewer) {
-    if (!(viewer instanceof Player)) return SOURCE_LOCALE;
-    return LOCALE_CACHE.getUnchecked(((Player) viewer).spigot().getLocale());
   }
 
   public static Locale getLocale(@Nullable Pointered viewer) {
@@ -396,9 +344,8 @@ public final class TextTranslations {
    */
   @Deprecated
   public static String translate(String key, @NotNull Pointered viewer, @NotNull Object... args) {
-    final Component text =
-        translatable(
-            key, Stream.of(args).map(TextTranslations::toComponent).collect(Collectors.toList()));
+    final Component text = translatable(
+        key, Stream.of(args).map(TextTranslations::toComponent).collect(Collectors.toList()));
 
     return LegacyComponentSerializer.legacySection().serialize(translate(text, viewer));
   }
@@ -407,10 +354,5 @@ public final class TextTranslations {
     if (obj instanceof Component) return (Component) obj;
     if (obj instanceof ComponentLike) return (ComponentLike) obj;
     return text(String.valueOf(obj));
-  }
-
-  public static String toMinecraftGson(Component component, @Nullable CommandSender viewer) {
-    Component translated = translate(component, getPointered(viewer));
-    return GsonComponentSerializer.colorDownsamplingGson().serialize(translated);
   }
 }

@@ -11,7 +11,7 @@ import tc.oc.pgm.filters.query.PlayerStateQuery;
 public class AttackerQueryModifier extends QueryModifier<DamageQuery, PlayerQuery> {
 
   public AttackerQueryModifier(Filter child) {
-    super(child, PlayerQuery.class);
+    super(child, DamageQuery.class, PlayerQuery.class);
   }
 
   @Nullable
@@ -19,10 +19,5 @@ public class AttackerQueryModifier extends QueryModifier<DamageQuery, PlayerQuer
   protected PlayerQuery transformQuery(DamageQuery query) {
     ParticipantState attacker = query.getDamageInfo().getAttacker();
     return attacker != null ? new PlayerStateQuery(query.getEvent(), attacker) : null;
-  }
-
-  @Override
-  public Class<? extends DamageQuery> queryType() {
-    return DamageQuery.class;
   }
 }

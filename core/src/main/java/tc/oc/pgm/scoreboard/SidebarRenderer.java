@@ -3,6 +3,8 @@ package tc.oc.pgm.scoreboard;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +29,6 @@ import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.ProximityGoal;
-import tc.oc.pgm.goals.ShowOption;
-import tc.oc.pgm.score.ScoreMatchModule;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -65,10 +65,9 @@ class SidebarRenderer {
     final Collection<Gamemode> gamemodes = map.getGamemodes();
     if (!gamemodes.isEmpty()) {
       boolean acronyms = gamemodes.size() > 1;
-      List<Component> gmComponents =
-          gamemodes.stream()
-              .map(gm -> text(acronyms ? gm.getAcronym() : gm.getFullName()))
-              .collect(Collectors.toList());
+      List<Component> gmComponents = gamemodes.stream()
+          .map(gm -> text(acronyms ? gm.getAcronym() : gm.getFullName()))
+          .collect(Collectors.toList());
       return TextFormatter.list(gmComponents, NamedTextColor.AQUA);
     }
 
@@ -84,7 +83,7 @@ class SidebarRenderer {
       }
 
       // When there are multiple, primary game modes
-      games.set(0, text(Gamemode.OBJECTIVES.getFullName(), NamedTextColor.AQUA));
+      games.set(0, translatable("gamemode.generic.name", NamedTextColor.AQUA));
       break;
     }
 
@@ -138,18 +137,22 @@ class SidebarRenderer {
     if (!context.hasScores && !context.isBlitz) return;
     context.startSection();
 
-    for (Competitor competitor : match.getSortedCompetitors()) {
-      Component text;
-      if (context.hasScores) {
-        text = renderScore(competitor);
-      } else {
-        text = renderBlitz(competitor);
-      }
-      if (text != null) {
+    if (context.hasScores) {
+      var smm = assertNotNull(context.smm);
+      int limit = smm.hasScoreLimit() ? smm.getScoreLimit() : -1;
 
-        if (text != empty()) {
-          text = text.append(space());
-        }
+      for (Competitor competitor : match.getSortedCompetitors()) {
+        if (!smm.getScoreboardFilter().response(competitor)) continue;
+        context.addRow(context.display.format(competitor, (int) smm.getScore(competitor), limit));
+
+        // No point rendering more scores, usually seen in FFA
+        if (context.isFull()) break;
+      }
+    } else {
+      for (Competitor competitor : match.getSortedCompetitors()) {
+        Component text = renderBlitz(competitor);
+        if (text == null) continue;
+        if (text != empty()) text = text.append(space());
         context.addRow(text.append(competitor.getName(NameStyle.SIMPLE_COLOR)));
 
         // No point rendering more scores, usually seen in FFA
@@ -167,7 +170,7 @@ class SidebarRenderer {
 
   private List<Competitor> getSortedCompetitors(RenderContext context, Party viewer) {
     List<Competitor> sortedCompetitors = new ArrayList<>(match.getSortedCompetitors());
-    sortedCompetitors.retainAll(context.competitorsWithGoals);
+    sortedCompetitors.retainAll(context.competitorGoals.keySet());
     // Bump viewing party to the top of the list
     if (viewer instanceof Competitor && sortedCompetitors.remove(viewer)) {
       sortedCompetitors.add(0, (Competitor) viewer);
@@ -184,7 +187,7 @@ class SidebarRenderer {
     if (context.isCompactWool) {
       boolean firstWool = true;
 
-      List<Goal> sortedWools = new ArrayList<>(context.gmm.getGoals(competitor));
+      List<Goal<?>> sortedWools = context.competitorGoals.get(competitor);
       sortedWools.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
 
       // Calculate whether having three spaces between each wool would fit on the scoreboard.
@@ -192,17 +195,15 @@ class SidebarRenderer {
           MAX_LENGTH < (3 * sortedWools.size()) + (3 * (sortedWools.size() - 1)) + 1;
       TextComponent.Builder woolText = text();
       for (Goal<?> goal : sortedWools) {
-        if (goal instanceof MonumentWool && goal.hasShowOption(ShowOption.SHOW_SIDEBAR)) {
-          MonumentWool wool = (MonumentWool) goal;
+        if (goal instanceof MonumentWool wool) {
           TextComponent spacer = space();
           if (!firstWool && !horizontalCompact) {
             spacer = spacer.append(space()).append(space());
           }
           firstWool = false;
-          woolText.append(
-              spacer
-                  .append(wool.renderSidebarStatusText(competitor, context.viewer))
-                  .color(wool.renderSidebarStatusColor(competitor, context.viewer)));
+          woolText.append(spacer
+              .append(wool.renderSidebarStatusText(competitor, context.viewer))
+              .color(wool.renderSidebarStatusColor(competitor, context.viewer)));
         }
       }
       // Add a row for the compact wools
@@ -210,12 +211,8 @@ class SidebarRenderer {
 
     } else {
       // Not compact; add a row for each of this team's goals
-      for (Goal<?> goal : context.gmm.getGoals()) {
-        if (!goal.isShared()
-            && goal.canComplete(competitor)
-            && goal.hasShowOption(ShowOption.SHOW_SIDEBAR)) {
-          context.addRow(this.renderGoal(goal, competitor, context.viewer));
-        }
+      for (Goal<?> goal : context.competitorGoals.get(competitor)) {
+        context.addRow(this.renderGoal(goal, competitor, context.viewer));
       }
     }
   }
@@ -229,22 +226,6 @@ class SidebarRenderer {
       }
       context.addRow(footer);
     }
-  }
-
-  private Component renderScore(Competitor competitor) {
-    ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
-    if (!smm.getScoreboardFilter().response(competitor)) {
-      return null;
-    }
-    Component score = text((int) smm.getScore(competitor), NamedTextColor.WHITE);
-    if (!smm.hasScoreLimit()) {
-      return score;
-    }
-    return text()
-        .append(score)
-        .append(text("/", NamedTextColor.DARK_GRAY))
-        .append(text(smm.getScoreLimit(), NamedTextColor.GRAY))
-        .build();
   }
 
   private Component renderBlitz(Competitor competitor) {
@@ -266,12 +247,11 @@ class SidebarRenderer {
     final TextComponent.Builder line = text();
 
     line.append(space());
-    line.append(
-        goal.renderSidebarStatusText(competitor, viewingParty)
-            .color(
-                blinkTask != null && blinkTask.isDark()
-                    ? NamedTextColor.BLACK
-                    : goal.renderSidebarStatusColor(competitor, viewingParty)));
+    line.append(goal.renderSidebarStatusText(competitor, viewingParty)
+        .color(
+            blinkTask != null && blinkTask.isDark()
+                ? NamedTextColor.BLACK
+                : goal.renderSidebarStatusColor(competitor, viewingParty)));
 
     if (goal instanceof ProximityGoal) {
       final ProximityGoal<?> proximity = (ProximityGoal<?>) goal;
@@ -282,9 +262,8 @@ class SidebarRenderer {
     }
 
     line.append(space());
-    line.append(
-        goal.renderSidebarLabelText(competitor, viewingParty)
-            .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
+    line.append(goal.renderSidebarLabelText(competitor, viewingParty)
+        .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
 
     return line.build();
   }

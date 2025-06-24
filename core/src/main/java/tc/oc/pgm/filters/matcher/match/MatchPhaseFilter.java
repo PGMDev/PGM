@@ -12,13 +12,12 @@ import tc.oc.pgm.filters.operator.AnyFilter;
 
 public class MatchPhaseFilter extends TypedFilter.Impl<MatchQuery> {
 
+  public static final MatchPhaseFilter IDLE = new MatchPhaseFilter(MatchPhase.IDLE);
+  public static final MatchPhaseFilter STARTING = new MatchPhaseFilter(MatchPhase.STARTING);
   public static final MatchPhaseFilter RUNNING = new MatchPhaseFilter(MatchPhase.RUNNING);
   public static final MatchPhaseFilter FINISHED = new MatchPhaseFilter(MatchPhase.FINISHED);
-  public static final MatchPhaseFilter STARTING = new MatchPhaseFilter(MatchPhase.STARTING);
-  public static final MatchPhaseFilter IDLE = new MatchPhaseFilter(MatchPhase.IDLE);
-  public static final Filter STARTED =
-      AnyFilter.of(
-          new MatchPhaseFilter(MatchPhase.RUNNING), new MatchPhaseFilter(MatchPhase.FINISHED));
+  public static final Filter STARTED = AnyFilter.of(
+      new MatchPhaseFilter(MatchPhase.RUNNING), new MatchPhaseFilter(MatchPhase.FINISHED));
 
   private final MatchPhase matchPhase;
 

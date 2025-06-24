@@ -35,9 +35,27 @@ public class MatchFooterTabEntry extends DynamicTabEntry {
   public void addToView(TabView view) {
     super.addToView(view);
     if (this.tickTask == null && match.isLoaded()) {
-      Runnable tick = MatchFooterTabEntry.this::invalidate;
+      Runnable tick =
+          new Runnable() {
+            private long length;
+            private boolean running;
+
+            @Override
+            public void run() {
+              long lastLen = length;
+              boolean lastRunning = running;
+              length = match.getDuration().getSeconds();
+              running = match.isRunning();
+
+              if (this.length != lastLen || this.running != lastRunning) {
+                MatchFooterTabEntry.this.invalidate();
+              }
+            }
+          };
       this.tickTask =
-          match.getExecutor(MatchScope.LOADED).scheduleWithFixedDelay(tick, 0, 1, TimeUnit.SECONDS);
+          match
+              .getExecutor(MatchScope.LOADED)
+              .scheduleWithFixedDelay(tick, 0, 50, TimeUnit.MILLISECONDS);
     }
   }
 
