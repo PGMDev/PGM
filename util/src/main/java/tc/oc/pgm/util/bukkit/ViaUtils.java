@@ -12,7 +12,7 @@ public class ViaUtils {
   public static final int VERSION_1_7 = 5;
   public static final int VERSION_1_8 = 47;
   public static final int VERSION_1_13 = 393;
-  public static final int VERSION_1_21 = 767;
+  public static final int VERSION_1_21_6 = 771;
 
   private static final boolean ENABLED = isViaLoaded();
 
@@ -31,13 +31,13 @@ public class ViaUtils {
 
   /**
    * @see <a
-   *     href="https://wiki.vg/Protocol_version_numbers">https://wiki.vg/Protocol_version_numbers</a>
+   *     href="https://minecraft.wiki/w/Java_Edition_data_values/Protocol_and_data_versions">https://minecraft.wiki/w/Java_Edition_data_values/Protocol_and_data_versions</a>
    */
   public static int getProtocolVersion(Player player) {
     if (enabled()) {
       return Via.getAPI().getPlayerVersion(player.getUniqueId());
     } else {
-      return Platform.VARIANT == SPORTPAPER ? VERSION_1_8 : VERSION_1_21;
+      return Platform.VARIANT == SPORTPAPER ? VERSION_1_8 : VERSION_1_21_6;
     }
   }
 
