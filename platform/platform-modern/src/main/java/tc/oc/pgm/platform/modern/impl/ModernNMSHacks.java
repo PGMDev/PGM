@@ -7,14 +7,15 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
+import io.papermc.paper.FeatureHooks;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtException;
@@ -28,7 +29,6 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.LevelChunkSection;
@@ -191,13 +191,13 @@ public class ModernNMSHacks implements NMSHacks {
     var console = server.getServer(); // NMS server
 
     Preconditions.checkArgument(creator != null, "WorldCreator cannot be null");
+
     String name = creator.name();
-    ChunkGenerator generator = creator.generator();
+    ChunkGenerator chunkGenerator = creator.generator();
     BiomeProvider biomeProvider = creator.biomeProvider();
     File folder = new File(server.getWorldContainer(), name);
     World world = server.getWorld(name);
 
-    // Paper start
     World worldByKey = server.getWorld(creator.key());
     if (world != null || worldByKey != null) {
       if (world == worldByKey) {
@@ -206,15 +206,16 @@ public class ModernNMSHacks implements NMSHacks {
       throw new IllegalArgumentException("Cannot create a world with key " + creator.key()
           + " and name " + name + " one (or both) already match a world that exists");
     }
-    // Paper end
+
     if (folder.exists()) {
       Preconditions.checkArgument(
           folder.isDirectory(), "File (%s) exists and isn't a folder", name);
     }
 
-    if (generator == null) {
-      generator = server.getGenerator(name);
+    if (chunkGenerator == null) {
+      chunkGenerator = server.getGenerator(name);
     }
+
     if (biomeProvider == null) {
       biomeProvider = server.getBiomeProvider(name);
     }
@@ -228,121 +229,122 @@ public class ModernNMSHacks implements NMSHacks {
             throw new IllegalArgumentException("Illegal dimension (" + creator.environment() + ")");
         };
 
-    LevelStorageSource.LevelStorageAccess worldSession;
+    LevelStorageSource.LevelStorageAccess levelStorageAccess;
     try {
-      worldSession = LevelStorageSource.createDefault(server.getWorldContainer().toPath())
+      levelStorageAccess = LevelStorageSource.createDefault(
+              server.getWorldContainer().toPath())
           .validateAndCreateAccess(name, actualDimension);
     } catch (IOException | ContentValidationException ex) {
       throw new RuntimeException(ex);
     }
 
-    if (!worldSession.hasWorldData()) {
+    // Abort if level.dat is empty
+    if (!levelStorageAccess.hasWorldData()) {
       throw new UnsupportedOperationException("Cannot use PGM createWorld with an empty level.dat");
     }
 
-    Dynamic<?> dynamic;
-    net.minecraft.world.level.storage.LevelSummary worldinfo;
+    Dynamic<?> dataTag;
+    net.minecraft.world.level.storage.LevelSummary summary;
     try {
-      dynamic = worldSession.getDataTag();
-      worldinfo = worldSession.getSummary(dynamic);
-    } catch (NbtException | ReportedNbtException | IOException ioexception) {
-      LevelStorageSource.LevelDirectory convertable_b = worldSession.getLevelDirectory();
-
+      dataTag = levelStorageAccess.getDataTag();
+      summary = levelStorageAccess.getSummary(dataTag);
+    } catch (NbtException | ReportedNbtException | IOException e) {
+      LevelStorageSource.LevelDirectory levelDirectory = levelStorageAccess.getLevelDirectory();
       MinecraftServer.LOGGER.warn(
-          "Failed to load world data from {}", convertable_b.dataFile(), ioexception);
+          "Failed to load world data from {}", levelDirectory.dataFile(), e);
+
       return null;
     }
 
-    if (worldinfo.requiresManualConversion()) {
+    if (summary.requiresManualConversion()) {
       MinecraftServer.LOGGER.info(
           "This world must be opened in an older version (like 1.6.4) to be safely converted");
       return null;
     }
 
-    if (!worldinfo.isCompatible()) {
+    if (!summary.isCompatible()) {
       MinecraftServer.LOGGER.info("This world was created by an incompatible version.");
       return null;
     }
 
-    PrimaryLevelData worlddata;
-    WorldLoader.DataLoadContext worldloader_a = console.worldLoader;
-    RegistryAccess.Frozen iregistrycustom_dimension = worldloader_a.datapackDimensions();
-    net.minecraft.core.Registry<LevelStem> iregistry =
-        iregistrycustom_dimension.lookupOrThrow(Registries.LEVEL_STEM);
-    LevelDataAndDimensions leveldataanddimensions = LevelStorageSource.getLevelDataAndDimensions(
-        dynamic, worldloader_a.dataConfiguration(), iregistry, worldloader_a.datapackWorldgen());
-    worlddata = (PrimaryLevelData) leveldataanddimensions.worldData();
+    PrimaryLevelData primaryLevelData;
+    WorldLoader.DataLoadContext context = console.worldLoader;
+    RegistryAccess.Frozen registryAccess = context.datapackDimensions();
+    Registry<LevelStem> contextLevelStemRegistry =
+        registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
+    LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
+        dataTag, context.dataConfiguration(), contextLevelStemRegistry, context.datapackWorldgen());
+    primaryLevelData = (PrimaryLevelData) levelDataAndDimensions.worldData();
 
-    iregistrycustom_dimension = leveldataanddimensions.dimensions().dimensionsRegistryAccess();
-    iregistry = iregistrycustom_dimension.lookupOrThrow(Registries.LEVEL_STEM);
+    registryAccess = levelDataAndDimensions.dimensions().dimensionsRegistryAccess();
+    contextLevelStemRegistry = registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
 
-    worlddata.customDimensions = iregistry;
-    worlddata.checkName(name);
-    worlddata.setModdedInfo(
+    primaryLevelData.customDimensions = contextLevelStemRegistry;
+    primaryLevelData.checkName(name);
+    primaryLevelData.setModdedInfo(
         console.getServerModName(), console.getModdedStatus().shouldReportAsModified());
 
-    long j =
-        BiomeManager.obfuscateSeed(worlddata.worldGenOptions().seed()); // Paper - use world seed
-
-    List<CustomSpawner> list = List.of();
-    LevelStem worlddimension = iregistry.getValue(actualDimension);
+    long i = BiomeManager.obfuscateSeed(primaryLevelData.worldGenOptions().seed());
+    LevelStem customStem = contextLevelStemRegistry.getValue(actualDimension);
 
     WorldInfo worldInfo = new CraftWorldInfo(
-        worlddata,
-        worldSession,
+        primaryLevelData,
+        levelStorageAccess,
         creator.environment(),
-        worlddimension.type().value(),
-        worlddimension.generator(),
-        console.registryAccess()); // Paper - Expose vanilla BiomeProvider from WorldInfo
-    if (biomeProvider == null && generator != null) {
-      biomeProvider = generator.getDefaultBiomeProvider(worldInfo);
+        customStem.type().value(),
+        customStem.generator(),
+        console.registryAccess());
+    if (biomeProvider == null && chunkGenerator != null) {
+      biomeProvider = chunkGenerator.getDefaultBiomeProvider(worldInfo);
     }
 
     // If the world is < 1.18-exp.1, replace dimension type
-    boolean isOld =
-        worldinfo.levelVersion().minecraftVersion().version() < DataVersions.V1_18_EXP_1;
+    boolean isOld = summary.levelVersion().minecraftVersion().version() < DataVersions.V1_18_EXP_1;
     if (isOld && actualDimension == LevelStem.OVERWORLD) {
       var dimReg = console.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
       var dimHolder = dimReg.getOrThrow(PgmBootstrap.LEGACY_OVERWORLD);
 
-      worlddimension = new LevelStem(dimHolder, worlddimension.generator());
+      customStem = new LevelStem(dimHolder, customStem.generator());
     }
-    ResourceKey<net.minecraft.world.level.Level> worldKey;
-    worldKey = ResourceKey.create(
+
+    ResourceKey<net.minecraft.world.level.Level> dimensionKey;
+    dimensionKey = ResourceKey.create(
         Registries.DIMENSION,
         ResourceLocation.fromNamespaceAndPath(
             creator.key().namespace(), creator.key().value()));
 
-    worlddata.getGameRules().getRule(GameRules.RULE_SPAWN_CHUNK_RADIUS).set(0, null);
+    primaryLevelData.getGameRules().getRule(GameRules.RULE_SPAWN_CHUNK_RADIUS).set(0, null);
 
-    ServerLevel internal = new ServerLevel(
+    ServerLevel serverLevel = new ServerLevel(
         console,
         console.executor,
-        worldSession,
-        worlddata,
-        worldKey,
-        Objects.requireNonNull(worlddimension),
+        levelStorageAccess,
+        primaryLevelData,
+        dimensionKey,
+        customStem,
         console.progressListenerFactory.create(
-            worlddata.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS)),
+            primaryLevelData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS)),
         false, // isDebug
-        j,
+        i,
         ImmutableList.of(),
         true, // tickTime
         console.overworld().getRandomSequences(),
         creator.environment(),
-        generator,
+        chunkGenerator,
         biomeProvider);
 
     if (server.getWorld(name) == null) {
       return null;
     }
 
-    console.addLevel(internal);
-    console.initWorld(internal, worlddata, worlddata, worlddata.worldGenOptions());
-    internal.setSpawnSettings(true);
-    console.prepareLevels(internal.getChunkSource().chunkMap.progressListener, internal);
-    server.getPluginManager().callEvent(new WorldLoadEvent(internal.getWorld()));
-    return internal.getWorld();
+    console.addLevel(serverLevel);
+    console.initWorld(
+        serverLevel, primaryLevelData, primaryLevelData, primaryLevelData.worldGenOptions());
+    serverLevel.setSpawnSettings(true);
+    console.prepareLevels(serverLevel.getChunkSource().chunkMap.progressListener, serverLevel);
+    FeatureHooks.tickEntityManager(serverLevel);
+    server.getPluginManager().callEvent(new WorldLoadEvent(serverLevel.getWorld()));
+    return serverLevel.getWorld();
   }
 
   @Override
