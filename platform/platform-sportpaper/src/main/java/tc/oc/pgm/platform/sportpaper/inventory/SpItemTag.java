@@ -32,6 +32,7 @@ public class SpItemTag<T, N extends NBTBase> implements ItemTag<T> {
 
   @Nullable
   @Override
+  @SuppressWarnings("unchecked")
   public T get(ItemStack item) {
     if (!item.hasItemMeta()) return null;
     var meta = item.getItemMeta();
@@ -39,12 +40,8 @@ public class SpItemTag<T, N extends NBTBase> implements ItemTag<T> {
     var tag = cbMeta.getUnhandledTags().get(key);
 
     if (tag == null) return null;
-    if (!type.nbtClass.isAssignableFrom(tag.getClass())) {
-      throw new IllegalStateException("Unexpected NBT data type for [" + key + "]: expected "
-          + type.nbtClass.getName() + ", got " + tag.getClass().getName());
-    }
 
-    return type.toRuntime.apply(type.nbtClass.cast(tag));
+    return type.fromNbt.apply((N) tag);
   }
 
   @Override
@@ -69,33 +66,21 @@ public class SpItemTag<T, N extends NBTBase> implements ItemTag<T> {
   }
 
   /** Represents a transform between a runtime type and its NBT representation */
-  public record Codec<RT, NBT extends NBTBase>(
-      Class<RT> runtimeClass,
-      Class<NBT> nbtClass,
-      Function<RT, NBT> toNbt,
-      Function<NBT, RT> toRuntime) {
-    public static Codec<Byte, NBTTagByte> BYTE =
-        new Codec<>(Byte.class, NBTTagByte.class, NBTTagByte::new, NBTTagByte::f);
-    public static Codec<Short, NBTTagShort> SHORT =
-        new Codec<>(Short.class, NBTTagShort.class, NBTTagShort::new, NBTTagShort::e);
-    public static Codec<Integer, NBTTagInt> INTEGER =
-        new Codec<>(Integer.class, NBTTagInt.class, NBTTagInt::new, NBTTagInt::d);
-    public static Codec<Long, NBTTagLong> LONG =
-        new Codec<>(Long.class, NBTTagLong.class, NBTTagLong::new, NBTTagLong::c);
-    public static Codec<Float, NBTTagFloat> FLOAT =
-        new Codec<>(Float.class, NBTTagFloat.class, NBTTagFloat::new, NBTTagFloat::h);
+  public record Codec<RT, NBT extends NBTBase>(Function<RT, NBT> toNbt, Function<NBT, RT> fromNbt) {
+    public static Codec<Byte, NBTTagByte> BYTE = new Codec<>(NBTTagByte::new, NBTTagByte::f);
+    public static Codec<Short, NBTTagShort> SHORT = new Codec<>(NBTTagShort::new, NBTTagShort::e);
+    public static Codec<Integer, NBTTagInt> INTEGER = new Codec<>(NBTTagInt::new, NBTTagInt::d);
+    public static Codec<Long, NBTTagLong> LONG = new Codec<>(NBTTagLong::new, NBTTagLong::c);
+    public static Codec<Float, NBTTagFloat> FLOAT = new Codec<>(NBTTagFloat::new, NBTTagFloat::h);
     public static Codec<Double, NBTTagDouble> DOUBLE =
-        new Codec<>(Double.class, NBTTagDouble.class, NBTTagDouble::new, NBTTagDouble::g);
+        new Codec<>(NBTTagDouble::new, NBTTagDouble::g);
     public static Codec<byte[], NBTTagByteArray> BYTE_ARRAY =
-        new Codec<>(byte[].class, NBTTagByteArray.class, NBTTagByteArray::new, NBTTagByteArray::c);
+        new Codec<>(NBTTagByteArray::new, NBTTagByteArray::c);
     public static Codec<String, NBTTagString> STRING =
-        new Codec<>(String.class, NBTTagString.class, NBTTagString::new, NBTTagString::a_);
-    public static Codec<Boolean, NBTTagByte> BOOLEAN = new Codec<>(
-        Boolean.class,
-        NBTTagByte.class,
-        b -> new NBTTagByte((byte) (b ? 1 : 0)),
-        byteTag -> byteTag.f() != 0);
+        new Codec<>(NBTTagString::new, NBTTagString::a_);
+    public static Codec<Boolean, NBTTagByte> BOOLEAN =
+        new Codec<>(b -> new NBTTagByte((byte) (b ? 1 : 0)), byteTag -> byteTag.f() != 0);
     public static Codec<int[], NBTTagIntArray> INT_ARRAY =
-        new Codec<>(int[].class, NBTTagIntArray.class, NBTTagIntArray::new, NBTTagIntArray::c);
+        new Codec<>(NBTTagIntArray::new, NBTTagIntArray::c);
   }
 }
