@@ -58,6 +58,7 @@ public class BlitzModule implements MapModule<BlitzMatchModule> {
 
       int lives = Integer.MAX_VALUE;
       boolean broadcastLives = false;
+      boolean lightning = false;
       Filter filter = null;
       Filter scoreboardFilter = null;
       Filter joinFilter = null;
@@ -65,19 +66,18 @@ public class BlitzModule implements MapModule<BlitzMatchModule> {
       FilterParser filters = factory.getFilters();
       for (Element blitzEl : blitzElements) {
         broadcastLives = XMLUtils.parseBoolean(blitzEl.getChild("broadcastLives"), true);
-        lives =
-            XMLUtils.parseNumberInRange(
-                Node.fromChildOrAttr(blitzEl, "lives"), Integer.class, Range.atLeast(1), 1);
+        lightning = XMLUtils.parseBoolean(Node.fromChildOrAttr(blitzEl, "lightning"), false);
+        lives = XMLUtils.parseNumberInRange(
+            Node.fromChildOrAttr(blitzEl, "lives"), Integer.class, Range.atLeast(1), 1);
         filter = filters.parseProperty(blitzEl, "filter", StaticFilter.ALLOW);
-        scoreboardFilter =
-            filters.parseProperty(
-                blitzEl, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.PARTY);
+        scoreboardFilter = filters.parseProperty(
+            blitzEl, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.PARTY);
         joinFilter = filters.parseProperty(blitzEl, "join-filter", StaticFilter.DENY);
       }
 
       if (lives != Integer.MAX_VALUE) {
-        return new BlitzModule(
-            new BlitzConfig(lives, broadcastLives, filter, scoreboardFilter, joinFilter));
+        return new BlitzModule(new BlitzConfig(
+            lives, broadcastLives, lightning, filter, scoreboardFilter, joinFilter));
       }
 
       return null;

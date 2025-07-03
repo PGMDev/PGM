@@ -140,15 +140,14 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
   public void showLivesTitle(MatchPlayer matchPlayer) {
     int lives = this.lifeManager.getLives(matchPlayer.getId());
-    matchPlayer.showTitle(
-        title(
-            empty(),
+    matchPlayer.showTitle(title(
+        empty(),
+        translatable(
+            "blitz.livesRemaining",
+            NamedTextColor.RED,
             translatable(
-                "blitz.livesRemaining",
-                NamedTextColor.RED,
-                translatable(
-                    lives == 1 ? "misc.life" : "misc.lives", NamedTextColor.AQUA, text(lives))),
-            Title.Times.times(Duration.ZERO, fromTicks(60), fromTicks(20))));
+                lives == 1 ? "misc.life" : "misc.lives", NamedTextColor.AQUA, text(lives))),
+        Title.Times.times(Duration.ZERO, fromTicks(60), fromTicks(20))));
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -157,6 +156,10 @@ public class BlitzMatchModule implements MatchModule, Listener {
 
     World world = event.getMatch().getWorld();
     Location death = event.getDeathLocation();
+
+    if (this.config.getLightning()) {
+      world.strikeLightningEffect(death);
+    }
 
     double radius = 0.1;
     int n = 8;
@@ -184,15 +187,12 @@ public class BlitzMatchModule implements MatchModule, Listener {
     // Player leaving may have ended the match, causing a rejected execution.
     if (!match.isRunning()) return;
 
-    match
-        .getExecutor(MatchScope.RUNNING)
-        .execute(
-            () -> {
-              ImmutableSet.copyOf(match.getParticipants()).stream()
-                  .filter(participating -> isPlayerEliminated(participating.getId()))
-                  .forEach(participating -> match.setParty(participating, match.getDefaultParty()));
+    match.getExecutor(MatchScope.RUNNING).execute(() -> {
+      ImmutableSet.copyOf(match.getParticipants()).stream()
+          .filter(participating -> isPlayerEliminated(participating.getId()))
+          .forEach(participating -> match.setParty(participating, match.getDefaultParty()));
 
-              match.calculateVictory();
-            });
+      match.calculateVictory();
+    });
   }
 }
