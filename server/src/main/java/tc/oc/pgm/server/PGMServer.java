@@ -1,11 +1,10 @@
 package tc.oc.pgm.server;
 
+import com.destroystokyo.paper.console.PaperConsole;
 import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.InetAddress;
-import java.util.Iterator;
 import java.util.logging.Handler;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,20 +15,16 @@ import net.minecraft.server.v1_8_R3.MinecraftEncryption;
 import net.minecraft.server.v1_8_R3.WorldLoaderServer;
 import net.minecraft.server.v1_8_R3.WorldSettings;
 import net.minecraft.server.v1_8_R3.WorldType;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.io.IoBuilder;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionParser;
-import org.bukkit.craftbukkit.v1_8_R3.LoggerOutputStream;
 import org.bukkit.craftbukkit.v1_8_R3.util.ForwardLogHandler;
-import org.bukkit.craftbukkit.v1_8_R3.util.TerminalConsoleWriterThread;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoadOrder;
-import org.fusesource.jansi.AnsiConsole;
 import org.spigotmc.SpigotConfig;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
@@ -42,7 +37,6 @@ import tc.oc.pgm.util.reflect.ReflectionUtils;
 public class PGMServer extends DedicatedServer implements Runnable {
 
   public static void main(String[] args) throws InvalidDescriptionException {
-    BasicConfigurator.configure();
     new PGMServer(new PluginDescriptionFile(
             Thread.currentThread().getContextClassLoader().getResourceAsStream("plugin.yml")))
         .run();
@@ -109,56 +103,27 @@ public class PGMServer extends DedicatedServer implements Runnable {
   }
 
   protected Logger setupLogger() {
-    AnsiConsole.systemInstall();
-
     final java.util.logging.Logger global = java.util.logging.Logger.getLogger("");
     global.setUseParentHandlers(false);
 
-    final Handler[] handlers = global.getHandlers();
-    for (int i = 0; i < handlers.length; ++i) {
-      global.removeHandler(handlers[i]);
+    for (Handler handler : global.getHandlers()) {
+      global.removeHandler(handler);
     }
 
     global.addHandler(new ForwardLogHandler());
-    org.apache.logging.log4j.Logger logger = LogManager.getRootLogger();
+    final Logger logger = LogManager.getRootLogger();
 
-    if (logger instanceof org.apache.logging.log4j.core.Logger) {
-      final Iterator<org.apache.logging.log4j.core.Appender> appenders =
-          ((org.apache.logging.log4j.core.Logger) logger)
-              .getAppenders()
-              .values()
-              .iterator();
-      while (appenders.hasNext()) {
-        final org.apache.logging.log4j.core.Appender appender = appenders.next();
-        if (appender instanceof ConsoleAppender) {
-          ((org.apache.logging.log4j.core.Logger) logger).removeAppender(appender);
-        }
-      }
-    }
+    System.setOut(IoBuilder.forLogger(logger).setLevel(Level.INFO).buildPrintStream());
+    System.setErr(IoBuilder.forLogger(logger).setLevel(Level.WARN).buildPrintStream());
 
-    new Thread(new TerminalConsoleWriterThread(System.out, reader)).start();
-    System.setOut(new PrintStream(new LoggerOutputStream(logger, Level.INFO), true));
-    System.setErr(new PrintStream(new LoggerOutputStream(logger, Level.WARN), true));
-
-    BasicConfigurator.resetConfiguration();
-
-    var actualLogger = ReflectionUtils.readStaticField(
-        DedicatedServer.class, org.apache.logging.log4j.Logger.class, "LOGGER");
+    var actualLogger =
+        ReflectionUtils.readStaticField(DedicatedServer.class, Logger.class, "LOGGER");
     return actualLogger != null ? actualLogger : logger;
   }
 
   protected void setupConsole() {
     final Thread console = new Thread(() -> {
-      try {
-        while (!isStopped() && isRunning()) {
-          final String command = reader.readLine(">", null);
-          if (command != null && !command.trim().isEmpty()) {
-            issueCommand(command, this);
-          }
-        }
-      } catch (IOException io) {
-        safeShutdown();
-      }
+      new PaperConsole(PGMServer.this).start();
     });
     console.setDaemon(true);
     console.start();
@@ -208,6 +173,7 @@ public class PGMServer extends DedicatedServer implements Runnable {
     if (rewind != null) {
       loader.togglePlugin(rewind, true);
     }
+
     final Plugin backwards = server.getPluginManager().getPlugin("ViaBackwards");
     if (backwards != null) {
       loader.togglePlugin(backwards, true);
