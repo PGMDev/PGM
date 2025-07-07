@@ -8,6 +8,7 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ExposedAction;
+import tc.oc.pgm.action.replacements.ReplacementParser;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -58,6 +59,13 @@ public class ActionModule implements MapModule<ActionMatchModule> {
     public ActionModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       ActionParser parser = factory.getParser().getActionParser();
+      var replacementParser = new ReplacementParser(factory, true);
+      var features = factory.getFeatures();
+
+      for (var replacement : XMLUtils.flattenElements(
+          doc.getRootElement(), Set.of("replacements"), replacementParser.replacementTypes())) {
+        features.addFeature(replacement, replacementParser.parse(replacement, null));
+      }
 
       for (Element action :
           XMLUtils.flattenElements(doc.getRootElement(), Set.of("actions"), parser.actionTypes())) {

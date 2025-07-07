@@ -3,15 +3,11 @@ package tc.oc.pgm.action;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
-import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import java.lang.reflect.Method;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import net.kyori.adventure.sound.Sound;
@@ -37,6 +33,8 @@ import tc.oc.pgm.action.actions.TakePaymentAction;
 import tc.oc.pgm.action.actions.TeleportAction;
 import tc.oc.pgm.action.actions.VelocityAction;
 import tc.oc.pgm.action.actions.WeatherAction;
+import tc.oc.pgm.action.replacements.Replacement;
+import tc.oc.pgm.action.replacements.ReplacementParser;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
@@ -55,12 +53,10 @@ import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
-import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.math.Formula;
-import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
@@ -69,13 +65,12 @@ import tc.oc.pgm.variables.Variable;
 
 public class ActionParser {
 
-  private static final NumberFormat DEFAULT_FORMAT = NumberFormat.getIntegerInstance();
-
   private final MapFactory factory;
   private final boolean legacy;
   private final FeatureDefinitionContext features;
   private final XMLFluentParser parser;
   private final Map<String, Method> methodParsers;
+  private final ReplacementParser replacementParser;
 
   public ActionParser(MapFactory factory) {
     this.factory = factory;
@@ -83,6 +78,7 @@ public class ActionParser {
     this.features = factory.getFeatures();
     this.parser = factory.getParser();
     this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+    replacementParser = new ReplacementParser(factory);
   }
 
   public <B extends Filterable<?>> Action<? super B> parseProperty(
@@ -291,40 +287,17 @@ public class ActionParser {
 
     List<Element> replacements = XMLUtils.flattenElements(el, "replacements");
     if (replacements.isEmpty()) {
-      return new MessageAction<>(Audience.class, text, actionbar, title, null);
+      return new MessageAction<>(Filterable.class, text, actionbar, title, null);
     }
 
     scope = parseScope(el, scope);
 
-    ImmutableMap.Builder<String, MessageAction.Replacement<T>> replacementMap =
-        ImmutableMap.builder();
+    ImmutableMap.Builder<String, Replacement> replacementMap = ImmutableMap.builder();
     for (Element replacement : XMLUtils.flattenElements(el, "replacements")) {
       replacementMap.put(
-          XMLUtils.parseRequiredId(replacement), parseReplacement(replacement, scope));
+          XMLUtils.parseRequiredId(replacement), replacementParser.parse(replacement, scope));
     }
     return new MessageAction<>(scope, text, actionbar, title, replacementMap.build());
-  }
-
-  private <T extends Filterable<?>> MessageAction.Replacement<T> parseReplacement(
-      Element el, Class<T> scope) throws InvalidXMLException {
-    // TODO: Support alternative replacement types (eg: player(s), team(s), or durations)
-    switch (el.getName().toLowerCase(Locale.ROOT)) {
-      case "decimal":
-        Formula<T> formula = parser.formula(scope, el, "value").required();
-        Node formatNode = Node.fromAttr(el, "format");
-        NumberFormat format =
-            formatNode != null ? new DecimalFormat(formatNode.getValue()) : DEFAULT_FORMAT;
-        return (T filterable) -> text(format.format(formula.applyAsDouble(filterable)));
-      case "player":
-        var variable = parser.variable(el, "var").scope(MatchPlayer.class).singleExclusive();
-        var fallback = XMLUtils.parseFormattedText(el, "fallback", empty());
-        var nameStyle = parser.parseEnum(NameStyle.class, el, "style").optional(NameStyle.VERBOSE);
-
-        return (T filterable) ->
-            variable.getHolder(filterable).map(mp -> mp.getName(nameStyle)).orElse(fallback);
-      default:
-        throw new InvalidXMLException("Unknown replacement type", el);
-    }
   }
 
   @MethodParser("sound")
