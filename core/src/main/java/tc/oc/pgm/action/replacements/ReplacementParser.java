@@ -123,11 +123,10 @@ public class ReplacementParser {
       var filter = parser.filter(innerEl, "filter").optional(() -> {
         if (formula == null)
           throw new InvalidXMLException(
-              "The filter attribute is required if value attribute is not specified in the switch element",
-              innerEl);
+              "The filter is required if value is not specified in the switch element", innerEl);
         if (valueRange == null)
           throw new InvalidXMLException(
-              "At least a filter or a match attribute must be specified", innerEl);
+              "At least a filter or a case match must be specified", innerEl);
         return StaticFilter.ALLOW;
       });
       var result = parser.component(innerEl, "result").required();
