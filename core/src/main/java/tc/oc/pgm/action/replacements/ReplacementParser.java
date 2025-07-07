@@ -119,23 +119,15 @@ public class ReplacementParser {
     var branches = new ArrayList<SwitchBranch>(children.size());
 
     for (var innerEl : children) {
-      var valueRange = parser
-          .doubleRange(innerEl, "match")
-          .validate((r, n) -> {
-            if (formula == null) {
-              throw new InvalidXMLException(
-                  "A match attribute is specified but there's no switch value to bind to", n);
-            }
-          })
-          .optional();
+      var valueRange = formula != null ? parser.doubleRange(innerEl, "match").orNull() : null;
       var filter = parser.filter(innerEl, "filter").respondsTo(scope).optional(() -> {
-        if (valueRange.isEmpty())
+        if (valueRange == null)
           throw new InvalidXMLException(
               "At least a filter or a match attribute must be specified", innerEl);
         return StaticFilter.ALLOW;
       });
       var result = parser.component(innerEl, "result").required();
-      branches.add(new SwitchBranch(result, valueRange.orElse(Range.all()), filter));
+      branches.add(new SwitchBranch(result, valueRange != null ? valueRange : Range.all(), filter));
     }
 
     return ScopedReplacement.of(scope, ctx -> {
