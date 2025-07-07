@@ -120,7 +120,7 @@ public class ReplacementParser {
 
     for (var innerEl : children) {
       var valueRange = formula != null ? parser.doubleRange(innerEl, "match").orNull() : null;
-      var filter = parser.filter(innerEl, "filter").respondsTo(scope).optional(() -> {
+      var filter = parser.filter(innerEl, "filter").optional(() -> {
         if (valueRange == null)
           throw new InvalidXMLException(
               "At least a filter or a match attribute must be specified", innerEl);
