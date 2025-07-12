@@ -4,15 +4,14 @@ import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(Supports.Variant.SPORTPAPER)
-public class LegacyItemTagFactory implements ItemTag.Factory {
-
+public class SpItemTagFactory implements ItemTag.Factory {
   @Override
   public ItemTag<String> newString(String key) {
-    return new LegacyItemTag();
+    return new SpItemTag<>(key, SpItemTag.Codec.STRING);
   }
 
   @Override
   public ItemTag<Boolean> newBoolean(String key) {
-    return new LegacyBooleanItemTag(newString(key));
+    return new SpItemTag<>(key, SpItemTag.Codec.BOOLEAN);
   }
 }
