@@ -68,8 +68,8 @@ public class Carried extends Spawned implements Missing {
   public Carried(Flag flag, Post post, MatchPlayer carrier, Location dropLocation) {
     super(flag, post);
     this.carrier = carrier;
-    this.dropLocations.add(
-        dropLocation); // Need an initial dropLocation in case the carrier never generates ones
+    // Need an initial dropLocation in case the carrier never generates ones
+    this.dropLocations.add(dropLocation);
   }
 
   @Override
@@ -208,6 +208,10 @@ public class Carried extends Spawned implements Missing {
           this.flag.getDefinition().getPointsPerSecond() / 20D,
           ScoreCause.FLAG_CARRIED_TICK);
     }
+
+    if (!isFlag(carrier.getInventory().getHelmet())) {
+      this.dropFlag();
+    }
   }
 
   @Override
@@ -293,7 +297,7 @@ public class Carried extends Spawned implements Missing {
   }
 
   protected boolean isFlag(ItemStack stack) {
-    return stack.isSimilar(this.flag.getBannerItem());
+    return stack != null && stack.isSimilar(this.flag.getBannerItem());
   }
 
   @Override
