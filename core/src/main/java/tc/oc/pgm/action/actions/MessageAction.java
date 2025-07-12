@@ -1,16 +1,27 @@
 package tc.oc.pgm.action.actions;
 
+import static net.kyori.adventure.text.Component.text;
+
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.filters.Filterable;
 
 public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
-  private static final Pattern REPLACEMENT_PATTERN = Pattern.compile("\\{(.+?)}");
+  private static final Pattern PATTERN = Pattern.compile("\\{(.+?)}");
+  private static final PlainTextComponentSerializer SERIALIZER =
+      PlainTextComponentSerializer.plainText();
 
   private final Component text;
   private final Component actionbar;
@@ -42,13 +53,33 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
       return component;
     }
 
-    return component.replaceText(TextReplacementConfig.builder()
-        .match(REPLACEMENT_PATTERN)
-        .replacement((match, original) -> {
-          Replacement r = replacements.get(match.group(1));
-          return r != null ? r.get(scope) : original;
-        })
-        .build());
+    BiFunction<MatchResult, TextComponent.Builder, ComponentLike> replacer = (match, original) -> {
+      Replacement r = replacements.get(match.group(1));
+      return r != null ? r.get(scope) : original;
+    };
+
+    component = component.replaceText(b -> b.match(PATTERN).replacement(replacer));
+    component = replaceClickEvents(
+        component,
+        mr ->
+            SERIALIZER.serialize(replacer.apply(mr, text().content(mr.group())).asComponent()));
+
+    return component;
+  }
+
+  private Component replaceClickEvents(
+      Component component, Function<MatchResult, String> replacer) {
+    var click = component.clickEvent();
+    if (click != null) {
+      var matcher = PATTERN.matcher(click.value());
+      var result = new StringBuilder();
+      while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
+      matcher.appendTail(result);
+      component = component.clickEvent(ClickEvent.clickEvent(click.action(), result.toString()));
+    }
+    var children = new ArrayList<>(component.children());
+    children.replaceAll(child -> replaceClickEvents(child, replacer));
+    return component.children(children);
   }
 
   private Title replace(Title title, T scope) {
