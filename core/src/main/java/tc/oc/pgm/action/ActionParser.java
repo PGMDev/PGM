@@ -10,6 +10,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -62,6 +64,8 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.Variable;
+import tc.oc.pgm.variables.VariableParser;
+import tc.oc.pgm.variables.VariablesModule;
 
 public class ActionParser {
 
@@ -124,16 +128,52 @@ public class ActionParser {
     return (property || "action".equals(el.getName())) && el.getChildren().isEmpty();
   }
 
-  public <B> Action<? super B> parseReference(Node node, Class<B> bound)
+  public <B extends Filterable<?>> Action<? super B> parseReference(Node node, Class<B> bound)
       throws InvalidXMLException {
     return parseReference(node, node.getValue(), bound);
   }
 
-  private <B> Action<? super B> parseReference(Node node, String id, Class<B> bound)
-      throws InvalidXMLException {
-    Action<? super B> action = features.addReference(new XMLActionReference<>(features, node, id));
+  private <B extends Filterable<?>> Action<? super B> parseReference(
+      Node node, String id, Class<B> bound) throws InvalidXMLException {
+    @SuppressWarnings("unchecked")
+    var action = (Action<? super B>) features.get(id, ActionDefinition.class);
+    if (action == null) action = parseInlineAction(node, id, bound);
+    if (action == null)
+      action = features.addReference(new XMLActionReference<>(features, node, id));
+
     validate(action, ActionScopeValidation.of(bound), node);
     return action;
+  }
+
+  private static final String EXPRESSION = "[^=\\]]+";
+  private static final Pattern INLINE_SET =
+      Pattern.compile("(%VAR%)(?:\\[(%IDX%)])?\\s*:=\\s*(%EXP%)"
+          .replace("%VAR%", VariableParser.VARIABLE_ID.pattern())
+          .replace("%IDX%", EXPRESSION)
+          .replace("%EXP%", EXPRESSION));
+
+  private <B extends Filterable<?>> Action<? super B> parseInlineAction(
+      Node node, String id, Class<B> scope) throws InvalidXMLException {
+    Matcher match = INLINE_SET.matcher(id);
+    if (!match.matches()) return null;
+
+    if (scope == null)
+      throw new InvalidXMLException("Inline action requires an implicit scope", node);
+
+    var context = factory.needModule(VariablesModule.class).getContext(scope);
+
+    Variable<?> var = features.resolve(node, match.group(1), Variable.class);
+    Formula<B> formula = Formula.of(match.group(3), context);
+
+    if (var.isIndexed() && var instanceof Variable.Indexed<?> varIdx) {
+      var idxText = match.group(2);
+      if (idxText == null)
+        throw new InvalidXMLException(
+            "Inline action doesn't define the index to insert into", node);
+
+      return new SetVariableAction.Indexed<>(scope, varIdx, Formula.of(idxText, context), formula);
+    }
+    return new SetVariableAction<>(scope, var, formula);
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
