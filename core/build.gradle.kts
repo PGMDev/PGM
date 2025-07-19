@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.7-SNAPSHOT")
+    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.8-SNAPSHOT")
 
     implementation(project(":util"))
     runtimeOnly(project(":platform-sportpaper")) { exclude("*") }
