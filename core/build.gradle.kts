@@ -82,7 +82,7 @@ publishing {
 val pluginProperties = mapOf(
     "name" to project.name,
     "description" to project.description,
-    "apiVersion" to "1.21.7",
+    "apiVersion" to "1.21.8",
     "mainClass" to "tc.oc.pgm.PGMPlugin",
     "version" to project.version,
     "commitHash" to project.latestCommitHash(),
