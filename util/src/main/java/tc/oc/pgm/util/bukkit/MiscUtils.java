@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -59,4 +60,6 @@ public interface MiscUtils {
   Key getSound(Sound constant);
 
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
+
+  boolean isPowerEnchanted(Projectile proj);
 }

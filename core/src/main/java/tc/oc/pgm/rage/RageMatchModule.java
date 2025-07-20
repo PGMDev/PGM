@@ -2,9 +2,9 @@ package tc.oc.pgm.rage;
 
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,7 +17,6 @@ import tc.oc.pgm.util.bukkit.Enchantments;
 
 @ListenerScope(MatchScope.RUNNING)
 public class RageMatchModule implements MatchModule, Listener {
-
   public RageMatchModule(Match match) {}
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -28,12 +27,10 @@ public class RageMatchModule implements MatchModule, Listener {
   }
 
   private boolean isRage(Entity damager) {
-    if (damager instanceof Player) {
-      Player player = (Player) damager;
+    if (damager instanceof Player player) {
       return player.getItemInHand().containsEnchantment(Enchantments.SHARPNESS);
-    } else if (damager instanceof Arrow) {
-      Arrow arrow = (Arrow) damager; // Arrows with damage > 2 are from power bows.
-      return arrow.getShooter() instanceof Player && MISC_UTILS.getArrowDamage(arrow) > 2.0D;
+    } else if (damager instanceof Projectile proj) {
+      return proj.getShooter() instanceof Player && MISC_UTILS.isPowerEnchanted(proj);
     }
     return false;
   }

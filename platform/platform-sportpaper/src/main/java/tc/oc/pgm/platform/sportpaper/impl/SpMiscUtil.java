@@ -21,6 +21,7 @@ import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -110,5 +111,11 @@ public class SpMiscUtil implements MiscUtils {
   @SuppressWarnings("PatternValidation")
   public Key getSound(Sound enumConstant) {
     return key(CraftSound.getSound(enumConstant));
+  }
+
+  @Override
+  public boolean isPowerEnchanted(Projectile proj) {
+    // Arrows with damage > 2 are from power bows.
+    return proj instanceof Arrow arrow && arrow.spigot().getDamage() > 2.0D;
   }
 }
