@@ -17,9 +17,12 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -111,5 +114,15 @@ public class ModernMiscUtil implements MiscUtils {
   public void initScoreboardTeam(Team team, NamedTextColor color) {
     team.color(color);
     team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+  }
+
+  @Override
+  public boolean isPowerEnchanted(Projectile proj) {
+    if (proj instanceof AbstractArrow arrow) {
+      // We can leverage the used weapon data to determine if the arrow was shot from a power bow
+      var weapon = arrow.getWeapon();
+      return weapon != null && weapon.containsEnchantment(Enchantment.POWER);
+    }
+    return false;
   }
 }
