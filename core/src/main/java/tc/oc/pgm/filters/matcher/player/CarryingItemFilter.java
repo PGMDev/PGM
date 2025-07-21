@@ -1,7 +1,5 @@
 package tc.oc.pgm.filters.matcher.player;
 
-import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
-
 import com.google.common.collect.ImmutableList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,10 +45,9 @@ public class CarryingItemFilter extends ParticipantItemFilter {
 
     // Potentially add the crafting grid if that's the currently open inventory
     InventoryView invView = player.getBukkit().getOpenInventory();
-    InventoryType type = INVENTORY_VIEW.getType(invView);
+    InventoryType type = invView.getType();
     if (type == InventoryType.CRAFTING || type == InventoryType.WORKBENCH) {
-      return Stream.concat(
-          inventory, Arrays.stream(INVENTORY_VIEW.getTopInventory(invView).getContents()));
+      return Stream.concat(inventory, Arrays.stream(invView.getTopInventory().getContents()));
     }
     return inventory;
   }

@@ -20,6 +20,6 @@ public class RecipeUnlocker implements Listener {
     player
         .getRecipeBook()
         .known
-        .addAll(MinecraftServer.getServer().getRecipeManager().byName.keySet());
+        .addAll(MinecraftServer.getServer().getRecipeManager().recipes.byKey.keySet());
   }
 }

@@ -1,11 +1,8 @@
 package tc.oc.pgm.doublejump;
 
-import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
-
 import java.util.Iterator;
 import java.util.Map;
 import org.bukkit.GameMode;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,13 +21,10 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
-
-  private static final Sound ZOMBIE_INFECT =
-      parse(Sound::valueOf, "ZOMBIE_INFECT", "ENTITY_ZOMBIE_INFECT");
-
   private static class Jumper {
     private final Player player;
     private final DoubleJumpKit kit;
@@ -112,9 +106,8 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
 
       impulse.setY(0.75 + Math.abs(impulse.getY()) * 0.5);
       impulse.multiply(jumper.kit.power / 3f);
-      event.getPlayer().setVelocity(impulse);
-
-      player.getWorld().playSound(player.getLocation(), ZOMBIE_INFECT, 0.5f, 1.8f);
+      player.setVelocity(impulse);
+      Sounds.play(player, Sounds.DOUBLE_JUMP);
     }
   }
 

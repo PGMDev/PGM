@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
@@ -19,7 +20,9 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -31,7 +34,7 @@ import tc.oc.pgm.util.nms.packets.EntityPackets;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.5")
 public class ModernEntityPackets implements EntityPackets {
 
   private static final EntityDataAccessor<Byte> ENTITY_FLAGS =
@@ -52,7 +55,7 @@ public class ModernEntityPackets implements EntityPackets {
             loc.getYaw(),
             EntityType.ARMOR_STAND,
             0,
-            CraftVector.toNMS(velocity),
+            CraftVector.toVec3(velocity),
             0),
         new ClientboundSetEntityDataPacket(
             entityId,
@@ -74,7 +77,7 @@ public class ModernEntityPackets implements EntityPackets {
         loc.getYaw(),
         EntityType.WITHER_SKULL,
         0,
-        CraftVector.toNMS(velocity),
+        CraftVector.toVec3(velocity),
         0));
   }
 
@@ -85,16 +88,12 @@ public class ModernEntityPackets implements EntityPackets {
 
   @Override
   public Packet teleportEntityPacket(int entityId, Location location) {
-    PacketContainer packet = PlPacket.PL.createPacket(PacketType.Play.Server.ENTITY_TELEPORT);
+    Vec3 position = new Vec3(location.getX(), location.getY(), location.getZ());
+    PositionMoveRotation positionMoveRotation =
+        new PositionMoveRotation(position, Vec3.ZERO, location.getYaw(), location.getPitch());
 
-    packet.getIntegers().write(0, entityId);
-    packet.getDoubles().write(0, location.getX());
-    packet.getDoubles().write(1, location.getY());
-    packet.getDoubles().write(2, location.getZ());
-    packet.getBytes().write(0, (byte) (location.getYaw() * 256 / 360));
-    packet.getBytes().write(1, (byte) (location.getPitch() * 256 / 360));
-
-    return new PlPacket(packet);
+    return new ModernPacket<>(
+        new ClientboundEntityPositionSyncPacket(entityId, positionMoveRotation, false));
   }
 
   @Override

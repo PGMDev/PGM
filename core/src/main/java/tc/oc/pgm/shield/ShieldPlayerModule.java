@@ -1,10 +1,8 @@
 package tc.oc.pgm.shield;
 
-import static tc.oc.pgm.util.bukkit.BukkitUtils.parse;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.logging.Logger;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.potion.PotionEffectType;
@@ -14,6 +12,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 
 public class ShieldPlayerModule implements Tickable {
@@ -58,8 +57,6 @@ public class ShieldPlayerModule implements Tickable {
     addAbsorption(-shieldHealth);
   }
 
-  static Sound RECHARGE_SOUND = parse(Sound::valueOf, "ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP");
-
   /**
    * Recharge the shield to its maximum health. If the player has more absorption than the current
    * shield strength, the excess is preserved.
@@ -70,7 +67,7 @@ public class ShieldPlayerModule implements Tickable {
       logger.fine("Recharging shield: shield=" + shieldHealth + " delta=" + delta);
       shieldHealth = parameters.maxHealth;
       addAbsorption(delta);
-      bukkit.playSound(bukkit.getLocation(), RECHARGE_SOUND, 1, 2);
+      player.playSound(Sounds.SHIELD_RECHARGE);
     }
   }
 
@@ -88,11 +85,10 @@ public class ShieldPlayerModule implements Tickable {
       // Detect shield damage, in case it somehow happens without firing an event.
       double absorption = getAbsorption();
       if (shieldHealth > absorption) {
-        logger.fine(
-            "Detected unexpected shield damage: shield="
-                + shieldHealth
-                + " absorption="
-                + absorption);
+        logger.fine("Detected unexpected shield damage: shield="
+            + shieldHealth
+            + " absorption="
+            + absorption);
         shieldHealth = absorption;
         damage();
       }
@@ -120,13 +116,12 @@ public class ShieldPlayerModule implements Tickable {
       double newAbsorption =
           Math.max(0, getAbsorption() - 4 * (1 + event.getEffect().getAmplifier()));
       if (newAbsorption < shieldHealth) {
-        logger.fine(
-            "Compensating for removal of absorption "
-                + event.getEffect().getAmplifier()
-                + " effect, which will reduce absorption hearts to "
-                + newAbsorption
-                + ", which is below shield health of "
-                + shieldHealth);
+        logger.fine("Compensating for removal of absorption "
+            + event.getEffect().getAmplifier()
+            + " effect, which will reduce absorption hearts to "
+            + newAbsorption
+            + ", which is below shield health of "
+            + shieldHealth);
         addAbsorption(shieldHealth - newAbsorption);
       }
     }

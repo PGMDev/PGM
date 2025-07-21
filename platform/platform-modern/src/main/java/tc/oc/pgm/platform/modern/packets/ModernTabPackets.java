@@ -40,7 +40,7 @@ import tc.oc.pgm.util.nms.packets.TabPackets;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.4")
 public class ModernTabPackets implements TabPackets {
 
   @Override
@@ -99,12 +99,14 @@ public class ModernTabPackets implements TabPackets {
             yield ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(
                 team, operation == TeamPacketOperation.CREATE);
           }
-          case REMOVE -> ClientboundSetPlayerTeamPacket.createRemovePacket(
-              new PlayerTeam(null, name));
-          case JOIN -> ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
-              new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.ADD);
-          case LEAVE -> ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
-              new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.REMOVE);
+          case REMOVE ->
+            ClientboundSetPlayerTeamPacket.createRemovePacket(new PlayerTeam(null, name));
+          case JOIN ->
+            ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
+                new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.ADD);
+          case LEAVE ->
+            ClientboundSetPlayerTeamPacket.createMultiplePlayerPacket(
+                new PlayerTeam(null, name), players, ClientboundSetPlayerTeamPacket.Action.REMOVE);
         });
   }
 
@@ -167,7 +169,8 @@ public class ModernTabPackets implements TabPackets {
 
       packet
           .entries()
-          .add(new Entry(uuid, profile, true, ping, GameType.SURVIVAL, nmsComponent, null));
+          .add(new Entry(
+              uuid, profile, true, ping, GameType.SURVIVAL, nmsComponent, true, -1, null));
     }
 
     @Override

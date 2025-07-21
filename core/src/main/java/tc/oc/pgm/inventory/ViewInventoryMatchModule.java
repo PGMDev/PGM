@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -54,6 +53,7 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.kits.WalkSpeedKit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.util.StringUtils;
+import tc.oc.pgm.util.attribute.Attributes;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.inventory.InventoryUtils;
@@ -340,7 +340,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       }
 
       AttributeInstance knockbackAttribute =
-          matchHolder.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
+          matchHolder.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
       if (knockbackAttribute != null) {
         double knockbackResistance = knockbackAttribute.getValue();
         if (knockbackResistance > 0) {

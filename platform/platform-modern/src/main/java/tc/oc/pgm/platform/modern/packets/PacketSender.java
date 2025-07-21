@@ -13,7 +13,7 @@ public interface PacketSender {
   default void send(Packet<?> packet, Player viewer) {
     if (viewer.isOnline()) {
       var nmsPlayer = ((CraftPlayer) viewer).getHandle();
-      nmsPlayer.connection.sendPacket(packet);
+      nmsPlayer.connection.send(packet);
     }
   }
 

@@ -4,7 +4,6 @@ import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
-import static tc.oc.pgm.util.bukkit.InventoryViewUtil.INVENTORY_VIEW;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -490,7 +489,7 @@ public class PickerMatchModule implements MatchModule, Listener {
    */
   private @Nullable Inventory getOpenWindow(MatchPlayer player) {
     if (picking.contains(player)) {
-      return INVENTORY_VIEW.getTopInventory(player.getBukkit().getOpenInventory());
+      return player.getBukkit().getOpenInventory().getTopInventory();
     }
     return null;
   }
@@ -714,7 +713,7 @@ public class PickerMatchModule implements MatchModule, Listener {
 
     match.getExecutor(MatchScope.LOADED).execute(() -> {
       if (bukkit.isOnline()) {
-        INVENTORY_VIEW.getTopInventory(bukkit.getOpenInventory()).clear();
+        bukkit.getOpenInventory().getTopInventory().clear();
         bukkit.closeInventory();
       }
     });

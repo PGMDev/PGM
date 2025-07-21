@@ -23,17 +23,19 @@ repositories {
 
 dependencies {
     api("org.jdom:jdom2:2.0.6.1")
-    api("net.kyori:adventure-api:4.18.0")
-    api("net.kyori:adventure-text-serializer-plain:4.18.0")
-    api("net.kyori:adventure-platform-bukkit:4.3.4")
+    api("net.kyori:adventure-api:4.23.0")
+    api("net.kyori:adventure-text-serializer-plain:4.23.0")
+    // Use jitpack for specific snapshot for Paper 1.21.6+ support
+    // api("net.kyori:adventure-platform-bukkit:4.4.0")
+    api("com.github.KyoriPowered:adventure-platform:5867a1939a")
     api("org.incendo:cloud-core:2.0.0")
     api("org.incendo:cloud-annotations:2.0.0")
-    api("org.incendo:cloud-paper:2.0.0-beta.10")
-    api("org.incendo:cloud-minecraft-extras:2.0.0-beta.10")
+    api("org.incendo:cloud-paper:2.0.0-beta.11")
+    api("org.incendo:cloud-minecraft-extras:2.0.0-beta.11")
     api("me.lucko:commodore:2.2")
-    api("fr.mrmicky:fastboard:2.1.3")
+    api("fr.mrmicky:fastboard:2.1.5")
     api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
-    api("org.eclipse.jgit:org.eclipse.jgit:6.7.0.202309050840-r") { exclude("*") }
+    api("org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r") { exclude("*") }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
@@ -68,7 +70,7 @@ spotless {
     ratchetFrom = "origin/dev"
     java {
         removeUnusedImports()
-        palantirJavaFormat("2.47.0").style("GOOGLE").formatJavadoc(true)
+        palantirJavaFormat("2.72.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 

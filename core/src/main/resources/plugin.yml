@@ -1,5 +1,4 @@
 name: PGM
-api-version: 1.20.6
 softdepend: [ViaVersion, ProtocolLib]
 description: ${description}
 main: ${mainClass}

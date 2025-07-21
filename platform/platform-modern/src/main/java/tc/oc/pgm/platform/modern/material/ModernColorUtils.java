@@ -23,7 +23,7 @@ import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = PAPER, minVersion = "1.20.6")
-@SuppressWarnings("deprecation")
+@SuppressWarnings("removal")
 public class ModernColorUtils implements ColorUtils {
 
   private static final Map<Material, Map<DyeColor, Material>> COLORABLE_MATERIALS = new HashMap<>();

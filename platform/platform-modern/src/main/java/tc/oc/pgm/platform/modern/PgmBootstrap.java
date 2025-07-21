@@ -1,24 +1,33 @@
 package tc.oc.pgm.platform.modern;
 
 import ca.spottedleaf.dataconverter.converters.DataConverter;
-import ca.spottedleaf.dataconverter.minecraft.MCVersions;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import ca.spottedleaf.dataconverter.types.MapType;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
-import io.papermc.paper.registry.TypedKey;
-import java.util.OptionalLong;
-import net.kyori.adventure.key.Key;
+import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
+import io.papermc.paper.plugin.entrypoint.classloader.PaperPluginClassLoader;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import io.papermc.paper.plugin.manager.PaperPluginManagerImpl;
+import io.papermc.paper.plugin.provider.classloader.PaperClassLoaderStorage;
+import io.papermc.paper.plugin.provider.configuration.PaperPluginMeta;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.jar.JarFile;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.util.valueproviders.UniformInt;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.bukkit.plugin.InvalidPluginException;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.java.PluginClassLoader;
 import org.jetbrains.annotations.NotNull;
-import tc.oc.pgm.platform.modern.registry.PgmRegistryEvents;
-import tc.oc.pgm.platform.modern.registry.PgmRegistryKey;
+import tc.oc.pgm.util.DataVersions;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PgmBootstrap implements PluginBootstrap {
@@ -31,38 +40,26 @@ public class PgmBootstrap implements PluginBootstrap {
 
   @Override
   public void bootstrap(@NotNull BootstrapContext context) {
-    // Registering is required here, as the server will sync the registries with the client
-    context
-        .getLifecycleManager()
-        .registerEventHandler(PgmRegistryEvents.DIMENSION_TYPE.freeze().newHandler(e -> e.registry()
-            .register(
-                TypedKey.create(PgmRegistryKey.DIMENSION_TYPE, Key.key(NAMESPACE, PATH)),
-                b -> b.setDimension(new DimensionType(
-                    OptionalLong.empty(),
-                    true,
-                    false,
-                    false,
-                    true,
-                    1.0,
-                    true,
-                    false,
-                    0, // Min height = 0
-                    256,
-                    256,
-                    BlockTags.INFINIBURN_OVERWORLD,
-                    BuiltinDimensionTypes.OVERWORLD_EFFECTS,
-                    0.0f,
-                    new DimensionType.MonsterSettings(false, true, UniformInt.of(0, 7), 0))))));
+    // Register the compatibility datapack
+    context.getLifecycleManager().registerEventHandler(LifecycleEvents.DATAPACK_DISCOVERY, e -> {
+      var registrar = e.registrar();
+      try {
+        final var uri = Objects.requireNonNull(
+                PgmBootstrap.class.getResource("/pgm_compat_datapack"))
+            .toURI();
+        registrar.discoverPack(uri, "pgmCompat");
+      } catch (URISyntaxException | IOException ex) {
+        throw new RuntimeException(ex);
+      }
+    });
 
-    // 1.17 worlds get pgm:legacy_overworld dimension, which limits world height 0 to 255
-    int VERSION = MCVersions.V1_17_1 + 95;
-    MCTypeRegistry.CHUNK.addStructureConverter(new DataConverter<>(VERSION) {
+    // Set legacy maps to the datapack-provided legacy overworld dimension
+    MCTypeRegistry.CHUNK.addStructureConverter(new DataConverter<>(DataVersions.V1_18_EXP_1) {
       @Override
-      public MapType<String> convert(
-          final MapType<String> data, final long sourceVersion, final long toVersion) {
-        final MapType<String> level = data.getMap("Level");
+      public MapType convert(MapType data, final long sourceVersion, final long toVersion) {
+        final MapType level = data.getMap("Level");
         if (level == null) return data;
-        final MapType<String> context = data.getMap("__context"); // Passed through by ChunkStorage
+        final MapType context = data.getMap("__context"); // Passed through by ChunkStorage
         if (context == null) return data;
         if ("minecraft:overworld".equals(context.getString("dimension", ""))) {
           context.setString("dimension", "pgm:legacy_overworld");
@@ -70,5 +67,54 @@ public class PgmBootstrap implements PluginBootstrap {
         return data;
       }
     });
+  }
+
+  @Override
+  public JavaPlugin createPlugin(PluginProviderContext context) {
+    var ourClassLoader = (PaperPluginClassLoader) getClass().getClassLoader();
+    var pluginMeta = (PaperPluginMeta) ourClassLoader.getConfiguration();
+    var descriptor = new PluginDescriptionFile(
+        pluginMeta.getName(),
+        pluginMeta.getName(),
+        pluginMeta.getProvidedPlugins(),
+        pluginMeta.getMainClass(),
+        null,
+        pluginMeta.getPluginDependencies(),
+        pluginMeta.getPluginSoftDependencies(),
+        pluginMeta.getLoadBeforePlugins(),
+        pluginMeta.getVersion(),
+        Map.of(),
+        pluginMeta.getDescription(),
+        pluginMeta.getAuthors(),
+        pluginMeta.getContributors(),
+        pluginMeta.getWebsite(),
+        pluginMeta.getLoggerPrefix(),
+        pluginMeta.getLoadOrder(),
+        pluginMeta.getPermissions(),
+        pluginMeta.getPermissionDefault(),
+        Set.of(),
+        pluginMeta.getAPIVersion(),
+        List.of());
+
+    try {
+      // Unregister the bootstrap classloader to make sure the PluginClassLoader below:
+      // - doesn't loop into itself, causing a stack overflow
+      // - is used by 3rd-party integration plugins to load PGM classes
+      PaperClassLoaderStorage.instance().unregisterClassloader(ourClassLoader);
+
+      var jar = new JarFile(context.getPluginSource().toFile());
+      var classLoader = new PluginClassLoader(
+          ourClassLoader.getParent(),
+          descriptor,
+          context.getDataDirectory().toFile(),
+          context.getPluginSource().toFile(),
+          ourClassLoader,
+          jar,
+          PaperPluginManagerImpl.getInstance());
+
+      return Objects.requireNonNull(classLoader.getPlugin());
+    } catch (IOException | InvalidPluginException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

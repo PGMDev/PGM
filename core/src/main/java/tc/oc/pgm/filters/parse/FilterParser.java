@@ -296,7 +296,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("entity")
   public EntityTypeFilter parseEntity(Element el) throws InvalidXMLException {
-    var type = EntityTypes.getByName(el.getTextNormalize());
+    var type = EntityTypes.getClassByName(el.getTextNormalize());
     if (type == null)
       throw new InvalidXMLException("Could not find entity type: " + el.getTextNormalize(), el);
 

@@ -3,6 +3,9 @@ package tc.oc.pgm.util.bukkit;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.entity.Player;
+import tc.oc.pgm.util.Audience;
+import tc.oc.pgm.util.platform.Platform;
 
 public interface Sounds {
   Sound ADMIN_CHAT = sound("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP", 1f, 0.7f);
@@ -19,6 +22,7 @@ public interface Sounds {
       sound("IRONGOLEM_HIT", "ENTITY_IRON_GOLEM_HURT", 1f, 4f / 3f); // Enemy death is higher pitch
   Sound DEFUSE = sound("FIZZ", "ENTITY_GENERIC_EXTINGUISH_FIRE");
   Sound DIRECT_MESSAGE = sound("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP", 1f, 1.2f);
+  Sound DOUBLE_JUMP = sound("ZOMBIE_INFECT", "ENTITY_ZOMBIE_INFECT", 0.5f, 1.8f);
   Sound FALLBACK = sound("NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING");
   Sound FLAG_DROP = sound("FIREWORK_TWINKLE2", "ENTITY_FIREWORK_ROCKET_TWINKLE_FAR");
   Sound FLAG_DROP_OWN = sound("WITHER_HURT", "ENTITY_WITHER_HURT", 0.7f, 1f);
@@ -27,6 +31,7 @@ public interface Sounds {
   Sound FLAG_RETURN = FLAG_DROP;
   Sound FLAG_RETURN_OWN = sound("ZOMBIE_INFECT", "ENTITY_ZOMBIE_INFECT", 1.1f, 1.2f);
   Sound INVENTORY_CLICK = sound("CLICK", "BLOCK_DISPENSER_DISPENSE", 1f, 2f);
+  Sound ITEM_PICKUP = sound("ITEM_PICKUP", "ENTITY_ITEM_PICKUP");
   Sound MATCH_COUNTDOWN = sound("NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING", 1f, 1.19f);
   Sound MATCH_START = sound("NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING", 1f, 1.59f);
   Sound MATCH_WIN = sound("WITHER_DEATH", "ENTITY_WITHER_DEATH");
@@ -44,10 +49,12 @@ public interface Sounds {
   Sound PROXIMITY_ALARM = sound("FIREWORK_BLAST2", "ENTITY_FIREWORK_ROCKET_BLAST_FAR", 1f, 0.7f);
   Sound RAINDROPS = sound("LEVEL_UP", "ENTITY_PLAYER_LEVELUP", 1f, 1.5f);
   Sound SCORE = sound("LEVEL_UP", "ENTITY_PLAYER_LEVELUP");
+  Sound SHIELD_RECHARGE = sound("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP", 1f, 2f);
   Sound SHOP_PURCHASE = sound("FIRE_IGNITE", "ITEM_FLINTANDSTEEL_USE", 1f, 1.4f);
   Sound TIMELIMIT_COUNTDOWN = sound("CLICK", "BLOCK_DISPENSER_DISPENSE", 0.25f, 2f);
   Sound TIMELIMIT_CRESCENDO = sound("PORTAL_TRIGGER", "BLOCK_PORTAL_TRIGGER", 1f, 0.78f);
   Sound TIP = sound("ENDERMAN_IDLE", "ENTITY_ENDERMAN_AMBIENT", 1f, 1.2f);
+  Sound TNT_FUSE = sound("FUSE", "ENTITY_TNT_PRIMED");
   Sound WARNING = sound("NOTE_BASS", "BLOCK_NOTE_BLOCK_BASS", 1f, 0.75f);
 
   static Sound sound(String legacyConstant, String modernConstant) {
@@ -57,10 +64,13 @@ public interface Sounds {
   static Sound sound(String legacyConstant, String modernConstant, float volume, float pitch) {
     // Sound.sound due to a compiler bug
     return Sound.sound(
-        MISC_UTILS.getSound(
-            BukkitUtils.parse(org.bukkit.Sound::valueOf, legacyConstant, modernConstant)),
+        MISC_UTILS.getSoundKey(Platform.isModern() ? modernConstant : legacyConstant),
         Sound.Source.MASTER,
         volume,
         pitch);
+  }
+
+  static void play(Player player, Sound sound) {
+    Audience.get(player).playSound(sound);
   }
 }

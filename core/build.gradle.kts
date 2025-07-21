@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.1-SNAPSHOT")
+    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.8-SNAPSHOT")
 
     implementation(project(":util"))
     runtimeOnly(project(":platform-sportpaper")) { exclude("*") }
@@ -22,6 +22,7 @@ tasks.named<ShadowJar>("shadowJar") {
     archiveFileName = "PGM.jar"
     archiveClassifier.set("")
     destinationDirectory = rootProject.projectDir.resolve("build/libs")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     minimize {
         // Exclude from minimization as they're required at runtime
@@ -48,6 +49,7 @@ tasks.named<ShadowJar>("shadowJar") {
     pgmRelocate("org.slf4j")
 
     exclude("META-INF/**")
+    exclude("OSGI-INF/")
     exclude("**/*.html")
     exclude("javax/**") // Unsure why this is even added
 
@@ -77,16 +79,20 @@ publishing {
     }
 }
 
+val pluginProperties = mapOf(
+    "name" to project.name,
+    "description" to project.description,
+    "apiVersion" to "1.21.8",
+    "mainClass" to "tc.oc.pgm.PGMPlugin",
+    "version" to project.version,
+    "commitHash" to project.latestCommitHash(),
+    "url" to "https://pgm.dev/"
+)
+
 tasks {
     processResources {
         filesMatching(listOf("plugin.yml", "paper-plugin.yml")) {
-            expand(
-                "name" to project.name,
-                "description" to project.description,
-                "mainClass" to "tc.oc.pgm.PGMPlugin",
-                "version" to project.version,
-                "commitHash" to project.latestCommitHash(),
-                "url" to "https://pgm.dev/")
+            expand(pluginProperties)
         }
     }
 

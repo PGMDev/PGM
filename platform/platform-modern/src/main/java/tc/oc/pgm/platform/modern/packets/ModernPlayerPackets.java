@@ -30,7 +30,7 @@ import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.nms.packets.PlayerPackets;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.21.7")
 public class ModernPlayerPackets implements PlayerPackets, PacketSender {
 
   private static final int POSE_FIELD = 6;
@@ -87,6 +87,6 @@ public class ModernPlayerPackets implements PlayerPackets, PacketSender {
   public void updateVelocity(Player player) {
     var handle = ((CraftPlayer) player).getHandle();
     handle.hurtMarked = false;
-    handle.connection.sendPacket(new ClientboundSetEntityMotionPacket(handle));
+    handle.connection.send(new ClientboundSetEntityMotionPacket(handle));
   }
 }
