@@ -68,6 +68,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.platform.modern.PgmBootstrap;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
+import tc.oc.pgm.platform.modern.util.PGMServerLevel;
 import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
@@ -314,7 +315,7 @@ public class ModernNMSHacks implements NMSHacks {
 
     primaryLevelData.getGameRules().getRule(GameRules.RULE_SPAWN_CHUNK_RADIUS).set(0, null);
 
-    ServerLevel serverLevel = new ServerLevel(
+    ServerLevel serverLevel = new PGMServerLevel(
         console,
         console.executor,
         levelStorageAccess,
