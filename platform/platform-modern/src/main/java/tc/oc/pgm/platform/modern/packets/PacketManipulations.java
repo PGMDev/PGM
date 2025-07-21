@@ -1,13 +1,22 @@
 package tc.oc.pgm.platform.modern.packets;
 
 import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.injector.netty.WirePacket;
+import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
+import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
@@ -16,6 +25,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
 import tc.oc.pgm.platform.modern.util.Packets;
+import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
@@ -45,7 +55,8 @@ public class PacketManipulations implements PacketSender {
         Map.of(
             PacketType.Play.Server.ENTITY_STATUS, this::handleEntityStatus,
             PacketType.Play.Server.PLAYER_COMBAT_KILL, this::handleCombatKill,
-            PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata));
+            PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata,
+            PacketType.Status.Server.SERVER_INFO, this::handleServerPing));
   }
 
   private void handleEntityStatus(PacketEvent event) {
@@ -125,6 +136,39 @@ public class PacketManipulations implements PacketSender {
       }
 
       if (!checkHealth && !hideParticles) return;
+    }
+  }
+
+  private void handleServerPing(PacketEvent event) {
+    JsonObject pingExtra = new JsonObject();
+    new ExtraPingDataRequestEvent() {
+      @Override
+      public JsonObject getServerListExtra(Plugin plugin) {
+        return (JsonObject)
+            pingExtra.asMap().computeIfAbsent(plugin.namespace(), k -> new JsonObject());
+      }
+    }.callEvent();
+
+    if (!pingExtra.isEmpty()) {
+      // Encode the response manually, otherwise the extra data will get lost
+      var serverPing = (ServerStatus) event.getPacket().getServerPings().read(0).getHandle();
+      var jsonData = ServerStatus.CODEC
+          .encodeStart(JsonOps.INSTANCE, serverPing)
+          .getOrThrow()
+          .getAsJsonObject();
+
+      jsonData.add("bukkit_extra", pingExtra);
+
+      var byteBuf = new FriendlyByteBuf(Unpooled.buffer());
+      byteBuf.writeJsonWithCodec(Codec.PASSTHROUGH, new Dynamic<>(JsonOps.INSTANCE, jsonData));
+
+      ProtocolLibrary.getProtocolManager()
+          .sendWirePacket(
+              event.getPlayer(),
+              new WirePacket(PacketType.Status.Server.SERVER_INFO, byteBuf.array()));
+
+      byteBuf.release();
+      event.setCancelled(true);
     }
   }
 }

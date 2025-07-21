@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.bukkit;
 
-import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
@@ -20,9 +19,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
@@ -32,10 +29,6 @@ public interface MiscUtils {
 
   default boolean yield(Event event) {
     return false;
-  }
-
-  default JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
-    return new JsonObject();
   }
 
   default EventException createEventException(Throwable cause, Event event) {

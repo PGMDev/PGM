@@ -2,7 +2,6 @@ package tc.oc.pgm.platform.modern.impl;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
-import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
@@ -35,9 +34,7 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.util.DataVersions;
@@ -47,12 +44,6 @@ import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = PAPER, minVersion = "1.21.5")
 public class ModernMiscUtil implements MiscUtils {
-  @Override
-  public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
-    // TODO: PLATFORM 1.20 no support for extra fields in server ping
-    return new JsonObject();
-  }
-
   @Override
   public EventException createEventException(Throwable cause, Event event) {
     return new EventException(cause);

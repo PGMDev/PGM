@@ -1,7 +1,6 @@
 package tc.oc.pgm.listeners;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -30,6 +29,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
 
 public class ServerPingDataListener implements Listener {
 
@@ -66,7 +66,7 @@ public class ServerPingDataListener implements Listener {
 
   @EventHandler
   public void onServerListPing(ServerListPingEvent event) {
-    if (!ready.get() || legacySportPaper.get()) return;
+    if (!ready.get()) return;
 
     // Remove vanished players from player sample/ping count
     Iterator<Player> playerSample = event.iterator();
@@ -76,9 +76,14 @@ public class ServerPingDataListener implements Listener {
         playerSample.remove();
       }
     }
+  }
+
+  @EventHandler
+  public void onExtraDataRequest(ExtraPingDataRequestEvent event) {
+    if (legacySportPaper.get()) return;
 
     try {
-      JsonObject root = MISC_UTILS.getServerListExtra(event, PGM.get());
+      JsonObject root = event.getServerListExtra(PGM.get());
       this.matchManager.getMatches().forEachRemaining(match -> {
         String matchId = match.getId();
         try {

@@ -4,7 +4,6 @@ import static net.kyori.adventure.key.Key.key;
 import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
-import com.google.gson.JsonObject;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -31,9 +30,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
 import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
@@ -48,11 +45,6 @@ public class SpMiscUtil implements MiscUtils {
   public boolean yield(Event event) {
     event.yield();
     return true;
-  }
-
-  @Override
-  public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
-    return event.getOrCreateExtra(plugin);
   }
 
   @Override
