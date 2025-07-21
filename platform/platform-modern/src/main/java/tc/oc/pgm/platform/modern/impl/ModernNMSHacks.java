@@ -7,7 +7,6 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
-import io.papermc.paper.FeatureHooks;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -342,7 +341,6 @@ public class ModernNMSHacks implements NMSHacks {
         serverLevel, primaryLevelData, primaryLevelData, primaryLevelData.worldGenOptions());
     serverLevel.setSpawnSettings(true);
     console.prepareLevels(serverLevel.getChunkSource().chunkMap.progressListener, serverLevel);
-    FeatureHooks.tickEntityManager(serverLevel);
     server.getPluginManager().callEvent(new WorldLoadEvent(serverLevel.getWorld()));
     return serverLevel.getWorld();
   }
