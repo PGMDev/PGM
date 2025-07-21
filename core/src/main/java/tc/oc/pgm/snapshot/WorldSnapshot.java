@@ -2,6 +2,7 @@ package tc.oc.pgm.snapshot;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -14,10 +15,12 @@ import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.nms.NMSHacks;
 
 public class WorldSnapshot {
   private final World world;
   private final Map<ChunkVector, ChunkSnapshot> chunkSnapshots = new HashMap<>();
+  private final Map<BlockVector, Object> savedNBT = new HashMap<>();
   private final BudgetWorldEdit worldEdit;
 
   public WorldSnapshot(World world) {
@@ -80,11 +83,36 @@ public class WorldSnapshot {
   }
 
   public void saveRegion(Region region) {
-    region.getChunkPositions().forEach(cv -> this.saveSnapshot(cv, null));
+    Region.Static staticRegion = region.getStatic(world);
+    staticRegion.getChunkPositions().forEach(cv -> this.saveSnapshot(cv, null));
+    staticRegion.getBlockVectors().forEach(pos -> {
+      Block block = world.getBlockAt(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ());
+      try {
+        Object tag = NMSHacks.NMS_HACKS.getBlockNBT(block);
+        if (tag != null) savedNBT.put(pos, tag);
+      } catch (Throwable t) {
+        Bukkit.getLogger().info("Failed to save NBT for block at " + pos + ": " + t.getMessage());
+      }
+    });
   }
 
   public void placeBlocks(Region region, BlockVector offset, boolean update) {
-    worldEdit.placeBlocks(region, offset, update);
+    Region.Static staticRegion = region.getStatic(world);
+    worldEdit.placeBlocks(staticRegion, offset, update);
+    staticRegion.getBlockVectors().forEach(pos -> {
+      Block block = world.getBlockAt(
+          pos.getBlockX() + offset.getBlockX(),
+          pos.getBlockY() + offset.getBlockY(),
+          pos.getBlockZ() + offset.getBlockZ());
+      Object tag = savedNBT.get(pos);
+      if (tag != null) {
+        try {
+          NMSHacks.NMS_HACKS.setBlockNBT(block, tag);
+        } catch (Throwable t) {
+          Bukkit.getLogger().info("Failed to restore NBT at " + pos + ": " + t.getMessage());
+        }
+      }
+    });
   }
 
   public void removeBlocks(Region region, BlockVector offset, boolean update) {
