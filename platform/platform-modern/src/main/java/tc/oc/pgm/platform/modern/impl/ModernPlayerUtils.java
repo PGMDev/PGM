@@ -171,7 +171,7 @@ public class ModernPlayerUtils implements PlayerUtils {
   }
 
   private boolean updateMetadata(Player player, boolean set, String key) {
-    if (player.hasMetadata(key)) return false;
+    if (player.hasMetadata(key) == set) return false;
 
     if (set) player.setMetadata(key, TRUE);
     else player.removeMetadata(key, BukkitUtils.getPlugin());
