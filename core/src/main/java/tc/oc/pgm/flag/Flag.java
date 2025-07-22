@@ -355,6 +355,14 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     }
   }
 
+  public boolean pickupFlag(MatchPlayer carrier, Location location) {
+    return this.state.pickupFlag(carrier, location);
+  }
+
+  public void dropFlag() {
+    this.state.dropFlag();
+  }
+
   public boolean canPickup(Query query, Post post) {
     return getDefinition().getPickupFilter().query(query).isAllowed()
         && post.getPickupFilter().query(query).isAllowed();

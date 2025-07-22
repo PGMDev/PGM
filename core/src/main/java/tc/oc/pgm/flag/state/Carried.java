@@ -215,12 +215,12 @@ public class Carried extends Spawned implements Missing {
 
   @Override
   public boolean isCarrying(MatchPlayer player) {
-    return this.carrier == player;
+    return carrier() == player;
   }
 
   @Override
   public boolean isCarrying(Party party) {
-    return this.carrier.getParty() == party;
+    return carrier().getParty() == party;
   }
 
   @Override
@@ -228,7 +228,8 @@ public class Carried extends Spawned implements Missing {
     return player != this.carrier.getBukkit();
   }
 
-  protected void dropFlag() {
+  @Override
+  public void dropFlag() {
     for (Location dropLocation : this.dropLocations) {
       if (this.flag.canDrop(new PlayerQuery(null, carrier, dropLocation))) {
         this.flag.transition(new Dropped(this.flag, this.post, dropLocation, this.carrier));
@@ -281,6 +282,10 @@ public class Carried extends Spawned implements Missing {
 
     FlagCaptureEvent event = new FlagCaptureEvent(this.flag, this.carrier, net);
     this.flag.getMatch().callEvent(event);
+  }
+
+  private MatchPlayer carrier() {
+    return pickingUp != null ? this.pickingUp : carrier;
   }
 
   public MatchPlayer getCarrier() {

@@ -13,16 +13,12 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
-import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
-import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
-import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.hologram.Hologram;
 import tc.oc.pgm.hologram.HologramMatchModule;
 import tc.oc.pgm.util.block.BlockStates;
-import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.material.Materials;
 
 /** Base class for flag states in which the banner is placed on the ground somewhere as a block */
@@ -32,7 +28,6 @@ public abstract class Uncarried extends Spawned {
   protected final BlockState oldBlock;
   protected final BlockState oldBase;
   protected final Hologram hologram;
-  private @Nullable MatchPlayer pickingUp;
 
   public Uncarried(Flag flag, Post post, @Nullable Location location) {
     super(flag, post);
@@ -95,36 +90,6 @@ public abstract class Uncarried extends Spawned {
     super.leaveState();
   }
 
-  @Override
-  public boolean isCarrying(MatchPlayer player) {
-    // This allows CarryingFlagFilter to match and cancel the pickup before it actually happens
-    return player == this.pickingUp || super.isCarrying(player);
-  }
-
-  @Override
-  public boolean isCarrying(Party party) {
-    return (this.pickingUp != null && party == this.pickingUp.getParty())
-        || super.isCarrying(party);
-  }
-
-  protected boolean pickupFlag(MatchPlayer carrier) {
-    try {
-      this.pickingUp = carrier;
-      FlagPickupEvent event = new FlagPickupEvent(this.flag, carrier, this.location);
-      this.flag.getMatch().callEvent(event);
-      if (event.isCancelled()) return false;
-    } finally {
-      this.pickingUp = null;
-    }
-
-    this.flag.playStatusSound(Sounds.FLAG_PICKUP_OWN, Sounds.FLAG_PICKUP);
-    this.flag.touch(carrier.getParticipantState());
-
-    this.flag.transition(new Carried(this.flag, this.post, carrier, this.location));
-
-    return true;
-  }
-
   protected boolean inPickupRange(Player player) {
     Location playerLoc = player.getLocation();
     Location flagLoc = this.getLocation();
@@ -142,16 +107,6 @@ public abstract class Uncarried extends Spawned {
     return false;
   }
 
-  protected boolean canPickup(MatchPlayer player) {
-    if (this.pickingUp != null) return false; // Prevent infinite recursion
-
-    for (Flag flag : this.flag.getMatch().getModule(FlagMatchModule.class).getFlags()) {
-      if (flag.isCarrying(player)) return false;
-    }
-
-    return this.flag.canPickup(player, this.post);
-  }
-
   @Override
   public void onEvent(PlayerMoveEvent event) {
     super.onEvent(event);
@@ -159,7 +114,7 @@ public abstract class Uncarried extends Spawned {
     if (player == null || !player.canInteract() || player.getBukkit().isDead()) return;
 
     if (this.inPickupRange(player.getBukkit()) && this.canPickup(player)) {
-      this.pickupFlag(player);
+      this.pickupFlag(player, this.location);
     }
   }
 

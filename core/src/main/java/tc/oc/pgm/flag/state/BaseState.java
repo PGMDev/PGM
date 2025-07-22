@@ -21,14 +21,17 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.flag.Flag;
+import tc.oc.pgm.flag.FlagMatchModule;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
+import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.Sounds;
 
 /** Base class for all {@link Flag} states */
 public abstract class BaseState implements Runnable, State {
@@ -37,6 +40,7 @@ public abstract class BaseState implements Runnable, State {
   protected final Post post;
   protected final Instant enterTime;
   protected @Nullable Long remainingTicks;
+  protected @Nullable MatchPlayer pickingUp;
   private Future<?> task;
 
   protected BaseState(Flag flag, Post post) {
@@ -57,16 +61,15 @@ public abstract class BaseState implements Runnable, State {
    * throw an exception. Care must be taken that any events fired cannot cause another transition
    * for this flag. Transitioning other flags is OK.
    *
-   * <p>If this state wants to immediately transition, it should return zero from {@link
-   * #getDuration}, which will cause {@link #finishCountdown} to be called after this method
+   * <p>If this state wants to immediately transition, it should return zero from
+   * {@link #getDuration}, which will cause {@link #finishCountdown} to be called after this method
    * returns.
    */
   public void enterState() {
-    this.task =
-        this.flag
-            .getMatch()
-            .getExecutor(MatchScope.LOADED)
-            .scheduleWithFixedDelay(this, TimeUtils.TICK, TimeUtils.TICK, TimeUnit.MILLISECONDS);
+    this.task = this.flag
+        .getMatch()
+        .getExecutor(MatchScope.LOADED)
+        .scheduleWithFixedDelay(this, TimeUtils.TICK, TimeUtils.TICK, TimeUnit.MILLISECONDS);
   }
 
   public void leaveState() {
@@ -75,6 +78,38 @@ public abstract class BaseState implements Runnable, State {
       this.task = null;
     }
   }
+
+  protected boolean canPickup(MatchPlayer player) {
+    if (this.pickingUp != null) return false; // Prevent infinite recursion
+
+    for (Flag flag : this.flag.getMatch().getModule(FlagMatchModule.class).getFlags()) {
+      if (flag.isCarrying(player)) return false;
+    }
+
+    return this.flag.canPickup(player, this.post);
+  }
+
+  public boolean pickupFlag(MatchPlayer carrier, Location location) {
+    if (!this.canPickup(carrier)) return false;
+
+    try {
+      this.pickingUp = carrier;
+      FlagPickupEvent event = new FlagPickupEvent(this.flag, carrier, location);
+      this.flag.getMatch().callEvent(event);
+      if (event.isCancelled()) return false;
+    } finally {
+      this.pickingUp = null;
+    }
+
+    this.flag.playStatusSound(Sounds.FLAG_PICKUP_OWN, Sounds.FLAG_PICKUP);
+    this.flag.touch(carrier.getParticipantState());
+
+    this.flag.transition(new Carried(this.flag, this.post, carrier, location));
+
+    return true;
+  }
+
+  public void dropFlag() {}
 
   @Override
   public Iterable<Location> getProximityLocations(ParticipantState player) {
@@ -139,7 +174,8 @@ public abstract class BaseState implements Runnable, State {
 
   @Override
   public boolean isCarrying(MatchPlayer player) {
-    return false;
+    // This allows CarryingFlagFilter to match and cancel the pickup before it actually happens
+    return player == this.pickingUp;
   }
 
   @Override
@@ -148,9 +184,8 @@ public abstract class BaseState implements Runnable, State {
     return matchPlayer != null && isCarrying(matchPlayer);
   }
 
-  @Override
   public boolean isCarrying(Party party) {
-    return false;
+    return this.pickingUp != null && party == this.pickingUp.getParty();
   }
 
   @Override
