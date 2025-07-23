@@ -1,5 +1,7 @@
 package tc.oc.pgm.tnt;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+
 import java.util.Random;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -114,13 +116,11 @@ public class TNTMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void dispenserNukes(BlockTransformEvent event) {
     BlockState oldState = event.getOldState();
-    if (oldState instanceof Dispenser
+    if (oldState instanceof Dispenser dispenser
         && this.properties.dispenserNukeLimit > 0
         && this.properties.dispenserNukeMultiplier > 0
-        && event.getCause() instanceof EntityExplodeEvent) {
-
-      EntityExplodeEvent explodeEvent = (EntityExplodeEvent) event.getCause();
-      Dispenser dispenser = (Dispenser) oldState;
+        && event.getCause() instanceof EntityExplodeEvent explodeEvent
+        && MISC_UTILS.isDestructiveExplosion(explodeEvent)) {
       int tntLimit =
           Math.round(this.properties.dispenserNukeLimit / this.properties.dispenserNukeMultiplier);
       int tntCount = 0;

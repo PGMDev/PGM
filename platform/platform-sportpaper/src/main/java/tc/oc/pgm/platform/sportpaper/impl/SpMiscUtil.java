@@ -28,6 +28,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
@@ -118,5 +119,11 @@ public class SpMiscUtil implements MiscUtils {
   public boolean isPowerEnchanted(Projectile proj) {
     // Arrows with damage > 2 are from power bows.
     return proj instanceof Arrow arrow && arrow.spigot().getDamage() > 2.0D;
+  }
+
+  @Override
+  public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
+    // All explosions in 1.8 are destructive
+    return true;
   }
 }

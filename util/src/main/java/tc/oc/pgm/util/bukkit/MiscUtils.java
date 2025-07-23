@@ -17,6 +17,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
@@ -61,4 +62,6 @@ public interface MiscUtils {
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
 
   boolean isPowerEnchanted(Projectile proj);
+
+  boolean isDestructiveExplosion(EntityExplodeEvent ev);
 }

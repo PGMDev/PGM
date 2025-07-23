@@ -383,7 +383,13 @@ public class BlockTransformListener implements Listener {
     for (Block block : event.blockList()) {
       if (block.getType() != Material.TNT) {
         // Don't cancel the explosion when individual blocks are cancelled
-        callEvent(event, block.getState(), BlockStates.toAir(block), playerState)
+        callEvent(
+                event,
+                block.getState(),
+                MISC_UTILS.isDestructiveExplosion(event)
+                    ? BlockStates.toAir(block)
+                    : block.getState(),
+                playerState)
             .setPropagate(false);
       }
     }

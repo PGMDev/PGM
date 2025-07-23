@@ -68,7 +68,9 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   }
 
   public static boolean causesDrops(final Event event) {
-    return event instanceof BlockBreakEvent || event instanceof EntityExplodeEvent;
+    return event instanceof BlockBreakEvent
+        || (event instanceof EntityExplodeEvent explodeEvent
+            && MISC_UTILS.isDestructiveExplosion(explodeEvent));
   }
 
   @EventHandler(priority = EventPriority.LOW)
@@ -169,8 +171,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       boolean explosion = false;
       MatchPlayer player = ParticipantBlockTransformEvent.getParticipant(event);
 
-      if (event.getCause() instanceof EntityExplodeEvent) {
-        EntityExplodeEvent explodeEvent = (EntityExplodeEvent) event.getCause();
+      if (event.getCause() instanceof EntityExplodeEvent explodeEvent) {
         explosion = true;
         yield = explodeEvent.getYield();
 
