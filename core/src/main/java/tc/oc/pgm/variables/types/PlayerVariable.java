@@ -87,7 +87,8 @@ public class PlayerVariable extends AbstractVariable<MatchPlayer> {
     SATURATION(Player::getSaturation, (p, s) -> p.setSaturation((float) s)),
     EXPERIENCE(Player::getTotalExperience, (p, ex) -> p.setTotalExperience((int) ex)),
     EXP_PROGRESS(Player::getExp, (p, ex) -> p.setExp((float) ex)),
-    LEVEL(Player::getLevel, (p, l) -> p.setLevel((int) l));
+    LEVEL(Player::getLevel, (p, l) -> p.setLevel((int) l)),
+    FIRE_TICKS(Player::getFireTicks, (p, fr) -> p.setFireTicks((int) fr));
 
     private final ToDoubleFunction<Player> getter;
     private final ObjDoubleConsumer<Player> setter;
