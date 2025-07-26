@@ -195,5 +195,7 @@ public final class InventoryUtils {
     void setCanPlaceOn(ItemMeta itemMeta, Set<Material> materials);
 
     Set<Material> getCanPlaceOn(ItemMeta itemMeta);
+
+    boolean isViewable(Inventory inventory);
   }
 }

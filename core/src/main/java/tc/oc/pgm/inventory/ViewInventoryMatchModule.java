@@ -435,7 +435,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
     if (realInventory instanceof PlayerInventory) {
       previewPlayerInventory(viewer, (PlayerInventory) realInventory);
-    } else {
+    } else if (INVENTORY_UTILS.isViewable(realInventory)) {
       Inventory fakeInventory;
       fakeInventory = NMS_HACKS.createFakeInventory(viewer, realInventory);
       fakeInventory.setContents(realInventory.getContents());

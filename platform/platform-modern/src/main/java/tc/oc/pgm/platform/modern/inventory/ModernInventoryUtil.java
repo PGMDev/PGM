@@ -14,6 +14,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -86,5 +87,10 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   @SuppressWarnings("removal")
   public Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
     return itemMeta.getCanPlaceOn();
+  }
+
+  @Override
+  public boolean isViewable(Inventory inventory) {
+    return inventory.getType().isCreatable();
   }
 }
