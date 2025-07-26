@@ -20,12 +20,14 @@ import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
+import tc.oc.pgm.action.actions.DropFlagAction;
 import tc.oc.pgm.action.actions.EnchantItemAction;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
 import tc.oc.pgm.action.actions.PasteStructureAction;
+import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
@@ -50,6 +52,7 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
 import tc.oc.pgm.filters.operator.AllFilter;
+import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.shops.ShopModule;
@@ -460,5 +463,16 @@ public class ActionParser {
   public WeatherAction parseWeather(Element el, Class<?> scope) throws InvalidXMLException {
     return WeatherAction.of(
         parser.parseEnum(WeatherMatchModule.WeatherType.class, el, "state").required());
+  }
+
+  @MethodParser("drop-flag")
+  public DropFlagAction parseDropFlag(Element el, Class<?> scope) throws InvalidXMLException {
+    return new DropFlagAction(parser.reference(FlagDefinition.class, el, "flag").required());
+  }
+
+  @MethodParser("pickup-flag")
+  public PickupFlagAction parsePickupFlag(Element el, Class<?> scope) throws InvalidXMLException {
+    return new PickupFlagAction(
+        parser.reference(FlagDefinition.class, el, "flag").required());
   }
 }

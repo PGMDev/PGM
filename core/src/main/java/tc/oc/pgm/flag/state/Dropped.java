@@ -44,6 +44,18 @@ public class Dropped extends Uncarried implements Missing {
   }
 
   @Override
+  protected void placeBanner() {
+    if (Duration.ZERO.equals(this.getDuration())) return;
+    super.placeBanner();
+  }
+
+  @Override
+  protected void breakBanner() {
+    if (Duration.ZERO.equals(this.getDuration())) return;
+    super.breakBanner();
+  }
+
+  @Override
   public void enterState() {
     super.enterState();
 
