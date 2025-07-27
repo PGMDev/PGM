@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.Potion;
@@ -69,5 +70,11 @@ public class SpInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
   @Override
   public Set<Material> getCanPlaceOn(ItemMeta itemMeta) {
     return itemMeta.getCanPlaceOn();
+  }
+
+  @Override
+  public boolean isViewable(Inventory inventory) {
+    // All inventories in 1.8 are viewable
+    return true;
   }
 }
