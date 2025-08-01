@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
+import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
@@ -30,6 +31,7 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
@@ -131,5 +133,11 @@ public class ModernMiscUtil implements MiscUtils {
       return weapon != null && weapon.containsEnchantment(Enchantment.POWER);
     }
     return false;
+  }
+
+  @Override
+  public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
+    return ev.getExplosionResult() == ExplosionResult.DESTROY
+        || ev.getExplosionResult() == ExplosionResult.DESTROY_WITH_DECAY;
   }
 }
