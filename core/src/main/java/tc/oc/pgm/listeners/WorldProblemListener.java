@@ -1,5 +1,6 @@
 package tc.oc.pgm.listeners;
 
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.HashMultimap;
@@ -46,10 +47,9 @@ public class WorldProblemListener implements Listener {
     if (str != null) {
       int value = Integer.parseInt(str);
       if (value > RANDOM_TICK_SPEED_LIMIT) {
-        broadcastDeveloperWarning(
-            "Gamerule 'randomTickSpeed' is set to "
-                + value
-                + " for this world (normal value is 3). This may overload the server.");
+        broadcastDeveloperWarning("Gamerule 'randomTickSpeed' is set to "
+            + value
+            + " for this world (normal value is 3). This may overload the server.");
       }
     }
   }
@@ -60,15 +60,18 @@ public class WorldProblemListener implements Listener {
     block36Locations.remove(event.getWorld());
   }
 
-  @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void repairChunk(ChunkLoadEvent event) {
     if (this.repairedChunks.put(event.getWorld(), event.getChunk())) {
-      // Replace formerly invisible half-iron-door blocks with barriers
-      for (Block ironDoor : NMS_HACKS.getBlocks(event.getChunk(), Materials.IRON_DOOR)) {
-        BlockFace half = (ironDoor.getData() & 8) == 0 ? BlockFace.DOWN : BlockFace.UP;
-        if (ironDoor.getRelative(half.getOppositeFace()).getType() != Materials.IRON_DOOR) {
-          ironDoor.setType(Material.BARRIER, false);
+      // Set by modern platform on 1.13+ worlds - we want to treat only the older worlds
+      if (!event.getWorld().hasMetadata("is-post-flattening")) {
+        // Replace formerly invisible half-iron-door blocks with barriers
+        for (Block ironDoor : NMS_HACKS.getBlocks(event.getChunk(), Materials.IRON_DOOR)) {
+          BlockFace half =
+              MATERIAL_UTILS.isUpperHalfOfDoor(ironDoor) ? BlockFace.UP : BlockFace.DOWN;
+          if (ironDoor.getRelative(half.getOppositeFace()).getType() != Materials.IRON_DOOR) {
+            ironDoor.setType(Material.BARRIER, false);
+          }
         }
       }
 

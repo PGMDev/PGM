@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Hanging;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -57,4 +58,6 @@ public interface MaterialUtils {
   boolean hasBlockStates(Material material);
 
   MaterialMatcher.Builder matcherBuilder();
+
+  boolean isUpperHalfOfDoor(Block block);
 }

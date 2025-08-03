@@ -19,6 +19,7 @@ import org.bukkit.entity.LeashHitch;
 import org.bukkit.entity.Painting;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Door;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.block.BlockData;
@@ -155,6 +156,11 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public MaterialMatcher.Builder matcherBuilder() {
     return new MaterialMatcherBuilderImpl();
+  }
+
+  @Override
+  public boolean isUpperHalfOfDoor(org.bukkit.block.Block block) {
+    return block.getState().getData() instanceof Door door && door.isTopHalf();
   }
 
   private static class MaterialMatcherBuilderImpl extends MaterialMatcher.BuilderImpl

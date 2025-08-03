@@ -9,8 +9,11 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.GlowItemFrame;
 import org.bukkit.entity.Hanging;
@@ -145,6 +148,12 @@ public class ModernMaterialUtils implements MaterialUtils {
   @Override
   public MaterialMatcher.Builder matcherBuilder() {
     return new MaterialMatcherBuilderImpl();
+  }
+
+  @Override
+  public boolean isUpperHalfOfDoor(Block block) {
+    return block.getState().getBlockData() instanceof Door door
+        && door.getHalf() == Bisected.Half.TOP;
   }
 
   private static class MaterialMatcherBuilderImpl extends MaterialMatcher.BuilderImpl
