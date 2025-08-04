@@ -2,11 +2,15 @@ package tc.oc.pgm.filters.matcher.player;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Range;
 import java.util.Collection;
+import org.bukkit.event.Event;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
+import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 
 public class EffectFilter extends ParticipantFilter {
   protected final PotionEffect base;
@@ -18,6 +22,11 @@ public class EffectFilter extends ParticipantFilter {
     this.base = assertNotNull(base);
     this.duration = duration;
     this.amplifier = amplifier;
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents() {
+    return ImmutableList.of(PotionEffectAddEvent.class, PotionEffectRemoveEvent.class);
   }
 
   protected Collection<PotionEffect> getEffects(MatchPlayer player) {
