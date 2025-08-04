@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.util.bukkit.Sounds;
 
@@ -57,6 +58,8 @@ public class Respawning extends Spawned implements Returning {
     // Respawn is delayed
     String postName = this.post.getPostName();
 
+    if (!this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) return;
+
     TranslatableComponent timeComponent = duration(respawnTime, NamedTextColor.AQUA);
     Component message = postName != null
         ? translatable(
@@ -69,8 +72,11 @@ public class Respawning extends Spawned implements Returning {
   }
 
   protected void respawn(@Nullable Component message) {
-    if (message != null) {
+    if (this.flag.hasShowOption(ShowOption.SHOW_EFFECTS)) {
       this.flag.playStatusSound(Sounds.FLAG_RETURN_OWN, Sounds.FLAG_RETURN);
+    }
+
+    if (this.flag.hasShowOption(ShowOption.SHOW_MESSAGES) && message != null) {
       this.flag.getMatch().sendMessage(message);
     }
 

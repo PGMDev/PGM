@@ -121,9 +121,8 @@ public class FlagParser {
     Filter respawnFilter =
         filterParser.parseFilterProperty(el, "respawn-filter", StaticFilter.ALLOW);
 
-    Duration recoverTime =
-        XMLUtils.parseDuration(
-            Node.fromAttr(el, "recover-time", "return-time"), PostDefinition.DEFAULT_RETURN_TIME);
+    Duration recoverTime = XMLUtils.parseDuration(
+        Node.fromAttr(el, "recover-time", "return-time"), PostDefinition.DEFAULT_RETURN_TIME);
     Duration respawnTime = XMLUtils.parseDuration(el.getAttribute("respawn-time"), null);
     Double respawnSpeed =
         XMLUtils.parseNumber(el.getAttribute("respawn-speed"), Double.class, (Double) null);
@@ -169,8 +168,7 @@ public class FlagParser {
     return flags.build();
   }
 
-  public NetDefinition parseNet(Element el, @Nullable FlagDefinition parentFlag)
-      throws InvalidXMLException {
+  public void parseNet(Element el, @Nullable FlagDefinition parentFlag) throws InvalidXMLException {
     checkDeprecatedFilter(el);
 
     String id = el.getAttributeValue("id");
@@ -220,29 +218,26 @@ public class FlagParser {
       returnableFlags = ImmutableSet.of();
     }
 
-    NetDefinition net =
-        new NetDefinition(
-            id,
-            region,
-            captureFilter,
-            respawnFilter,
-            owner,
-            pointsPerCapture,
-            sticky,
-            denyMessage,
-            respawnMessage,
-            returnPost,
-            capturableFlags,
-            returnableFlags,
-            respawnTogether,
-            proximityLocation);
+    NetDefinition net = new NetDefinition(
+        id,
+        region,
+        captureFilter,
+        respawnFilter,
+        owner,
+        pointsPerCapture,
+        sticky,
+        denyMessage,
+        respawnMessage,
+        returnPost,
+        capturableFlags,
+        returnableFlags,
+        respawnTogether,
+        proximityLocation);
     nets.add(net);
     factory.getFeatures().addFeature(el, net);
-
-    return net;
   }
 
-  public FlagDefinition parseFlag(Element el) throws InvalidXMLException {
+  public void parseFlag(Element el) throws InvalidXMLException {
     checkDeprecatedFilter(el);
     checkDeprecatedMultiPost(el);
 
@@ -270,12 +265,10 @@ public class FlagParser {
         XMLUtils.parseBoolean(el.getAttribute("show-respawn-on-pickup"), false);
     boolean dropOnWater = XMLUtils.parseBoolean(el.getAttribute("drop-on-water"), true);
     boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
-    ProximityMetric flagProximityMetric =
-        ProximityMetric.parse(
-            el, "flag", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
-    ProximityMetric netProximityMetric =
-        ProximityMetric.parse(
-            el, "net", new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
+    ProximityMetric flagProximityMetric = ProximityMetric.parse(
+        el, "flag", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
+    ProximityMetric netProximityMetric = ProximityMetric.parse(
+        el, "net", new ProximityMetric(ProximityMetric.Type.CLOSEST_PLAYER, false));
 
     PostDefinition defaultPost;
     Element elPost = XMLUtils.getUniqueChild(el, "post", "posts");
@@ -289,30 +282,29 @@ public class FlagParser {
       }
     }
 
-    FlagDefinition flag =
-        new FlagDefinition(
-            id,
-            name,
-            required,
-            options,
-            color,
-            defaultPost,
-            owner,
-            pointsPerCapture,
-            pointsPerSecond,
-            pickupFilter,
-            captureFilter,
-            dropFilter,
-            pickupKit,
-            dropKit,
-            carryKit,
-            multiCarrier,
-            carryMessage,
-            dropOnWater,
-            showBeam,
-            flagProximityMetric,
-            netProximityMetric,
-            showRespawnOnPickup);
+    FlagDefinition flag = new FlagDefinition(
+        id,
+        name,
+        required,
+        options,
+        color,
+        defaultPost,
+        owner,
+        pointsPerCapture,
+        pointsPerSecond,
+        pickupFilter,
+        captureFilter,
+        dropFilter,
+        pickupKit,
+        dropKit,
+        carryKit,
+        multiCarrier,
+        carryMessage,
+        dropOnWater,
+        showBeam,
+        flagProximityMetric,
+        netProximityMetric,
+        showRespawnOnPickup);
     flags.add(flag);
     factory.getFeatures().addFeature(el, flag);
 
@@ -320,8 +312,6 @@ public class FlagParser {
     for (Element elNet : el.getChildren("net")) {
       this.parseNet(elNet, flag);
     }
-
-    return flag;
   }
 
   public FlagModule parse(Document doc) throws InvalidXMLException {
