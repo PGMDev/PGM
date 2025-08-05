@@ -168,6 +168,9 @@ public class ActionParser {
     Variable<?> var = features.resolve(node, match.group(1), Variable.class);
     Formula<B> formula = Formula.of(match.group(3), context);
 
+    if (var.isReadonly())
+      throw new InvalidXMLException("Variable was readonly when write access is required", node);
+
     if (var.isIndexed() && var instanceof Variable.Indexed<?> varIdx) {
       var idxText = match.group(2);
       if (idxText == null)
