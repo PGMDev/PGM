@@ -64,6 +64,7 @@ import org.bukkit.generator.WorldInfo;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.platform.modern.PgmBootstrap;
@@ -299,7 +300,8 @@ public class ModernNMSHacks implements NMSHacks {
     }
 
     // If the world is < 1.18-exp.1, replace dimension type
-    boolean isOld = summary.levelVersion().minecraftVersion().version() < DataVersions.V1_18_EXP_1;
+    var dataVersion = summary.levelVersion().minecraftVersion().version();
+    boolean isOld = dataVersion < DataVersions.V1_18_EXP_1;
     if (isOld && actualDimension == LevelStem.OVERWORLD) {
       var dimReg = console.registryAccess().lookupOrThrow(Registries.DIMENSION_TYPE);
       var dimHolder = dimReg.getOrThrow(PgmBootstrap.LEGACY_OVERWORLD);
@@ -336,6 +338,11 @@ public class ModernNMSHacks implements NMSHacks {
     if (server.getWorld(name) == null) {
       return null;
     }
+
+    if (dataVersion >= DataVersions.V1_13)
+      serverLevel
+          .getWorld()
+          .setMetadata("is-post-flattening", new FixedMetadataValue(BukkitUtils.getPlugin(), true));
 
     console.addLevel(serverLevel);
     console.initWorld(
