@@ -19,24 +19,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.action.actions.ActionNode;
-import tc.oc.pgm.action.actions.DropFlagAction;
-import tc.oc.pgm.action.actions.EnchantItemAction;
-import tc.oc.pgm.action.actions.ExposedAction;
-import tc.oc.pgm.action.actions.FillAction;
-import tc.oc.pgm.action.actions.KillEntitiesAction;
-import tc.oc.pgm.action.actions.MessageAction;
-import tc.oc.pgm.action.actions.PasteStructureAction;
-import tc.oc.pgm.action.actions.PickupFlagAction;
-import tc.oc.pgm.action.actions.RepeatAction;
-import tc.oc.pgm.action.actions.ReplaceItemAction;
-import tc.oc.pgm.action.actions.ScopeSwitchAction;
-import tc.oc.pgm.action.actions.SetVariableAction;
-import tc.oc.pgm.action.actions.SoundAction;
-import tc.oc.pgm.action.actions.TakePaymentAction;
-import tc.oc.pgm.action.actions.TeleportAction;
-import tc.oc.pgm.action.actions.VelocityAction;
-import tc.oc.pgm.action.actions.WeatherAction;
+import tc.oc.pgm.action.actions.*;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.action.replacements.ReplacementParser;
 import tc.oc.pgm.api.feature.FeatureValidation;
@@ -412,6 +395,15 @@ public class ActionParser {
         parser.filter(el, "filter").orNull(),
         parser.parseBool(el, "update").orTrue(),
         parser.parseBool(el, "events").orFalse());
+  }
+
+  @MethodParser("team-alias")
+  public TeamAliasAction parseTeamAliasAction(Element el, Class<?> scope)
+      throws InvalidXMLException {
+    String teamId = Node.fromRequiredAttr(el, "team-id").getValue();
+    String alias = Node.fromRequiredAttr(el, "alias").getValue();
+
+    return new TeamAliasAction(teamId, alias);
   }
 
   @MethodParser("take-payment")
