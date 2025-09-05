@@ -226,4 +226,8 @@ public final class StringUtils {
     String suffix = lastColors + substring(text, split, split + MAX_SUFFIX - lastColors.length());
     return new String[] {prefix, suffix};
   }
+
+  public static boolean isNullOrEmpty(String str) {
+    return str == null || str.isEmpty();
+  }
 }

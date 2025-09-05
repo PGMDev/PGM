@@ -25,6 +25,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.platform.Platform;
 
 public final class InventoryUtils {
@@ -89,11 +90,10 @@ public final class InventoryUtils {
   }
 
   public static Collection<PotionEffect> getEffects(ItemStack potion) {
-    if (potion.getItemMeta() instanceof PotionMeta) {
-      PotionMeta meta = (PotionMeta) potion.getItemMeta();
+    if (potion.getItemMeta() instanceof PotionMeta meta) {
       if (meta.hasCustomEffects()) {
         return meta.getCustomEffects();
-      } else if (potion.getType() == Material.POTION) { // Sanity check, SpawnablePotionBukkit
+      } else if (Materials.POTIONS.matches(potion)) { // Sanity check, SpawnablePotionBukkit
         return INVENTORY_UTILS.getPotionEffects(potion);
       }
     }

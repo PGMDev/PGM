@@ -33,6 +33,8 @@ import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.platform.Platform;
+import tc.oc.pgm.util.text.MinecraftComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class DeathMessageBuilder {
@@ -209,8 +211,11 @@ public class DeathMessageBuilder {
     return false;
   }
 
-  private static final Set<EntityType> IGNORED_ENTITIES =
-      ImmutableSet.of(EntityTypes.COMPLEX_PART, EntityTypes.ENDER_CRYSTAL, EntityTypes.UNKNOWN);
+  private static final Set<EntityType> IGNORED_ENTITIES = ImmutableSet.of(
+      EntityTypes.COMPLEX_PART,
+      // Modern servers have a translation for the ender crystal
+      Platform.isModern() ? EntityTypes.UNKNOWN : EntityTypes.ENDER_CRYSTAL,
+      EntityTypes.UNKNOWN);
 
   boolean entity(EntityInfo entityInfo) {
     // Skip for entities that are weird and have no translations
@@ -218,28 +223,28 @@ public class DeathMessageBuilder {
 
     if (option("entity")) {
       weapon = entityInfo.getName();
-      option(entityInfo.getIdentifier());
+      option(makeEntityIdentifier(entityInfo));
       return true;
     }
     return false;
   }
 
   boolean insentient(@Nullable PhysicalInfo info) {
-    if (info instanceof PotionInfo) {
-      if (potion((PotionInfo) info)) {
+    if (info instanceof PotionInfo potionInfo) {
+      if (potion(potionInfo)) {
         return true;
       } else if (option("entity")) {
         // PotionInfo.getName returns a potion name,
         // which doesn't work outside a potion death message.
-        weapon = translatable("item.potion.name");
+        weapon = MinecraftComponent.material(Material.POTION);
         return true;
       }
-    } else if (info instanceof EntityInfo) {
-      return !(info instanceof MobInfo) && entity((EntityInfo) info);
-    } else if (info instanceof BlockInfo) {
-      return block((BlockInfo) info);
-    } else if (info instanceof ItemInfo) {
-      return item((ItemInfo) info);
+    } else if (info instanceof EntityInfo entityInfo) {
+      return !(info instanceof MobInfo) && entity(entityInfo);
+    } else if (info instanceof BlockInfo blockInfo) {
+      return block(blockInfo);
+    } else if (info instanceof ItemInfo itemInfo) {
+      return item(itemInfo);
     }
 
     return false;
@@ -248,15 +253,15 @@ public class DeathMessageBuilder {
   boolean mob(MobInfo mobInfo) {
     if (option("mob")) {
       mob = mobInfo.getName();
-      option(mobInfo.getIdentifier());
+      option(makeEntityIdentifier(mobInfo));
       return true;
     }
     return false;
   }
 
   boolean physical(@Nullable PhysicalInfo info) {
-    if (info instanceof MobInfo) {
-      return mob((MobInfo) info);
+    if (info instanceof MobInfo mobInfo) {
+      return mob(mobInfo);
     } else {
       return insentient(info);
     }
@@ -279,36 +284,23 @@ public class DeathMessageBuilder {
 
   void attack(@Nullable PhysicalInfo attacker, @Nullable PhysicalInfo weapon) throws NoMessage {
     player();
-    if (attacker instanceof MobInfo && !mob((MobInfo) attacker)) {
+    if (attacker instanceof MobInfo mobInfo && !mob(mobInfo)) {
       return;
     }
     insentient(weapon);
   }
 
   void generic(GenericDamageInfo info) throws NoMessage {
-    switch (info.getDamageType()) {
-      case CONTACT:
-        require("cactus");
-        break;
-      case DROWNING:
-        require("drown");
-        break;
-      case LIGHTNING:
-        require("lightning");
-        break;
-      case STARVATION:
-        require("starve");
-        break;
-      case SUFFOCATION:
-        require("suffocate");
-        break;
-      case CUSTOM:
-        require("generic");
-        break;
-      default:
-        require("unknown");
-        break;
-    }
+    require(
+        switch (info.getDamageType()) {
+          case CONTACT -> "cactus";
+          case DROWNING -> "drown";
+          case LIGHTNING -> "lightning";
+          case STARVATION -> "starve";
+          case SUFFOCATION -> "suffocate";
+          case CUSTOM -> "generic";
+          default -> "unknown";
+        });
   }
 
   void melee(MeleeInfo melee) throws NoMessage {
@@ -322,9 +314,9 @@ public class DeathMessageBuilder {
   }
 
   void projectile(ProjectileInfo projectile, Location distanceReference) throws NoMessage {
-    if (projectile.getProjectile() instanceof PotionInfo) {
+    if (projectile.getProjectile() instanceof PotionInfo potionInfo) {
       try {
-        magic((PotionInfo) projectile.getProjectile(), projectile.getShooter());
+        magic(potionInfo, projectile.getShooter());
         return;
       } catch (NoMessage ignored) {
         // If we can't generate a magic message (probably because it's part
@@ -335,8 +327,8 @@ public class DeathMessageBuilder {
     require("projectile");
 
     PhysicalInfo info = projectile.getProjectile();
-    if (info instanceof EntityInfo) {
-      switch (((EntityInfo) info).getEntityType()) {
+    if (info instanceof EntityInfo entityInfo) {
+      switch (entityInfo.getEntityType()) {
         case UNKNOWN:
         case ARROW:
         case WITHER_SKULL:
@@ -377,8 +369,8 @@ public class DeathMessageBuilder {
   void fire(FireInfo fire) throws NoMessage {
     require("fire");
     player();
-    if (!(fire.getIgniter() instanceof BlockInfo
-        && ((BlockInfo) fire.getIgniter()).getMaterial().getItemType() == Material.FIRE)) {
+    if (!(fire.getIgniter() instanceof BlockInfo igniter
+        && igniter.getMaterial().getItemType() == Material.FIRE)) {
       // "burned by fire" is redundant
       physical(fire.getIgniter());
     }
@@ -389,16 +381,16 @@ public class DeathMessageBuilder {
     require(fall.getTo().name().toLowerCase());
 
     TrackerInfo cause = fall.getCause();
-    if (cause instanceof SpleefInfo) {
+    if (cause instanceof SpleefInfo spleefInfo) {
       require("spleef");
-      DamageInfo breaker = ((SpleefInfo) cause).getBreaker();
-      if (breaker instanceof ExplosionInfo) {
-        explosion((ExplosionInfo) breaker, fall.getOrigin());
+      DamageInfo breaker = spleefInfo.getBreaker();
+      if (breaker instanceof ExplosionInfo explosionInfo) {
+        explosion(explosionInfo, fall.getOrigin());
       } else {
         player();
       }
-    } else if (cause instanceof DamageInfo) {
-      damage((DamageInfo) cause, fall.getOrigin());
+    } else if (cause instanceof DamageInfo damageInfo) {
+      damage(damageInfo, fall.getOrigin());
     } else if (fall.getTo() == FallInfo.To.GROUND) {
       setDistance(Trackers.distanceFromRanged(fall, victim.getBukkit().getLocation()));
 
@@ -421,34 +413,32 @@ public class DeathMessageBuilder {
   }
 
   void damage(DamageInfo info, Location location) throws NoMessage {
-    if (info instanceof MeleeInfo) {
-      melee((MeleeInfo) info);
-    } else if (info instanceof ProjectileInfo) {
-      projectile((ProjectileInfo) info, location);
-    } else if (info instanceof ExplosionInfo) {
-      explosion((ExplosionInfo) info, location);
-    } else if (info instanceof FireInfo) {
-      fire((FireInfo) info);
-    } else if (info instanceof PotionInfo) {
-      magic((PotionInfo) info, null);
-    } else if (info instanceof FallingBlockInfo) {
-      squash((FallingBlockInfo) info);
-    } else if (info instanceof BlockInfo) {
-      final Material material = ((BlockInfo) info).getMaterial().getItemType();
-      if (material == Material.ANVIL) {
-        squash((BlockInfo) info);
-      } else if (material == Material.CACTUS) {
-        cactus((BlockInfo) info);
-      } else {
-        suffocate((BlockInfo) info);
+    switch (info) {
+      case MeleeInfo meleeInfo -> melee(meleeInfo);
+      case ProjectileInfo projectileInfo -> projectile(projectileInfo, location);
+      case ExplosionInfo explosionInfo -> explosion(explosionInfo, location);
+      case FireInfo fireInfo -> fire(fireInfo);
+      case PotionInfo potionInfo -> magic(potionInfo, null);
+      case FallingBlockInfo fallingBlockInfo -> squash(fallingBlockInfo);
+      case BlockInfo blockInfo -> {
+        switch (blockInfo.getMaterial().getItemType()) {
+          case ANVIL -> squash(blockInfo);
+          case CACTUS -> cactus(blockInfo);
+          default -> suffocate(blockInfo);
+        }
       }
-    } else if (info instanceof FallInfo) {
-      fall((FallInfo) info);
-    } else if (info instanceof GenericDamageInfo) {
-      generic((GenericDamageInfo) info);
-    } else {
-      throw new NoMessage();
+      case FallInfo fallInfo -> fall(fallInfo);
+      case GenericDamageInfo genericDamageInfo -> generic(genericDamageInfo);
+      case null, default -> throw new NoMessage();
     }
+  }
+
+  // Converts an entity type into a legacy entity type name for translation purposes
+  private String makeEntityIdentifier(EntityInfo entityInfo) {
+    var entityType = entityInfo.getEntityType();
+    if (entityType == EntityType.CREEPER) return "Creeper";
+    else if (entityType == EntityTypes.PRIMED_TNT) return "PrimedTnt";
+    return entityInfo.getIdentifier();
   }
 
   void build(DamageInfo damageInfo) {
