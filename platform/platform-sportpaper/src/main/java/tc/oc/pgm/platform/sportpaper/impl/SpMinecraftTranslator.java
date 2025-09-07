@@ -26,9 +26,13 @@ public class SpMinecraftTranslator implements MinecraftComponent.MinecraftTransl
   @Override
   @SuppressWarnings("deprecation")
   public String getTranslationKey(EntityType entityType) {
-    if (entityType == EntityType.MINECART_TNT)
-      return getTranslationKey(Material.EXPLOSIVE_MINECART);
-    return ENTITY_TYPE_FORMAT.formatted(entityType.getName());
+    return switch (entityType) {
+      case MINECART_TNT -> getTranslationKey(Material.EXPLOSIVE_MINECART);
+      case EGG -> getTranslationKey(Material.EGG);
+      // Not fully correct, but whatever
+      case FISHING_HOOK -> getTranslationKey(Material.FISHING_ROD);
+      default -> ENTITY_TYPE_FORMAT.formatted(entityType.getName());
+    };
   }
 
   @Override
