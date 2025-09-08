@@ -7,18 +7,22 @@ import com.destroystokyo.paper.profile.ProfileProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.Lifecycle;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalLong;
 import java.util.UUID;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtException;
 import net.minecraft.nbt.ReportedNbtException;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -29,10 +33,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldDimensions;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -273,8 +281,12 @@ public class ModernNMSHacks implements NMSHacks {
     RegistryAccess.Frozen registryAccess = context.datapackDimensions();
     Registry<LevelStem> contextLevelStemRegistry =
         registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
-    LevelDataAndDimensions levelDataAndDimensions = LevelStorageSource.getLevelDataAndDimensions(
-        dataTag, context.dataConfiguration(), contextLevelStemRegistry, context.datapackWorldgen());
+    LevelDataAndDimensions levelDataAndDimensions = getLevelDataAndDimensions(
+        dataTag,
+        context.dataConfiguration(),
+        contextLevelStemRegistry,
+        context.datapackWorldgen(),
+        creator.seed());
     primaryLevelData = (PrimaryLevelData) levelDataAndDimensions.worldData();
 
     registryAccess = levelDataAndDimensions.dimensions().dimensionsRegistryAccess();
@@ -351,6 +363,33 @@ public class ModernNMSHacks implements NMSHacks {
     console.prepareLevels(serverLevel.getChunkSource().chunkMap.progressListener, serverLevel);
     server.getPluginManager().callEvent(new WorldLoadEvent(serverLevel.getWorld()));
     return serverLevel.getWorld();
+  }
+
+  /**
+   * Modified version of
+   * {@link net.minecraft.world.level.storage.LevelStorageSource#getLevelDataAndDimensions} for
+   * passing a custom or random seed.
+   */
+  private static LevelDataAndDimensions getLevelDataAndDimensions(
+      Dynamic<?> levelData,
+      WorldDataConfiguration dataConfiguration,
+      Registry<LevelStem> levelStemRegistry,
+      HolderLookup.Provider registries,
+      long seed) {
+    Dynamic<?> worldDataTag = RegistryOps.injectRegistryContext(levelData, registries);
+    Dynamic<?> worldGenSettingsTag = worldDataTag.get("WorldGenSettings").orElseEmptyMap();
+    WorldGenSettings worldGenSettings =
+        WorldGenSettings.CODEC.parse(worldGenSettingsTag).getOrThrow();
+    LevelSettings levelSettings = LevelSettings.parse(worldDataTag, dataConfiguration);
+    WorldDimensions.Complete complete = worldGenSettings.dimensions().bake(levelStemRegistry);
+    Lifecycle lifecycle = complete.lifecycle().add(registries.allRegistriesLifecycle());
+    PrimaryLevelData primaryLevelData = PrimaryLevelData.parse(
+        worldDataTag,
+        levelSettings,
+        complete.specialWorldProperty(),
+        worldGenSettings.options().withSeed(OptionalLong.of(seed)),
+        lifecycle);
+    return new LevelDataAndDimensions(primaryLevelData, complete);
   }
 
   @Override
