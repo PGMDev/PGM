@@ -13,6 +13,7 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.Post;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.scoreboard.SidebarMatchModule;
 import tc.oc.pgm.util.TimeUtils;
@@ -60,8 +61,13 @@ public class Dropped extends Uncarried implements Missing {
     super.enterState();
 
     if (!Duration.ZERO.equals(getDuration())) {
-      this.flag.playStatusSound(Sounds.FLAG_DROP_OWN, Sounds.FLAG_DROP);
-      this.flag.getMatch().sendMessage(translatable("flag.drop", this.flag.getComponentName()));
+      if (this.flag.hasShowOption(ShowOption.SHOW_EFFECTS)) {
+        this.flag.playStatusSound(Sounds.FLAG_DROP_OWN, Sounds.FLAG_DROP);
+      }
+
+      if (this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) {
+        this.flag.getMatch().sendMessage(translatable("flag.drop", this.flag.getComponentName()));
+      }
     }
 
     if (TimeUtils.isInfinite(getDuration())) {

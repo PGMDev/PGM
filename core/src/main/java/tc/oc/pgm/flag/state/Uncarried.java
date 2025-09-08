@@ -99,9 +99,7 @@ public abstract class Uncarried extends Spawned {
       double dx = playerLoc.getX() - flagLoc.getX();
       double dz = playerLoc.getZ() - flagLoc.getZ();
 
-      if (dx * dx + dz * dz <= 1) {
-        return true;
-      }
+      return dx * dx + dz * dz <= 1;
     }
 
     return false;

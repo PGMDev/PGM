@@ -41,6 +41,7 @@ import tc.oc.pgm.flag.NetDefinition;
 import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.score.ScoreCause;
@@ -122,7 +123,8 @@ public class Carried extends Spawned implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.blinkGoal(this.flag, 2, null);
 
-    if (this.flag.getDefinition().willShowRespawnOnPickup()) {
+    if (this.flag.getDefinition().willShowRespawnOnPickup()
+        && this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) {
       String postName = post.peekNext(flag).getPostName();
       if (postName != null) { // The post needs a name in order to display the message.
         this.flag
@@ -191,13 +193,15 @@ public class Carried extends Spawned implements Missing {
   public void tickRunning() {
     super.tickRunning();
 
-    Component message = this.getMessage();
-    this.carrier.sendActionBar(message);
+    if (this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) {
+      Component message = this.getMessage();
+      this.carrier.sendActionBar(message);
 
-    if (!message.equals(this.lastMessage)) {
-      this.lastMessage = message;
-      this.carrier.showTitle(
-          title(empty(), message, Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(35))));
+      if (!message.equals(this.lastMessage)) {
+        this.lastMessage = message;
+        this.carrier.showTitle(
+            title(empty(), message, Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(35))));
+      }
     }
 
     ScoreMatchModule smm = this.flag.getMatch().getModule(ScoreMatchModule.class);
@@ -242,14 +246,16 @@ public class Carried extends Spawned implements Missing {
   }
 
   protected void captureFlag(NetDefinition net) {
-    this.carrier.sendMessage(translatable("flag.capture.you", this.flag.getComponentName()));
+    if (this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) {
+      this.carrier.sendMessage(translatable("flag.capture.you", this.flag.getComponentName()));
 
-    this.flag
-        .getMatch()
-        .sendMessage(translatable(
-            "flag.capture.player",
-            this.flag.getComponentName(),
-            this.carrier.getName(NameStyle.COLOR)));
+      this.flag
+          .getMatch()
+          .sendMessage(translatable(
+              "flag.capture.player",
+              this.flag.getComponentName(),
+              this.carrier.getName(NameStyle.COLOR)));
+    }
 
     this.flag.resetTouches(this.carrier.getCompetitor());
     this.flag.resetProximity(this.carrier.getCompetitor());

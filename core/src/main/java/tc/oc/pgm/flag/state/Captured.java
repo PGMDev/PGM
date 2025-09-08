@@ -30,15 +30,12 @@ public class Captured extends BaseState implements Returning {
     this.lastLocation = lastLocation;
   }
 
-  protected boolean tryRespawn(boolean allFlagsCaptured) {
+  protected void tryRespawn(boolean allFlagsCaptured) {
     if ((!this.net.isRespawnTogether() || allFlagsCaptured)
-        && this.net.getRespawnFilter().query(new GoalQuery(this.flag)).isAllowed()) {
+        && this.net.getRespawnFilter().query(new GoalQuery<>(this.flag)).isAllowed()) {
 
       this.flag.transition(
           new Respawning(this.flag, this.post, this.lastLocation, true, this.wasDelayed));
-      return true;
-    } else {
-      return false;
     }
   }
 
@@ -65,9 +62,8 @@ public class Captured extends BaseState implements Returning {
   @Override
   public void onEvent(FlagCaptureEvent event) {
     super.onEvent(event);
-    tryRespawn(
-        event.areAllFlagsCaptured()
-            && event.getNet().getCapturableFlags().contains(this.flag.getDefinition()));
+    tryRespawn(event.areAllFlagsCaptured()
+        && event.getNet().getCapturableFlags().contains(this.flag.getDefinition()));
   }
 
   @Override

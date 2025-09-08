@@ -26,6 +26,7 @@ import tc.oc.pgm.flag.Post;
 import tc.oc.pgm.flag.event.FlagCaptureEvent;
 import tc.oc.pgm.flag.event.FlagPickupEvent;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.teams.Team;
@@ -89,24 +90,25 @@ public abstract class BaseState implements Runnable, State {
     return this.flag.canPickup(player, this.post);
   }
 
-  public boolean pickupFlag(MatchPlayer carrier, Location location) {
-    if (!this.canPickup(carrier)) return false;
+  public void pickupFlag(MatchPlayer carrier, Location location) {
+    if (!this.canPickup(carrier)) return;
 
     try {
       this.pickingUp = carrier;
       FlagPickupEvent event = new FlagPickupEvent(this.flag, carrier, location);
       this.flag.getMatch().callEvent(event);
-      if (event.isCancelled()) return false;
+      if (event.isCancelled()) return;
     } finally {
       this.pickingUp = null;
     }
 
-    this.flag.playStatusSound(Sounds.FLAG_PICKUP_OWN, Sounds.FLAG_PICKUP);
+    if (this.flag.hasShowOption(ShowOption.SHOW_EFFECTS)) {
+      this.flag.playStatusSound(Sounds.FLAG_PICKUP_OWN, Sounds.FLAG_PICKUP);
+    }
+
     this.flag.touch(carrier.getParticipantState());
 
     this.flag.transition(new Carried(this.flag, this.post, carrier, location));
-
-    return true;
   }
 
   public void dropFlag() {}
