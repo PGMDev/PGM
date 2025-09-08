@@ -105,6 +105,7 @@ public abstract class BaseState implements Runnable, State {
     if (this.flag.hasShowOption(ShowOption.SHOW_EFFECTS)) {
       this.flag.playStatusSound(Sounds.FLAG_PICKUP_OWN, Sounds.FLAG_PICKUP);
     }
+
     this.flag.touch(carrier.getParticipantState());
 
     this.flag.transition(new Carried(this.flag, this.post, carrier, location));
