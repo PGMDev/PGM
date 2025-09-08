@@ -58,8 +58,6 @@ public class Respawning extends Spawned implements Returning {
     // Respawn is delayed
     String postName = this.post.getPostName();
 
-    if (!this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) return;
-
     TranslatableComponent timeComponent = duration(respawnTime, NamedTextColor.AQUA);
     Component message = postName != null
         ? translatable(
@@ -68,15 +66,18 @@ public class Respawning extends Spawned implements Returning {
             text(postName, NamedTextColor.AQUA),
             timeComponent)
         : translatable("flag.willRespawn", this.flag.getComponentName(), timeComponent);
-    this.flag.getMatch().sendMessage(message);
+
+    if (this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) {
+      this.flag.getMatch().sendMessage(message);
+    }
   }
 
-  protected void respawn(@Nullable Component message) {
+  protected void respawn(Component message) {
     if (this.flag.hasShowOption(ShowOption.SHOW_EFFECTS)) {
       this.flag.playStatusSound(Sounds.FLAG_RETURN_OWN, Sounds.FLAG_RETURN);
     }
 
-    if (this.flag.hasShowOption(ShowOption.SHOW_MESSAGES) && message != null) {
+    if (this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) {
       this.flag.getMatch().sendMessage(message);
     }
 

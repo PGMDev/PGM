@@ -123,9 +123,8 @@ public class Carried extends Spawned implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.blinkGoal(this.flag, 2, null);
 
-    if (!this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) return;
-
-    if (this.flag.getDefinition().willShowRespawnOnPickup()) {
+    if (this.flag.getDefinition().willShowRespawnOnPickup()
+        && this.flag.hasShowOption(ShowOption.SHOW_MESSAGES)) {
       String postName = post.peekNext(flag).getPostName();
       if (postName != null) { // The post needs a name in order to display the message.
         this.flag
