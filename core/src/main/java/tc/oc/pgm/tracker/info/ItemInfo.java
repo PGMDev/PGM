@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
@@ -37,7 +38,7 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
   public Component getName() {
     if (getItem().hasItemMeta()) {
       String customName = getItem().getItemMeta().getDisplayName();
-      if (customName != null) {
+      if (!StringUtils.isNullOrEmpty(customName)) {
         return LegacyComponentSerializer.legacySection().deserialize(customName);
       }
     }

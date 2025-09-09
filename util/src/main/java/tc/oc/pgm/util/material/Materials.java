@@ -46,6 +46,7 @@ public interface Materials {
           || m.name().endsWith("_AXE")
           || m.name().endsWith("_PICKAXE")
           || m.name().endsWith("_SHOVEL")
+          || m.name().endsWith("_SPADE") // 1.8 shovels
           || m.name().endsWith("_HOE"))
       .addAll(BOW, FLINT_AND_STEEL, SHEARS, STICK)
       .addNullable(Material.getMaterial("TRIDENT"))
@@ -66,6 +67,11 @@ public interface Materials {
   MaterialMatcher SOLID_EXCLUSIONS = MaterialMatcher.builder()
       .add(parse("SIGN_POST", "LEGACY_SIGN_POST")) // on modern, it's just *_SIGN
       .addAll(m -> m.name().endsWith("_PLATE") || m.name().endsWith("_SIGN"))
+      .build();
+
+  MaterialMatcher POTIONS = MaterialMatcher.builder()
+      .add(POTION)
+      .addAll(m -> m.name().endsWith("_POTION"))
       .build();
 
   static Material parse(String... names) {

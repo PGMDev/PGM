@@ -1,16 +1,18 @@
 package tc.oc.pgm.tracker.info;
 
-import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.api.tracker.info.RangedInfo;
+import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
 
@@ -59,13 +61,13 @@ public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
   }
 
   @Override
-  public net.kyori.adventure.text.Component getName() {
+  public Component getName() {
     if (customName != null) {
       return LegacyComponentSerializer.legacySection().deserialize(customName);
     } else if (getProjectile() instanceof PotionInfo) {
       // PotionInfo.getName returns a potion name,
       // which doesn't work outside a potion death message.
-      return translatable("item.potion.name");
+      return MinecraftComponent.material(Material.POTION);
     } else {
       return getProjectile().getName();
     }

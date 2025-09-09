@@ -318,9 +318,9 @@ public class PickerMatchModule implements MatchModule, Listener {
   public void checkInventoryClick(final InventoryClickEvent event) {
     if (event.getCurrentItem() == null
         || event.getCurrentItem().getItemMeta() == null
-        || event.getCurrentItem().getItemMeta().getDisplayName() == null) return;
-    if (event.getWhoClicked() instanceof Player) {
-      MatchPlayer player = match.getPlayer((Player) event.getWhoClicked());
+        || !event.getCurrentItem().getItemMeta().hasDisplayName()) return;
+    if (event.getWhoClicked() instanceof Player bukkitPlayer) {
+      MatchPlayer player = match.getPlayer(bukkitPlayer);
       if (player == null || !this.picking.contains(player)) return;
 
       this.handleInventoryClick(
@@ -348,8 +348,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     if ((!right && !left) || InventoryUtils.isNothing(event.getClickedItem())) return;
 
     final ItemStack hand = event.getClickedItem();
-    String displayName = hand.getItemMeta().getDisplayName();
-    if (displayName == null) return;
+    if (!hand.getItemMeta().hasDisplayName()) return;
 
     final MatchPlayer player = event.getPlayer();
     if (!canUse(player)) return;
