@@ -39,7 +39,7 @@ public class ComponentRenderer extends TranslatableComponentRenderer<Pointered> 
       @NotNull VirtualComponent vc, @NotNull Pointered pointer) {
     var factory = contextFactory.get(vc.contextType());
     if (factory == null)
-      throw new UnsupportedOperationException("Contest type not supported: " + vc.contextType());
+      throw new UnsupportedOperationException("Context type not supported: " + vc.contextType());
 
     Component rendered = doRender(vc, factory.apply(pointer));
     var style = vc.style();
