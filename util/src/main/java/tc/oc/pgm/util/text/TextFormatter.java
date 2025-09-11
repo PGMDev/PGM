@@ -44,7 +44,7 @@ public final class TextFormatter {
         texts instanceof List ? (List<? extends Component>) texts : new ArrayList<>(texts);
     return switch (textList.size()) {
       case 0 -> empty();
-      case 1 -> textList.getFirst().colorIfAbsent(color);
+      case 1 -> empty().color(color).append(textList.getFirst());
       case 2 -> translatable("misc.list.pair", color, textList);
       default -> {
         var it = textList.iterator();

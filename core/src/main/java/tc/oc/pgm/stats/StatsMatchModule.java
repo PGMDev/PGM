@@ -3,6 +3,7 @@ package tc.oc.pgm.stats;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.Component.virtual;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 import static tc.oc.pgm.util.text.TextFormatter.list;
@@ -77,7 +78,6 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.player.PlayerComponent;
-import tc.oc.pgm.util.text.RenderableComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.wool.MonumentWool;
@@ -358,15 +358,14 @@ public class StatsMatchModule implements MatchModule, Listener {
     if (best)
       who = translatable("misc.authorship", agg.type.makeNumber(agg.value), credit(agg.players));
     if (own)
-      who = who.append((RenderableComponent) v -> {
-        if (!(v instanceof Player p)) return empty();
+      who = who.append(virtual(Player.class, p -> {
         if (agg.players.contains(p.getUniqueId()) || hasNoStats(p.getUniqueId())) return empty();
         var value = getStatValue(
             agg.type, match.getPlayer(p.getUniqueId()), getGlobalPlayerStat(p.getUniqueId()));
         if (value == null) return empty();
         var number = agg.type.makeNumber(value);
         return !best ? number : text("   ").append(translatable("match.stats.you.short", number));
-      });
+      }));
     return agg.type.component(who);
   }
 
@@ -383,8 +382,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private Component getPlayerComponent(UUID uuid) {
     var player = player(uuid, NameStyle.VERBOSE);
-    if (player != PlayerComponent.UNKNOWN_PLAYER && player != PlayerComponent.UNKNOWN)
-      return player;
+    if (player != PlayerComponent.UNKNOWN) return player;
     return stats.column(uuid).values().stream()
         .max(Comparator.comparing(PlayerStats::getTimePlayed))
         .map(PlayerStats::getPlayerComponent)
@@ -475,7 +473,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   private record AggStat<T extends Number & Comparable<T>>(
-      StatType type, T value, Set<UUID> players) {
+      StatType<?> type, T value, Set<UUID> players) {
     public AggStat<T> track(UUID uuid, MatchPlayer player, StatHolder stat) {
       T newVal = (T) getStatValue(type, player, stat);
       if (newVal == null) return this;
@@ -490,9 +488,8 @@ public class StatsMatchModule implements MatchModule, Listener {
   private static Number getStatValue(StatType<?> statType, MatchPlayer player, StatHolder stat) {
     return switch (statType) {
       case StatType.Builtin builtin -> stat.getStat(builtin);
-      case StatType.OfFormula formulaStats -> player != null
-          ? formulaStats.formula().apply(player)
-          : null;
+      case StatType.OfFormula formulaStats ->
+        player != null ? formulaStats.formula().apply(player) : null;
     };
   }
 }
