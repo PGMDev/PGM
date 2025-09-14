@@ -31,7 +31,7 @@ import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.matcher.block.StructuralLoadFilter;
 import tc.oc.pgm.filters.matcher.block.VoidFilter;
 import tc.oc.pgm.filters.matcher.damage.AttackerQueryModifier;
-import tc.oc.pgm.filters.matcher.damage.DamagerFilter;
+import tc.oc.pgm.filters.matcher.damage.DamagerQueryModifier;
 import tc.oc.pgm.filters.matcher.damage.RelationFilter;
 import tc.oc.pgm.filters.matcher.damage.VictimQueryModifier;
 import tc.oc.pgm.filters.matcher.entity.EntityTypeFilter;
@@ -269,8 +269,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   @MethodParser("damager")
-  public Filter damager(Element el) throws InvalidXMLException {
-    return new DamagerFilter(parseChild(el));
+  public DamagerQueryModifier damager(Element el) throws InvalidXMLException {
+    return new DamagerQueryModifier(parseChild(el));
   }
 
   @MethodParser("class")

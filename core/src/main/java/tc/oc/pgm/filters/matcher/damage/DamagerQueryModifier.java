@@ -10,9 +10,9 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.modifier.QueryModifier;
 import tc.oc.pgm.tracker.info.EntityInfo;
 
-public class DamagerFilter extends QueryModifier<DamageQuery, EntityTypeQuery> {
+public class DamagerQueryModifier extends QueryModifier<DamageQuery, EntityTypeQuery> {
 
-  public DamagerFilter(Filter child) {
+  public DamagerQueryModifier(Filter child) {
     super(child, DamageQuery.class, EntityTypeQuery.class);
   }
 
