@@ -24,7 +24,7 @@ public class DamagerFilter extends QueryModifier<DamageQuery, EntityTypeQuery> {
       return new EntityTypeQuery() {
         @Override
         public Class<? extends Entity> getEntityType() {
-          return ((EntityInfo) damager).getEntityType().getEntityClass();
+          return ((EntityInfo) damager).getEntityClass();
         }
 
         @Override

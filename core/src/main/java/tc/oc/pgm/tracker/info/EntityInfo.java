@@ -1,7 +1,5 @@
 package tc.oc.pgm.tracker.info;
 
-import static tc.oc.pgm.util.Assert.assertNotNull;
-
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Entity;
@@ -14,25 +12,18 @@ import tc.oc.pgm.util.text.MinecraftComponent;
 public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
 
   private final EntityType entityType;
+  private final Class<? extends Entity> entityClass;
   private final @Nullable String customName;
 
-  public EntityInfo(
-      EntityType entityType, @Nullable String customName, @Nullable ParticipantState owner) {
-    super(owner);
-    this.entityType = assertNotNull(entityType);
-    this.customName = customName;
-  }
-
-  public EntityInfo(EntityType entityType, @Nullable String customName) {
-    this(entityType, customName, null);
-  }
-
   public EntityInfo(Entity entity, @Nullable ParticipantState owner) {
-    this(entity.getType(), entity.getCustomName(), owner);
+    super(owner);
+    this.entityType = entity.getType();
+    this.entityClass = entity.getClass();
+    this.customName = entity.getCustomName();
   }
 
-  public EntityInfo(Entity entity) {
-    this(entity, null);
+  public Class<? extends Entity> getEntityClass() {
+    return entityClass;
   }
 
   public EntityType getEntityType() {
