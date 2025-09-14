@@ -5,6 +5,7 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.text.MinecraftComponent;
@@ -20,6 +21,11 @@ public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
 
   public ThrownPotionInfo(ThrownPotion entity) {
     this(entity, null);
+  }
+
+  @Override
+  public @Nullable PhysicalInfo getDamager() {
+    return this;
   }
 
   @Override
