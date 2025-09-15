@@ -62,4 +62,6 @@ public interface PlayerUtils {
           .sendBlockChange(player, location);
     });
   }
+
+  boolean isGliding(Player player);
 }

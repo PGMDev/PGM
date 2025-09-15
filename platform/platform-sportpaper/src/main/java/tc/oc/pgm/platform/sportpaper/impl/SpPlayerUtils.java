@@ -183,6 +183,12 @@ public class SpPlayerUtils implements PlayerUtils, PacketSender {
     }
   }
 
+  @Override
+  public boolean isGliding(Player player) {
+    // Gliding is not possible in 1.8
+    return false;
+  }
+
   private static final Field CHUNK = getField(PacketPlayOutMultiBlockChange.class, "a");
   private static final Field BLOCKS = getField(PacketPlayOutMultiBlockChange.class, "b");
 

@@ -52,6 +52,7 @@ import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingItemFilter;
 import tc.oc.pgm.filters.matcher.player.EffectFilter;
 import tc.oc.pgm.filters.matcher.player.FlyingFilter;
+import tc.oc.pgm.filters.matcher.player.GlidingFilter;
 import tc.oc.pgm.filters.matcher.player.GroundedFilter;
 import tc.oc.pgm.filters.matcher.player.HoldingItemFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
@@ -381,6 +382,11 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("sprinting")
   public PlayerMovementFilter parseSprinting(Element el) throws InvalidXMLException {
     return PlayerMovementFilter.SPRINTING;
+  }
+
+  @MethodParser("gliding")
+  public GlidingFilter parseGliding(Element el) throws InvalidXMLException {
+    return GlidingFilter.INSTANCE;
   }
 
   @MethodParser("flying")

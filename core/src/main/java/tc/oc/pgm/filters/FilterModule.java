@@ -18,6 +18,7 @@ import tc.oc.pgm.filters.matcher.block.VoidFilter;
 import tc.oc.pgm.filters.matcher.match.MatchPhaseFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
 import tc.oc.pgm.filters.matcher.player.FlyingFilter;
+import tc.oc.pgm.filters.matcher.player.GlidingFilter;
 import tc.oc.pgm.filters.matcher.player.GroundedFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
@@ -95,6 +96,7 @@ public class FilterModule implements MapModule<FilterMatchModule> {
         features.addFeature(null, "sprinting", PlayerMovementFilter.SPRINTING);
         features.addFeature(null, "grounded", GroundedFilter.INSTANCE);
         features.addFeature(null, "flying", FlyingFilter.INSTANCE);
+        features.addFeature(null, "gliding", GlidingFilter.INSTANCE);
         features.addFeature(null, "can-fly", CanFlyFilter.INSTANCE);
       }
 
