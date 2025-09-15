@@ -6,6 +6,7 @@ import org.bukkit.entity.FallingBlock;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
 public class FallingBlockInfo extends EntityInfo implements DamageInfo {
@@ -19,6 +20,11 @@ public class FallingBlockInfo extends EntityInfo implements DamageInfo {
 
   public FallingBlockInfo(FallingBlock entity) {
     this(entity, null);
+  }
+
+  @Override
+  public @Nullable PhysicalInfo getDamager() {
+    return this;
   }
 
   @Override

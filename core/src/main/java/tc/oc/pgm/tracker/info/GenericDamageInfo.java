@@ -24,6 +24,7 @@ public class GenericDamageInfo implements DamageInfo, CauseInfo {
     this(damageType, null);
   }
 
+  @Override
   public @Nullable PhysicalInfo getDamager() {
     return damager;
   }

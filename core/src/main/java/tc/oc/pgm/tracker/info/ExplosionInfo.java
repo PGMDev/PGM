@@ -19,6 +19,10 @@ public class ExplosionInfo implements DamageInfo, RangedInfo, CauseInfo {
     this.explosive = assertNotNull(explosive);
   }
 
+  public @Nullable PhysicalInfo getDamager() {
+    return explosive;
+  }
+
   public PhysicalInfo getExplosive() {
     return explosive;
   }

@@ -32,6 +32,11 @@ public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
     this.customName = customName;
   }
 
+  @Override
+  public @Nullable PhysicalInfo getDamager() {
+    return projectile;
+  }
+
   public PhysicalInfo getProjectile() {
     return projectile;
   }
