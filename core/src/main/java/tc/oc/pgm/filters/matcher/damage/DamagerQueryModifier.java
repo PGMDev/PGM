@@ -20,11 +20,11 @@ public class DamagerQueryModifier extends QueryModifier<DamageQuery, EntityTypeQ
   @Override
   protected EntityTypeQuery transformQuery(DamageQuery query) {
     var damager = query.getDamageInfo().getDamager();
-    if (damager instanceof EntityInfo) {
+    if (damager instanceof EntityInfo entityInfo) {
       return new EntityTypeQuery() {
         @Override
         public Class<? extends Entity> getEntityType() {
-          return ((EntityInfo) damager).getEntityClass();
+          return entityInfo.getEntityClass();
         }
 
         @Override
