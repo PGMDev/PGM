@@ -219,4 +219,9 @@ public class ModernPlayerUtils implements PlayerUtils {
       }
     });
   }
+
+  @Override
+  public boolean isGliding(Player player) {
+    return player.isGliding();
+  }
 }
