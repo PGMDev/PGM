@@ -46,6 +46,8 @@ import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
@@ -417,12 +419,22 @@ public class ActionParser {
   }
 
   @MethodParser("team-alias")
-  public TeamAliasAction parseTeamAliasAction(Element el, Class<?> scope)
-      throws InvalidXMLException {
+  public <T extends Filterable<?>> TeamAliasAction<T> parseTeamAliasAction(
+      Element el, Class<T> scope) throws InvalidXMLException {
+    scope = parseScope(el, scope);
     String alias = parser.string(el, "alias").required();
-    var team = parser.reference(TeamFactory.class, el, "team").required();
 
-    return new TeamAliasAction(team, alias);
+    if (scope.getSimpleName().equals("Match")) {
+      var team = parser.reference(TeamFactory.class, el, "team").required();
+      return new TeamAliasAction.WithTeam<>(scope, alias, team);
+    } else if (scope.getSimpleName().equals("Party")) {
+      return new TeamAliasAction<>(scope, alias);
+    } else {
+      throw new InvalidXMLException(
+          "Wrong scope defined for action, scope must be " + Match.class.getSimpleName() + " or "
+              + Party.class.getSimpleName(),
+          el);
+    }
   }
 
   @MethodParser("take-payment")
