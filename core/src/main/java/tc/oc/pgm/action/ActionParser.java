@@ -46,7 +46,6 @@ import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
@@ -62,6 +61,7 @@ import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
 import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -419,22 +419,17 @@ public class ActionParser {
   }
 
   @MethodParser("team-alias")
-  public <T extends Filterable<?>> TeamAliasAction<T> parseTeamAliasAction(
-      Element el, Class<T> scope) throws InvalidXMLException {
-    scope = parseScope(el, scope);
+  public <T extends Filterable<?>> Action<?> parseTeamAliasAction(Element el, Class<T> scope)
+      throws InvalidXMLException {
     String alias = parser.string(el, "alias").required();
+    var action = new TeamAliasAction(alias);
+    var teamBuilder = parser.reference(TeamFactory.class, el, "team");
+    var team = scope == Party.class ? teamBuilder.orNull() : teamBuilder.required();
 
-    if (scope.getSimpleName().equals("Match")) {
-      var team = parser.reference(TeamFactory.class, el, "team").required();
-      return new TeamAliasAction.WithTeam<>(scope, alias, team);
-    } else if (scope.getSimpleName().equals("Party")) {
-      return new TeamAliasAction<>(scope, alias);
-    } else {
-      throw new InvalidXMLException(
-          "Wrong scope defined for action, scope must be " + Match.class.getSimpleName() + " or "
-              + Party.class.getSimpleName(),
-          el);
-    }
+    return team == null
+        ? action
+        : new ScopeSwitchAction<>(
+            scope, f -> f.moduleRequire(TeamMatchModule.class).getTeam(team.get()), null, action);
   }
 
   @MethodParser("take-payment")
