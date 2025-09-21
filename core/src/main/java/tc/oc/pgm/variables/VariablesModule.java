@@ -52,6 +52,19 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     return (Formula.ContextFactory<T>) variablesByScope.get(scope);
   }
 
+  public Class<? extends Filterable<?>> deriveScope(String expression) {
+    var vars = Formula.getUsedVariables(expression, getContext(Filterables.SCOPES.getLast()));
+
+    for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
+      if (variablesByScope.get(scope).vars.keySet().containsAll(vars)) return scope;
+    }
+
+    vars.removeAll(variablesByScope.get(Filterables.SCOPES.getLast()).vars.keySet());
+
+    throw new IllegalStateException(
+        "Expression '" + expression + "' uses variables not found in any scope: " + vars);
+  }
+
   private record Context<T extends Filterable<?>>(
       ImmutableSet<String> variables, ImmutableSet<String> arrays, Map<String, Variable<?>> vars)
       implements Formula.ContextFactory<T> {
@@ -85,10 +98,10 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
     @Override
     public ExpressionContext withContext(T scope) {
-      Map<String, Double> variableCache = new HashMap<>();
-      Map<String, Function> arrayCache = new HashMap<>();
-
       return new ExpressionContext() {
+        private final Map<String, Double> variableCache = new HashMap<>();
+        private final Map<String, Function> arrayCache = new HashMap<>();
+
         @Override
         public Set<String> getVariables() {
           return variables;

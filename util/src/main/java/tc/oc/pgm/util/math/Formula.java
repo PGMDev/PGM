@@ -1,13 +1,18 @@
 package tc.oc.pgm.util.math;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.ToDoubleFunction;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
+import net.objecthunter.exp4j.shuntingyard.ShuntingYard;
+import net.objecthunter.exp4j.tokenizer.FunctionToken;
+import net.objecthunter.exp4j.tokenizer.VariableToken;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Formula<T> extends ToDoubleFunction<T> {
@@ -34,23 +39,31 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     }
   }
 
-  static <T> Formula<T> of(String expression, ContextFactory<T> context)
+  static <T> ExpFormula<T> of(String expression, ContextFactory<T> context)
       throws IllegalArgumentException {
     Expression exp = new ExpressionBuilder(expression)
         .variables(context.getVariables())
         .functions(AddedFunctions.ALL)
-        .functions(context.getArrays().stream()
-            .map(str -> new Function(str, 1) {
-              @Override
-              public double apply(double... doubles) {
-                throw new UnsupportedOperationException(
-                    "Cannot get array value without replacement!");
-              }
-            })
-            .collect(Collectors.toList()))
+        .functions(
+            context.getArrays().stream().<Function>map(ArrayPlaceholder::new).toList())
         .build();
 
     return new ExpFormula<>(exp, context);
+  }
+
+  static Set<String> getUsedVariables(String expr, ContextFactory<?> context)
+      throws IllegalArgumentException {
+    var fn = new HashMap<>(AddedFunctions.BY_NAME);
+    context.getArrays().forEach(arr -> fn.put(arr, new ArrayPlaceholder(arr)));
+
+    var result = new HashSet<String>();
+    for (var token : ShuntingYard.convertToRPN(expr, fn, Map.of(), context.getVariables(), false)) {
+      if (token instanceof VariableToken vt) result.add(vt.getName());
+      else if (token instanceof FunctionToken ft) {
+        if (ft.getFunction() instanceof ArrayPlaceholder a) result.add(a.getName());
+      }
+    }
+    return result;
   }
 
   default <R> Formula<R> map(java.util.function.Function<R, T> mapper) {
@@ -62,18 +75,22 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     return applyAsDouble(value);
   }
 
-  class ExpFormula<T> implements Formula<T> {
-    private final Expression expression;
-    private final ContextFactory<T> context;
-
-    private ExpFormula(Expression expression, ContextFactory<T> context) {
-      this.expression = expression;
-      this.context = context;
-    }
-
+  record ExpFormula<T>(Expression expression, ContextFactory<T> context) implements Formula<T> {
     @Override
     public double applyAsDouble(T value) {
       return expression.setExpressionContext(context.withContext(value)).evaluate();
+    }
+  }
+
+  class ArrayPlaceholder extends Function {
+    private ArrayPlaceholder(String name) {
+      super(name, 1);
+    }
+
+    @Override
+    public double apply(double... doubles) {
+      throw new UnsupportedOperationException(
+          "Function can only be ran after replacement with a context");
     }
   }
 
