@@ -34,6 +34,7 @@ import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.action.actions.SoundAction;
 import tc.oc.pgm.action.actions.TakePaymentAction;
+import tc.oc.pgm.action.actions.TeamAliasAction;
 import tc.oc.pgm.action.actions.TeleportAction;
 import tc.oc.pgm.action.actions.VelocityAction;
 import tc.oc.pgm.action.actions.WeatherAction;
@@ -45,6 +46,7 @@ import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
@@ -58,6 +60,8 @@ import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
+import tc.oc.pgm.teams.TeamFactory;
+import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -412,6 +416,20 @@ public class ActionParser {
         parser.filter(el, "filter").orNull(),
         parser.parseBool(el, "update").orTrue(),
         parser.parseBool(el, "events").orFalse());
+  }
+
+  @MethodParser("team-alias")
+  public <T extends Filterable<?>> Action<?> parseTeamAliasAction(Element el, Class<T> scope)
+      throws InvalidXMLException {
+    String alias = parser.string(el, "alias").required();
+    var action = new TeamAliasAction(alias);
+    var teamBuilder = parser.reference(TeamFactory.class, el, "team");
+    var team = scope == Party.class ? teamBuilder.orNull() : teamBuilder.required();
+
+    return team == null
+        ? action
+        : new ScopeSwitchAction<>(
+            scope, f -> f.moduleRequire(TeamMatchModule.class).getTeam(team.get()), null, action);
   }
 
   @MethodParser("take-payment")
