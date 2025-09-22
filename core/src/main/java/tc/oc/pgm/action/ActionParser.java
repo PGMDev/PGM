@@ -148,7 +148,7 @@ public class ActionParser {
     return action;
   }
 
-  private static final String EXPRESSION = "[^=\\]]+";
+  private static final String EXPRESSION = "[^=]+";
   private static final Pattern INLINE_SET =
       Pattern.compile("(%VAR%)(?:\\[(%IDX%)])?\\s*:=\\s*(%EXP%)"
           .replace("%VAR%", VariableParser.VARIABLE_ID.pattern())

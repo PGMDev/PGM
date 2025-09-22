@@ -1,6 +1,8 @@
 package tc.oc.pgm.util.math;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import net.objecthunter.exp4j.function.Function;
 
 class AddedFunctions {
@@ -46,4 +48,7 @@ class AddedFunctions {
           return count >= 1;
         }
       });
+
+  public static final Map<String, Function> BY_NAME =
+      ALL.stream().collect(Collectors.toUnmodifiableMap(Function::getName, f -> f));
 }

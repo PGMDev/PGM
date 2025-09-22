@@ -22,6 +22,7 @@ import tc.oc.pgm.filters.operator.DenyFilter;
 import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.operator.OneFilter;
 import tc.oc.pgm.util.MethodParser;
+import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.parser.ParsingNode;
 import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -29,6 +30,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariableParser;
+import tc.oc.pgm.variables.VariablesModule;
 
 public class FeatureFilterParser extends FilterParser {
 
@@ -90,8 +92,9 @@ public class FeatureFilterParser extends FilterParser {
   }
 
   private static final Pattern INLINE_VARIABLE =
-      Pattern.compile("(%VAR%)(?:\\[(\\d+)])?\\s*=\\s*(%RANGE%|%NUM%)"
+      Pattern.compile("(?:(%VAR%)(?:\\[(\\d+)])?|(%EXPR%))\\s*=\\s*(%RANGE%|%NUM%)"
           .replace("%VAR%", VariableParser.VARIABLE_ID.pattern())
+          .replace("%EXPR%", "[^=]+")
           .replace("%RANGE%", XMLUtils.RANGE_DOTTED.pattern())
           .replace("%NUM%", "-?\\d*\\.?\\d+"));
 
@@ -108,13 +111,22 @@ public class FeatureFilterParser extends FilterParser {
     // Parse variable filter
     Matcher match = INLINE_VARIABLE.matcher(text);
     if (match.matches()) {
-      Variable<?> variable = features.resolve(node, match.group(1), Variable.class);
-      Integer index =
-          match.group(2) == null ? null : XMLUtils.parseNumber(node, match.group(2), Integer.class);
-      Range<Double> range = XMLUtils.parseNumericRange(node, match.group(3), Double.class);
-      return VariableFilter.of(variable, index, range, node);
-    }
+      Range<Double> range = XMLUtils.parseNumericRange(node, match.group(4), Double.class);
 
+      var varName = match.group(1);
+      if (varName != null) {
+        Variable<?> variable = features.resolve(node, match.group(1), Variable.class);
+        Integer index = match.group(2) == null
+            ? null
+            : XMLUtils.parseNumber(node, match.group(2), Integer.class);
+        return VariableFilter.of(variable, index, range, node);
+      } else {
+        var variables = factory.needModule(VariablesModule.class);
+        var expr = match.group(3);
+        var scope = variables.deriveScope(expr);
+        return VariableFilter.of(Formula.of(expr, variables.getContext(scope)), scope, range);
+      }
+    }
     return null;
   }
 
@@ -127,8 +139,8 @@ public class FeatureFilterParser extends FilterParser {
       case "not" -> new InverseFilter(buildChild(node, parsed));
       case "deny" -> new DenyFilter(buildChild(node, parsed));
       case "allow" -> new AllowFilter(buildChild(node, parsed));
-      default -> throw new SyntaxException(
-          "Unknown inline filter type " + parsed.getBase(), parsed);
+      default ->
+        throw new SyntaxException("Unknown inline filter type " + parsed.getBase(), parsed);
     };
   }
 
