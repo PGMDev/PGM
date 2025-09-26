@@ -64,10 +64,6 @@ public interface MaterialMatcher {
     return builder().addAll(materials).build();
   }
 
-  static MaterialMatcher ofMatchers(Collection<? extends MaterialMatcher> matchers) {
-    return CompoundMaterialMatcher.of(matchers);
-  }
-
   static MaterialMatcher parse(Element el) throws InvalidXMLException {
     return MaterialMatcher.builder().parse(new Node(el)).build();
   }
@@ -239,7 +235,7 @@ public interface MaterialMatcher {
       List<MaterialMatcher> materialMatchers = new ArrayList<>(materials.size() + matchers.size());
       if (!materials.isEmpty()) materialMatchers.add(MaterialMatcher.of(materials));
       if (!matchers.isEmpty()) materialMatchers.addAll(matchers);
-      return MaterialMatcher.ofMatchers(materialMatchers);
+      return CompoundMaterialMatcher.of(materialMatchers);
     }
   }
 }
