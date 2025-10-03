@@ -27,7 +27,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.query.LocationQuery;
@@ -126,9 +125,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     this.bannerData = COLOR_UTILS.createBanner(banner);
     this.bannerData.setName(getComponentName());
     this.bannerItem = this.getBannerData().createItem();
-    ItemMeta meta = this.bannerItem.getItemMeta();
-    meta.setDisplayName(getColoredName());
-    this.bannerItem.setItemMeta(meta);
 
     this.bannerLocation = getLocationWithYaw(banner, bannerData.getFacing());
     this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());

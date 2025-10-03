@@ -21,6 +21,7 @@ import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.material.ColorUtils;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.platform.Supports;
+import tc.oc.pgm.util.text.TextTranslations;
 
 @Supports(value = PAPER, minVersion = "1.20.6")
 @SuppressWarnings("removal")
@@ -119,7 +120,7 @@ public class ModernColorUtils implements ColorUtils {
     return new BannerData(meta) {
       @Override
       public void setName(Component coloredName) {
-        meta.displayName(coloredName);
+        meta.displayName(TextTranslations.translate(coloredName));
       }
 
       @Override
