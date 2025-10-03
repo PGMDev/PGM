@@ -25,7 +25,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.query.Query;
@@ -111,14 +110,8 @@ public class Carried extends Spawned implements Missing {
     kit = this.flag.getDefinition().getCarryKit();
     if (kit != null) carrier.applyKit(kit, false);
 
-    // Add name to the flag item for modern
-    ItemStack bannerItem = this.flag.getBannerItem();
-    ItemMeta itemMeta = bannerItem.getItemMeta();
-    itemMeta.setDisplayName(this.flag.getColoredName());
-    bannerItem.setItemMeta(itemMeta);
-
     this.helmetItem = this.carrier.getBukkit().getInventory().getHelmet();
-    this.carrier.getBukkit().getInventory().setHelmet(bannerItem.clone());
+    this.carrier.getBukkit().getInventory().setHelmet(this.flag.getBannerItem().clone());
 
     PGM.get()
         .getExecutor()
