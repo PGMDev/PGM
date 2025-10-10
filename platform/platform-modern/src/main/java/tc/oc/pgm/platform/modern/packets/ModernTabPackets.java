@@ -7,6 +7,7 @@ import static net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePac
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.mojang.authlib.GameProfile;
+import io.papermc.paper.profile.MutablePropertyMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -162,7 +163,7 @@ public class ModernTabPackets implements TabPackets {
         @Nullable Skin skin,
         @Nullable net.kyori.adventure.text.Component displayName) {
 
-      GameProfile profile = new GameProfile(uuid, name);
+      GameProfile profile = new GameProfile(uuid, name, new MutablePropertyMap());
       if (skin != null) Skins.toProfile(profile, skin);
 
       var nmsComponent = displayName == null ? null : (Component) SERIALIZER.serialize(displayName);

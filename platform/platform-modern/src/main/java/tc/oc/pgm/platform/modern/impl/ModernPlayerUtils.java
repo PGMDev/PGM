@@ -2,7 +2,6 @@ package tc.oc.pgm.platform.modern.impl;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
-import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.AbstractMap;
@@ -15,6 +14,7 @@ import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -41,7 +41,7 @@ import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.21.4")
+@Supports(value = PAPER, minVersion = "1.21.9")
 public class ModernPlayerUtils implements PlayerUtils {
 
   private static final FixedMetadataValue TRUE =
@@ -74,8 +74,8 @@ public class ModernPlayerUtils implements PlayerUtils {
 
   @Override
   public String getPlayerName(UUID uuid) {
-    return Optional.ofNullable(MinecraftServer.getServer().getProfileCache())
-        .flatMap(c -> c.get(uuid).map(GameProfile::getName))
+    return Optional.of(MinecraftServer.getServer().services().nameToIdCache())
+        .flatMap(c -> c.get(uuid).map(NameAndId::name))
         .orElse(null);
   }
 
