@@ -144,6 +144,11 @@ public class XMLRegionReference extends XMLFeatureReference<RegionDefinition>
   }
 
   @Override
+  public boolean isDynamic() {
+    return get().isDynamic();
+  }
+
+  @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
     return get().getRelevantEvents();
   }
