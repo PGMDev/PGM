@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
@@ -449,7 +448,10 @@ public abstract class KitParser {
     patterns.add(new org.bukkit.block.banner.Pattern(color, PatternType.BASE));
     for (Element elLayer : el.getChildren("layer")) {
       DyeColor layerColor = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(elLayer, "color"));
-      String patternString = XMLUtils.getRequiredAttribute(elLayer, "pattern").getValue();
+      String patternString = XMLUtils.getRequiredAttribute(elLayer, "pattern")
+          .getValue()
+          .toUpperCase()
+          .replace(" ", "_");
       PatternType patternType = PatternType.valueOf(patternString);
       org.bukkit.block.banner.Pattern pattern =
           new org.bukkit.block.banner.Pattern(layerColor, patternType);
