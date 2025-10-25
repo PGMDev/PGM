@@ -24,16 +24,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
+import org.bukkit.*;
 import org.bukkit.FireworkEffect.Type;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -73,7 +72,8 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class KitParser {
-  private static final Set<String> ITEM_TYPES = Set.of("item", "book", "head", "firework");
+  private static final Set<String> ITEM_TYPES =
+      Set.of("item", "book", "head", "firework", "banner");
 
   protected final MapFactory factory;
   protected final Set<Kit> kits = new HashSet<>();
@@ -281,6 +281,7 @@ public abstract class KitParser {
       case "book" -> parseBook(el);
       case "head" -> parseHead(el);
       case "firework" -> parseFirework(el);
+      case "banner" -> parseBanner(el);
       default -> null;
     };
   }
@@ -433,6 +434,25 @@ public abstract class KitParser {
       colors.add(XMLUtils.parseHexColor(node));
     }
     return colors;
+  }
+
+  public ItemStack parseBanner(Element el) throws InvalidXMLException {
+    ItemStack itemStack = parseItem(el, Materials.BANNER);
+    BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
+    DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(el, "base-color"));
+    List<org.bukkit.block.banner.Pattern> patterns = new ArrayList<>();
+    patterns.add(new org.bukkit.block.banner.Pattern(color, PatternType.BASE));
+    for (Element elLayer : el.getChildren("layer")) {
+      DyeColor layerColor = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(elLayer, "color"));
+      String patternString = XMLUtils.getRequiredAttribute(elLayer, "pattern").getValue();
+      PatternType patternType = PatternType.valueOf(patternString);
+      org.bukkit.block.banner.Pattern pattern =
+          new org.bukkit.block.banner.Pattern(layerColor, patternType);
+      patterns.add(pattern);
+    }
+    meta.setPatterns(patterns);
+    itemStack.setItemMeta(meta);
+    return itemStack;
   }
 
   public ItemMatcher parseItemMatcher(Element parent) throws InvalidXMLException {
@@ -588,7 +608,7 @@ public abstract class KitParser {
       case HIDE_UNBREAKABLE -> "unbreakable";
       case HIDE_DESTROYS -> "can-destroy";
       case HIDE_PLACED_ON -> "can-place-on";
-        //noinspection UnnecessaryDefault: newer versions do have extra branches
+      //noinspection UnnecessaryDefault: newer versions do have extra branches
       default -> {
         if (flag == InventoryUtils.HIDE_ADDITIONAL_FLAG) yield "other";
         yield flag.name().replace("HIDE_", "").toLowerCase().replace("_", "-");
