@@ -32,7 +32,7 @@ public interface Materials {
   Material BOOK_AND_QUILL = parse("BOOK_AND_QUILL", "WRITABLE_BOOK");
   Material EYE_OF_ENDER = parse("EYE_OF_ENDER", "ENDER_EYE");
   Material FIREWORK = parse("FIREWORK", "FIREWORK_ROCKET");
-  Material BANNER = parse("BANNER");
+  Material BANNER = parse("BANNER", "LEGACY_BANNER");
   Material WATCH = parse("WATCH", "CLOCK");
   Material DYE = parse("INK_SACK", "BLACK_DYE");
   Material IRON_DOOR = parse("IRON_DOOR_BLOCK", "IRON_DOOR");

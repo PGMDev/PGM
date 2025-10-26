@@ -2,6 +2,7 @@ package tc.oc.pgm.kits;
 
 import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.base.Splitter;
@@ -443,21 +444,17 @@ public abstract class KitParser {
   public ItemStack parseBanner(Element el) throws InvalidXMLException {
     ItemStack itemStack = parseItem(el, Materials.BANNER);
     BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
+
     DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(el, "base-color"));
-    List<org.bukkit.block.banner.Pattern> patterns = new ArrayList<>();
-    patterns.add(new org.bukkit.block.banner.Pattern(color, PatternType.BASE));
-    for (Element elLayer : el.getChildren("layer")) {
-      DyeColor layerColor = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(elLayer, "color"));
-      String patternString = XMLUtils.getRequiredAttribute(elLayer, "pattern")
-          .getValue()
-          .toUpperCase()
-          .replace(" ", "_");
-      PatternType patternType = PatternType.valueOf(patternString);
-      org.bukkit.block.banner.Pattern pattern =
-          new org.bukkit.block.banner.Pattern(layerColor, patternType);
-      patterns.add(pattern);
+    COLOR_UTILS.setColor(itemStack, color);
+
+    for (Element layerEl : el.getChildren("layer")) {
+      DyeColor layerColor = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(layerEl, "color"));
+      PatternType patternType =
+          XMLUtils.parsePatternType(XMLUtils.getRequiredAttribute(layerEl, "pattern"));
+      meta.addPattern(new org.bukkit.block.banner.Pattern(layerColor, patternType));
     }
-    meta.setPatterns(patterns);
+
     itemStack.setItemMeta(meta);
     return itemStack;
   }

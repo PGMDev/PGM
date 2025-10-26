@@ -14,6 +14,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.block.banner.PatternType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.potion.PotionEffect;
@@ -33,6 +34,7 @@ import tc.oc.pgm.util.attribute.Attributes;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.DyeColors;
 import tc.oc.pgm.util.bukkit.Enchantments;
+import tc.oc.pgm.util.bukkit.PatternTypes;
 import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.ItemMaterialData;
@@ -1144,5 +1146,17 @@ public final class XMLUtils {
       throw new InvalidXMLException("Invalid color format '" + rawColor + "'", node);
     }
     return Color.fromRGB(Integer.parseInt(rawColor, 16));
+  }
+
+  public static PatternType parsePatternType(Attribute attr, String text)
+      throws InvalidXMLException {
+    var patternType = PatternTypes.getByName(text);
+    if (patternType != null) return patternType;
+
+    throw new InvalidXMLException("Unknown pattern type '" + text + "'", attr);
+  }
+
+  public static PatternType parsePatternType(Attribute attr) throws InvalidXMLException {
+    return parsePatternType(attr, attr.getValue());
   }
 }
