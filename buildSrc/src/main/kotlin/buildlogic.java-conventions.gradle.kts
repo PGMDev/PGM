@@ -21,13 +21,13 @@ repositories {
 
 dependencies {
     api("org.jdom:jdom2:2.0.6.1")
-    api("net.kyori:adventure-api:4.24.0")
-    api("net.kyori:adventure-text-serializer-plain:4.24.0")
+    api("net.kyori:adventure-api:4.25.0")
+    api("net.kyori:adventure-text-serializer-plain:4.25.0")
     api("net.kyori:adventure-platform-bukkit:4.4.1")
     api("org.incendo:cloud-core:2.0.0")
     api("org.incendo:cloud-annotations:2.0.0")
-    api("org.incendo:cloud-paper:2.0.0-beta.11")
-    api("org.incendo:cloud-minecraft-extras:2.0.0-beta.11")
+    api("org.incendo:cloud-paper:2.0.0-beta.13")
+    api("org.incendo:cloud-minecraft-extras:2.0.0-beta.13")
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
     api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
@@ -63,7 +63,7 @@ spotless {
     ratchetFrom = "origin/dev"
     java {
         removeUnusedImports()
-        palantirJavaFormat("2.73.0").style("GOOGLE").formatJavadoc(true)
+        palantirJavaFormat("2.80.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 

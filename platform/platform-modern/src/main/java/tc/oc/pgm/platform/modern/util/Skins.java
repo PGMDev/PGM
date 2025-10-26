@@ -6,7 +6,7 @@ import tc.oc.pgm.util.skin.Skin;
 
 public abstract class Skins {
   public static Skin fromProfile(GameProfile profile) {
-    for (Property property : profile.getProperties().get("textures")) {
+    for (Property property : profile.properties().get("textures")) {
       return new Skin(property.value(), property.signature());
     }
     return Skin.EMPTY;
@@ -15,7 +15,7 @@ public abstract class Skins {
   public static void toProfile(GameProfile profile, Skin skin) {
     if (skin == null || skin.isEmpty()) return;
     profile
-        .getProperties()
+        .properties()
         .put(
             "textures",
             skin.getSignature() != null
