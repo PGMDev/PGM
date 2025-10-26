@@ -165,8 +165,7 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
     // Can't leave if the match is over
     if (match.isFinished()) {
-      leaving.sendWarning(
-              translatable("join.err.afterFinish"));
+      leaving.sendWarning(translatable("join.err.afterFinish"));
       return false;
     }
 
