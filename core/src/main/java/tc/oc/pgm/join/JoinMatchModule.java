@@ -163,6 +163,12 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   public boolean leave(MatchPlayer leaving, JoinRequest request) {
     if (cancelQueuedJoin(leaving)) return true;
 
+    // Can't leave if the match is over
+    if (match.isFinished()) {
+      leaving.sendWarning(translatable("join.err.afterFinish"));
+      return false;
+    }
+
     if (leaving.getParty() instanceof ObserverParty) {
       leaving.sendWarning(
           translatable("join.err.alreadyJoined.team", leaving.getParty().getName()));
