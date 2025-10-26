@@ -91,7 +91,7 @@ tasks {
                 mapOf(
                     "name" to name,
                     "description" to description,
-                    "apiVersion" to "1.21.8",
+                    "apiVersion" to "1.21.10",
                     "mainClass" to "tc.oc.pgm.PGMPlugin",
                     "version" to version,
                     "commitHash" to commitHash,

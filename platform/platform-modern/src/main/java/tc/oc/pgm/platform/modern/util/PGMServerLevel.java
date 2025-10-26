@@ -6,7 +6,6 @@ import java.util.concurrent.Executor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
@@ -31,7 +30,6 @@ public class PGMServerLevel extends ServerLevel {
       PrimaryLevelData serverLevelData,
       ResourceKey<Level> dimension,
       LevelStem levelStem,
-      ChunkProgressListener progressListener,
       boolean isDebug,
       long biomeZoomSeed,
       List<CustomSpawner> customSpawners,
@@ -47,7 +45,6 @@ public class PGMServerLevel extends ServerLevel {
         serverLevelData,
         dimension,
         levelStem,
-        progressListener,
         isDebug,
         biomeZoomSeed,
         customSpawners,
