@@ -337,6 +337,10 @@ public class ModernNMSHacks implements NMSHacks {
     return serverLevel.getWorld();
   }
 
+  /**
+   * {@link io.papermc.paper.world.PaperWorldLoader#getLevelData} adapted for
+   * {@link ModernNMSHacks#createWorld}
+   */
   private static PaperWorldLoader.LevelDataResult getLevelData(
       final LevelStorageSource.LevelStorageAccess levelStorageAccess) {
     // Abort if level.dat is empty

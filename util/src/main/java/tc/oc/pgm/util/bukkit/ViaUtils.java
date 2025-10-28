@@ -12,7 +12,7 @@ public class ViaUtils {
   public static final int VERSION_1_7 = 5;
   public static final int VERSION_1_8 = 47;
   public static final int VERSION_1_13 = 393;
-  public static final int VERSION_1_21_7 = 772;
+  public static final int VERSION_1_21_10 = 773;
 
   private static final boolean ENABLED = isViaLoaded();
 
@@ -37,7 +37,7 @@ public class ViaUtils {
     if (enabled()) {
       return Via.getAPI().getPlayerVersion(player.getUniqueId());
     } else {
-      return Platform.VARIANT == SPORTPAPER ? VERSION_1_8 : VERSION_1_21_7;
+      return Platform.VARIANT == SPORTPAPER ? VERSION_1_8 : VERSION_1_21_10;
     }
   }
 

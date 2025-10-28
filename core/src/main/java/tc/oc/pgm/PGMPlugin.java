@@ -130,7 +130,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       getServer().getPluginManager().disablePlugin(this);
     }
     // Fix before any audiences have the chance of creating
-    ViaUtils.removeViaChatFacet();
+    if (Platform.isLegacy()) ViaUtils.removeViaChatFacet();
 
     Permissions.registerAll();
 
