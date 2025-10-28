@@ -443,10 +443,10 @@ public abstract class KitParser {
 
   public ItemStack parseBanner(Element el) throws InvalidXMLException {
     ItemStack itemStack = parseItem(el, Materials.BANNER);
-    BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
-
     DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(el, "base-color"));
     COLOR_UTILS.setColor(itemStack, color);
+    
+    BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
 
     for (Element layerEl : el.getChildren("layer")) {
       DyeColor layerColor = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(layerEl, "color"));
