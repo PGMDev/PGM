@@ -445,7 +445,6 @@ public abstract class KitParser {
     ItemStack itemStack = parseItem(el, Materials.BANNER);
     DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(el, "base-color"));
     COLOR_UTILS.setColor(itemStack, color);
-    
     BannerMeta meta = (BannerMeta) itemStack.getItemMeta();
 
     for (Element layerEl : el.getChildren("layer")) {
