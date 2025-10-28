@@ -63,7 +63,7 @@ spotless {
     ratchetFrom = "origin/dev"
     java {
         removeUnusedImports()
-        palantirJavaFormat("2.80.0").style("GOOGLE").formatJavadoc(true)
+        palantirJavaFormat("2.81.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 

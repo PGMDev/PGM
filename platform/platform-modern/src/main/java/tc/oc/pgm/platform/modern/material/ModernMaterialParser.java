@@ -94,6 +94,9 @@ class ModernMaterialParser {
     }
     text = text.toUpperCase(Locale.ROOT).replaceAll("\\s+", "_").replaceAll("\\W", "");
 
+    // 1.21.9 introduced copper chains, so chain was renamed accordingly
+    if (text.equals("CHAIN")) return Material.IRON_CHAIN;
+
     var legacy = Material.getMaterial("LEGACY_" + text);
     if (legacy != null) return legacy;
 
