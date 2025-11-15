@@ -77,6 +77,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.player.PlayerComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.wool.MonumentWool;
@@ -354,7 +355,8 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private Component getMessage(AggStat<?> agg, boolean best, boolean own) {
     Component who = empty();
-    if (best) who = translatable("misc.authorship", agg.type.makeNumber(agg.value), credit(agg));
+    if (best)
+      who = translatable("misc.authorship", agg.type.makeNumber(agg.value), credit(agg.players));
     if (own)
       who = who.append(virtual(Player.class, p -> {
         if (agg.players.contains(p.getUniqueId()) || hasNoStats(p.getUniqueId())) return empty();
@@ -367,25 +369,25 @@ public class StatsMatchModule implements MatchModule, Listener {
     return agg.type.component(who);
   }
 
-  private Component credit(AggStat<?> agg) {
-    if (agg.players.size() >= 10)
+  private Component credit(Set<UUID> players) {
+    if (players.size() >= 10)
       return translatable("objective.credit.many", NamedTextColor.GRAY, TextDecoration.ITALIC);
 
-    var list = list(
-        Collections2.transform(
-            agg.players, player -> this.getPlayerComponent(player, (StatType.Builtin) agg.type)),
-        null);
-    if (agg.players.size() > 3)
+    var list = list(Collections2.transform(players, this::getPlayerComponent), null);
+    if (players.size() > 3)
       return translatable("match.stats.severalPlayers", NamedTextColor.GRAY, TextDecoration.ITALIC)
           .hoverEvent(list);
     return list;
   }
 
-  private Component getPlayerComponent(UUID uuid, StatType.Builtin type) {
+  private Component getPlayerComponent(UUID uuid) {
     var player = player(uuid, NameStyle.VERBOSE);
 
+    if (player != PlayerComponent.UNKNOWN
+        && match.getPlayer(uuid).getBukkit().isOnline()
+        && !match.getPlayer(uuid).isObserving()) return player;
     return stats.column(uuid).values().stream()
-        .max(Comparator.comparingDouble(playerStat -> playerStat.getStat(type).doubleValue()))
+        .max(Comparator.comparing(PlayerStats::getTimePlayed))
         .map(PlayerStats::getPlayerComponent)
         .orElse(player);
   }
