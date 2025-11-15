@@ -384,7 +384,7 @@ public class StatsMatchModule implements MatchModule, Listener {
     var player = player(uuid, NameStyle.VERBOSE);
 
     if (player != PlayerComponent.UNKNOWN
-        && match.getPlayer(uuid).getBukkit().isOnline()
+        && match.getPlayer(uuid) != null
         && !match.getPlayer(uuid).isObserving()) return player;
     return stats.column(uuid).values().stream()
         .max(Comparator.comparing(PlayerStats::getTimePlayed))
