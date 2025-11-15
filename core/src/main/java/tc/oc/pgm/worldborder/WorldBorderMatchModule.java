@@ -16,6 +16,7 @@ import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.MatchQuery;
 import tc.oc.pgm.goals.events.GoalEvent;
@@ -140,12 +141,20 @@ public class WorldBorderMatchModule implements MatchModule, Listener {
   private void freeze() {
     if (appliedBorder != null && appliedBorder.isMoving()) {
       match.getLogger().fine("Freezing border " + appliedBorder);
-      match.getWorld().getWorldBorder().setSize(match.getWorld().getWorldBorder().getSize(), 0);
+      match
+          .getWorld()
+          .getWorldBorder()
+          .setSize(match.getWorld().getWorldBorder().getSize(), 0);
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onGoalComplete(GoalEvent event) {
+    update(event);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onMatchEnd(MatchFinishEvent event) {
     update(event);
   }
 }
