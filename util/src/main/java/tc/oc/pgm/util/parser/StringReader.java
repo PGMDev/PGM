@@ -22,8 +22,8 @@ public class StringReader {
    * @return The next word read in full.
    */
   public String readText() {
-    int quoteChar = pollFor('"', '\'');
-    boolean quoted = quoteChar != -1;
+    char quoteChar = pollQuote();
+    boolean quoted = quoteChar != 0;
 
     for (int i = nextIdx; i < string.length(); i++) {
       char ch = string.charAt(i);
@@ -92,24 +92,22 @@ public class StringReader {
   }
 
   /**
-   * Peeks at the next char ignoring whitespace, if it's one of {@param chs}, polls it and returns
-   * the matching character
+   * Peeks at the next char ignoring whitespace, if it's one of " or ', polls it and returns the
+   * quote character that was found
    *
-   * @param chs The characters to expect next
-   * @return one of {@param chs} if it is the next char, and it was skipped. -1 otherwise.
+   * @return one of " or ' if it is the next char, and it was skipped, 0 otherwise.
    */
-  public int pollFor(char... chs) {
+  public char pollQuote() {
     for (int i = nextIdx; i < string.length(); i++) {
       char currChar = string.charAt(i);
-      for (char ch : chs) {
-        if (currChar == ch) {
-          nextIdx = i + 1;
-          return ch;
-        }
+      if (currChar == '"' || currChar == '\'') {
+        nextIdx = i + 1;
+        return currChar;
+      } else if (!Character.isWhitespace(currChar)) {
+        return 0;
       }
-      if (!Character.isWhitespace(currChar)) return -1;
     }
-    return -1;
+    return 0;
   }
 
   public String substring(int start, int end) {
