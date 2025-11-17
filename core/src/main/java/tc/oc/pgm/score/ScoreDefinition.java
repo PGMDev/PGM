@@ -34,6 +34,7 @@ public record ScoreDefinition(
     },
     CIRCLE("\u2B24", 16), // ⬤
     SQUARE("\u2b1b", 16), // ⬛
+    HEART("\u2764", 16), // ❤
     PIPE("|", 24);
 
     public final String symbol;

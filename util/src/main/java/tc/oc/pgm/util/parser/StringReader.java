@@ -15,20 +15,22 @@ public class StringReader {
 
   /**
    * Reads a text (arbitrary string) as defined below: Any character is eligible, except for '(' ','
-   * ')' and any whitespace char. You may use a quoted string "string" for any char except " being
-   * eligible. Either of them may be escaped by using \, and \ can be escaped by \\.
+   * ')' and any whitespace char. You may use a quoted string "string" or 'string' for any char
+   * except " (or ', respectively) being eligible. Either of them may be escaped by using \, and \
+   * can be escaped by \\.
    *
    * @return The next word read in full.
    */
   public String readText() {
-    boolean quoted = pollIf('"');
+    char quoteChar = pollQuote();
+    boolean quoted = quoteChar != 0;
 
     for (int i = nextIdx; i < string.length(); i++) {
       char ch = string.charAt(i);
       if (ch == '\\') {
         // Skip the next char, it's been escaped
         i++;
-      } else if (quoted ? ch == '"' : ch == '(' || ch == ',' || ch == ')' || ch == ' ') {
+      } else if (quoted ? ch == quoteChar : ch == '(' || ch == ',' || ch == ')' || ch == ' ') {
         if (nextIdx == i)
           throw new SyntaxException("Invalid text, expected at least one char", nextIdx);
 
@@ -87,6 +89,25 @@ public class StringReader {
       }
     }
     return false;
+  }
+
+  /**
+   * Peeks at the next char ignoring whitespace, if it's one of " or ', polls it and returns the
+   * quote character that was found
+   *
+   * @return one of " or ' if it is the next char, and it was skipped, 0 otherwise.
+   */
+  public char pollQuote() {
+    for (int i = nextIdx; i < string.length(); i++) {
+      char currChar = string.charAt(i);
+      if (currChar == '"' || currChar == '\'') {
+        nextIdx = i + 1;
+        return currChar;
+      } else if (!Character.isWhitespace(currChar)) {
+        return 0;
+      }
+    }
+    return 0;
   }
 
   public String substring(int start, int end) {
