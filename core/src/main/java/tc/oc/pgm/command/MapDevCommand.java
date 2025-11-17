@@ -137,7 +137,10 @@ public class MapDevCommand {
     var pl = viewer.getBukkit();
     var world = pl.getWorld();
     var reg = region.getStatic(world);
-    if (!reg.getBounds().isBlockFinite()) {
+    var bounds = reg.getBounds();
+    if (bounds.isEmpty()) {
+      throw exception("Region is empty");
+    } else if (!bounds.isBlockFinite()) {
       throw exception("Region is not finite");
     }
 
