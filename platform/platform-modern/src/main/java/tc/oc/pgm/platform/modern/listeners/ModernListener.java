@@ -87,7 +87,6 @@ public class ModernListener implements Listener {
   }
 
   @EventHandler(ignoreCancelled = true)
-  @SuppressWarnings("removal")
   public void onEntityDespawn(org.bukkit.event.entity.EntityRemoveEvent modernEvent) {
     if (modernEvent.getCause() == org.bukkit.event.entity.EntityRemoveEvent.Cause.OUT_OF_WORLD) {
       EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(modernEvent.getEntity());

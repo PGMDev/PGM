@@ -8,6 +8,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.Lifecycle;
+import io.papermc.paper.world.PaperWorldLoader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -43,6 +43,7 @@ import net.minecraft.world.level.levelgen.WorldDimensions;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelDataAndDimensions;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.validation.ContentValidationException;
 import org.bukkit.Bukkit;
@@ -86,7 +87,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.21.6")
+@Supports(value = PAPER, minVersion = "1.21.9")
 public class ModernNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
@@ -194,7 +195,7 @@ public class ModernNMSHacks implements NMSHacks {
     }
   }
 
-  /** This is ripped straight out of craft bukkit, modified to support custom dimensions */
+  /** {@link org.bukkit.craftbukkit.CraftServer#createWorld} adapted to support custom dimensions */
   public World createWorld(WorldCreator creator) {
     var server = (CraftServer) Bukkit.getServer();
     var console = server.getServer(); // NMS server
@@ -247,40 +248,16 @@ public class ModernNMSHacks implements NMSHacks {
       throw new RuntimeException(ex);
     }
 
-    // Abort if level.dat is empty
-    if (!levelStorageAccess.hasWorldData()) {
-      throw new UnsupportedOperationException("Cannot use PGM createWorld with an empty level.dat");
-    }
-
-    Dynamic<?> dataTag;
-    net.minecraft.world.level.storage.LevelSummary summary;
-    try {
-      dataTag = levelStorageAccess.getDataTag();
-      summary = levelStorageAccess.getSummary(dataTag);
-    } catch (NbtException | ReportedNbtException | IOException e) {
-      LevelStorageSource.LevelDirectory levelDirectory = levelStorageAccess.getLevelDirectory();
-      MinecraftServer.LOGGER.warn(
-          "Failed to load world data from {}", levelDirectory.dataFile(), e);
-
-      return null;
-    }
-
-    if (summary.requiresManualConversion()) {
-      MinecraftServer.LOGGER.info(
-          "This world must be opened in an older version (like 1.6.4) to be safely converted");
-      return null;
-    }
-
-    if (!summary.isCompatible()) {
-      MinecraftServer.LOGGER.info("This world was created by an incompatible version.");
-      return null;
-    }
-
     PrimaryLevelData primaryLevelData;
-    WorldLoader.DataLoadContext context = console.worldLoader;
+    WorldLoader.DataLoadContext context = console.worldLoaderContext;
     RegistryAccess.Frozen registryAccess = context.datapackDimensions();
     Registry<LevelStem> contextLevelStemRegistry =
         registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
+    Dynamic<?> dataTag = getLevelData(levelStorageAccess).dataTag();
+
+    if (dataTag == null) return null;
+
+    var summary = levelStorageAccess.getSummary(dataTag);
     LevelDataAndDimensions levelDataAndDimensions = getLevelDataAndDimensions(
         dataTag,
         context.dataConfiguration(),
@@ -327,8 +304,6 @@ public class ModernNMSHacks implements NMSHacks {
         ResourceLocation.fromNamespaceAndPath(
             creator.key().namespace(), creator.key().value()));
 
-    primaryLevelData.getGameRules().getRule(GameRules.RULE_SPAWN_CHUNK_RADIUS).set(0, null);
-
     ServerLevel serverLevel = new PGMServerLevel(
         console,
         console.executor,
@@ -336,8 +311,6 @@ public class ModernNMSHacks implements NMSHacks {
         primaryLevelData,
         dimensionKey,
         customStem,
-        console.progressListenerFactory.create(
-            primaryLevelData.getGameRules().getInt(GameRules.RULE_SPAWN_CHUNK_RADIUS)),
         false, // isDebug
         i,
         ImmutableList.of(),
@@ -357,12 +330,48 @@ public class ModernNMSHacks implements NMSHacks {
           .setMetadata("is-post-flattening", new FixedMetadataValue(BukkitUtils.getPlugin(), true));
 
     console.addLevel(serverLevel);
-    console.initWorld(
-        serverLevel, primaryLevelData, primaryLevelData, primaryLevelData.worldGenOptions());
+    console.initWorld(serverLevel, primaryLevelData, primaryLevelData.worldGenOptions());
     serverLevel.setSpawnSettings(true);
-    console.prepareLevels(serverLevel.getChunkSource().chunkMap.progressListener, serverLevel);
+    console.prepareLevel(serverLevel);
     server.getPluginManager().callEvent(new WorldLoadEvent(serverLevel.getWorld()));
     return serverLevel.getWorld();
+  }
+
+  /**
+   * {@link io.papermc.paper.world.PaperWorldLoader#getLevelData} adapted for
+   * {@link ModernNMSHacks#createWorld}
+   */
+  private static PaperWorldLoader.LevelDataResult getLevelData(
+      final LevelStorageSource.LevelStorageAccess levelStorageAccess) {
+    // Abort if level.dat is empty
+    if (!levelStorageAccess.hasWorldData()) {
+      throw new UnsupportedOperationException("Cannot use PGM createWorld with an empty level.dat");
+    }
+
+    Dynamic<?> dataTag;
+    LevelSummary summary;
+    try {
+      dataTag = levelStorageAccess.getDataTag();
+      summary = levelStorageAccess.getSummary(dataTag);
+    } catch (NbtException | ReportedNbtException | IOException e) {
+      LevelStorageSource.LevelDirectory levelDirectory = levelStorageAccess.getLevelDirectory();
+      MinecraftServer.LOGGER.warn(
+          "Failed to load world data from {}", levelDirectory.dataFile(), e);
+      return new PaperWorldLoader.LevelDataResult(null, true);
+    }
+
+    if (summary.requiresManualConversion()) {
+      MinecraftServer.LOGGER.info(
+          "This world must be opened in an older version (like 1.6.4) to be safely converted");
+      return new PaperWorldLoader.LevelDataResult(null, true);
+    }
+
+    if (!summary.isCompatible()) {
+      MinecraftServer.LOGGER.info("This world was created by an incompatible version.");
+      return new PaperWorldLoader.LevelDataResult(null, true);
+    }
+
+    return new PaperWorldLoader.LevelDataResult(dataTag, false);
   }
 
   /**
