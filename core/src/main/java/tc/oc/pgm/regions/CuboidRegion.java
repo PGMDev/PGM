@@ -1,6 +1,9 @@
 package tc.oc.pgm.regions;
 
+import com.google.common.collect.Iterators;
+import java.util.Iterator;
 import java.util.Random;
+import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
@@ -66,6 +69,24 @@ public class CuboidRegion implements RegionDefinition.HardStatic {
 
     public Vector getMutableMax() {
       return bounds.max;
+    }
+
+    @Override
+    public boolean contains(Vector point) {
+      Bounds b = this.bounds.normalizedClone();
+
+      return point.getX() >= b.getMin().getX()
+          && point.getX() <= b.getMax().getX()
+          && point.getY() >= b.getMin().getY()
+          && point.getY() <= b.getMax().getY()
+          && point.getZ() >= b.getMin().getZ()
+          && point.getZ() <= b.getMax().getZ();
+    }
+
+    @Override
+    public Iterator<BlockVector> getBlockVectorIterator() {
+      Bounds normalized = this.bounds.normalizedClone();
+      return Iterators.filter(normalized.getBlockIterator(), this::contains);
     }
   }
 

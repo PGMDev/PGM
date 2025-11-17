@@ -42,6 +42,21 @@ public class Bounds implements Cloneable {
     return new Bounds(this);
   }
 
+  public Bounds normalizedClone() {
+    Vector min = this.getMin();
+    Vector max = this.getMax();
+
+    double minX = Math.min(min.getX(), max.getX());
+    double minY = Math.min(min.getY(), max.getY());
+    double minZ = Math.min(min.getZ(), max.getZ());
+
+    double maxX = Math.max(min.getX(), max.getX());
+    double maxY = Math.max(min.getY(), max.getY());
+    double maxZ = Math.max(min.getZ(), max.getZ());
+
+    return new Bounds(new Vector(minX, minY, minZ), new Vector(maxX, maxY, maxZ));
+  }
+
   public static Bounds unbounded() {
     return new Bounds(
         new Vector(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY),
