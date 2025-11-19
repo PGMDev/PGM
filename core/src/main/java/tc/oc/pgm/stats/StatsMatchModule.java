@@ -383,10 +383,10 @@ public class StatsMatchModule implements MatchModule, Listener {
   private Component getPlayerComponent(UUID uuid) {
     var mp = match.getPlayer(uuid);
     var player = player(uuid, NameStyle.VERBOSE);
-
     if (mp != null && mp.getCompetitor() != null && player != PlayerComponent.UNKNOWN) {
       return player;
     }
+
     return stats.column(uuid).values().stream()
         .max(Comparator.comparing(PlayerStats::getTimePlayed))
         .map(PlayerStats::getPlayerComponent)
