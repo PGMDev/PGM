@@ -382,15 +382,17 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private Component getPlayerComponent(UUID uuid) {
     var mp = match.getPlayer(uuid);
-    var player = player(uuid, NameStyle.VERBOSE);
-    if (mp != null && mp.getCompetitor() != null && player != PlayerComponent.UNKNOWN) {
-      return player;
+    Component player = null;
+
+    if (mp != null && mp.getCompetitor() != null) {
+      player = player(uuid, NameStyle.VERBOSE);
+      if (player != PlayerComponent.UNKNOWN) return player;
     }
 
     return stats.column(uuid).values().stream()
         .max(Comparator.comparing(PlayerStats::getTimePlayed))
         .map(PlayerStats::getPlayerComponent)
-        .orElse(player);
+        .orElse(player != null ? player : player(uuid, NameStyle.VERBOSE));
   }
 
   /** Formats raw damage to damage relative to the amount of hearths the player would have broken */
