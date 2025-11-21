@@ -77,7 +77,6 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.named.NameStyle;
-import tc.oc.pgm.util.player.PlayerComponent;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.wool.MonumentWool;
@@ -382,17 +381,12 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   private Component getPlayerComponent(UUID uuid) {
     var mp = match.getPlayer(uuid);
-    Component player = null;
-
-    if (mp != null && mp.getCompetitor() != null) {
-      player = player(uuid, NameStyle.VERBOSE);
-      if (player != PlayerComponent.UNKNOWN) return player;
-    }
+    if (mp != null && mp.getCompetitor() != null) return mp.getName();
 
     return stats.column(uuid).values().stream()
         .max(Comparator.comparing(PlayerStats::getTimePlayed))
         .map(PlayerStats::getPlayerComponent)
-        .orElse(player != null ? player : player(uuid, NameStyle.VERBOSE));
+        .orElseGet(() -> player(uuid, NameStyle.VERBOSE));
   }
 
   /** Formats raw damage to damage relative to the amount of hearths the player would have broken */
