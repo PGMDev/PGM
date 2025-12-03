@@ -62,23 +62,28 @@ public class MatchAnnouncer implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchEnd(final MatchFinishEvent event) {
     final Match match = event.getMatch();
+    final Collection<Competitor> winners = event.getWinners();
+    final boolean singleWinner = winners.size() == 1;
 
-    // broadcast match finish message
+    Component title;
+    if (winners.isEmpty()) {
+      title = translatable("broadcast.gameOver");
+    } else if (singleWinner) {
+      title = translatable(
+          Iterables.getOnlyElement(winners).isNamePlural()
+              ? "broadcast.gameOver.teamWinners"
+              : "broadcast.gameOver.teamWinner",
+          TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
+    } else {
+      // 2 or more winners, show "Tied!" as the title
+      title = translatable("broadcast.gameOver.tied", NamedTextColor.YELLOW);
+    }
+
+    // Broadcast match finish titles to participants
     for (MatchPlayer viewer : match.getPlayers()) {
-      Component title = null, subtitle = empty();
-      final Collection<Competitor> winners = event.getWinners();
-      final boolean singleWinner = winners.size() == 1;
-      if (winners.isEmpty()) {
-        title = translatable("broadcast.gameOver");
-      } else {
-        if (singleWinner) {
-          title = translatable(
-              Iterables.getOnlyElement(winners).isNamePlural()
-                  ? "broadcast.gameOver.teamWinners"
-                  : "broadcast.gameOver.teamWinner",
-              TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE));
-        }
+      Component subtitle = empty();
 
+      if (!winners.isEmpty()) {
         // Use stream here instead of #contains to avoid unchecked cast
         if (winners.stream().anyMatch(w -> w == viewer.getParty())) {
           // Winner
@@ -98,10 +103,7 @@ public class MatchAnnouncer implements Listener {
         }
       }
 
-      if (title == null) {
-        // 2 or more winners, show "Tied!" as the title
-        title = translatable("broadcast.gameOver.tied", NamedTextColor.YELLOW);
-
+      if (subtitle == empty()) {
         // If 2 or 3 winners we show the winners as the subtitle
         if (winners.size() <= 3) {
           subtitle = TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE);
@@ -111,10 +113,12 @@ public class MatchAnnouncer implements Listener {
       final Title.Times titleTimes = Title.Times.times(Duration.ZERO, fromTicks(40), fromTicks(40));
       viewer.showTitle(title(title, subtitle, titleTimes));
 
-      viewer.sendMessage(title);
-
       if (viewer.getParty() instanceof Competitor || !singleWinner) viewer.sendMessage(subtitle);
     }
+
+    // Broadcast match finish message to the match
+    // This includes console
+    match.sendMessage(title);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

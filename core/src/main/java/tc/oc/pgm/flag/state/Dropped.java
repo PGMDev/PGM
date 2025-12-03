@@ -99,7 +99,7 @@ public class Dropped extends Uncarried implements Missing {
 
   @Override
   public boolean isRecoverable() {
-    return true;
+    return this.flag.getMatch().isRunning();
   }
 
   @Override

@@ -10,6 +10,7 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.flag.Flag;
@@ -54,7 +55,8 @@ public class Respawning extends Spawned implements Returning {
   public void enterState() {
     super.enterState();
 
-    if (Duration.ZERO.equals(respawnTime)) return;
+    if (Duration.ZERO.equals(respawnTime) || !this.flag.getMatch().isRunning()) return;
+
     // Respawn is delayed
     String postName = this.post.getPostName();
 
@@ -82,6 +84,11 @@ public class Respawning extends Spawned implements Returning {
     }
 
     this.flag.transition(new Returned(this.flag, this.post, this.respawnTo));
+  }
+
+  @Override
+  protected boolean canSeeParticles(Player player) {
+    return this.flag.getMatch().isRunning();
   }
 
   @Override
