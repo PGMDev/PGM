@@ -38,10 +38,18 @@ public class NullChunkGenerator extends ChunkGenerator {
 
     ChunkData chunkData = super.createChunkData(world);
 
-    // For everyblock in the chunk set the biome to plains
+    Biome newBiome;
+
+    switch (world.getEnvironment()) {
+      case NETHER -> newBiome = Biome.valueOf("NETHER_WASTES");
+      case THE_END -> newBiome = Biome.valueOf("THE_END");
+      default -> newBiome = Biome.PLAINS;
+    }
+
+    // For every block in the chunk set the biome
     for (int x = 0; x < 16; x++) {
       for (int z = 0; z < 16; z++) {
-        biome.setBiome(x, z, Biome.PLAINS);
+        biome.setBiome(x, z, newBiome);
       }
     }
     return chunkData;
