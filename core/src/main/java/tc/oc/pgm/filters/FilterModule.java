@@ -37,7 +37,7 @@ public class FilterModule implements MapModule<FilterMatchModule> {
   /**
    * Create the FilterModule.
    *
-   * @param filterContext the context where all {@link Filters} for the relevant match can be found.
+   * @param filterContext the context where all {@link Filter}s for the relevant match can be found.
    *     Important to find {@link ReactorFactory}s
    */
   private FilterModule(ContextStore<? super Filter> filterContext) {
