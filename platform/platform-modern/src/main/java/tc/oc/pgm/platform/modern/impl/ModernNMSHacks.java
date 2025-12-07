@@ -76,11 +76,11 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.platform.modern.PgmBootstrap;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.platform.modern.util.PGMServerLevel;
 import tc.oc.pgm.util.DataVersions;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
@@ -188,9 +188,7 @@ public class ModernNMSHacks implements NMSHacks {
           .generator(terrain ? null : NullChunkGenerator.INSTANCE)
           .seed(terrain ? seed : 0));
     } catch (Throwable t) {
-      BukkitUtils.getPlugin()
-          .getLogger()
-          .log(Level.SEVERE, "Failed to create world " + worldName, t);
+      PGM.get().getLogger().log(Level.SEVERE, "Failed to create world " + worldName, t);
       return null;
     }
   }
@@ -327,7 +325,7 @@ public class ModernNMSHacks implements NMSHacks {
     if (dataVersion >= DataVersions.V1_13)
       serverLevel
           .getWorld()
-          .setMetadata("is-post-flattening", new FixedMetadataValue(BukkitUtils.getPlugin(), true));
+          .setMetadata("is-post-flattening", new FixedMetadataValue(PGM.get(), true));
 
     console.addLevel(serverLevel);
     console.initWorld(serverLevel, primaryLevelData, primaryLevelData.worldGenOptions());

@@ -1,5 +1,6 @@
 package tc.oc.pgm.api;
 
+import static tc.oc.pgm.api.platform.ModuleRegistrar.MODULE_REGISTRAR;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
@@ -184,15 +185,17 @@ public final class Modules {
     this.mapToMatch = new LinkedHashMap<>();
 
     registerAll();
+    MODULE_REGISTRAR.registerModules(this);
   }
 
-  <M extends MatchModule> void register(Class<M> matchModule, MatchModuleFactory<M> factory) {
+  public <M extends MatchModule> void register(
+      Class<M> matchModule, MatchModuleFactory<M> factory) {
     if (match.containsKey(assertNotNull(matchModule)))
       throw new IllegalArgumentException(matchModule.getSimpleName() + " was registered twice");
     match.put(matchModule, assertNotNull(factory));
   }
 
-  <M extends MatchModule, N extends MapModule<M>> void register(
+  public <M extends MatchModule, N extends MapModule<M>> void register(
       Class<N> mapModule, @Nullable Class<M> matchModule, MapModuleFactory<N> factory) {
     if (map.containsKey(assertNotNull(mapModule)) || mapToMatch.containsKey(mapModule))
       throw new IllegalArgumentException(mapModule.getSimpleName() + " was registered twice");
@@ -200,7 +203,7 @@ public final class Modules {
     if (matchModule != null) mapToMatch.put(mapModule, matchModule);
   }
 
-  <M extends MatchModule> void registerDependencyOnly(
+  public <M extends MatchModule> void registerDependencyOnly(
       Class<M> matchModule, MatchModuleFactory<M> factory) {
     if (matchDependencyOnly.containsKey(assertNotNull(matchModule)))
       throw new IllegalArgumentException(matchModule.getSimpleName() + " was registered twice");

@@ -12,7 +12,7 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.bukkit.RecipeUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -22,7 +22,7 @@ import tc.oc.pgm.util.xml.Node;
 public class ModernRecipeUtils implements RecipeUtils {
 
   private NamespacedKey getKey() {
-    return NamespacedKey.fromString(UUID.randomUUID().toString(), BukkitUtils.getPlugin());
+    return NamespacedKey.fromString(UUID.randomUUID().toString(), PGM.get());
   }
 
   @Override

@@ -29,13 +29,13 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.platform.modern.material.ModernBlockData;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.platform.modern.util.Skins;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.block.RayBlockIntersection;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;
@@ -44,8 +44,7 @@ import tc.oc.pgm.util.skin.Skin;
 @Supports(value = PAPER, minVersion = "1.21.9")
 public class ModernPlayerUtils implements PlayerUtils {
 
-  private static final FixedMetadataValue TRUE =
-      new FixedMetadataValue(BukkitUtils.getPlugin(), true);
+  private static final FixedMetadataValue TRUE = new FixedMetadataValue(PGM.get(), true);
 
   @Override
   public boolean teleportRelative(
@@ -174,7 +173,7 @@ public class ModernPlayerUtils implements PlayerUtils {
     if (player.hasMetadata(key) == set) return false;
 
     if (set) player.setMetadata(key, TRUE);
-    else player.removeMetadata(key, BukkitUtils.getPlugin());
+    else player.removeMetadata(key, PGM.get());
     return true;
   }
 
@@ -218,10 +217,5 @@ public class ModernPlayerUtils implements PlayerUtils {
         };
       }
     });
-  }
-
-  @Override
-  public boolean isGliding(Player player) {
-    return player.isGliding();
   }
 }

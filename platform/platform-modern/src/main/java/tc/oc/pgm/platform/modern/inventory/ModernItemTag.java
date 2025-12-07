@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 
 /** An item tag that encodes data in an item meta's persistent data container */
@@ -16,7 +16,7 @@ final class ModernItemTag<T> implements ItemTag<T> {
   private final PersistentDataType<?, T> type;
 
   ModernItemTag(String key, PersistentDataType<?, T> type) {
-    this.key = NamespacedKey.fromString(key, BukkitUtils.getPlugin());
+    this.key = NamespacedKey.fromString(key, PGM.get());
     this.type = type;
   }
 
