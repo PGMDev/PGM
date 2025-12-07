@@ -9,8 +9,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.player.ParticipantFilter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
-public class ModernGlidingFilter extends ParticipantFilter {
-  public static final FilterDefinition INSTANCE = new ModernGlidingFilter();
+public class GlidingFilter extends ParticipantFilter {
+  public static final FilterDefinition INSTANCE = new GlidingFilter();
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {

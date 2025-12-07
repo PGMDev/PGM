@@ -1,6 +1,5 @@
 package tc.oc.pgm.api;
 
-import static tc.oc.pgm.api.platform.ModuleRegistrar.MODULE_REGISTRAR;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
@@ -136,6 +135,7 @@ import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tnt.TNTModule;
 import tc.oc.pgm.tntrender.TNTRenderMatchModule;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.variables.VariablesMatchModule;
 import tc.oc.pgm.variables.VariablesModule;
 import tc.oc.pgm.wool.WoolMatchModule;
@@ -144,6 +144,11 @@ import tc.oc.pgm.worldborder.WorldBorderMatchModule;
 import tc.oc.pgm.worldborder.WorldBorderModule;
 
 public final class Modules {
+  private static final ModuleRegistrar MODULE_REGISTRAR = Platform.get(ModuleRegistrar.class);
+
+  public interface ModuleRegistrar {
+    void registerModules(Modules modules);
+  }
 
   public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP;
   public static final Map<Class<? extends MapModule<?>>, MapModuleFactory<?>> MAP_DEPENDENCY_ONLY;

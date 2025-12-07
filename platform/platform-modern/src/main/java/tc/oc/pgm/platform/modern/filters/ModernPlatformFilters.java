@@ -10,6 +10,6 @@ import tc.oc.pgm.util.platform.Supports;
 public class ModernPlatformFilters implements PlatformFilters {
   @Override
   public Filter gliding() {
-    return ModernGlidingFilter.INSTANCE;
+    return GlidingFilter.INSTANCE;
   }
 }

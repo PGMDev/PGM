@@ -96,7 +96,7 @@ public class FilterModule implements MapModule<FilterMatchModule> {
         features.addFeature(null, "grounded", GroundedFilter.INSTANCE);
         features.addFeature(null, "flying", FlyingFilter.INSTANCE);
         // TODO: support fallback feature ids being overriden without being a breaking change
-        // features.addFeature(null, "gliding", GlidingFilter.INSTANCE);
+        // features.addFeature(null, "gliding", PLATFORM_FILTERS.gliding());
         features.addFeature(null, "can-fly", CanFlyFilter.INSTANCE);
       }
 
