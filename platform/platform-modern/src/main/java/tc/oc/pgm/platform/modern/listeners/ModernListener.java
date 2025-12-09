@@ -20,7 +20,7 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
@@ -81,8 +81,7 @@ public class ModernListener implements Listener {
     }
     if (!pgmEvents.isEmpty()) {
       Bukkit.getScheduler()
-          .runTask(
-              BukkitUtils.getPlugin(), () -> pgmEvents.forEach(pgmEv -> handleCall(pgmEv, event)));
+          .runTask(PGM.get(), () -> pgmEvents.forEach(pgmEv -> handleCall(pgmEv, event)));
     }
   }
 

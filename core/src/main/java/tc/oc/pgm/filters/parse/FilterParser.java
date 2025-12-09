@@ -1,5 +1,7 @@
 package tc.oc.pgm.filters.parse;
 
+import static tc.oc.pgm.filters.PlatformFilters.PLATFORM_FILTERS;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
 import java.lang.reflect.Method;
@@ -52,7 +54,6 @@ import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingItemFilter;
 import tc.oc.pgm.filters.matcher.player.EffectFilter;
 import tc.oc.pgm.filters.matcher.player.FlyingFilter;
-import tc.oc.pgm.filters.matcher.player.GlidingFilter;
 import tc.oc.pgm.filters.matcher.player.GroundedFilter;
 import tc.oc.pgm.filters.matcher.player.HoldingItemFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
@@ -386,7 +387,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("gliding")
   public Filter parseGliding(Element el) throws InvalidXMLException {
-    return GlidingFilter.INSTANCE;
+    return PLATFORM_FILTERS.gliding();
   }
 
   @MethodParser("flying")
