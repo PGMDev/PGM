@@ -14,4 +14,10 @@ public class SpPlatformFilters implements PlatformFilters {
     // Gliding is not possible in 1.8
     return StaticFilter.DENY;
   }
+
+  @Override
+  public Filter riptiding() {
+    // Riptiding is not possible in 1.8
+    return StaticFilter.DENY;
+  }
 }

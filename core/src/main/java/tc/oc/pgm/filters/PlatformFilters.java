@@ -7,4 +7,6 @@ public interface PlatformFilters {
   PlatformFilters PLATFORM_FILTERS = Platform.get(PlatformFilters.class);
 
   Filter gliding();
+
+  Filter riptiding();
 }
