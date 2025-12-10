@@ -30,6 +30,7 @@ import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -125,5 +126,10 @@ public class SpMiscUtil implements MiscUtils {
   public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
     // All explosions in 1.8 are destructive
     return true;
+  }
+
+  @Override
+  public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
+    return ev.getItem();
   }
 }

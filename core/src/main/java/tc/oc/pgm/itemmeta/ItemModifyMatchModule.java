@@ -1,5 +1,6 @@
 package tc.oc.pgm.itemmeta;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
@@ -99,7 +100,7 @@ public class ItemModifyMatchModule implements MatchModule, Listener {
 
     if (applyRules(itemStack)) {
       event.setCancelled(true);
-      PLAYERS.fakePlayerItemPickup(event.getPlayer(), item);
+      PLAYERS.fakePlayerItemPickup(event.getPlayer(), MISC_UTILS.getFakePickupEntity(event));
       event.getPlayer().getInventory().addItem(itemStack);
     }
   }

@@ -23,6 +23,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -62,15 +63,17 @@ public class ModernPlayerPackets implements PlayerPackets, PacketSender {
   }
 
   @Override
-  public void fakePlayerItemPickup(Player player, Item item) {
+  public void fakePlayerItemPickup(Player player, Entity entity) {
     float pitch = (((float) (Math.random() - Math.random()) * 0.7F + 1.0F) * 2.0F);
-    item.getWorld().playSound(item.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.2F, pitch);
+    entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.2F, pitch);
 
     var packet = new ClientboundTakeItemEntityPacket(
-        item.getEntityId(), player.getEntityId(), item.getItemStack().getAmount());
+        entity.getEntityId(),
+        player.getEntityId(),
+        entity instanceof Item item ? item.getItemStack().getAmount() : 1);
 
-    sendToViewers(packet, player, false);
-    item.remove();
+    sendToViewers(packet, entity, false);
+    entity.remove();
   }
 
   @Override
