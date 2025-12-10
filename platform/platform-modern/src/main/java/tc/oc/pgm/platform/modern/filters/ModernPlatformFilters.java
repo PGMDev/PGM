@@ -12,4 +12,9 @@ public class ModernPlatformFilters implements PlatformFilters {
   public Filter gliding() {
     return GlidingFilter.INSTANCE;
   }
+
+  @Override
+  public Filter riptiding() {
+    return RiptidingFilter.INSTANCE;
+  }
 }
