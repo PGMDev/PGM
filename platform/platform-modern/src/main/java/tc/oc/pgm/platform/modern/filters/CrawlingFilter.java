@@ -13,6 +13,7 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 public class CrawlingFilter extends ParticipantFilter {
   public static final FilterDefinition INSTANCE = new CrawlingFilter();
 
+
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
     return Collections.singleton(PlayerCoarseMoveEvent.class);
