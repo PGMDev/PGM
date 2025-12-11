@@ -13,6 +13,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.modules.WorldTimeModule;
+import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class GameRulesModule implements MapModule<GameRulesMatchModule> {
@@ -40,11 +41,13 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
 
       for (Element gameRulesElement : doc.getRootElement().getChildren("gamerules")) {
         for (Element gameRuleElement : gameRulesElement.getChildren()) {
-          String rule = gameRuleElement.getName();
+          String rule = GameRules.getByName(gameRuleElement.getName());
           String value = gameRuleElement.getValue();
 
-          if (value == null) {
-            throw new InvalidXMLException("Missing value for gamerule " + rule, gameRuleElement);
+          if (rule == null) {
+            throw new InvalidXMLException("Invalid or unsupported game rule", gameRuleElement);
+          } else if (value == null) {
+            throw new InvalidXMLException("Missing value for game rule " + rule, gameRuleElement);
           } else if (gameRules.containsKey(rule)) {
             throw new InvalidXMLException(rule + " has already been specified", gameRuleElement);
           }

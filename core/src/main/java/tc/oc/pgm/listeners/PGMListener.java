@@ -3,6 +3,7 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TemporalComponent.duration;
@@ -36,10 +37,8 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
-import tc.oc.pgm.api.map.GameRule;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
@@ -50,6 +49,7 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeavePartyEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
+import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.inventory.Slot;
@@ -161,25 +161,20 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void initGamerules(final MatchLoadEvent event) {
-    setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
+    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.FIRE_SPREAD, "false");
   }
 
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(
-            GameRule.DO_FIRE_TICK.getId(),
-            event
-                .getMatch()
-                .needModule(GameRulesMatchModule.class)
-                .getGameRule(GameRule.DO_FIRE_TICK.getId()));
+    MISC_UTILS.setGameRule(
+        event.getMatch().getWorld(),
+        GameRules.FIRE_SPREAD,
+        event.getMatch().needModule(GameRulesMatchModule.class).getGameRule(GameRules.FIRE_SPREAD));
   }
 
   @EventHandler
   public void postGamerules(final MatchFinishEvent event) {
-    setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
+    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.FIRE_SPREAD, "false");
   }
 
   //
@@ -188,25 +183,23 @@ public class PGMListener implements Listener {
   //
   @EventHandler
   public void lockTime(final MatchLoadEvent event) {
-    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
+    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.ADVANCE_TIME, "false");
   }
 
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(
-            GameRule.DO_DAYLIGHT_CYCLE.getId(),
-            event
-                .getMatch()
-                .needModule(GameRulesMatchModule.class)
-                .getGameRule(GameRule.DO_DAYLIGHT_CYCLE.getId()));
+    MISC_UTILS.setGameRule(
+        event.getMatch().getWorld(),
+        GameRules.ADVANCE_TIME,
+        event
+            .getMatch()
+            .needModule(GameRulesMatchModule.class)
+            .getGameRule(GameRules.ADVANCE_TIME));
   }
 
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
-    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
+    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.ADVANCE_TIME, "false");
   }
 
   @EventHandler
@@ -317,10 +310,6 @@ public class PGMListener implements Listener {
     if (playerSkin != null) {
       PGM.get().getDatastore().setSkin(player.getId(), playerSkin);
     }
-  }
-
-  public void setGameRule(MatchEvent event, String gameRule, boolean gameRuleValue) {
-    event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
   }
 
   /** Prevent teleporting outside the border */

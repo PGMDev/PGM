@@ -8,7 +8,7 @@ import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
+import org.bukkit.GameRules;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
@@ -97,7 +97,7 @@ public class ModernListener implements Listener {
 
   @EventHandler
   public void onMatchLoad(WorldLoadEvent event) {
-    event.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+    event.getWorld().setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
   }
 
   @EventHandler(priority = EventPriority.HIGH)

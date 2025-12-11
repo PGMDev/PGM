@@ -1,12 +1,13 @@
 package tc.oc.pgm.gamerules;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.Map;
-import tc.oc.pgm.api.map.GameRule;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
+import tc.oc.pgm.util.bukkit.GameRules;
 
 public class GameRulesMatchModule implements MatchModule {
 
@@ -22,16 +23,15 @@ public class GameRulesMatchModule implements MatchModule {
   public void load() {
     // first, set doDaylightCycle according to timelock
     WorldTimeModule wtm = this.match.getModule(WorldTimeModule.class);
-    this.match
-        .getWorld()
-        .setGameRuleValue(
-            GameRule.DO_DAYLIGHT_CYCLE.getId(),
-            Boolean.toString(wtm != null && !wtm.isTimeLocked()));
+    MISC_UTILS.setGameRule(
+        this.match.getWorld(),
+        GameRules.ADVANCE_TIME,
+        Boolean.toString(wtm != null && !wtm.isTimeLocked()));
 
     // second, set any gamerules defined in the map's XML
     // doDaylightCycle set in XML's gamerules module will take precedence over timelock
     for (Map.Entry<String, String> gameRule : this.gameRules.entrySet()) {
-      this.match.getWorld().setGameRuleValue(gameRule.getKey(), gameRule.getValue());
+      MISC_UTILS.setGameRule(this.match.getWorld(), gameRule.getKey(), gameRule.getValue());
     }
 
     // lastly, retrieve gamerules from the map's level.dat and set them if absent

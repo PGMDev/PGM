@@ -10,9 +10,13 @@ import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
 import org.bukkit.ExplosionResult;
+import org.bukkit.GameRule;
+import org.bukkit.GameRules;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
@@ -42,7 +46,7 @@ import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.5")
+@Supports(value = PAPER, minVersion = "1.21.11")
 public class ModernMiscUtil implements MiscUtils {
   @Override
   public EventException createEventException(Throwable cause, Event event) {
@@ -77,8 +81,9 @@ public class ModernMiscUtil implements MiscUtils {
   @Override
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
     var world = ((CraftWorld) loc.getWorld()).getHandle();
-    var potion = new net.minecraft.world.entity.projectile.ThrownSplashPotion(
-        world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
+    var potion =
+        new net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion(
+            world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
     world.addFreshEntity(potion);
     return (ThrownPotion) potion.getBukkitEntity();
   }
@@ -138,5 +143,40 @@ public class ModernMiscUtil implements MiscUtils {
   public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
     if (ev instanceof PlayerPickupArrowEvent arrowEvent) return arrowEvent.getArrow();
     return ev.getItem();
+  }
+
+  @Override
+  public String[] getGameRules() {
+    return Registry.GAME_RULE.stream()
+        .map(GameRule::getKey)
+        .map(NamespacedKey::getKey)
+        .toArray(String[]::new);
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public void setGameRule(World world, String rule, String value) {
+    NamespacedKey key = NamespacedKey.fromString(rule);
+    if (key == null) {
+      throw new IllegalArgumentException("Invalid game rule: " + rule);
+    }
+
+    GameRule<?> gameRule = Registry.GAME_RULE.getOrThrow(key);
+
+    // Special case as this replaced doFireTick, a boolean in legacy
+    if (gameRule == GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER) {
+      if (value.equalsIgnoreCase("true")) value = "128"; // Minecraft default
+      if (value.equalsIgnoreCase("false")) value = "0"; // Equivalent to doFireTick as false
+    }
+
+    if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+      world.setGameRule((GameRule<Boolean>) gameRule, Boolean.parseBoolean(value));
+    } else {
+      try {
+        world.setGameRule((GameRule<Integer>) gameRule, Integer.parseInt(value));
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("Invalid value for game rule: " + value, e);
+      }
+    }
   }
 }

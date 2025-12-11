@@ -19,8 +19,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarFile;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -36,7 +36,7 @@ public class PgmBootstrap implements PluginBootstrap {
   private static final String PATH = "legacy_overworld";
 
   public static final ResourceKey<DimensionType> LEGACY_OVERWORLD = ResourceKey.create(
-      Registries.DIMENSION_TYPE, ResourceLocation.fromNamespaceAndPath(NAMESPACE, PATH));
+      Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(NAMESPACE, PATH));
 
   @Override
   public void bootstrap(@NonNull BootstrapContext context) {
