@@ -17,4 +17,9 @@ public class ModernPlatformFilters implements PlatformFilters {
   public Filter riptiding() {
     return RiptidingFilter.INSTANCE;
   }
+
+  @Override
+  public Filter crawling() {
+    return CrawlingFilter.INSTANCE;
+  }
 }

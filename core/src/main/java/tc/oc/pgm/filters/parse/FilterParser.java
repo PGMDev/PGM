@@ -395,6 +395,11 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     return PLATFORM_FILTERS.riptiding();
   }
 
+  @MethodParser("crawling")
+  public Filter parseCrawling(Element el) throws InvalidXMLException {
+    return PLATFORM_FILTERS.crawling();
+  }
+
   @MethodParser("flying")
   public FlyingFilter parseFlying(Element el) throws InvalidXMLException {
     return FlyingFilter.INSTANCE;

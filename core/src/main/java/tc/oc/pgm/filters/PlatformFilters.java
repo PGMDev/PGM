@@ -9,4 +9,6 @@ public interface PlatformFilters {
   Filter gliding();
 
   Filter riptiding();
+
+  Filter crawling();
 }
