@@ -33,6 +33,8 @@ import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerPickupArrowEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -139,5 +141,11 @@ public class ModernMiscUtil implements MiscUtils {
   public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
     return ev.getExplosionResult() == ExplosionResult.DESTROY
         || ev.getExplosionResult() == ExplosionResult.DESTROY_WITH_DECAY;
+  }
+
+  @Override
+  public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
+    if (ev instanceof PlayerPickupArrowEvent arrowEvent) return arrowEvent.getArrow();
+    return ev.getItem();
   }
 }

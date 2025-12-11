@@ -1,5 +1,6 @@
 package tc.oc.pgm.modules;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
 import com.google.common.collect.Iterables;
@@ -36,7 +37,7 @@ public class ToolRepairMatchModule implements MatchModule, Listener {
     ItemStack pickup = item.getItemStack();
 
     event.setCancelled(true);
-    PLAYERS.fakePlayerItemPickup(event.getPlayer(), item);
+    PLAYERS.fakePlayerItemPickup(event.getPlayer(), MISC_UTILS.getFakePickupEntity(event));
 
     int hitsLeft = pickup.getType().getMaxDurability() - pickup.getDurability() + 1;
     stack.setDurability((short) Math.max(stack.getDurability() - hitsLeft, 0));

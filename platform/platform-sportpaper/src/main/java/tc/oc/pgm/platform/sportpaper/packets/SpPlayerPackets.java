@@ -17,7 +17,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutWorldBorder;
 import net.minecraft.server.v1_8_R3.WorldBorder;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.entity.Item;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.bukkit.ViaUtils;
@@ -71,11 +71,12 @@ public class SpPlayerPackets implements PlayerPackets, PacketSender {
   }
 
   @Override
-  public void fakePlayerItemPickup(Player player, Item item) {
+  public void fakePlayerItemPickup(Player player, Entity entity) {
     float pitch = (((float) (Math.random() - Math.random()) * 0.7F + 1.0F) * 2.0F);
-    item.getWorld().playSound(item.getLocation(), org.bukkit.Sound.ITEM_PICKUP, 0.2F, pitch);
-    sendToViewers(new PacketPlayOutCollect(item.getEntityId(), player.getEntityId()), item, false);
-    item.remove();
+    entity.getWorld().playSound(entity.getLocation(), org.bukkit.Sound.ITEM_PICKUP, 0.2F, pitch);
+    sendToViewers(
+        new PacketPlayOutCollect(entity.getEntityId(), player.getEntityId()), entity, false);
+    entity.remove();
   }
 
   @Override
