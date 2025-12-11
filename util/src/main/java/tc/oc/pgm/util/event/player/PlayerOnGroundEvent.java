@@ -16,7 +16,7 @@ public class PlayerOnGroundEvent extends PlayerEvent {
   }
 
   /**
-   * Returns true of the player is on the ground after the event
+   * Returns true if the player is on the ground after the event
    *
    * @return if the player is on the ground
    */

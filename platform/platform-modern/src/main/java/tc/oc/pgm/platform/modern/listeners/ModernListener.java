@@ -7,6 +7,9 @@ import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.entity.FallingBlock;
@@ -18,9 +21,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.player.PlayerRiptideEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.platform.modern.util.event.player.PlayerRiptideEndEvent;
+import tc.oc.pgm.platform.modern.util.event.player.PlayerToggleGlideEvent;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
@@ -54,6 +61,40 @@ public class ModernListener implements Listener {
   public void onPlayerAttackEntity(PrePlayerAttackEntityEvent event) {
     var pgmEvent = new PlayerAttackEntityEvent(event.getPlayer(), event.getAttacked());
     handleCall(pgmEvent, event);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onPlayerToggleGlide(EntityToggleGlideEvent event) {
+    if (event.getEntity() instanceof Player p) {
+      handleCall(new PlayerToggleGlideEvent(p, event.isGliding()), event);
+    }
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onRiptideStart(PlayerRiptideEvent event) {
+    Player player = event.getPlayer();
+
+    AtomicReference<Future<?>> futureRef = new AtomicReference<>();
+
+    Future<?> future = PGM.get()
+        .getExecutor()
+        .scheduleWithFixedDelay(
+            () -> {
+              if (!player.isRiptiding()) {
+                PlayerRiptideEndEvent endEvent = new PlayerRiptideEndEvent(player, false);
+                handleCall(endEvent, event);
+
+                Future<?> f = futureRef.get();
+                if (f != null) {
+                  f.cancel(false);
+                }
+              }
+            },
+            50L,
+            50L,
+            TimeUnit.MILLISECONDS);
+
+    futureRef.set(future);
   }
 
   @EventHandler(ignoreCancelled = true)
