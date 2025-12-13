@@ -37,7 +37,6 @@ public class ServerPingDataListener implements Listener {
   private final MapOrder mapOrder;
   private final Logger logger;
   private final AtomicBoolean ready;
-  private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
 
   public ServerPingDataListener(MatchManager matchManager, MapOrder mapOrder, Logger parentLogger) {
@@ -45,7 +44,6 @@ public class ServerPingDataListener implements Listener {
     this.mapOrder = assertNotNull(mapOrder);
     this.logger = ClassLogger.get(assertNotNull(parentLogger), ServerPingDataListener.class);
     this.ready = new AtomicBoolean();
-    this.legacySportPaper = new AtomicBoolean();
     this.matchCache = CacheBuilder.newBuilder()
         .weakKeys()
         .expireAfterWrite(5L, TimeUnit.SECONDS)
@@ -80,21 +78,15 @@ public class ServerPingDataListener implements Listener {
 
   @EventHandler
   public void onExtraDataRequest(ExtraPingDataRequestEvent event) {
-    if (legacySportPaper.get()) return;
-
-    try {
-      JsonObject root = event.getServerListExtra(PGM.get());
-      this.matchManager.getMatches().forEachRemaining(match -> {
-        String matchId = match.getId();
-        try {
-          root.add(matchId, this.matchCache.get(match));
-        } catch (ExecutionException e) {
-          this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
-        }
-      });
-    } catch (NoSuchMethodError ex) {
-      legacySportPaper.compareAndSet(false, true);
-    }
+    JsonObject root = event.getServerListExtra(PGM.get());
+    this.matchManager.getMatches().forEachRemaining(match -> {
+      String matchId = match.getId();
+      try {
+        root.add(matchId, this.matchCache.get(match));
+      } catch (ExecutionException e) {
+        this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
+      }
+    });
   }
 
   private void serializeMatch(Match match, JsonObject jsonObject) {
