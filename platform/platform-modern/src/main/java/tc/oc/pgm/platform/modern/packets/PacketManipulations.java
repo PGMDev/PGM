@@ -6,15 +6,13 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.netty.WirePacket;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import io.netty.buffer.Unpooled;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -55,8 +53,11 @@ public class PacketManipulations implements PacketSender {
         Map.of(
             PacketType.Play.Server.ENTITY_STATUS, this::handleEntityStatus,
             PacketType.Play.Server.PLAYER_COMBAT_KILL, this::handleCombatKill,
-            PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata,
-            PacketType.Status.Server.SERVER_INFO, this::handleServerPing));
+            PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata));
+    Packets.register(
+        plugin,
+        ListenerPriority.HIGHEST,
+        Map.of(PacketType.Status.Server.SERVER_INFO, this::handleServerPing));
   }
 
   private void handleEntityStatus(PacketEvent event) {
@@ -159,8 +160,10 @@ public class PacketManipulations implements PacketSender {
 
       jsonData.add("bukkit_extra", pingExtra);
 
-      var byteBuf = new FriendlyByteBuf(Unpooled.buffer());
-      byteBuf.writeJsonWithCodec(Codec.PASSTHROUGH, new Dynamic<>(JsonOps.INSTANCE, jsonData));
+      var byteBuf = Unpooled.buffer();
+      ByteBufCodecs.lenientJson(Short.MAX_VALUE).encode(byteBuf, jsonData);
+      // Trim the excess allocated by the buffer to make things behave more like vanilla
+      byteBuf.capacity(byteBuf.readableBytes());
 
       ProtocolLibrary.getProtocolManager()
           .sendWirePacket(
