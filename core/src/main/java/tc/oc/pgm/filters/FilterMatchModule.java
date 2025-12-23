@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -427,6 +428,9 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
               else match.getLogger().warning("MatchPlayer not found for player " + o);
             } else if (o instanceof Filterable) {
               this.invalidate((Filterable<?>) o);
+            } else if (o instanceof Entity) {
+              // No-op, non-player entities can be returned from events and should just be ignored
+              match.getLogger().finer("Non-player entity was filtered " + o.getClass());
             } else {
               throw new IllegalStateException(
                   "A cached MethodHandle returned a non-expected type. Was: " + o.getClass());

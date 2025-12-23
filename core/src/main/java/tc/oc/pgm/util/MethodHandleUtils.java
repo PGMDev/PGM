@@ -21,15 +21,13 @@ public final class MethodHandleUtils {
   private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
   private static final Map<Class<? extends Event>, MethodHandle> CACHED_HANDLES = new HashMap<>();
 
-  private static final List<HandleFinder> FILTERABLE_GETTERS =
-      ImmutableList.of(
-          new HandleFinder(MatchPlayer.class, "getPlayer"),
-          new HandleFinder(Party.class, "getParty"),
-          new HandleFinder(Match.class, "getMatch"),
-          new HandleFinder(Player.class, "getPlayer"),
-          new HandleFinder(Player.class, "getActor"),
-          new HandleFinder(Entity.class, "getActor"),
-          new HandleFinder(LivingEntity.class, "getEntity"));
+  private static final List<HandleFinder> FILTERABLE_GETTERS = ImmutableList.of(
+      new HandleFinder(MatchPlayer.class, "getPlayer"),
+      new HandleFinder(Party.class, "getParty"),
+      new HandleFinder(Match.class, "getMatch"),
+      new HandleFinder(Player.class, "getPlayer", "getActor"),
+      new HandleFinder(LivingEntity.class, "getEntity", "getActor"),
+      new HandleFinder(Entity.class, "getEntity", "getActor"));
 
   public static MethodHandle getHandle(Class<? extends Event> event) throws NoSuchMethodException {
     MethodHandle handle = CACHED_HANDLES.computeIfAbsent(event, MethodHandleUtils::findHandle);
@@ -49,20 +47,18 @@ public final class MethodHandleUtils {
     return null;
   }
 
-  private static class HandleFinder {
-    private final MethodType type;
-    private final String name;
-
-    private HandleFinder(Class<?> returnType, String name) {
-      this.type = MethodType.methodType(returnType);
-      this.name = name;
+  private record HandleFinder(MethodType type, String... names) {
+    private HandleFinder(Class<?> type, String... names) {
+      this(MethodType.methodType(type), names);
     }
 
     private @Nullable MethodHandle find(Class<?> clazz) {
-      try {
-        return LOOKUP.findVirtual(clazz, this.name, this.type);
-      } catch (NoSuchMethodException | IllegalAccessException e) {
-        // No-Op
+      for (String name : names) {
+        try {
+          return LOOKUP.findVirtual(clazz, name, this.type);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+          // No-Op
+        }
       }
       return null;
     }

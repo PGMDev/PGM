@@ -1,20 +1,20 @@
 package tc.oc.pgm.platform.modern.filters;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityPoseChangeEvent;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.player.ParticipantFilter;
-import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public class GlidingFilter extends ParticipantFilter {
   public static final FilterDefinition INSTANCE = new GlidingFilter();
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
-    return Collections.singleton(PlayerCoarseMoveEvent.class);
+    return List.of(EntityPoseChangeEvent.class);
   }
 
   @Override
