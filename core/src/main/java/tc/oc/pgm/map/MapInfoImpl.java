@@ -126,6 +126,11 @@ public class MapInfoImpl implements MapInfo {
   }
 
   @Override
+  public String getBaseId() {
+    return variants.get(DEFAULT_VARIANT).getId();
+  }
+
+  @Override
   public VariantInfo getVariant() {
     return variant;
   }

@@ -164,7 +164,7 @@ public class MapPoll {
     VOTE_BOOK_TAG.set(personalDummyVoteBook, VOTE_BOOK_METADATA);
     ItemMeta meta = personalDummyVoteBook.getItemMeta();
 
-    meta.setDisplayName(TextTranslations.translateLegacy(VOTE_BOOK_TITLE, viewer.getBukkit()));
+    meta.setDisplayName(TextTranslations.translateLegacy(VOTE_BOOK_TITLE, viewer));
 
     personalDummyVoteBook.setItemMeta(meta);
 
@@ -186,9 +186,7 @@ public class MapPoll {
     boolean added = votes.add(player.getId());
     if (!added) votes.remove(player.getId());
 
-    if (match.get() != null) {
-      match.get().callEvent(new MatchPlayerVoteEvent(player, vote, added));
-    }
+    player.getMatch().callEvent(new MatchPlayerVoteEvent(player, vote, added));
 
     return added;
   }
@@ -198,7 +196,7 @@ public class MapPoll {
     return votes.entrySet().stream()
         .max(Comparator.comparingInt(e -> countVotes(e.getValue())))
         .map(Map.Entry::getKey)
-        .orElse(null);
+        .orElseThrow();
   }
 
   /**
@@ -251,8 +249,10 @@ public class MapPoll {
     running = false;
     MapInfo picked = getMostVotedMap();
     Match match = this.match.get();
-    if (match != null) match.getPlayers().forEach(player -> announceWinner(player, picked));
-    if (picked != null) match.callEvent(new MatchVoteFinishEvent(match, picked));
+    if (match != null) {
+      match.getPlayers().forEach(player -> announceWinner(player, picked));
+      match.callEvent(new MatchVoteFinishEvent(match, picked));
+    }
     return picked;
   }
 

@@ -26,7 +26,7 @@ public class VoteData {
   }
 
   public static VoteData of(double weight, double score, MapInfo map, boolean persist) {
-    return of(weight, score, PGM.get().getDatastore().getMapData(map.getId(), score), persist);
+    return of(weight, score, PGM.get().getDatastore().getMapData(map.getBaseId(), score), persist);
   }
 
   public void setScore(double score) {
