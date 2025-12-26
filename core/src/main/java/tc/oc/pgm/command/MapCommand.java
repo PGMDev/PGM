@@ -9,6 +9,7 @@ import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.text.TextFormatter.list;
 
 import com.google.common.collect.ImmutableList;
 import java.io.File;
@@ -18,6 +19,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
@@ -37,9 +40,11 @@ import org.incendo.cloud.annotations.Flag;
 import org.incendo.cloud.annotations.suggestion.Suggestions;
 import org.incendo.cloud.context.CommandContext;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
+import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapLibrary;
 import tc.oc.pgm.api.map.MapSource;
@@ -66,23 +71,17 @@ public final class MapCommand {
       CommandSender sender,
       MapLibrary library,
       @Argument("page") @Default("1") @Range(min = "1") int page,
+      @Flag(value = "gamemodes", aliases = "g", repeatable = true, suggestions = "gamemodes")
+          List<String> gamemodes,
       @Flag(value = "tags", aliases = "t", repeatable = true, suggestions = "maptags")
           List<String> tags,
       @Flag(value = "author", aliases = "a") String author,
       @Flag(value = "name", aliases = "n") String name,
       @Flag(value = "phase", aliases = "p", repeatable = true) List<Phase.Phases> phases) {
     Stream<MapInfo> search = library.getMaps(name);
-    if (!tags.isEmpty()) {
-      final Map<Boolean, Set<String>> tagSet = tags.stream()
-          .flatMap(t -> Arrays.stream(t.split(",")))
-          .map(String::toLowerCase)
-          .map(String::trim)
-          .collect(Collectors.partitioningBy(
-              s -> s.startsWith("!"),
-              Collectors.mapping(
-                  (String s) -> s.startsWith("!") ? s.substring(1) : s, Collectors.toSet())));
-      search = search.filter(map -> matchesTags(map, tagSet.get(false), tagSet.get(true)));
-    }
+    if (!gamemodes.isEmpty())
+      search = search.filter(makeMatcher(gamemodes, MapInfo::getGamemodes, Gamemode::getId));
+    if (!tags.isEmpty()) search = search.filter(makeMatcher(tags, MapInfo::getTags, MapTag::getId));
 
     Phase.Phases chosenPhases = Phase.Phases.parse(sender, phases);
     search = search.filter(map -> chosenPhases.contains(map.getPhase()));
@@ -123,32 +122,46 @@ public final class MapCommand {
     }.display(audience, ImmutableList.copyOf(maps), page);
   }
 
-  @Suggestions("maptags")
-  public List<String> suggestMapTags(CommandContext<CommandSender> sender, String input) {
-    int commaIdx = input.lastIndexOf(',');
-
-    final String prefix = input.substring(0, commaIdx == -1 ? 0 : commaIdx + 1);
-    final String toComplete =
-        input.substring(commaIdx + 1).toLowerCase(Locale.ROOT).replace("!", "");
-
-    return MapTag.getAllTagIds().stream()
-        .filter(mt -> LiquidMetal.match(mt, toComplete))
-        .flatMap(tag -> Stream.of(prefix + tag, prefix + "!" + tag))
-        .collect(Collectors.toList());
+  private static <T> @NonNull Predicate<MapInfo> makeMatcher(
+      List<String> input, Function<MapInfo, Collection<T>> extractor, Function<T, String> asStr) {
+    var inputSet = input.stream()
+        .flatMap(t -> Arrays.stream(t.split(",")))
+        .map(s -> s.toLowerCase(Locale.ROOT).trim())
+        .collect(Collectors.partitioningBy(
+            s -> s.startsWith("!"),
+            Collectors.mapping(s -> s.startsWith("!") ? s.substring(1) : s, Collectors.toSet())));
+    var positive = inputSet.get(false);
+    var negative = inputSet.get(true);
+    return map -> {
+      int matches = 0;
+      for (T prop : extractor.apply(map)) {
+        var strProp = asStr.apply(prop).toLowerCase(Locale.ROOT).trim();
+        if (negative.contains(strProp)) return false;
+        if (positive.contains(strProp)) matches++;
+      }
+      return matches == positive.size();
+    };
   }
 
-  private static boolean matchesTags(
-      MapInfo map, Collection<String> posTags, Collection<String> negTags) {
-    int matches = 0;
-    for (MapTag tag : assertNotNull(map).getTags()) {
-      if (negTags != null && negTags.contains(tag.getId())) {
-        return false;
-      }
-      if (posTags != null && posTags.contains(tag.getId())) {
-        matches++;
-      }
-    }
-    return posTags == null || matches == posTags.size();
+  @Suggestions("maptags")
+  public List<String> suggestMapTags(CommandContext<CommandSender> sender, String input) {
+    return suggestFlagList(input, MapTag.getAllTagIds().stream());
+  }
+
+  @Suggestions("gamemodes")
+  public List<String> suggestGamemodes(CommandContext<CommandSender> sender, String input) {
+    return suggestFlagList(input, Arrays.stream(Gamemode.values()).map(Gamemode::getId));
+  }
+
+  public List<String> suggestFlagList(String input, Stream<String> options) {
+    int commaIdx = input.lastIndexOf(',') + 1;
+    var previous = input.substring(0, commaIdx);
+    var suggesting = input.substring(commaIdx).toLowerCase(Locale.ROOT).replace("!", "");
+
+    return options
+        .filter(gm -> LiquidMetal.match(gm, suggesting))
+        .map(gm -> previous + gm)
+        .toList();
   }
 
   private static boolean matchesAuthor(MapInfo map, String query, boolean exact) {
@@ -178,6 +191,13 @@ public final class MapCommand {
     audience.sendMessage(text()
         .append(mapInfoLabel("map.info.objective"))
         .append(text(map.getDescription(), NamedTextColor.GOLD))
+        .build());
+
+    var gamemodes = map.getGamemodes();
+    audience.sendMessage(text()
+        .append(
+            mapInfoLabel("map.info.gamemode." + (gamemodes.size() == 1 ? "singular" : "plural")))
+        .append(list(gamemodes, NamedTextColor.GOLD))
         .build());
 
     Collection<Contributor> authors = map.getAuthors();

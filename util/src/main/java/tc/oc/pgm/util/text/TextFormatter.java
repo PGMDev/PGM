@@ -39,17 +39,17 @@ public final class TextFormatter {
    * @param color The color of the list separators.
    * @return A text list.
    */
-  public static Component list(Collection<? extends Component> texts, TextColor color) {
-    final List<? extends Component> textList =
-        texts instanceof List ? (List<? extends Component>) texts : new ArrayList<>(texts);
-    return switch (textList.size()) {
+  public static Component list(Collection<? extends ComponentLike> texts, TextColor color) {
+    var list =
+        texts instanceof List ? (List<? extends ComponentLike>) texts : new ArrayList<>(texts);
+    return switch (list.size()) {
       case 0 -> empty();
-      case 1 -> empty().color(color).append(textList.getFirst());
-      case 2 -> translatable("misc.list.pair", color, textList);
+      case 1 -> empty().color(color).append(list.getFirst());
+      case 2 -> translatable("misc.list.pair", color, list);
       default -> {
-        var it = textList.iterator();
-        Component a = translatable("misc.list.start", color, it.next(), it.next());
-        Component b = it.next();
+        var it = list.iterator();
+        var a = translatable("misc.list.start", color, it.next(), it.next());
+        var b = it.next();
         while (it.hasNext()) {
           a = translatable("misc.list.middle", color, a, b);
           b = it.next();
