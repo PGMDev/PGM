@@ -51,7 +51,7 @@ public class VotingPool extends MapPool {
   }
 
   private Map<MapInfo, VoteData> buildMapScores(ToDoubleFunction<MapInfo> weight) {
-    var ids = maps.stream().map(MapInfo::getId).toList();
+    var ids = maps.stream().map(MapInfo::getBaseId).toList();
     var persisted = PGM.get().getDatastore().getMapData(ids, constants.defaultScore());
     return Collections.unmodifiableMap(maps.stream()
         .collect(Collectors.toMap(
@@ -59,7 +59,7 @@ public class VotingPool extends MapPool {
             m -> VoteData.of(
                 weight.applyAsDouble(m),
                 constants.defaultScore(),
-                persisted.get(m.getId()),
+                persisted.get(m.getBaseId()),
                 constants.persistScores()))));
   }
 
@@ -152,8 +152,8 @@ public class VotingPool extends MapPool {
               // If there is a restart queued, don't start a vote
               if (RestartManager.isQueued()) return;
 
-              currentPoll =
-                  new MapPoll(match, mapPicker.getMaps(manager.getVoteOptions(), mapScores));
+              currentPoll = new MapPoll(
+                  match, mapPicker.getMaps(match.getMap(), manager.getVoteOptions(), mapScores));
             },
             5,
             TimeUnit.SECONDS);
