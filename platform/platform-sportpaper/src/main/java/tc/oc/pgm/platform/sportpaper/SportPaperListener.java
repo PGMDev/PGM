@@ -2,8 +2,11 @@ package tc.oc.pgm.platform.sportpaper;
 
 import static tc.oc.pgm.util.event.EventUtil.handleCall;
 
+import com.google.gson.JsonObject;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
+import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
@@ -19,7 +22,6 @@ import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 public class SportPaperListener implements Listener {
-
   @EventHandler(ignoreCancelled = true)
   public void onBlockFall(org.bukkit.event.block.BlockFallEvent sportEvent) {
     BlockFallEvent pgmEvent = new BlockFallEvent(sportEvent.getBlock(), sportEvent.getEntity());
@@ -107,5 +109,17 @@ public class SportPaperListener implements Listener {
   public void onEntityDespawn(org.bukkit.event.entity.EntityDespawnInVoidEvent sportEvent) {
     EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(sportEvent.getEntity());
     handleCall(pgmEvent, sportEvent);
+  }
+
+  @EventHandler
+  public void onServerPing(final org.bukkit.event.server.ServerListPingEvent event) {
+    handleCall(
+        new ExtraPingDataRequestEvent() {
+          @Override
+          public JsonObject getServerListExtra(Plugin plugin) {
+            return event.getOrCreateExtra(plugin);
+          }
+        },
+        event);
   }
 }
