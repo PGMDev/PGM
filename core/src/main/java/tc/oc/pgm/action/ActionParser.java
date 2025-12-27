@@ -36,6 +36,7 @@ import tc.oc.pgm.action.actions.SoundAction;
 import tc.oc.pgm.action.actions.TakePaymentAction;
 import tc.oc.pgm.action.actions.TeamAliasAction;
 import tc.oc.pgm.action.actions.TeleportAction;
+import tc.oc.pgm.action.actions.TeleportRegionAction;
 import tc.oc.pgm.action.actions.VelocityAction;
 import tc.oc.pgm.action.actions.WeatherAction;
 import tc.oc.pgm.action.replacements.Replacement;
@@ -48,6 +49,7 @@ import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
@@ -456,12 +458,28 @@ public class ActionParser {
   @MethodParser("teleport")
   public Action<? super MatchPlayer> parseTeleport(Element el, Class<?> scope)
       throws InvalidXMLException {
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
 
     var pitchFormula = parser.formula(MatchPlayer.class, el, "pitch").optional();
     var yawFormula = parser.formula(MatchPlayer.class, el, "yaw").optional();
+
+    if (el.getAttribute("region") != null) {
+      Region.Static region = parser.staticRegion(el, "region").randomPoints().orNull();
+      if (region == null) {
+        throw new InvalidXMLException("Unknown region: " + el.getAttributeValue("region"), el);
+      }
+      return new TeleportRegionAction(region, pitchFormula, yawFormula);
+    }
+
+    if (el.getAttribute("x") == null
+        || el.getAttribute("y") == null
+        || el.getAttribute("z") == null) {
+      throw new InvalidXMLException(
+          "Teleport requires either attributes x, y and z, or a region", el);
+    }
+
+    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
+    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
+    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
 
     return new TeleportAction(xFormula, yFormula, zFormula, pitchFormula, yawFormula);
   }
