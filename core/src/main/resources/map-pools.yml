@@ -70,6 +70,9 @@ pools:
     #  - same_gamemode: amount of other maps of the same gamemode already picked for the vote
     #  - mapsize: the size for this map in total players (sum of all team counts)
     #  - players: amount of active players online (eg: obs count as half)
+    # - participants: amount of joined players online
+    # - observers: amount of observers online
+    # - play_minutes: duration of the previous match in minutes
     #
     # WARNING: this is a complicated setting to modify on your own, it is not
     #          recommended to modify it on your own unless you know what you're doing.
