@@ -1,23 +1,23 @@
 package tc.oc.pgm.spawns.states;
 
-import java.util.List;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
-import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.events.PlayerChangePartyEvent;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
 public abstract class State {
 
+  protected final Match match;
   protected final SpawnMatchModule smm;
   protected final MatchPlayer player;
   protected final Player bukkit;
@@ -26,8 +26,9 @@ public abstract class State {
 
   private boolean entered, exited;
 
-  public State(SpawnMatchModule smm, MatchPlayer player) {
-    this.smm = smm;
+  public State(MatchPlayer player) {
+    this.match = player.getMatch();
+    this.smm = match.needModule(SpawnMatchModule.class);
     this.player = player;
     this.bukkit = player.getBukkit();
   }
@@ -47,13 +48,7 @@ public abstract class State {
     if (permission != null) permission.givePermission(player);
   }
 
-  /**
-   * @param events List of events to call AFTER the transition is complete. This method can add
-   *     events to the list, and the caller will fire them. Events that can generate another state
-   *     transition for the same player MUST be deferred in this way, as state transitions cannot be
-   *     nested within each other.
-   */
-  public void leaveState(List<Event> events) {
+  public void leaveState() {
     if (permission != null) permission.revokePermission(player);
 
     if (!entered) {
@@ -65,7 +60,7 @@ public abstract class State {
   }
 
   protected void transition(State newState) {
-    smm.transition(player, this, newState);
+    smm.transition(player, newState);
   }
 
   public void onEvent(final PlayerDeathEvent event) {
@@ -78,7 +73,8 @@ public abstract class State {
 
   public void tick() {}
 
-  public void onEvent(final PlayerJoinPartyEvent event) {}
+  /** Called only when oldParty and newParty are both non-null */
+  public void onEvent(final PlayerChangePartyEvent event) {}
 
   public void onEvent(final MatchPlayerDeathEvent event) {}
 

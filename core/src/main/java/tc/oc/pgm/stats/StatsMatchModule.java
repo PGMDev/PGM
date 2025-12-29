@@ -144,7 +144,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onPlayerLeaveMatch(final PlayerLeavePartyEvent event) {
-    if (event.getMatch().isRunning() && event.getParty() instanceof Competitor) {
+    if (event.getMatch().isRunning() && event.wasParticipating()) {
       getPlayerStat(event.getPlayer()).endParticipation();
     }
   }

@@ -4,18 +4,15 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 
-import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.event.Event;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.events.PlayerJoinPartyEvent;
-import tc.oc.pgm.spawns.SpawnMatchModule;
+import tc.oc.pgm.events.PlayerChangePartyEvent;
 import tc.oc.pgm.spawns.SpawnModule;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.util.TimeUtils;
@@ -35,8 +32,8 @@ public class Dead extends Spawning {
 
   private boolean kitted, rotted;
 
-  public Dead(SpawnMatchModule smm, MatchPlayer player) {
-    super(smm, player, player.getMatch().getTick().tick, 0);
+  public Dead(MatchPlayer player) {
+    super(player, player.getMatch().getTick().tick, 0);
 
     // Allow stuff like /tp or /j
     if (options.spectate) this.permission = new StatePermissions.Observer();
@@ -67,7 +64,7 @@ public class Dead extends Spawning {
   }
 
   @Override
-  public void leaveState(List<Event> events) {
+  public void leaveState() {
     player.setFrozen(false);
     player.setDead(false);
 
@@ -79,7 +76,7 @@ public class Dead extends Spawning {
     // If regular rotting didn't end, force-finish it to avoid client-side
     endRotting();
 
-    super.leaveState(events);
+    super.leaveState();
   }
 
   @Override
@@ -109,13 +106,13 @@ public class Dead extends Spawning {
   }
 
   @Override
-  public void onEvent(PlayerJoinPartyEvent event) {
+  public void onEvent(PlayerChangePartyEvent event) {
     super.onEvent(event);
 
     if (event.getNewParty() instanceof Competitor) {
-      transition(new Joining(smm, player, smm.getJoinPenalty(event), true));
+      transition(new Joining(player, smm.getJoinPenalty(event), true));
     } else {
-      transition(new Observing(smm, player, true, false));
+      transition(new Observing(player, true, false));
     }
   }
 

@@ -13,10 +13,10 @@ java {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/") // Paper builds & paperweight plugin
     maven("https://oss.sonatype.org/content/repositories/snapshots/") // Snapshots
     maven("https://repo.viaversion.com/") // Viaversion
     maven("https://repo.pgm.fyi/snapshots") // Sportpaper & other pgm-specific stuff
-    maven("https://repo.papermc.io/repository/maven-public/") // Paper builds & paperweight plugin
 }
 
 dependencies {

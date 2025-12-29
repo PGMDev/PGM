@@ -2,9 +2,10 @@ package tc.oc.pgm.spawns;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,10 +13,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -41,9 +44,9 @@ import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.events.PlayerChangePartyEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
-import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.events.PlayerPartyChangeEventBase;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.spawns.states.Joining;
@@ -62,10 +65,12 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   private final Match match;
   private final SpawnModule module;
   private final Map<MatchPlayer, State> states = new HashMap<>();
-  private final Set<MatchPlayer> transitioningPlayers = new HashSet<>();
+  private final ListMultimap<MatchPlayer, State> transitions = ArrayListMultimap.create();
+
   private final Map<Competitor, Spawn> unique = new HashMap<>();
   private final Set<Spawn> failed = new HashSet<>();
-  private final ObserverToolFactory observerToolFactory;
+
+  // Join timeouts
   private final Cache<UUID, Long> deathTicks =
       CacheBuilder.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
   private final Cache<UUID, ParticipationData> participationData =
@@ -74,7 +79,6 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   public SpawnMatchModule(Match match, SpawnModule module) {
     this.match = match;
     this.module = module;
-    this.observerToolFactory = new ObserverToolFactory(PGM.get());
   }
 
   public Match getMatch() {
@@ -98,10 +102,6 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   public List<Kit> getPlayerKits() {
     return module.playerKits;
-  }
-
-  public ObserverToolFactory getObserverToolFactory() {
-    return observerToolFactory;
   }
 
   /** Return all {@link Spawn}s that the given player is currently allowed to spawn at */
@@ -139,42 +139,6 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     }
   }
 
-  public void transition(MatchPlayer player, @Nullable State oldState, @Nullable State newState) {
-    match.getLogger().fine("Transitioning " + player + " from " + oldState + " to " + newState);
-
-    if (transitioningPlayers.contains(player)) {
-      throw new IllegalStateException("Nested spawn state transition for player "
-          + player
-          + " oldState="
-          + oldState
-          + " newState="
-          + newState);
-    }
-
-    ArrayList<Event> events = new ArrayList<>();
-    transitioningPlayers.add(player);
-    try {
-      if (oldState != states.get(player)) {
-        throw new IllegalStateException("Tried to transition out of non-current state " + oldState);
-      }
-
-      if (oldState != null) oldState.leaveState(events);
-
-      if (newState == null) {
-        states.remove(player);
-      } else {
-        states.put(player, newState);
-        newState.enterState();
-      }
-    } finally {
-      transitioningPlayers.remove(player);
-    }
-
-    for (Event event : events) {
-      match.callEvent(event);
-    }
-  }
-
   public void reportFailedSpawn(Spawn spawn, MatchPlayer player) {
     if (failed.add(spawn)) {
       // Note: PGM no longer keeps Document data after map parsing
@@ -190,12 +154,72 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     return deathTick != null ? deathTick : 0;
   }
 
-  public long getJoinPenalty(PlayerPartyChangeEvent event) {
+  public long getJoinPenalty(PlayerPartyChangeEventBase event) {
     if (event.getRequest().has(JoinRequest.Flag.FORCE)) return 0;
     if (event.getNewParty() == null || !event.getNewParty().isParticipating()) return 0;
 
     ParticipationData data = participationData.getIfPresent(event.getPlayer().getId());
     return data == null ? 0 : data.getJoinTick(event.getNewParty() instanceof Team t ? t : null);
+  }
+
+  private void leaveState(MatchPlayer player) {
+    final State state = states.get(player);
+    if (state != null) {
+      state.leaveState();
+      states.remove(player);
+    }
+  }
+
+  private void enterState(MatchPlayer player, State state) {
+    states.put(player, state);
+    state.enterState();
+  }
+
+  private void changeState(MatchPlayer player, @Nullable State state) {
+    leaveState(player);
+    if (state != null) {
+      enterState(player, state);
+    }
+  }
+
+  private boolean hasQueuedTransitions(MatchPlayer player) {
+    return transitions.containsKey(player);
+  }
+
+  private void processQueuedTransitions(MatchPlayer player) {
+    final List<State> queue = transitions.get(player);
+    while (!queue.isEmpty()) {
+      changeState(player, queue.removeFirst());
+    }
+  }
+
+  public void transition(MatchPlayer player, @Nullable State newState) {
+    transitions.put(player, newState);
+  }
+
+  private void withState(@Nullable MatchPlayer player, Consumer<State> consumer) {
+    if (player == null) return;
+    var state = states.get(player);
+    if (state != null) consumer.accept(state);
+  }
+
+  private void withState(@Nullable Entity bukkit, BiConsumer<MatchPlayer, State> consumer) {
+    final MatchPlayer player = match.getPlayer(bukkit);
+    withState(player, state -> consumer.accept(player, state));
+  }
+
+  private void dispatchEvent(@Nullable MatchPlayer player, Consumer<State> consumer) {
+    withState(player, state -> {
+      consumer.accept(state);
+      processQueuedTransitions(player);
+    });
+  }
+
+  private void dispatchEvent(@Nullable Entity bukkit, BiConsumer<MatchPlayer, State> consumer) {
+    withState(bukkit, (player, state) -> {
+      consumer.accept(player, state);
+      processQueuedTransitions(player);
+    });
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -210,103 +234,89 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     participationData.put(event.getPlayer().getId(), data);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPartyChange(final PlayerPartyChangeEvent event) {
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPartyChange(final PlayerChangePartyEvent event) {
     MatchPlayer player = event.getPlayer();
     if (event.getOldParty() == null) {
       // Join match
-      if (event.getNewParty().isParticipating()) {
-        transition(player, null, new Joining(this, player, getJoinPenalty(event), false));
-      } else {
-        transition(player, null, new Observing(this, player, true, true));
-      }
-    } else if (event.getNewParty() == null) {
-      // Leave match
-      transition(player, states.get(player), null);
+      var newState = event.getNewParty().isParticipating()
+          ? new Joining(player, getJoinPenalty(event), false)
+          : new Observing(player, true, true);
+      event.addHandler(() -> enterState(player, newState));
     } else {
-      // Party change during match
-      State state = states.get(player);
-      // Should always be PlayerPartyJoinEvent if getNewParty() != null
-      if (state != null) state.onEvent((PlayerJoinPartyEvent) event);
+      withState(player, state -> {
+        state.onEvent(event);
+
+        if (hasQueuedTransitions(player)) {
+          // If the party change caused a state transition, leave the old
+          // state before the change, and enter the new state afterward.
+
+          // The potential danger here is that the player has no spawn state
+          // during the party change, while other events are firing. The
+          // danger is minimized by listening at MONITOR priority.
+          leaveState(player);
+          event.addHandler(() -> processQueuedTransitions(player));
+        }
+      });
     }
   }
 
   /** Must run before {@link tc.oc.pgm.tracker.trackers.DeathTracker#onPlayerDeath} */
   @EventHandler(priority = EventPriority.LOW)
   public void onVanillaDeath(final PlayerDeathEvent event) {
-    MatchPlayer player = match.getPlayer(event.getEntity());
-    if (player == null) return;
-
-    State state = states.get(player);
-    if (state != null) state.onEvent(event);
+    dispatchEvent(event.getEntity(), (player, state) -> state.onEvent(event));
   }
 
   @EventHandler(priority = EventPriority.HIGH)
   public void onDeath(final MatchPlayerDeathEvent event) {
-    State state = states.get(event.getVictim());
-    if (state != null) state.onEvent(event);
+    dispatchEvent(event.getVictim(), state -> state.onEvent(event));
   }
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onInventoryClick(final InventoryClickEvent event) {
-    MatchPlayer player = match.getPlayer(event.getWhoClicked());
-    if (player != null) {
-      State state = states.get(player);
-      if (state != null) state.onEvent(event);
-    }
+    dispatchEvent(event.getWhoClicked(), (player, state) -> state.onEvent(event));
   }
 
   // Listen on HIGH so the picker can handle this first
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onObserverInteract(final ObserverInteractEvent event) {
-    MatchPlayer player = event.getPlayer();
-    if (player != null) {
-      State state = states.get(player);
-      if (state != null) state.onEvent(event);
-    }
+    dispatchEvent(event.getPlayer(), state -> state.onEvent(event));
   }
 
   @EventHandler
   public void onAttackEntity(final PlayerAttackEntityEvent event) {
-    MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player != null) {
-      State state = states.get(player);
-      if (state != null) state.onEvent(event);
-    }
+    dispatchEvent(event.getPlayer(), (p, state) -> state.onEvent(event));
   }
 
   @EventHandler
   public void onTransferItem(final PlayerItemTransferEvent event) {
-    MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player != null) {
-      State state = states.get(player);
-      if (state != null) state.onEvent(event);
-    }
+    dispatchEvent(event.getPlayer(), (p, state) -> state.onEvent(event));
   }
 
   @EventHandler
   public void onPlayerDamage(final EntityDamageEvent event) {
-    MatchPlayer player = getMatch().getPlayer(event.getEntity());
-    if (player != null) {
-      State state = states.get(player);
-      if (state != null) state.onEvent(event);
-    }
+    dispatchEvent(event.getEntity(), (p, state) -> state.onEvent(event));
   }
 
   @EventHandler
   public void matchBegin(final MatchStartEvent event) {
     // Copy states so they can transition without concurrent modification
-    for (State state : ImmutableList.copyOf(states.values())) {
+    ImmutableMap.copyOf(states).forEach((player, state) -> {
       state.onEvent(event);
-    }
+      processQueuedTransitions(player);
+    });
   }
 
   @EventHandler
   public void matchEnd(final MatchFinishEvent event) {
     // Copy states so they can transition without concurrent modification
-    for (State state : ImmutableList.copyOf(states.values())) {
-      state.onEvent(event);
-    }
+    ImmutableMap.copyOf(states).forEach((player, state) -> {
+      // This event can be fired from inside a party change, so some players may have no party
+      if (player.getParty() != null) {
+        state.onEvent(event);
+        processQueuedTransitions(player);
+      }
+    });
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
@@ -362,8 +372,9 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   @Override
   public void tick(Match match, Tick tick) {
     // Copy states so they can transition without concurrent modification
-    for (State state : ImmutableList.copyOf(states.values())) {
+    ImmutableMap.copyOf(states).forEach((player, state) -> {
       state.tick();
-    }
+      processQueuedTransitions(player);
+    });
   }
 }
