@@ -43,6 +43,7 @@ import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.flag.state.BaseState;
 import tc.oc.pgm.flag.state.Captured;
 import tc.oc.pgm.flag.state.Completed;
+import tc.oc.pgm.flag.state.Dropped;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.Spawned;
 import tc.oc.pgm.flag.state.State;
@@ -217,7 +218,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public boolean canDrop(LocationQuery query) {
     return canDropAt(query.getLocation())
-        && getDefinition().getDropFilter().query(query).isAllowed();
+        && getDefinition().getDropFilter().query(query).isAllowed()
+        && !(this.state instanceof Dropped);
   }
 
   public boolean canDropAt(Location location) {
