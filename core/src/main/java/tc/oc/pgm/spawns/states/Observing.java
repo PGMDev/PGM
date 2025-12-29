@@ -12,8 +12,8 @@ import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.events.PlayerJoinPartyEvent;
-import tc.oc.pgm.spawns.ObserverToolFactory;
+import tc.oc.pgm.events.PlayerChangePartyEvent;
+import tc.oc.pgm.spawns.ObsTools;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
@@ -27,8 +27,8 @@ public class Observing extends State {
   private final boolean reset;
   private final boolean teleport;
 
-  public Observing(SpawnMatchModule smm, MatchPlayer player, boolean reset, boolean teleport) {
-    super(smm, player);
+  public Observing(MatchPlayer player, boolean reset, boolean teleport) {
+    super(player);
     this.reset = reset;
     this.teleport = teleport;
     this.permission = new StatePermissions.Observer();
@@ -66,11 +66,10 @@ public class Observing extends State {
 
     if (reset) {
       // Give basic observer items
-      ObserverToolFactory toolFactory = smm.getObserverToolFactory();
-      player.getInventory().setItem(0, toolFactory.getTeleportTool(bukkit));
+      player.getInventory().setItem(0, ObsTools.getTeleportTool(bukkit));
 
-      if (toolFactory.canUseEditWand(bukkit)) {
-        player.getInventory().setItem(1, toolFactory.getEditWand(bukkit));
+      if (ObsTools.canUseEditWand(bukkit)) {
+        player.getInventory().setItem(1, ObsTools.getEditWand(bukkit));
       }
 
       // Let other modules give observer items
@@ -95,14 +94,14 @@ public class Observing extends State {
   public void onEvent(MatchStartEvent event) {
     super.onEvent(event);
     if (player.isParticipating()) {
-      transition(new Joining(smm, player, 0, false));
+      transition(new Joining(player, 0, false));
     }
   }
 
   @Override
-  public void onEvent(PlayerJoinPartyEvent event) {
+  public void onEvent(PlayerChangePartyEvent event) {
     if (event.getNewParty() instanceof Competitor && event.getMatch().isRunning()) {
-      transition(new Joining(smm, player, smm.getJoinPenalty(event), false));
+      transition(new Joining(player, smm.getJoinPenalty(event), false));
     }
   }
 
