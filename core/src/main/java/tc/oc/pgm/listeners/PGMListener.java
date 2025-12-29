@@ -254,14 +254,16 @@ public class PGMListener implements Listener {
     MatchPlayer quitter = event.getPlayer();
     if (!quitter.isAlive()) return;
 
+    var world = quitter.getBukkit().getWorld();
+    var location = quitter.getBukkit().getLocation();
     for (ItemStack item : quitter.getInventory().getContents()) {
       if (item == null || item.getType() == Material.AIR) continue;
-      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
+      world.dropItemNaturally(location, item);
     }
 
     for (ItemStack armor : quitter.getInventory().getArmorContents()) {
       if (armor == null || armor.getType() == Material.AIR) continue;
-      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
+      world.dropItemNaturally(location, armor);
     }
   }
 
