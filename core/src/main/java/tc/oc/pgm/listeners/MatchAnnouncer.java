@@ -79,6 +79,9 @@ public class MatchAnnouncer implements Listener {
       title = translatable("broadcast.gameOver.tied", NamedTextColor.YELLOW);
     }
 
+    // Broadcast match finish message to the match, which includes console
+    match.sendMessage(title);
+
     // Broadcast match finish titles to participants
     for (MatchPlayer viewer : match.getPlayers()) {
       Component subtitle = empty();
@@ -103,11 +106,9 @@ public class MatchAnnouncer implements Listener {
         }
       }
 
-      if (subtitle == empty()) {
-        // If 2 or 3 winners we show the winners as the subtitle
-        if (winners.size() <= 3) {
-          subtitle = TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE);
-        }
+      // If 2 or 3 winners we show the winners as the subtitle
+      if (!singleWinner && winners.size() <= 3) {
+        subtitle = TextFormatter.nameList(winners, NameStyle.FANCY, NamedTextColor.WHITE);
       }
 
       final Title.Times titleTimes = Title.Times.times(Duration.ZERO, fromTicks(40), fromTicks(40));
@@ -115,10 +116,6 @@ public class MatchAnnouncer implements Listener {
 
       if (viewer.getParty() instanceof Competitor || !singleWinner) viewer.sendMessage(subtitle);
     }
-
-    // Broadcast match finish message to the match
-    // This includes console
-    match.sendMessage(title);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
