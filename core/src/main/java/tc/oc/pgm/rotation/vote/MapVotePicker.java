@@ -4,6 +4,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import net.objecthunter.exp4j.ExpressionContext;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.pools.VotingPool;
 import tc.oc.pgm.util.math.Formula;
@@ -138,11 +141,17 @@ public class MapVotePicker {
         || data.getScore() <= constants.scoreMinToVote()
         || data.isOnCooldown(constants)) return 0;
 
+    Iterator<Match> iterator = PGM.get().getMatchManager().getMatches();
+    Match match = iterator.hasNext() ? iterator.next() : null;
+
     var context = new MapVoteContext(
         data.getScore(),
         getRepeatedGamemodes(previousMaps, map),
         map.getMaxPlayers().stream().mapToInt(i -> i).sum(),
-        manager.getActivePlayers(null));
+        manager.getActivePlayers(match),
+        match == null ? 0 : match.getParticipants().size(),
+        match == null ? Bukkit.getOnlinePlayers().size() : match.getObservers().size(),
+        match == null ? 0 : match.getDuration().toMillis() / 60_000d);
 
     return Math.max(modifier.applyAsDouble(context) * data.getWeight(), 0);
   }
@@ -157,18 +166,28 @@ public class MapVotePicker {
   }
 
   private static final class MapVoteContext extends ExpressionContext.Impl {
-    public MapVoteContext(double score, double sameGamemode, double mapsize, double players) {
+    public MapVoteContext(
+        double score,
+        double sameGamemode,
+        double mapsize,
+        double players,
+        double participants,
+        double observers,
+        double playMinutes) {
       super(
           Map.of(
               "score", score,
               "same_gamemode", sameGamemode,
               "mapsize", mapsize,
-              "players", players),
+              "players", players,
+              "participants", participants,
+              "observers", observers,
+              "play_minutes", playMinutes),
           null);
     }
 
     static Set<String> variables() {
-      return new MapVoteContext(0, 0, 0, 0).getVariables();
+      return new MapVoteContext(0, 0, 0, 0, 0, 0, 0).getVariables();
     }
   }
 
