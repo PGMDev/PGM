@@ -22,7 +22,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -43,6 +42,7 @@ import tc.oc.pgm.flag.post.PostDefinition;
 import tc.oc.pgm.flag.state.BaseState;
 import tc.oc.pgm.flag.state.Captured;
 import tc.oc.pgm.flag.state.Completed;
+import tc.oc.pgm.flag.state.Dropped;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.Spawned;
 import tc.oc.pgm.flag.state.State;
@@ -50,6 +50,7 @@ import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
+import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.points.AngleProvider;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.points.StaticAngleProvider;
@@ -125,6 +126,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     this.bannerData = COLOR_UTILS.createBanner(banner);
     this.bannerData.setName(getComponentName());
     this.bannerItem = this.getBannerData().createItem();
+    ItemTags.PREVENT_SHARING.set(this.bannerItem, true);
 
     this.bannerLocation = getLocationWithYaw(banner, bannerData.getFacing());
     this.bannerYawProvider = new StaticAngleProvider(this.bannerLocation.getYaw());
@@ -217,7 +219,8 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public boolean canDrop(LocationQuery query) {
     return canDropAt(query.getLocation())
-        && getDefinition().getDropFilter().query(query).isAllowed();
+        && getDefinition().getDropFilter().query(query).isAllowed()
+        && !(this.state instanceof Dropped);
   }
 
   public boolean canDropAt(Location location) {
@@ -465,11 +468,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
         listener.playSound(otherSound);
       }
     }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onPlayerDeath(PlayerDeathEvent event) {
-    event.getDrops().removeIf(itemStack -> itemStack.isSimilar(this.getBannerItem()));
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

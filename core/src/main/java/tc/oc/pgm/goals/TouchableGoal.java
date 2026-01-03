@@ -24,7 +24,6 @@ import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.util.Audience;
 
 /**
  * A {@link Goal} that may be 'touched' by players, meaning the player has made some tangible
@@ -190,7 +189,6 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     if (!hasShowOption(ShowOption.SHOW_MESSAGES)) return;
 
     Component message = getTouchMessage(toucher, false);
-    Audience.console().sendMessage(message);
 
     if (shouldShowTouched(toucher.getParty())) {
       if (showEnemyTouches())

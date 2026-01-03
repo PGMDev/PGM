@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -159,6 +160,14 @@ public class KitMatchModule implements MatchModule, Listener {
       sendLockWarning(event.getPlayer());
     } else if (isUnshareable(event.getItemDrop().getItemStack())) {
       event.getItemDrop().remove();
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void processItemRemoval(ItemSpawnEvent event) {
+    ItemStack item = event.getEntity().getItemStack();
+    if (isUnshareable(item)) {
+      event.setCancelled(true);
     }
   }
 

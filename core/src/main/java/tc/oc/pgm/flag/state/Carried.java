@@ -74,7 +74,7 @@ public class Carried extends Spawned implements Missing {
 
   @Override
   public boolean isRecoverable() {
-    return true;
+    return this.flag.getMatch().isRunning();
   }
 
   @Override

@@ -16,7 +16,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.spawns.RespawnOptions;
 import tc.oc.pgm.spawns.Spawn;
-import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 
@@ -28,8 +27,8 @@ public abstract class Spawning extends Participating {
   protected final long startTick;
   protected final long spawnAtTick;
 
-  public Spawning(SpawnMatchModule smm, MatchPlayer player, long deathTick, long minSpawnTick) {
-    super(smm, player);
+  public Spawning(MatchPlayer player, long deathTick, long minSpawnTick) {
+    super(player);
     this.options = smm.getRespawnOptions(player);
     this.spawnRequested = options.auto;
     this.startTick = player.getMatch().getTick().tick;
@@ -97,7 +96,7 @@ public abstract class Spawning extends Participating {
     Location location = spawn.getSpawn(player);
     if (location == null) return false;
 
-    transition(new Alive(smm, player, spawn, location));
+    transition(new Alive(player, spawn, location));
     return true;
   }
 
