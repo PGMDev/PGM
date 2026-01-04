@@ -1,7 +1,5 @@
 package tc.oc.pgm.picker;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
@@ -673,8 +671,8 @@ public class PickerMatchModule implements MatchModule, Listener {
         if (cls != cmm.getSelectedClass(player.getId())) {
           if (cmm.getCanChangeClass(player.getId())) {
             cmm.setPlayerClass(player.getId(), cls);
-            player.sendMessage(translatable(
-                "match.class.ok", NamedTextColor.GOLD, text(name, NamedTextColor.GREEN)));
+
+            player.sendMessage(translatable("match.class.ok", NamedTextColor.GREEN, cls));
             scheduleRefresh(player);
           } else {
             player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));
