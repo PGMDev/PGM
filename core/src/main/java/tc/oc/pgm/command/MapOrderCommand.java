@@ -1,9 +1,6 @@
 package tc.oc.pgm.command;
 
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static net.kyori.adventure.text.event.ClickEvent.runCommand;
-import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.api.Permissions.DEV;
 import static tc.oc.pgm.api.map.Phase.DEVELOPMENT;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
@@ -88,11 +85,7 @@ public final class MapOrderCommand {
   }
 
   public static void sendSetNextMessage(@NotNull MapInfo map, CommandSender sender) {
-    Component mapName = text(map.getName(), NamedTextColor.GOLD)
-        .hoverEvent(showText(translatable(
-            "command.maps.hover", NamedTextColor.GRAY, map.getStyledName(MapNameStyle.COLOR))))
-        .clickEvent(runCommand("/map " + map.getName()));
-    ChatManager.broadcastAdminMessage(
-        translatable("map.setNext", NamedTextColor.GRAY, player(sender), mapName));
+    ChatManager.broadcastAdminMessage(translatable(
+        "map.setNext", NamedTextColor.GRAY, player(sender), map.getStyledName(MapNameStyle.COLOR)));
   }
 }
