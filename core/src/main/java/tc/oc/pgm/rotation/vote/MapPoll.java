@@ -115,7 +115,9 @@ public class MapPoll {
         .append(text("" + countVotes(votes.get(map)), NamedTextColor.YELLOW))
         .append(text("] "))
         .append(map.getStyledName(
-            winner ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS : MapNameStyle.COLOR_WITH_AUTHORS))
+            winner
+                ? MapNameStyle.HIGHLIGHT_WITH_AUTHORS_INTERACTIVE
+                : MapNameStyle.COLOR_WITH_AUTHORS_INTERACTIVE))
         .build();
   }
 
