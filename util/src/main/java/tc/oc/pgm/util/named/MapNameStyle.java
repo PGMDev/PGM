@@ -7,14 +7,10 @@ package tc.oc.pgm.util.named;
  */
 public enum MapNameStyle {
   PLAIN(false, false, false, false), // No formatting for map
-  COLOR(true, false, false, false), // Format with color only, no authors or highlight
+  COLOR(true, false, false, true), // Format with color, hover, and click
   HIGHLIGHT(true, true, false, false), // Format with color and highlight, no authors
-  COLOR_WITH_AUTHORS(true, false, true, false), // Format with color and authors, no highlight
-  HIGHLIGHT_WITH_AUTHORS(true, true, true, false), // Format with color, authors, and highlight
-  COLOR_INTERACTIVE(true, false, false, true), // Format with color, hover, and click
-  COLOR_WITH_AUTHORS_INTERACTIVE(
-      true, false, true, true), // Format with color, authors, hover, and click
-  HIGHLIGHT_WITH_AUTHORS_INTERACTIVE(
+  COLOR_WITH_AUTHORS(true, false, true, true), // Format with color, authors, hover, and click
+  HIGHLIGHT_WITH_AUTHORS(
       true, true, true, true); // Format with color, highlight, authors, hover, and click
 
   public final boolean isColor; // If color formatting should apply

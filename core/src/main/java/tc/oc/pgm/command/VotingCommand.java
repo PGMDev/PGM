@@ -53,10 +53,7 @@ public class VotingCommand {
     VotePoolOptions vote = getVoteOptions(mapOrder);
 
     Component addMessage = translatable(
-        "vote.add",
-        NamedTextColor.GRAY,
-        player(sender),
-        map.getStyledName(MapNameStyle.COLOR_INTERACTIVE));
+        "vote.add", NamedTextColor.GRAY, player(sender), map.getStyledName(MapNameStyle.COLOR));
 
     if (vote.isMapAdded(map)) {
       viewer.sendWarning(addMessage);
@@ -84,7 +81,7 @@ public class VotingCommand {
           "vote.remove",
           NamedTextColor.GRAY,
           player(sender),
-          map.getStyledName(MapNameStyle.COLOR_INTERACTIVE)));
+          map.getStyledName(MapNameStyle.COLOR)));
     } else {
       viewer.sendWarning(translatable("map.notFound"));
     }
@@ -108,7 +105,7 @@ public class VotingCommand {
     VotePoolOptions vote = getVoteOptions(mapOrder);
 
     List<Component> maps = vote.getCustomVoteMaps().stream()
-        .map(mi -> mi.getStyledName(MapNameStyle.COLOR_INTERACTIVE))
+        .map(mi -> mi.getStyledName(MapNameStyle.COLOR))
         .collect(Collectors.toList());
     Component clearedMsg = translatable(
         "vote.remove",
@@ -163,7 +160,7 @@ public class VotingCommand {
       Component indexedName = text()
           .append(text(index, NamedTextColor.YELLOW))
           .append(text(". ", NamedTextColor.WHITE))
-          .append(mi.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS_INTERACTIVE))
+          .append(mi.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS))
           .build();
       viewer.sendMessage(indexedName);
       index++;

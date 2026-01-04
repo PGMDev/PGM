@@ -111,7 +111,7 @@ public final class MapCommand {
         return text()
             .append(text(index + 1))
             .append(text(". "))
-            .append(map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS_INTERACTIVE))
+            .append(map.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS))
             .build();
       }
     }.display(audience, ImmutableList.copyOf(maps), page);

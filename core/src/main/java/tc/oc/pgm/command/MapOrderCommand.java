@@ -39,7 +39,7 @@ public final class MapOrderCommand {
     audience.sendMessage(translatable(
         "map.nextMap",
         NamedTextColor.DARK_PURPLE,
-        next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS_INTERACTIVE)));
+        next.getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 
   @Command("setnext|sn [map]")
@@ -64,7 +64,7 @@ public final class MapOrderCommand {
 
     if (reset) {
       if (mapOrder.getNextMap() != null) {
-        Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR_INTERACTIVE);
+        Component mapName = mapOrder.getNextMap().getStyledName(MapNameStyle.COLOR);
         mapOrder.setNextMap(null);
         ChatManager.broadcastAdminMessage(
             translatable("map.setNext.revert", NamedTextColor.GRAY, player(sender), mapName));
@@ -86,9 +86,6 @@ public final class MapOrderCommand {
 
   public static void sendSetNextMessage(@NotNull MapInfo map, CommandSender sender) {
     ChatManager.broadcastAdminMessage(translatable(
-        "map.setNext",
-        NamedTextColor.GRAY,
-        player(sender),
-        map.getStyledName(MapNameStyle.COLOR_INTERACTIVE)));
+        "map.setNext", NamedTextColor.GRAY, player(sender), map.getStyledName(MapNameStyle.COLOR)));
   }
 }

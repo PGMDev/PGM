@@ -254,34 +254,29 @@ public class MapInfoImpl implements MapInfo {
 
     if (style.isColor) name.color(NamedTextColor.GOLD);
     if (style.isHighlight) name.decoration(TextDecoration.UNDERLINED, true);
+
+    Component component = name.build();
+
     if (style.showAuthors) {
-      Component component = translatable(
+      component = translatable(
           "misc.authorship",
           NamedTextColor.DARK_PURPLE,
-          name.build(),
+          component,
           TextFormatter.list(
               getAuthors().stream()
                   .map(c -> c.getName(NameStyle.PLAIN).color(NamedTextColor.RED))
                   .collect(Collectors.toList()),
               NamedTextColor.DARK_PURPLE));
-
-      if (style.isInteractive) {
-        return component
-            .hoverEvent(showText(translatable(
-                "command.maps.hover", NamedTextColor.GRAY, text(getName(), NamedTextColor.GOLD))))
-            .clickEvent(runCommand("/map " + getName()));
-      } else {
-        return component;
-      }
     }
 
     if (style.isInteractive) {
-      name.hoverEvent(showText(translatable(
-          "command.maps.hover", NamedTextColor.GRAY, text(getName(), NamedTextColor.GOLD))));
-      name.clickEvent(runCommand("/map " + getName()));
+      component = component
+          .hoverEvent(showText(translatable(
+              "command.maps.hover", NamedTextColor.GRAY, text(getName(), NamedTextColor.GOLD))))
+          .clickEvent(runCommand("/map " + getName()));
     }
 
-    return name.build();
+    return component;
   }
 
   private static @NotNull List<String> parseRules(Element root) {

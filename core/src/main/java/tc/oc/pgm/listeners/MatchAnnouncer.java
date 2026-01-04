@@ -164,6 +164,6 @@ public class MatchAnnouncer implements Listener {
     match.sendMessage(translatable(
         "misc.playing",
         NamedTextColor.DARK_PURPLE,
-        match.getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS_INTERACTIVE)));
+        match.getMap().getStyledName(MapNameStyle.COLOR_WITH_AUTHORS)));
   }
 }
