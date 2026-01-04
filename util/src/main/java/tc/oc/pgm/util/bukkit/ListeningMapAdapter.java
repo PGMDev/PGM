@@ -4,9 +4,12 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
+import org.jspecify.annotations.NonNull;
 
 /**
  * {@link Map} adapter that uses {@link K} keys and guarantees that the map only ever contains valid
@@ -14,8 +17,8 @@ import org.bukkit.plugin.Plugin;
  * keys are valid. Subclass are also responsible for defining the events and their actions when the
  * adapter is enabled. MapAdapter is a {@link org.bukkit.event.Listener} and registers itself to
  * receive events on behalf of the plugin passed to the constructor when {@link #enable()} is
- * called. This must be called before using the map. The map can be unregistered by calling {@link
- * #disable()}.
+ * called. This must be called before using the map. The map can be unregistered by calling
+ * {@link #disable()}.
  */
 public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> implements Listener {
 
@@ -50,13 +53,42 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
    * the map and null is returned.
    */
   @Override
-  public V put(K key, V value) {
+  public V put(@NonNull K key, @NonNull V value) {
     this.assertEnabled();
     if (isValid(key)) {
       return this.map.put(key, value);
     } else {
       return null;
     }
+  }
+
+  @Override
+  public V computeIfAbsent(K key, @NonNull Function<? super K, ? extends V> fn) {
+    this.assertEnabled();
+    return isValid(key) ? this.map.computeIfAbsent(key, fn) : fn.apply(key);
+  }
+
+  @Override
+  public V computeIfPresent(
+      K key, @NonNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    this.assertEnabled();
+    return isValid(key) ? this.map.computeIfPresent(key, remappingFunction) : null;
+  }
+
+  @Override
+  public V compute(
+      K key, @NonNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+    this.assertEnabled();
+    return isValid(key) ? this.map.compute(key, remappingFunction) : null;
+  }
+
+  @Override
+  public V merge(
+      K key,
+      @NonNull V value,
+      @NonNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+    this.assertEnabled();
+    return this.map.merge(key, value, remappingFunction);
   }
 
   /** If the entry is a valid new entry */
