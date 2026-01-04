@@ -2,6 +2,8 @@ package tc.oc.pgm.map;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
@@ -252,11 +254,14 @@ public class MapInfoImpl implements MapInfo {
 
     if (style.isColor) name.color(NamedTextColor.GOLD);
     if (style.isHighlight) name.decoration(TextDecoration.UNDERLINED, true);
+
+    Component component = name.build();
+
     if (style.showAuthors) {
-      return translatable(
+      component = translatable(
           "misc.authorship",
           NamedTextColor.DARK_PURPLE,
-          name.build(),
+          component,
           TextFormatter.list(
               getAuthors().stream()
                   .map(c -> c.getName(NameStyle.PLAIN).color(NamedTextColor.RED))
@@ -264,7 +269,14 @@ public class MapInfoImpl implements MapInfo {
               NamedTextColor.DARK_PURPLE));
     }
 
-    return name.build();
+    if (style.isInteractive) {
+      component = component
+          .hoverEvent(showText(translatable(
+              "command.maps.hover", NamedTextColor.GRAY, text(getName(), NamedTextColor.GOLD))))
+          .clickEvent(runCommand("/map " + getName()));
+    }
+
+    return component;
   }
 
   private static @NotNull List<String> parseRules(Element root) {
