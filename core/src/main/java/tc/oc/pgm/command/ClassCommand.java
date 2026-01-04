@@ -31,13 +31,12 @@ public final class ClassCommand {
     if (newClass == null) {
       player.sendMessage(translatable("match.class.current", NamedTextColor.GREEN)
           .append(space())
-          .append(currentClass.getComponent()));
+          .append(currentClass));
       player.sendMessage(translatable("match.class.view", NamedTextColor.GOLD));
     } else {
       classes.setPlayerClass(player.getId(), newClass);
 
-      player.sendMessage(
-          translatable("match.class.ok", NamedTextColor.GREEN, newClass.getComponent()));
+      player.sendMessage(translatable("match.class.ok", NamedTextColor.GREEN, newClass));
       if (player.isParticipating()) {
         player.sendMessage(translatable("match.class.queue", NamedTextColor.GREEN));
       }

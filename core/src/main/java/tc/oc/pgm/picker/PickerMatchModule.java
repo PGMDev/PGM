@@ -672,8 +672,7 @@ public class PickerMatchModule implements MatchModule, Listener {
           if (cmm.getCanChangeClass(player.getId())) {
             cmm.setPlayerClass(player.getId(), cls);
 
-            player.sendMessage(
-                translatable("match.class.ok", NamedTextColor.GREEN, cls.getComponent()));
+            player.sendMessage(translatable("match.class.ok", NamedTextColor.GREEN, cls));
             scheduleRefresh(player);
           } else {
             player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));

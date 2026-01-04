@@ -7,15 +7,17 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.material.ItemMaterialData;
 
-public class PlayerClass {
+public class PlayerClass implements ComponentLike {
   private final String name;
   private final String familyName;
   private final @Nullable String description;
@@ -60,7 +62,8 @@ public class PlayerClass {
     return this.longdescription;
   }
 
-  public Component getComponent() {
+  @Override
+  public @NotNull Component asComponent() {
     TextComponent.Builder component =
         text().content(this.name).color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
 
