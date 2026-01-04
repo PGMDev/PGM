@@ -1,9 +1,15 @@
 package tc.oc.pgm.classes;
 
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
@@ -52,6 +58,19 @@ public class PlayerClass {
 
   public @Nullable String getLongDescription() {
     return this.longdescription;
+  }
+
+  public Component getComponent() {
+    TextComponent.Builder component =
+        text().content(this.name).color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
+
+    String desc = this.description != null ? this.description : this.longdescription;
+    if (desc != null) {
+      component.hoverEvent(showText(
+          text(this.name + ": ", NamedTextColor.GOLD).append(text(desc, NamedTextColor.GRAY))));
+    }
+
+    return component.build();
   }
 
   public boolean isSticky() {
