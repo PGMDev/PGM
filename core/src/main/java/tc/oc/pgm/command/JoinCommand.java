@@ -1,5 +1,8 @@
 package tc.oc.pgm.command;
 
+import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
+
 import org.incendo.cloud.annotation.specifier.FlagYielding;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
@@ -10,8 +13,10 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
+import tc.oc.pgm.util.named.NameStyle;
 
 public final class JoinCommand {
 
@@ -29,7 +34,15 @@ public final class JoinCommand {
     }
 
     if (force && player.getBukkit().hasPermission(Permissions.JOIN_FORCE)) {
-      joiner.forceJoin(player, (Competitor) team);
+      final Party oldParty = player.getParty();
+      if (joiner.forceJoin(player, (Competitor) team)) {
+        ChatManager.broadcastAdminMessage(translatable(
+            "join.ok.force.announce",
+            player(player, NameStyle.FANCY),
+            player.getName(NameStyle.FANCY),
+            player.getParty().getName(),
+            oldParty.getName()));
+      }
     } else {
       joiner.join(player, (Competitor) team);
     }
