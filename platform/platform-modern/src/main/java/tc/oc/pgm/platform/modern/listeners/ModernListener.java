@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -18,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import tc.oc.pgm.api.PGM;
@@ -103,5 +105,16 @@ public class ModernListener implements Listener {
     switch (event.getCause()) {
       case NETHER_PORTAL, END_PORTAL -> event.setCancelled(true);
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerDeath(PlayerDeathEvent event) {
+    // Fix block break desync after death due to the world considered being unloaded by the player
+    // (the server ignores any player action packets coming from players who are considered
+    // "unloaded"), since players don't really die in PGM. This has to be done the next tick, as
+    // Player#clientLoaded is set after the event.
+    Bukkit.getScheduler()
+        .runTask(
+            PGM.get(), () -> ((CraftPlayer) event.getPlayer()).getHandle().setClientLoaded(true));
   }
 }
