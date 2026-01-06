@@ -21,7 +21,7 @@ public class OnlinePlayerMapAdapter<V> extends ListeningMapAdapter<Player, V> im
 
   @Override
   public boolean isValid(Player key) {
-    return key.isOnline();
+    return key.isOnline() && !LeavingPlayers.contains(key);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

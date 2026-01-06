@@ -22,7 +22,7 @@ public class OnlinePlayerUUIDMapAdapter<V> extends ListeningMapAdapter<UUID, V>
 
   public boolean isValid(UUID key) {
     Player player = Bukkit.getPlayer(key);
-    return player != null && player.isOnline();
+    return player != null && player.isOnline() && !LeavingPlayers.contains(player);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
