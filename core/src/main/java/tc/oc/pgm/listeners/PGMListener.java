@@ -3,7 +3,6 @@ package tc.oc.pgm.listeners;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.TemporalComponent.duration;
@@ -161,20 +160,22 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void initGamerules(final MatchLoadEvent event) {
-    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.FIRE_SPREAD, "false");
+    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(event.getMatch().getWorld(), 0);
   }
 
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    MISC_UTILS.setGameRule(
+    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(
         event.getMatch().getWorld(),
-        GameRules.FIRE_SPREAD,
-        event.getMatch().needModule(GameRulesMatchModule.class).getGameRule(GameRules.FIRE_SPREAD));
+        event
+            .getMatch()
+            .needModule(GameRulesMatchModule.class)
+            .getGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER));
   }
 
   @EventHandler
   public void postGamerules(final MatchFinishEvent event) {
-    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.FIRE_SPREAD, "false");
+    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(event.getMatch().getWorld(), 0);
   }
 
   //
@@ -183,14 +184,13 @@ public class PGMListener implements Listener {
   //
   @EventHandler
   public void lockTime(final MatchLoadEvent event) {
-    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.ADVANCE_TIME, "false");
+    GameRules.ADVANCE_TIME.set(event.getMatch().getWorld(), false);
   }
 
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
-    MISC_UTILS.setGameRule(
+    GameRules.ADVANCE_TIME.set(
         event.getMatch().getWorld(),
-        GameRules.ADVANCE_TIME,
         event
             .getMatch()
             .needModule(GameRulesMatchModule.class)
@@ -199,7 +199,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
-    MISC_UTILS.setGameRule(event.getMatch().getWorld(), GameRules.ADVANCE_TIME, "false");
+    GameRules.ADVANCE_TIME.set(event.getMatch().getWorld(), false);
   }
 
   @EventHandler

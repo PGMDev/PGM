@@ -48,14 +48,12 @@ public class WorldProblemListener implements Listener {
 
   @EventHandler
   public void warnRandomTickRate(WorldLoadEvent event) {
-    String str = event.getWorld().getGameRuleValue(GameRules.RANDOM_TICK_SPEED);
-    if (str != null) {
-      int value = Integer.parseInt(str);
-      if (value > RANDOM_TICK_SPEED_LIMIT) {
-        broadcastDeveloperWarning("Gamerule " + GameRules.RANDOM_TICK_SPEED + " is set to "
-            + value
-            + " for this world (normal value is 3). This may overload the server.");
-      }
+    var randomTickSpeed = GameRules.RANDOM_TICK_SPEED.get(event.getWorld());
+
+    if (randomTickSpeed != null && randomTickSpeed > RANDOM_TICK_SPEED_LIMIT) {
+      broadcastDeveloperWarning("Gamerule " + GameRules.RANDOM_TICK_SPEED.name() + " is set to "
+          + randomTickSpeed
+          + " for this world (normal value is 3). This may overload the server.");
     }
   }
 

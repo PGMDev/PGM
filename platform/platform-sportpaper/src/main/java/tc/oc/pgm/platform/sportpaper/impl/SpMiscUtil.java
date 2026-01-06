@@ -12,7 +12,6 @@ import net.minecraft.server.v1_8_R3.EntityPotion;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.CraftSound;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -33,7 +32,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
 import tc.oc.pgm.util.DataVersions;
-import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
@@ -124,23 +122,5 @@ public class SpMiscUtil implements MiscUtils {
   @Override
   public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
     return ev.getItem();
-  }
-
-  @Override
-  public String[] getGameRules() {
-    net.minecraft.server.v1_8_R3.GameRules gameRules = new net.minecraft.server.v1_8_R3.GameRules();
-    return gameRules.getGameRules();
-  }
-
-  @Override
-  public void setGameRule(World world, String rule, String value) {
-    // Handle modern game rule as correctly as possible in legacy
-    if (rule.equals(GameRules.FIRE_SPREAD)
-        && !(value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))) {
-      if (value.equals("0")) value = "false";
-      else value = "true";
-    }
-
-    world.setGameRuleValue(rule, value);
   }
 }

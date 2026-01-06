@@ -5,7 +5,6 @@ import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -61,8 +60,4 @@ public interface MiscUtils {
   boolean isDestructiveExplosion(EntityExplodeEvent ev);
 
   Entity getFakePickupEntity(PlayerPickupItemEvent ev);
-
-  String[] getGameRules();
-
-  void setGameRule(World world, String rule, String value);
 }

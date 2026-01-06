@@ -1,43 +1,38 @@
 package tc.oc.pgm.util.bukkit;
 
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.Assert.assertNotNull;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
-import tc.oc.pgm.util.StringUtils;
+import java.util.Set;
+import org.jetbrains.annotations.Unmodifiable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.platform.Platform;
 
-// We only parse what game rules we are supporting in PGM
-// TODO: evaluate what modern game rules make sense to support
+@NullMarked
 public class GameRules {
-  private static final Map<String, String> BY_NAME = new HashMap<>();
-
-  static {
-    parse("mob_drops", "doMobLoot");
-    parse("block_drops", "doTileDrops");
-    parse("keep_inventory", "keepInventory");
-    parse("mob_griefing", "mobGriefing");
-    parse("natural_health_regeneration", "naturalRegeneration");
-    if (Platform.isModern()) {
-      parse("locator_bar", "locatorBar");
-    }
+  public interface GameRuleRegistry {
+    @Unmodifiable
+    Map<String, GameRule<?>> getGameRules();
   }
 
-  public static String ADVANCE_TIME = parse("advance_time", "doDaylightCycle");
-  public static String FIRE_SPREAD = parse("fire_spread_radius_around_player", "doFireTick");
-  public static String RANDOM_TICK_SPEED = parse("random_tick_speed", "randomTickSpeed");
+  private static final @Unmodifiable Map<String, GameRule<?>> KNOWN_GAME_RULES =
+      Platform.get(GameRuleRegistry.class).getGameRules();
 
-  private static String parse(String... names) {
-    String rule = BukkitUtils.parse(
-        name -> Arrays.asList(MISC_UTILS.getGameRules()).contains(name) ? name : null, names);
-    for (String name : names) {
-      BY_NAME.put(StringUtils.simplify(name), rule);
-    }
-    return rule;
+  private static final @Unmodifiable Set<GameRule<?>> KNOWN_GAME_RULES_SET =
+      Set.copyOf(KNOWN_GAME_RULES.values());
+
+  public static GameRule<Boolean> ADVANCE_TIME = assertNotNull(getByName("advance_time"));
+  public static GameRule<Integer> FIRE_SPREAD_RADIUS_AROUND_PLAYER =
+      assertNotNull(getByName("fire_spread_radius_around_player"));
+  public static GameRule<Integer> RANDOM_TICK_SPEED = assertNotNull(getByName("random_tick_speed"));
+
+  @SuppressWarnings("unchecked")
+  public static <T> @Nullable GameRule<T> getByName(String name) {
+    return (GameRule<T>) KNOWN_GAME_RULES.get(name);
   }
 
-  public static String getByName(String name) {
-    return BY_NAME.get(StringUtils.simplify(name));
+  public static @Unmodifiable Set<GameRule<?>> getKnownGameRules() {
+    return KNOWN_GAME_RULES_SET;
   }
 }
