@@ -1,10 +1,10 @@
 package tc.oc.pgm.server;
 
 import com.destroystokyo.paper.console.PaperConsole;
-import com.google.common.collect.Lists;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,7 +22,6 @@ import org.apache.logging.log4j.io.IoBuilder;
 import org.bukkit.craftbukkit.libs.joptsimple.OptionParser;
 import org.bukkit.craftbukkit.v1_8_R3.util.ForwardLogHandler;
 import org.bukkit.plugin.InvalidDescriptionException;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginLoadOrder;
 import org.spigotmc.SpigotConfig;
@@ -51,15 +50,15 @@ public class PGMServer extends DedicatedServer implements Runnable {
     super(
         new OptionParser() {
           {
-            this.acceptsAll(Lists.newArrayList("config"), "")
+            this.acceptsAll(List.of("config"), "")
                 .withRequiredArg()
                 .ofType(File.class)
                 .defaultsTo(new File("server.properties"));
-            this.acceptsAll(Lists.newArrayList("sportpaper-settings"), "")
+            this.acceptsAll(List.of("sportpaper-settings"), "")
                 .withRequiredArg()
                 .ofType(File.class)
                 .defaultsTo(new File("sportpaper.yml"));
-            this.acceptsAll(Lists.newArrayList("plugins"), "")
+            this.acceptsAll(List.of("plugins"), "")
                 .withRequiredArg()
                 .ofType(File.class)
                 .defaultsTo(new File("plugins"));
@@ -93,9 +92,9 @@ public class PGMServer extends DedicatedServer implements Runnable {
 
     setupProperties();
     setupServer();
+    setupListener();
     setupPlugins();
     setupWorld();
-    setupListener();
     setupConsole();
     setupProperties();
 
@@ -168,21 +167,11 @@ public class PGMServer extends DedicatedServer implements Runnable {
 
     final RuntimePluginLoader loader = new RuntimePluginLoader(server);
 
-    // TODO: Investigate why ViaRewind needs to be enabled explicitly
-    final Plugin rewind = server.getPluginManager().getPlugin("ViaRewind");
-    if (rewind != null) {
-      loader.togglePlugin(rewind, true);
-    }
-
-    final Plugin backwards = server.getPluginManager().getPlugin("ViaBackwards");
-    if (backwards != null) {
-      loader.togglePlugin(backwards, true);
-    }
-
     for (PluginDescriptionFile plugin : plugins) {
       loader.loadPlugin(plugin);
     }
-    server.enablePlugins(PluginLoadOrder.POSTWORLD);
+    // Enable startup plugins, post-world plugins will be enabled for us by the server
+    server.enablePlugins(PluginLoadOrder.STARTUP);
   }
 
   protected void setupWorld() {
@@ -192,7 +181,8 @@ public class PGMServer extends DedicatedServer implements Runnable {
     a(U(), U(), 0 /* seed */, WorldType.FLAT, "" /* generator */);
     final long duration = System.nanoTime() - start;
 
-    logger.info("Done (%.3fs)! For help, type \"help\" or \"?\"", (double) duration / 1.0E9D);
+    final String loadTime = String.format("%.3f", (double) duration / 1.0E9D);
+    logger.info("Done ({}s)! For help, type \"help\" or \"?\"", loadTime);
   }
 
   protected void setupListener() throws IOException {
