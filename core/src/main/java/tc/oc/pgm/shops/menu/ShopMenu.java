@@ -267,7 +267,13 @@ public class ShopMenu extends InventoryMenu {
     meta.addItemFlags(ItemFlag.values());
     item.setItemMeta(meta);
 
-    return ClickableItem.of(item, c -> shop.purchase(icon, getViewer()));
+    return ClickableItem.of(item, c -> {
+      if (c.isShiftClick()) {
+        shop.purchaseStack(icon, getViewer());
+      } else {
+        shop.purchase(icon, getViewer());
+      }
+    });
   }
 
   private ClickableItem getPageItem(Player player, int page, boolean next) {

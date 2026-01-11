@@ -54,4 +54,17 @@ public class Payment {
         ? Materials.itemsSimilar(item, this.item, true)
         : item.getType() == currency;
   }
+
+  public int getAffordableAmount(PlayerInventory inventory) {
+    if (price <= 0) return 64 * 9 * 4; // Infinite (or very high) if its free.
+
+    int totalCurrency = 0;
+    for (ItemStack item : inventory.getContents()) {
+      if (item != null && matches(item)) {
+        totalCurrency += item.getAmount();
+      }
+    }
+    // Whole division: If you have 10 gold and if it costs 3, return 3.
+    return totalCurrency / price;
+  }
 }

@@ -17,6 +17,7 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/") // Snapshots
     maven("https://repo.viaversion.com/") // Viaversion
     maven("https://repo.pgm.fyi/snapshots") // Sportpaper & other pgm-specific stuff
+    maven("https://jitpack.io") // MinusKube SmartsInv fix for shift click
 }
 
 dependencies {
@@ -30,7 +31,7 @@ dependencies {
     api("org.incendo:cloud-minecraft-extras:2.0.0-beta.13")
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
-    api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
+    api("com.github.MinusKube:SmartInvs:master-SNAPSHOT") { exclude("*") }
     api("org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r") { exclude("*") }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
