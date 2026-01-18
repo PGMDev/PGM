@@ -7,7 +7,6 @@ import java.util.List;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.util.bukkit.Sounds;
@@ -55,8 +54,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
       return;
     }
 
-    // If not KitNode, do not charge more than once.
-    if (!(icon.getAction() instanceof KitNode)) {
+    if (!icon.isStackable()) {
       purchase(icon, buyer);
       return;
     }
