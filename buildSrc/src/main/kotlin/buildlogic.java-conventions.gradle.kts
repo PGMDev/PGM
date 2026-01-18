@@ -31,7 +31,7 @@ dependencies {
     api("org.incendo:cloud-minecraft-extras:2.0.0-beta.13")
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
-    api("com.github.MinusKube:SmartInvs:master-SNAPSHOT") { exclude("*") }
+    api("com.github.MinusKube:SmartInvs:9c9dbbe") { exclude("*") }
     api("org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r") { exclude("*") }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
