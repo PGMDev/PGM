@@ -13,7 +13,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
-import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
@@ -27,6 +26,7 @@ import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.kits.HealthKit;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -102,7 +102,7 @@ public class DamageHistoryMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPotionEffectAdd(final PotionEffectAddEvent event) {
-    if (!event.getEffect().getType().equals(PotionEffectType.ABSORPTION)) return;
+    if (!event.getEffect().getType().equals(PotionEffects.ABSORPTION)) return;
 
     MatchPlayer victim = getVictim(event.getEntity());
     if (victim == null) return;
@@ -115,9 +115,8 @@ public class DamageHistoryMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onHealthChangeKit(ApplyKitEvent event) {
-    if (!(event.getKit() instanceof HealthKit)) return;
+    if (!(event.getKit() instanceof HealthKit healthKit)) return;
 
-    HealthKit healthKit = (HealthKit) event.getKit();
     Player bukkitPlayer = event.getPlayer().getBukkit();
 
     double newHealth = Math.min(healthKit.getHalfHearts(), bukkitPlayer.getMaxHealth());

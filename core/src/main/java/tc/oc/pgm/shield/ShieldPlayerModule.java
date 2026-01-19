@@ -5,13 +5,13 @@ import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 
@@ -112,7 +112,7 @@ public class ShieldPlayerModule implements Tickable {
     // absorption hearts, so when the effect is removed, it simply removes
     // the same amount of absorption that it added initially. If any of that
     // eats into the shield, we refund the difference.
-    if (PotionEffectType.ABSORPTION.equals(event.getEffect().getType())) {
+    if (PotionEffects.ABSORPTION.equals(event.getEffect().getType())) {
       double newAbsorption =
           Math.max(0, getAbsorption() - 4 * (1 + event.getEffect().getAmplifier()));
       if (newAbsorption < shieldHealth) {

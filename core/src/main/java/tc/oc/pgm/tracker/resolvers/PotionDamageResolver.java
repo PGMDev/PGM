@@ -9,6 +9,7 @@ import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.tracker.info.GenericPotionInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 
 public class PotionDamageResolver implements DamageResolver {
 
@@ -18,10 +19,10 @@ public class PotionDamageResolver implements DamageResolver {
     PotionEffectType effect;
     switch (damageType) {
       case POISON:
-        effect = PotionEffectType.POISON;
+        effect = PotionEffects.POISON;
         break;
       case WITHER:
-        effect = PotionEffectType.WITHER;
+        effect = PotionEffects.WITHER;
         break;
       case MAGIC:
         effect = null;
