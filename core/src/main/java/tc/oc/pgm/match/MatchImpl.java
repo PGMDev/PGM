@@ -9,7 +9,20 @@ import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
@@ -849,7 +862,7 @@ public class MatchImpl implements Match {
     try {
       new ModuleLoader(); // Will load all map and match modules and throw any errors
 
-      for (Feature feature : getFeatureContext().getAll()) {
+      for (Feature<?> feature : getFeatureContext().getAll()) {
         if (feature instanceof Listener) {
           addListener((Listener) feature, getListenerScope((Listener) feature, MatchScope.RUNNING));
         }

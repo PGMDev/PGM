@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -96,10 +97,9 @@ public final class ApiUsernameResolver extends AbstractBatchingUsernameResolver 
     }
   }
 
-  private static String resolveSync(UUID id) throws IOException {
-    final HttpURLConnection url =
-        (HttpURLConnection)
-            new URL("https://api.ashcon.app/mojang/v2/user/" + assertNotNull(id)).openConnection();
+  private static String resolveSync(UUID id) throws IOException, URISyntaxException {
+    final URI uri = new URI("https://api.ashcon.app/mojang/v2/user/" + assertNotNull(id));
+    final HttpURLConnection url = (HttpURLConnection) uri.toURL().openConnection();
     url.setRequestMethod("GET");
     url.setRequestProperty("User-Agent", userAgent);
     url.setRequestProperty("Accept", "application/json");

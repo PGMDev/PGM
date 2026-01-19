@@ -275,6 +275,8 @@ public class ModernNMSHacks implements NMSHacks {
     long i = BiomeManager.obfuscateSeed(primaryLevelData.worldGenOptions().seed());
     LevelStem customStem = contextLevelStemRegistry.getValue(actualDimension);
 
+    if (customStem == null) return null;
+
     WorldInfo worldInfo = new CraftWorldInfo(
         primaryLevelData,
         levelStorageAccess,

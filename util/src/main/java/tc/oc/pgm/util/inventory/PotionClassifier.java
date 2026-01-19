@@ -19,34 +19,34 @@ public final class PotionClassifier {
   private static final Map<PotionEffectType, Integer> potionEffectTypeImplications =
       ImmutableMap.<PotionEffectType, Integer>builder()
           //  Harmful effects
-          .put(PotionEffects.BLINDNESS, HARMFUL)
+          .put(PotionEffectType.BLINDNESS, HARMFUL)
           .put(PotionEffects.NAUSEA, HARMFUL)
           .put(PotionEffects.INSTANT_DAMAGE, HARMFUL)
-          .put(PotionEffects.HUNGER, HARMFUL)
-          .put(PotionEffects.POISON, HARMFUL)
+          .put(PotionEffectType.HUNGER, HARMFUL)
+          .put(PotionEffectType.POISON, HARMFUL)
           .put(PotionEffects.SLOWNESS, HARMFUL)
           .put(PotionEffects.MINING_FATIGUE, HARMFUL)
-          .put(PotionEffects.WEAKNESS, HARMFUL)
-          .put(PotionEffects.WITHER, HARMFUL)
+          .put(PotionEffectType.WEAKNESS, HARMFUL)
+          .put(PotionEffectType.WITHER, HARMFUL)
           //  Beneficial effects
           .put(PotionEffects.HASTE, BENEFICIAL)
-          .put(PotionEffects.FIRE_RESISTANCE, BENEFICIAL)
+          .put(PotionEffectType.FIRE_RESISTANCE, BENEFICIAL)
           .put(PotionEffects.INSTANT_HEALTH, BENEFICIAL)
-          .put(PotionEffects.HEALTH_BOOST, BENEFICIAL)
+          .put(PotionEffectType.HEALTH_BOOST, BENEFICIAL)
           .put(PotionEffects.STRENGTH, BENEFICIAL)
-          .put(PotionEffects.INVISIBILITY, BENEFICIAL)
+          .put(PotionEffectType.INVISIBILITY, BENEFICIAL)
           .put(PotionEffects.JUMP_BOOST, BENEFICIAL)
-          .put(PotionEffects.NIGHT_VISION, BENEFICIAL)
-          .put(PotionEffects.REGENERATION, BENEFICIAL)
-          .put(PotionEffects.SATURATION, BENEFICIAL)
-          .put(PotionEffects.SPEED, BENEFICIAL)
-          .put(PotionEffects.WATER_BREATHING, BENEFICIAL)
+          .put(PotionEffectType.NIGHT_VISION, BENEFICIAL)
+          .put(PotionEffectType.REGENERATION, BENEFICIAL)
+          .put(PotionEffectType.SATURATION, BENEFICIAL)
+          .put(PotionEffectType.SPEED, BENEFICIAL)
+          .put(PotionEffectType.WATER_BREATHING, BENEFICIAL)
           .build();
   /** Potion effects mapped to their negative (inverse) implications. */
   private static final Map<PotionEffectType, Integer> inversePotionEffectTypeImplications =
       ImmutableMap.<PotionEffectType, Integer>builder()
           //  SLOW
-          .put(PotionEffects.SPEED, HARMFUL)
+          .put(PotionEffectType.SPEED, HARMFUL)
           //  SPEED
           .put(PotionEffects.SLOWNESS, BENEFICIAL)
           //  MINING_FATIGUE
@@ -72,45 +72,43 @@ public final class PotionClassifier {
           //  Normal behavior
           .put(PotionEffects.NAUSEA, HARMFUL)
           //  Normal behavior
-          .put(PotionEffects.REGENERATION, BENEFICIAL)
+          .put(PotionEffectType.REGENERATION, BENEFICIAL)
           //  Inverse of DAMAGE_RESISTANCE
           .put(PotionEffects.RESISTANCE, HARMFUL)
           //  Normal behavior
-          .put(PotionEffects.FIRE_RESISTANCE, BENEFICIAL)
+          .put(PotionEffectType.FIRE_RESISTANCE, BENEFICIAL)
           //  Normal behavior
-          .put(PotionEffects.WATER_BREATHING, BENEFICIAL)
+          .put(PotionEffectType.WATER_BREATHING, BENEFICIAL)
           //  Normal behavior
-          .put(PotionEffects.INVISIBILITY, BENEFICIAL)
+          .put(PotionEffectType.INVISIBILITY, BENEFICIAL)
           //  Normal behavior
-          .put(PotionEffects.BLINDNESS, HARMFUL)
+          .put(PotionEffectType.BLINDNESS, HARMFUL)
           //  Normal behavior
-          .put(PotionEffects.NIGHT_VISION, BENEFICIAL)
+          .put(PotionEffectType.NIGHT_VISION, BENEFICIAL)
           //  SATURATION
-          .put(PotionEffects.HUNGER, BENEFICIAL)
+          .put(PotionEffectType.HUNGER, BENEFICIAL)
           //  INCREASE_DAMAGE
-          .put(PotionEffects.WEAKNESS, BENEFICIAL)
+          .put(PotionEffectType.WEAKNESS, BENEFICIAL)
           //  Normal behavior
-          .put(PotionEffects.POISON, HARMFUL)
+          .put(PotionEffectType.POISON, HARMFUL)
           //  Normal behavior
-          .put(PotionEffects.WITHER, HARMFUL)
+          .put(PotionEffectType.WITHER, HARMFUL)
           //  Inverse of HEALTH_BOOST. When all hearts are removed (<= -5), the player instantly
           // dies.
-          .put(PotionEffects.HEALTH_BOOST, HARMFUL)
+          .put(PotionEffectType.HEALTH_BOOST, HARMFUL)
           //  Normal behavior
-          .put(PotionEffects.ABSORPTION, BENEFICIAL)
+          .put(PotionEffectType.ABSORPTION, BENEFICIAL)
           /* HUNGER
           ~ Side effect: adds 10 absorption hearts at the start of the effect.
           */
-          .put(PotionEffects.SATURATION, HARMFUL)
+          .put(PotionEffectType.SATURATION, HARMFUL)
           .build();
 
   public static double getScore(ThrownPotion potion) {
     double score = 0;
 
-    for (PotionEffect effect :
-        Iterables.concat(
-            potion.getEffects(),
-            ((PotionMeta) potion.getItem().getItemMeta()).getCustomEffects())) {
+    for (PotionEffect effect : Iterables.concat(
+        potion.getEffects(), ((PotionMeta) potion.getItem().getItemMeta()).getCustomEffects())) {
       score += getScore(effect);
     }
 

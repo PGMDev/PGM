@@ -21,17 +21,17 @@ repositories {
 
 dependencies {
     api("org.jdom:jdom2:2.0.6.1")
-    api("net.kyori:adventure-api:4.25.0")
-    api("net.kyori:adventure-text-serializer-plain:4.25.0")
+    api("net.kyori:adventure-api:4.26.1")
+    api("net.kyori:adventure-text-serializer-plain:4.26.1")
     api("net.kyori:adventure-platform-bukkit:4.4.1")
     api("org.incendo:cloud-core:2.0.0")
     api("org.incendo:cloud-annotations:2.0.0")
-    api("org.incendo:cloud-paper:2.0.0-beta.13")
-    api("org.incendo:cloud-minecraft-extras:2.0.0-beta.13")
+    api("org.incendo:cloud-paper:2.0.0-beta.14")
+    api("org.incendo:cloud-minecraft-extras:2.0.0-beta.14")
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
-    api("fr.minuskube.inv:smart-invs:1.2.7") { exclude("*") }
-    api("org.eclipse.jgit:org.eclipse.jgit:7.3.0.202506031305-r") { exclude("*") }
+    api("fr.minuskube.inv:smart-invs:1.2.7") { isTransitive = false }
+    api("org.eclipse.jgit:org.eclipse.jgit:7.5.0.202512021534-r") { isTransitive = false }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
@@ -51,10 +51,10 @@ version = "0.16-SNAPSHOT"
 description = "The original PvP Game Manager for Minecraft"
 
 tasks {
-    withType<JavaCompile>() {
+    withType<JavaCompile> {
         options.encoding = "UTF-8"
     }
-    withType<Javadoc>() {
+    withType<Javadoc> {
         options.encoding = "UTF-8"
     }
 }
@@ -63,7 +63,10 @@ spotless {
     ratchetFrom = "origin/dev"
     java {
         removeUnusedImports()
-        palantirJavaFormat("2.81.0").style("GOOGLE").formatJavadoc(true)
+        trimTrailingWhitespace()
+        forbidWildcardImports()
+        formatAnnotations()
+        palantirJavaFormat("2.85.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 

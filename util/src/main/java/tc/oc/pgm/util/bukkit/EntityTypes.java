@@ -11,35 +11,32 @@ public class EntityTypes {
   private static final Map<String, EntityType> BY_NAME = new HashMap<>();
 
   static {
+    parse("DROPPED_ITEM", "ITEM");
+    parse("LEASH_HITCH", "LEASH_KNOT");
+    parse("ENDER_SIGNAL", "EYE_OF_ENDER");
+    parse("THROWN_EXP_BOTTLE", "EXPERIENCE_BOTTLE");
+    parse("FIREWORK", "FIREWORK_ROCKET");
+    parse("MINECART_COMMAND", "COMMAND_BLOCK_MINECART");
+    parse("MINECART_CHEST", "CHEST_MINECART");
+    parse("MINECART_FURNACE", "FURNACE_MINECART");
+    parse("MINECART_TNT", "TNT_MINECART");
+    parse("MINECART_HOPPER", "HOPPER_MINECART");
+    parse("MINECART_MOB_SPAWNER", "SPAWNER_MINECART");
+    parse("PIG_ZOMBIE", "ZOMBIFIED_PIGLIN");
+    parse("MUSHROOM_COW", "MOOSHROOM");
+    parse("SNOWMAN", "SNOW_GOLEM");
+    parse("SPLASH_POTION", "POTION");
+    parse("FISHING_HOOK", "FISHING_BOBBER");
+    parse("LIGHTNING", "LIGHTNING_BOLT");
+
     for (EntityType value : EntityType.values()) {
       BY_NAME.put(StringUtils.simplify(value.name()), value);
     }
   }
 
-  public static final EntityType DROPPED_ITEM = parse("DROPPED_ITEM", "ITEM");
-  public static final EntityType LEASH_HITCH = parse("LEASH_HITCH", "LEASH_KNOT");
-  public static final EntityType ENDER_SIGNAL = parse("ENDER_SIGNAL", "EYE_OF_ENDER");
-  public static final EntityType THROWN_EXP_BOTTLE =
-      parse("THROWN_EXP_BOTTLE", "EXPERIENCE_BOTTLE");
   public static final EntityType PRIMED_TNT = parse("PRIMED_TNT", "TNT");
-  public static final EntityType FIREWORK = parse("FIREWORK", "FIREWORK_ROCKET");
-  public static final EntityType MINECART_COMMAND =
-      parse("MINECART_COMMAND", "COMMAND_BLOCK_MINECART");
-  public static final EntityType MINECART_CHEST = parse("MINECART_CHEST", "CHEST_MINECART");
-  public static final EntityType MINECART_FURNACE = parse("MINECART_FURNACE", "FURNACE_MINECART");
-  public static final EntityType MINECART_TNT = parse("MINECART_TNT", "TNT_MINECART");
-  public static final EntityType MINECART_HOPPER = parse("MINECART_HOPPER", "HOPPER_MINECART");
-  public static final EntityType MINECART_MOB_SPAWNER =
-      parse("MINECART_MOB_SPAWNER", "SPAWNER_MINECART");
-  public static final EntityType PIG_ZOMBIE = parse("PIG_ZOMBIE", "ZOMBIFIED_PIGLIN");
-  public static final EntityType MUSHROOM_COW = parse("MUSHROOM_COW", "MOOSHROOM");
-  public static final EntityType SNOWMAN = parse("SNOWMAN", "SNOW_GOLEM");
   public static final EntityType ENDER_CRYSTAL = parse("ENDER_CRYSTAL", "END_CRYSTAL");
-  public static final EntityType SPLASH_POTION = parse("SPLASH_POTION", "POTION");
-  public static final EntityType FISHING_HOOK = parse("FISHING_HOOK", "FISHING_BOBBER");
-  public static final EntityType LIGHTNING = parse("LIGHTNING", "LIGHTNING_BOLT");
   public static final EntityType COMPLEX_PART = parse("COMPLEX_PART", "UNKNOWN");
-  public static final EntityType UNKNOWN = EntityType.UNKNOWN;
 
   private static EntityType parse(String... names) {
     EntityType type = BukkitUtils.parse(EntityType::valueOf, names);

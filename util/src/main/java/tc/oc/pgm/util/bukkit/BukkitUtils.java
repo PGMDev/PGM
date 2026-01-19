@@ -5,7 +5,10 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
@@ -123,29 +126,29 @@ public interface BukkitUtils {
   }
 
   Map<PotionEffectType, String> POTION_EFFECT_MAP = ImmutableMap.<PotionEffectType, String>builder()
-      .put(PotionEffects.BLINDNESS, "Blindness")
+      .put(PotionEffectType.SPEED, "Speed")
+      .put(PotionEffectType.REGENERATION, "Regeneration")
+      .put(PotionEffectType.FIRE_RESISTANCE, "Fire Resistance")
+      .put(PotionEffectType.WATER_BREATHING, "Water Breathing")
+      .put(PotionEffectType.INVISIBILITY, "Invisibility")
+      .put(PotionEffectType.BLINDNESS, "Blindness")
+      .put(PotionEffectType.NIGHT_VISION, "Night Vision")
+      .put(PotionEffectType.HUNGER, "Hunger")
+      .put(PotionEffectType.WEAKNESS, "Weakness")
+      .put(PotionEffectType.POISON, "Poison")
+      .put(PotionEffectType.WITHER, "Wither")
+      .put(PotionEffectType.HEALTH_BOOST, "Health Boost")
+      .put(PotionEffectType.ABSORPTION, "Absorption")
+      .put(PotionEffectType.SATURATION, "Saturation")
+      .put(PotionEffects.SLOWNESS, "Slowness")
+      .put(PotionEffects.HASTE, "Haste")
+      .put(PotionEffects.MINING_FATIGUE, "Mining Fatigue")
+      .put(PotionEffects.STRENGTH, "Strength")
+      .put(PotionEffects.INSTANT_HEALTH, "Instant Health")
+      .put(PotionEffects.INSTANT_DAMAGE, "Instant Damage")
+      .put(PotionEffects.JUMP_BOOST, "Jump Boost")
       .put(PotionEffects.NAUSEA, "Nausea")
       .put(PotionEffects.RESISTANCE, "Resistance")
-      .put(PotionEffects.HASTE, "Haste")
-      .put(PotionEffects.FIRE_RESISTANCE, "Fire Resistance")
-      .put(PotionEffects.INSTANT_DAMAGE, "Instant Damage")
-      .put(PotionEffects.INSTANT_HEALTH, "Instant Health")
-      .put(PotionEffects.HUNGER, "Hunger")
-      .put(PotionEffects.STRENGTH, "Strength")
-      .put(PotionEffects.INVISIBILITY, "Invisibility")
-      .put(PotionEffects.JUMP_BOOST, "Jump Boost")
-      .put(PotionEffects.NIGHT_VISION, "Night Vision")
-      .put(PotionEffects.POISON, "Poison")
-      .put(PotionEffects.REGENERATION, "Regeneration")
-      .put(PotionEffects.SLOWNESS, "Slowness")
-      .put(PotionEffects.MINING_FATIGUE, "Mining Fatigue")
-      .put(PotionEffects.SPEED, "Speed")
-      .put(PotionEffects.WATER_BREATHING, "Water Breathing")
-      .put(PotionEffects.WEAKNESS, "Weakness")
-      .put(PotionEffects.WITHER, "Wither")
-      .put(PotionEffects.HEALTH_BOOST, "Health Boost")
-      .put(PotionEffects.ABSORPTION, "Absorption")
-      .put(PotionEffects.SATURATION, "Saturation")
       .build();
 
   static <T> T parse(Function<String, T> parser, String... names) {

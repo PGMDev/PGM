@@ -39,6 +39,7 @@ import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.map.GameRule;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
+import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
@@ -241,8 +242,7 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void nerfFishing(PlayerFishEvent event) {
-    if (event.getCaught() instanceof Item) {
-      Item caught = (Item) event.getCaught();
+    if (event.getCaught() instanceof Item caught) {
       if (caught.getItemStack().getType() != Materials.RAW_FISH) {
         caught.setItemStack(new ItemStack(Materials.RAW_FISH));
       }
@@ -283,8 +283,8 @@ public class PGMListener implements Listener {
       // No limit
       Component forced = translatable("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
-        Component time = TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
-            .color(NamedTextColor.GREEN);
+        Component time =
+            TemporalComponent.duration(event.getTimeLimit()).color(NamedTextColor.GREEN);
 
         // If time & match limit are present, display both
         if (event.getMatchLimit() != 0) {
@@ -327,11 +327,7 @@ public class PGMListener implements Listener {
     }
   }
 
-  public void setGameRule(MatchLoadEvent event, String gameRule, boolean gameRuleValue) {
-    event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
-  }
-
-  public void setGameRule(MatchFinishEvent event, String gameRule, boolean gameRuleValue) {
+  public void setGameRule(MatchEvent event, String gameRule, boolean gameRuleValue) {
     event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
   }
 

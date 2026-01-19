@@ -9,6 +9,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -26,9 +27,9 @@ public class Dead extends Spawning {
   private static final PotionEffect CONFUSION =
       new PotionEffect(PotionEffects.NAUSEA, 100, 0, true, false);
   private static final PotionEffect BLINDNESS_SHORT =
-      new PotionEffect(PotionEffects.BLINDNESS, 21, 0, true, false);
+      new PotionEffect(PotionEffectType.BLINDNESS, 21, 0, true, false);
   private static final PotionEffect BLINDNESS_LONG =
-      new PotionEffect(PotionEffects.BLINDNESS, Integer.MAX_VALUE, 0, true, false);
+      new PotionEffect(PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 0, true, false);
 
   private boolean kitted, rotted;
 
@@ -70,7 +71,7 @@ public class Dead extends Spawning {
 
     PLAYERS.showBorderWarning(bukkit, false);
 
-    bukkit.removePotionEffect(PotionEffects.BLINDNESS);
+    bukkit.removePotionEffect(PotionEffectType.BLINDNESS);
     bukkit.removePotionEffect(PotionEffects.NAUSEA);
 
     // If regular rotting didn't end, force-finish it to avoid client-side

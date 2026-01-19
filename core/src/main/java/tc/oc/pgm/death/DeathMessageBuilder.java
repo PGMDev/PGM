@@ -17,8 +17,13 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
-import tc.oc.pgm.api.tracker.info.*;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
+import tc.oc.pgm.api.tracker.info.FallInfo;
+import tc.oc.pgm.api.tracker.info.MeleeInfo;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
+import tc.oc.pgm.api.tracker.info.RangedInfo;
+import tc.oc.pgm.api.tracker.info.TrackerInfo;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
@@ -164,8 +169,7 @@ public class DeathMessageBuilder {
 
   boolean variant() {
     int count = 0;
-    for (; getAllKeys().contains(key + "." + count); count++)
-      ;
+    while (getAllKeys().contains(key + "." + count)) count++;
 
     if (count == 0) return false;
 
@@ -214,8 +218,8 @@ public class DeathMessageBuilder {
   private static final Set<EntityType> IGNORED_ENTITIES = ImmutableSet.of(
       EntityTypes.COMPLEX_PART,
       // Modern servers have a translation for the ender crystal
-      Platform.isModern() ? EntityTypes.UNKNOWN : EntityTypes.ENDER_CRYSTAL,
-      EntityTypes.UNKNOWN);
+      Platform.isModern() ? EntityType.UNKNOWN : EntityTypes.ENDER_CRYSTAL,
+      EntityType.UNKNOWN);
 
   boolean entity(EntityInfo entityInfo) {
     // Skip for entities that are weird and have no translations
@@ -328,15 +332,12 @@ public class DeathMessageBuilder {
 
     PhysicalInfo info = projectile.getProjectile();
     if (info instanceof EntityInfo entityInfo) {
-      switch (entityInfo.getEntityType()) {
-        case UNKNOWN:
-        case ARROW:
-        case WITHER_SKULL:
-          info = null; // "shot by arrow" is redundant
-          break;
-      }
+      info = switch (entityInfo.getEntityType()) {
+        case UNKNOWN, ARROW, WITHER_SKULL -> null; // "shot by arrow" is redundant
+        default -> info;
+      };
     } else {
-      // Projectile name may be different than entity name e.g. custom projectile
+      // Projectile name may be different from entity name e.g. custom projectile
       weapon = projectile.getName();
     }
 
