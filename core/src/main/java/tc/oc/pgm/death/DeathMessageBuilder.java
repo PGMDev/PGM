@@ -218,8 +218,8 @@ public class DeathMessageBuilder {
   private static final Set<EntityType> IGNORED_ENTITIES = ImmutableSet.of(
       EntityTypes.COMPLEX_PART,
       // Modern servers have a translation for the ender crystal
-      Platform.isModern() ? EntityType.UNKNOWN : EntityTypes.ENDER_CRYSTAL,
-      EntityType.UNKNOWN);
+      Platform.isModern() ? EntityTypes.UNKNOWN : EntityTypes.ENDER_CRYSTAL,
+      EntityTypes.UNKNOWN);
 
   boolean entity(EntityInfo entityInfo) {
     // Skip for entities that are weird and have no translations

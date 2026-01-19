@@ -70,8 +70,7 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
   private Component replaceClickEvents(
       Component component, Function<MatchResult, String> replacer) {
     var click = component.clickEvent();
-    if (click != null) {
-      var payload = ((ClickEvent.Payload.Text) click.payload());
+    if (click != null && click.payload() instanceof ClickEvent.Payload.Text payload) {
       var matcher = PATTERN.matcher(payload.value());
       var result = new StringBuilder();
       while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
