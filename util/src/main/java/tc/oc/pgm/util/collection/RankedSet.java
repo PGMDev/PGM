@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A set of objects with a dynamic partial ordering that can be manually invalidated. The ordering
@@ -99,7 +99,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
 
   /** Iterate in ranking order */
   @Override
-  public @NotNull Iterator<E> iterator() {
+  public @NonNull Iterator<E> iterator() {
     freshenRanking();
     return list.iterator();
   }
@@ -110,35 +110,35 @@ public class RankedSet<E> extends ForwardingSet<E> {
   }
 
   @Override
-  public boolean add(@NotNull E e) {
+  public boolean add(@NonNull E e) {
     list.add(e);
     invalidateRanking();
     return super.add(e);
   }
 
   @Override
-  public boolean remove(@NotNull Object e) {
+  public boolean remove(@NonNull Object e) {
     list.remove(e);
     invalidateRanking();
     return super.remove(e);
   }
 
   @Override
-  public boolean addAll(@NotNull Collection<? extends E> c) {
+  public boolean addAll(@NonNull Collection<? extends E> c) {
     list.addAll(c);
     invalidateRanking();
     return super.addAll(c);
   }
 
   @Override
-  public boolean removeAll(@NotNull Collection<?> c) {
+  public boolean removeAll(@NonNull Collection<?> c) {
     list.removeAll(c);
     invalidateRanking();
     return super.removeAll(c);
   }
 
   @Override
-  public boolean retainAll(@NotNull Collection<?> c) {
+  public boolean retainAll(@NonNull Collection<?> c) {
     list.retainAll(c);
     invalidateRanking();
     return super.retainAll(c);
@@ -152,7 +152,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
   }
 
   @Override
-  public <T> T @NotNull [] toArray(T[] array) {
+  public <T> T @NonNull [] toArray(T[] array) {
     Iterator<E> iterator = iterator();
     for (int i = 0; i < array.length && iterator.hasNext(); i++) {
       array[i] = (T) iterator.next();
@@ -161,7 +161,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
   }
 
   @Override
-  public Object @NotNull [] toArray() {
+  public Object @NonNull [] toArray() {
     return toArray(new Object[size()]);
   }
 }

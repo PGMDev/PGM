@@ -13,7 +13,6 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.MatchQuery;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.MeleeInfo;
@@ -93,7 +92,7 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
       }
     }
 
-    @Nullable Entity actor = GeneralizedEvent.getActorIfPresent(event);
+    Entity actor = GeneralizedEvent.getActorIfPresent(event);
 
     return switch (this.cause) {
       // Actor types

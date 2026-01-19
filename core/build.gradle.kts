@@ -33,7 +33,6 @@ tasks.named<ShadowJar>("shadowJar") {
     dependencies {
         exclude(dependency("com.mojang:brigadier")) // Added by commodore
         // Several compile-only annotation dependencies
-        exclude(dependency("org.jspecify:jspecify"))
         exclude(dependency("org.jetbrains:annotations"))
         exclude(dependency("org.checkerframework:checker-qual"))
         exclude(dependency("org.apiguardian:apiguardian-api"))

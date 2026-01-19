@@ -35,6 +35,10 @@ dependencies {
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
+    // Annotations
+    api("org.jspecify:jspecify:1.0.0")
+    compileOnly("org.jetbrains:annotations:26.0.2-1")
+
     // Optional plugin deps
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
     compileOnly("com.viaversion:viaversion-api:5.0.0")
@@ -71,7 +75,7 @@ spotless {
 
 restrictImports {
     group {
-        reason = "Use org.jetbrains.annotations to add annotations"
+        reason = "Use org.jspecify.annotations to add annotations, or org.jetbrains.annotations if needed"
         bannedImports = listOf("javax.annotation.**")
     }
     group {

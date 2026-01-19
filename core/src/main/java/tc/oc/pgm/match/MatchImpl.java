@@ -42,8 +42,8 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -329,7 +329,7 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public @NotNull Audience audience() {
+  public @NonNull Audience audience() {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
     audiences.add(Audience.console());
     return Audience.get(audiences);
@@ -502,7 +502,7 @@ public class MatchImpl implements Match {
    * (and bail if either are cancelled) -
    */
   private boolean setOrClearPlayerParty(
-      MatchPlayer player, @Nullable Party newParty, @NotNull JoinRequest joinRequest) {
+      MatchPlayer player, @Nullable Party newParty, @NonNull JoinRequest joinRequest) {
     Party oldParty = player.getParty();
 
     assertTrue(this == player.getMatch(), "Player belongs to a different match");

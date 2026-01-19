@@ -9,7 +9,7 @@ import java.util.function.Function;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * {@link Map} adapter that uses {@link K} keys and guarantees that the map only ever contains valid
@@ -53,7 +53,7 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
    * the map and null is returned.
    */
   @Override
-  public V put(@NotNull K key, @NotNull V value) {
+  public V put(@NonNull K key, @NonNull V value) {
     this.assertEnabled();
     if (isValid(key)) {
       return this.map.put(key, value);
@@ -63,21 +63,21 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
   }
 
   @Override
-  public V computeIfAbsent(K key, @NotNull Function<? super K, ? extends V> fn) {
+  public V computeIfAbsent(K key, @NonNull Function<? super K, ? extends V> fn) {
     this.assertEnabled();
     return isValid(key) ? this.map.computeIfAbsent(key, fn) : fn.apply(key);
   }
 
   @Override
   public V computeIfPresent(
-      K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+      K key, @NonNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
     this.assertEnabled();
     return isValid(key) ? this.map.computeIfPresent(key, remappingFunction) : null;
   }
 
   @Override
   public V compute(
-      K key, @NotNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
+      K key, @NonNull BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
     this.assertEnabled();
     return isValid(key) ? this.map.compute(key, remappingFunction) : null;
   }
@@ -85,8 +85,8 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
   @Override
   public V merge(
       K key,
-      @NotNull V value,
-      @NotNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
+      @NonNull V value,
+      @NonNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
     this.assertEnabled();
     return this.map.merge(key, value, remappingFunction);
   }

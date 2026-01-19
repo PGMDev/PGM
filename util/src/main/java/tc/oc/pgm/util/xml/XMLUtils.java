@@ -40,8 +40,8 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.Pair;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -421,7 +421,7 @@ public final class XMLUtils {
   }
 
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      @NotNull Node node, Class<T> type) throws InvalidXMLException {
+      @NonNull Node node, Class<T> type) throws InvalidXMLException {
     return parseNumericRange(node, node.getValue(), type);
   }
 

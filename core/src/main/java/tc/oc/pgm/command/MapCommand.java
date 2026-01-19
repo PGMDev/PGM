@@ -43,7 +43,7 @@ import org.incendo.cloud.annotations.Default;
 import org.incendo.cloud.annotations.Flag;
 import org.incendo.cloud.annotations.suggestion.Suggestions;
 import org.incendo.cloud.context.CommandContext;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.map.Contributor;
@@ -120,7 +120,7 @@ public final class MapCommand {
     }.display(audience, ImmutableList.copyOf(maps), page);
   }
 
-  private static <T> @NotNull Predicate<MapInfo> makeMatcher(
+  private static <T> @NonNull Predicate<MapInfo> makeMatcher(
       List<String> input, Function<MapInfo, Collection<T>> extractor, Function<T, String> asStr) {
     var inputSet = input.stream()
         .flatMap(t -> Arrays.stream(t.split(",")))
@@ -391,7 +391,7 @@ public final class MapCommand {
     return text;
   }
 
-  @NotNull
+  @NonNull
   private ComponentLike formatMapSource(CommandSender sender, MapInfo map) {
     MapSource source = map.getSource();
     MapRoot root = source.getRoot();
