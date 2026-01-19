@@ -109,7 +109,7 @@ public enum SettingKey implements Aliased {
    * @return The name.
    */
   public String getName() {
-    return aliases.get(0);
+    return aliases.getFirst();
   }
 
   /**

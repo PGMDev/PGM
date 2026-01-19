@@ -1,6 +1,9 @@
 package tc.oc.pgm.platform.sportpaper.packets;
 
-import static net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction.*;
+import static net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER;
+import static net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER;
+import static net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME;
+import static net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.google.common.collect.Lists;

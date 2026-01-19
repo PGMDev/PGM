@@ -5,7 +5,15 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import com.google.common.collect.ForwardingSet;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A set of objects with a dynamic partial ordering that can be manually invalidated. The ordering
@@ -91,7 +99,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
 
   /** Iterate in ranking order */
   @Override
-  public Iterator<E> iterator() {
+  public @NotNull Iterator<E> iterator() {
     freshenRanking();
     return list.iterator();
   }
@@ -102,35 +110,35 @@ public class RankedSet<E> extends ForwardingSet<E> {
   }
 
   @Override
-  public boolean add(E e) {
+  public boolean add(@NotNull E e) {
     list.add(e);
     invalidateRanking();
     return super.add(e);
   }
 
   @Override
-  public boolean remove(Object e) {
+  public boolean remove(@NotNull Object e) {
     list.remove(e);
     invalidateRanking();
     return super.remove(e);
   }
 
   @Override
-  public boolean addAll(Collection<? extends E> c) {
+  public boolean addAll(@NotNull Collection<? extends E> c) {
     list.addAll(c);
     invalidateRanking();
     return super.addAll(c);
   }
 
   @Override
-  public boolean removeAll(Collection<?> c) {
+  public boolean removeAll(@NotNull Collection<?> c) {
     list.removeAll(c);
     invalidateRanking();
     return super.removeAll(c);
   }
 
   @Override
-  public boolean retainAll(Collection<?> c) {
+  public boolean retainAll(@NotNull Collection<?> c) {
     list.retainAll(c);
     invalidateRanking();
     return super.retainAll(c);
@@ -144,7 +152,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
   }
 
   @Override
-  public <T> T[] toArray(T[] array) {
+  public <T> T @NotNull [] toArray(T[] array) {
     Iterator<E> iterator = iterator();
     for (int i = 0; i < array.length && iterator.hasNext(); i++) {
       array[i] = (T) iterator.next();
@@ -153,7 +161,7 @@ public class RankedSet<E> extends ForwardingSet<E> {
   }
 
   @Override
-  public Object[] toArray() {
+  public Object @NotNull [] toArray() {
     return toArray(new Object[size()]);
   }
 }

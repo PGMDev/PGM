@@ -15,7 +15,9 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.MatchQuery;
-import tc.oc.pgm.api.tracker.info.*;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
+import tc.oc.pgm.api.tracker.info.MeleeInfo;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ItemInfo;
@@ -93,91 +95,55 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
 
     @Nullable Entity actor = GeneralizedEvent.getActorIfPresent(event);
 
-    switch (this.cause) {
-        // Actor types
-      case WORLD:
-        return !(actor instanceof LivingEntity);
+    return switch (this.cause) {
+      // Actor types
+      case WORLD -> !(actor instanceof LivingEntity);
+      case LIVING -> actor instanceof LivingEntity;
+      case MOB -> actor instanceof LivingEntity && !(actor instanceof Player);
+      case PLAYER -> actor instanceof Player;
 
-      case LIVING:
-        return actor instanceof LivingEntity;
-
-      case MOB:
-        return actor instanceof LivingEntity && !(actor instanceof Player);
-
-      case PLAYER:
-        return actor instanceof Player;
-
-        // Block actions
-      case PUNCH:
-        return event instanceof PlayerPunchBlockEvent || punchDamage;
-
-      case TRAMPLE:
-        return event instanceof PlayerTrampleBlockEvent;
-
-      case MINE:
-        return event instanceof BlockDamageEvent
+      // Block actions
+      case PUNCH -> event instanceof PlayerPunchBlockEvent || punchDamage;
+      case TRAMPLE -> event instanceof PlayerTrampleBlockEvent;
+      case MINE ->
+        event instanceof BlockDamageEvent
             || event instanceof BlockBreakEvent
             || event instanceof PlayerBucketFillEvent;
 
-        // Damage types
-      case MELEE:
-        return damageCause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+      // Damage types
+      case MELEE ->
+        damageCause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
             || damageInfo instanceof MeleeInfo;
-
-      case PROJECTILE:
-        return damageCause == EntityDamageEvent.DamageCause.PROJECTILE
+      case PROJECTILE ->
+        damageCause == EntityDamageEvent.DamageCause.PROJECTILE
             || damageInfo instanceof ProjectileInfo;
-
-      case POTION:
-        return damageCause == EntityDamageEvent.DamageCause.MAGIC
+      case POTION ->
+        damageCause == EntityDamageEvent.DamageCause.MAGIC
             || damageCause == EntityDamageEvent.DamageCause.POISON
             || damageCause == EntityDamageEvent.DamageCause.WITHER
             || damageInfo instanceof PotionInfo;
-
-      case EXPLOSION:
-        return event instanceof EntityExplodeEvent
+      case EXPLOSION ->
+        event instanceof EntityExplodeEvent
             || damageCause == EntityDamageEvent.DamageCause.BLOCK_EXPLOSION
             || damageCause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION;
-
-      case COMBUSTION:
-        return event instanceof BlockBurnEvent
+      case COMBUSTION ->
+        event instanceof BlockBurnEvent
             || damageCause == EntityDamageEvent.DamageCause.FIRE
             || damageCause == EntityDamageEvent.DamageCause.FIRE_TICK
             || damageCause == EntityDamageEvent.DamageCause.LAVA;
-
-      case FALL: // Strictly damage from hitting the ground
-        return damageCause == EntityDamageEvent.DamageCause.FALL;
-
-      case GRAVITY: // Any damage caused by a fall
-        return damageCause == EntityDamageEvent.DamageCause.FALL
+      case FALL -> // Strictly damage from hitting the ground
+        damageCause == EntityDamageEvent.DamageCause.FALL;
+      case GRAVITY -> // Any damage caused by a fall
+        damageCause == EntityDamageEvent.DamageCause.FALL
             || damageCause == EntityDamageEvent.DamageCause.VOID;
-
-      case VOID:
-        return damageCause == EntityDamageEvent.DamageCause.VOID;
-
-      case SQUASH:
-        return damageCause == EntityDamageEvent.DamageCause.FALLING_BLOCK;
-
-      case SUFFOCATION:
-        return damageCause == EntityDamageEvent.DamageCause.SUFFOCATION;
-
-      case DROWNING:
-        return damageCause == EntityDamageEvent.DamageCause.DROWNING;
-
-      case STARVATION:
-        return damageCause == EntityDamageEvent.DamageCause.STARVATION;
-
-      case LIGHTNING:
-        return damageCause == EntityDamageEvent.DamageCause.LIGHTNING;
-
-      case CACTUS:
-        return damageCause == EntityDamageEvent.DamageCause.CONTACT;
-
-      case THORNS:
-        return damageCause == EntityDamageEvent.DamageCause.THORNS;
-
-      default:
-        return false;
-    }
+      case VOID -> damageCause == EntityDamageEvent.DamageCause.VOID;
+      case SQUASH -> damageCause == EntityDamageEvent.DamageCause.FALLING_BLOCK;
+      case SUFFOCATION -> damageCause == EntityDamageEvent.DamageCause.SUFFOCATION;
+      case DROWNING -> damageCause == EntityDamageEvent.DamageCause.DROWNING;
+      case STARVATION -> damageCause == EntityDamageEvent.DamageCause.STARVATION;
+      case LIGHTNING -> damageCause == EntityDamageEvent.DamageCause.LIGHTNING;
+      case CACTUS -> damageCause == EntityDamageEvent.DamageCause.CONTACT;
+      case THORNS -> damageCause == EntityDamageEvent.DamageCause.THORNS;
+    };
   }
 }

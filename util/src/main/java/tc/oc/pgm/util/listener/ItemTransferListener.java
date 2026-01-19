@@ -8,10 +8,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.inventory.*;
+import org.bukkit.inventory.CraftingInventory;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MerchantInventory;
 import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.ItemTransferEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -99,11 +107,10 @@ public class ItemTransferListener implements Listener {
     }
 
     // Get the player who clicked
-    if (!(event.getWhoClicked() instanceof Player)) {
+    if (!(event.getWhoClicked() instanceof Player player)) {
       // Can this happen?
       return;
     }
-    Player player = (Player) event.getWhoClicked();
 
     // In a dual-inventory view, InventoryClickEvent.getInventory() always returns the top
     // inventory, so to figure out which one was actually clicked, we compare the view
@@ -132,7 +139,7 @@ public class ItemTransferListener implements Listener {
           null,
           quantity,
           null);
-      this.callEvent(transferEvent);
+      callEvent(transferEvent);
       cancelled = cancelled | event.isCancelled() | quantity != transferEvent.getQuantity();
 
       // Remove the item from the inventory so handlers of the second event can see that it is gone
@@ -558,10 +565,9 @@ public class ItemTransferListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void onPlayerDragInventory(InventoryDragEvent event) {
     // This is when you spread items evenly across slots by dragging
-    if (!(event.getWhoClicked() instanceof Player)) {
+    if (!(event.getWhoClicked() instanceof Player player)) {
       return;
     }
-    Player player = (Player) event.getWhoClicked();
 
     ItemStack transferred = event.getOldCursor().clone();
     transferred.setAmount(0);

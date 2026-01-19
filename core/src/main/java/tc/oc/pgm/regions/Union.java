@@ -1,7 +1,6 @@
 package tc.oc.pgm.regions;
 
-import static com.google.common.collect.Iterators.*;
-
+import com.google.common.collect.Iterators;
 import java.util.Iterator;
 import java.util.function.Supplier;
 import org.bukkit.util.BlockVector;
@@ -129,16 +128,17 @@ public class Union implements RegionDefinition.Static {
     final int sumVolume = childrenVolume;
     return () -> {
       var visited = new BlockVectorSet(sumVolume);
-      return filter(childScan(), visited::add);
+      return Iterators.filter(childScan(), visited::add);
     };
   }
 
   private Iterator<BlockVector> fullScan() {
-    return filter(getBounds().getBlockIterator(), this::contains);
+    return Iterators.filter(getBounds().getBlockIterator(), this::contains);
   }
 
   private Iterator<BlockVector> childScan() {
-    return concat(transform(forArray(regions), r -> r.getStatic().getBlockVectorIterator()));
+    return Iterators.concat(Iterators.transform(
+        Iterators.forArray(regions), r -> r.getStatic().getBlockVectorIterator()));
   }
 
   @Override

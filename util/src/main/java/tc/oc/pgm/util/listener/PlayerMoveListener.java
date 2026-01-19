@@ -9,7 +9,10 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.Audience;
@@ -47,7 +50,7 @@ public class PlayerMoveListener implements Listener {
     this.handleMovementHigh(event);
   }
 
-  private final void handleMovementHigh(final PlayerMoveEvent event) {
+  private void handleMovementHigh(final PlayerMoveEvent event) {
     Player player = event.getPlayer();
     Location originalFrom = event.getFrom();
     Location originalTo = event.getTo();
@@ -98,8 +101,7 @@ public class PlayerMoveListener implements Listener {
   private boolean callCoarsePlayerMove(final PlayerMoveEvent event) {
     // Don't fire coarse events for teleports that are not "in-game"
     // e.g. /jumpto commands
-    if (event instanceof PlayerTeleportEvent) {
-      PlayerTeleportEvent teleportEvent = (PlayerTeleportEvent) event;
+    if (event instanceof PlayerTeleportEvent teleportEvent) {
       if (teleportEvent.getCause() != TeleportCause.ENDER_PEARL
           && teleportEvent.getCause() != TeleportCause.UNKNOWN) {
         return false;
