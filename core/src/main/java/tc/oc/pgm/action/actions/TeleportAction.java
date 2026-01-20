@@ -1,26 +1,29 @@
 package tc.oc.pgm.action.actions;
 
 import java.util.Optional;
-import org.bukkit.Location;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.math.Formula;
 
 public class TeleportAction extends AbstractAction<MatchPlayer> {
 
-  private final Formula<MatchPlayer> xformula;
-  private final Formula<MatchPlayer> yformula;
-  private final Formula<MatchPlayer> zformula;
+  private final Optional<Region> region;
+  private final Optional<Formula<MatchPlayer>> xformula;
+  private final Optional<Formula<MatchPlayer>> yformula;
+  private final Optional<Formula<MatchPlayer>> zformula;
   private final Optional<Formula<MatchPlayer>> pitchFormula;
   private final Optional<Formula<MatchPlayer>> yawFormula;
 
   public TeleportAction(
-      Formula<MatchPlayer> xformula,
-      Formula<MatchPlayer> yformula,
-      Formula<MatchPlayer> zformula,
+      Optional<Region> region,
+      Optional<Formula<MatchPlayer>> xformula,
+      Optional<Formula<MatchPlayer>> yformula,
+      Optional<Formula<MatchPlayer>> zformula,
       Optional<Formula<MatchPlayer>> pitchFormula,
       Optional<Formula<MatchPlayer>> yawFormula) {
     super(MatchPlayer.class);
+    this.region = region;
     this.xformula = xformula;
     this.yformula = yformula;
     this.zformula = zformula;
@@ -30,10 +33,13 @@ public class TeleportAction extends AbstractAction<MatchPlayer> {
 
   @Override
   public void trigger(MatchPlayer player) {
-    Location location = player.getLocation();
-    location.setX(xformula.applyAsDouble(player));
-    location.setY(yformula.applyAsDouble(player));
-    location.setZ(zformula.applyAsDouble(player));
+    var location = this.region
+        .map(r -> r.getRandom(player.getMatch()).toLocation(player.getWorld()))
+        .orElseGet(player::getLocation);
+
+    xformula.ifPresent(f -> location.setX(f.applyAsDouble(player)));
+    yformula.ifPresent(f -> location.setY(f.applyAsDouble(player)));
+    zformula.ifPresent(f -> location.setZ(f.applyAsDouble(player)));
 
     pitchFormula.ifPresent(f -> location.setPitch((float) f.applyAsDouble(player)));
     yawFormula.ifPresent(f -> location.setYaw((float) f.applyAsDouble(player)));
