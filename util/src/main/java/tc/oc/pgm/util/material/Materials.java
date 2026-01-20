@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.material;
 
-import static org.bukkit.Material.*;
 import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 
 import org.bukkit.Bukkit;
@@ -10,7 +9,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Materials {
@@ -49,7 +48,7 @@ public interface Materials {
           || m.name().endsWith("_SHOVEL")
           || m.name().endsWith("_SPADE") // 1.8 shovels
           || m.name().endsWith("_HOE"))
-      .addAll(BOW, FLINT_AND_STEEL, SHEARS, STICK)
+      .addAll(Material.BOW, Material.FLINT_AND_STEEL, Material.SHEARS, Material.STICK)
       .addNullable(Material.getMaterial("TRIDENT"))
       .addNullable(Material.getMaterial("MACE"))
       .build();
@@ -71,7 +70,7 @@ public interface Materials {
       .build();
 
   MaterialMatcher POTIONS = MaterialMatcher.builder()
-      .add(POTION)
+      .add(Material.POTION)
       .addAll(m -> m.name().endsWith("_POTION"))
       .build();
 

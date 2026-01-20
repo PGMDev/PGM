@@ -11,6 +11,7 @@ import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
+import static tc.oc.pgm.util.text.TemporalComponent.duration;
 
 import com.google.common.collect.Lists;
 import java.time.Duration;
@@ -33,7 +34,6 @@ import tc.oc.pgm.stats.PlayerStats;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.skin.Skin;
-import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 /** Represents a player's stats via player head & lore * */
@@ -86,7 +86,7 @@ public class PlayerStatsMenuItem implements MenuItem {
         lore.add(empty());
         lore.add(translatable(
             "match.stats.flaghold.concise",
-            TemporalComponent.duration(stats.getLongestFlagHold(), NamedTextColor.AQUA)
+            duration(stats.getLongestFlagHold(), NamedTextColor.AQUA)
                 .decoration(TextDecoration.BOLD, true)));
       }
     }

@@ -28,7 +28,7 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
   protected boolean lazyEnable = true;
 
   public ListeningMapAdapter(Plugin plugin) {
-    this(new HashMap<K, V>(), plugin);
+    this(new HashMap<>(), plugin);
   }
 
   public ListeningMapAdapter(Map<K, V> map, Plugin plugin) {

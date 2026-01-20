@@ -5,9 +5,8 @@ import org.bukkit.Location;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -21,6 +20,7 @@ import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.bukkit.Sounds;
 
 /** Player is alive and participating */
@@ -149,8 +149,8 @@ public class Alive extends Participating {
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
       // Keep speed and NV for visual continuity
       if (effect.getType() != null
-          && !PotionEffectType.NIGHT_VISION.equals(effect.getType())
-          && !PotionEffectType.SPEED.equals(effect.getType())) {
+          && !PotionEffects.NIGHT_VISION.equals(effect.getType())
+          && !PotionEffects.SPEED.equals(effect.getType())) {
 
         bukkit.removePotionEffect(effect.getType());
       }

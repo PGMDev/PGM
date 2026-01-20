@@ -23,8 +23,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -50,41 +49,25 @@ public class CombatLogTracker implements Listener {
   // Minimum water required to stop the player's fall
   private static final int BREAK_FALL_WATER_DEPTH = 3;
 
-  private static class Damage {
-    public final Instant time;
-    public final EntityDamageEvent event;
+  private record Damage(Instant time, EntityDamageEvent event) {}
 
-    private Damage(Instant time, EntityDamageEvent event) {
-      this.time = time;
-      this.event = event;
-    }
-  }
+  /**
+   * @param cause what will cause the death
+   * @param alreadyDamaged if the player has already been damaged by this cause
+   */
+  private record ImminentDeath(
+      EntityDamageEvent.DamageCause cause,
+      Location deathLocation,
+      @Nullable Block blockDamager,
+      boolean alreadyDamaged) {}
 
-  private static class ImminentDeath {
-    public final EntityDamageEvent.DamageCause cause; // what will cause the death
-    public final Location deathLocation;
-    public final Block blockDamager;
-    public final boolean alreadyDamaged; // if the player has already been damaged by this cause
-
-    private ImminentDeath(
-        EntityDamageEvent.DamageCause cause,
-        Location deathLocation,
-        @Nullable Block blockDamager,
-        boolean damaged) {
-      this.cause = cause;
-      this.deathLocation = deathLocation;
-      this.blockDamager = blockDamager;
-      this.alreadyDamaged = damaged;
-    }
-  }
-
-  private Map<Player, Damage> recentDamage = new HashMap<>();
+  private final Map<Player, Damage> recentDamage = new HashMap<>();
 
   public CombatLogTracker(TrackerMatchModule tmm) {}
 
   private static boolean hasFireResistance(LivingEntity entity) {
     for (PotionEffect effect : entity.getActivePotionEffects()) {
-      if (PotionEffectType.FIRE_RESISTANCE.equals(effect.getType())) return true;
+      if (PotionEffects.FIRE_RESISTANCE.equals(effect.getType())) return true;
     }
     return false;
   }
@@ -103,8 +86,7 @@ public class CombatLogTracker implements Listener {
   public void onPlayerDamage(EntityDamageEvent event) {
     if (event.getDamage() <= 0) return;
 
-    if (!(event.getEntity() instanceof Player)) return;
-    Player player = (Player) event.getEntity();
+    if (!(event.getEntity() instanceof Player player)) return;
 
     if (player.getGameMode() == GameMode.CREATIVE) return;
 
@@ -242,7 +224,7 @@ public class CombatLogTracker implements Listener {
       }
 
       // Search the blocks directly beneath the player until we find what they would have landed on
-      Block block = null;
+      Block block;
       for (; location.getY() >= 0; location.add(0, -1, 0)) {
         block = location.getBlock();
         if (block != null) {

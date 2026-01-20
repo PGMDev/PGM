@@ -9,7 +9,20 @@ import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,8 +42,8 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -316,7 +329,7 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public @NotNull Audience audience() {
+  public @NonNull Audience audience() {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
     audiences.add(Audience.console());
     return Audience.get(audiences);
@@ -489,7 +502,7 @@ public class MatchImpl implements Match {
    * (and bail if either are cancelled) -
    */
   private boolean setOrClearPlayerParty(
-      MatchPlayer player, @Nullable Party newParty, @NotNull JoinRequest joinRequest) {
+      MatchPlayer player, @Nullable Party newParty, @NonNull JoinRequest joinRequest) {
     Party oldParty = player.getParty();
 
     assertTrue(this == player.getMatch(), "Player belongs to a different match");
@@ -849,7 +862,7 @@ public class MatchImpl implements Match {
     try {
       new ModuleLoader(); // Will load all map and match modules and throw any errors
 
-      for (Feature feature : getFeatureContext().getAll()) {
+      for (Feature<?> feature : getFeatureContext().getAll()) {
         if (feature instanceof Listener) {
           addListener((Listener) feature, getListenerScope((Listener) feature, MatchScope.RUNNING));
         }
