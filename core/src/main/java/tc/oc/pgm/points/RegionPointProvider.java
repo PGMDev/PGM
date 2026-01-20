@@ -22,7 +22,6 @@ public class RegionPointProvider implements PointProvider {
   public RegionPointProvider(Region region, PointProviderAttributes attributes) {
     this.attributes = attributes;
     this.region = assertNotNull(region, "region");
-    ;
   }
 
   @Override

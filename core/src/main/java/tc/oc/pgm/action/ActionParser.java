@@ -456,14 +456,19 @@ public class ActionParser {
   @MethodParser("teleport")
   public Action<? super MatchPlayer> parseTeleport(Element el, Class<?> scope)
       throws InvalidXMLException {
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
+    var region = parser.region(el, "region").randomPoints().optional();
+
+    var xFormula = parser.formula(MatchPlayer.class, el, "x").optional();
+    var yFormula = parser.formula(MatchPlayer.class, el, "y").optional();
+    var zFormula = parser.formula(MatchPlayer.class, el, "z").optional();
 
     var pitchFormula = parser.formula(MatchPlayer.class, el, "pitch").optional();
     var yawFormula = parser.formula(MatchPlayer.class, el, "yaw").optional();
 
-    return new TeleportAction(xFormula, yFormula, zFormula, pitchFormula, yawFormula);
+    if (region.isEmpty() && (xFormula.isEmpty() || yFormula.isEmpty() || zFormula.isEmpty()))
+      throw new InvalidXMLException("Either 'region' or 'x','y' and 'z' are required", el);
+
+    return new TeleportAction(region, xFormula, yFormula, zFormula, pitchFormula, yawFormula);
   }
 
   @MethodParser("paste-structure")
