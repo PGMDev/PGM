@@ -336,7 +336,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       this.currentLocation.setYaw(0);
 
       this.increment = normalizedDirection.clone().multiply(definition.velocity);
-      this.substeps = Math.max(1, (int) (definition.velocity / ce.size()));
+      this.substeps = Math.min(10, Math.max(1, (int) (definition.velocity / Math.max(0.1, ce.size()))));
       this.substep = increment.clone().divide(new Vector(substeps, substeps, substeps));
       if (this.substep.length() < 0.1) this.substep = normalizedDirection.clone().multiply(0.1);
 
