@@ -40,7 +40,7 @@ public class WoolModule implements MapModule<WoolMatchModule> {
   protected final Multimap<TeamFactory, MonumentWoolFactory> woolFactories;
 
   public WoolModule(Multimap<TeamFactory, MonumentWoolFactory> woolFactories) {
-    assert woolFactories.size() > 0;
+    assert !woolFactories.isEmpty();
     this.woolFactories = woolFactories;
   }
 

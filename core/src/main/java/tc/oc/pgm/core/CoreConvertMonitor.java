@@ -12,7 +12,7 @@ public class CoreConvertMonitor implements Runnable {
 
   public CoreConvertMonitor(CoreMatchModule parent) {
     this.parent = parent;
-    this.nextMaterial = getNext(parent.cores.iterator().next());
+    this.nextMaterial = getNext(parent.cores.getFirst());
   }
 
   @Override
@@ -30,7 +30,7 @@ public class CoreConvertMonitor implements Runnable {
           .append(text(name + " CORE MODE", NamedTextColor.RED))
           .append(text(" < < < <", NamedTextColor.DARK_AQUA))
           .build());
-      this.nextMaterial = getNext(parent.cores.iterator().next());
+      this.nextMaterial = getNext(parent.cores.getFirst());
     }
   }
 
@@ -41,11 +41,9 @@ public class CoreConvertMonitor implements Runnable {
   }
 
   public static String getName(Material material) {
-    switch (material) {
-      case GOLD_BLOCK:
-        return "GOLD";
-      default:
-        return null;
+    if (material == Material.GOLD_BLOCK) {
+      return "GOLD";
     }
+    return null;
   }
 }

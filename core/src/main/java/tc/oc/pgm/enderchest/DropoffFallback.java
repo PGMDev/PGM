@@ -4,5 +4,5 @@ package tc.oc.pgm.enderchest;
 public enum DropoffFallback {
   KEEP,
   DELETE,
-  AUTO;
+  AUTO
 }

@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 
 /** A dependency graph for {@link Module}s and their {@link ModuleFactory}s. */
@@ -73,7 +73,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
     }
 
     if (!errors.isEmpty()) {
-      throw errors.get(0);
+      throw errors.getFirst();
     }
   }
 
@@ -154,7 +154,7 @@ public abstract class ModuleGraph<M extends Module, F extends ModuleFactory<M>>
       }
     }
 
-    @Nullable M module;
+    M module;
     try {
       module = createModule(factory);
     } catch (ModuleLoadException e) {

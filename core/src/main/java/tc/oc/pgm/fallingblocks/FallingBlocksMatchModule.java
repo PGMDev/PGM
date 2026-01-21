@@ -19,7 +19,7 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -287,7 +287,6 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
         this.blockDisturbersByTick.put(tick, blockDisturbers);
       }
 
-      Block block = blockState.getBlock();
       if (!blockDisturbers.containsKey(pos)) {
         blockDisturbers.put(pos, disturber);
       }

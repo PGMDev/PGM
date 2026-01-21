@@ -17,7 +17,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class GameRulesModule implements MapModule<GameRulesMatchModule> {
 
-  private Map<String, String> gameRules;
+  private final Map<String, String> gameRules;
 
   private GameRulesModule(Map<String, String> gamerules) {
     this.gameRules = gamerules;

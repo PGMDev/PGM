@@ -59,15 +59,11 @@ public class FilterNode implements FilterDefinition {
 
   public static FilterNode allow(Filter child) {
     return new FilterNode(
-        Collections.<Filter>emptyList(),
-        Collections.singletonList(child),
-        Collections.<Filter>emptyList());
+        Collections.emptyList(), Collections.singletonList(child), Collections.emptyList());
   }
 
   public static FilterNode deny(Filter child) {
     return new FilterNode(
-        Collections.<Filter>emptyList(),
-        Collections.<Filter>emptyList(),
-        Collections.singletonList(child));
+        Collections.emptyList(), Collections.emptyList(), Collections.singletonList(child));
   }
 }

@@ -62,17 +62,8 @@ public class EnderChestMatchModule implements MatchModule, Listener {
     }
 
     if (!dropped) {
-      switch (fallback) {
-        case AUTO:
-          if (dropoffs.isEmpty()) {
-            enderchest.clear();
-          }
-          break;
-        case DELETE:
-          enderchest.clear();
-          break;
-        default:
-          break;
+      if (fallback == DropoffFallback.DELETE) {
+        enderchest.clear();
       }
     }
   }

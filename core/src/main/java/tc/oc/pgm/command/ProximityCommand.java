@@ -12,7 +12,6 @@ import org.incendo.cloud.annotations.CommandDescription;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.goals.ProximityGoal;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.TouchableGoal;
@@ -37,9 +36,8 @@ public final class ProximityCommand {
       boolean teamHeader = false;
 
       for (Goal<?> goal : gmm.getGoals(team)) {
-        if (goal instanceof TouchableGoal && goal.hasShowOption(ShowOption.SHOW_INFO)) {
-          TouchableGoal touchable = (TouchableGoal) goal;
-          ProximityGoal proximity = (ProximityGoal) goal;
+        if (goal instanceof TouchableGoal<?> touchable
+            && goal.hasShowOption(ShowOption.SHOW_INFO)) {
 
           if (!teamHeader) {
             lines.add(TextTranslations.translateLegacy(team.getName(), player.getBukkit()));
@@ -56,16 +54,15 @@ public final class ProximityCommand {
             line += ChatColor.RED + " UNTOUCHED";
           }
 
-          if (proximity.isProximityRelevant(team)) {
-            ProximityMetric metric = proximity.getProximityMetric(team);
+          if (touchable.isProximityRelevant(team)) {
+            ProximityMetric metric = touchable.getProximityMetric(team);
             if (metric != null) {
-              line +=
-                  ChatColor.GRAY
-                      + " "
-                      + metric.description()
-                      + ": "
-                      + ChatColor.AQUA
-                      + String.format("%.2f", proximity.getMinimumDistance(team));
+              line += ChatColor.GRAY
+                  + " "
+                  + metric.description()
+                  + ": "
+                  + ChatColor.AQUA
+                  + String.format("%.2f", touchable.getMinimumDistance(team));
             }
           }
 

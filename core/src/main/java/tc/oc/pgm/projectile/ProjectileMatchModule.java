@@ -29,7 +29,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter;
@@ -144,8 +144,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onProjectileHurtEvent(EntityDamageByEntityEvent event) {
-    if (!(event.getEntity() instanceof LivingEntity)) return;
-    LivingEntity damagedEntity = (LivingEntity) event.getEntity();
+    if (!(event.getEntity() instanceof LivingEntity damagedEntity)) return;
 
     ProjectileDefinition projectileDefinition =
         ProjectileMatchModule.getProjectileDefinition(event.getDamager());
@@ -264,15 +263,11 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   }
 
   private static boolean isValidProjectileAction(Action action, ClickAction clickAction) {
-    switch (clickAction) {
-      case RIGHT:
-        return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
-      case LEFT:
-        return action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK;
-      case BOTH:
-        return action != Action.PHYSICAL;
-    }
-    return false;
+    return switch (clickAction) {
+      case RIGHT -> action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
+      case LEFT -> action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK;
+      case BOTH -> action != Action.PHYSICAL;
+    };
   }
 
   private void startCooldown(Player player, ProjectileDefinition definition) {

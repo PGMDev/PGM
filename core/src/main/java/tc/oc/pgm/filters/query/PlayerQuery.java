@@ -9,7 +9,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -75,8 +75,7 @@ public class PlayerQuery extends Query implements tc.oc.pgm.api.filter.query.Pla
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof PlayerQuery)) return false;
-    PlayerQuery query = (PlayerQuery) o;
+    if (!(o instanceof PlayerQuery query)) return false;
     return Objects.equals(player, query.player);
   }
 

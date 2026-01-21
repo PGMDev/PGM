@@ -105,7 +105,7 @@ public class JoinLeaveAnnouncer implements Listener {
     return value.equals(SettingValue.JOIN_FRIENDS) && Integration.isFriend(a, b);
   }
 
-  public static enum JoinVisibility {
+  public enum JoinVisibility {
     ALL, // When player is not vanished, show everyone
     STAFF, // When player is vanished and actually joins/quits, show staff only
     NONSTAFF; // When player toggles vanish, show non-staff (fake broadcast)

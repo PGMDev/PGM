@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface FeatureInfo {
   /** A readable name for the type of feature (used for database documents and error messages) */
-  public String name();
+  String name();
 }

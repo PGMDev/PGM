@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 
@@ -55,7 +55,7 @@ public class SpreadPointProvider extends AggregatePointProvider {
       }
     }
 
-    int index = (int) Math.floor(match.getRandom().nextInt(bestPoints.size()));
+    int index = (int) (double) match.getRandom().nextInt(bestPoints.size());
     return bestPoints.get(index);
   }
 

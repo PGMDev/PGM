@@ -63,7 +63,7 @@ public class QueuedParty extends PartyImpl {
       if (PGM.get().getConfiguration().canPriorityKick()) {
         // If priority kicking is enabled, might as well join the high
         // priority players first so nobody actually gets kicked.
-        Collections.sort(this.memberOrder, new Order());
+        this.memberOrder.sort(new Order());
       }
     }
     return this.memberOrder;

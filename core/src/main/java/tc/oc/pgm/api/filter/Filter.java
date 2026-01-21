@@ -34,15 +34,13 @@ public interface Filter extends FeatureDefinition {
    * <p>{@link #respondsTo(Class)} can be used to ensure that this method will not throw.
    */
   default boolean response(Query query) {
-    switch (query(query)) {
-      case ALLOW:
-        return true;
-      case DENY:
-        return false;
-      default:
+    return switch (query(query)) {
+      case ALLOW -> true;
+      case DENY -> false;
+      default ->
         throw new UnsupportedOperationException(
             "Filter " + this + " did not respond to the query " + query);
-    }
+    };
   }
 
   /**
@@ -59,8 +57,8 @@ public interface Filter extends FeatureDefinition {
    * Does this filter support dynamic notifications?
    *
    * <p>If this returns true, then any change in the response of this filter to a query that passes
-   * {@link #respondsTo(Class)} must notify {@link FilterListener}s registered through {@link
-   * tc.oc.pgm.filters.FilterMatchModule}.
+   * {@link #respondsTo(Class)} must notify {@link FilterListener}s registered through
+   * {@link tc.oc.pgm.filters.FilterMatchModule}.
    *
    * <p>This method should NOT account for the behavior of any {@link #dependencies()}, as that is
    * done automatically by the calling code. This method can return true as long as it does NOT

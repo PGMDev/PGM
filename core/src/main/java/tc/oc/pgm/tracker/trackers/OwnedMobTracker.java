@@ -28,8 +28,7 @@ public class OwnedMobTracker extends AbstractTracker<MobInfo> {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onMobSpawn(PlayerSpawnEntityEvent event) {
     ParticipantState owner = match.getParticipantState(event.getPlayer());
-    if (event.getEntity() instanceof LivingEntity && owner != null) {
-      LivingEntity mob = (LivingEntity) event.getEntity();
+    if (event.getEntity() instanceof LivingEntity mob && owner != null) {
       entities().trackEntity(event.getEntity(), new MobInfo(mob, owner));
     }
   }
@@ -58,16 +57,14 @@ public class OwnedMobTracker extends AbstractTracker<MobInfo> {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onSlimeSplit(CreatureSpawnEvent event) {
-    switch (event.getSpawnReason()) {
-      case SLIME_SPLIT:
-        Slime parent = splitter.get();
-        if (parent != null) {
-          MobInfo info = resolveEntity(parent);
-          if (info != null) {
-            entities().trackEntity(event.getEntity(), info);
-          }
+    if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
+      Slime parent = splitter.get();
+      if (parent != null) {
+        MobInfo info = resolveEntity(parent);
+        if (info != null) {
+          entities().trackEntity(event.getEntity(), info);
         }
-        break;
+      }
     }
   }
 

@@ -23,7 +23,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
@@ -76,8 +76,7 @@ public class DamageMatchModule implements MatchModule, Listener {
    */
   public static boolean isAllowedSelfDamage(DamageInfo damageInfo) {
     // Disable self-damage with arrows
-    if (damageInfo instanceof ProjectileInfo) {
-      ProjectileInfo projectileInfo = (ProjectileInfo) damageInfo;
+    if (damageInfo instanceof ProjectileInfo projectileInfo) {
       if (projectileInfo.getProjectile() instanceof EntityInfo
           && ((EntityInfo) projectileInfo.getProjectile()).getEntityType() == EntityType.ARROW) {
         return false;
@@ -145,16 +144,14 @@ public class DamageMatchModule implements MatchModule, Listener {
 
   /** Query whether the given damage is both allowed and incentivized for the attacker. */
   public Filter.QueryResponse queryHostile(ParticipantState victim, DamageInfo damageInfo) {
-    switch (PlayerRelation.get(victim, damageInfo.getAttacker())) {
-      case SELF:
-      case ALLY:
+    return switch (PlayerRelation.get(victim, damageInfo.getAttacker())) {
+      case SELF, ALLY ->
         // Players don't want to hurt themselves or their teammates
-        return Filter.QueryResponse.DENY;
-
-      default:
+        Filter.QueryResponse.DENY;
+      default ->
         // They also don't want to waste time trying to inflict damage that will be filtered out
-        return queryRules(null, victim, damageInfo);
-    }
+        queryRules(null, victim, damageInfo);
+    };
   }
 
   /**

@@ -40,7 +40,7 @@ public class ItemRule {
       }
 
       Set<ItemFlag> flags = this.meta.getItemFlags();
-      meta.addItemFlags(flags.toArray(new ItemFlag[flags.size()]));
+      meta.addItemFlags(flags.toArray(new ItemFlag[0]));
 
       InventoryUtils.addEnchantments(meta, this.meta.getEnchants());
 

@@ -6,6 +6,7 @@ import com.google.common.cache.LoadingCache;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.map.MapActivity;
 import tc.oc.pgm.api.map.MapData;
@@ -25,29 +26,27 @@ public class CacheDatastore implements Datastore {
 
   public CacheDatastore(Datastore datastore) {
     this.datastore = datastore;
-    this.usernames = CacheBuilder.newBuilder()
-        .softValues()
-        .build(new CacheLoader<UUID, Username>() {
-          @Override
-          public Username load(UUID id) {
-            return datastore.getUsername(id);
-          }
-        });
-    this.settings = CacheBuilder.newBuilder().build(new CacheLoader<UUID, Settings>() {
+    this.usernames = CacheBuilder.newBuilder().softValues().build(new CacheLoader<>() {
       @Override
-      public Settings load(UUID id) {
+      public Username load(@NonNull UUID id) {
+        return datastore.getUsername(id);
+      }
+    });
+    this.settings = CacheBuilder.newBuilder().build(new CacheLoader<>() {
+      @Override
+      public Settings load(@NonNull UUID id) {
         return datastore.getSettings(id);
       }
     });
-    this.skins = CacheBuilder.newBuilder().build(new CacheLoader<UUID, Skin>() {
+    this.skins = CacheBuilder.newBuilder().build(new CacheLoader<>() {
       @Override
-      public Skin load(UUID id) {
+      public Skin load(@NonNull UUID id) {
         return datastore.getSkin(id);
       }
     });
-    this.activities = CacheBuilder.newBuilder().build(new CacheLoader<String, MapActivity>() {
+    this.activities = CacheBuilder.newBuilder().build(new CacheLoader<>() {
       @Override
-      public MapActivity load(String name) {
+      public MapActivity load(@NonNull String name) {
         return datastore.getMapActivity(name);
       }
     });

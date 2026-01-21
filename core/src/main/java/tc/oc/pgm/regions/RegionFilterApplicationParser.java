@@ -71,10 +71,8 @@ public class RegionFilterApplicationParser {
   }
 
   public void parseLane(Element el) throws InvalidXMLException {
-    final Filter filter =
-        new DenyFilter(
-            new TeamFilter(
-                Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory)));
+    final Filter filter = new DenyFilter(new TeamFilter(
+        Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory)));
     final Region region = parseRegion(el);
     final Component message = translatable("match.laneExit");
 
@@ -150,18 +148,11 @@ public class RegionFilterApplicationParser {
           for (String name : Splitter.on(" ").split(node.getValue())) {
             filters.add(filterParser.parseReference(node, name));
           }
-          switch (filters.size()) {
-            case 0:
-              filter = null;
-              break;
-            case 1:
-              filter = filters.get(0);
-              break;
-            default:
-              filter =
-                  new FilterNode(
-                      filters, Collections.<Filter>emptyList(), Collections.<Filter>emptyList());
-          }
+          filter = switch (filters.size()) {
+            case 0 -> null;
+            case 1 -> filters.getFirst();
+            default -> new FilterNode(filters, Collections.emptyList(), Collections.emptyList());
+          };
         }
       }
 

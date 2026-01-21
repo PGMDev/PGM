@@ -16,7 +16,7 @@ public class PlayerLeavePartyEvent extends PlayerPartyChangeEventBase {
     return oldParty;
   }
 
-  private static HandlerList handlers = new HandlerList();
+  private static final HandlerList handlers = new HandlerList();
 
   @Override
   public HandlerList getHandlers() {

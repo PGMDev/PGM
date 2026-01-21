@@ -12,7 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
@@ -108,8 +108,7 @@ public class KitModule implements MapModule<KitMatchModule> {
       }
 
       // Apply any item-mods rules to item kits
-      if (kit instanceof ItemKit) {
-        ItemKit itKit = (ItemKit) kit;
+      if (kit instanceof ItemKit itKit) {
         for (ItemStack is : Iterables.concat(itKit.getSlotItems().values(), itKit.getFreeItems())) {
           if (!hasTnt && is.getType() == Material.TNT && is.getAmount() >= 16) {
             hasTnt = true;

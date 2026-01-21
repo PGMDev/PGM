@@ -1,6 +1,7 @@
 package tc.oc.pgm.features;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -26,7 +27,7 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
   }
 
   public XMLFeatureReference(
-      FeatureDefinitionContext context, Node node, @Nullable String id, Class<T> type) {
+      FeatureDefinitionContext context, @NonNull Node node, @Nullable String id, Class<T> type) {
     this.context = context;
     this.node = node;
     this.id = id != null ? id : node.getValueNormalize();

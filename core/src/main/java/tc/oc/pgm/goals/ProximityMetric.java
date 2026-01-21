@@ -1,13 +1,13 @@
 package tc.oc.pgm.goals;
 
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ProximityMetric {
-  public static enum Type {
+  public enum Type {
     CLOSEST_PLAYER("closest player"),
     CLOSEST_BLOCK("closest block"),
     CLOSEST_KILL("closest kill"),
@@ -47,8 +47,7 @@ public class ProximityMetric {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof ProximityMetric)) return false;
-    ProximityMetric that = (ProximityMetric) o;
+    if (!(o instanceof ProximityMetric that)) return false;
     return this.type == that.type && this.horizontal == that.horizontal;
   }
 
@@ -68,9 +67,8 @@ public class ProximityMetric {
       throws InvalidXMLException {
     if (!prefix.isEmpty()) prefix = prefix + "-";
 
-    ProximityMetric.Type type =
-        XMLUtils.parseEnum(
-            Node.fromAttr(el, prefix + "proximity-metric"), ProximityMetric.Type.class, def.type);
+    ProximityMetric.Type type = XMLUtils.parseEnum(
+        Node.fromAttr(el, prefix + "proximity-metric"), ProximityMetric.Type.class, def.type);
 
     // If proximity metric is none, use null proximity so that it doesn't try to get tracked nor
     // shows in the scoreboard

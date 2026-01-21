@@ -4,11 +4,9 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -73,8 +71,7 @@ public class SpectateMatchModule implements MatchModule, Listener {
   public List<MatchPlayer> getSpectating(UUID player) {
     final Collection<UUID> list = spectators.get(player);
     if (list == null) return ImmutableList.of();
-    return Collections.unmodifiableList(
-        list.stream().map(match::getPlayer).filter(Objects::nonNull).collect(Collectors.toList()));
+    return list.stream().map(match::getPlayer).filter(Objects::nonNull).toList();
   }
 
   /** Get the {@link MatchPlayer}s currently spectating the given {@link MatchPlayer}, if any. */

@@ -48,7 +48,6 @@ public class ItemKeepMatchModule implements MatchModule, Listener {
    * NOTE: Must be called before
    * {@link tc.oc.pgm.tracker.trackers.DeathTracker#onPlayerDeath(PlayerDeathEvent)}
    */
-  @SuppressWarnings("deprecation")
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void processPlayerDeath(PlayerDeathEvent event) {
     MatchPlayer player = this.match.getPlayer(event.getEntity());
