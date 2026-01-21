@@ -12,15 +12,14 @@ import java.util.stream.StreamSupport;
 
 public class StreamUtils {
 
-  private static final Collector<Object, ?, ImmutableList<Object>> TO_IMMUTABLE_LIST =
-      Collector.of(
-          ImmutableList::builder,
-          ImmutableList.Builder::add,
-          (ImmutableList.Builder<Object> a, ImmutableList.Builder<Object> b) -> {
-            a.addAll(b.build());
-            return a;
-          },
-          ImmutableList.Builder::build);
+  private static final Collector<Object, ?, ImmutableList<Object>> TO_IMMUTABLE_LIST = Collector.of(
+      ImmutableList::builder,
+      ImmutableList.Builder::add,
+      (ImmutableList.Builder<Object> a, ImmutableList.Builder<Object> b) -> {
+        a.addAll(b.build());
+        return a;
+      },
+      ImmutableList.Builder::build);
 
   public static <T> Stream<T> of(Iterable<T> iterable) {
     return of(iterable.iterator());
@@ -38,7 +37,7 @@ public class StreamUtils {
 
   public static <T> Stream<T> toStream(Enumeration<T> e) {
     return StreamSupport.stream(
-        new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
+        new Spliterators.AbstractSpliterator<>(Long.MAX_VALUE, Spliterator.ORDERED) {
           public boolean tryAdvance(Consumer<? super T> action) {
             if (e.hasMoreElements()) {
               action.accept(e.nextElement());

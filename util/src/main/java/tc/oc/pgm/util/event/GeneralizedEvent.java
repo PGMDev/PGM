@@ -21,7 +21,7 @@ import org.bukkit.event.vehicle.VehicleEvent;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.weather.WeatherEvent;
 import org.bukkit.event.world.WorldEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /** An event that wraps another event. */
 public abstract class GeneralizedEvent extends PreemptiveEvent {
@@ -77,25 +77,49 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
   }
 
   public static @Nullable Entity getActorIfPresent(Event event) {
-    if (event == null) return null;
-
-    if (event instanceof EntityEvent) return ((EntityEvent) event).getEntity();
-    if (event instanceof PlayerEvent) return ((PlayerEvent) event).getPlayer();
-    if (event instanceof BlockEvent) {
-      if (event instanceof BlockPlaceEvent) return ((BlockPlaceEvent) event).getPlayer();
-      if (event instanceof BlockBreakEvent) return ((BlockBreakEvent) event).getPlayer();
-      if (event instanceof BlockDamageEvent) return ((BlockDamageEvent) event).getPlayer();
-      if (event instanceof FurnaceExtractEvent) return ((FurnaceExtractEvent) event).getPlayer();
-      if (event instanceof SignChangeEvent) return ((SignChangeEvent) event).getPlayer();
+    switch (event) {
+      case null -> {
+        return null;
+      }
+      case EntityEvent entityEvent -> {
+        return entityEvent.getEntity();
+      }
+      case PlayerEvent playerEvent -> {
+        return playerEvent.getPlayer();
+      }
+      case BlockEvent blockEvent -> {
+        switch (blockEvent) {
+          case BlockPlaceEvent blockPlaceEvent -> {
+            return blockPlaceEvent.getPlayer();
+          }
+          case BlockBreakEvent blockBreakEvent -> {
+            return blockBreakEvent.getPlayer();
+          }
+          case BlockDamageEvent blockDamageEvent -> {
+            return blockDamageEvent.getPlayer();
+          }
+          case FurnaceExtractEvent furnaceExtractEvent -> {
+            return furnaceExtractEvent.getPlayer();
+          }
+          case SignChangeEvent signChangeEvent -> {
+            return signChangeEvent.getPlayer();
+          }
+          default -> {}
+        }
+      }
+      default -> {}
     }
-    if (event instanceof VehicleEvent) {
-      if (event instanceof VehicleExitEvent) return ((VehicleExitEvent) event).getExited();
-      if (event instanceof VehicleDamageEvent) return ((VehicleDamageEvent) event).getAttacker();
-      if (event instanceof VehicleDestroyEvent) return ((VehicleDestroyEvent) event).getAttacker();
-      if (event instanceof VehicleEnterEvent) return ((VehicleEnterEvent) event).getEntered();
-      if (event instanceof VehicleEntityCollisionEvent)
-        return ((VehicleEntityCollisionEvent) event).getEntity();
-      return ((VehicleEvent) event).getVehicle();
+
+    if (event instanceof VehicleEvent vehicleEvent) {
+      return switch (vehicleEvent) {
+        case VehicleExitEvent vehicleExitEvent -> vehicleExitEvent.getExited();
+        case VehicleDamageEvent vehicleDamageEvent -> vehicleDamageEvent.getAttacker();
+        case VehicleDestroyEvent vehicleDestroyEvent -> vehicleDestroyEvent.getAttacker();
+        case VehicleEnterEvent vehicleEnterEvent -> vehicleEnterEvent.getEntered();
+        case VehicleEntityCollisionEvent vehicleEntityCollisionEvent ->
+          vehicleEntityCollisionEvent.getEntity();
+        default -> vehicleEvent.getVehicle();
+      };
     }
     if (event instanceof GeneralizedEvent) return ((GeneralizedEvent) event).getActor();
 
@@ -103,7 +127,7 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
   }
 
   /**
-   * Tries to extract a {@link World} from a event.
+   * Tries to extract a {@link World} from an event.
    *
    * @param event The event to look for a {@link World} in
    */
@@ -112,7 +136,8 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
     if (event instanceof PlayerEvent) return ((PlayerEvent) event).getPlayer().getWorld();
     if (event instanceof EntityEvent) return ((EntityEvent) event).getEntity().getWorld();
     if (event instanceof BlockEvent) return ((BlockEvent) event).getBlock().getWorld();
-    if (event instanceof VehicleEvent) return ((VehicleEvent) event).getVehicle().getWorld();
+    if (event instanceof VehicleEvent)
+      return ((VehicleEvent) event).getVehicle().getWorld();
     if (event instanceof WeatherEvent) return ((WeatherEvent) event).getWorld();
 
     return null;

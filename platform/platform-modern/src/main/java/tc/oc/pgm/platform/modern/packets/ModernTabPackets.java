@@ -33,7 +33,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.platform.modern.util.Skins;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.nms.packets.Packet;
@@ -54,7 +54,6 @@ public class ModernTabPackets implements TabPackets {
   @Override
   public Packet spawnPlayerPacket(int entityId, UUID uuid, Location loc, Player player) {
     var data = ((CraftEntity) player).getHandle().getEntityData().packAll();
-    if (data == null) return Packet.of();
     return new ModernPacket<>(new ClientboundBundlePacket(List.of(
         new ClientboundAddEntityPacket(
             entityId,
@@ -135,7 +134,7 @@ public class ModernTabPackets implements TabPackets {
         String name,
         int ping,
         @Nullable Skin skin,
-        @Nullable net.kyori.adventure.text.Component displayName) {
+        net.kyori.adventure.text.Component displayName) {
       packet.profileIds().add(uuid);
     }
 
@@ -161,7 +160,7 @@ public class ModernTabPackets implements TabPackets {
         String name,
         int ping,
         @Nullable Skin skin,
-        @Nullable net.kyori.adventure.text.Component displayName) {
+        net.kyori.adventure.text.Component displayName) {
 
       GameProfile profile = new GameProfile(uuid, name, new MutablePropertyMap());
       if (skin != null) Skins.toProfile(profile, skin);

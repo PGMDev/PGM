@@ -8,8 +8,8 @@ import org.bukkit.ChatColor;
 /**
  * These utilities should no longer be used, instead use {@link tc.oc.pgm.util.text.TextFormatter}
  *
- * <p>TODO: Determine if any of these would be useful and move to {@link
- * tc.oc.pgm.util.text.TextFormatter}
+ * <p>TODO: Determine if any of these would be useful and move to
+ * {@link tc.oc.pgm.util.text.TextFormatter}
  */
 public final class LegacyFormatUtils {
 
@@ -26,56 +26,22 @@ public final class LegacyFormatUtils {
     } else if (Character.isDigit(c)) {
       return 5;
     } else if (Character.isLowerCase(c)) {
-      switch (c) {
-        case 'i':
-          return 1;
-
-        case 'l':
-          return 2;
-
-        case 't':
-          return 3;
-
-        case 'f':
-        case 'k':
-          return 4;
-
-        default:
-          return 5;
-      }
+      return switch (c) {
+        case 'i' -> 1;
+        case 'l' -> 2;
+        case 't' -> 3;
+        case 'f', 'k' -> 4;
+        default -> 5;
+      };
     } else {
-      switch (c) {
-        case '!':
-        case '.':
-        case ',':
-        case ';':
-        case ':':
-        case '|':
-          return 1;
-
-        case '\'':
-          return 2;
-
-        case '[':
-        case ']':
-        case ' ':
-          return 3;
-
-        case '*':
-        case '(':
-        case ')':
-        case '{':
-        case '}':
-        case '<':
-        case '>':
-          return 4;
-
-        case '@':
-          return 6;
-
-        default:
-          return 5;
-      }
+      return switch (c) {
+        case '!', '.', ',', ';', ':', '|' -> 1;
+        case '\'' -> 2;
+        case '[', ']', ' ' -> 3;
+        case '*', '(', ')', '{', '}', '<', '>' -> 4;
+        case '@' -> 6;
+        default -> 5;
+      };
     }
   }
 
@@ -224,15 +190,6 @@ public final class LegacyFormatUtils {
             this.format.italic = true;
             break;
 
-          default:
-            this.format.color = ChatColor.getByChar(c);
-            this.format.obfuscated = false;
-            this.format.bold = false;
-            this.format.strikethrough = false;
-            this.format.underline = false;
-            this.format.italic = false;
-            break;
-
           case 'r':
             this.format.obfuscated = false;
             this.format.bold = false;
@@ -240,6 +197,15 @@ public final class LegacyFormatUtils {
             this.format.underline = false;
             this.format.italic = false;
             this.format.color = null;
+            break;
+
+          default:
+            this.format.color = ChatColor.getByChar(c);
+            this.format.obfuscated = false;
+            this.format.bold = false;
+            this.format.strikethrough = false;
+            this.format.underline = false;
+            this.format.italic = false;
             break;
         }
 
@@ -389,7 +355,7 @@ public final class LegacyFormatUtils {
         + ChatColor.STRIKETHROUGH
         + Strings.repeat(" ", spaceCount)
         + text
-        + lineColor.toString()
+        + lineColor
         + ChatColor.STRIKETHROUGH
         + Strings.repeat(" ", spaceCount);
   }
@@ -429,7 +395,7 @@ public final class LegacyFormatUtils {
       if (format == null) {
         lines.add(text.substring(lineStart, parser.chars));
       } else {
-        lines.add(format.toString() + text.substring(lineStart, parser.chars));
+        lines.add(format + text.substring(lineStart, parser.chars));
       }
 
       lineStart = parser.chars;
@@ -451,7 +417,7 @@ public final class LegacyFormatUtils {
             / (dash.length() * 2);
     String dashes = dashCount >= 0 ? Strings.repeat(dash, dashCount) : "";
 
-    StringBuffer builder = new StringBuffer();
+    StringBuilder builder = new StringBuilder();
     if (dashCount > 0) {
       builder.append(dashPrefix).append(dashes).append(ChatColor.RESET);
     }
@@ -522,17 +488,10 @@ public final class LegacyFormatUtils {
   }
 
   public static boolean isFormat(ChatColor color) {
-    switch (color) {
-      case BOLD:
-      case ITALIC:
-      case UNDERLINE:
-      case STRIKETHROUGH:
-      case MAGIC:
-        return true;
-
-      default:
-        return false;
-    }
+    return switch (color) {
+      case BOLD, ITALIC, UNDERLINE, STRIKETHROUGH, MAGIC -> true;
+      default -> false;
+    };
   }
 
   /**

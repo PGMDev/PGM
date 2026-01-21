@@ -27,8 +27,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.platform.modern.material.ModernBlockData;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
@@ -93,7 +93,7 @@ public class ModernPlayerUtils implements PlayerUtils {
     if (updateMetadata(player, showInvisible, PacketManipulations.SHOW_INVISIBLE_KEY)) {
       // Refresh all seen entities' metadata
       var nmsPlayer = ((CraftPlayer) player).getHandle();
-      ServerLevel world = (ServerLevel) nmsPlayer.level();
+      ServerLevel world = nmsPlayer.level();
       var entityMap = world.getChunkSource().chunkMap.entityMap;
 
       for (var entity : world.players()) {
@@ -191,10 +191,10 @@ public class ModernPlayerUtils implements PlayerUtils {
     // A no-allocation implementation of a transform from BlockVectorSet to Map<Position, BlockData>
     player.sendMultiBlockChange(new AbstractMap<Location, BlockData>() {
       @Override
-      public @NotNull Set<Entry<Location, BlockData>> entrySet() {
+      public @NonNull Set<Entry<Location, BlockData>> entrySet() {
         return new AbstractSet<>() {
           @Override
-          public Iterator<Entry<Location, BlockData>> iterator() {
+          public @NonNull Iterator<Entry<Location, BlockData>> iterator() {
             return new Iterator<>() {
               private final LongIterator iterator = set.iterator();
               private final Location cachedLoc = player.getLocation();

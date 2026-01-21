@@ -1,6 +1,7 @@
 package tc.oc.pgm.timelimit;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.text.TemporalComponent.duration;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -9,10 +10,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
-import tc.oc.pgm.util.text.TemporalComponent;
 
 public class OvertimeCountdown extends TimeLimitCountdown {
 
@@ -46,8 +46,7 @@ public class OvertimeCountdown extends TimeLimitCountdown {
         .decoration(TextDecoration.BOLD, true);
   }
 
-  @Nullable
-  protected BossBar.Color barColor() {
+  protected BossBar.@Nullable Color barColor() {
     return BossBar.Color.YELLOW;
   }
 
@@ -77,8 +76,7 @@ public class OvertimeCountdown extends TimeLimitCountdown {
       match.sendMessage(translatable(
           "broadcast.overtime.limit",
           NamedTextColor.YELLOW,
-          TemporalComponent.briefNaturalApproximate(timeLimit.getMaxOvertime())
-              .color(NamedTextColor.AQUA)));
+          duration(timeLimit.getMaxOvertime()).color(NamedTextColor.AQUA)));
     }
   }
 
