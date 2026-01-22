@@ -17,7 +17,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 import tc.oc.pgm.util.named.NameStyle;
@@ -34,12 +33,7 @@ public class PlayerRenderer {
   protected PlayerRenderer() {
     this.nameCache = CacheBuilder.newBuilder()
         .expireAfterAccess(15, TimeUnit.MINUTES)
-        .build(new CacheLoader<>() {
-          @Override
-          public Component load(@NonNull PlayerCacheKey key) {
-            return render(key);
-          }
-        });
+        .build(CacheLoader.from(this::render));
   }
 
   Component render(PlayerData data, PlayerRelationship relation) {

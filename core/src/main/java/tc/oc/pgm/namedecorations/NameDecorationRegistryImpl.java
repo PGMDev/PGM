@@ -41,12 +41,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   private NameDecorationProvider provider;
   private final LoadingCache<UUID, DecorationCacheEntry> decorationCache = CacheBuilder.newBuilder()
       .expireAfterAccess(15, TimeUnit.MINUTES)
-      .build(new CacheLoader<>() {
-        @Override
-        public DecorationCacheEntry load(@NonNull UUID uuid) {
-          return new DecorationCacheEntry(uuid);
-        }
-      });
+      .build(CacheLoader.from(DecorationCacheEntry::new));
 
   public NameDecorationRegistryImpl(@Nullable NameDecorationProvider provider) {
     setProvider(provider);
