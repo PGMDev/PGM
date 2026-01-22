@@ -18,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerListPingEvent;
-import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.Contributor;
@@ -48,14 +47,11 @@ public class ServerPingDataListener implements Listener {
     this.matchCache = CacheBuilder.newBuilder()
         .weakKeys()
         .expireAfterWrite(5L, TimeUnit.SECONDS)
-        .build(new CacheLoader<>() {
-          @Override
-          public JsonObject load(@NonNull Match match) {
-            JsonObject jsonObject = new JsonObject();
-            serializeMatch(match, jsonObject);
-            return jsonObject;
-          }
-        });
+        .build(CacheLoader.from(match -> {
+          JsonObject jsonObject = new JsonObject();
+          serializeMatch(match, jsonObject);
+          return jsonObject;
+        }));
   }
 
   @EventHandler
