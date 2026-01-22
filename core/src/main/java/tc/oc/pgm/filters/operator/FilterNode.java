@@ -1,7 +1,6 @@
 package tc.oc.pgm.filters.operator;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
@@ -58,12 +57,10 @@ public class FilterNode implements FilterDefinition {
   }
 
   public static FilterNode allow(Filter child) {
-    return new FilterNode(
-        Collections.emptyList(), Collections.singletonList(child), Collections.emptyList());
+    return new FilterNode(List.of(), List.of(child), List.of());
   }
 
   public static FilterNode deny(Filter child) {
-    return new FilterNode(
-        Collections.emptyList(), Collections.emptyList(), Collections.singletonList(child));
+    return new FilterNode(List.of(), List.of(), List.of(child));
   }
 }
