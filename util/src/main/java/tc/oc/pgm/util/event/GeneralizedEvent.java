@@ -132,13 +132,13 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
    * @param event The event to look for a {@link World} in
    */
   public static @Nullable World getWorldIfPresent(Event event) {
-    if (event instanceof WorldEvent) return ((WorldEvent) event).getWorld();
-    if (event instanceof PlayerEvent) return ((PlayerEvent) event).getPlayer().getWorld();
-    if (event instanceof EntityEvent) return ((EntityEvent) event).getEntity().getWorld();
-    if (event instanceof BlockEvent) return ((BlockEvent) event).getBlock().getWorld();
-    if (event instanceof VehicleEvent)
-      return ((VehicleEvent) event).getVehicle().getWorld();
-    if (event instanceof WeatherEvent) return ((WeatherEvent) event).getWorld();
+    if (event instanceof WorldEvent worldEvent) return worldEvent.getWorld();
+    if (event instanceof PlayerEvent playerEvent) return playerEvent.getPlayer().getWorld();
+    if (event instanceof EntityEvent entityEvent) return entityEvent.getEntity().getWorld();
+    if (event instanceof BlockEvent blockEvent) return blockEvent.getBlock().getWorld();
+    if (event instanceof VehicleEvent vehicleEvent)
+      return vehicleEvent.getVehicle().getWorld();
+    if (event instanceof WeatherEvent weatherEvent) return weatherEvent.getWorld();
 
     return null;
   }
