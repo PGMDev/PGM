@@ -17,27 +17,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.action.actions.ActionNode;
-import tc.oc.pgm.action.actions.DropFlagAction;
-import tc.oc.pgm.action.actions.EnchantItemAction;
-import tc.oc.pgm.action.actions.ExposedAction;
-import tc.oc.pgm.action.actions.FillAction;
-import tc.oc.pgm.action.actions.KillEntitiesAction;
-import tc.oc.pgm.action.actions.MessageAction;
-import tc.oc.pgm.action.actions.PasteStructureAction;
-import tc.oc.pgm.action.actions.PickupFlagAction;
-import tc.oc.pgm.action.actions.RepeatAction;
-import tc.oc.pgm.action.actions.ReplaceItemAction;
-import tc.oc.pgm.action.actions.ScopeSwitchAction;
-import tc.oc.pgm.action.actions.SetVariableAction;
-import tc.oc.pgm.action.actions.SoundAction;
-import tc.oc.pgm.action.actions.TakePaymentAction;
-import tc.oc.pgm.action.actions.TeamAliasAction;
-import tc.oc.pgm.action.actions.TeleportAction;
-import tc.oc.pgm.action.actions.VelocityAction;
-import tc.oc.pgm.action.actions.WeatherAction;
+import tc.oc.pgm.action.actions.*;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.action.replacements.ReplacementParser;
 import tc.oc.pgm.api.feature.FeatureValidation;
@@ -386,6 +369,14 @@ public class ActionParser {
   public KillEntitiesAction parseKillEntities(Element el, Class<?> scope)
       throws InvalidXMLException {
     return new KillEntitiesAction(parser.filter(el, "filter").required());
+  }
+
+  @MethodParser("open-shop")
+  public OpenShop parseOpenShop(Element el, Class<?> scope) throws InvalidXMLException {
+    Attribute shopAttr = XMLUtils.getRequiredAttribute(el, "shop");
+    String shopId = shopAttr.getValue();
+
+    return new OpenShop(shopId);
   }
 
   @MethodParser("replace-item")
