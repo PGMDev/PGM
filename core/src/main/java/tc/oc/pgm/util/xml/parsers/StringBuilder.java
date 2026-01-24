@@ -1,8 +1,10 @@
 package tc.oc.pgm.util.xml.parsers;
 
+import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
 import org.jdom2.Element;
 import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class StringBuilder extends PrimitiveBuilder<String, StringBuilder> {
   private boolean colored;
@@ -20,6 +22,14 @@ public class StringBuilder extends PrimitiveBuilder<String, StringBuilder> {
   protected String parse(String text) throws TextException {
     if (colored) text = ChatColor.translateAlternateColorCodes('`', text);
     return text;
+  }
+
+  public StringBuilder validate(Pattern pattern) {
+    var predicate = pattern.asMatchPredicate();
+    return this.validate((s, node) -> {
+      if (!predicate.test(s))
+        throw new InvalidXMLException("Expected string to match " + pattern, el);
+    });
   }
 
   @Override

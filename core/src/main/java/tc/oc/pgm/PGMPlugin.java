@@ -417,7 +417,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
       if (message != null) {
         getLogger().log(Level.INFO, ChatColor.stripColor(message));
-        Bukkit.broadcast(message, Permissions.DEBUG);
+        Bukkit.broadcast(ChatColor.RED + message, Permissions.DEBUG);
       }
 
       if (message == null || message.contains("Unhandled")) {

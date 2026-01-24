@@ -418,10 +418,15 @@ public class ActionParser {
         parser.parseBool(el, "events").orFalse());
   }
 
+  private static final Pattern TEAM_NAME =
+      Pattern.compile(".*[a-z]{3}.*", Pattern.CASE_INSENSITIVE);
+
   @MethodParser("team-alias")
   public <T extends Filterable<?>> Action<?> parseTeamAliasAction(Element el, Class<T> scope)
       throws InvalidXMLException {
-    String alias = parser.string(el, "alias").required();
+    String alias = parser.string(el, "alias").validate(TEAM_NAME).required().trim();
+    if ("obs".equalsIgnoreCase(alias))
+      throw new InvalidXMLException("'obs' is a reserved team alias", el);
     var action = new TeamAliasAction(alias);
     var teamBuilder = parser.reference(TeamFactory.class, el, "team");
     var team = scope == Party.class ? teamBuilder.orNull() : teamBuilder.required();
