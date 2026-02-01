@@ -52,8 +52,10 @@ public class ModernTabPackets implements TabPackets {
   }
 
   @Override
+  @SuppressWarnings("ConstantConditions")
   public Packet spawnPlayerPacket(int entityId, UUID uuid, Location loc, Player player) {
     var data = ((CraftEntity) player).getHandle().getEntityData().packAll();
+    if (data == null) return Packet.of();
     return new ModernPacket<>(new ClientboundBundlePacket(List.of(
         new ClientboundAddEntityPacket(
             entityId,
@@ -134,7 +136,7 @@ public class ModernTabPackets implements TabPackets {
         String name,
         int ping,
         @Nullable Skin skin,
-        net.kyori.adventure.text.Component displayName) {
+        net.kyori.adventure.text.@Nullable Component displayName) {
       packet.profileIds().add(uuid);
     }
 

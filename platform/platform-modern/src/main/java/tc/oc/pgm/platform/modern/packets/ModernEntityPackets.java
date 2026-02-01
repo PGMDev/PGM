@@ -132,8 +132,11 @@ public class ModernEntityPackets implements EntityPackets {
   }
 
   @Override
+  @SuppressWarnings("ConstantConditions")
   public Packet entityMetadataPacket(int entityId, Entity entity, boolean complete) {
     var data = ((CraftEntity) entity).getHandle().getEntityData().packAll();
-    return new ModernPacket<>(new ClientboundSetEntityDataPacket(entityId, data));
+    return data == null
+        ? Packet.of()
+        : new ModernPacket<>(new ClientboundSetEntityDataPacket(entityId, data));
   }
 }

@@ -95,8 +95,8 @@ public abstract class TabManager implements Listener {
     return this.playerEntries.get(player);
   }
 
-  public void removePlayerEntry(Player player) {
-    this.playerEntries.remove(player);
+  public TabEntry removePlayerEntry(Player player) {
+    return this.playerEntries.remove(player);
   }
 
   protected TabEntry getBlankEntry(int index) {

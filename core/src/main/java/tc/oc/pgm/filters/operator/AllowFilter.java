@@ -20,9 +20,9 @@ public class AllowFilter extends SingleFilterFunction {
 
   @Override
   public QueryResponse query(Query query) {
-    if (filter.query(query) == QueryResponse.ALLOW) {
-      return QueryResponse.ALLOW;
-    }
-    return QueryResponse.ABSTAIN;
+    return switch (filter.query(query)) {
+      case ALLOW -> QueryResponse.ALLOW;
+      default -> QueryResponse.ABSTAIN;
+    };
   }
 }
