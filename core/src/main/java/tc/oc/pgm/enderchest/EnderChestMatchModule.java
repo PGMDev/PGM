@@ -46,7 +46,6 @@ public class EnderChestMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onParticipantLeave(PlayerPartyChangeEvent event) {
     if (!isEnabled()) return;
-    if (dropoffs.isEmpty()) return;
     Party oldParty = event.getOldParty();
     if (!(oldParty instanceof Competitor)) return;
 
@@ -62,8 +61,17 @@ public class EnderChestMatchModule implements MatchModule, Listener {
     }
 
     if (!dropped) {
-      if (fallback == DropoffFallback.DELETE) {
-        enderchest.clear();
+      switch (fallback) {
+        case AUTO:
+          if (dropoffs.isEmpty()) {
+            enderchest.clear();
+          }
+          break;
+        case DELETE:
+          enderchest.clear();
+          break;
+        default:
+          break;
       }
     }
   }
