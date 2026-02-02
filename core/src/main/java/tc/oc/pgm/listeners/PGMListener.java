@@ -242,7 +242,8 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void nerfFishing(PlayerFishEvent event) {
-    if (event.getCaught() instanceof Item caught) {
+    if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH
+        && event.getCaught() instanceof Item caught) {
       if (caught.getItemStack().getType() != Materials.RAW_FISH) {
         caught.setItemStack(new ItemStack(Materials.RAW_FISH));
       }
