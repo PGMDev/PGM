@@ -24,6 +24,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -109,13 +110,11 @@ public class ClassModule implements MapModule<ClassMatchModule> {
       for (Element classEl : classElements) {
         PlayerClass cls = parseClass(classEl, factory.getKits(), family);
 
-        if (usedNames.contains(cls.getName().toLowerCase())) {
+        if (!usedNames.add(StringUtils.normalize(cls.getName()))) {
           throw new InvalidXMLException(
               "Class already registered to \" + cls.getName() + \"; skipping second instance",
               classEl);
         }
-
-        usedNames.add(cls.getName().toLowerCase());
 
         String classFamily = classEl.getAttributeValue("family");
         if (!family.equals(classFamily)) {

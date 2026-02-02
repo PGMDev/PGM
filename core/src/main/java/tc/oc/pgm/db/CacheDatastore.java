@@ -25,7 +25,8 @@ public class CacheDatastore implements Datastore {
 
   public CacheDatastore(Datastore datastore) {
     this.datastore = datastore;
-    this.usernames = CacheBuilder.newBuilder().build(CacheLoader.from(datastore::getUsername));
+    this.usernames =
+        CacheBuilder.newBuilder().softValues().build(CacheLoader.from(datastore::getUsername));
     this.settings = CacheBuilder.newBuilder().build(CacheLoader.from(datastore::getSettings));
     this.skins = CacheBuilder.newBuilder().build(CacheLoader.from(datastore::getSkin));
     this.activities = CacheBuilder.newBuilder().build(CacheLoader.from(datastore::getMapActivity));

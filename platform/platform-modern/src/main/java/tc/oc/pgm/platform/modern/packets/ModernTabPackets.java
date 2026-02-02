@@ -162,7 +162,7 @@ public class ModernTabPackets implements TabPackets {
         String name,
         int ping,
         @Nullable Skin skin,
-        net.kyori.adventure.text.Component displayName) {
+        net.kyori.adventure.text.@Nullable Component displayName) {
 
       GameProfile profile = new GameProfile(uuid, name, new MutablePropertyMap());
       if (skin != null) Skins.toProfile(profile, skin);
