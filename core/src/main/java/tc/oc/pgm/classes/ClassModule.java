@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -100,11 +101,20 @@ public class ClassModule implements MapModule<ClassMatchModule> {
       if (family == null)
         throw new InvalidXMLException("Unable to determine family for classes", doc);
 
+      Set<String> usedNames = Sets.newHashSet();
+
       ImmutableMap.Builder<String, PlayerClass> builder = ImmutableMap.builder();
       PlayerClass defaultClass = null;
 
       for (Element classEl : classElements) {
         PlayerClass cls = parseClass(classEl, factory.getKits(), family);
+
+        usedNames.add(cls.getName().toLowerCase());
+        if (usedNames.contains(cls.getName().toLowerCase())) {
+          throw new InvalidXMLException(
+              "Class already registered to \" + cls.getName() + \"; skipping second instance",
+              classEl);
+        }
 
         String classFamily = classEl.getAttributeValue("family");
         if (!family.equals(classFamily)) {
