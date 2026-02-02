@@ -47,14 +47,11 @@ public class ServerPingDataListener implements Listener {
     this.matchCache = CacheBuilder.newBuilder()
         .weakKeys()
         .expireAfterWrite(5L, TimeUnit.SECONDS)
-        .build(new CacheLoader<Match, JsonObject>() {
-          @Override
-          public JsonObject load(Match match) throws Exception {
-            JsonObject jsonObject = new JsonObject();
-            serializeMatch(match, jsonObject);
-            return jsonObject;
-          }
-        });
+        .build(CacheLoader.from(match -> {
+          JsonObject jsonObject = new JsonObject();
+          serializeMatch(match, jsonObject);
+          return jsonObject;
+        }));
   }
 
   @EventHandler

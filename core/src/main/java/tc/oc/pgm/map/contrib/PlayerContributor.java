@@ -5,7 +5,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import com.google.common.base.Objects;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.player.Username;
@@ -28,7 +28,7 @@ public class PlayerContributor implements Contributor {
   }
 
   @Override
-  public String getContribution() {
+  public @Nullable String getContribution() {
     return contribution;
   }
 
@@ -49,8 +49,7 @@ public class PlayerContributor implements Contributor {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof PlayerContributor)) return false;
-    final PlayerContributor o = (PlayerContributor) obj;
+    if (!(obj instanceof PlayerContributor o)) return false;
     return this.id.equals(o.getId()) && Objects.equal(this.contribution, o.getContribution());
   }
 

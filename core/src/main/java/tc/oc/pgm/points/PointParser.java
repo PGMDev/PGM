@@ -46,15 +46,13 @@ public class PointParser {
 
     List<PointProvider> providers = new ArrayList<>();
     for (Attribute attr : XMLUtils.getAttributes(el, aliases)) {
-      providers.add(
-          new RegionPointProvider(
-              validate(regionParser.parseReference(attr), new Node(attr)), attributes));
+      providers.add(new RegionPointProvider(
+          validate(regionParser.parseReference(attr), new Node(attr)), attributes));
     }
     for (Element child : XMLUtils.getChildren(el, aliases)) {
-      providers.add(
-          new RegionPointProvider(
-              validate(regionParser.parseChild(child), new Node(child)),
-              parseAttributes(child, attributes)));
+      providers.add(new RegionPointProvider(
+          validate(regionParser.parseChild(child), new Node(child)),
+          parseAttributes(child, attributes)));
     }
     return providers;
   }
@@ -73,7 +71,7 @@ public class PointParser {
       throws InvalidXMLException {
     List<PointProvider> points = new ArrayList<>();
     parsePoint(points, el, attributes);
-    if (points.size() == 1) return points.get(0);
+    if (points.size() == 1) return points.getFirst();
     throw new InvalidXMLException(
         "Expected one location, either as direct value or as a single child region", el);
   }
@@ -126,7 +124,7 @@ public class PointParser {
       List<PointProvider> providers, Element el, PointProviderAttributes attributes)
       throws InvalidXMLException {
     Node node = new Node(el);
-    for (Region region : expandRegion(new ArrayList<Region>(), regionParser.parse(el))) {
+    for (Region region : expandRegion(new ArrayList<>(), regionParser.parse(el))) {
       providers.add(new RegionPointProvider(validate(region, node), attributes));
     }
   }

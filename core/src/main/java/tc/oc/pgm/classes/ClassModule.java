@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -24,6 +24,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitModule;
 import tc.oc.pgm.kits.KitParser;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -86,8 +87,7 @@ public class ClassModule implements MapModule<ClassMatchModule> {
       for (Element classEl : classElements) {
         String classFamily = classEl.getAttributeValue("family");
         if (classFamily != null) {
-          Integer num = familyFrequency.get(classFamily);
-          familyFrequency.put(classFamily, (num != null ? num.intValue() : 0) + 1);
+          familyFrequency.compute(classFamily, (k, num) -> (num != null ? num : 0) + 1);
         }
       }
 
@@ -103,27 +103,24 @@ public class ClassModule implements MapModule<ClassMatchModule> {
         throw new InvalidXMLException("Unable to determine family for classes", doc);
 
       Set<String> usedNames = Sets.newHashSet();
+
       ImmutableMap.Builder<String, PlayerClass> builder = ImmutableMap.builder();
       PlayerClass defaultClass = null;
 
       for (Element classEl : classElements) {
         PlayerClass cls = parseClass(classEl, factory.getKits(), family);
 
-        if (usedNames.contains(cls.getName().toLowerCase())) {
+        if (!usedNames.add(StringUtils.normalize(cls.getName()))) {
           throw new InvalidXMLException(
               "Class already registered to \" + cls.getName() + \"; skipping second instance",
               classEl);
         }
 
         String classFamily = classEl.getAttributeValue("family");
-        if (family == null) {
-          family = classFamily;
-        } else {
-          if (!family.equals(classFamily)) {
-            throw new InvalidXMLException(
-                "Family was determined to be '" + family + "' but class specified '" + classFamily,
-                classEl);
-          }
+        if (!family.equals(classFamily)) {
+          throw new InvalidXMLException(
+              "Family was determined to be '" + family + "' but class specified '" + classFamily,
+              classEl);
         }
 
         if (XMLUtils.parseBoolean(classEl.getAttribute("default"), false)) {

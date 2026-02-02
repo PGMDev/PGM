@@ -10,7 +10,7 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jdom2.Element;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.util.attribute.AttributeUtils;
 import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.platform.Supports;
@@ -81,14 +81,16 @@ public class ModernAttributeUtil implements AttributeUtils {
       double amount, AttributeModifier.Operation operation, EquipmentSlotGroup group)
       implements SimpleAttributeModifier {
     @Override
-    public int compareTo(@NotNull SimpleAttributeModifier obj) {
-      if (!(obj instanceof SimpleModifier o)) return 0;
-      int res = operation.ordinal() - o.operation.ordinal();
+    public int compareTo(@NonNull SimpleAttributeModifier obj) {
+      if (!(obj
+          instanceof SimpleModifier(double a, AttributeModifier.Operation o, EquipmentSlotGroup g)))
+        return 0;
+      int res = operation.ordinal() - o.ordinal();
       if (res != 0) return res;
-      res = group.toString().compareTo(o.group.toString());
+      res = group.toString().compareTo(g.toString());
       if (res != 0) return res;
 
-      return Double.compare(amount, o.amount);
+      return Double.compare(amount, a);
     }
   }
 

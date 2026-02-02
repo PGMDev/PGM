@@ -17,7 +17,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -98,8 +98,7 @@ public class TNTMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void setCustomProperties(ExplosionPrimeEvent event) {
-    if (event.getEntity() instanceof TNTPrimed) {
-      TNTPrimed tnt = (TNTPrimed) event.getEntity();
+    if (event.getEntity() instanceof TNTPrimed tnt) {
 
       if (this.properties.fuse != null) {
         tnt.setFuseTicks(this.getFuseTicks());

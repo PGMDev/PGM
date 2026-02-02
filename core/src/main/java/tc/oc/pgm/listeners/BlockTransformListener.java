@@ -21,7 +21,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -50,7 +49,7 @@ import org.bukkit.material.Door;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
@@ -99,49 +98,45 @@ public class BlockTransformListener implements Listener {
               method.getParameterTypes()[0].asSubclass(Event.class);
 
           for (final EventPriority priority : EventPriority.values()) {
-            EventExecutor executor = new EventExecutor() {
-              @Override
-              public void execute(Listener listener, Event event) throws EventException {
-                // REMOVED: Ignore the event if it was fron a non-Match world
-                // if (event instanceof Physical
-                //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld())
-                // ==
-                // null)
-                //  return;
+            EventExecutor executor = (listener, event) -> {
+              // if (event instanceof Physical
+              //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld())
+              // ==
+              // null)
+              //  return;
 
-                if (!Events.isCancelled(event)) {
-                  // At the first priority level, call the event handler method.
-                  // If it decides to generate a BlockTransformEvent, it will be stored in
-                  // currentEvents.
-                  if (priority == EventPriority.LOWEST) {
-                    if (eventClass.isInstance(event)) {
-                      try {
-                        method.invoke(listener, event);
-                      } catch (InvocationTargetException ex) {
-                        throw MISC_UTILS.createEventException(ex.getCause(), event);
-                      } catch (Throwable t) {
-                        throw MISC_UTILS.createEventException(t, event);
-                      }
+              if (!Events.isCancelled(event)) {
+                // At the first priority level, call the event handler method.
+                // If it decides to generate a BlockTransformEvent, it will be stored in
+                // currentEvents.
+                if (priority == EventPriority.LOWEST) {
+                  if (eventClass.isInstance(event)) {
+                    try {
+                      method.invoke(listener, event);
+                    } catch (InvocationTargetException ex) {
+                      throw MISC_UTILS.createEventException(ex.getCause(), event);
+                    } catch (Throwable t) {
+                      throw MISC_UTILS.createEventException(t, event);
                     }
                   }
                 }
+              }
 
-                // Check for cached events and dispatch them at the current priority level
-                // only.
-                // The BTE needs to be dispatched even after it's cancelled, because we DO
-                // have
-                // listeners that depend on receiving cancelled events e.g. WoolMatchModule.
-                for (BlockTransformEvent bte : currentEvents.get(event)) {
-                  Events.callEvent(bte, priority);
-                }
+              // Check for cached events and dispatch them at the current priority level
+              // only.
+              // The BTE needs to be dispatched even after it's cancelled, because we DO
+              // have
+              // listeners that depend on receiving cancelled events e.g. WoolMatchModule.
+              for (BlockTransformEvent bte : currentEvents.get(event)) {
+                Events.callEvent(bte, priority);
+              }
 
-                // After dispatching the last priority level, clean up the cached events and
-                // do
-                // post-event stuff.
-                // This needs to happen even if the event is cancelled.
-                if (priority == EventPriority.MONITOR) {
-                  finishCauseEvent(event);
-                }
+              // After dispatching the last priority level, clean up the cached events and
+              // do
+              // post-event stuff.
+              // This needs to happen even if the event is cancelled.
+              if (priority == EventPriority.MONITOR) {
+                finishCauseEvent(event);
               }
             };
 
@@ -489,18 +484,18 @@ public class BlockTransformListener implements Listener {
 
   private byte getPistonDirectionByte(BlockFace face) {
     return switch (face) {
-      default -> 0; // down included
       case UP -> 1;
       case NORTH -> 2;
       case SOUTH -> 3;
       case WEST -> 4;
       case EAST -> 5;
+      default -> 0; // down included
     };
   }
 
   @EventWrapper
   public void onBlockPistonRetract(final BlockPistonRetractEvent event) {
-    this.onPistonMove(event, event.getBlocks(), new HashMap<Block, BlockState>());
+    this.onPistonMove(event, event.getBlocks(), new HashMap<>());
   }
 
   // -----------------------------

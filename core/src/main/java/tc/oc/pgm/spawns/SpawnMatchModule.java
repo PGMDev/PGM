@@ -25,7 +25,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
@@ -325,7 +325,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     event.setSpawnLocation(match.getWorld().getSpawnLocation());
   }
 
-  @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = false)
+  @EventHandler(priority = EventPriority.NORMAL)
   public void teleportObservers(final EntityDamageEvent event) {
     // When an observer begins to take fall damage, teleport them to their spawn
     // Due to a bug causing infinite TP loop, only tp twice a second at most

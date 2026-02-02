@@ -121,9 +121,7 @@ public class PGMServer extends DedicatedServer implements Runnable {
   }
 
   protected void setupConsole() {
-    final Thread console = new Thread(() -> {
-      new PaperConsole(PGMServer.this).start();
-    });
+    final Thread console = new Thread(() -> new PaperConsole(PGMServer.this).start());
     console.setDaemon(true);
     console.start();
   }

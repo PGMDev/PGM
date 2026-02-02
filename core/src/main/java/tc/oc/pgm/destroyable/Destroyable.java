@@ -26,8 +26,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Firework;
 import org.bukkit.util.BlockVector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -129,7 +129,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   // Remove @Nullable
   @Override
-  public @NotNull Team getOwner() {
+  public @NonNull Team getOwner() {
     Team owner = super.getOwner();
     if (owner == null) {
       throw new IllegalStateException("destroyable " + getId() + " has no owner");
@@ -403,7 +403,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       if (player != null && player.getParty() == this.getOwner()) {
         return "objective.damageOwn";
       }
-    } else if (deltaHealth > 0) {
+    } else {
       // Repair
       if (player != null && player.getParty() != this.getOwner()) {
         return "objective.repairOther";
@@ -486,7 +486,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return StringUtils.percentage(this.getCompletion());
   }
 
-  @NotNull
+  @NonNull
   @Override
   public String renderPreciseCompletion() {
     return this.getBreaks() + "/" + this.getBreaksRequired();
@@ -537,11 +537,11 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return this.isDestroyed() && this.canComplete(team);
   }
 
-  public @NotNull List<DestroyableHealthChange> getEvents() {
+  public @NonNull List<DestroyableHealthChange> getEvents() {
     return ImmutableList.copyOf(this.events);
   }
 
-  public @NotNull ImmutableList<DestroyableContribution> getContributions() {
+  public @NonNull ImmutableList<DestroyableContribution> getContributions() {
     if (this.contributions != null) {
       return this.contributions;
     }

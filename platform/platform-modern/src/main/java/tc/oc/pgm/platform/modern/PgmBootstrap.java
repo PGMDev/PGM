@@ -26,7 +26,7 @@ import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.PluginClassLoader;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.util.DataVersions;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -39,7 +39,7 @@ public class PgmBootstrap implements PluginBootstrap {
       Registries.DIMENSION_TYPE, ResourceLocation.fromNamespaceAndPath(NAMESPACE, PATH));
 
   @Override
-  public void bootstrap(@NotNull BootstrapContext context) {
+  public void bootstrap(@NonNull BootstrapContext context) {
     // Register the compatibility datapack
     context.getLifecycleManager().registerEventHandler(LifecycleEvents.DATAPACK_DISCOVERY, e -> {
       var registrar = e.registrar();
@@ -70,7 +70,7 @@ public class PgmBootstrap implements PluginBootstrap {
   }
 
   @Override
-  public JavaPlugin createPlugin(PluginProviderContext context) {
+  public @NonNull JavaPlugin createPlugin(PluginProviderContext context) {
     var ourClassLoader = (PaperPluginClassLoader) getClass().getClassLoader();
     var pluginMeta = (PaperPluginMeta) ourClassLoader.getConfiguration();
     var descriptor = new PluginDescriptionFile(

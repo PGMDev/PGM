@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.skin;
 
+import java.util.Objects;
+
 /** A self-contained skin */
 public class Skin {
   public static final Skin EMPTY = new Skin(null, null);
@@ -34,17 +36,13 @@ public class Skin {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof Skin)) {
+    if (!(o instanceof Skin skin)) {
       return false;
     }
-    Skin skin = (Skin) o;
-    if (data != null ? !data.equals(skin.data) : skin.data != null) {
+    if (!Objects.equals(data, skin.data)) {
       return false;
     }
-    if (signature != null ? !signature.equals(skin.signature) : skin.signature != null) {
-      return false;
-    }
-    return true;
+    return Objects.equals(signature, skin.signature);
   }
 
   @Override

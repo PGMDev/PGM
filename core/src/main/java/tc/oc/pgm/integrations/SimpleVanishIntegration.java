@@ -50,15 +50,14 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
     this.vanishedPlayers = Lists.newArrayList();
     this.matchManager = matchManager;
     this.hotbarFlash = false;
-    this.hotbarTask =
-        tasks.scheduleAtFixedRate(
-            () -> {
-              getOnlineVanished().forEach(p -> sendHotbarVanish(p, hotbarFlash));
-              hotbarFlash = !hotbarFlash; // Toggle boolean so we get a nice flashing effect
-            },
-            0,
-            1,
-            TimeUnit.SECONDS);
+    this.hotbarTask = tasks.scheduleAtFixedRate(
+        () -> {
+          getOnlineVanished().forEach(p -> sendHotbarVanish(p, hotbarFlash));
+          hotbarFlash = !hotbarFlash; // Toggle boolean so we get a nice flashing effect
+        },
+        0,
+        1,
+        TimeUnit.SECONDS);
 
     // Register listener
     PGM.get().getServer().getPluginManager().registerEvents(this, PGM.get());
@@ -172,7 +171,7 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
   public void onUnvanish(PlayerVanishEvent event) {
     // If player joined via "vanish" subdomain, but unvanishes while online
     // stop tracking them for auto-vanish removal
-    if (!event.isVanished() && tempVanish.contains(event.getPlayer().getId())) {
+    if (!event.isVanished()) {
       tempVanish.remove(event.getPlayer().getId());
     }
   }

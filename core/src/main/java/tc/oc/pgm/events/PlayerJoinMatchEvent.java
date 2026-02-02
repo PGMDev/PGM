@@ -22,7 +22,7 @@ import tc.oc.pgm.join.JoinRequest;
  */
 public class PlayerJoinMatchEvent extends PlayerJoinPartyEvent {
 
-  private List<Component> extraLines = Lists.newArrayList();
+  private final List<Component> extraLines = Lists.newArrayList();
 
   public PlayerJoinMatchEvent(MatchPlayer player, Party newParty, JoinRequest request) {
     super(player, null, assertNotNull(newParty), request);

@@ -13,13 +13,13 @@ public class GoalCompleteEvent extends GoalEvent {
   private final boolean isGood;
   private final ImmutableList<? extends Contribution> contributions;
 
-  public GoalCompleteEvent(Match match, Goal goal, Competitor competitor, boolean isGood) {
-    this(match, goal, competitor, isGood, ImmutableList.<Contribution>of());
+  public GoalCompleteEvent(Match match, Goal<?> goal, Competitor competitor, boolean isGood) {
+    this(match, goal, competitor, isGood, ImmutableList.of());
   }
 
   public GoalCompleteEvent(
       Match match,
-      Goal goal,
+      Goal<?> goal,
       Competitor competitor,
       boolean isGood,
       List<? extends Contribution> contributions) {

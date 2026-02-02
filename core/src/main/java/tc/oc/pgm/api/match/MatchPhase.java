@@ -8,8 +8,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public enum MatchPhase {
 
   /**
-   * The {@link Match} is loaded, but no countdown has been queued for it to transition to {@link
-   * MatchPhase#STARTING}.
+   * The {@link Match} is loaded, but no countdown has been queued for it to transition to
+   * {@link MatchPhase#STARTING}.
    */
   IDLE,
 
@@ -38,18 +38,12 @@ public enum MatchPhase {
    * @return Whether the transition is allowed.
    */
   public boolean canTransitionTo(MatchPhase next) {
-    switch (this) {
-      case IDLE:
-        return next == STARTING || next == RUNNING;
-      case STARTING:
-        return next == RUNNING || next == IDLE || next == STARTING;
-      case RUNNING:
-        return next == FINISHED;
-      case FINISHED:
-        return false;
-      default:
-        throw new IllegalStateException("Unknown transition state for " + next);
-    }
+    return switch (this) {
+      case IDLE -> next == STARTING || next == RUNNING;
+      case STARTING -> next == RUNNING || next == IDLE || next == STARTING;
+      case RUNNING -> next == FINISHED;
+      case FINISHED -> false;
+    };
   }
 
   @Override

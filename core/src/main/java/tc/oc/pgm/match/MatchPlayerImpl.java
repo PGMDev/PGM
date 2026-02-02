@@ -31,8 +31,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -453,7 +453,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   }
 
   @Override
-  public @NotNull Audience audience() {
+  public @NonNull Audience audience() {
     return audience;
   }
 
@@ -508,8 +508,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof MatchPlayer)) return false;
-    final MatchPlayer o = (MatchPlayer) obj;
+    if (!(obj instanceof MatchPlayer o)) return false;
     return this.id.equals(o.getId()) && this.match.equals(o.getMatch());
   }
 

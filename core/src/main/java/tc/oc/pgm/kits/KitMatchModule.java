@@ -122,8 +122,7 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onGrenadeLaunch(final ProjectileLaunchEvent event) {
-    if (event.getEntity().getShooter() instanceof Player) {
-      Player player = (Player) event.getEntity().getShooter();
+    if (event.getEntity().getShooter() instanceof Player player) {
       ItemStack stack = player.getItemInHand();
 
       if (stack != null) {

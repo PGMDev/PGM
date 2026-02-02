@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -34,13 +34,13 @@ public interface Goal<T extends GoalDefinition> extends Feature<T> {
   boolean isCompleted(Competitor team);
 
   default boolean isCompleted(Optional<? extends Competitor> competitor) {
-    return competitor.isPresent() ? isCompleted(competitor.get()) : isCompleted();
+    return competitor.map(this::isCompleted).orElseGet(this::isCompleted);
   }
 
   /**
    * Returns true if this goal can be completed by multiple teams (e.g. a capture point). Currently,
-   * this affects how the goal is displayed on the scoreboard, and how it interacts with {@link
-   * GoalFilter}.
+   * this affects how the goal is displayed on the scoreboard, and how it interacts with
+   * {@link GoalFilter}.
    */
   boolean isShared();
 

@@ -12,8 +12,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.material.ItemMaterialData;
 
@@ -63,7 +63,7 @@ public class PlayerClass implements ComponentLike {
   }
 
   @Override
-  public @NotNull Component asComponent() {
+  public @NonNull Component asComponent() {
     TextComponent.Builder component =
         text().content(this.name).color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
 
@@ -118,8 +118,7 @@ public class PlayerClass implements ComponentLike {
   public boolean equals(Object obj) {
     if (this == obj) return true;
     if (obj == null) return false;
-    if (!(obj instanceof PlayerClass)) return false;
-    PlayerClass other = (PlayerClass) obj;
+    if (!(obj instanceof PlayerClass other)) return false;
     if (!this.name.equals(other.name)) return false;
     if (!this.familyName.equals(other.familyName)) return false;
     if (this.description == null) {

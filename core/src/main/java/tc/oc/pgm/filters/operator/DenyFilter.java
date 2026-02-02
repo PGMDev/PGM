@@ -18,11 +18,9 @@ public class DenyFilter extends SingleFilterFunction {
 
   @Override
   public QueryResponse query(Query query) {
-    switch (filter.query(query)) {
-      case ALLOW:
-        return QueryResponse.DENY;
-      default:
-        return QueryResponse.ABSTAIN;
-    }
+    return switch (filter.query(query)) {
+      case ALLOW -> QueryResponse.DENY;
+      default -> QueryResponse.ABSTAIN;
+    };
   }
 }

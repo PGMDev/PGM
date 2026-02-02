@@ -38,14 +38,8 @@ public class SqlUsernameResolver extends AbstractBatchingUsernameResolver {
     CompletableFuture.allOf(futures).join();
   }
 
-  private static class SingleSelect implements ThreadSafeConnection.Query {
-    private final UUID uuid;
-    private final CompletableFuture<UsernameResponse> future;
-
-    public SingleSelect(UUID uuid, CompletableFuture<UsernameResponse> future) {
-      this.uuid = uuid;
-      this.future = future;
-    }
+  private record SingleSelect(UUID uuid, CompletableFuture<UsernameResponse> future)
+      implements ThreadSafeConnection.Query {
 
     @Override
     public String getFormat() {
@@ -69,14 +63,8 @@ public class SqlUsernameResolver extends AbstractBatchingUsernameResolver {
     }
   }
 
-  private static class BatchSelect implements ThreadSafeConnection.Query {
-    private final List<UUID> uuids;
-    private final BiConsumer<UUID, UsernameResponse> completion;
-
-    public BatchSelect(List<UUID> uuids, BiConsumer<UUID, UsernameResponse> completion) {
-      this.uuids = uuids;
-      this.completion = completion;
-    }
+  private record BatchSelect(List<UUID> uuids, BiConsumer<UUID, UsernameResponse> completion)
+      implements ThreadSafeConnection.Query {
 
     @Override
     public String getFormat() {

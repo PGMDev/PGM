@@ -1,18 +1,21 @@
 package tc.oc.pgm.controlpoint.events;
 
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.controlpoint.ControlPoint;
 
 public class ControllerChangeEvent extends ControlPointEvent {
   private static final HandlerList handlers = new HandlerList();
-  @Nullable private final Competitor oldController;
-  @Nullable private final Competitor newController;
+  private final @Nullable Competitor oldController;
+  private final @Nullable Competitor newController;
 
   public ControllerChangeEvent(
-      Match match, ControlPoint hill, Competitor oldController, Competitor newController) {
+      Match match,
+      ControlPoint hill,
+      @Nullable Competitor oldController,
+      @Nullable Competitor newController) {
     super(match, hill);
     this.oldController = oldController;
     this.newController = newController;

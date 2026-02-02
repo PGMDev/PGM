@@ -40,8 +40,9 @@ public class RandomOrderPostResolver implements PostResolver {
   }
 
   private SinglePost findNext(Flag flag) {
-    GoalQuery query = new GoalQuery(flag);
-    if (next != null && next.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) return next;
+    GoalQuery<?> query = new GoalQuery<>(flag);
+    if (next != null && next.getRespawnFilter().query(new GoalQuery<>(flag)).isAllowed())
+      return next;
 
     Collections.shuffle(posts);
     for (SinglePost post : posts) {

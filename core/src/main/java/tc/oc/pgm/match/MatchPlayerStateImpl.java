@@ -8,8 +8,8 @@ import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -19,19 +19,19 @@ import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.named.NameStyle;
 
 public class MatchPlayerStateImpl implements MatchPlayerState {
-  private final @NotNull Match match;
-  private final @NotNull String username;
-  private final @NotNull UUID uuid;
-  private final @NotNull Party party;
+  private final @NonNull Match match;
+  private final @NonNull String username;
+  private final @NonNull UUID uuid;
+  private final @NonNull Party party;
   private final boolean dead;
   private final boolean vanished;
   private final @Nullable String nick;
 
   // Excluded from equals/hashcode
-  private final @NotNull Vector location;
-  private final @NotNull Audience audience;
+  private final @NonNull Vector location;
+  private final @NonNull Audience audience;
 
-  protected MatchPlayerStateImpl(@NotNull MatchPlayer player) {
+  protected MatchPlayerStateImpl(@NonNull MatchPlayer player) {
     this.match = assertNotNull(player).getMatch();
     this.username = assertNotNull(player.getBukkit().getName());
     this.uuid = assertNotNull(player.getId());
@@ -45,22 +45,22 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
-  public @NotNull Match getMatch() {
+  public @NonNull Match getMatch() {
     return match;
   }
 
   @Override
-  public @NotNull Party getParty() {
+  public @NonNull Party getParty() {
     return party;
   }
 
   @Override
-  public @NotNull UUID getId() {
+  public @NonNull UUID getId() {
     return uuid;
   }
 
   @Override
-  public @NotNull Location getLocation() {
+  public @NonNull Location getLocation() {
     return location.toLocation(match.getWorld());
   }
 
@@ -80,7 +80,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   }
 
   @Override
-  @NotNull
+  @NonNull
   public Audience audience() {
     return audience;
   }
@@ -109,9 +109,7 @@ public class MatchPlayerStateImpl implements MatchPlayerState {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof MatchPlayerStateImpl)) return false;
-
-    MatchPlayerStateImpl that = (MatchPlayerStateImpl) o;
+    if (!(o instanceof MatchPlayerStateImpl that)) return false;
 
     if (isDead() != that.isDead()) return false;
     if (isVanished() != that.isVanished()) return false;

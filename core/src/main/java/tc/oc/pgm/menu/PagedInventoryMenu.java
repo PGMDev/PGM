@@ -129,7 +129,7 @@ public abstract class PagedInventoryMenu extends InventoryMenu {
         c -> getInventory().open(player, page));
   }
 
-  private final ItemStack getPageIcon(String text, int page) {
+  private ItemStack getPageIcon(String text, int page) {
     return getNamedItem(text, PAGE_MATERIAL, page);
   }
 

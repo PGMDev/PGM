@@ -147,8 +147,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void updateMonitoredClick(final InventoryClickEvent event) {
-    if (event.getWhoClicked() instanceof Player) {
-      Player player = (Player) event.getWhoClicked();
+    if (event.getWhoClicked() instanceof Player player) {
 
       boolean playerInventory =
           event.getInventory().getType() == InventoryType.CRAFTING; // cb bug fix
@@ -170,8 +169,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         // this is how we determine if we have a match
         if (inventory.getViewers().isEmpty()
             || tracker.getWatched().getViewers().isEmpty()
-            || inventory.getViewers().size() > tracker.getWatched().getViewers().size())
-          continue invLoop;
+            || inventory.getViewers().size() > tracker.getWatched().getViewers().size()) continue;
 
         for (int i = 0; i < inventory.getViewers().size(); i++) {
           if (!inventory
@@ -232,8 +230,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void updateMonitoredHealth(final EntityRegainHealthEvent event) {
-    if (event.getEntity() instanceof Player) {
-      Player player = (Player) event.getEntity();
+    if (event.getEntity() instanceof Player player) {
       if (player.getHealth() == player.getMaxHealth()) return;
       this.scheduleCheck((Player) event.getEntity());
     }
@@ -379,7 +376,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     }
 
     // potions
-    boolean hasPotions = holder.getActivePotionEffects().size() > 0;
+    boolean hasPotions = !holder.getActivePotionEffects().isEmpty();
     ItemStack potions = new ItemStack(hasPotions ? Material.POTION : Material.GLASS_BOTTLE);
     ItemMeta potionMeta = potions.getItemMeta();
     potionMeta.setDisplayName(ChatColor.AQUA.toString()

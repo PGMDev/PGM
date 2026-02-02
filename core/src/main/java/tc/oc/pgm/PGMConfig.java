@@ -21,8 +21,6 @@ import java.nio.file.Paths;
 import java.text.Normalizer;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -39,7 +37,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -394,14 +392,11 @@ public final class PGMConfig implements Config {
     }
 
     // Will be sorted based on priority, in ascending order
-    Collections.sort(groups, new Comparator<String>() {
-      @Override
-      public int compare(String o1, String o2) {
-        try {
-          return Integer.parseInt(o1.split("\\|")[0]) - Integer.parseInt(o2.split("\\|")[0]);
-        } catch (Throwable t) {
-          return 0;
-        }
+    groups.sort((o1, o2) -> {
+      try {
+        return Integer.parseInt(o1.split("\\|")[0]) - Integer.parseInt(o2.split("\\|")[0]);
+      } catch (Throwable t) {
+        return 0;
       }
     });
 
@@ -774,13 +769,13 @@ public final class PGMConfig implements Config {
 
   private static class Flair implements Config.Flair {
 
-    private String prefix;
-    private String suffix;
-    private String displayName;
-    private String description;
-    private String clickLink;
-    private Component prefixOverride;
-    private Component suffixOverride;
+    private final String prefix;
+    private final String suffix;
+    private final String displayName;
+    private final String description;
+    private final String clickLink;
+    private final Component prefixOverride;
+    private final Component suffixOverride;
 
     public Flair(ConfigurationSection config) {
       final String prefix = config.getString("prefix");
@@ -847,7 +842,7 @@ public final class PGMConfig implements Config {
   public static class Moderation {
 
     public static boolean isRuleLinkVisible() {
-      return getRulesLink().length() > 0;
+      return !getRulesLink().isEmpty();
     }
 
     public static String getRulesLink() {
@@ -863,7 +858,7 @@ public final class PGMConfig implements Config {
     }
 
     public static boolean isAppealVisible() {
-      return getAppealMessage().length() > 0;
+      return !getAppealMessage().isEmpty();
     }
   }
 }

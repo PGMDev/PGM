@@ -52,32 +52,32 @@ public class GoalMatchModule implements MatchModule, Listener {
   }
 
   protected final Match match;
-  protected final List<Goal> goals = new ArrayList<>();
-  protected final Multimap<Competitor, Goal> goalsByCompetitor = ArrayListMultimap.create();
-  protected final Multimap<Goal, Competitor> competitorsByGoal = HashMultimap.create();
+  protected final List<Goal<?>> goals = new ArrayList<>();
+  protected final Multimap<Competitor, Goal<?>> goalsByCompetitor = ArrayListMultimap.create();
+  protected final Multimap<Goal<?>, Competitor> competitorsByGoal = HashMultimap.create();
   protected final Map<Competitor, GoalProgress> progressByCompetitor = new HashMap<>();
 
   private GoalMatchModule(Match match) {
     this.match = match;
   }
 
-  public Collection<Goal> getGoals() {
+  public Collection<Goal<?>> getGoals() {
     return Collections.unmodifiableCollection(goals);
   }
 
-  public Collection<Goal> getGoals(Competitor competitor) {
+  public Collection<Goal<?>> getGoals(Competitor competitor) {
     return Collections.unmodifiableCollection(goalsByCompetitor.get(competitor));
   }
 
-  public Collection<Competitor> getCompetitors(Goal goal) {
+  public Collection<Competitor> getCompetitors(Goal<?> goal) {
     return competitorsByGoal.get(goal);
   }
 
-  public Multimap<Competitor, Goal> getGoalsByCompetitor() {
+  public Multimap<Competitor, Goal<?>> getGoalsByCompetitor() {
     return goalsByCompetitor;
   }
 
-  public Multimap<Goal, Competitor> getCompetitorsByGoal() {
+  public Multimap<Goal<?>, Competitor> getCompetitorsByGoal() {
     return competitorsByGoal;
   }
 
@@ -107,7 +107,7 @@ public class GoalMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchLoad(MatchLoadEvent event) {
-    for (Goal goal : goals) {
+    for (Goal<?> goal : goals) {
       for (Competitor competitor : match.getCompetitors()) {
         addCompetitorGoal(competitor, goal);
       }
@@ -118,7 +118,7 @@ public class GoalMatchModule implements MatchModule, Listener {
   public void onCompetitorAdd(CompetitorAddEvent event) {
     match.getLogger().fine("Competitor added " + event.getCompetitor());
 
-    for (Goal goal : goals) {
+    for (Goal<?> goal : goals) {
       addCompetitorGoal(event.getCompetitor(), goal);
     }
   }
@@ -126,15 +126,15 @@ public class GoalMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onCompetitorRemove(CompetitorRemoveEvent event) {
     goalsByCompetitor.removeAll(event.getCompetitor());
-    for (Goal goal : ImmutableSet.copyOf(competitorsByGoal.keySet())) {
+    for (Goal<?> goal : ImmutableSet.copyOf(competitorsByGoal.keySet())) {
       competitorsByGoal.remove(goal, event.getCompetitor());
     }
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends Goal> Multimap<Competitor, T> getGoals(Class<T> filterClass) {
+  public <T extends Goal<?>> Multimap<Competitor, T> getGoals(Class<T> filterClass) {
     Multimap<Competitor, T> filteredGoals = ArrayListMultimap.create();
-    for (Entry<Competitor, Goal> entry : this.goalsByCompetitor.entries()) {
+    for (Entry<Competitor, Goal<?>> entry : this.goalsByCompetitor.entries()) {
       if (filterClass.isInstance(entry.getValue())) {
         filteredGoals.put(entry.getKey(), (T) entry.getValue());
       }

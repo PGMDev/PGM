@@ -10,7 +10,7 @@ import tc.oc.pgm.result.ImmediateVictoryCondition;
 
 /** Immediate, unconditional victory for an explicit {@link Team}. */
 public class TeamVictoryCondition extends ImmediateVictoryCondition {
-  private TeamFactory teamDefinition;
+  private final TeamFactory teamDefinition;
 
   public TeamVictoryCondition(TeamFactory teamDefinition) {
     this.teamDefinition = assertNotNull(teamDefinition);

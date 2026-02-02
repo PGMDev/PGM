@@ -41,7 +41,7 @@ public final class ModeCommand {
     TextComponent.Builder builder = text()
         .append(translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
 
-    ModeChangeCountdown next = countdowns.get(0);
+    ModeChangeCountdown next = countdowns.getFirst();
     Duration timeLeft = modes.getCountdown().getTimeLeft(next);
 
     if (timeLeft == null) {

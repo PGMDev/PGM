@@ -23,7 +23,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.platform.Platform;
@@ -123,17 +123,15 @@ public final class InventoryUtils {
       return stack;
     }
 
-    if (leftover == stack.getAmount()) {
-      return stack;
-    } else {
+    if (leftover != stack.getAmount()) {
       placed = stack.clone();
       placed.setAmount(amount);
       inv.setItem(slot, placed);
 
       stack = stack.clone();
       stack.setAmount(leftover);
-      return stack;
     }
+    return stack;
   }
 
   public static ItemStack placeStack(Inventory inv, Iterable<Integer> slots, ItemStack stack) {

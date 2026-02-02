@@ -4,15 +4,15 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Instant;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.goals.TouchableGoal;
 
 /** Raised when a player touches a goal. */
 public class GoalTouchEvent extends GoalEvent {
-  private final TouchableGoal goal;
+  private final TouchableGoal<?> goal;
   private final @Nullable Competitor competitor;
   private final boolean firstForCompetitor;
   private final @Nullable ParticipantState player;
@@ -33,7 +33,7 @@ public class GoalTouchEvent extends GoalEvent {
    * @param time The time at which the touch occurred.
    */
   public GoalTouchEvent(
-      TouchableGoal goal,
+      TouchableGoal<?> goal,
       @Nullable Competitor competitor,
       boolean firstForCompetitor,
       @Nullable ParticipantState player,
@@ -51,7 +51,7 @@ public class GoalTouchEvent extends GoalEvent {
     this.time = assertNotNull(time, "Time");
   }
 
-  public GoalTouchEvent(TouchableGoal goal, Instant time) {
+  public GoalTouchEvent(TouchableGoal<?> goal, Instant time) {
     this(goal, null, false, null, false, false, time);
   }
 
@@ -60,7 +60,7 @@ public class GoalTouchEvent extends GoalEvent {
   }
 
   @Override
-  public @NotNull Competitor getCompetitor() { // remove @Nullable
+  public @NonNull Competitor getCompetitor() { // remove @Nullable
     //noinspection ConstantConditions
     return super.getCompetitor();
   }
@@ -82,7 +82,7 @@ public class GoalTouchEvent extends GoalEvent {
   }
 
   @Override
-  public TouchableGoal getGoal() {
+  public TouchableGoal<?> getGoal() {
     return this.goal;
   }
 

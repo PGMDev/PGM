@@ -14,8 +14,8 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.util.ComponentMessageThrowable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /** An exception with a localized error message. */
 public class TextException extends RuntimeException
@@ -27,23 +27,22 @@ public class TextException extends RuntimeException
       @Nullable Throwable cause, @Nullable String suggestion, String key, Component... args) {
     super(key, cause);
     final boolean suggest = suggestion != null;
-    this.message =
-        translatable()
-            .key(key)
-            .args(args)
-            .color(NamedTextColor.RED)
-            .append(suggest ? space() : empty())
-            .append(suggest ? translatable("error.suggestionSuffix", text(suggestion)) : empty())
-            .build();
+    this.message = translatable()
+        .key(key)
+        .arguments(args)
+        .color(NamedTextColor.RED)
+        .append(suggest ? space() : empty())
+        .append(suggest ? translatable("error.suggestionSuffix", text(suggestion)) : empty())
+        .build();
   }
 
   @Override
-  public @NotNull Component componentMessage() {
+  public @NonNull Component componentMessage() {
     return this.message;
   }
 
   @Override
-  public @NotNull Component asComponent() {
+  public @NonNull Component asComponent() {
     return this.message;
   }
 

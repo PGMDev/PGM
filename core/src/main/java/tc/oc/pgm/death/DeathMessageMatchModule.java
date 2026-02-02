@@ -50,10 +50,10 @@ public class DeathMessageMatchModule implements MatchModule, Listener {
       boolean show = involved
           || isStaff
           || switch (viewer.getSettings().getValue(SettingKey.DEATH)) {
-            case DEATH_OWN -> false;
             case DEATH_FRIENDS -> isFriendInvolved(viewer.getBukkit(), event);
-            case DEATH_SQUAD -> isFriendInvolved(viewer.getBukkit(), event)
-                || isSquadInvolved(viewer.getBukkit(), event);
+            case DEATH_SQUAD ->
+              isFriendInvolved(viewer.getBukkit(), event)
+                  || isSquadInvolved(viewer.getBukkit(), event);
             case DEATH_ALL -> true;
             default -> false;
           };

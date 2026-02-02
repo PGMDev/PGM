@@ -7,7 +7,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 
@@ -50,10 +50,8 @@ public class EntityQuery extends Query implements tc.oc.pgm.api.filter.query.Ent
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof EntityQuery)) return false;
-    EntityQuery query = (EntityQuery) o;
-    if (!entity.equals(query.entity)) return false;
-    return true;
+    if (!(o instanceof EntityQuery query)) return false;
+    return entity.equals(query.entity);
   }
 
   @Override

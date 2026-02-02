@@ -27,6 +27,7 @@ import org.bukkit.Difficulty;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.WorldInfo;
@@ -150,7 +151,8 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   }
 
   @Override
-  public Match get(long duration, TimeUnit unit) throws InterruptedException, ExecutionException {
+  public Match get(long duration, @NonNull TimeUnit unit)
+      throws InterruptedException, ExecutionException {
     return future.get();
   }
 
@@ -199,9 +201,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   }
 
   /** Stage #1: ensures that a {@link MapContext} is loaded. */
-  private static class InitMapStage implements Stage {
-    private final String mapId;
-
+  private record InitMapStage(String mapId) implements Stage {
     private InitMapStage(String mapId) {
       this.mapId = assertNotNull(mapId);
     }
@@ -256,10 +256,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   }
 
   /** Stage #3: initializes the {@link World} on the main thread. */
-  private static class InitWorldStage implements Stage, Revertable {
-    private final MapContext map;
-    private final String worldName;
-
+  private record InitWorldStage(MapContext map, String worldName) implements Stage, Revertable {
     private InitWorldStage(MapContext map, String worldName) {
       this.map = assertNotNull(map);
       this.worldName = assertNotNull(worldName);

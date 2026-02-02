@@ -4,7 +4,7 @@ import java.time.Duration;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.rotation.pools.MapPool;
 
@@ -53,11 +53,11 @@ public class MapPoolAdjustEvent extends Event {
     return forced;
   }
 
-  public CommandSender getSender() {
+  public @Nullable CommandSender getSender() {
     return sender;
   }
 
-  public Duration getTimeLimit() {
+  public @Nullable Duration getTimeLimit() {
     return timeLimit;
   }
 
