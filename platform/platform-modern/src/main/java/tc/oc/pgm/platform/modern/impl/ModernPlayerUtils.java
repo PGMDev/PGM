@@ -178,6 +178,11 @@ public class ModernPlayerUtils implements PlayerUtils {
   }
 
   @Override
+  public boolean willBeOnline(Player player) {
+    return player.isConnected();
+  }
+
+  @Override
   public void sendMultiBlockPacket(
       Player player, BlockVectorSet positions, @Nullable BlockMaterialData data) {
     LongSet set = positions.getLongSet();

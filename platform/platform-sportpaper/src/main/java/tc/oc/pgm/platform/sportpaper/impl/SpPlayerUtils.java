@@ -155,6 +155,11 @@ public class SpPlayerUtils implements PlayerUtils, PacketSender {
   }
 
   @Override
+  public boolean willBeOnline(Player player) {
+    return player.willBeOnline();
+  }
+
+  @Override
   public void sendMultiBlockPacket(
       Player pl, BlockVectorSet positions, @Nullable BlockMaterialData data) {
     // Build a map of chunk -> block[]
