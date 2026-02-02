@@ -109,12 +109,13 @@ public class ClassModule implements MapModule<ClassMatchModule> {
       for (Element classEl : classElements) {
         PlayerClass cls = parseClass(classEl, factory.getKits(), family);
 
-        usedNames.add(cls.getName().toLowerCase());
         if (usedNames.contains(cls.getName().toLowerCase())) {
           throw new InvalidXMLException(
               "Class already registered to \" + cls.getName() + \"; skipping second instance",
               classEl);
         }
+
+        usedNames.add(cls.getName().toLowerCase());
 
         String classFamily = classEl.getAttributeValue("family");
         if (!family.equals(classFamily)) {
