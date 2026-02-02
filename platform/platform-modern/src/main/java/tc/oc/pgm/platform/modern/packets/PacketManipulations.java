@@ -142,6 +142,7 @@ public class PacketManipulations implements PacketSender {
   }
 
   private void handleServerPing(PacketEvent event) {
+    if (event.isCancelled()) return;
     JsonObject pingExtra = new JsonObject();
     new ExtraPingDataRequestEvent() {
       @Override
