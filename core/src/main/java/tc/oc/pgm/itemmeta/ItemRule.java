@@ -10,20 +10,24 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class ItemRule {
   final MaterialMatcher items;
+  final @Nullable ItemMatcher matcher;
   final PotionMeta meta;
 
-  public ItemRule(MaterialMatcher items, PotionMeta meta) {
+  public ItemRule(MaterialMatcher items, @Nullable ItemMatcher matcher, PotionMeta meta) {
     this.items = items;
+    this.matcher = matcher;
     this.meta = meta;
   }
 
   public boolean matches(ItemStack stack) {
-    return items.matches(stack);
+    return items.matches(stack) && (matcher == null || matcher.matches(stack));
   }
 
   public void apply(ItemStack stack) {

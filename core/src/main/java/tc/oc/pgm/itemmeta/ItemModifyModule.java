@@ -14,6 +14,7 @@ import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -21,24 +22,30 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
   private static final ItemTag<Boolean> APPLIED = ItemTag.newBoolean("custom-meta-applied");
+  private final MaterialMatcher matcher;
   private final List<ItemRule> rules;
 
   public ItemModifyModule(List<ItemRule> rules) {
     this.rules = rules;
+    var builder = MaterialMatcher.builder();
+    rules.forEach(r -> builder.add(r.items));
+    this.matcher = builder.build();
   }
 
   public boolean applyRules(ItemStack stack) {
-    if (stack == null || stack.getType() == Material.AIR || APPLIED.has(stack)) {
+    if (stack == null
+        || stack.getType() == Material.AIR
+        || !matcher.matches(stack)
+        || APPLIED.has(stack)) {
       return false;
-    } else {
-      APPLIED.set(stack, true);
-      for (ItemRule rule : rules) {
-        if (rule.matches(stack)) {
-          rule.apply(stack);
-        }
-      }
-      return true;
     }
+    APPLIED.set(stack, true);
+    for (ItemRule rule : rules) {
+      if (rule.matches(stack)) {
+        rule.apply(stack);
+      }
+    }
+    return true;
   }
 
   @Override
@@ -52,15 +59,23 @@ public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
         throws InvalidXMLException {
       List<ItemRule> rules = new ArrayList<>();
       for (Element elRule : XMLUtils.flattenElements(doc.getRootElement(), "item-mods", "rule")) {
-        MaterialMatcher items =
-            XMLUtils.parseMaterialMatcher(XMLUtils.getRequiredUniqueChild(elRule, "match"));
+        var match = XMLUtils.getRequiredUniqueChild(elRule, "match");
+        ItemMatcher itemMatcher;
+        MaterialMatcher materialMatcher;
+        if (match.getChild("matcher") != null) {
+          itemMatcher = factory.getKits().parseItemMatcher(match, "matcher");
+          materialMatcher = itemMatcher.getMaterialMatcher();
+        } else {
+          itemMatcher = null;
+          materialMatcher = XMLUtils.parseMaterialMatcher(match);
+        }
 
         // Always use a PotionMeta so the rule can have potion effects, though it will only apply
         // those to potion items
         PotionMeta meta = (PotionMeta) Bukkit.getItemFactory().getItemMeta(Material.POTION);
         factory.getKits().parseItemMeta(XMLUtils.getRequiredUniqueChild(elRule, "modify"), meta);
 
-        ItemRule rule = new ItemRule(items, meta);
+        ItemRule rule = new ItemRule(materialMatcher, itemMatcher, meta);
         rules.add(rule);
       }
 

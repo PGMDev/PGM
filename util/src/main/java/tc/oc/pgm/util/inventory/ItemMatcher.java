@@ -3,6 +3,7 @@ package tc.oc.pgm.util.inventory;
 import com.google.common.collect.Range;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
 
 public class ItemMatcher {
@@ -31,6 +32,10 @@ public class ItemMatcher {
 
     this.amount = amount;
     this.base = stripMeta(base);
+  }
+
+  public MaterialMatcher getMaterialMatcher() {
+    return MaterialMatcher.builder().add(base, ignoreDurability).build();
   }
 
   private ItemStack stripMeta(final ItemStack item) {
