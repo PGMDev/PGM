@@ -19,22 +19,17 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
+public record ItemModifyModule(List<ItemRule> rules) implements MapModule<ItemModifyMatchModule> {
   private static final ItemTag<Boolean> APPLIED = ItemTag.newBoolean("custom-meta-applied");
-  private final List<ItemRule> rules;
-
-  public ItemModifyModule(List<ItemRule> rules) {
-    this.rules = rules;
-  }
 
   public boolean applyRules(ItemStack stack) {
     if (stack == null || stack.getType() == Material.AIR || APPLIED.has(stack)) {
       return false;
     } else {
-      APPLIED.set(stack, true);
       for (ItemRule rule : rules) {
         if (rule.matches(stack)) {
           rule.apply(stack);
+          APPLIED.set(stack, true);
         }
       }
       return true;
