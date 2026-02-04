@@ -127,6 +127,9 @@ public final class PGMConfig implements Config {
   // experiments.*
   private final Map<String, Object> experiments;
 
+  // modern.*
+  private final boolean commandBlocksEnabled;
+
   PGMConfig(FileConfiguration config, File dataFolder) throws TextException {
     handleLegacyConfig(config, dataFolder);
 
@@ -241,6 +244,8 @@ public final class PGMConfig implements Config {
 
     final ConfigurationSection experiments = config.getConfigurationSection("experiments");
     this.experiments = experiments == null ? ImmutableMap.of() : experiments.getValues(false);
+
+    commandBlocksEnabled = parseBoolean(config.getString("modern.allow-command-blocks", "false"));
   }
 
   private Path getPath(Path base, String dir) {
@@ -697,6 +702,11 @@ public final class PGMConfig implements Config {
   @Override
   public Map<String, Object> getExperiments() {
     return experiments;
+  }
+
+  @Override
+  public boolean allowCommandBlocks() {
+    return commandBlocksEnabled;
   }
 
   private static class Group implements Config.Group {
