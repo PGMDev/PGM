@@ -6,16 +6,7 @@ import org.bukkit.plugin.Plugin;
 
 public class RequestRestartEvent extends Event {
 
-  public static class Deferral {
-    private final Plugin plugin;
-
-    public Deferral(Plugin plugin) {
-      this.plugin = plugin;
-    }
-
-    public Plugin getPlugin() {
-      return plugin;
-    }
+  public record Deferral(Plugin plugin) {
 
     /**
      * Remove the deferral from blocking the restart. After this method is called, object is useless
