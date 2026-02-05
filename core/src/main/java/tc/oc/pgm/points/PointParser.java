@@ -151,8 +151,8 @@ public class PointParser {
 
   public PointProviderAttributes parseAttributes(Element el, PointProviderAttributes attributes)
       throws InvalidXMLException {
-    boolean safe = XMLUtils.parseBoolean(el.getAttribute("safe"), attributes.isSafe());
-    boolean outdoors = XMLUtils.parseBoolean(el.getAttribute("outdoors"), attributes.isOutdoors());
+    boolean safe = XMLUtils.parseBoolean(el.getAttribute("safe"), attributes.safe());
+    boolean outdoors = XMLUtils.parseBoolean(el.getAttribute("outdoors"), attributes.outdoors());
 
     Vector target = XMLUtils.parseVector(el.getAttribute("angle"), (Vector) null);
     if (target != null) {
@@ -162,7 +162,7 @@ public class PointParser {
 
     AngleProvider yawProvider = parseStaticAngleProvider(el.getAttribute("yaw"));
     AngleProvider pitchProvider = parseStaticAngleProvider(el.getAttribute("pitch"));
-    if (yawProvider != null || pitchProvider != null || safe != attributes.isSafe()) {
+    if (yawProvider != null || pitchProvider != null || safe != attributes.safe()) {
       return new PointProviderAttributes(yawProvider, pitchProvider, safe, outdoors);
     }
 

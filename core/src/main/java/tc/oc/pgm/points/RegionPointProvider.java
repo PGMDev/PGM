@@ -31,7 +31,7 @@ public class RegionPointProvider implements PointProvider {
 
   @Override
   public boolean canFail() {
-    return attributes.isSafe();
+    return attributes.safe();
   }
 
   @Override
@@ -42,13 +42,13 @@ public class RegionPointProvider implements PointProvider {
 
     if (location == null) return null;
 
-    if (attributes.getYawProvider() != null) {
-      location.setYaw(attributes.getYawProvider().getAngle(pos));
+    if (attributes.yawProvider() != null) {
+      location.setYaw(attributes.yawProvider().getAngle(pos));
       location.setHasYaw(true);
     }
 
-    if (attributes.getPitchProvider() != null) {
-      location.setPitch(attributes.getPitchProvider().getAngle(pos));
+    if (attributes.pitchProvider() != null) {
+      location.setPitch(attributes.pitchProvider().getAngle(pos));
       location.setHasPitch(true);
     }
 
@@ -67,7 +67,7 @@ public class RegionPointProvider implements PointProvider {
     if (isSpawnable(location)) return location;
 
     int scanDirection;
-    if (attributes.isOutdoors()) {
+    if (attributes.outdoors()) {
       location.setY(Math.max(location.getY(), location.getWorld().getHighestBlockYAt(location)));
       scanDirection = 1;
     } else {
@@ -90,8 +90,8 @@ public class RegionPointProvider implements PointProvider {
   }
 
   private boolean isSpawnable(Location location) {
-    return (!attributes.isSafe() || isSafe(location))
-        && (!attributes.isOutdoors() || isOutdoors(location));
+    return (!attributes.safe() || isSafe(location))
+        && (!attributes.outdoors() || isOutdoors(location));
   }
 
   /**
