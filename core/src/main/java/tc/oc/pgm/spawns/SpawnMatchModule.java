@@ -131,7 +131,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
       potential.removeAll(unique.values());
       if (!potential.isEmpty()) {
         Spawn spawn = potential.get(match.getRandom().nextInt(potential.size()));
-        if (spawn.attributes.exclusive) unique.put(competitor, spawn);
+        if (spawn.attributes.exclusive()) unique.put(competitor, spawn);
         return spawn;
       } else {
         return null;
@@ -352,7 +352,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     if (unique.containsKey(competitor)) {
       Spawn spawn = unique.get(competitor);
       // Do not change if persistence is enabled
-      if (!spawn.attributes.persistent) {
+      if (!spawn.attributes.persistent()) {
         unique.remove(competitor);
       }
     }

@@ -17,11 +17,11 @@ public class Spawn implements FeatureDefinition {
   }
 
   public Optional<Kit> getKit() {
-    return Optional.fromNullable(this.attributes.kit);
+    return Optional.fromNullable(this.attributes.kit());
   }
 
   public boolean allows(MatchPlayer player) {
-    return this.attributes.filter.query(player).isAllowed();
+    return this.attributes.filter().query(player).isAllowed();
   }
 
   // assume the caller has already called .matches()
