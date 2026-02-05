@@ -139,16 +139,8 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     }
   }
 
-  public static class GenericFormula<T extends Filterable<?>> implements FilterDefinition {
-    private final Formula<T> formula;
-    private final Class<T> scope;
-    private final Range<Double> values;
-
-    public GenericFormula(Formula<T> variable, Class<T> scope, Range<Double> values) {
-      this.formula = variable;
-      this.scope = scope;
-      this.values = values;
-    }
+  public record GenericFormula<T extends Filterable<?>>(
+      Formula<T> formula, Class<T> scope, Range<Double> values) implements FilterDefinition {
 
     @Override
     public QueryResponse query(Query q) {
@@ -170,14 +162,8 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
    * Specialization for team formulas implementing CompetitorFilter. Allows team to be set to a
    * specific one.
    */
-  public static class TeamFormula implements CompetitorFilter {
-    private final Formula<Party> formula;
-    private final Range<Double> values;
-
-    public TeamFormula(Formula<Party> variable, Range<Double> values) {
-      this.formula = variable;
-      this.values = values;
-    }
+  public record TeamFormula(Formula<Party> formula, Range<Double> values)
+      implements CompetitorFilter {
 
     @Override
     public boolean matches(PartyQuery query) {
