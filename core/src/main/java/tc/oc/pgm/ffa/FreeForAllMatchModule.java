@@ -242,7 +242,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       return false;
     }
 
-    if (result instanceof FfaJoinResult && ((FfaJoinResult) result).priorityKickRequired()) {
+    if (result instanceof FfaJoinResult && ((FfaJoinResult) result).priorityKick()) {
       priorityKick(request);
     }
 
@@ -264,14 +264,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     updateReadiness();
   }
 
-  public static class FfaJoinResult implements JoinResult {
-    private final JoinResultOption status;
-    private final boolean priorityKick;
-
-    public FfaJoinResult(JoinResultOption status, boolean priorityKick) {
-      this.status = status;
-      this.priorityKick = priorityKick;
-    }
+  public record FfaJoinResult(JoinResultOption status, boolean priorityKick) implements JoinResult {
 
     @Override
     public boolean isSuccess() {
@@ -281,10 +274,6 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     @Override
     public JoinResultOption getOption() {
       return status;
-    }
-
-    public boolean priorityKickRequired() {
-      return priorityKick;
     }
   }
 }
