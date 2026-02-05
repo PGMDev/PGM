@@ -13,16 +13,11 @@ import tc.oc.pgm.api.player.MatchPlayer;
  * The default order that players are listed for a given viewer. Roughly speaking, the order is: 1.
  * viewer 2. friends 3. staff 4. other flair ranks 5. alphabetical
  */
-public class PlayerOrder implements Comparator<MatchPlayer> {
+public record PlayerOrder(MatchPlayer viewer) implements Comparator<MatchPlayer> {
 
-  private final MatchPlayer viewer;
-
-  public PlayerOrder(MatchPlayer viewer) {
-    this.viewer = viewer;
-  }
-
+  @Deprecated
   public MatchPlayer getViewer() {
-    return viewer;
+    return viewer();
   }
 
   @Override
