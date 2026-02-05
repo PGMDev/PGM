@@ -37,9 +37,9 @@ public final class ParseRangeTest {
 
     for (Pair<String, Range<Integer>> mathematicalFormatRange : mathematicalFormatRanges) {
       Range<Integer> parsedRange =
-          XMLUtils.parseNumericRange(dummyNode(mathematicalFormatRange.getLeft()), Integer.class);
+          XMLUtils.parseNumericRange(dummyNode(mathematicalFormatRange.left()), Integer.class);
 
-      Assertions.assertEquals(mathematicalFormatRange.getRight(), parsedRange);
+      Assertions.assertEquals(mathematicalFormatRange.right(), parsedRange);
     }
   }
 
@@ -61,9 +61,9 @@ public final class ParseRangeTest {
 
     for (Pair<String, Range<Double>> vanillaFormatRange : vanillaFormatRanges) {
       Range<Double> parsedRange =
-          XMLUtils.parseNumericRange(dummyNode(vanillaFormatRange.getLeft()), Double.class);
+          XMLUtils.parseNumericRange(dummyNode(vanillaFormatRange.left()), Double.class);
 
-      Assertions.assertEquals(vanillaFormatRange.getRight(), parsedRange);
+      Assertions.assertEquals(vanillaFormatRange.right(), parsedRange);
     }
   }
 

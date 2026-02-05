@@ -64,7 +64,7 @@ public class LootableMatchModule implements MatchModule, Listener {
 
     fillers.forEach(filler -> fmm.onRise(Match.class, filler.getRefillTrigger(), m -> this.filledAt
         .keySet()
-        .removeIf(f -> filler.equals(f.getRight()))));
+        .removeIf(f -> filler.equals(f.right()))));
   }
 
   /**

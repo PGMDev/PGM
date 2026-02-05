@@ -349,13 +349,13 @@ public abstract class KitParser {
     if (attr != null) {
       for (String modifierText : Splitter.on(";").split(attr.getValue())) {
         var mod = XMLUtils.parseCompactAttributeModifier(attr, modifierText);
-        modifiers.put(mod.getLeft(), mod.getRight());
+        modifiers.put(mod.left(), mod.right());
       }
     }
 
     for (Element elAttribute : el.getChildren("attribute")) {
       var mod = XMLUtils.parseAttributeModifier(elAttribute);
-      modifiers.put(mod.getLeft(), mod.getRight());
+      modifiers.put(mod.left(), mod.right());
     }
 
     return modifiers;
