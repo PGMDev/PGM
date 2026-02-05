@@ -16,12 +16,8 @@ import tc.oc.pgm.goals.events.GoalCompleteEvent;
  * query. If the anyTeam flag is set, then the filter matches when any team has completed the
  * objective.
  */
-public class GoalFilter implements CompetitorFilter {
-  private final FeatureReference<? extends GoalDefinition> goal;
-
-  public GoalFilter(FeatureReference<? extends GoalDefinition> goal) {
-    this.goal = goal;
-  }
+public record GoalFilter(FeatureReference<? extends GoalDefinition> goal)
+    implements CompetitorFilter {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
