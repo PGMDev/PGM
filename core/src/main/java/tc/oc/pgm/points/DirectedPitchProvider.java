@@ -4,9 +4,9 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.util.Vector;
 
-public class DirectedPitchProvider implements AngleProvider {
-  public DirectedPitchProvider(Vector target) {
-    this.target = assertNotNull(target, "target");
+public record DirectedPitchProvider(Vector target) implements AngleProvider {
+  public DirectedPitchProvider {
+    assertNotNull(target, "target");
   }
 
   @Override
@@ -14,9 +14,8 @@ public class DirectedPitchProvider implements AngleProvider {
     double dx = this.target.getX() - from.getX();
     double dz = this.target.getZ() - from.getZ();
     double distance = Math.sqrt(dx * dx + dz * dz);
-    double dy =
-        this.target.getY()
-            - (from.getY() + 1.62); // add eye height so player actually looks at point
+    double dy = this.target.getY()
+        - (from.getY() + 1.62); // add eye height so player actually looks at point
     return (float) Math.toDegrees(Math.atan2(-dy, distance));
   }
 
@@ -24,6 +23,4 @@ public class DirectedPitchProvider implements AngleProvider {
   public boolean isConstant() {
     return true;
   }
-
-  final Vector target;
 }
