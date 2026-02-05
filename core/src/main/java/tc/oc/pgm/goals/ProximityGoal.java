@@ -52,7 +52,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
 
   public @Nullable ProximityMetric.Type getProximityMetricType(Competitor team) {
     ProximityMetric metric = getProximityMetric(team);
-    return metric == null ? null : metric.type;
+    return metric == null ? null : metric.type();
   }
 
   /**
@@ -124,7 +124,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
 
       // Note: distances stay squared as long as possible
       int distance;
-      if (metric.horizontal) {
+      if (metric.horizontal()) {
         distance = dx * dx + dz * dz;
       } else {
         distance = dx * dx + dy * dy + dz * dz;

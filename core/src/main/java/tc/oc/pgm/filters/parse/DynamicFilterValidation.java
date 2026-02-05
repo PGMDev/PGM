@@ -10,18 +10,13 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
-public class DynamicFilterValidation implements FeatureValidation<FilterDefinition> {
+public record DynamicFilterValidation(Class<? extends Filterable<?>> type)
+    implements FeatureValidation<FilterDefinition> {
   public static final DynamicFilterValidation ANY = new DynamicFilterValidation(null);
   public static final DynamicFilterValidation PLAYER =
       new DynamicFilterValidation(MatchPlayer.class);
   public static final DynamicFilterValidation PARTY = new DynamicFilterValidation(Party.class);
   public static final DynamicFilterValidation MATCH = new DynamicFilterValidation(Match.class);
-
-  private final Class<? extends Filterable<?>> type;
-
-  private DynamicFilterValidation(Class<? extends Filterable<?>> type) {
-    this.type = type;
-  }
 
   public static DynamicFilterValidation of(Class<? extends Filterable<?>> type) {
     if (type == null) return ANY;
