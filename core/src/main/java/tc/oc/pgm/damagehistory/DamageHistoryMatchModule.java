@@ -72,7 +72,7 @@ public class DamageHistoryMatchModule implements MatchModule, Listener {
         || highest.getValue() < (total * PGM.get().getConfiguration().getAssistPercent())
         || highest.getKey().getParty().equals(player.getParty())) return null;
 
-    return highest.getKey().getState();
+    return highest.getKey().state();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

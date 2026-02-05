@@ -7,13 +7,7 @@ import java.util.UUID;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.ParticipantState;
 
-public class DamageHistoryKey {
-
-  private final ParticipantState state;
-
-  public DamageHistoryKey(ParticipantState state) {
-    this.state = state;
-  }
+public record DamageHistoryKey(ParticipantState state) {
 
   public static DamageHistoryKey from(DamageEntry damageEntry) {
     ParticipantState damager = damageEntry.getDamager();
@@ -21,8 +15,9 @@ public class DamageHistoryKey {
     return new DamageHistoryKey(damager);
   }
 
+  @Deprecated
   public ParticipantState getState() {
-    return state;
+    return state();
   }
 
   public UUID getPlayer() {
