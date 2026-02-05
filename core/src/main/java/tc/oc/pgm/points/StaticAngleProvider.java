@@ -2,10 +2,7 @@ package tc.oc.pgm.points;
 
 import org.bukkit.util.Vector;
 
-public class StaticAngleProvider implements AngleProvider {
-  public StaticAngleProvider(float measure) {
-    this.measure = measure;
-  }
+public record StaticAngleProvider(float measure) implements AngleProvider {
 
   @Override
   public float getAngle(Vector from) {
@@ -16,6 +13,4 @@ public class StaticAngleProvider implements AngleProvider {
   public boolean isConstant() {
     return true;
   }
-
-  final float measure;
 }
