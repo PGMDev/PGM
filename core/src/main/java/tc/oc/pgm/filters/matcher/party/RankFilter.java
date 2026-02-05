@@ -13,13 +13,7 @@ import tc.oc.pgm.goals.events.GoalProximityChangeEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 
 /** Match whether a {@link Competitor}'s score is within a range. */
-public class RankFilter implements CompetitorFilter {
-
-  private final Range<Integer> positions;
-
-  public RankFilter(Range<Integer> positions) {
-    this.positions = positions;
-  }
+public record RankFilter(Range<Integer> positions) implements CompetitorFilter {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
