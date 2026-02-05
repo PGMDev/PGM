@@ -123,7 +123,7 @@ public class KitModule implements MapModule<KitMatchModule> {
       if (imm != null) {
         if (kit instanceof ArmorKit) {
           for (ArmorKit.ArmorItem armor : ((ArmorKit) kit).getArmor().values()) {
-            imm.applyRules(armor.stack);
+            imm.applyRules(armor.stack());
           }
         }
       }

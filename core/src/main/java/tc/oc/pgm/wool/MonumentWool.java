@@ -128,7 +128,7 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
     if (event.getKit() instanceof ArmorKit) {
       for (ArmorKit.ArmorItem armorPiece :
           ((ArmorKit) event.getKit()).getArmor().values()) {
-        handleWoolAcquisition(event.getPlayer().getBukkit(), armorPiece.stack);
+        handleWoolAcquisition(event.getPlayer().getBukkit(), armorPiece.stack());
       }
     }
   }
