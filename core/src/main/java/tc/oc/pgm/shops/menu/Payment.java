@@ -7,35 +7,32 @@ import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.material.Materials;
 
-public class Payment {
+public record Payment(
+    Material currency, int price, ChatColor color, @Nullable ItemStack item) {
 
-  private final ChatColor color;
-  private final Material currency;
-  private final int price;
-
-  private final @Nullable ItemStack item;
-
-  public Payment(Material currency, int price, ChatColor color, @Nullable ItemStack item) {
-    this.currency = currency;
-    this.price = price;
-    this.color = color;
-    this.item = item;
-  }
-
-  public Material getCurrency() {
+  @Override
+  public Material currency() {
     return item != null ? item.getType() : currency;
   }
 
+  @Deprecated
+  public Material getCurrency() {
+    return currency();
+  }
+
+  @Deprecated
   public int getPrice() {
-    return price;
+    return price();
   }
 
+  @Deprecated
   public ChatColor getColor() {
-    return color;
+    return color();
   }
 
+  @Deprecated
   public @Nullable ItemStack getItem() {
-    return item;
+    return item();
   }
 
   public boolean hasPayment(PlayerInventory inventory) {

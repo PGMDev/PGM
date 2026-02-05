@@ -207,9 +207,9 @@ public class ShopMenu extends InventoryMenu {
           .map(p -> {
             boolean hasPayment = p.hasPayment(getViewer().getInventory());
 
-            Component currencyName = p.getItem() != null
-                ? text(p.getItem().getItemMeta().getDisplayName())
-                : text(getMaterial(p.getCurrency())).color(TextFormatter.convert(p.getColor()));
+            Component currencyName = p.item() != null
+                ? text(p.item().getItemMeta().getDisplayName())
+                : text(getMaterial(p.currency())).color(TextFormatter.convert(p.color()));
 
             Component prefix = icon.getPayments().size() == 1
                 ? null
@@ -224,7 +224,7 @@ public class ShopMenu extends InventoryMenu {
             }
 
             priceComponent
-                .append(text(p.getPrice(), hasPayment ? NamedTextColor.GREEN : NamedTextColor.RED))
+                .append(text(p.price(), hasPayment ? NamedTextColor.GREEN : NamedTextColor.RED))
                 .append(space())
                 .append(currencyName);
 

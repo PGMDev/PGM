@@ -8,7 +8,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 public interface Payable {
 
   default boolean isFree() {
-    return getPayments().isEmpty() || getPayments().stream().noneMatch(p -> p.getPrice() > 0);
+    return getPayments().isEmpty() || getPayments().stream().noneMatch(p -> p.price() > 0);
   }
 
   List<Payment> getPayments();
@@ -24,7 +24,7 @@ public interface Payable {
     if (!isFree()) {
       PlayerInventory inventory = buyer.getInventory();
       for (Payment payment : getPayments()) {
-        int remaining = payment.getPrice();
+        int remaining = payment.price();
         for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
           ItemStack item = inventory.getItem(slot);
           if (item == null || !payment.matches(item)) continue;
