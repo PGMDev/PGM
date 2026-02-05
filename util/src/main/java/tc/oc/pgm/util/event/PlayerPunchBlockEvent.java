@@ -15,7 +15,7 @@ public class PlayerPunchBlockEvent extends PlayerBlockEvent implements Cancellab
 
   public PlayerPunchBlockEvent(
       final Event cause, final Player player, final RayBlockIntersection ray) {
-    super(cause, player, assertNotNull(ray).getBlock());
+    super(cause, player, assertNotNull(ray).block());
     this.ray = ray;
   }
   /**

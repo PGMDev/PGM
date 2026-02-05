@@ -26,7 +26,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -254,12 +254,12 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     RayBlockIntersection hit = event.getRay();
 
     BlockDrops drops =
-        getRuleSet().getDrops(event, hit.getBlock().getState(), player.getParticipantState());
+        getRuleSet().getDrops(event, hit.block().getState(), player.getParticipantState());
     if (drops == null) return;
 
-    BlockMaterialData oldMaterial = MaterialData.block(hit.getBlock());
-    replaceBlock(drops, hit.getBlock(), player);
-    Location location = hit.getPosition().toLocation(hit.getBlock().getWorld());
+    BlockMaterialData oldMaterial = MaterialData.block(hit.block());
+    replaceBlock(drops, hit.block(), player);
+    Location location = hit.position().toLocation(hit.block().getWorld());
 
     EFFECTS.blockBreak(location, oldMaterial);
     dropObjects(drops, player, location, 1d, false);
