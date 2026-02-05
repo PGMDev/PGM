@@ -14,19 +14,11 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 
-public class RegionPointProvider implements PointProvider {
+public record RegionPointProvider(Region region, PointProviderAttributes attributes)
+    implements PointProvider {
 
-  private final Region region;
-  private final PointProviderAttributes attributes;
-
-  public RegionPointProvider(Region region, PointProviderAttributes attributes) {
-    this.attributes = attributes;
-    this.region = assertNotNull(region, "region");
-  }
-
-  @Override
-  public Region getRegion() {
-    return region;
+  public RegionPointProvider {
+    assertNotNull(region, "region");
   }
 
   @Override

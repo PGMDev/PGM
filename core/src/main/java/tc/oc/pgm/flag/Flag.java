@@ -103,13 +103,13 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
     Banner banner = null;
     for (PointProvider point : definition.getDefaultPost().getFallback().getReturnPoints()) {
-      if (point.getRegion() instanceof PointRegion r) {
+      if (point.region() instanceof PointRegion r) {
         // Do not require PointRegions to be at the exact center of the block.
         // It might make sense to just override PointRegion.getBlockVectors() to
         // always do this, but it does technically violate the contract of that method.
         banner = toBanner(r.getPosition().toLocation(match.getWorld()).getBlock());
       } else {
-        banner = StreamUtils.of(point.getRegion().getBlocks(match.getWorld()))
+        banner = StreamUtils.of(point.region().getBlocks(match.getWorld()))
             .map(Flag::toBanner)
             .filter(Objects::nonNull)
             .findFirst()

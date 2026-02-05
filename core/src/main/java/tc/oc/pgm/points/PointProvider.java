@@ -10,7 +10,12 @@ public interface PointProvider {
 
   Location getPoint(Match match, @Nullable Entity entity);
 
-  Region getRegion();
+  Region region();
 
   boolean canFail();
+
+  @Deprecated
+  default Region getRegion() {
+    return region();
+  }
 }

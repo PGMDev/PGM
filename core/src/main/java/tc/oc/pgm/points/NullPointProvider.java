@@ -19,7 +19,7 @@ public class NullPointProvider implements PointProvider {
   }
 
   @Override
-  public Region getRegion() {
+  public Region region() {
     return EmptyRegion.INSTANCE;
   }
 

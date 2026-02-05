@@ -16,11 +16,11 @@ public abstract class AggregatePointProvider implements PointProvider {
   }
 
   @Override
-  public Region getRegion() {
+  public Region region() {
     if (region == null) {
       Region[] regions = new Region[children.size()];
       for (int i = 0; i < regions.length; i++) {
-        regions[i] = children.get(i).getRegion();
+        regions[i] = children.get(i).region();
       }
       region = Union.of(regions);
     }
