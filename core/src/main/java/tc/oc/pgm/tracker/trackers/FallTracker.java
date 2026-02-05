@@ -64,7 +64,7 @@ public class FallTracker implements Listener, DamageResolver {
 
         case FIRE_TICK:
           if (fall.isInLava
-              || match.getTick().tick - fall.outLavaTick < FallState.MAX_BURNING_TICKS) {
+              || match.getTick().tick() - fall.outLavaTick < FallState.MAX_BURNING_TICKS) {
             fall.to = FallInfo.To.LAVA;
           } else {
             return null;
@@ -138,7 +138,7 @@ public class FallTracker implements Listener, DamageResolver {
   private void playerBecameUnsupported(FallState fall) {
     if (!fall.isStarted
         && !fall.isSupported()
-        && match.getTick().tick - fall.startTime.tick <= FallState.MAX_KNOCKBACK_TICKS) {
+        && match.getTick().tick() - fall.startTime.tick() <= FallState.MAX_KNOCKBACK_TICKS) {
       fall.isStarted = true;
       logger.fine("Started " + fall);
     }
@@ -231,7 +231,7 @@ public class FallTracker implements Listener, DamageResolver {
         if (fall.isClimbing) {
           // Player moved onto a ladder, cancel the fall if they are still on it after
           // MAX_CLIMBING_TIME
-          fall.climbingTick = now.tick;
+          fall.climbingTick = now.tick();
           this.scheduleCheckFallTimeout(fall, FallState.MAX_CLIMBING_TICKS + 1);
         } else {
           becameUnsupported = true;
@@ -243,7 +243,7 @@ public class FallTracker implements Listener, DamageResolver {
         if (fall.isSwimming) {
           // Player moved into water, cancel the fall if they are still in it after
           // MAX_SWIMMING_TIME
-          fall.swimmingTick = now.tick;
+          fall.swimmingTick = now.tick();
           this.scheduleCheckFallTimeout(fall, FallState.MAX_SWIMMING_TICKS + 1);
         } else {
           becameUnsupported = true;
@@ -258,9 +258,9 @@ public class FallTracker implements Listener, DamageResolver {
       if (isInLava != fall.isInLava) {
         fall.isInLava = isInLava;
         if (fall.isInLava) {
-          fall.inLavaTick = now.tick;
+          fall.inLavaTick = now.tick();
         } else {
-          fall.outLavaTick = now.tick;
+          fall.outLavaTick = now.tick();
           this.scheduleCheckFallTimeout(fall, FallState.MAX_BURNING_TICKS + 1);
         }
       }
@@ -278,7 +278,7 @@ public class FallTracker implements Listener, DamageResolver {
       if (event.getOnGround()) {
         // Falling player landed on the ground, cancel the fall if they are still there after
         // MAX_ON_GROUND_TIME
-        fall.onGroundTick = match.getTick().tick;
+        fall.onGroundTick = match.getTick().tick();
         fall.groundTouchCount++;
         this.scheduleCheckFallTimeout(fall, FallState.MAX_ON_GROUND_TICKS + 1);
       } else {

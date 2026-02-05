@@ -36,12 +36,7 @@ public enum Phase {
     return null;
   }
 
-  public static class Phases {
-    private final EnumSet<Phase> phases;
-
-    private Phases(EnumSet<Phase> phases) {
-      this.phases = phases;
-    }
+  public record Phases(EnumSet<Phase> phases) {
 
     public boolean contains(Phase phase) {
       return this.phases.contains(phase);

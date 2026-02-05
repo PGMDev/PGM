@@ -85,7 +85,7 @@ public class Payload extends ControlPoint {
     if (!oldPos.toBlockVector().equals(position.toBlockVector()))
       playerTracker.setRegion(captureRegion);
 
-    tickParticles(match.getTick().tick);
+    tickParticles(match.getTick().tick());
     tickMinecart();
   }
 

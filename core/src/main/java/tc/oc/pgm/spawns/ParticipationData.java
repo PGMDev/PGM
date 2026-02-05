@@ -26,7 +26,7 @@ class ParticipationData {
       wasFull = match.getParticipants().size() >= match.getMaxPlayers();
       wasStacked = false;
     }
-    lastLeaveTick = match.getTick().tick;
+    lastLeaveTick = match.getTick().tick();
   }
 
   public long getJoinTick(Team newTeam) {

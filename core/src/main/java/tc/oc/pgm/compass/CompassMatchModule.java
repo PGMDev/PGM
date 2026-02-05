@@ -61,7 +61,7 @@ public class CompassMatchModule implements MatchModule, Tickable, Listener {
   @Override
   public synchronized void tick(Match match, Tick tick) {
     for (Map.Entry<UUID, Long> lastRefreshEntry : lastRefresh.entrySet()) {
-      long ticksSince = tick.tick - lastRefreshEntry.getValue();
+      long ticksSince = tick.tick() - lastRefreshEntry.getValue();
       if (ticksSince >= REFRESH_TICKS) {
         UUID uuid = lastRefreshEntry.getKey();
         MatchPlayer player = this.match.getPlayer(uuid);
@@ -74,9 +74,9 @@ public class CompassMatchModule implements MatchModule, Tickable, Listener {
           continue;
         }
 
-        lastRefresh.put(player.getId(), tick.tick);
+        lastRefresh.put(player.getId(), tick.tick());
 
-        updatePlayerCompass(player, chooseCompassTarget(player), tick.tick);
+        updatePlayerCompass(player, chooseCompassTarget(player), tick.tick());
       }
     }
   }

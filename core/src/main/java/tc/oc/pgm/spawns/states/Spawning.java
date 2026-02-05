@@ -31,7 +31,7 @@ public abstract class Spawning extends Participating {
     super(player);
     this.options = smm.getRespawnOptions(player);
     this.spawnRequested = options.auto;
-    this.startTick = player.getMatch().getTick().tick;
+    this.startTick = player.getMatch().getTick().tick();
     this.spawnAtTick = Math.max(deathTick + options.delayTicks, minSpawnTick);
   }
 
@@ -74,7 +74,7 @@ public abstract class Spawning extends Participating {
   }
 
   protected long age() {
-    return player.getMatch().getTick().tick - startTick;
+    return player.getMatch().getTick().tick() - startTick;
   }
 
   @Override
@@ -101,7 +101,7 @@ public abstract class Spawning extends Participating {
   }
 
   protected long ticksUntilRespawn() {
-    return spawnAtTick - player.getMatch().getTick().tick;
+    return spawnAtTick - player.getMatch().getTick().tick();
   }
 
   public @Nullable Spawn chooseSpawn() {

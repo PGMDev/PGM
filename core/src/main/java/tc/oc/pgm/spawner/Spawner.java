@@ -39,7 +39,7 @@ public class Spawner implements Listener, Tickable {
   public Spawner(SpawnerDefinition definition, Match match) {
     this.definition = definition;
     this.match = match;
-    this.lastTick = match.getTick().tick;
+    this.lastTick = match.getTick().tick();
     this.players = new OnlinePlayerMapAdapter<>(PGM.get());
     calculateDelay();
   }
@@ -47,7 +47,7 @@ public class Spawner implements Listener, Tickable {
   @Override
   public void tick(Match match, Tick tick) {
     if (!canSpawn()) return;
-    if (match.getTick().tick - lastTick >= currentDelay) {
+    if (match.getTick().tick() - lastTick >= currentDelay) {
       for (Spawnable spawnable : definition.objects) {
         final Location location =
             definition.spawnRegion.getRandom(match).toLocation(match.getWorld());
@@ -68,7 +68,7 @@ public class Spawner implements Listener, Tickable {
       currentDelay = (long) (match.getRandom().nextDouble() * (maxDelay - minDelay)
           + minDelay); // Picks a random tick duration between minDelay and maxDelay
     }
-    lastTick = match.getTick().tick;
+    lastTick = match.getTick().tick();
   }
 
   private boolean canSpawn() {

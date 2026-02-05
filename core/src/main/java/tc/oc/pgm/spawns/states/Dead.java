@@ -33,7 +33,7 @@ public class Dead extends Spawning {
   private boolean kitted, rotted;
 
   public Dead(MatchPlayer player) {
-    super(player, player.getMatch().getTick().tick, 0);
+    super(player, player.getMatch().getTick().tick(), 0);
 
     // Allow stuff like /tp or /j
     if (options.spectate) this.permission = new StatePermissions.Observer();

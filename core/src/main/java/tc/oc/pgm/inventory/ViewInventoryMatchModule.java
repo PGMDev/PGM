@@ -94,7 +94,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     if (updateQueue.isEmpty()) return;
 
     updateQueue.entrySet().removeIf(entry -> {
-      if (!entry.getValue().isAfter(match.getTick().instant)) {
+      if (!entry.getValue().isAfter(match.getTick().instant())) {
         checkMonitoredInventories(entry.getKey());
         return true;
       }
@@ -269,7 +269,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   protected void scheduleCheck(Player updater) {
     if (this.updateQueue.containsKey(updater)) return;
-    this.updateQueue.put(updater, match.getTick().instant.plus(TICK));
+    this.updateQueue.put(updater, match.getTick().instant().plus(TICK));
   }
 
   protected void checkMonitoredInventories(Player updater) {

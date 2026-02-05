@@ -66,7 +66,7 @@ public class CountdownRunner extends BukkitRunnable {
     if (count > 0) {
       this.count = count;
       this.interval = interval;
-      this.start = match.getTick().instant;
+      this.start = match.getTick().instant();
       this.end = this.start.plus(remaining);
       this.secondsRemaining = remaining.getSeconds();
 
@@ -85,7 +85,7 @@ public class CountdownRunner extends BukkitRunnable {
       logger.fine("Cancelling countdown " + countdown);
 
       this.stop();
-      Duration remaining = Duration.between(match.getTick().instant, this.end);
+      Duration remaining = Duration.between(match.getTick().instant(), this.end);
       this.countdown.onCancel(
           TimeUtils.isShorterThan(remaining, Duration.ZERO) ? Duration.ZERO : remaining,
           this.getTotalTime());
@@ -126,7 +126,7 @@ public class CountdownRunner extends BukkitRunnable {
     for (;
         this.secondsRemaining >= 0
             && this.secondsRemaining * 20
-                >= TimeUtils.toTicks(Duration.between(match.getTick().instant, this.end));
+                >= TimeUtils.toTicks(Duration.between(match.getTick().instant(), this.end));
         this.secondsRemaining--) {
       this.countdown.onTick(Duration.ofSeconds(this.secondsRemaining), this.getTotalTime());
     }

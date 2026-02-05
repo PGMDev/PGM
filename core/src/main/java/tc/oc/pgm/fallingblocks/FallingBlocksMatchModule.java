@@ -214,7 +214,7 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
 
     World world = match.getWorld();
     Long2ObjectMap<ParticipantState> blockDisturbers =
-        this.blockDisturbersByTick.remove(match.getTick().tick);
+        this.blockDisturbersByTick.remove(match.getTick().tick());
     if (blockDisturbers == null) return;
 
     LongSet supported = new LongOpenHashSet();
@@ -279,7 +279,7 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
   private void disturb(long pos, BlockState blockState, @Nullable ParticipantState disturber) {
     FallingBlocksRule rule = this.ruleWithShortestDelay(blockState);
     if (rule != null) {
-      long tick = match.getTick().tick + rule.delay;
+      long tick = match.getTick().tick() + rule.delay;
       Long2ObjectMap<ParticipantState> blockDisturbers = this.blockDisturbersByTick.get(tick);
 
       if (blockDisturbers == null) {

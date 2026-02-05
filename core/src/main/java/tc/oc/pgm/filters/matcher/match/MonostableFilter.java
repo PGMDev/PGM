@@ -101,7 +101,7 @@ public class MonostableFilter extends SingleFilterFunction
 
     boolean matches(Filterable<?> filterable, boolean response) {
       if (response) { // If inner filter still matches, check if the time has expired
-        final Instant now = this.match.getTick().instant;
+        final Instant now = this.match.getTick().instant();
 
         Instant end = endTimes.get(filterable);
         if (end == null) {
@@ -120,7 +120,7 @@ public class MonostableFilter extends SingleFilterFunction
 
     @Override
     public void tick(Match match, Tick tick) {
-      final Instant now = tick.instant;
+      final Instant now = tick.instant();
 
       endTimes.forEach((filterable, end) -> {
         if (!now.isBefore(end) && lastTick.isBefore(end)) {
@@ -164,7 +164,7 @@ public class MonostableFilter extends SingleFilterFunction
       Instant end = endTimes.get(filterable);
 
       // Create or remove boss bar
-      if (end != null && match.getTick().instant.isBefore(end)) createBossBar(filterable);
+      if (end != null && match.getTick().instant().isBefore(end)) createBossBar(filterable);
       else removeBossBar(filterable);
     }
 
@@ -172,7 +172,7 @@ public class MonostableFilter extends SingleFilterFunction
     public void tick(Match match, Tick tick) {
       super.tick(match, tick);
 
-      final Instant now = tick.instant;
+      final Instant now = tick.instant();
 
       endTimes.forEach((filterable, end) -> {
         if (now.isBefore(end)) {

@@ -331,7 +331,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     // Due to a bug causing infinite TP loop, only tp twice a second at most
     if (event.getEntity() instanceof Player
         && event.getCause() == EntityDamageEvent.DamageCause.VOID
-        && (match.getTick().tick % 10) == 0) {
+        && (match.getTick().tick() % 10) == 0) {
       MatchPlayer player = match.getPlayer(event.getEntity());
       if (player != null && player.isObserving()) {
         Spawn spawn = chooseSpawn(player);
@@ -360,7 +360,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   @EventHandler(ignoreCancelled = true)
   public void onPlayerDeath(MatchPlayerDeathEvent event) {
-    long tick = event.getMatch().getTick().tick;
+    long tick = event.getMatch().getTick().tick();
 
     if (event.isPredicted()) {
       tick = tick + PREDICTED_EXTRA_TICKS;
