@@ -146,7 +146,8 @@ public class KitMatchModule implements MatchModule, Listener {
     if (event.getEntity().getShooter() instanceof Player) {
       Grenade grenade = Grenade.get(event.getEntity());
       if (grenade != null) {
-        MISC_UTILS.createExplosion(event.getEntity(), grenade.power, grenade.fire, grenade.destroy);
+        MISC_UTILS.createExplosion(
+            event.getEntity(), grenade.power(), grenade.fire(), grenade.destroy());
         event.getEntity().remove();
       }
     }
