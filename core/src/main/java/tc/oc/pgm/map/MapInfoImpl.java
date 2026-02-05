@@ -359,7 +359,7 @@ public class MapInfoImpl implements MapInfo {
               Iterables.transform(((TeamModule) module).getTeams(), TeamFactory::getMaxPlayers));
 
         if (module instanceof FreeForAllModule)
-          players.add(((FreeForAllModule) module).options().maxPlayers);
+          players.add(((FreeForAllModule) module).options().maxPlayers());
       }
 
       if (world.hasTerrain()) tags.add(TERRAIN);

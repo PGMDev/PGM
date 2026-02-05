@@ -81,7 +81,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     this.match = match;
     this.options = options;
 
-    if (options.colors) {
+    if (options.colors()) {
       final List<ChatColor> colors = Lists.newArrayList(COLORS);
       Collections.shuffle(colors);
       colors.forEach(this.colors::push);
@@ -102,25 +102,25 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   }
 
   public int getMinPlayers() {
-    return minPlayers != null ? minPlayers : options.minPlayers;
+    return minPlayers != null ? minPlayers : options.minPlayers();
   }
 
   public int getMaxPlayers() {
-    return maxPlayers != null ? maxPlayers : options.maxPlayers;
+    return maxPlayers != null ? maxPlayers : options.maxPlayers();
   }
 
   public int getMaxOverfill() {
-    return maxOverfill != null ? maxOverfill : options.maxOverfill;
+    return maxOverfill != null ? maxOverfill : options.maxOverfill();
   }
 
   public void setMinPlayers(@Nullable Integer minPlayers) {
-    this.minPlayers = minPlayers == null ? options.minPlayers : minPlayers;
+    this.minPlayers = minPlayers == null ? options.minPlayers() : minPlayers;
     updateReadiness();
   }
 
   public void setMaxPlayers(@Nullable Integer maxPlayers, @Nullable Integer maxOverfill) {
-    this.maxPlayers = maxPlayers == null ? options.maxPlayers : maxPlayers;
-    this.maxOverfill = maxOverfill == null ? options.maxOverfill : maxOverfill;
+    this.maxPlayers = maxPlayers == null ? options.maxPlayers() : maxPlayers;
+    this.maxOverfill = maxOverfill == null ? options.maxOverfill() : maxOverfill;
     match.setMaxPlayers(getMaxPlayers());
   }
 

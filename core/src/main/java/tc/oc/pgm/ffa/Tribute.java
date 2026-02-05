@@ -135,7 +135,7 @@ public class Tribute implements Competitor {
 
   @Override
   public NameTagVisibility getNameTagVisibility() {
-    return this.nameTagOverride != null ? nameTagOverride : ffa.getOptions().nameTagVisibility;
+    return this.nameTagOverride != null ? nameTagOverride : ffa.getOptions().nameTagVisibility();
   }
 
   @Override
