@@ -299,7 +299,7 @@ public class ShopMenu extends InventoryMenu {
     public CategoryItem(Category category) {
       this.category = category;
       this.item =
-          ClickableItem.of(category.getCategoryIcon(), c -> setCategory(category, c.getSlot()));
+          ClickableItem.of(category.categoryIcon(), c -> setCategory(category, c.getSlot()));
     }
 
     boolean isActive() {
@@ -307,7 +307,7 @@ public class ShopMenu extends InventoryMenu {
     }
 
     boolean changed() {
-      return active != (active = category.getFilter().query(getViewer()).isAllowed());
+      return active != (active = category.filter().query(getViewer()).isAllowed());
     }
   }
 }
