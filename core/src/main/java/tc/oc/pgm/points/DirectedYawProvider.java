@@ -4,9 +4,9 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.util.Vector;
 
-public class DirectedYawProvider implements AngleProvider {
-  public DirectedYawProvider(Vector target) {
-    this.target = assertNotNull(target, "target");
+public record DirectedYawProvider(Vector target) implements AngleProvider {
+  public DirectedYawProvider {
+    assertNotNull(target, "target");
   }
 
   @Override
@@ -20,6 +20,4 @@ public class DirectedYawProvider implements AngleProvider {
   public boolean isConstant() {
     return true;
   }
-
-  Vector target;
 }
