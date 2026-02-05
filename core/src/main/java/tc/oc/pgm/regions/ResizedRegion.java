@@ -53,18 +53,17 @@ public class ResizedRegion extends TransformedRegion implements RegionDefinition
       max.multiply(oldSize);
     }
 
-    this.bounds =
-        new Bounds(oldBounds.getMin().subtract(min), oldBounds.getMax().add(max));
+    this.bounds = new Bounds(oldBounds.min().subtract(min), oldBounds.max().add(max));
     var newSize = bounds.getSize();
 
     this.matrix = TransformMatrix.concat(
-        TransformMatrix.untranslate(oldBounds.getMin()),
+        TransformMatrix.untranslate(oldBounds.min()),
         TransformMatrix.scale(newSize.clone().divide(oldSize)),
-        TransformMatrix.translate(bounds.getMin()));
+        TransformMatrix.translate(bounds.min()));
 
     this.inverse = TransformMatrix.concat(
-        TransformMatrix.untranslate(bounds.getMin()),
+        TransformMatrix.untranslate(bounds.min()),
         TransformMatrix.scale(oldSize.clone().divide(newSize)),
-        TransformMatrix.translate(oldBounds.getMin()));
+        TransformMatrix.translate(oldBounds.min()));
   }
 }

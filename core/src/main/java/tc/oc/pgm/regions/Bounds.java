@@ -4,23 +4,20 @@ import java.util.Iterator;
 import java.util.Random;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.util.block.CuboidBlockIterator;
 
-public class Bounds implements Cloneable {
-  protected final Vector min;
-  protected final Vector max;
-
-  public Bounds(Vector min, Vector max) {
-    this.min = min.clone();
-    this.max = max.clone();
+public record Bounds(Vector min, Vector max) implements Cloneable {
+  public Bounds {
+    min.clone();
+    max.clone();
   }
 
   /** Create a minimal bounding box containing all of the given points */
   public Bounds(Vector... points) {
-    this.min =
-        new Vector(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-    this.max =
-        new Vector(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
+    this(
+        new Vector(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY),
+        new Vector(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY));
 
     for (Vector p : points) {
       this.min.setX(Math.min(this.min.getX(), p.getX()));
@@ -136,12 +133,24 @@ public class Bounds implements Cloneable {
     return this.contains(bounds.min) && this.contains(bounds.max);
   }
 
-  public Vector getMin() {
+  @Override
+  public Vector min() {
     return this.min.clone();
   }
 
-  public Vector getMax() {
+  @Override
+  public Vector max() {
     return this.max.clone();
+  }
+
+  @Deprecated
+  public Vector getMin() {
+    return min();
+  }
+
+  @Deprecated
+  public Vector getMax() {
+    return max();
   }
 
   public Vector getSize() {
@@ -245,7 +254,7 @@ public class Bounds implements Cloneable {
   }
 
   @Override
-  public String toString() {
+  public @NonNull String toString() {
     return "Bounds{min=[" + this.min.toString() + "],max=[" + this.max.toString() + "]}";
   }
 }

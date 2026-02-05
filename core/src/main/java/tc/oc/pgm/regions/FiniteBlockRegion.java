@@ -118,7 +118,7 @@ public class FiniteBlockRegion implements RegionDefinition.HardStatic {
     if (region instanceof CuboidRegion && proto != null && proto.isOlderThan(REGION_FIX_VERSION)) {
       // Due to an old bug, legacy maps have cuboids that are one block too big
       Bounds bounds = region.getBounds();
-      region = new CuboidRegion(bounds.getMin(), bounds.getMax().add(new Vector(1, 1, 1)));
+      region = new CuboidRegion(bounds.min(), bounds.max().add(new Vector(1, 1, 1)));
     }
 
     return new FiniteBlockRegion(StreamUtils.of(region.getBlocks(world))

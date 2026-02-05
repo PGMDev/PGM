@@ -168,7 +168,7 @@ public class MapDevCommand {
       this.loc = new Location(player.getWorld(), 0, 0, 0);
 
       var bounds = region.getBounds();
-      Vector min = bounds.getMin(), max = bounds.getMax();
+      Vector min = bounds.min(), max = bounds.max();
       boolean hasBottom = min.getY() >= -64, hasTop = max.getY() <= 320;
       if (!hasBottom) min.setY(-32);
       if (!hasTop) max.setY(288);

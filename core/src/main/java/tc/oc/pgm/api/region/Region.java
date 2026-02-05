@@ -186,7 +186,7 @@ public interface Region extends TypedFilter<LocationQuery> {
           "Cannot enumerate chunks in unbounded region type " + getClass().getSimpleName());
     }
 
-    final ChunkVector min = ChunkVector.ofBlock(bounds.getMin()),
+    final ChunkVector min = ChunkVector.ofBlock(bounds.min()),
         max = ChunkVector.ofBlock(bounds.getBlockMaxInside());
 
     int minX = min.getChunkX(), maxX = max.getChunkX();

@@ -41,9 +41,12 @@ public class CuboidRegion implements RegionDefinition.HardStatic {
       throw new ArithmeticException("Region is empty");
     }
 
-    double x = this.randomRange(random, this.bounds.min.getX(), this.bounds.max.getX());
-    double y = this.randomRange(random, this.bounds.min.getY(), this.bounds.max.getY());
-    double z = this.randomRange(random, this.bounds.min.getZ(), this.bounds.max.getZ());
+    double x =
+        this.randomRange(random, this.bounds.min().getX(), this.bounds.max().getX());
+    double y =
+        this.randomRange(random, this.bounds.min().getY(), this.bounds.max().getY());
+    double z =
+        this.randomRange(random, this.bounds.min().getZ(), this.bounds.max().getZ());
     return new Vector(x, y, z);
   }
 
@@ -61,20 +64,20 @@ public class CuboidRegion implements RegionDefinition.HardStatic {
     }
 
     public Vector getMutableMin() {
-      return bounds.min;
+      return bounds.min();
     }
 
     public Vector getMutableMax() {
-      return bounds.max;
+      return bounds.max();
     }
   }
 
   @Override
   public String toString() {
     return "CuboidRegion{min=["
-        + this.bounds.min.toString()
+        + this.bounds.min().toString()
         + "],max=["
-        + this.bounds.max.toString()
+        + this.bounds.max().toString()
         + "]}";
   }
 }

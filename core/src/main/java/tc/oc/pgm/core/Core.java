@@ -79,13 +79,13 @@ public class Core extends TouchableGoal<CoreFactory>
       match.getLogger().warning("No lava found in core " + this.getName());
     }
 
-    Vector min = region.getBounds().getMin().subtract(new Vector(15, 0, 15));
+    Vector min = region.getBounds().min().subtract(new Vector(15, 0, 15));
     min.setY(0);
-    Vector max = region.getBounds().getMax().add(new Vector(15, 0, 15));
-    max.setY(region.getBounds().getMin().getY() - definition.getLeakLevel());
+    Vector max = region.getBounds().max().add(new Vector(15, 0, 15));
+    max.setY(region.getBounds().min().getY() - definition.getLeakLevel());
     this.leakRegion = new CuboidRegion(min, max);
 
-    this.leakRequired = lavaRegion.getBounds().getMin().getBlockY() - max.getBlockY() + 1;
+    this.leakRequired = lavaRegion.getBounds().min().getBlockY() - max.getBlockY() + 1;
     this.isShared = match.getCompetitors().stream().filter(this::canComplete).count() != 1;
   }
 
@@ -154,7 +154,7 @@ public class Core extends TouchableGoal<CoreFactory>
   }
 
   public boolean updateLeak(int yLevel) {
-    int newLeak = Math.min(lavaRegion.getBounds().getMin().getBlockY() - yLevel, leakRequired);
+    int newLeak = Math.min(lavaRegion.getBounds().min().getBlockY() - yLevel, leakRequired);
     if (newLeak > this.leak) {
       this.leak = newLeak;
       return true;
