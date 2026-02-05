@@ -60,7 +60,7 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
   private @Nullable FallingBlocksRule ruleWithShortestDelay(BlockState block) {
     FallingBlocksRule shortest = null;
     for (FallingBlocksRule rule : this.rules) {
-      if (rule.canFall(block) && (shortest == null || shortest.delay > rule.delay)) {
+      if (rule.canFall(block) && (shortest == null || shortest.delay() > rule.delay())) {
         shortest = rule;
       }
     }
@@ -279,7 +279,7 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
   private void disturb(long pos, BlockState blockState, @Nullable ParticipantState disturber) {
     FallingBlocksRule rule = this.ruleWithShortestDelay(blockState);
     if (rule != null) {
-      long tick = match.getTick().tick() + rule.delay;
+      long tick = match.getTick().tick() + rule.delay();
       Long2ObjectMap<ParticipantState> blockDisturbers = this.blockDisturbersByTick.get(tick);
 
       if (blockDisturbers == null) {
