@@ -3,14 +3,7 @@ package tc.oc.pgm.payload.track;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
-class CurvedRail implements RailOffset {
-  private final BlockFace from;
-  private final BlockFace to;
-
-  public CurvedRail(BlockFace from, BlockFace to) {
-    this.from = from;
-    this.to = to;
-  }
+record CurvedRail(BlockFace from, BlockFace to) implements RailOffset {
 
   @Override
   public Vector getOffset(double progress) {
