@@ -4,34 +4,25 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 
-/** Provides additional information about why a {@link Destroyable} was damaged. */
-public class DestroyableHealthChange {
-  private final @NotNull BlockState oldState;
-  private final @NotNull BlockState newState;
-  private final @Nullable ParticipantState playerCause;
-  private final int healthChange;
-
-  /**
-   * Creates an instance of the class.
-   *
-   * @param oldState State the destroyed block was in before broken
-   * @param playerCause Player most responsible for the damage
-   */
-  public DestroyableHealthChange(
-      @NotNull BlockState oldState,
-      @NotNull BlockState newState,
-      @Nullable ParticipantState playerCause,
-      int healthChange) {
+/**
+ * Provides additional information about why a {@link Destroyable} was damaged.
+ *
+ * @param oldState Gets the state of the block before being damaged.
+ * @param newState Gets the state of the block after being damaged.
+ * @param playerCause Gets the player most responsible for the damage.
+ */
+public record DestroyableHealthChange(
+    @NonNull BlockState oldState,
+    @NonNull BlockState newState,
+    @Nullable ParticipantState playerCause,
+    int healthChange) {
+  /** Creates an instance of the class. */
+  public DestroyableHealthChange {
     assertNotNull(oldState, "old block state");
-
-    this.oldState = oldState;
-    this.newState = newState;
-    this.playerCause = playerCause;
-    this.healthChange = healthChange;
   }
 
   /**
@@ -39,38 +30,27 @@ public class DestroyableHealthChange {
    *
    * @return Damaged block
    */
-  public @NotNull Block getBlock() {
+  public @NonNull Block getBlock() {
     return this.oldState.getBlock();
   }
 
-  /**
-   * Gets the state of the block before being damaged.
-   *
-   * @return Old block state
-   */
-  public @NotNull BlockState getOldState() {
-    return this.oldState;
+  @Deprecated
+  public @NonNull BlockState getOldState() {
+    return oldState();
   }
 
-  /**
-   * Gets the state of the block after being damaged.
-   *
-   * @return Old block state
-   */
-  public @NotNull BlockState getNewState() {
-    return this.newState;
+  @Deprecated
+  public @NonNull BlockState getNewState() {
+    return newState();
   }
 
-  /**
-   * Gets the player responsible for the damage.
-   *
-   * @return Player responsible for the damage or null if none exists
-   */
+  @Deprecated
   public @Nullable ParticipantState getPlayerCause() {
-    return this.playerCause;
+    return playerCause();
   }
 
+  @Deprecated
   public int getHealthChange() {
-    return healthChange;
+    return healthChange();
   }
 }

@@ -550,12 +550,12 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     int totalDamage = 0;
     for (DestroyableHealthChange change : this.events) {
-      if (change.getHealthChange() < 0) {
-        MatchPlayerState player = change.getPlayerCause();
+      if (change.healthChange() < 0) {
+        MatchPlayerState player = change.playerCause();
         if (player != null) {
-          playerDamage.put(player, playerDamage.get(player) - change.getHealthChange());
+          playerDamage.put(player, playerDamage.get(player) - change.healthChange());
         }
-        totalDamage -= change.getHealthChange();
+        totalDamage -= change.healthChange();
       }
     }
 
