@@ -51,7 +51,7 @@ public class KillRewardMatchModule implements MatchModule, Listener {
       @Nullable Event event, ParticipantState victim, DamageInfo damageInfo) {
     final DamageQuery query = DamageQuery.attackerDefault(event, victim, damageInfo);
     return Collections2.filter(
-        killRewards, killReward -> killReward.filter.query(query).isAllowed());
+        killRewards, killReward -> killReward.filter().query(query).isAllowed());
   }
 
   private Collection<KillReward> getRewards(MatchPlayerDeathEvent event) {
@@ -61,22 +61,21 @@ public class KillRewardMatchModule implements MatchModule, Listener {
   private void giveRewards(MatchPlayer killer, Collection<KillReward> rewards) {
     for (KillReward reward : rewards) {
       // Apply action/kit first, so it can not override reward items
-      reward.action.trigger(killer);
+      reward.action().trigger(killer);
 
-      for (ItemStack stack : reward.items) {
+      for (ItemStack stack : reward.items()) {
         ItemStack clone = stack.clone();
         ItemModifier.apply(clone, killer);
-        PlayerItemTransferEvent event =
-            new PlayerItemTransferEvent(
-                null,
-                ItemTransferEvent.Reason.PLUGIN,
-                killer.getBukkit(),
-                null,
-                killer.getBukkit().getInventory(),
-                clone,
-                null,
-                clone.getAmount(),
-                null);
+        PlayerItemTransferEvent event = new PlayerItemTransferEvent(
+            null,
+            ItemTransferEvent.Reason.PLUGIN,
+            killer.getBukkit(),
+            null,
+            killer.getBukkit().getInventory(),
+            clone,
+            null,
+            clone.getAmount(),
+            null);
         match.callEvent(event);
         if (!event.isCancelled() && event.getQuantity() > 0) {
           // BEWARE: addItem modifies its argument.. send in the clone!
@@ -103,7 +102,7 @@ public class KillRewardMatchModule implements MatchModule, Listener {
     Collection<KillReward> rewards = getRewards(event);
 
     // Always apply victim rewards
-    rewards.forEach(r -> r.victimAction.trigger(victim));
+    rewards.forEach(r -> r.victimAction().trigger(victim));
 
     // Apply kill rewards only if killer didn't leave
     MatchPlayer onlineKiller = killer.getPlayer().orElse(null);

@@ -103,7 +103,7 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
     ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
     if (imm != null) {
       for (KillReward reward : rewards) {
-        for (ItemStack stack : reward.items) {
+        for (ItemStack stack : reward.items()) {
           imm.applyRules(stack);
         }
       }
