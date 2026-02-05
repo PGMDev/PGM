@@ -31,21 +31,13 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
     }
   }
 
-  class Piecewise implements PortalTransform {
-    private final DoubleProvider x, y, z, yaw, pitch;
-
-    private Piecewise(
-        DoubleProvider x,
-        DoubleProvider y,
-        DoubleProvider z,
-        DoubleProvider yaw,
-        DoubleProvider pitch) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      this.yaw = yaw;
-      this.pitch = pitch;
-    }
+  record Piecewise(
+      DoubleProvider x,
+      DoubleProvider y,
+      DoubleProvider z,
+      DoubleProvider yaw,
+      DoubleProvider pitch)
+      implements PortalTransform {
 
     private Vector mutate(Vector v) {
       v.setX(x.apply(v.getX()));
@@ -168,12 +160,10 @@ public interface PortalTransform extends InvertibleOperator<PortalTransform> {
     }
   }
 
-  class Concatenate implements PortalTransform {
-    private final PortalTransform first, last;
-
-    private Concatenate(PortalTransform first, PortalTransform last) {
-      this.first = assertNotNull(first);
-      this.last = assertNotNull(last);
+  record Concatenate(PortalTransform first, PortalTransform last) implements PortalTransform {
+    public Concatenate {
+      assertNotNull(first);
+      assertNotNull(last);
     }
 
     @Override
