@@ -32,12 +32,7 @@ public interface Packet {
     public void sendToViewers(Entity entity, boolean excludeSpectators) {}
   }
 
-  class CompoundPacket implements Packet {
-    private final Packet[] packets;
-
-    public CompoundPacket(Packet... packets) {
-      this.packets = packets;
-    }
+  record CompoundPacket(Packet... packets) implements Packet {
 
     @Override
     public void send(Player viewer) {

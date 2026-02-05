@@ -18,8 +18,8 @@ public abstract class Skins {
         .properties()
         .put(
             "textures",
-            skin.getSignature() != null
-                ? new Property("textures", skin.getData(), skin.getSignature())
-                : new Property("textures", skin.getData()));
+            skin.signature() != null
+                ? new Property("textures", skin.data(), skin.signature())
+                : new Property("textures", skin.data()));
   }
 }
