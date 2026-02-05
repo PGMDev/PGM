@@ -3,7 +3,7 @@ package tc.oc.pgm.kits;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 
-public class KitRule implements FeatureDefinition {
+public record KitRule(Action action, Kit kit, Filter filter) implements FeatureDefinition {
 
   enum Action {
     GIVE,
@@ -11,25 +11,18 @@ public class KitRule implements FeatureDefinition {
     LEND
   }
 
-  private final Action action;
-  private final Kit kit;
-  private final Filter filter;
-
-  public KitRule(Action action, Kit kit, Filter filter) {
-    this.action = action;
-    this.kit = kit;
-    this.filter = filter;
-  }
-
+  @Deprecated
   public Action getAction() {
-    return action;
+    return action();
   }
 
+  @Deprecated
   public Kit getKit() {
-    return kit;
+    return kit();
   }
 
+  @Deprecated
   public Filter getFilter() {
-    return filter;
+    return filter();
   }
 }
