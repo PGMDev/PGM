@@ -203,7 +203,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
       for (BlockMaterialData material : this.materials) {
         BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
-        if (drops != null && drops.replacement != null && this.hasMaterial(drops.replacement)) {
+        if (drops != null && drops.replacement() != null && this.hasMaterial(drops.replacement())) {
           return true;
         }
       }
@@ -272,9 +272,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     int health = 1;
     if (this.blockDropsRuleSet != null) {
       BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
-      if (drops != null && drops.replacement != null) {
-        health +=
-            this.buildBlockMaterialHealthMap(block, drops.replacement, materialHealthMap, visited);
+      if (drops != null && drops.replacement() != null) {
+        health += this.buildBlockMaterialHealthMap(
+            block, drops.replacement(), materialHealthMap, visited);
       }
     }
 

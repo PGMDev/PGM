@@ -104,15 +104,15 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   }
 
   private void giveKit(BlockDrops drops, MatchPlayer player) {
-    if (player != null && player.isParticipating() && player.canInteract() && drops.kit != null) {
-      player.applyKit(drops.kit, false);
+    if (player != null && player.isParticipating() && player.canInteract() && drops.kit() != null) {
+      player.applyKit(drops.kit(), false);
     }
   }
 
   private void dropItems(BlockDrops drops, MatchPlayer player, Location location, double yield) {
     if (player == null || player.getGameMode() != GameMode.CREATIVE) {
       Random random = match.getRandom();
-      for (Map.Entry<ItemStack, Double> entry : drops.items.entrySet()) {
+      for (Map.Entry<ItemStack, Double> entry : drops.items().entrySet()) {
         if (random.nextFloat() < yield * entry.getValue()) {
           Location dropLocation = location.clone();
           dropLocation.setX(dropLocation.getBlockX() + random.nextDouble() * 0.5 + 0.25);
@@ -125,24 +125,24 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   }
 
   private void dropExperience(BlockDrops drops, Location location) {
-    if (drops.experience != 0) {
+    if (drops.experience() != 0) {
       ExperienceOrb expOrb =
           (ExperienceOrb) location.getWorld().spawnEntity(location, EntityType.EXPERIENCE_ORB);
       if (expOrb != null) {
-        expOrb.setExperience(drops.experience);
+        expOrb.setExperience(drops.experience());
       }
     }
   }
 
   private void replaceBlock(BlockDrops drops, Block block, MatchPlayer player) {
-    if (drops.replacement != null) {
+    if (drops.replacement() != null) {
       EntityChangeBlockEvent event =
-          MISC_UTILS.createEntityChangeBlockEvent(player.getBukkit(), block, drops.replacement);
+          MISC_UTILS.createEntityChangeBlockEvent(player.getBukkit(), block, drops.replacement());
       match.callEvent(event);
 
       if (!event.isCancelled()) {
         BlockState state = block.getState();
-        drops.replacement.applyTo(state);
+        drops.replacement().applyTo(state);
         state.update(true, true);
       }
     }
@@ -175,10 +175,10 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
         explosion = true;
         yield = explodeEvent.getYield();
 
-        if (drops.fallChance != null
+        if (drops.fallChance() != null
             && oldState.getType().isBlock()
             && oldState.getType() != Material.AIR
-            && match.getRandom().nextFloat() < drops.fallChance) {
+            && match.getRandom().nextFloat() < drops.fallChance()) {
 
           FallingBlock fallingBlock = match
               .getWorld()
@@ -188,14 +188,14 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
                   event.getOldState().getRawData());
           fallingBlock.setDropItem(false);
 
-          if (drops.landChance != null && match.getRandom().nextFloat() >= drops.landChance) {
+          if (drops.landChance() != null && match.getRandom().nextFloat() >= drops.landChance()) {
             this.fallingBlocksThatWillNotLand.add(fallingBlock);
           }
 
           Vector v =
               fallingBlock.getLocation().subtract(explodeEvent.getLocation()).toVector();
           double distance = v.length();
-          v.normalize().multiply(BASE_FALL_SPEED * drops.fallSpeed / Math.max(1d, distance));
+          v.normalize().multiply(BASE_FALL_SPEED * drops.fallSpeed() / Math.max(1d, distance));
 
           // A very simple deflection model. Check for a solid
           // neighbor block and "bounce" the velocity off of it.

@@ -115,29 +115,29 @@ public class BlockDropsRuleSet {
 
       custom = true;
 
-      if (rule.drops.kit != null) {
-        kits.add(rule.drops.kit);
+      if (rule.drops.kit() != null) {
+        kits.add(rule.drops.kit());
       }
 
-      if (rule.drops.replacement != null) {
-        replacement = rule.drops.replacement;
+      if (rule.drops.replacement() != null) {
+        replacement = rule.drops.replacement();
       }
 
-      if (rule.drops.fallChance != null) {
-        fallChance = rule.drops.fallChance;
+      if (rule.drops.fallChance() != null) {
+        fallChance = rule.drops.fallChance();
       }
 
-      if (rule.drops.landChance != null) {
-        landChance = rule.drops.landChance;
+      if (rule.drops.landChance() != null) {
+        landChance = rule.drops.landChance();
       }
 
-      if (rule.drops.fallSpeed != null) {
-        fallSpeed = rule.drops.fallSpeed;
+      if (rule.drops.fallSpeed() != null) {
+        fallSpeed = rule.drops.fallSpeed();
       }
 
       if (rule.dropOnWrongTool || rightToolUsed) {
-        items.putAll(rule.drops.items);
-        experience += rule.drops.experience;
+        items.putAll(rule.drops.items());
+        experience += rule.drops.experience();
       }
     }
 
