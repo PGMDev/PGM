@@ -3,21 +3,15 @@ package tc.oc.pgm.enderchest;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 
-public class Dropoff {
+public record Dropoff(Region region, Filter filter) {
 
-  private final Region region;
-  private final Filter filter;
-
-  public Dropoff(Region region, Filter filter) {
-    this.region = region;
-    this.filter = filter;
-  }
-
+  @Deprecated
   public Region getRegion() {
-    return region;
+    return region();
   }
 
+  @Deprecated
   public Filter getFilter() {
-    return filter;
+    return filter();
   }
 }

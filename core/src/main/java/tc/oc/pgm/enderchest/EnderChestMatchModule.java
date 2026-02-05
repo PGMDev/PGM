@@ -53,8 +53,8 @@ public class EnderChestMatchModule implements MatchModule, Listener {
 
     boolean dropped = false;
     for (Dropoff dropoff : dropoffs) {
-      if (dropoff.getFilter().query(oldParty).isAllowed()) {
-        drop(enderchest, dropoff.getRegion().getRandom(match).toLocation(match.getWorld()));
+      if (dropoff.filter().query(oldParty).isAllowed()) {
+        drop(enderchest, dropoff.region().getRandom(match).toLocation(match.getWorld()));
         dropped = true;
         break;
       }
