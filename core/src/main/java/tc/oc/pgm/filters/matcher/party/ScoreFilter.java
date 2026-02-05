@@ -10,13 +10,7 @@ import tc.oc.pgm.api.party.event.CompetitorScoreChangeEvent;
 import tc.oc.pgm.score.ScoreMatchModule;
 
 /** Match whether a {@link Competitor}'s score is within a range. */
-public class ScoreFilter implements CompetitorFilter {
-
-  private final Range<Integer> values;
-
-  public ScoreFilter(Range<Integer> values) {
-    this.values = values;
-  }
+public record ScoreFilter(Range<Integer> values) implements CompetitorFilter {
 
   @Override
   public Collection<Class<? extends Event>> getRelevantEvents() {
