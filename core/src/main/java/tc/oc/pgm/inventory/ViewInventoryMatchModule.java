@@ -168,14 +168,14 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
         // because a player can only be viewing one inventory at a time,
         // this is how we determine if we have a match
         if (inventory.getViewers().isEmpty()
-            || tracker.getWatched().getViewers().isEmpty()
-            || inventory.getViewers().size() > tracker.getWatched().getViewers().size()) continue;
+            || tracker.watched().getViewers().isEmpty()
+            || inventory.getViewers().size() > tracker.watched().getViewers().size()) continue;
 
         for (int i = 0; i < inventory.getViewers().size(); i++) {
           if (!inventory
               .getViewers()
               .get(i)
-              .equals(tracker.getWatched().getViewers().get(i))) {
+              .equals(tracker.watched().getViewers().get(i))) {
             continue invLoop;
           }
         }
@@ -277,7 +277,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
       Player pl = entry.getKey();
       InventoryTrackerEntry tracker = entry.getValue();
 
-      InventoryHolder invHolder = tracker.getWatched().getHolder();
+      InventoryHolder invHolder = tracker.watched().getHolder();
 
       if (tracker.isPlayerInventory()) {
         Player holder = (Player) invHolder;
@@ -449,9 +449,9 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
     InventoryTrackerEntry entry = this.monitoredInventories.get(viewer);
     if (entry != null
-        && entry.getWatched().equals(realInventory)
-        && entry.getPreview().getSize() == fakeInventory.getSize()) {
-      entry.getPreview().setContents(fakeInventory.getContents());
+        && entry.watched().equals(realInventory)
+        && entry.preview().getSize() == fakeInventory.getSize()) {
+      entry.preview().setContents(fakeInventory.getContents());
     } else {
       entry = new InventoryTrackerEntry(realInventory, fakeInventory);
       this.monitoredInventories.put(viewer, entry);
