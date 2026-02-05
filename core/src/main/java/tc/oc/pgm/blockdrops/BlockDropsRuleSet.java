@@ -14,7 +14,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
@@ -32,19 +32,13 @@ import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
-public class BlockDropsRuleSet {
-  private final ImmutableList<BlockDropsRule> rules;
-
+public record BlockDropsRuleSet(ImmutableList<BlockDropsRule> rules) {
   public BlockDropsRuleSet(List<BlockDropsRule> rules) {
-    this.rules = ImmutableList.copyOf(rules);
+    this(ImmutableList.copyOf(rules));
   }
 
   public boolean isEmpty() {
     return this.rules.isEmpty();
-  }
-
-  public ImmutableList<BlockDropsRule> getRules() {
-    return this.rules;
   }
 
   /** Return the subset of rules that may act on the given region */

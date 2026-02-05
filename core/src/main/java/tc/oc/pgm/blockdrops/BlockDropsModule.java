@@ -118,7 +118,7 @@ public class BlockDropsModule implements MapModule<BlockDropsMatchModule> {
     // Apply any item-mods to all drops
     ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
     if (imm != null) {
-      for (BlockDropsRule rule : ruleSet.getRules()) {
+      for (BlockDropsRule rule : ruleSet.rules()) {
         for (Map.Entry<ItemStack, Double> entry : rule.drops().items().entrySet()) {
           imm.applyRules(entry.getKey());
         }

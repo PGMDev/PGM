@@ -196,7 +196,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   protected boolean isAffectedByBlockReplacementRules() {
-    if (this.blockDropsRuleSet == null || this.blockDropsRuleSet.getRules().isEmpty()) {
+    if (this.blockDropsRuleSet == null || this.blockDropsRuleSet.rules().isEmpty()) {
       return false;
     }
 

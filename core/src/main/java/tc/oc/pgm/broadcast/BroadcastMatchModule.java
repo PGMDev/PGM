@@ -23,9 +23,9 @@ public class BroadcastMatchModule implements MatchModule {
     for (Broadcast broadcast : this.broadcasts.values()) {
       this.countdowns.start(
           new BroadcastCountdown(this.match, broadcast),
-          broadcast.after,
-          broadcast.every,
-          broadcast.count);
+          broadcast.after(),
+          broadcast.every(),
+          broadcast.count());
     }
   }
 
