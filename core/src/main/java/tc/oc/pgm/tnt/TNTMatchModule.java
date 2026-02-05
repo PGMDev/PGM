@@ -45,8 +45,8 @@ public class TNTMatchModule implements MatchModule, Listener {
   }
 
   public int getFuseTicks() {
-    assert this.properties.fuse != null;
-    return (int) TimeUtils.toTicks(this.properties.fuse);
+    assert this.properties.fuse() != null;
+    return (int) TimeUtils.toTicks(this.properties.fuse());
   }
 
   private boolean callPrimeEvent(TNTPrimed tnt, @Nullable Entity primer) {
@@ -67,25 +67,25 @@ public class TNTMatchModule implements MatchModule, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void yieldSet(EntityExplodeEvent event) {
-    if (this.properties.yield != null && event.getEntity() instanceof TNTPrimed) {
-      event.setYield(this.properties.yield);
+    if (this.properties.yield() != null && event.getEntity() instanceof TNTPrimed) {
+      event.setYield(this.properties.yield());
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleInstantActivation(BlockPlaceEvent event) {
-    if (this.properties.instantIgnite && event.getBlock().getType() == Material.TNT) {
+    if (this.properties.instantIgnite() && event.getBlock().getType() == Material.TNT) {
       World world = event.getBlock().getWorld();
       TNTPrimed tnt = world.spawn(
           event.getBlock().getLocation().clone().add(new Location(world, 0.5, 0.5, 0.5)),
           TNTPrimed.class);
 
-      if (this.properties.fuse != null) {
+      if (this.properties.fuse() != null) {
         tnt.setFuseTicks(this.getFuseTicks());
       }
 
-      if (this.properties.power != null) {
-        tnt.setYield(this.properties.power); // Note: not related to EntityExplodeEvent.yield
+      if (this.properties.power() != null) {
+        tnt.setYield(this.properties.power()); // Note: not related to EntityExplodeEvent.yield
       }
 
       if (callPrimeEvent(tnt, event.getPlayer())) {
@@ -100,12 +100,12 @@ public class TNTMatchModule implements MatchModule, Listener {
   public void setCustomProperties(ExplosionPrimeEvent event) {
     if (event.getEntity() instanceof TNTPrimed tnt) {
 
-      if (this.properties.fuse != null) {
+      if (this.properties.fuse() != null) {
         tnt.setFuseTicks(this.getFuseTicks());
       }
 
-      if (this.properties.power != null) {
-        tnt.setYield(this.properties.power); // Note: not related to EntityExplodeEvent.yield
+      if (this.properties.power() != null) {
+        tnt.setYield(this.properties.power()); // Note: not related to EntityExplodeEvent.yield
       }
     }
   }
@@ -116,12 +116,12 @@ public class TNTMatchModule implements MatchModule, Listener {
   public void dispenserNukes(BlockTransformEvent event) {
     BlockState oldState = event.getOldState();
     if (oldState instanceof Dispenser dispenser
-        && this.properties.dispenserNukeLimit > 0
-        && this.properties.dispenserNukeMultiplier > 0
+        && this.properties.dispenserNukeLimit() > 0
+        && this.properties.dispenserNukeMultiplier() > 0
         && event.getCause() instanceof EntityExplodeEvent explodeEvent
         && MISC_UTILS.isDestructiveExplosion(explodeEvent)) {
-      int tntLimit =
-          Math.round(this.properties.dispenserNukeLimit / this.properties.dispenserNukeMultiplier);
+      int tntLimit = Math.round(
+          this.properties.dispenserNukeLimit() / this.properties.dispenserNukeMultiplier());
       int tntCount = 0;
 
       ItemStack[] inv = dispenser.getInventory().getContents();
@@ -137,7 +137,7 @@ public class TNTMatchModule implements MatchModule, Listener {
         }
       }
 
-      tntCount = (int) Math.ceil(tntCount * this.properties.dispenserNukeMultiplier);
+      tntCount = (int) Math.ceil(tntCount * this.properties.dispenserNukeMultiplier());
 
       for (int i = 0; i < tntCount; i++) {
         TNTPrimed tnt = match.getWorld().spawn(dispenser.getLocation(), TNTPrimed.class);

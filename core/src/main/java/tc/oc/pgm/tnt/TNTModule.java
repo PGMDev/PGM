@@ -37,7 +37,7 @@ public class TNTModule implements MapModule<TNTMatchModule> {
 
   @Override
   public Collection<MapTag> getTags() {
-    return properties.instantIgnite ? TAGS : Collections.emptyList();
+    return properties.instantIgnite() ? TAGS : Collections.emptyList();
   }
 
   @Override
@@ -67,30 +67,26 @@ public class TNTModule implements MapModule<TNTMatchModule> {
 
       for (Element tntElement : doc.getRootElement().getChildren("tnt")) {
         exists = true;
-        instantIgnite =
-            XMLUtils.parseBoolean(
-                XMLUtils.getUniqueChild(tntElement, "instantignite"), instantIgnite);
+        instantIgnite = XMLUtils.parseBoolean(
+            XMLUtils.getUniqueChild(tntElement, "instantignite"), instantIgnite);
         blockDamage =
             XMLUtils.parseBoolean(XMLUtils.getUniqueChild(tntElement, "blockdamage"), blockDamage);
         yield =
             XMLUtils.parseNumber(XMLUtils.getUniqueChild(tntElement, "yield"), Float.class, yield);
         power =
             XMLUtils.parseNumber(XMLUtils.getUniqueChild(tntElement, "power"), Float.class, power);
-        dispenserNukeLimit =
-            XMLUtils.parseNumber(
-                XMLUtils.getUniqueChild(tntElement, "dispenser-tnt-limit"),
-                Integer.class,
-                dispenserNukeLimit);
-        dispenserNukeMultiplier =
-            XMLUtils.parseNumber(
-                XMLUtils.getUniqueChild(tntElement, "dispenser-tnt-multiplier"),
-                Float.class,
-                dispenserNukeMultiplier);
+        dispenserNukeLimit = XMLUtils.parseNumber(
+            XMLUtils.getUniqueChild(tntElement, "dispenser-tnt-limit"),
+            Integer.class,
+            dispenserNukeLimit);
+        dispenserNukeMultiplier = XMLUtils.parseNumber(
+            XMLUtils.getUniqueChild(tntElement, "dispenser-tnt-multiplier"),
+            Float.class,
+            dispenserNukeMultiplier);
         licensing =
             XMLUtils.parseBoolean(XMLUtils.getUniqueChild(tntElement, "licensing"), licensing);
-        friendlyDefuse =
-            XMLUtils.parseBoolean(
-                XMLUtils.getUniqueChild(tntElement, "friendly-defuse"), friendlyDefuse);
+        friendlyDefuse = XMLUtils.parseBoolean(
+            XMLUtils.getUniqueChild(tntElement, "friendly-defuse"), friendlyDefuse);
 
         Element fuseElement = XMLUtils.getUniqueChild(tntElement, "fuse");
         if (fuseElement != null) {
@@ -109,27 +105,25 @@ public class TNTModule implements MapModule<TNTMatchModule> {
         factory
             .needModule(RegionModule.class)
             .getRFAContextBuilder()
-            .prepend(
-                new RegionFilterApplication(
-                    RFAScope.BLOCK_BREAK,
-                    EverywhereRegion.INSTANCE,
-                    new DenyFilter(new CauseFilter(CauseFilter.Cause.EXPLOSION)),
-                    (Component) null,
-                    false));
+            .prepend(new RegionFilterApplication(
+                RFAScope.BLOCK_BREAK,
+                EverywhereRegion.INSTANCE,
+                new DenyFilter(new CauseFilter(CauseFilter.Cause.EXPLOSION)),
+                (Component) null,
+                false));
       }
 
       return exists
-          ? new TNTModule(
-              new TNTProperties(
-                  yield,
-                  power,
-                  instantIgnite,
-                  blockDamage,
-                  fuse,
-                  dispenserNukeLimit,
-                  dispenserNukeMultiplier,
-                  licensing,
-                  friendlyDefuse))
+          ? new TNTModule(new TNTProperties(
+              yield,
+              power,
+              instantIgnite,
+              blockDamage,
+              fuse,
+              dispenserNukeLimit,
+              dispenserNukeMultiplier,
+              licensing,
+              friendlyDefuse))
           : null;
     }
   }

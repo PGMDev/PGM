@@ -77,16 +77,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     }
   }
 
-  public static class TeamJoinResult implements JoinResult {
-    private final JoinResultOption status;
-    private final Team team;
-    private final boolean priorityKick;
-
-    public TeamJoinResult(JoinResultOption status, @Nullable Team team, boolean priorityKick) {
-      this.status = status;
-      this.team = team;
-      this.priorityKick = priorityKick;
-    }
+  public record TeamJoinResult(
+      JoinResultOption status, @Nullable Team team, boolean priorityKick) implements JoinResult {
 
     public TeamJoinResult(JoinResultOption status) {
       this(status, null, false);
@@ -100,14 +92,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     @Override
     public JoinResultOption getOption() {
       return status;
-    }
-
-    public Team getTeam() {
-      return team;
-    }
-
-    public boolean priorityKickRequired() {
-      return priorityKick;
     }
   }
 
@@ -298,9 +282,8 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         if (result.isSuccess()) {
           float fullness = team.getFullnessAfterJoin(request.getPlayerCount());
           if (bestResult == null
-              || (!result.priorityKickRequired() && bestResult.priorityKickRequired())
-              || (result.priorityKickRequired() == bestResult.priorityKickRequired()
-                  && fullness < minFullness)) {
+              || (!result.priorityKick() && bestResult.priorityKick())
+              || (result.priorityKick() == bestResult.priorityKick() && fullness < minFullness)) {
 
             bestResult = result;
             minFullness = fullness;
@@ -416,9 +399,9 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           return true;
 
         case FULL:
-          if (teamResult.getTeam() != null) {
+          if (teamResult.team() != null) {
             joining.sendWarning(
-                translatable("join.err.full.team", teamResult.getTeam().getName()));
+                translatable("join.err.full.team", teamResult.team().getName()));
           } else {
             joining.sendWarning(translatable("join.err.full"));
           }
@@ -431,12 +414,12 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
           return true;
       }
 
-      if (!internalJoin(joining, teamResult.getTeam(), request)) {
+      if (!internalJoin(joining, teamResult.team(), request)) {
         return false;
       }
 
-      if (teamResult.priorityKickRequired()) {
-        kickPlayerOffTeam(teamResult.getTeam(), false);
+      if (teamResult.priorityKick()) {
+        kickPlayerOffTeam(teamResult.team(), false);
       }
 
       return true;
@@ -503,7 +486,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     TeamJoinResult kickResult =
         this.getEmptiestJoinableTeam(kickFrom, JoinRequest.fromPlayer(kickMe, null));
     if (kickResult.isSuccess()) {
-      kickTo = kickResult.getTeam();
+      kickTo = kickResult.team();
     } else {
       // If no teams are available, kick them to observers, if necessary
       if (forBalance) return false;
