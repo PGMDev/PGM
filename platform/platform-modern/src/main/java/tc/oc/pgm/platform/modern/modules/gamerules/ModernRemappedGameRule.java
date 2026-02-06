@@ -33,11 +33,7 @@ public class ModernRemappedGameRule<T> extends ModernBukkitGameRule<T> {
             "Don't know how to parse value for " + handle.getType().getName()));
       }
 
-      try {
-        return Result.ok(handle.getType().cast(parsedValue));
-      } catch (ClassCastException e) {
-        return Result.err(e);
-      }
+      return Result.ok(handle.getType().cast(parsedValue));
     } catch (Throwable e) {
       return Result.err(e);
     }

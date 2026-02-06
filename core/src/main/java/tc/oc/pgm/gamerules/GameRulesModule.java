@@ -51,39 +51,39 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
           if (value == null) {
             throw new InvalidXMLException(
                 "Missing value for game rule " + ruleName, gameRuleElement);
-          } else {
-            GameRule<?> rule = GameRules.getByName(ruleName);
-            if (rule == null) {
-              logger.log(
-                  Level.WARNING,
-                  null,
-                  new InvalidXMLException(
-                      "Game rule " + ruleName + " does not exist or is unsupported by the platform",
-                      gameRuleElement));
-              continue;
-            } else if (gameRules.containsKey(rule)) {
-              throw new InvalidXMLException(
-                  rule.name() + " has already been specified", gameRuleElement);
-            }
+          }
 
-            var maybeConflict = gameRules.keySet().stream()
-                .filter(Predicate.not(rule::canBeCombinedWith))
-                .findFirst();
+          GameRule<?> rule = GameRules.getByName(ruleName);
+          if (rule == null) {
+            logger.log(
+                Level.WARNING,
+                null,
+                new InvalidXMLException(
+                    "Game rule " + ruleName + " does not exist or is unsupported by the platform",
+                    gameRuleElement));
+            continue;
+          } else if (gameRules.containsKey(rule)) {
+            throw new InvalidXMLException(
+                rule.name() + " has already been specified", gameRuleElement);
+          }
 
-            if (maybeConflict.isPresent()) {
+          var maybeConflict = gameRules.keySet().stream()
+              .filter(Predicate.not(rule::canBeCombinedWith))
+              .findFirst();
+
+          if (maybeConflict.isPresent()) {
+            throw new InvalidXMLException(
+                "Game rule " + rule.name() + " cannot be combined with "
+                    + maybeConflict.get().name(),
+                gameRuleElement);
+          }
+
+          switch (rule.tryParse(value)) {
+            case Result.Ok<?, ?>(Object parsed) -> gameRules.put(rule, parsed);
+            case Result.Err<?, ?>(Throwable err) ->
               throw new InvalidXMLException(
-                  "Game rule " + rule.name() + " cannot be combined with "
-                      + maybeConflict.get().name(),
+                  "Failed to parse game rule value for " + rule.name() + ": " + err.getMessage(),
                   gameRuleElement);
-            }
-
-            switch (rule.tryParse(value)) {
-              case Result.Ok<?, ?>(Object parsed) -> gameRules.put(rule, parsed);
-              case Result.Err<?, ?>(Throwable err) ->
-                throw new InvalidXMLException(
-                    "Failed to parse game rule value for " + rule.name() + ": " + err.getMessage(),
-                    gameRuleElement);
-            }
           }
         }
       }
