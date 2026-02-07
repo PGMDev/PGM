@@ -32,7 +32,6 @@ import net.minecraft.server.WorldLoader;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -57,7 +56,6 @@ import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.entity.CraftFirework;
 import org.bukkit.craftbukkit.generator.CraftWorldInfo;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
@@ -92,9 +90,8 @@ import tc.oc.pgm.util.skin.Skin;
 public class ModernNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
-    FireworkRocketEntity entityFirework = ((CraftFirework) firework).getHandle();
-    entityFirework.lifetime = 2;
-    entityFirework.life = 2;
+    firework.setTicksToDetonate(2);
+    firework.setTicksFlown(2);
     ENTITIES
         .entityMetadataPacket(firework.getEntityId(), firework, false)
         .sendToViewers(firework, false);
