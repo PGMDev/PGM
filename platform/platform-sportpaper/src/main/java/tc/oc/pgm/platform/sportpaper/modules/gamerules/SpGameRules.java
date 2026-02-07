@@ -15,14 +15,7 @@ import tc.oc.pgm.util.platform.Supports;
 @Supports(SPORTPAPER)
 @NullMarked
 public class SpGameRules implements tc.oc.pgm.util.bukkit.GameRules.GameRuleRegistry {
-  protected static final @Unmodifiable Map<String, String> DEFAULTS;
-  private static final @Unmodifiable Map<String, GameRule<?>> GAME_RULES;
-
-  static {
-    Builder.BuiltData data = new Builder().build();
-    DEFAULTS = data.defaults();
-    GAME_RULES = data.rules();
-  }
+  private static final @Unmodifiable Map<String, GameRule<?>> GAME_RULES = new Builder().build();
 
   private static Class<?> getType(GameRules rules, String ruleName) {
     if (rules.a(ruleName, GameRules.EnumGameRuleType.BOOLEAN_VALUE)) {
@@ -40,18 +33,14 @@ public class SpGameRules implements tc.oc.pgm.util.bukkit.GameRules.GameRuleRegi
   }
 
   private static class Builder {
-    private record BuiltData(
-        @Unmodifiable Map<String, String> defaults,
-        @Unmodifiable Map<String, GameRule<?>> rules) {}
-
     private final GameRules nmsRules = new GameRules();
-    private final Map<String, String> defaults = new HashMap<>();
     private final Map<String, GameRule<?>> rules = new HashMap<>();
 
-    private BuiltData build() {
+    private @Unmodifiable Map<String, GameRule<?>> build() {
       for (String gameRule : nmsRules.getGameRules()) {
-        defaults.put(gameRule, nmsRules.get(gameRule));
-        rules.put(gameRule, new SpKVGameRule<>(gameRule, getType(nmsRules, gameRule)));
+        rules.put(
+            gameRule,
+            new SpKVGameRule<>(gameRule, getType(nmsRules, gameRule), nmsRules.get(gameRule)));
       }
 
       registerRemapped(
@@ -75,7 +64,7 @@ public class SpGameRules implements tc.oc.pgm.util.bukkit.GameRules.GameRuleRegi
       registerModern("send_command_feedback", "sendCommandFeedback");
       registerModern("reduced_debug_info", "reducedDebugInfo");
 
-      return new BuiltData(Map.copyOf(defaults), Map.copyOf(rules));
+      return Map.copyOf(rules);
     }
 
     private void registerModern(String modernName, String oldName) {

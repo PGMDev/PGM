@@ -7,7 +7,6 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import tc.oc.pgm.util.Result;
 import tc.oc.pgm.util.bukkit.GameRule;
 
 @NullMarked
@@ -19,10 +18,12 @@ public class SpKVGameRule<T> implements GameRule<T> {
 
   protected final String ruleName;
   protected final Class<T> ruleType;
+  private final String defaultValue;
 
-  public SpKVGameRule(String ruleName, Class<T> ruleType) {
+  public SpKVGameRule(String ruleName, Class<T> ruleType, String defaultValue) {
     this.ruleName = ruleName;
     this.ruleType = ruleType;
+    this.defaultValue = defaultValue;
   }
 
   @Override
@@ -49,17 +50,12 @@ public class SpKVGameRule<T> implements GameRule<T> {
 
   @Override
   public void set(World world, @Nullable T value) {
-    setFromString(world, value != null ? value.toString() : null);
+    String stringifiedValue = value != null ? value.toString() : defaultValue;
+    world.setGameRuleValue(ruleName, stringifiedValue);
   }
 
   @Override
-  public void setFromString(World world, @Nullable String value) {
-    if (value == null) value = SpGameRules.DEFAULTS.get(ruleName);
-    world.setGameRuleValue(ruleName, value);
-  }
-
-  @Override
-  public Result<T, ?> tryParse(String value) {
+  public T tryParse(String value) {
     return parseStringValue(value, ruleType);
   }
 
@@ -73,27 +69,18 @@ public class SpKVGameRule<T> implements GameRule<T> {
     };
   }
 
-  protected static <T> Result<T, ?> parseStringValue(String value, Class<T> ruleType) {
-    try {
-      Object parsedValue;
-      if (ruleType == Boolean.class) {
-        parsedValue = Boolean.valueOf(value);
-      } else if (ruleType == Integer.class) {
-        parsedValue = Integer.valueOf(value);
-      } else if (ruleType == String.class) {
-        parsedValue = value;
-      } else {
-        return Result.err(new IllegalArgumentException(
-            "Don't know how to parse value for " + ruleType.getName()));
-      }
-
-      try {
-        return Result.ok(ruleType.cast(parsedValue));
-      } catch (ClassCastException e) {
-        return Result.err(e);
-      }
-    } catch (Throwable e) {
-      return Result.err(e);
+  protected static <T> T parseStringValue(String value, Class<T> ruleType) {
+    Object parsedValue;
+    if (ruleType == Boolean.class) {
+      parsedValue = Boolean.valueOf(value);
+    } else if (ruleType == Integer.class) {
+      parsedValue = Integer.valueOf(value);
+    } else if (ruleType == String.class) {
+      parsedValue = value;
+    } else {
+      throw new IllegalArgumentException("Don't know how to parse value for " + ruleType.getName());
     }
+
+    return ruleType.cast(parsedValue);
   }
 }

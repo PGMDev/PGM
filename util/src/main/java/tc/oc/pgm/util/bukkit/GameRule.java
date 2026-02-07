@@ -3,7 +3,6 @@ package tc.oc.pgm.util.bukkit;
 import org.bukkit.World;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import tc.oc.pgm.util.Result;
 
 @NullMarked
 public interface GameRule<T> {
@@ -34,20 +33,13 @@ public interface GameRule<T> {
   void set(World world, @Nullable T value);
 
   /**
-   * Sets the value of the game rule in the given world from a string representation
-   *
-   * @param world The world to set the game rule in
-   * @param value The string representation of the value to set, or null to reset to default
-   */
-  void setFromString(World world, @Nullable String value);
-
-  /**
    * Tries to parse the given string into a value through the implementation's parsing logic
    *
    * @param value The string value to parse
-   * @return A Result containing the parsed value or an error if parsing failed
+   * @return The parsed game rule value
+   * @throws Throwable if an error occurs during parsing.
    */
-  Result<T, ?> tryParse(String value);
+  T tryParse(String value) throws Throwable;
 
   /**
    * Checks if this game rule can be combined with another game rule

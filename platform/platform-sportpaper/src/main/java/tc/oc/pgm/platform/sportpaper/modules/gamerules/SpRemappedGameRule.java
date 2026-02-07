@@ -4,7 +4,6 @@ import java.util.function.Function;
 import org.bukkit.World;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import tc.oc.pgm.util.Result;
 import tc.oc.pgm.util.bukkit.GameRule;
 
 @NullMarked
@@ -45,25 +44,11 @@ public class SpRemappedGameRule<T, U> implements GameRule<T> {
 
   @Override
   public void set(World world, @Nullable T value) {
-    backingRule.set(world, set.apply(value));
+    backingRule.set(world, value != null ? set.apply(value) : null);
   }
 
   @Override
-  public void setFromString(World world, @Nullable String value) {
-    if (value == null) {
-      backingRule.setFromString(world, null);
-    } else {
-      Result<T, ?> parsed = tryParse(value);
-      try {
-        set(world, parsed.value());
-      } catch (Throwable e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  @Override
-  public Result<T, ?> tryParse(String value) {
+  public T tryParse(String value) {
     return SpKVGameRule.parseStringValue(value, ruleType);
   }
 

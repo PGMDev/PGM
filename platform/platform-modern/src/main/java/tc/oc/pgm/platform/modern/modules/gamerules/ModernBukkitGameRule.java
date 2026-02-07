@@ -7,7 +7,6 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftGameRule;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import tc.oc.pgm.util.Result;
 import tc.oc.pgm.util.bukkit.GameRule;
 
 @NullMarked
@@ -47,19 +46,7 @@ public class ModernBukkitGameRule<T> implements GameRule<T> {
   }
 
   @Override
-  public void setFromString(World world, @Nullable String value) {
-    if (value == null) set(world, null);
-    else {
-      try {
-        set(world, tryParse(value).value());
-      } catch (Throwable e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
-  @Override
-  public Result<T, ?> tryParse(String value) {
+  public T tryParse(String value) throws Throwable {
     var nms = ((CraftGameRule<T>) handle).getHandle();
     return nms.deserialize(value)
         .flatMap(val ->
@@ -69,7 +56,7 @@ public class ModernBukkitGameRule<T> implements GameRule<T> {
                 .encodeStart(NullOps.INSTANCE, val)
                 .map(ignored -> val)
                 .mapError(error -> "Invalid game rule value: " + error))
-        .mapOrElse(Result::ok, error -> Result.err(new Exception(error.message())));
+        .getOrThrow(Exception::new);
   }
 
   @Override

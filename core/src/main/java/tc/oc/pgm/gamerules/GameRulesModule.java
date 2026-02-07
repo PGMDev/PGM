@@ -15,7 +15,6 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.Result;
 import tc.oc.pgm.util.bukkit.GameRule;
 import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -78,12 +77,12 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
                 gameRuleElement);
           }
 
-          switch (rule.tryParse(value)) {
-            case Result.Ok<?, ?>(Object parsed) -> gameRules.put(rule, parsed);
-            case Result.Err<?, ?>(Throwable err) ->
-              throw new InvalidXMLException(
-                  "Failed to parse game rule value for " + rule.name() + ": " + err.getMessage(),
-                  gameRuleElement);
+          try {
+            gameRules.put(rule, rule.tryParse(value));
+          } catch (Throwable e) {
+            throw new InvalidXMLException(
+                "Failed to parse game rule value for " + rule.name() + ": " + e.getMessage(),
+                gameRuleElement);
           }
         }
       }
