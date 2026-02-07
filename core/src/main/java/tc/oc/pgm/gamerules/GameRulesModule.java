@@ -81,8 +81,7 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
             gameRules.put(rule, rule.tryParse(value));
           } catch (Throwable e) {
             throw new InvalidXMLException(
-                "Failed to parse game rule value for " + rule.name() + ": " + e.getMessage(),
-                gameRuleElement);
+                "Failed to parse game rule value for " + rule.name(), gameRuleElement, e);
           }
         }
       }
