@@ -1,5 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Entity;
@@ -9,6 +10,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
+@Getter
 public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
 
   private final EntityType entityType;
@@ -20,18 +22,6 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
     this.entityType = entity.getType();
     this.entityClass = entity.getClass();
     this.customName = entity.getCustomName();
-  }
-
-  public Class<? extends Entity> getEntityClass() {
-    return entityClass;
-  }
-
-  public EntityType getEntityType() {
-    return entityType;
-  }
-
-  public @Nullable String getCustomName() {
-    return customName;
   }
 
   @Override

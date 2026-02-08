@@ -10,6 +10,7 @@ import static tc.oc.pgm.util.text.TemporalComponent.clock;
 import static tc.oc.pgm.util.text.TemporalComponent.seconds;
 
 import java.time.Duration;
+import lombok.Getter;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -23,9 +24,16 @@ import tc.oc.pgm.events.CountdownEndEvent;
 import tc.oc.pgm.events.CountdownStartEvent;
 
 public abstract class MatchCountdown extends Countdown {
+  @Getter
   protected final Match match;
+
+  @Getter
   protected final BossBar bossBar;
-  protected Duration remaining, total;
+
+  @Getter
+  protected Duration remaining;
+
+  protected Duration total;
 
   public MatchCountdown(Match match, BossBar bossBar) {
     this.match = match;
@@ -38,14 +46,6 @@ public abstract class MatchCountdown extends Countdown {
 
   public MatchCountdown(Match match) {
     this(match, BossBar.Color.BLUE);
-  }
-
-  public Match getMatch() {
-    return this.match;
-  }
-
-  public BossBar getBossBar() {
-    return this.bossBar;
   }
 
   protected abstract Component formatText();
@@ -94,11 +94,10 @@ public abstract class MatchCountdown extends Countdown {
 
     if (showTitle()) {
       getMatch()
-          .showTitle(
-              title(
-                  text(remaining.getSeconds(), NamedTextColor.YELLOW),
-                  empty(),
-                  Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(15))));
+          .showTitle(title(
+              text(remaining.getSeconds(), NamedTextColor.YELLOW),
+              empty(),
+              Title.Times.times(Duration.ZERO, fromTicks(5), fromTicks(15))));
     }
 
     super.onTick(remaining, total);
@@ -162,9 +161,5 @@ public abstract class MatchCountdown extends Countdown {
 
   protected float bossBarProgress(Duration remaining, Duration total) {
     return total.isZero() ? 0f : Math.min(1f, (float) remaining.toMillis() / total.toMillis());
-  }
-
-  public Duration getRemaining() {
-    return remaining;
   }
 }

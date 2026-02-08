@@ -1,12 +1,22 @@
 package tc.oc.pgm.util.tablist;
 
+import lombok.Getter;
+
 public class TabViewDirtyTracker {
+  @Getter
   private boolean layout;
+
+  @Getter
   private boolean content;
+
+  @Getter
   private boolean header;
+
+  @Getter
   private boolean footer;
 
   // Should this view be prioritized?
+  @Getter
   private boolean priority;
 
   private TabManagerDirtyTracker parent;
@@ -27,28 +37,8 @@ public class TabViewDirtyTracker {
     return layout || content || header || footer;
   }
 
-  public boolean isPriority() {
-    return priority;
-  }
-
-  public boolean isLayout() {
-    return layout;
-  }
-
-  public boolean isContent() {
-    return content;
-  }
-
   public boolean isLayoutOrContent() {
     return layout || content;
-  }
-
-  public boolean isHeader() {
-    return header;
-  }
-
-  public boolean isFooter() {
-    return footer;
   }
 
   public boolean isHeaderOrFooter() {

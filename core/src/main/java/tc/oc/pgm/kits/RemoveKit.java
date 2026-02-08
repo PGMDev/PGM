@@ -1,18 +1,16 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
+import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 
+@Getter
 public class RemoveKit extends AbstractKit {
   private final Kit kit;
 
   public RemoveKit(Kit kit) {
     this.kit = kit;
-  }
-
-  public Kit getKit() {
-    return kit;
   }
 
   @Override

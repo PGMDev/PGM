@@ -7,6 +7,7 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.SlotPos;
 import java.util.List;
+import lombok.Getter;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
@@ -24,7 +25,9 @@ public class TeamStatsMenu extends PagedInventoryMenu {
   private static final int STARTING_ROW = 1;
   private static final int STARTING_COL = 0;
 
+  @Getter
   private final Competitor team;
+
   private final List<PlayerStatsMenuItem> members;
   private final ClickableItem teamItem;
 
@@ -45,10 +48,6 @@ public class TeamStatsMenu extends PagedInventoryMenu {
     this.team = team;
     this.members = members;
     this.teamItem = teamItem;
-  }
-
-  public Competitor getTeam() {
-    return team;
   }
 
   @Override

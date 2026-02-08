@@ -1,10 +1,12 @@
 package tc.oc.pgm.events;
 
+import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.countdowns.Countdown;
 
+@Getter
 public class CountdownStartEvent extends MatchEvent {
 
   private final Countdown countdown;
@@ -14,10 +16,6 @@ public class CountdownStartEvent extends MatchEvent {
   public CountdownStartEvent(Match match, Countdown countdown) {
     super(match);
     this.countdown = countdown;
-  }
-
-  public Countdown getCountdown() {
-    return countdown;
   }
 
   public static HandlerList getHandlerList() {

@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import lombok.Getter;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,7 @@ public class CountdownRunner extends BukkitRunnable {
   private @Nullable Instant end;
 
   // The remaining seconds that will be passed to onTick for the next cycle
+  @Getter
   private long secondsRemaining;
 
   private Future<?> task = null;
@@ -109,10 +111,6 @@ public class CountdownRunner extends BukkitRunnable {
 
   public Duration getTotalTime() {
     return Duration.between(this.start, this.end);
-  }
-
-  public long getSecondsRemaining() {
-    return this.secondsRemaining;
   }
 
   @Override

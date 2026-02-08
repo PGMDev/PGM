@@ -3,6 +3,7 @@ package tc.oc.pgm.tnt;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.Random;
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -33,15 +34,13 @@ import tc.oc.pgm.util.inventory.InventoryUtils;
 public class TNTMatchModule implements MatchModule, Listener {
 
   private final Match match;
+
+  @Getter
   private final TNTProperties properties;
 
   public TNTMatchModule(Match match, TNTProperties properties) {
     this.match = match;
     this.properties = properties;
-  }
-
-  public TNTProperties getProperties() {
-    return properties;
   }
 
   public int getFuseTicks() {

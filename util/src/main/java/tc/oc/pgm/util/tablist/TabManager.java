@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -43,7 +44,10 @@ import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
  */
 public abstract class TabManager implements Listener {
   protected final Logger logger;
+
+  @Getter
   protected final Plugin plugin;
+
   protected final DefaultMapAdapter<Player, TabView> enabledViews;
 
   protected final DefaultMapAdapter<Player, TabEntry> playerEntries;
@@ -69,10 +73,6 @@ public abstract class TabManager implements Listener {
 
   public TabManager(Plugin plugin) {
     this(plugin, null, null);
-  }
-
-  public Plugin getPlugin() {
-    return plugin;
   }
 
   public @Nullable TabView getViewOrNull(Player viewer) {

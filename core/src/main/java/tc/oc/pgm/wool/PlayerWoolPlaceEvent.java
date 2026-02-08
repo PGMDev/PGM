@@ -1,10 +1,12 @@
 package tc.oc.pgm.wool;
 
+import lombok.Getter;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.event.MatchEvent;
 import tc.oc.pgm.api.player.ParticipantState;
 
+@Getter
 public class PlayerWoolPlaceEvent extends MatchEvent {
   private static final HandlerList handlers = new HandlerList();
 
@@ -17,18 +19,6 @@ public class PlayerWoolPlaceEvent extends MatchEvent {
     this.player = player;
     this.wool = wool;
     this.block = block;
-  }
-
-  public ParticipantState getPlayer() {
-    return this.player;
-  }
-
-  public MonumentWool getWool() {
-    return this.wool;
-  }
-
-  public BlockState getBlock() {
-    return this.block;
   }
 
   @Override

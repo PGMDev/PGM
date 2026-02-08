@@ -1,26 +1,21 @@
 package tc.oc.pgm.spawns.events;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
+@Getter
+@Setter
 public class PlayerSpawnEvent extends MatchPlayerEvent {
 
+  /** The location where this player will spawn at. */
   protected Location location;
 
   public PlayerSpawnEvent(MatchPlayer player, Location location) {
     super(player);
-    this.location = location;
-  }
-
-  /** Gets the location this player will spawn at. */
-  public Location getLocation() {
-    return this.location;
-  }
-
-  /** Sets the location where this player will spawn at. */
-  public void setLocation(Location location) {
     this.location = location;
   }
 

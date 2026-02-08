@@ -1,5 +1,6 @@
 package tc.oc.pgm.shops.menu;
 
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -9,10 +10,15 @@ import tc.oc.pgm.util.material.Materials;
 
 public class Payment {
 
+  @Getter
   private final ChatColor color;
+
   private final Material currency;
+
+  @Getter
   private final int price;
 
+  @Getter
   private final @Nullable ItemStack item;
 
   public Payment(Material currency, int price, ChatColor color, @Nullable ItemStack item) {
@@ -24,18 +30,6 @@ public class Payment {
 
   public Material getCurrency() {
     return item != null ? item.getType() : currency;
-  }
-
-  public int getPrice() {
-    return price;
-  }
-
-  public ChatColor getColor() {
-    return color;
-  }
-
-  public @Nullable ItemStack getItem() {
-    return item;
   }
 
   public boolean hasPayment(PlayerInventory inventory) {

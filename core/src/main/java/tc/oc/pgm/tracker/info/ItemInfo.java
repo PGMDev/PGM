@@ -1,5 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
@@ -10,6 +11,7 @@ import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
+@Getter
 public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
 
   private static final ItemStack AIR_STACK = new ItemStack(Material.AIR);
@@ -23,10 +25,6 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
 
   public ItemInfo(@Nullable ItemStack item) {
     this(item, null);
-  }
-
-  public ItemStack getItem() {
-    return item;
   }
 
   @Override

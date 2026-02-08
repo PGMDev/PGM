@@ -3,6 +3,8 @@ package tc.oc.pgm.api.event;
 import static net.kyori.adventure.text.Component.text;
 
 import java.util.Collection;
+import lombok.Getter;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.channels.Channel;
@@ -11,11 +13,23 @@ import tc.oc.pgm.util.event.PreemptiveEvent;
 
 public class ChannelMessageEvent<T> extends PreemptiveEvent {
 
+  @Getter
   private final Channel<T> channel;
+
+  @Getter
   private final MatchPlayer sender;
+
+  @Getter
   private final T target;
+
+  @Getter
+  @Setter
   private Collection<MatchPlayer> viewers;
+
+  @Getter
   private String message;
+
+  @Setter
   private Component component;
 
   public ChannelMessageEvent(
@@ -31,30 +45,6 @@ public class ChannelMessageEvent<T> extends PreemptiveEvent {
     this.message = message;
   }
 
-  public Channel<T> getChannel() {
-    return channel;
-  }
-
-  public MatchPlayer getSender() {
-    return sender;
-  }
-
-  public T getTarget() {
-    return target;
-  }
-
-  public Collection<MatchPlayer> getViewers() {
-    return viewers;
-  }
-
-  public void setViewers(Collection<MatchPlayer> viewers) {
-    this.viewers = viewers;
-  }
-
-  public String getMessage() {
-    return message;
-  }
-
   public void setMessage(String message) {
     this.message = message;
     this.component = null;
@@ -62,10 +52,6 @@ public class ChannelMessageEvent<T> extends PreemptiveEvent {
 
   public Component getComponent() {
     return (component != null) ? component : text(message);
-  }
-
-  public void setComponent(Component component) {
-    this.component = component;
   }
 
   private static final HandlerList handlers = new HandlerList();

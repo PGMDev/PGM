@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -62,7 +63,9 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   private static final long PREDICTED_EXTRA_TICKS = 10 * 20;
 
+  @Getter
   private final Match match;
+
   private final SpawnModule module;
   private final Map<MatchPlayer, State> states = new HashMap<>();
   private final ListMultimap<MatchPlayer, State> transitions = ArrayListMultimap.create();
@@ -79,10 +82,6 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   public SpawnMatchModule(Match match, SpawnModule module) {
     this.match = match;
     this.module = module;
-  }
-
-  public Match getMatch() {
-    return match;
   }
 
   public RespawnOptions getRespawnOptions(Query query) {

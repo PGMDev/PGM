@@ -1,5 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -9,6 +10,7 @@ import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
+@Getter
 public class BlockInfo extends OwnerInfoBase implements PhysicalInfo, DamageInfo {
 
   private final MaterialData material;
@@ -28,10 +30,6 @@ public class BlockInfo extends OwnerInfoBase implements PhysicalInfo, DamageInfo
 
   public BlockInfo(BlockState block) {
     this(block, null);
-  }
-
-  public MaterialData getMaterial() {
-    return material;
   }
 
   @Override

@@ -3,6 +3,7 @@ package tc.oc.pgm.regions;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
 import java.util.function.Supplier;
+import lombok.Getter;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
@@ -11,7 +12,9 @@ import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.util.block.BlockVectorSet;
 
 public class Union implements RegionDefinition.Static {
+  @Getter
   private final Region[] regions;
+
   private Supplier<Iterator<BlockVector>> iteratorFactory;
 
   public Union(Region... regions) {
@@ -24,10 +27,6 @@ public class Union implements RegionDefinition.Static {
       case 1 -> regions[0];
       default -> new Union(regions);
     };
-  }
-
-  public Region[] getRegions() {
-    return regions;
   }
 
   @Override

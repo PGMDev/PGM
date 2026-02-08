@@ -4,6 +4,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -20,15 +21,12 @@ import tc.oc.pgm.join.JoinRequest;
  *
  * <p>A player's initial party can be changed from {@link MatchPlayerAddEvent}.
  */
+@Getter
 public class PlayerJoinMatchEvent extends PlayerJoinPartyEvent {
 
   private final List<Component> extraLines = Lists.newArrayList();
 
   public PlayerJoinMatchEvent(MatchPlayer player, Party newParty, JoinRequest request) {
     super(player, null, assertNotNull(newParty), request);
-  }
-
-  public List<Component> getExtraLines() {
-    return extraLines;
   }
 }

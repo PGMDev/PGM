@@ -1,5 +1,6 @@
 package tc.oc.pgm.structure;
 
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.feature.Feature;
@@ -10,8 +11,12 @@ import tc.oc.pgm.snapshot.WorldSnapshot;
 
 public class Structure implements Feature<StructureDefinition> {
 
+  @Getter
   private final StructureDefinition definition;
+
   private final WorldSnapshot snapshot;
+
+  @Getter
   private final Region region;
 
   public Structure(StructureDefinition definition, Match match, WorldSnapshot snapshot) {
@@ -33,15 +38,6 @@ public class Structure implements Feature<StructureDefinition> {
   @Override
   public String getId() {
     return getDefinition().getId();
-  }
-
-  @Override
-  public StructureDefinition getDefinition() {
-    return definition;
-  }
-
-  public Region getRegion() {
-    return region;
   }
 
   public void place(BlockVector offset, boolean update) {

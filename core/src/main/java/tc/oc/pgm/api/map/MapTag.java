@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,9 +20,19 @@ public final class MapTag implements Comparable<MapTag> {
   private static final Pattern PATTERN = Pattern.compile("^[a-z0-9_-]+$");
   private static final String SYMBOL = "#";
 
+  /** A short, lowercase id without the "#". */
+  @Getter
   private final String id;
+  /** Get a full name for the tag. */
+  @Getter
   private final Component name;
+
   private final @Nullable Gamemode gamemode;
+  /**
+   * Whether this tag is an auxiliary gamemode, that works as a 2nd level gamemode. Eg: blitz or
+   * rage are auxiliary due to wool "and blitz", or deathmatch "and rage".
+   */
+  @Getter
   private final boolean auxiliary;
 
   public MapTag(String id, String name) {
@@ -47,24 +58,6 @@ public final class MapTag implements Comparable<MapTag> {
   }
 
   /**
-   * Get a short id for the tag.
-   *
-   * @return A short, lowercase id without the "#".
-   */
-  public String getId() {
-    return this.id;
-  }
-
-  /**
-   * Get a full name for the tag.
-   *
-   * @return A full name.
-   */
-  public Component getName() {
-    return this.name;
-  }
-
-  /**
    * Get whether this tag represents a "gamemode."
    *
    * @return If the tag is for a gamemode.
@@ -76,16 +69,6 @@ public final class MapTag implements Comparable<MapTag> {
   /** @return the gamemode if this tag represents one, null otherwise. */
   public @Nullable Gamemode getGamemode() {
     return this.gamemode;
-  }
-
-  /**
-   * Get whether this tag is an auxiliary gamemode, that works as a 2nd level gamemode. Eg: blitz or
-   * rage are auxiliary due to wool "and blitz", or deathmatch "and rage".
-   *
-   * @return If an auxiliary feature.
-   */
-  public boolean isAuxiliary() {
-    return this.auxiliary;
   }
 
   @Override

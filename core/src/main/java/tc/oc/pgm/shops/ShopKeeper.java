@@ -3,6 +3,7 @@ package tc.oc.pgm.shops;
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -20,7 +21,11 @@ public class ShopKeeper {
 
   private final String name;
   private final PointProvider location;
+
+  @Getter
   private final Class<? extends Entity> type;
+
+  @Getter
   private final Shop shop;
 
   public ShopKeeper(
@@ -29,14 +34,6 @@ public class ShopKeeper {
     this.location = location;
     this.type = type;
     this.shop = shop;
-  }
-
-  public Shop getShop() {
-    return shop;
-  }
-
-  public Class<? extends Entity> getType() {
-    return type;
   }
 
   public String getName() {

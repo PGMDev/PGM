@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import lombok.Getter;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
@@ -80,14 +81,12 @@ public abstract class KitParser {
       Set.of("item", "book", "head", "firework", "banner");
 
   protected final MapFactory factory;
+
+  @Getter
   protected final Set<Kit> kits = new HashSet<>();
 
   public KitParser(MapFactory factory) {
     this.factory = factory;
-  }
-
-  public Set<Kit> getKits() {
-    return kits;
   }
 
   public abstract Kit parse(Element el) throws InvalidXMLException;

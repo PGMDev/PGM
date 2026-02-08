@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -311,7 +312,9 @@ public class SidebarMatchModule implements MatchModule, Listener {
     private final Goal<?> goal;
     private final long intervalTicks;
 
+    @Getter
     private boolean dark;
+
     private Long ticksRemaining;
 
     private BlinkTask(Goal<?> goal, float rateHz, @Nullable Duration duration) {
@@ -332,10 +335,6 @@ public class SidebarMatchModule implements MatchModule, Listener {
       this.task.cancel(true);
       SidebarMatchModule.this.blinkingGoals.remove(this.goal);
       renderSidebarDebounce();
-    }
-
-    public boolean isDark() {
-      return this.dark;
     }
 
     @Override

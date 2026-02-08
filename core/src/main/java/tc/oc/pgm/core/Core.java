@@ -9,6 +9,7 @@ import static net.kyori.adventure.text.format.Style.style;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.Set;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
@@ -47,9 +48,15 @@ public class Core extends TouchableGoal<CoreFactory>
   private static final MaterialMatcher LAVA_BLOCKS =
       MaterialMatcher.of(Material.LAVA, Materials.STILL_LAVA);
 
+  @Getter
   protected final FiniteBlockRegion casingRegion;
+
+  @Getter
   protected final FiniteBlockRegion lavaRegion;
+
+  @Getter
   protected final Region leakRegion;
+
   protected final int leakRequired;
   protected final boolean isShared;
 
@@ -139,18 +146,6 @@ public class Core extends TouchableGoal<CoreFactory>
 
   public boolean isCoreMaterial(MaterialData material) {
     return this.material.matches(material);
-  }
-
-  public FiniteBlockRegion getCasingRegion() {
-    return this.casingRegion;
-  }
-
-  public FiniteBlockRegion getLavaRegion() {
-    return this.lavaRegion;
-  }
-
-  public Region getLeakRegion() {
-    return this.leakRegion;
   }
 
   public boolean updateLeak(int yLevel) {

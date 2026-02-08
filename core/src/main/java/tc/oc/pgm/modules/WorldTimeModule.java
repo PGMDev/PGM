@@ -1,6 +1,7 @@
 package tc.oc.pgm.modules;
 
 import java.util.logging.Logger;
+import lombok.Getter;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
@@ -12,27 +13,16 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 
+@Getter
 public class WorldTimeModule implements MapModule<WorldTimeModule>, MatchModule {
-  private final boolean lock;
+  private final boolean timeLocked;
   private final Long time;
-  private final boolean random;
+  private final boolean timeRandom;
 
-  public WorldTimeModule(boolean lock, Long time, boolean random) {
-    this.lock = lock;
+  public WorldTimeModule(boolean timeLocked, Long time, boolean timeRandom) {
+    this.timeLocked = timeLocked;
     this.time = time;
-    this.random = random;
-  }
-
-  public boolean isTimeLocked() {
-    return this.lock;
-  }
-
-  public Long getTime() {
-    return this.time;
-  }
-
-  public boolean isTimeRandom() {
-    return this.random;
+    this.timeRandom = timeRandom;
   }
 
   public static class Factory implements MapModuleFactory<WorldTimeModule> {

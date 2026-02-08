@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.inventory.Slot;
@@ -14,8 +15,14 @@ import tc.oc.pgm.util.inventory.Slot;
  * containers returned by the various getter methods. Note that {@link ArmorKit}s fire a generic
  * {@link ApplyKitEvent}, not this one.
  */
+@Getter
 public class ApplyItemKitEvent extends ApplyKitEvent {
+  /**
+   * A map of the items in the kit by slot number. This map, and the contained ItemStacks, can be
+   * modified to alter what is applied, without altering the original kit.
+   */
   private final Map<Slot, ItemStack> slotItems;
+
   private final List<ItemStack> freeItems;
   private final List<ItemStack> displacedItems;
 
@@ -33,22 +40,6 @@ public class ApplyItemKitEvent extends ApplyKitEvent {
       this.freeItems.add(stack.clone());
     }
     this.displacedItems = displacedItems;
-  }
-
-  /**
-   * Return a map of the items in the kit by slot number. This map, and the contained ItemStacks,
-   * can be modified to alter what is applied, without altering the original kit.
-   */
-  public Map<Slot, ItemStack> getSlotItems() {
-    return slotItems;
-  }
-
-  public List<ItemStack> getFreeItems() {
-    return freeItems;
-  }
-
-  public List<ItemStack> getDisplacedItems() {
-    return displacedItems;
   }
 
   /**

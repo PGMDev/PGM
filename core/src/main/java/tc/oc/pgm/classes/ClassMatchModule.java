@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import lombok.Getter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,9 +26,18 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 @ListenerScope(MatchScope.RUNNING)
 public class ClassMatchModule implements MatchModule, Listener {
   private final Match match;
+  /**
+   * Represents the class family
+   *
+   * <p>Family is used for grouping classes into a set of similar classes.
+   */
+  @Getter
   private final String family;
+
   private final Map<String, PlayerClass> classes;
   private final Set<PlayerClass> classesByName;
+  /** The default class that players will have if none selected. */
+  @Getter
   private final PlayerClass defaultClass;
 
   private final Map<UUID, PlayerClass> selectedClasses = Maps.newHashMap();
@@ -48,26 +58,6 @@ public class ClassMatchModule implements MatchModule, Listener {
   public void unload() {
     selectedClasses.clear();
     lastPlayedClass.clear();
-  }
-
-  /**
-   * Gets the class family.
-   *
-   * <p>Family is used for grouping classes into a set of similar classes.
-   *
-   * @return class family
-   */
-  public String getFamily() {
-    return this.family;
-  }
-
-  /**
-   * Gets the default class that players will have if none selected.
-   *
-   * @return default class
-   */
-  public PlayerClass getDefaultClass() {
-    return this.defaultClass;
   }
 
   /**

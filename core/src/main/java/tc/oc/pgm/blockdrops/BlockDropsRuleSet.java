@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Getter;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -32,6 +33,7 @@ import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
+@Getter
 public class BlockDropsRuleSet {
   private final ImmutableList<BlockDropsRule> rules;
 
@@ -41,10 +43,6 @@ public class BlockDropsRuleSet {
 
   public boolean isEmpty() {
     return this.rules.isEmpty();
-  }
-
-  public ImmutableList<BlockDropsRule> getRules() {
-    return this.rules;
   }
 
   /** Return the subset of rules that may act on the given region */

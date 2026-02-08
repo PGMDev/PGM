@@ -1,11 +1,13 @@
 package tc.oc.pgm.flag.event;
 
+import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.events.GoalEvent;
 
 /** Fired AFTER any transition of the {@link State} of a {@link Flag} */
+@Getter
 public class FlagStateChangeEvent extends GoalEvent {
 
   protected final Flag flag;
@@ -17,20 +19,6 @@ public class FlagStateChangeEvent extends GoalEvent {
     this.oldState = oldState;
     this.newState = newState;
   }
-
-  public Flag getFlag() {
-    return flag;
-  }
-
-  public State getOldState() {
-    return oldState;
-  }
-
-  public State getNewState() {
-    return newState;
-  }
-
-  // HandlerList crap
 
   private static final HandlerList handlers = new HandlerList();
 

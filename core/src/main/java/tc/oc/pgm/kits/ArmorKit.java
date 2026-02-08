@@ -11,15 +11,7 @@ import tc.oc.pgm.util.inventory.ArmorType;
 import tc.oc.pgm.util.inventory.Slot;
 
 public class ArmorKit extends AbstractKit {
-  public static class ArmorItem {
-    public final ItemStack stack;
-    public final boolean locked;
-
-    public ArmorItem(ItemStack stack, boolean locked) {
-      this.stack = stack;
-      this.locked = locked;
-    }
-  }
+  public record ArmorItem(ItemStack stack, boolean locked) {}
 
   private final Map<Slot.Armor, ArmorItem> armor;
 

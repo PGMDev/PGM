@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.text.TextParser.parseDuration;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
@@ -15,13 +16,25 @@ import tc.oc.pgm.rotation.MapPoolManager;
 public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   protected final MapPoolManager manager;
 
+  @Getter
   protected final MapPoolType type;
+
+  @Getter
   protected final String name;
+
+  @Getter
   protected final boolean enabled;
+
+  @Getter
   protected final List<MapInfo> maps;
+
+  @Getter
   protected final int players;
+
+  @Getter
   protected final Duration cycleTime;
 
+  @Getter
   protected final boolean dynamic;
 
   MapPool(
@@ -60,37 +73,8 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     this.maps = Collections.unmodifiableList(maps);
   }
 
-  public MapPoolType getType() {
-    return type;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  public boolean isDynamic() {
-    return dynamic;
-  }
-
-  public List<MapInfo> getMaps() {
-    return maps;
-  }
-
-  public int getPlayers() {
-    return players;
-  }
-
   protected MapInfo getRandom() {
     return maps.get((int) (Math.random() * maps.size()));
-  }
-
-  @Override
-  public Duration getCycleTime() {
-    return cycleTime;
   }
 
   /**

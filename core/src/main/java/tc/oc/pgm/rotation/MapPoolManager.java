@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -49,7 +50,10 @@ public class MapPoolManager implements MapOrder {
   private FileConfiguration mapPoolFileConfig;
 
   private final Map<MapPool, MapActivity> mapPools = Maps.newHashMap();
+
+  @Getter
   private MapPool activeMapPool;
+
   private MapOrder fallback; // Fallback map order in case no pool exists
 
   /* If a time limit is added via /setpool <name> -t [time], then after this duration the map pool will revert automatically */
@@ -60,10 +64,12 @@ public class MapPoolManager implements MapOrder {
   private int matchCount = 0; // # of completed matches since start of pool
 
   /** When a {@link MapInfo} is manually set next, it overrides the rotation order * */
+  @Getter
   private MapInfo overriderMap;
 
   /** Options related to voting pools, allows for custom voting @see {@link VotingPool} * */
-  private final VotePoolOptions options;
+  @Getter
+  private final VotePoolOptions voteOptions;
 
   private final Datastore database;
 
@@ -71,7 +77,7 @@ public class MapPoolManager implements MapOrder {
     this.logger = logger;
     this.mapPoolsFile = mapPoolsFile;
     this.database = database;
-    this.options = new VotePoolOptions();
+    this.voteOptions = new VotePoolOptions();
 
     if (!mapPoolsFile.exists()) {
       try {
@@ -149,10 +155,6 @@ public class MapPoolManager implements MapOrder {
     });
   }
 
-  public MapPool getActiveMapPool() {
-    return activeMapPool;
-  }
-
   public List<MapPool> getMapPools() {
     return mapPools.keySet().stream().sorted().collect(Collectors.toList());
   }
@@ -217,14 +219,6 @@ public class MapPoolManager implements MapOrder {
         .filter(rot -> rot.getName().equalsIgnoreCase(name))
         .findFirst()
         .orElse(null);
-  }
-
-  public MapInfo getOverriderMap() {
-    return overriderMap;
-  }
-
-  public VotePoolOptions getVoteOptions() {
-    return options;
   }
 
   public MapOrder getFallback() {

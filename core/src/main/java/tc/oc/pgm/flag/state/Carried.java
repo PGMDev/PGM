@@ -13,6 +13,7 @@ import java.util.Deque;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -56,7 +57,9 @@ import tc.oc.pgm.util.named.NameStyle;
 /** State of a flag when a player has picked it up and is wearing the banner on their head. */
 public class Carried extends Spawned implements Missing {
 
+  @Getter
   protected final MatchPlayer carrier;
+
   protected ItemStack helmetItem;
   protected @Nullable NetDefinition deniedByNet;
   protected @Nullable Flag deniedByFlag;
@@ -292,10 +295,6 @@ public class Carried extends Spawned implements Missing {
 
   private MatchPlayer carrier() {
     return pickingUp != null ? this.pickingUp : carrier;
-  }
-
-  public MatchPlayer getCarrier() {
-    return this.carrier;
   }
 
   protected boolean isCarrier(MatchPlayer player) {

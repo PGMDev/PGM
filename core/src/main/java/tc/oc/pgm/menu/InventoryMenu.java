@@ -7,6 +7,7 @@ import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -18,6 +19,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.inventory.ItemBuilder;
 
 /** A generic inventory menu * */
+@Getter
 public abstract class InventoryMenu implements InventoryProvider {
 
   private final SmartInventory inventory;
@@ -63,14 +65,6 @@ public abstract class InventoryMenu implements InventoryProvider {
 
   public Player getBukkit() {
     return viewer.getBukkit();
-  }
-
-  public MatchPlayer getViewer() {
-    return viewer;
-  }
-
-  public SmartInventory getInventory() {
-    return inventory;
   }
 
   public int lastRow() {

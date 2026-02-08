@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -34,7 +35,9 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
   public static final TextColor COLOR_TOUCHED = NamedTextColor.YELLOW;
   public static final Component SYMBOL_TOUCHED = text("\u2733"); // ✳
 
+  @Getter
   protected boolean touched;
+
   protected final Set<Competitor> touchingCompetitors = new HashSet<>();
   protected final Set<ParticipantState> touchingPlayers = new HashSet<>();
   protected final Set<ParticipantState> recentTouchingPlayers = new HashSet<>();
@@ -74,10 +77,6 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     return shouldShowTouched(competitor, viewer)
         ? SYMBOL_TOUCHED
         : super.renderSidebarStatusText(competitor, viewer);
-  }
-
-  public boolean isTouched() {
-    return touched;
   }
 
   /** Gets whether or not the specified team has touched the goal since the last reset. */

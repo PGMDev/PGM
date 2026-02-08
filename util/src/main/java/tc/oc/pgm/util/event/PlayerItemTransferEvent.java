@@ -1,12 +1,13 @@
 package tc.oc.pgm.util.event;
 
+import lombok.Getter;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An event when an {@link ItemStack} moves in or out of an {@link PlayerInventory}.
@@ -15,7 +16,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public class PlayerItemTransferEvent extends ItemTransferEvent {
 
+  /** the {@link Player} that transferred the item. */
+  @Getter
   private final Player player;
+
   private final @Nullable ItemStack cursor;
 
   public PlayerItemTransferEvent(
@@ -31,15 +35,6 @@ public class PlayerItemTransferEvent extends ItemTransferEvent {
     super(cause, type, fromInventory, toInventory, itemStack, itemEntity, quantity);
     this.player = player;
     this.cursor = cursor;
-  }
-
-  /**
-   * Gets the {@link Player} that transferred the item.
-   *
-   * @return a player.
-   */
-  public Player getPlayer() {
-    return player;
   }
 
   @Override

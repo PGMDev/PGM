@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.event.entity;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
 import org.bukkit.event.Cancellable;
@@ -10,7 +12,12 @@ public class ExplosionPrimeEvent extends EntityEvent implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
 
   private boolean cancel;
+
+  @Getter
+  @Setter
   private float radius;
+
+  @Setter
   private boolean fire;
 
   public ExplosionPrimeEvent(Entity what, float radius, boolean fire) {
@@ -32,20 +39,8 @@ public class ExplosionPrimeEvent extends EntityEvent implements Cancellable {
     this.cancel = cancel;
   }
 
-  public float getRadius() {
-    return this.radius;
-  }
-
-  public void setRadius(float radius) {
-    this.radius = radius;
-  }
-
   public boolean getFire() {
     return this.fire;
-  }
-
-  public void setFire(boolean fire) {
-    this.fire = fire;
   }
 
   public HandlerList getHandlers() {

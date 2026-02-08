@@ -5,6 +5,7 @@ import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
@@ -37,15 +38,13 @@ import tc.oc.pgm.util.material.Materials;
 public class CoreMatchModule implements MatchModule, Listener {
 
   protected final Match match;
+
+  @Getter
   protected final List<Core> cores;
 
   public CoreMatchModule(Match match, List<Core> cores) {
     this.match = match;
     this.cores = cores;
-  }
-
-  public List<Core> getCores() {
-    return this.cores;
   }
 
   @Override

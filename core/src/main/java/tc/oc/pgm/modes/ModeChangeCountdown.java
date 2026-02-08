@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.util.Set;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -17,6 +18,8 @@ import tc.oc.pgm.util.TimeUtils;
 public class ModeChangeCountdown extends MatchCountdown implements Comparable<ModeChangeCountdown> {
 
   private final CountdownContext context;
+
+  @Getter
   private final Mode mode;
 
   public ModeChangeCountdown(Match match, ObjectiveModesMatchModule parent, Mode mode) {
@@ -24,10 +27,6 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
 
     this.context = parent.getCountdown();
     this.mode = mode;
-  }
-
-  public Mode getMode() {
-    return this.mode;
   }
 
   @Override

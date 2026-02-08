@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import lombok.Getter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -73,7 +74,10 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickable, Listener {
 
   private final Match match;
+
+  @Getter
   private final ContextStore<? super Filter> filterContext;
+
   private final Set<Class<? extends Event>> listeningFor = new HashSet<>();
 
   private final DummyListener dummyListener = new DummyListener();
@@ -102,10 +106,6 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
   private static class ListenerSet {
     final Set<FilterListener<?>> rise = new HashSet<>();
     final Set<FilterListener<?>> fall = new HashSet<>();
-  }
-
-  public ContextStore<? super Filter> getFilterContext() {
-    return filterContext;
   }
 
   @EventHandler(priority = EventPriority.LOW)

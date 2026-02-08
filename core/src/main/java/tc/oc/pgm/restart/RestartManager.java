@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 
@@ -11,8 +12,13 @@ public class RestartManager {
 
   private static final Set<RequestRestartEvent.Deferral> deferrals = new HashSet<>();
 
+  @Getter
   private static Instant queuedAt;
+
+  @Getter
   private static String reason;
+
+  @Getter
   private static Duration countdown;
 
   /** Queues a restart to be initiated at next available opportunity. */
@@ -38,18 +44,6 @@ public class RestartManager {
       RestartManager.reason = null;
       RestartManager.countdown = null;
     }
-  }
-
-  public static @Nullable Instant getQueuedAt() {
-    return queuedAt;
-  }
-
-  public static @Nullable String getReason() {
-    return reason;
-  }
-
-  public static @Nullable Duration getCountdown() {
-    return countdown;
   }
 
   public static boolean isQueued() {

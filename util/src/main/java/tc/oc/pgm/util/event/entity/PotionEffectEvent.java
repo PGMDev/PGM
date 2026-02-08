@@ -1,11 +1,13 @@
 package tc.oc.pgm.util.event.entity;
 
+import lombok.Getter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityEvent;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.util.event.SportPaper;
 
+@Getter
 @SportPaper
 public abstract class PotionEffectEvent extends EntityEvent {
 
@@ -19,9 +21,5 @@ public abstract class PotionEffectEvent extends EntityEvent {
   @Override
   public LivingEntity getEntity() {
     return (LivingEntity) super.getEntity();
-  }
-
-  public PotionEffect getEffect() {
-    return effect;
   }
 }

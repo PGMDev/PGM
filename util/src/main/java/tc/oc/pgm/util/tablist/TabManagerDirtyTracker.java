@@ -1,10 +1,16 @@
 package tc.oc.pgm.util.tablist;
 
+import lombok.Getter;
+
 public class TabManagerDirtyTracker {
+  @Getter
   private boolean layoutOrContent;
+
+  @Getter
   private boolean headerOrFooter;
 
   // Is any child view prioritized?
+  @Getter
   private boolean priority;
 
   private final Runnable callback;
@@ -26,20 +32,8 @@ public class TabManagerDirtyTracker {
     }
   }
 
-  public boolean isLayoutOrContent() {
-    return layoutOrContent;
-  }
-
-  public boolean isHeaderOrFooter() {
-    return headerOrFooter;
-  }
-
   public boolean isDirty() {
     return layoutOrContent || headerOrFooter;
-  }
-
-  public boolean isPriority() {
-    return priority;
   }
 
   public void validateHeaderAndFooter() {

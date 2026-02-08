@@ -2,6 +2,8 @@ package tc.oc.pgm.loot;
 
 import java.time.Duration;
 import java.util.Objects;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -11,12 +13,23 @@ import tc.oc.pgm.util.compose.Composition;
 @FeatureInfo(name = "fill")
 public class FillerDefinition implements FeatureDefinition {
 
+  /** Items to fill with */
+  @Getter
   private final Composition<ItemStack> loot;
+  /** Blocks/entities that are fillable */
+  @Getter
   private final Filter filter;
+  /** Refill all blocks/entities when this filter goes high. */
+  @Getter
   private final Filter refillTrigger; // Dynamic
 
+  /** Refill an individual block/entity this much time after it was last filled */
+  @Getter
   private final Duration refillInterval;
 
+  /** Clear contents before refilling */
+  @Accessors(fluent = true)
+  @Getter
   private final boolean clearBeforeRefill;
 
   public FillerDefinition(
@@ -32,29 +45,9 @@ public class FillerDefinition implements FeatureDefinition {
     this.clearBeforeRefill = clearBeforeRefill;
   }
 
-  /** Items to fill with */
-  public Composition<ItemStack> getLoot() {
-    return this.loot;
-  }
-
-  /** Blocks/entities that are fillable */
-  public Filter getFilter() {
-    return this.filter;
-  }
-
-  /** Refill all blocks/entities when this filter goes high. */
-  public Filter getRefillTrigger() {
-    return this.refillTrigger;
-  }
-
-  /** Refill an individual block/entity this much time after it was last filled */
-  public Duration getRefillInterval() {
-    return this.refillInterval;
-  }
-
-  /** Clear contents before refilling */
+  @Deprecated
   public boolean cleanBeforeRefill() {
-    return this.clearBeforeRefill;
+    return clearBeforeRefill();
   }
 
   @Override

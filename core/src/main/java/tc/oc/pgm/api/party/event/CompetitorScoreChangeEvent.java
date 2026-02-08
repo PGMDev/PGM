@@ -1,5 +1,6 @@
 package tc.oc.pgm.api.party.event;
 
+import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.score.ScoreCause;
@@ -9,10 +10,14 @@ import tc.oc.pgm.score.ScoreCause;
  *
  * @see tc.oc.pgm.score.ScoreMatchModule
  */
+@Getter
 public class CompetitorScoreChangeEvent extends PartyEvent {
 
+  /** The old score of the {@link Competitor}. */
   private final double oldScore;
+  /** The new, and current, score of the {@link Competitor}. */
   private final double newScore;
+  /** The {@link ScoreCause} of the change in score. */
   private final ScoreCause cause;
 
   public CompetitorScoreChangeEvent(
@@ -30,33 +35,6 @@ public class CompetitorScoreChangeEvent extends PartyEvent {
    */
   public final Competitor getCompetitor() {
     return (Competitor) super.getParty();
-  }
-
-  /**
-   * Get the old score of the {@link Competitor}.
-   *
-   * @return The old score.
-   */
-  public double getOldScore() {
-    return oldScore;
-  }
-
-  /**
-   * Get the new, and current, score of the {@link Competitor}.
-   *
-   * @return The new score.
-   */
-  public double getNewScore() {
-    return this.newScore;
-  }
-
-  /**
-   * Get the {@link ScoreCause} of the change in score
-   *
-   * @return The cause of the score change.
-   */
-  public ScoreCause getCause() {
-    return cause;
   }
 
   private static final HandlerList handlers = new HandlerList();

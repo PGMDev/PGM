@@ -2,6 +2,8 @@ package tc.oc.pgm.modes;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.match.Match;
@@ -13,9 +15,16 @@ import tc.oc.pgm.goals.ModeChangeGoal;
 
 public class ObjectiveModeChangeEvent extends MatchEvent {
 
+  @Getter
   private final Mode mode;
+
+  @Getter
   private String name;
+
+  @Getter
+  @Setter
   private boolean visible;
+
   private static final HandlerList handlers = new HandlerList();
 
   public ObjectiveModeChangeEvent(Match match, final Mode mode) {
@@ -48,24 +57,8 @@ public class ObjectiveModeChangeEvent extends MatchEvent {
     return lastDestroyable;
   }
 
-  public boolean isVisible() {
-    return this.visible;
-  }
-
-  public final Mode getMode() {
-    return this.mode;
-  }
-
-  public void setVisible(boolean visible) {
-    this.visible = visible;
-  }
-
   public void setName(@NotNull String name) {
     this.name = assertNotNull(name, "name");
-  }
-
-  public String getName() {
-    return this.name;
   }
 
   @Override

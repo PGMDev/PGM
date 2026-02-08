@@ -3,6 +3,7 @@ package tc.oc.pgm.wool;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.DyeColor;
@@ -27,10 +28,18 @@ import tc.oc.pgm.util.text.TextFormatter;
 public class MonumentWoolFactory extends ProximityGoalDefinition {
   protected static final MaterialMatcher WOOL = MaterialMatcher.of(m -> m.name().endsWith("WOOL"));
 
+  @Getter
   protected final DyeColor color;
+
+  @Getter
   protected final Vector location;
+
   protected final Region placement;
+
+  @Getter
   protected final boolean craftable;
+
+  @Getter
   protected final Component componentName;
 
   public static String makeColorName(DyeColor color) {
@@ -102,25 +111,8 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
     return makeColorName(this.color);
   }
 
-  public DyeColor getColor() {
-    return this.color;
-  }
-
-  @Override
-  public Component getComponentName() {
-    return componentName;
-  }
-
-  public Vector getLocation() {
-    return this.location;
-  }
-
   public Region getPlacementRegion() {
     return this.placement;
-  }
-
-  public boolean isCraftable() {
-    return this.craftable;
   }
 
   public boolean isObjectiveWool(ItemStack stack) {

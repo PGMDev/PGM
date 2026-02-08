@@ -3,8 +3,10 @@ package tc.oc.pgm.map.source;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.nio.file.Path;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
+@Getter
 public class MapRoot {
   // Repository host, if any (eg: 'github.com' or 'gitlab.com')
   private final @Nullable String remoteHost;
@@ -36,25 +38,5 @@ public class MapRoot {
     this.displayName = displayName == null ? base.getFileName().toString() : displayName;
     this.baseUrl = baseUrl;
     this.isPrivate = isPrivate;
-  }
-
-  public @Nullable String getRemoteHost() {
-    return remoteHost;
-  }
-
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  public @Nullable String getBaseUrl() {
-    return baseUrl;
-  }
-
-  public boolean isPrivate() {
-    return isPrivate;
-  }
-
-  public Path getBase() {
-    return base;
   }
 }

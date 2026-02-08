@@ -2,6 +2,8 @@ package tc.oc.pgm.util.xml;
 
 import java.util.Set;
 import java.util.function.Consumer;
+import lombok.Getter;
+import lombok.Setter;
 import org.jdom2.Attribute;
 import org.jdom2.Content;
 import org.jdom2.DocType;
@@ -9,6 +11,8 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 
+@Getter
+@Setter
 public class DocumentWrapper extends Document {
 
   private static final Set<String> IGNORED_ATTRIBUTES =
@@ -34,18 +38,10 @@ public class DocumentWrapper extends Document {
     super(rootElement);
   }
 
-  public void setVisitingAllowed(boolean visitingAllowed) {
-    this.visitingAllowed = visitingAllowed;
-  }
-
   public void runWithoutVisitation(DocumentWorker worker) throws InvalidXMLException {
     this.visitingAllowed = false;
     worker.run();
     this.visitingAllowed = true;
-  }
-
-  public boolean isVisitingAllowed() {
-    return visitingAllowed;
   }
 
   public void checkUnvisited(Consumer<Node> unvisited) {

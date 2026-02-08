@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.Getter;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -21,8 +22,16 @@ import org.jdom2.located.LocatedElement;
 public class InheritingElement extends LocatedElement {
 
   private AtomicBoolean visited = new AtomicBoolean();
+
+  @Getter
   private String originalUri;
-  private int startLine, endLine;
+
+  @Getter
+  private int startLine;
+
+  @Getter
+  private int endLine;
+
   private int indexInParent = Integer.MIN_VALUE;
 
   public InheritingElement(Element el) {
@@ -69,17 +78,9 @@ public class InheritingElement extends LocatedElement {
     super(name, prefix, uri);
   }
 
-  public int getStartLine() {
-    return startLine;
-  }
-
   protected void setStartLine(int startLine) {
     setLine(startLine);
     this.startLine = startLine;
-  }
-
-  public int getEndLine() {
-    return endLine;
   }
 
   protected void setEndLine(int endLine) {
@@ -111,15 +112,13 @@ public class InheritingElement extends LocatedElement {
 
   public Iterable<Element> getChildren(Set<String> names) {
     boolean visitingAllowed = visitingAllowed();
-    return Iterables.filter(
-        super.getChildren(),
-        el -> {
-          if (names.contains(el.getName())) {
-            if (visitingAllowed) ((InheritingElement) el).setVisited();
-            return true;
-          }
-          return false;
-        });
+    return Iterables.filter(super.getChildren(), el -> {
+      if (names.contains(el.getName())) {
+        if (visitingAllowed) ((InheritingElement) el).setVisited();
+        return true;
+      }
+      return false;
+    });
   }
 
   @Override
@@ -138,10 +137,6 @@ public class InheritingElement extends LocatedElement {
 
   private boolean visitingAllowed() {
     return ((DocumentWrapper) getDocument()).isVisitingAllowed();
-  }
-
-  public String getOriginalUri() {
-    return originalUri;
   }
 
   @Override

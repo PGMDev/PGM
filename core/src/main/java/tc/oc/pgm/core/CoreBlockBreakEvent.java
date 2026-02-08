@@ -1,9 +1,11 @@
 package tc.oc.pgm.core;
 
+import lombok.Getter;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayerState;
 
+@Getter
 public class CoreBlockBreakEvent extends CoreEvent {
   private static final HandlerList handlers = new HandlerList();
 
@@ -14,14 +16,6 @@ public class CoreBlockBreakEvent extends CoreEvent {
     super(player.getMatch(), core);
     this.player = player;
     this.blockBroken = blockBroken;
-  }
-
-  public MatchPlayerState getPlayer() {
-    return this.player;
-  }
-
-  public BlockState getBlockBroken() {
-    return this.blockBroken;
   }
 
   @Override

@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -55,6 +56,8 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final Map<Party, Scoreboard> partyScoreboards = new HashMap<>();
+
+  @Getter
   private final Scoreboard hiddenScoreboard;
 
   private ScoreboardMatchModule(Match match) {
@@ -208,10 +211,6 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
       match.getLogger().fine("Setting player " + player + " to hidden scoreboard");
       player.getBukkit().setScoreboard(getHiddenScoreboard());
     }
-  }
-
-  public Scoreboard getHiddenScoreboard() {
-    return hiddenScoreboard;
   }
 
   public Iterable<Scoreboard> getScoreboards() {

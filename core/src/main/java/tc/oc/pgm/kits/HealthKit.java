@@ -3,9 +3,11 @@ package tc.oc.pgm.kits;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.List;
+import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 
+@Getter
 public class HealthKit extends AbstractKit {
   protected final int halfHearts;
 
@@ -14,10 +16,6 @@ public class HealthKit extends AbstractKit {
         0 < halfHearts && halfHearts <= 20,
         "halfHearts must be greater than 0 and less than or equal to 20");
     this.halfHearts = halfHearts;
-  }
-
-  public int getHalfHearts() {
-    return halfHearts;
   }
 
   /** The force flag allows the kit to decrease the player's health */

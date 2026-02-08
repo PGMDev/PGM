@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import lombok.Getter;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -47,6 +48,11 @@ public class StartMatchModule implements MatchModule, Listener {
   protected final Set<UnreadyReason> unreadyReasons = new HashSet<>();
   protected @Nullable BossBar startBar;
   protected boolean finishedLoading;
+  /**
+   * -- GETTER -- If true, the match start countdown will automatically start when conditions allow
+   * it
+   */
+  @Getter
   protected boolean autoStart; // Initialized from config, but is mutable
 
   private StartMatchModule(Match match) {
@@ -87,11 +93,6 @@ public class StartMatchModule implements MatchModule, Listener {
   // FIXME: Unsafe cast to SingleCountdownContext
   private SingleCountdownContext cc() {
     return (SingleCountdownContext) match.getCountdown();
-  }
-
-  /** If true, the match start countdown will automatically start when conditions allow it */
-  public boolean isAutoStart() {
-    return autoStart;
   }
 
   /** Enable/disable auto-start and return true if the setting was changed */

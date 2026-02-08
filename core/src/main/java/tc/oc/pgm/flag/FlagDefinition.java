@@ -1,6 +1,7 @@
 package tc.oc.pgm.flag;
 
 import java.util.Collection;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
 import org.jetbrains.annotations.Nullable;
@@ -29,16 +30,29 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   private final @Nullable DyeColor
       color; // Flag color, null detects color from the banner at match load time
+
+  @Getter
   private final PostDefinition defaultPost; // Flag starts the match at this post
+
   private final @Nullable FeatureReference<TeamFactory>
       owner; // Team that owns the flag, affects various things
+
+  @Getter
   private final double
       pointsPerCapture; // Points awarded for capturing this flag, in addition to points from the
   // Net
+  @Getter
   private final double pointsPerSecond; // Points awarded while carrying this flag
+
+  @Getter
   private final Filter pickupFilter; // Filter players who can pickup this flag
+
+  @Getter
   private final Filter captureFilter; // Filter players who can capture this flag
+
+  @Getter
   private final Filter dropFilter; // Filter players who can drop the flag
+
   private final @Nullable Kit pickupKit; // Kit to give on flag pickup
   private final @Nullable Kit dropKit; // Kit to give carrier when they drop the flag
   private final @Nullable Kit carryKit; // Kit to give to/take from the flag carrier
@@ -115,10 +129,6 @@ public class FlagDefinition extends ProximityGoalDefinition {
     }
   }
 
-  public PostDefinition getDefaultPost() {
-    return this.defaultPost;
-  }
-
   @Override
   public @Nullable TeamFactory getOwner() {
     return this.owner == null ? null : this.owner.get();
@@ -129,26 +139,6 @@ public class FlagDefinition extends ProximityGoalDefinition {
   @Override
   protected String getDefaultId() {
     return makeDefaultId() + "--" + makeId(getName());
-  }
-
-  public double getPointsPerCapture() {
-    return this.pointsPerCapture;
-  }
-
-  public double getPointsPerSecond() {
-    return this.pointsPerSecond;
-  }
-
-  public Filter getPickupFilter() {
-    return this.pickupFilter;
-  }
-
-  public Filter getDropFilter() {
-    return dropFilter;
-  }
-
-  public Filter getCaptureFilter() {
-    return captureFilter;
   }
 
   public @Nullable Kit getPickupKit() {

@@ -2,6 +2,7 @@ package tc.oc.pgm.api.player.event;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
@@ -22,7 +23,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
  */
 public class ObserverInteractEvent extends MatchPlayerEvent implements Cancellable {
 
+  /** The type of {@link ClickType} interaction. */
+  @Getter
   private final ClickType clickType;
+
   private final @Nullable Block clickedBlock;
   private final @Nullable Entity clickedEntity;
   private final @Nullable ItemStack clickedItem;
@@ -39,15 +43,6 @@ public class ObserverInteractEvent extends MatchPlayerEvent implements Cancellab
     this.clickedBlock = clickedBlock;
     this.clickedEntity = clickedEntity;
     this.clickedItem = clickedItem;
-  }
-
-  /**
-   * Get the type of {@link ClickType} interaction.
-   *
-   * @return The {@link ClickType}.
-   */
-  public ClickType getClickType() {
-    return clickType;
   }
 
   /**

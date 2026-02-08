@@ -2,6 +2,7 @@ package tc.oc.pgm.teams;
 
 import java.util.Collection;
 import java.util.Collections;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.event.Event;
@@ -16,16 +17,26 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.matcher.TypedFilter;
 
 /** Immutable class to represent a team in a map that is not tied to any specific match. */
+@Getter
 @FeatureInfo(name = "team")
 public class TeamFactory extends SelfIdentifyingFeatureDefinition
     implements TypedFilter<PartyQuery> {
+  /** This team's default name as set by the map creator. */
   protected final String defaultName;
+
   protected final boolean defaultNamePlural;
+  /** This team's default color as set by the map creator. */
   protected final ChatColor defaultColor;
+  /** The dye color to use for blocks on kits or control points */
   protected final @Nullable DyeColor dyeColor;
+
   protected final int minPlayers;
+
+  /** The maximum players that may be on this team. */
   protected final int maxPlayers;
+  /** The maximum overfill players that may be on this team. */
   protected final int maxOverfill;
+
   protected final NameTagVisibility nameTagVisibility;
 
   /**
@@ -76,61 +87,8 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition
     return this.getDefaultName();
   }
 
-  /**
-   * Gets this team's default name as set by the map creator.
-   *
-   * @return Default team name.
-   */
-  public String getDefaultName() {
-    return this.defaultName;
-  }
-
-  public boolean isDefaultNamePlural() {
-    return this.defaultNamePlural;
-  }
-
-  /**
-   * Gets this team's default color as set by the map creator.
-   *
-   * @return Default team color.
-   */
-  public ChatColor getDefaultColor() {
-    return this.defaultColor;
-  }
-
   public String getDefaultColoredName() {
     return this.getDefaultColor() + this.getDefaultName();
-  }
-
-  /**
-   * Gets the dye color to use for blocks on kits or control points
-   *
-   * @return Dye color for the team
-   */
-  public @Nullable DyeColor getDyeColor() {
-    return this.dyeColor;
-  }
-
-  public int getMinPlayers() {
-    return minPlayers;
-  }
-
-  /**
-   * Gets the maximum players that may be on this team.
-   *
-   * @return Maximum players for this team.
-   */
-  public int getMaxPlayers() {
-    return this.maxPlayers;
-  }
-
-  /**
-   * Gets the maximum overfill players that may be on this team.
-   *
-   * @return Maximum team overfill size for this team always >= maxPlayers
-   */
-  public int getMaxOverfill() {
-    return this.maxOverfill;
   }
 
   /**
@@ -139,10 +97,6 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition
    */
   public int getOverfillSlots() {
     return this.maxOverfill - this.maxPlayers;
-  }
-
-  public NameTagVisibility getNameTagVisibility() {
-    return nameTagVisibility;
   }
 
   // Filter implementation:

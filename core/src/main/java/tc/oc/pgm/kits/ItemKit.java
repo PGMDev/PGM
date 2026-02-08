@@ -6,6 +6,7 @@ import com.google.common.collect.Iterables;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import lombok.Getter;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -17,8 +18,12 @@ import tc.oc.pgm.util.inventory.Slot;
 public class ItemKit implements KitDefinition {
   public static final int INFINITE_STACK_SIZE = 99;
 
+  @Getter
   protected final ImmutableMap<Slot, ItemStack> slotItems;
+
+  @Getter
   protected final ImmutableList<ItemStack> freeItems;
+
   protected final boolean repairTools;
   protected final boolean deductTools;
   protected final boolean deductItems;
@@ -41,14 +46,6 @@ public class ItemKit implements KitDefinition {
     this.deductTools = deductTools;
     this.deductItems = deductItems;
     this.dropOverflow = dropOverflow;
-  }
-
-  public ImmutableMap<Slot, ItemStack> getSlotItems() {
-    return slotItems;
-  }
-
-  public ImmutableList<ItemStack> getFreeItems() {
-    return freeItems;
   }
 
   public Iterable<ItemStack> getItems() {

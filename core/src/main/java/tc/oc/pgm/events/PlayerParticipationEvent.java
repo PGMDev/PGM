@@ -2,6 +2,7 @@ package tc.oc.pgm.events;
 
 import static net.kyori.adventure.text.Component.translatable;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -14,7 +15,10 @@ import tc.oc.pgm.join.JoinRequest;
 
 public abstract class PlayerParticipationEvent extends MatchPlayerEvent implements Cancellable {
 
+  /** NOTE: this Competitor MAY not be in the match at this point */
+  @Getter
   private final Competitor competitor;
+
   private final JoinRequest request;
   private boolean cancelled;
   private @Nullable Component cancelReason;
@@ -24,11 +28,6 @@ public abstract class PlayerParticipationEvent extends MatchPlayerEvent implemen
     super(player);
     this.competitor = competitor;
     this.request = request;
-  }
-
-  /** NOTE: this Competitor MAY not be in the match at this point */
-  public Competitor getCompetitor() {
-    return competitor;
   }
 
   @NotNull

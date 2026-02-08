@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -111,13 +112,11 @@ public class AfkTracker implements Listener {
   }
 
   public class Activity {
+    @Getter
     private Instant lastActive = now;
+
     private Instant softActive = now;
     private int softCount = 0;
-
-    public Instant getLastActive() {
-      return lastActive;
-    }
 
     public Duration getAfkDuration() {
       return Duration.between(lastActive, now);

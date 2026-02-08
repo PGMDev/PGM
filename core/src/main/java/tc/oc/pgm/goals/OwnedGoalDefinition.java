@@ -1,5 +1,6 @@
 package tc.oc.pgm.goals;
 
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.teams.TeamFactory;
 
@@ -9,6 +10,7 @@ import tc.oc.pgm.teams.TeamFactory;
  * owner. The only thing the base class does with the owner is store it and use it as part of the
  * default ID.
  */
+@Getter
 public abstract class OwnedGoalDefinition extends GoalDefinition {
   private final TeamFactory owner;
 
@@ -25,9 +27,5 @@ public abstract class OwnedGoalDefinition extends GoalDefinition {
   @Override
   protected String getDefaultId() {
     return this.getOwner().getId() + super.getDefaultId();
-  }
-
-  public TeamFactory getOwner() {
-    return this.owner;
   }
 }

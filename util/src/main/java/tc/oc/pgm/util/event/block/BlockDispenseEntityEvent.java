@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.event.block;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
@@ -11,8 +13,14 @@ import tc.oc.pgm.util.event.SportPaper;
 /** Called when an entity is dispensed from a block. */
 @SportPaper
 public class BlockDispenseEntityEvent extends BlockEvent {
+  @Setter
   private ItemStack item;
+
+  @Setter
   private Vector velocity;
+
+  /** The entity that is being dispensed. */
+  @Getter
   private final Entity entity;
 
   public BlockDispenseEntityEvent(
@@ -27,25 +35,8 @@ public class BlockDispenseEntityEvent extends BlockEvent {
     return this.item.clone();
   }
 
-  public void setItem(ItemStack item) {
-    this.item = item;
-  }
-
   public Vector getVelocity() {
     return this.velocity.clone();
-  }
-
-  public void setVelocity(Vector vel) {
-    this.velocity = vel;
-  }
-
-  /**
-   * Gets the entity that is being dispensed.
-   *
-   * @return An Entity for the item being dispensed
-   */
-  public Entity getEntity() {
-    return entity;
   }
 
   private static final HandlerList handlers = new HandlerList();

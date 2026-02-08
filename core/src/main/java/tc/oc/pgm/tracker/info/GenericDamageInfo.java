@@ -2,6 +2,7 @@ package tc.oc.pgm.tracker.info;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -9,6 +10,7 @@ import tc.oc.pgm.api.tracker.info.CauseInfo;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 
+@Getter
 public class GenericDamageInfo implements DamageInfo, CauseInfo {
 
   private final @Nullable PhysicalInfo damager;
@@ -25,17 +27,8 @@ public class GenericDamageInfo implements DamageInfo, CauseInfo {
   }
 
   @Override
-  public @Nullable PhysicalInfo getDamager() {
-    return damager;
-  }
-
-  @Override
   public @Nullable PhysicalInfo getCause() {
     return getDamager();
-  }
-
-  public EntityDamageEvent.DamageCause getDamageType() {
-    return damageType;
   }
 
   @Override

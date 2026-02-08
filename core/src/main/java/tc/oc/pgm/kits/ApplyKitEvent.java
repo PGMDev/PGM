@@ -1,5 +1,7 @@
 package tc.oc.pgm.kits;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.event.MatchEvent;
@@ -11,8 +13,15 @@ import tc.oc.pgm.api.player.MatchPlayer;
  */
 public class ApplyKitEvent extends MatchEvent implements Cancellable {
   private boolean cancelled;
+
+  @Getter
   private final MatchPlayer player;
+
+  @Getter
   private final Kit kit;
+
+  @Getter
+  @Setter
   private boolean force;
 
   public ApplyKitEvent(MatchPlayer player, Kit kit, boolean force) {
@@ -32,23 +41,6 @@ public class ApplyKitEvent extends MatchEvent implements Cancellable {
     this.cancelled = cancelled;
   }
 
-  public MatchPlayer getPlayer() {
-    return player;
-  }
-
-  public Kit getKit() {
-    return kit;
-  }
-
-  public boolean isForce() {
-    return force;
-  }
-
-  public void setForce(boolean force) {
-    this.force = force;
-  }
-
-  /* Handler junk */
   private static final HandlerList handlers = new HandlerList();
 
   @Override

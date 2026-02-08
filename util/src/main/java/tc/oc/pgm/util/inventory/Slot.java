@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -18,7 +19,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.platform.Platform;
 
@@ -421,6 +422,7 @@ public abstract class Slot {
     }
   }
 
+  @Getter
   public static class Armor extends Equipment {
     private static Map<ArmorType, Armor> byArmorType;
 
@@ -442,10 +444,6 @@ public abstract class Slot {
       super(key, armorType.inventorySlot(), equipmentSlot);
       this.armorType = armorType;
       byArmorType.put(armorType, this);
-    }
-
-    public ArmorType getArmorType() {
-      return armorType;
     }
 
     public static Armor forType(ArmorType armorType) {

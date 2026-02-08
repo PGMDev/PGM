@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
@@ -89,7 +90,10 @@ public enum SettingKey implements Aliased {
     }
   }; // Changes player preference for time of day
 
+  /** All aliases of this {@link SettingKey}. First index is always equal to {@code #getName}. */
+  @Getter
   private final List<String> aliases;
+
   private final SettingValue[] values;
   private final Material icon;
 
@@ -110,15 +114,6 @@ public enum SettingKey implements Aliased {
    */
   public String getName() {
     return aliases.getFirst();
-  }
-
-  /**
-   * Get all aliases of this {@link SettingKey}. First index is always equal to {@code #getName}.
-   *
-   * @return An immutable list of all aliases. Never {@code null} or empty.
-   */
-  public List<String> getAliases() {
-    return aliases;
   }
 
   @NonNull

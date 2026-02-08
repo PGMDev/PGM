@@ -2,6 +2,7 @@ package tc.oc.pgm.util.event.entity;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
 import tc.oc.pgm.util.event.SportPaper;
@@ -13,8 +14,10 @@ import tc.oc.pgm.util.event.SportPaper;
  * - a flaming arrow activates a TNT block <br>
  * - an entity damages an Ender Crystal
  */
+@Getter
 @SportPaper
 public class ExplosionPrimeByEntityEvent extends ExplosionPrimeEvent {
+  /** The {@link Entity} that caused this entity to become primed */
   private final Entity primer;
 
   public ExplosionPrimeByEntityEvent(Entity what, float radius, boolean fire, Entity primer) {
@@ -24,10 +27,5 @@ public class ExplosionPrimeByEntityEvent extends ExplosionPrimeEvent {
 
   public ExplosionPrimeByEntityEvent(Explosive explosive, Entity primer) {
     this(explosive, explosive.getYield(), explosive.isIncendiary(), primer);
-  }
-
-  /** @return The {@link Entity} that caused this entity to become primed */
-  public Entity getPrimer() {
-    return primer;
   }
 }

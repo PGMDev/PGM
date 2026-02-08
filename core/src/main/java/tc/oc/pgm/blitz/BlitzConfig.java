@@ -2,6 +2,7 @@ package tc.oc.pgm.blitz;
 
 import static tc.oc.pgm.util.Assert.assertTrue;
 
+import lombok.Getter;
 import tc.oc.pgm.api.filter.Filter;
 
 /** Represents information needed to run the Blitz game type. */
@@ -10,8 +11,14 @@ public class BlitzConfig {
   private final int lives;
   private final boolean broadcastLives;
   private final boolean lightning;
+
+  @Getter
   private final Filter filter;
+
+  @Getter
   private final Filter scoreboardFilter;
+
+  @Getter
   private final Filter joinFilter;
 
   public BlitzConfig(
@@ -46,17 +53,5 @@ public class BlitzConfig {
 
   public boolean getLightning() {
     return this.lightning;
-  }
-
-  public Filter getFilter() {
-    return this.filter;
-  }
-
-  public Filter getScoreboardFilter() {
-    return scoreboardFilter;
-  }
-
-  public Filter getJoinFilter() {
-    return joinFilter;
   }
 }

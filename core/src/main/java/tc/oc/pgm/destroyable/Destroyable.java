@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.FireworkEffect;
@@ -64,12 +65,15 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   // Block replacement rules in this ruleset will be used to calculate destroyable health
   protected BlockDropsRuleSet blockDropsRuleSet;
 
+  @Getter
   protected final FiniteBlockRegion blockRegion;
+
   protected MaterialMatcher materialPattern;
   protected Set<BlockMaterialData> materials;
   protected final boolean isShared;
 
   // The percentage of blocks that must be broken for the entire Destroyable to be destroyed.
+  @Getter
   protected double destructionRequired;
 
   protected final Duration SPARK_COOLDOWN = Duration.ofMillis(75);
@@ -81,9 +85,11 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
    * destroyable world and any non-destroyable world. Note that blocks are not necessarily at max
    * health when the match starts. This value can change as the result of mode changes.
    */
+  @Getter
   protected int maxHealth;
 
   // The current health of the Destroyable
+  @Getter
   protected int health;
 
   /**
@@ -415,10 +421,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return null;
   }
 
-  public FiniteBlockRegion getBlockRegion() {
-    return this.blockRegion;
-  }
-
   public boolean hasMaterial(MaterialData data) {
     return materialPattern.matches(data);
   }
@@ -427,24 +429,12 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     this.health = Math.max(0, Math.min(this.maxHealth, this.health + delta));
   }
 
-  public int getMaxHealth() {
-    return this.maxHealth;
-  }
-
-  public int getHealth() {
-    return this.health;
-  }
-
   public float getHealthPercent() {
     return (float) this.health / this.maxHealth;
   }
 
   public int getBreaks() {
     return this.maxHealth - this.health;
-  }
-
-  public double getDestructionRequired() {
-    return this.destructionRequired;
   }
 
   public String renderDestructionRequired() {

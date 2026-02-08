@@ -2,33 +2,30 @@ package tc.oc.pgm.regions;
 
 import static tc.oc.pgm.util.Assert.assertTrue;
 
+import lombok.Getter;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
 public class SphereRegion implements RegionDefinition.HardStatic {
   protected final Vector origin;
+
+  @Getter
   protected final double radius;
-  protected final double radiusSq;
+
+  @Getter
+  protected final double radiusSquared;
 
   public SphereRegion(Vector origin, double radius) {
     assertTrue(radius >= 0);
 
     this.origin = origin;
     this.radius = radius;
-    this.radiusSq = radius * radius;
-  }
-
-  public double getRadius() {
-    return this.radius;
-  }
-
-  public double getRadiusSquared() {
-    return this.radiusSq;
+    this.radiusSquared = radius * radius;
   }
 
   @Override
   public boolean contains(Vector point) {
-    return this.origin.distanceSquared(point) <= this.radiusSq;
+    return this.origin.distanceSquared(point) <= this.radiusSquared;
   }
 
   @Override
@@ -45,6 +42,6 @@ public class SphereRegion implements RegionDefinition.HardStatic {
 
   @Override
   public String toString() {
-    return "Sphere{origin=[" + this.origin + "],radiusSq=" + this.radiusSq + "}";
+    return "Sphere{origin=[" + this.origin + "],radiusSq=" + this.radiusSquared + "}";
   }
 }

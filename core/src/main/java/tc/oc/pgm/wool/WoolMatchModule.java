@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -42,6 +43,8 @@ import tc.oc.pgm.teams.Team;
 public class WoolMatchModule implements MatchModule, Listener {
 
   private final Match match;
+
+  @Getter
   private final Multimap<Team, MonumentWool> wools;
 
   // Map of containers to a flag indicating whether they contained objective wool when the match
@@ -70,10 +73,6 @@ public class WoolMatchModule implements MatchModule, Listener {
         .getExecutor(MatchScope.RUNNING)
         .scheduleWithFixedDelay(
             this::refillOneWoolPerContainer, 0, REFILL_INTERVAL, TimeUnit.SECONDS);
-  }
-
-  public Multimap<Team, MonumentWool> getWools() {
-    return wools;
   }
 
   private boolean isObjectiveWool(ItemStack stack) {

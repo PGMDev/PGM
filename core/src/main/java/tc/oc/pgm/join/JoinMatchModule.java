@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
+import lombok.Getter;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,7 +43,9 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   // Players who have requested to join before match start
+  @Getter
   private final QueuedParty queuedParticipants;
+
   private final Match match;
   private final OnlinePlayerMapAdapter<JoinRequest> requests;
 
@@ -181,10 +184,6 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     }
 
     return match.setParty(leaving, match.getDefaultParty(), request);
-  }
-
-  public QueuedParty getQueuedParticipants() {
-    return queuedParticipants;
   }
 
   public boolean isQueuedToJoin(MatchPlayer joining) {

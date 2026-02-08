@@ -1,17 +1,15 @@
 package tc.oc.pgm.variables.types;
 
+import lombok.Getter;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.variables.Variable;
 
+@Getter
 abstract class AbstractVariable<T extends Filterable<?>> implements Variable<T> {
   private final Class<T> scope;
 
   public AbstractVariable(Class<T> scope) {
     this.scope = scope;
-  }
-
-  public Class<T> getScope() {
-    return scope;
   }
 
   @Override

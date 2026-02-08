@@ -2,6 +2,8 @@ package tc.oc.pgm.structure;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -13,8 +15,15 @@ import tc.oc.pgm.regions.Bounds;
 @FeatureInfo(name = "structure")
 public class StructureDefinition extends SelfIdentifyingFeatureDefinition {
 
+  @Getter
   private final Region region;
+
+  @Accessors(fluent = true)
+  @Getter
   private final boolean includeAir;
+
+  @Accessors(fluent = true)
+  @Getter
   private final boolean clearSource;
 
   // Lazy init due to yet unresolved xml references
@@ -28,18 +37,6 @@ public class StructureDefinition extends SelfIdentifyingFeatureDefinition {
     this.region = assertNotNull(region);
     this.includeAir = includeAir;
     this.clearSource = clearSource;
-  }
-
-  public Region getRegion() {
-    return region;
-  }
-
-  public boolean includeAir() {
-    return includeAir;
-  }
-
-  public boolean clearSource() {
-    return clearSource;
   }
 
   public Vector getOrigin() {

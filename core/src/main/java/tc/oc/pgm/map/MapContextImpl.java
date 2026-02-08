@@ -5,13 +5,17 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.List;
+import lombok.Getter;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 
 public class MapContextImpl implements MapContext {
 
+  @Getter
   private final MapInfo info;
+
+  @Getter
   private final List<MapModule<?>> modules;
 
   public MapContextImpl(MapInfoImpl info, Collection<MapModule<?>> modules) {
@@ -20,15 +24,6 @@ public class MapContextImpl implements MapContext {
 
     // Update the map info with stuff derived from modules, like team sizes or tags.
     info.setContext(this);
-  }
-
-  public MapInfo getInfo() {
-    return info;
-  }
-
-  @Override
-  public Collection<MapModule<?>> getModules() {
-    return modules;
   }
 
   @Override

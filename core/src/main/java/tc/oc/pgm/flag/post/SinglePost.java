@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.Assert.assertTrue;
 import com.google.common.collect.ImmutableList;
 import java.time.Duration;
 import java.util.Random;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
@@ -26,22 +27,28 @@ public class SinglePost extends PostDefinition {
   // Team that owns the post, affects various things
   private final @Nullable FeatureReference<TeamFactory> owner;
   // Time between a flag dropping and being recovered, can be infinite
+  @Getter
   private final Duration recoverTime;
   // Fixed time between a flag being recovered and respawning at the post
   private final @Nullable Duration respawnTime;
   // Makes respawn time proportional to distance, flag "moves" back at this m/s
   private final @Nullable Double respawnSpeed;
   // Spawn points for the flag
+  @Getter
   private final ImmutableList<PointProvider> returnPoints;
   // Search for spawn points sequentially, see equivalent field in SpawnInfo
+  @Getter
   private final boolean sequential;
   // Flag enters Completed state when at this post
   private final boolean permanent;
   // Points awarded while any flag is at this post
+  @Getter
   private final double pointsPerSecond;
   // Filter players who can pick up a flag at this post
+  @Getter
   private final Filter pickupFilter;
   // Filter if a flag can respawn to this post
+  @Getter
   private final Filter respawnFilter;
 
   public SinglePost(
@@ -97,10 +104,6 @@ public class SinglePost extends PostDefinition {
     return this.owner == null ? ChatColor.WHITE : this.owner.get().getDefaultColor();
   }
 
-  public Duration getRecoverTime() {
-    return this.recoverTime;
-  }
-
   public Duration getRespawnTime(double distance) {
     if (respawnTime != null) {
       return respawnTime;
@@ -111,28 +114,8 @@ public class SinglePost extends PostDefinition {
     }
   }
 
-  public ImmutableList<PointProvider> getReturnPoints() {
-    return this.returnPoints;
-  }
-
-  public boolean isSequential() {
-    return this.sequential;
-  }
-
   public Boolean isPermanent() {
     return this.permanent;
-  }
-
-  public double getPointsPerSecond() {
-    return this.pointsPerSecond;
-  }
-
-  public Filter getPickupFilter() {
-    return this.pickupFilter;
-  }
-
-  public Filter getRespawnFilter() {
-    return respawnFilter;
   }
 
   public Location getReturnPoint(Flag flag, AngleProvider yawProvider) {

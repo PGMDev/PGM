@@ -1,5 +1,6 @@
 package tc.oc.pgm.goals.events;
 
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
 import org.jspecify.annotations.Nullable;
@@ -8,7 +9,11 @@ import tc.oc.pgm.goals.ProximityGoal;
 
 public class GoalProximityChangeEvent extends GoalEvent {
   private final @Nullable Location location;
+
+  @Getter
   private final double oldDistance;
+
+  @Getter
   private final double newDistance;
 
   public GoalProximityChangeEvent(
@@ -25,14 +30,6 @@ public class GoalProximityChangeEvent extends GoalEvent {
 
   public @Nullable Location getLocation() {
     return this.location;
-  }
-
-  public double getOldDistance() {
-    return this.oldDistance;
-  }
-
-  public double getNewDistance() {
-    return this.newDistance;
   }
 
   private static final HandlerList handlers = new HandlerList();

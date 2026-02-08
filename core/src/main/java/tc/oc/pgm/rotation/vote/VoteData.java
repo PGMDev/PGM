@@ -3,6 +3,7 @@ package tc.oc.pgm.rotation.vote;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import lombok.Getter;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapData;
 import tc.oc.pgm.api.map.MapInfo;
@@ -13,7 +14,9 @@ import tc.oc.pgm.util.TimeUtils;
 public class VoteData {
   private static final long SECONDS_PER_DAY = Duration.of(1, ChronoUnit.DAYS).toSeconds();
 
+  @Getter
   protected final double weight;
+
   protected final MapData mapData;
 
   public VoteData(double weight, MapData mapData) {
@@ -35,10 +38,6 @@ public class VoteData {
 
   public void onMatchEnd(Match match, VotingPool.VoteConstants constants) {
     mapData.saveMatch(getDuration(match, constants), constants.scoreAfterPlay().apply(match));
-  }
-
-  public double getWeight() {
-    return weight;
   }
 
   public double getScore() {

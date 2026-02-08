@@ -1,9 +1,11 @@
 package tc.oc.pgm.teams.events;
 
+import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.party.event.PartyEvent;
 import tc.oc.pgm.teams.Team;
 
+@Getter
 public class TeamRespawnsChangeEvent extends PartyEvent {
   private final Team team;
   private final int from;
@@ -16,18 +18,6 @@ public class TeamRespawnsChangeEvent extends PartyEvent {
     this.team = team;
     this.from = from;
     this.to = to;
-  }
-
-  public Team getTeam() {
-    return this.team;
-  }
-
-  public int getFrom() {
-    return this.from;
-  }
-
-  public int getTo() {
-    return this.to;
   }
 
   @Override

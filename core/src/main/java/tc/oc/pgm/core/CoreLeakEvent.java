@@ -1,9 +1,11 @@
 package tc.oc.pgm.core;
 
+import lombok.Getter;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.match.Match;
 
+@Getter
 public class CoreLeakEvent extends CoreEvent {
   private static final HandlerList handlers = new HandlerList();
 
@@ -12,10 +14,6 @@ public class CoreLeakEvent extends CoreEvent {
   public CoreLeakEvent(Match match, Core core, BlockState leakedBlock) {
     super(match, core);
     this.leakedBlock = leakedBlock;
-  }
-
-  public BlockState getLeakedBlock() {
-    return this.leakedBlock;
   }
 
   @Override

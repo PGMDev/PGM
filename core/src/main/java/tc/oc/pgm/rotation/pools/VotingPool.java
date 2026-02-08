@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import net.objecthunter.exp4j.ExpressionContext;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
@@ -36,6 +37,7 @@ public class VotingPool extends MapPool {
   // The current rating of maps. Eventually should be persisted elsewhere.
   private final Map<MapInfo, VoteData> mapScores;
 
+  @Getter
   private MapPoll currentPoll;
 
   public VotingPool(
@@ -77,10 +79,6 @@ public class VotingPool extends MapPool {
     this.constants = new VoteConstants(new MemoryConfiguration(), maps.size());
     this.mapPicker = MapVotePicker.of(manager, constants, null);
     this.mapScores = buildMapScores(m -> 1);
-  }
-
-  public MapPoll getCurrentPoll() {
-    return currentPoll;
   }
 
   public double getMapScore(MapInfo map) {

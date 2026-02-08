@@ -1,9 +1,11 @@
 package tc.oc.pgm.score;
 
+import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
+@Getter
 public class MatchPlayerScoreEvent extends MatchPlayerEvent {
 
   private static final HandlerList handlers = new HandlerList();
@@ -15,14 +17,6 @@ public class MatchPlayerScoreEvent extends MatchPlayerEvent {
     super(player);
     this.score = score;
     this.cause = cause;
-  }
-
-  public double getScore() {
-    return score;
-  }
-
-  public ScoreCause getCause() {
-    return cause;
   }
 
   @Override

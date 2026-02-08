@@ -1,10 +1,12 @@
 package tc.oc.pgm.rotation.vote.events;
 
+import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerEvent;
 
+@Getter
 public class MatchPlayerVoteEvent extends MatchPlayerEvent {
 
   private final MapInfo map;
@@ -14,14 +16,6 @@ public class MatchPlayerVoteEvent extends MatchPlayerEvent {
     super(player);
     this.map = map;
     this.add = add;
-  }
-
-  public MapInfo getMap() {
-    return map;
-  }
-
-  public boolean isAdd() {
-    return add;
   }
 
   private static final HandlerList handlers = new HandlerList();

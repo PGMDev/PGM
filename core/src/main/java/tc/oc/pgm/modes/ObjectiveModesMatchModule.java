@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
@@ -38,7 +39,10 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
               .thenComparing(Mode::getLegacyName));
 
   private final Match match;
+
+  @Getter
   private final ImmutableList<Mode> modes;
+
   private final List<ModeChangeCountdown> countdowns;
   private final CountdownContext countdownContext;
 
@@ -80,10 +84,6 @@ public class ObjectiveModesMatchModule implements MatchModule, Listener {
     for (ModeChangeCountdown countdown : this.getAllCountdowns()) {
       this.countdownContext.cancel(countdown);
     }
-  }
-
-  public ImmutableList<Mode> getModes() {
-    return modes;
   }
 
   public CountdownContext getCountdown() {

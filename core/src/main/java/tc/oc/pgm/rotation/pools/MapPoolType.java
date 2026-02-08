@@ -2,6 +2,7 @@ package tc.oc.pgm.rotation.pools;
 
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
+import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -14,16 +15,14 @@ public enum MapPoolType implements Aliased {
   VOTED("Voted", VotingPool::new),
   SHUFFLED("Shuffled", RandomMapPool::new);
 
+  @Getter
   private final String name;
+
   private final PoolFactory factory;
 
   MapPoolType(String name, PoolFactory factory) {
     this.name = name;
     this.factory = factory;
-  }
-
-  public String getName() {
-    return name;
   }
 
   public static MapPoolType of(String str) {

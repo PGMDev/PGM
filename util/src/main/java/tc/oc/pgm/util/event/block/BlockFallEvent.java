@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.event.block;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.Cancellable;
@@ -11,6 +13,9 @@ import tc.oc.pgm.util.event.SportPaper;
 public class BlockFallEvent extends BlockEvent implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
   private final FallingBlock fallingBlock;
+
+  @Getter
+  @Setter
   private boolean cancelled = false;
 
   public BlockFallEvent(final Block block, final FallingBlock fallingBlock) {
@@ -20,14 +25,6 @@ public class BlockFallEvent extends BlockEvent implements Cancellable {
 
   public FallingBlock getEntity() {
     return fallingBlock;
-  }
-
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
   }
 
   @Override

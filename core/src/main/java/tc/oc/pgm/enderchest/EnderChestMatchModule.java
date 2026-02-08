@@ -2,6 +2,7 @@ package tc.oc.pgm.enderchest;
 
 import com.google.common.collect.ImmutableList;
 import java.util.List;
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -21,7 +22,10 @@ import tc.oc.pgm.events.PlayerPartyChangeEvent;
 public class EnderChestMatchModule implements MatchModule, Listener {
 
   private final Match match;
+
+  @Getter
   private final boolean enabled;
+
   private final DropoffFallback fallback;
 
   private final ImmutableList<Dropoff> dropoffs;
@@ -32,10 +36,6 @@ public class EnderChestMatchModule implements MatchModule, Listener {
     this.enabled = enabled;
     this.dropoffs = ImmutableList.copyOf(dropoffs);
     this.fallback = fallback;
-  }
-
-  public boolean isEnabled() {
-    return enabled;
   }
 
   @EventHandler

@@ -1,9 +1,11 @@
 package tc.oc.pgm.flag.post;
 
 import com.google.common.collect.ImmutableList;
+import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 
+@Getter
 public class CompositePost extends PostDefinition {
 
   private final ImmutableList<SinglePost> posts;
@@ -20,18 +22,6 @@ public class CompositePost extends PostDefinition {
     this.sequential = sequential;
     this.posts = posts;
     this.fallback = fallback != null ? fallback : posts.getFirst();
-  }
-
-  public boolean isSequential() {
-    return sequential;
-  }
-
-  public ImmutableList<SinglePost> getPosts() {
-    return posts;
-  }
-
-  public SinglePost getFallback() {
-    return fallback;
   }
 
   @Override

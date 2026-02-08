@@ -2,6 +2,7 @@ package tc.oc.pgm.tracker;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import lombok.Getter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByBlockEvent;
@@ -38,14 +39,20 @@ import tc.oc.pgm.tracker.trackers.TNTTracker;
 
 public class TrackerMatchModule implements MatchModule {
 
+  @Getter
   private final EntityTracker entityTracker;
+
+  @Getter
   private final BlockTracker blockTracker;
+
   private final FallTracker fallTracker;
   private final FireTracker fireTracker;
   private final FallingBlockTracker fallingBlockTracker;
   private final CactiTracker cactiTracker;
 
   private final Set<DamageResolver> damageResolvers = new LinkedHashSet<>();
+
+  @Getter
   private final Match match;
 
   public TrackerMatchModule(Match match) {
@@ -67,10 +74,6 @@ public class TrackerMatchModule implements MatchModule {
     damageResolvers.add(new GenericDamageResolver());
   }
 
-  public Match getMatch() {
-    return match;
-  }
-
   @Override
   public void load() {
     match.addListener(fallTracker, MatchScope.RUNNING);
@@ -86,14 +89,6 @@ public class TrackerMatchModule implements MatchModule {
     match.addListener(new ProjectileTracker(this, match), MatchScope.RUNNING);
     match.addListener(new CombatLogTracker(this), MatchScope.RUNNING);
     match.addListener(new DeathTracker(this), MatchScope.RUNNING);
-  }
-
-  public EntityTracker getEntityTracker() {
-    return entityTracker;
-  }
-
-  public BlockTracker getBlockTracker() {
-    return blockTracker;
   }
 
   public DamageInfo resolveDamage(EntityDamageEvent damageEvent) {

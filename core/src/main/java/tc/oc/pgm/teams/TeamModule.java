@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -31,7 +32,10 @@ public class TeamModule implements MapModule<TeamMatchModule> {
   private static final double OVERFILL_RATIO = 1.25;
   private static final Map<Integer, Collection<MapTag>> TAGS = new ConcurrentHashMap<>();
 
+  /** T he set of TeamInfo instances this map provides. */
+  @Getter
   private final Set<TeamFactory> teams;
+
   private final @Nullable Boolean requireEven;
 
   public TeamModule(Set<TeamFactory> teams, @Nullable Boolean requireEven) {
@@ -75,15 +79,6 @@ public class TeamModule implements MapModule<TeamMatchModule> {
   @Override
   public TeamMatchModule createMatchModule(Match match) {
     return new TeamMatchModule(match, teams);
-  }
-
-  /**
-   * Gets the set of TeamInfo instances this map provides.
-   *
-   * @return Teams this map supports.
-   */
-  public Set<TeamFactory> getTeams() {
-    return teams;
   }
 
   public TeamFactory getTeamByName(String name) {

@@ -2,11 +2,12 @@ package tc.oc.pgm.util.tablist;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -21,15 +22,23 @@ import tc.oc.pgm.util.text.TextTranslations;
 public class TabView {
 
   private static final int WIDTH = 4, HEIGHT = 20;
-  private final int size, headerSlot, footerSlot;
+
+  @Getter
+  private final int size;
+
+  private final int headerSlot;
+  private final int footerSlot;
 
   // The single player seeing this view
+  @Getter
   private final Player viewer;
 
   protected @Nullable TabManager manager;
 
   // True when any slots/header/footer have been changed but not rendered
+  @Getter
   protected final TabViewDirtyTracker dirtyTracker;
+
   private final TabEntry[] slots, rendered;
   private Component header, footer;
 
@@ -54,24 +63,12 @@ public class TabView {
       throw new IllegalStateException(getClass().getSimpleName() + " is not enabled");
   }
 
-  public Player getViewer() {
-    return viewer;
-  }
-
   public int getWidth() {
     return WIDTH;
   }
 
   public int getHeight() {
     return HEIGHT;
-  }
-
-  public int getSize() {
-    return this.size;
-  }
-
-  public TabViewDirtyTracker getDirtyTracker() {
-    return dirtyTracker;
   }
 
   /** Take control of the viewer's player list */

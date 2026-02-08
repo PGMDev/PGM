@@ -29,7 +29,7 @@ public class ControlPointBlockDisplay implements Listener {
   protected final ControlPoint controlPoint;
 
   protected final FiniteBlockRegion progressDisplayRegion;
-  protected final FiniteBlockRegion controllerDisplayRegion;
+  protected final FiniteBlockRegion ownerDisplayRegion;
   protected final WorldSnapshot snapshot;
 
   protected Competitor controllingTeam;
@@ -41,7 +41,7 @@ public class ControlPointBlockDisplay implements Listener {
 
     Filter visualMaterials = controlPoint.getDefinition().getVisualMaterials();
     Region progressDisplayRegion = controlPoint.getDefinition().getProgressDisplayRegion();
-    Region controllerDisplayRegion = controlPoint.getDefinition().getControllerDisplayRegion();
+    Region ownerDisplayRegion = controlPoint.getDefinition().getOwnerDisplayRegion();
 
     if (progressDisplayRegion == null) {
       this.progressDisplayRegion = null;
@@ -54,19 +54,19 @@ public class ControlPointBlockDisplay implements Listener {
       snapshot.saveRegion(progressDisplayRegion);
     }
 
-    if (controllerDisplayRegion == null) {
-      this.controllerDisplayRegion = null;
+    if (ownerDisplayRegion == null) {
+      this.ownerDisplayRegion = null;
     } else {
       Filter controllerDisplayFilter = this.progressDisplayRegion == null
           ? visualMaterials
           : AllFilter.of(visualMaterials, new InverseFilter(progressDisplayRegion));
 
-      this.controllerDisplayRegion = FiniteBlockRegion.fromWorld(
-          controllerDisplayRegion,
+      this.ownerDisplayRegion = FiniteBlockRegion.fromWorld(
+          ownerDisplayRegion,
           match.getWorld(),
           controllerDisplayFilter,
           match.getMap().getProto());
-      snapshot.saveRegion(controllerDisplayRegion);
+      snapshot.saveRegion(ownerDisplayRegion);
     }
   }
 
@@ -74,13 +74,13 @@ public class ControlPointBlockDisplay implements Listener {
    * Change the controller display to the given team's color, or reset the display if team is null
    */
   public void setController(Competitor controllingTeam) {
-    if (this.controllingTeam != controllingTeam && this.controllerDisplayRegion != null) {
+    if (this.controllingTeam != controllingTeam && this.ownerDisplayRegion != null) {
       if (controllingTeam == null) {
-        snapshot.placeBlocks(this.controllerDisplayRegion, null, false);
+        snapshot.placeBlocks(this.ownerDisplayRegion, null, false);
       } else {
         COLOR_UTILS.setColor(
             match.getWorld(),
-            this.controllerDisplayRegion.getBlockVectors(),
+            this.ownerDisplayRegion.getBlockVectors(),
             controllingTeam.getDyeColor());
       }
       this.controllingTeam = controllingTeam;

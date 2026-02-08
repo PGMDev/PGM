@@ -153,7 +153,7 @@ public class LootableMatchModule implements MatchModule, Listener {
       });
 
       fillerInventories.asMap().forEach((filler, inventories) -> {
-        if (filler.cleanBeforeRefill()) {
+        if (filler.clearBeforeRefill()) {
           inventories().forEach(Inventory::clear);
         }
       });

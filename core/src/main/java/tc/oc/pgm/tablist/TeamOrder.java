@@ -1,20 +1,18 @@
 package tc.oc.pgm.tablist;
 
 import java.util.Comparator;
+import lombok.Getter;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.Teams;
 
+@Getter
 public class TeamOrder implements Comparator<Team> {
 
   private final MatchPlayer viewer;
 
   public TeamOrder(MatchPlayer viewer) {
     this.viewer = viewer;
-  }
-
-  public MatchPlayer getViewer() {
-    return viewer;
   }
 
   @Override

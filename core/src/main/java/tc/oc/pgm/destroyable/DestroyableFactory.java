@@ -3,6 +3,7 @@ package tc.oc.pgm.destroyable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 import java.util.Iterator;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -17,12 +18,20 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 
 @FeatureInfo(name = "destroyable")
 public class DestroyableFactory extends ProximityGoalDefinition {
+  @Getter
   protected final Region region;
+
+  @Getter
   protected final MaterialMatcher materials;
+
+  @Getter
   protected final double destructionRequired;
+
   protected final ImmutableSet<Mode> modeList;
   protected final boolean showProgress;
   protected final SparksType sparks;
+
+  @Getter
   protected final boolean repairable;
 
   public DestroyableFactory(
@@ -49,20 +58,8 @@ public class DestroyableFactory extends ProximityGoalDefinition {
     this.repairable = repairable;
   }
 
-  public Region getRegion() {
-    return this.region;
-  }
-
-  public MaterialMatcher getMaterials() {
-    return this.materials;
-  }
-
   public ImmutableSet<Mode> getModes() {
     return this.modeList;
-  }
-
-  public double getDestructionRequired() {
-    return this.destructionRequired;
   }
 
   public boolean getShowProgress() {
@@ -75,10 +72,6 @@ public class DestroyableFactory extends ProximityGoalDefinition {
 
   public boolean isSparksAll() {
     return this.sparks == SparksType.ALL;
-  }
-
-  public boolean isRepairable() {
-    return this.repairable;
   }
 
   public enum SparksType implements Aliased {

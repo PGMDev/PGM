@@ -1,7 +1,9 @@
 package tc.oc.pgm.points;
 
+import lombok.Getter;
 import org.jspecify.annotations.Nullable;
 
+@Getter
 public class PointProviderAttributes {
   private final @Nullable AngleProvider yawProvider;
   private final @Nullable AngleProvider pitchProvider;
@@ -25,21 +27,5 @@ public class PointProviderAttributes {
 
   public boolean hasValues() {
     return yawProvider != null || pitchProvider != null;
-  }
-
-  public @Nullable AngleProvider getYawProvider() {
-    return yawProvider;
-  }
-
-  public @Nullable AngleProvider getPitchProvider() {
-    return pitchProvider;
-  }
-
-  public boolean isSafe() {
-    return safe;
-  }
-
-  public boolean isOutdoors() {
-    return outdoors;
   }
 }

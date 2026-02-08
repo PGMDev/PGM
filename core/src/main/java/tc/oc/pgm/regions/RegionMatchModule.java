@@ -4,6 +4,8 @@ import static tc.oc.pgm.api.map.MapProtos.REGION_PRIORITY_VERSION;
 import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
 import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -57,20 +59,14 @@ public class RegionMatchModule implements MatchModule, Listener {
   private final RFAContext rfaContext;
   private final boolean useRegionPriority;
 
+  @Getter
+  @Setter
   private Integer maxBuildHeight;
 
   public RegionMatchModule(Match match, RFAContext rfaContext, Integer maxBuildHeight) {
     this.match = match;
     this.rfaContext = rfaContext;
     this.useRegionPriority = match.getMap().getProto().isNoOlderThan(REGION_PRIORITY_VERSION);
-    this.maxBuildHeight = maxBuildHeight;
-  }
-
-  public Integer getMaxBuildHeight() {
-    return maxBuildHeight;
-  }
-
-  public void setMaxBuildHeight(Integer maxBuildHeight) {
     this.maxBuildHeight = maxBuildHeight;
   }
 

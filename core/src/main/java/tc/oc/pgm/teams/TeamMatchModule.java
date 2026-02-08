@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title.Times;
@@ -79,7 +80,10 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   public static class TeamJoinResult implements JoinResult {
     private final JoinResultOption status;
+
+    @Getter
     private final Team team;
+
     private final boolean priorityKick;
 
     public TeamJoinResult(JoinResultOption status, @Nullable Team team, boolean priorityKick) {
@@ -102,16 +106,13 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       return status;
     }
 
-    public Team getTeam() {
-      return team;
-    }
-
     public boolean priorityKickRequired() {
       return priorityKick;
     }
   }
 
   // All teams in the match
+  @Getter
   private final Set<Team> teams;
 
   // Minimum at any time of the number of additional players needed to start the match
@@ -196,10 +197,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
     } else {
       smm.removeUnreadyReason(NeedMorePlayers.class);
     }
-  }
-
-  public Set<Team> getTeams() {
-    return this.teams;
   }
 
   public Set<Team> getParticipatingTeams() {

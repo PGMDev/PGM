@@ -3,6 +3,7 @@ package tc.oc.pgm.util.collection;
 import it.unimi.dsi.fastutil.longs.LongCollection;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import java.util.NoSuchElementException;
+import lombok.Getter;
 
 /**
  * Minimal implementation of a FIFO queue of longs, stored efficiently in a primitive array. Does
@@ -11,7 +12,9 @@ import java.util.NoSuchElementException;
 public class LongDeque {
   public static final int DEFAULT_CAPACITY = 16;
 
+  @Getter
   private final long noEntryValue;
+
   private long[] buf;
   private int head, tail;
 
@@ -114,10 +117,6 @@ public class LongDeque {
   public void clear() {
     buf = new long[DEFAULT_CAPACITY];
     head = tail = 0;
-  }
-
-  public long getNoEntryValue() {
-    return noEntryValue;
   }
 
   public int size() {

@@ -4,6 +4,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.base.Objects;
 import java.util.UUID;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
@@ -13,7 +14,9 @@ import tc.oc.pgm.util.named.NameStyle;
 
 public class PlayerContributor implements Contributor {
 
+  @Getter
   private final UUID id;
+
   private final Username username;
   private final @Nullable String contribution;
 
@@ -21,10 +24,6 @@ public class PlayerContributor implements Contributor {
     this.id = assertNotNull(id);
     this.username = PGM.get().getDatastore().getUsername(id);
     this.contribution = contribution;
-  }
-
-  public UUID getId() {
-    return id;
   }
 
   @Override

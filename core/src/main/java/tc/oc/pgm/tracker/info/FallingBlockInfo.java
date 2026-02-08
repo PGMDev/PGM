@@ -1,5 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.FallingBlock;
@@ -9,6 +10,7 @@ import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
+@Getter
 public class FallingBlockInfo extends EntityInfo implements DamageInfo {
 
   private final Material material;
@@ -30,10 +32,6 @@ public class FallingBlockInfo extends EntityInfo implements DamageInfo {
   @Override
   public @Nullable ParticipantState getAttacker() {
     return getOwner();
-  }
-
-  public Material getMaterial() {
-    return material;
   }
 
   @Override

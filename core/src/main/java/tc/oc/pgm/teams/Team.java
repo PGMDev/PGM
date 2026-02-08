@@ -2,6 +2,7 @@ package tc.oc.pgm.teams;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
@@ -23,7 +24,9 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   // Same as above, but for "standard" 2-team same max-players matches
   public static final float MAX_STANDARD_IMBALANCE = 1.1f;
 
+  @Getter
   private final TeamFactory info;
+
   private int min, max, overfill;
   private @Nullable NameTagVisibility nameTagVisibilityOverride;
 
@@ -55,10 +58,6 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
   @Override
   public String getId() {
     return this.info.getId();
-  }
-
-  public TeamFactory getInfo() {
-    return this.info;
   }
 
   public boolean isInstance(final TeamFactory definition) {

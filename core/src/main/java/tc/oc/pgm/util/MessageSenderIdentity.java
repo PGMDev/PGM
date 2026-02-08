@@ -1,10 +1,12 @@
 package tc.oc.pgm.util;
 
 import java.util.UUID;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
 
+@Getter
 public class MessageSenderIdentity {
 
   private final UUID playerId;
@@ -13,14 +15,6 @@ public class MessageSenderIdentity {
   public MessageSenderIdentity(Player viewer, Player player) {
     this.playerId = player.getUniqueId();
     this.name = Players.getVisibleName(viewer, player);
-  }
-
-  public UUID getPlayerId() {
-    return playerId;
-  }
-
-  public String getName() {
-    return name;
   }
 
   public MatchPlayer getPlayer(Player viewer) {

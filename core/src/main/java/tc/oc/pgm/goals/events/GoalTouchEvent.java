@@ -3,6 +3,8 @@ package tc.oc.pgm.goals.events;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Instant;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.event.HandlerList;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -14,11 +16,23 @@ import tc.oc.pgm.goals.TouchableGoal;
 public class GoalTouchEvent extends GoalEvent {
   private final TouchableGoal<?> goal;
   private final @Nullable Competitor competitor;
+
+  @Getter
   private final boolean firstForCompetitor;
+
+  @Getter
   private final @Nullable ParticipantState player;
+
+  @Getter
   private final boolean firstForPlayer;
+
+  @Getter
   private final boolean firstForPlayerLife;
+
+  @Getter
   private final Instant time;
+
+  @Setter
   private boolean cancelToucherMessage;
 
   /**
@@ -55,30 +69,10 @@ public class GoalTouchEvent extends GoalEvent {
     this(goal, null, false, null, false, false, time);
   }
 
-  public Instant getTime() {
-    return this.time;
-  }
-
   @Override
   public @NonNull Competitor getCompetitor() { // remove @Nullable
     //noinspection ConstantConditions
     return super.getCompetitor();
-  }
-
-  public boolean isFirstForCompetitor() {
-    return firstForCompetitor;
-  }
-
-  public @Nullable ParticipantState getPlayer() {
-    return this.player;
-  }
-
-  public boolean isFirstForPlayer() {
-    return firstForPlayer;
-  }
-
-  public boolean isFirstForPlayerLife() {
-    return firstForPlayerLife;
   }
 
   @Override
@@ -88,10 +82,6 @@ public class GoalTouchEvent extends GoalEvent {
 
   public boolean getCancelToucherMessage() {
     return cancelToucherMessage;
-  }
-
-  public void setCancelToucherMessage(boolean cancelToucherMessage) {
-    this.cancelToucherMessage = cancelToucherMessage;
   }
 
   private static final HandlerList handlers = new HandlerList();

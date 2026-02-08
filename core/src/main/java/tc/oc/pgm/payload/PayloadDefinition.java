@@ -1,6 +1,8 @@
 package tc.oc.pgm.payload;
 
 import java.time.Duration;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
@@ -12,9 +14,17 @@ import tc.oc.pgm.teams.TeamFactory;
 
 public class PayloadDefinition extends ControlPointDefinition {
 
+  @Getter
   private final BlockVector location;
+
+  @Getter
   private final double radius;
+
+  @Accessors(fluent = true)
+  @Getter
   private final boolean showBeam;
+
+  @Getter
   private final Filter displayFilter;
 
   public PayloadDefinition(
@@ -77,22 +87,6 @@ public class PayloadDefinition extends ControlPointDefinition {
     this.radius = radius;
     this.showBeam = showBeam;
     this.displayFilter = displayFilter;
-  }
-
-  public BlockVector getLocation() {
-    return location;
-  }
-
-  public double getRadius() {
-    return radius;
-  }
-
-  public boolean showBeam() {
-    return showBeam;
-  }
-
-  public Filter getDisplayFilter() {
-    return displayFilter;
   }
 
   public Payload build(Match match) {

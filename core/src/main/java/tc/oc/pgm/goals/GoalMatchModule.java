@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -53,8 +54,13 @@ public class GoalMatchModule implements MatchModule, Listener {
 
   protected final Match match;
   protected final List<Goal<?>> goals = new ArrayList<>();
+
+  @Getter
   protected final Multimap<Competitor, Goal<?>> goalsByCompetitor = ArrayListMultimap.create();
+
+  @Getter
   protected final Multimap<Goal<?>, Competitor> competitorsByGoal = HashMultimap.create();
+
   protected final Map<Competitor, GoalProgress> progressByCompetitor = new HashMap<>();
 
   private GoalMatchModule(Match match) {
@@ -71,14 +77,6 @@ public class GoalMatchModule implements MatchModule, Listener {
 
   public Collection<Competitor> getCompetitors(Goal<?> goal) {
     return competitorsByGoal.get(goal);
-  }
-
-  public Multimap<Competitor, Goal<?>> getGoalsByCompetitor() {
-    return goalsByCompetitor;
-  }
-
-  public Multimap<Goal<?>, Competitor> getCompetitorsByGoal() {
-    return competitorsByGoal;
   }
 
   public void addGoal(Goal<?> goal) {

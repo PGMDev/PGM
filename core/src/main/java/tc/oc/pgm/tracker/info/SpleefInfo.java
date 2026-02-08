@@ -2,12 +2,14 @@ package tc.oc.pgm.tracker.info;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.api.tracker.info.CauseInfo;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 
+@Getter
 public class SpleefInfo implements DamageInfo, CauseInfo {
 
   private final DamageInfo breaker;
@@ -26,14 +28,6 @@ public class SpleefInfo implements DamageInfo, CauseInfo {
   @Override
   public DamageInfo getCause() {
     return breaker;
-  }
-
-  public DamageInfo getBreaker() {
-    return breaker;
-  }
-
-  public Tick getTime() {
-    return time;
   }
 
   @Override

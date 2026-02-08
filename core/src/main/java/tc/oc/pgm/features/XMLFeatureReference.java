@@ -1,5 +1,6 @@
 package tc.oc.pgm.features;
 
+import lombok.Getter;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
@@ -14,7 +15,11 @@ import tc.oc.pgm.util.xml.Node;
  */
 public class XMLFeatureReference<T extends FeatureDefinition> implements FeatureReference<T> {
   protected final FeatureDefinitionContext context;
+  /** Get the ID of the referenced feature, as parsed from the XML node */
+  @Getter
   protected final String id;
+  /** Get the type of the referenced feature */
+  @Getter
   protected final Class<T> type;
 
   // Will only be available prior to resolving and validating.
@@ -32,16 +37,6 @@ public class XMLFeatureReference<T extends FeatureDefinition> implements Feature
     this.node = node;
     this.id = id != null ? id : node.getValueNormalize();
     this.type = type;
-  }
-
-  /** Get the ID of the referenced feature, as parsed from the XML node */
-  public String getId() {
-    return this.id;
-  }
-
-  /** Get the type of the referenced feature */
-  public Class<T> getType() {
-    return this.type;
   }
 
   /** Get the XML node that references the feature */

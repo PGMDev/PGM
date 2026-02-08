@@ -1,8 +1,10 @@
 package tc.oc.pgm.stats;
 
 import java.util.Collection;
+import lombok.Getter;
 
 // Holds calculated total stats for a single team
+@Getter
 public class TeamStats implements StatHolder {
 
   private int teamKills = 0;
@@ -43,45 +45,5 @@ public class TeamStats implements StatHolder {
       case DAMAGE -> damageDone;
       default -> Double.NaN;
     };
-  }
-
-  public int getTeamKills() {
-    return teamKills;
-  }
-
-  public int getTeamDeaths() {
-    return teamDeaths;
-  }
-
-  public double getDamageDone() {
-    return damageDone;
-  }
-
-  public double getDamageTaken() {
-    return damageTaken;
-  }
-
-  public double getBowDamage() {
-    return bowDamage;
-  }
-
-  public double getBowDamageTaken() {
-    return bowDamageTaken;
-  }
-
-  public int getShotsTaken() {
-    return shotsTaken;
-  }
-
-  public int getShotsHit() {
-    return shotsHit;
-  }
-
-  public double getTeamKD() {
-    return teamKD;
-  }
-
-  public double getTeamBowAcc() {
-    return teamBowAcc;
   }
 }

@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.event.player;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -15,19 +17,14 @@ import tc.oc.pgm.util.event.SportPaper;
 public class PlayerAttackEntityEvent extends PlayerEvent implements Cancellable {
   private static final HandlerList handlers = new HandlerList();
   protected Entity clickedEntity;
+
+  @Getter
+  @Setter
   boolean cancelled = false;
 
   public PlayerAttackEntityEvent(final Player who, final Entity clickedEntity) {
     super(who);
     this.clickedEntity = clickedEntity;
-  }
-
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  public void setCancelled(boolean cancel) {
-    this.cancelled = cancel;
   }
 
   /**

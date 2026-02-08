@@ -1,5 +1,6 @@
 package tc.oc.pgm.events;
 
+import lombok.Getter;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -10,7 +11,11 @@ import tc.oc.pgm.join.JoinResult;
 public class PlayerJoinResultEvent extends MatchPlayerEvent implements Cancellable {
 
   private boolean cancelled;
+
+  @Getter
   private final JoinResult joinResult;
+
+  @Getter
   private final JoinRequest joinRequest;
 
   public PlayerJoinResultEvent(MatchPlayer player, JoinResult joinResult, JoinRequest request) {
@@ -18,14 +23,6 @@ public class PlayerJoinResultEvent extends MatchPlayerEvent implements Cancellab
     this.cancelled = false;
     this.joinResult = joinResult;
     this.joinRequest = request;
-  }
-
-  public JoinResult getJoinResult() {
-    return joinResult;
-  }
-
-  public JoinRequest getJoinRequest() {
-    return joinRequest;
   }
 
   @Override

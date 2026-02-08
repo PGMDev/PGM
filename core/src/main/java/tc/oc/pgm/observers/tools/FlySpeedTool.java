@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.Lists;
 import java.util.List;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -51,6 +52,8 @@ public class FlySpeedTool implements MenuItem {
     HYPERSPEED(NamedTextColor.LIGHT_PURPLE, 0.9f);
 
     private final TextColor color;
+
+    @Getter
     private final float value;
 
     private static final FlySpeed[] speeds = values();
@@ -58,10 +61,6 @@ public class FlySpeedTool implements MenuItem {
     FlySpeed(TextColor color, float value) {
       this.color = color;
       this.value = value;
-    }
-
-    public float getValue() {
-      return value;
     }
 
     public Component getName() {

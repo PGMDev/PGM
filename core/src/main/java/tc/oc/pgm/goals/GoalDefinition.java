@@ -6,6 +6,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.base.Splitter;
 import java.util.regex.Pattern;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +22,10 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   private final @Nullable Boolean required;
   private final ShowOptions showOptions;
+
+  @Getter
   private final String name;
+
   private final Component component;
 
   public GoalDefinition(
@@ -36,10 +40,6 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   @Override
   protected String getDefaultId() {
     return makeDefaultId() + "--" + makeId(this.name);
-  }
-
-  public String getName() {
-    return this.name;
   }
 
   public String getColoredName() {
@@ -67,20 +67,19 @@ public abstract class GoalDefinition extends SelfIdentifyingFeatureDefinition {
   }
 
   // See "objective.name.monument" for examples
-  private static final Pattern OBJECTIVE_PATTERN =
-      Pattern.compile(
-          "Monument|Core|Wool|Flag|Antenna|Base|Ship|Orb|Tower|Pillar|Inhibitor|Reactor|Engine");
+  private static final Pattern OBJECTIVE_PATTERN = Pattern.compile(
+      "Monument|Core|Wool|Flag|Antenna|Base|Ship|Orb|Tower|Pillar|Inhibitor|Reactor|Engine");
 
   // See "misc.top" for examples
-  private static final Pattern DESCRIPTOR_PATTERN =
-      Pattern.compile(
-          "Top|Bottom|Front|Back|Rear|Left|Right|Center|Mid|North|South|East|West|White|Orange|Magenta|Yellow|Lime|Pink|Gray|Cyan|Purple|Blue|Brown|Green|Red|Black|Light");
+  private static final Pattern DESCRIPTOR_PATTERN = Pattern.compile(
+      "Top|Bottom|Front|Back|Rear|Left|Right|Center|Mid|North|South|East|West|White|Orange|Magenta|Yellow|Lime|Pink|Gray|Cyan|Purple|Blue|Brown|Green|Red|Black|Light");
 
   // TODO: Support languages where words are ordered right-to-left
   private static Component translateName(final String name) {
     final TextComponent.Builder text = text();
     int results = 0;
-    for (final String section : Splitter.on(' ').omitEmptyStrings().trimResults().split(name)) {
+    for (final String section :
+        Splitter.on(' ').omitEmptyStrings().trimResults().split(name)) {
       if (results > 0) {
         text.append(space());
       }

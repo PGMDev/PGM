@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import java.time.Duration;
 import java.time.Instant;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -23,6 +24,7 @@ import tc.oc.pgm.util.bukkit.Sounds;
  * State of a flag after a player drops it on the ground, either by dying or by clicking on the
  * banner in their inventory. A flag can only enter this state when subject to a return delay.
  */
+@Getter
 public class Dropped extends Uncarried implements Missing {
 
   // Minimum time between a player dropping the flag and picking it up again
@@ -33,10 +35,6 @@ public class Dropped extends Uncarried implements Missing {
   public Dropped(Flag flag, Post post, Location location, MatchPlayer dropper) {
     super(flag, post, location);
     this.dropper = dropper;
-  }
-
-  public MatchPlayer getDropper() {
-    return dropper;
   }
 
   @Override

@@ -2,6 +2,7 @@ package tc.oc.pgm.api.map;
 
 import static net.kyori.adventure.text.Component.text;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
@@ -33,9 +34,12 @@ public enum Gamemode implements ComponentLike {
   SKYWARS("skywars", "Skywars", "Skywars"),
   SURVIVAL_GAMES("sg", "Survival Games", "SG");
 
+  @Getter
   private final String id;
 
   private final String name;
+
+  @Getter
   private final String acronym;
 
   Gamemode(String id, String name, String acronym) {
@@ -53,16 +57,8 @@ public enum Gamemode implements ComponentLike {
     return null;
   }
 
-  public String getId() {
-    return id;
-  }
-
   public String getFullName() {
     return name;
-  }
-
-  public String getAcronym() {
-    return acronym;
   }
 
   @Override

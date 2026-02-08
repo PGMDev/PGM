@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -384,16 +385,14 @@ public class MatchTabManager extends TabManager implements Listener {
 
   private class RenderTask implements Runnable {
 
+    @Getter
     private final boolean priority;
+
     private final Future<?> future;
 
     public RenderTask(boolean priority, long millis) {
       this.priority = priority;
       this.future = executor.schedule(this, millis, TimeUnit.MILLISECONDS);
-    }
-
-    public boolean isPriority() {
-      return priority;
     }
 
     public void cancel() {

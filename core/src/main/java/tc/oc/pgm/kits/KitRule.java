@@ -1,8 +1,10 @@
 package tc.oc.pgm.kits;
 
+import lombok.Getter;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 
+@Getter
 public class KitRule implements FeatureDefinition {
 
   enum Action {
@@ -19,17 +21,5 @@ public class KitRule implements FeatureDefinition {
     this.action = action;
     this.kit = kit;
     this.filter = filter;
-  }
-
-  public Action getAction() {
-    return action;
-  }
-
-  public Kit getKit() {
-    return kit;
-  }
-
-  public Filter getFilter() {
-    return filter;
   }
 }

@@ -1,5 +1,6 @@
 plugins {
     `java-library`
+    id("io.freefair.lombok")
     id("com.diffplug.spotless")
     id("de.skuzzle.restrictimports")
 }
@@ -8,6 +9,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+}
+
+lombok {
+    version = "1.18.42"
 }
 
 repositories {

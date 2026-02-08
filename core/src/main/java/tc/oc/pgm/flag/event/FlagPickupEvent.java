@@ -1,5 +1,6 @@
 package tc.oc.pgm.flag.event;
 
+import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -8,33 +9,27 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
 
 /**
- * Fired BEFORE a player picks up a flag, allowing it to be cancelled. This is used by {@link
- * tc.oc.pgm.regions.RegionMatchModule} to prevent flags from being picked up inside regions that
- * the player would not be allowed to enter if they were already carrying it.
+ * Fired BEFORE a player picks up a flag, allowing it to be cancelled. This is used by
+ * {@link tc.oc.pgm.regions.RegionMatchModule} to prevent flags from being picked up inside regions
+ * that the player would not be allowed to enter if they were already carrying it.
  */
 public class FlagPickupEvent extends Event implements Cancellable {
 
+  @Getter
   private final Flag flag;
+
+  @Getter
   private final MatchPlayer carrier;
+
+  @Getter
   private final Location location;
+
   private boolean cancelled;
 
   public FlagPickupEvent(Flag flag, MatchPlayer carrier, Location location) {
     this.flag = flag;
     this.carrier = carrier;
     this.location = location;
-  }
-
-  public Flag getFlag() {
-    return flag;
-  }
-
-  public MatchPlayer getCarrier() {
-    return carrier;
-  }
-
-  public Location getLocation() {
-    return location;
   }
 
   @Override

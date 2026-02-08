@@ -2,6 +2,7 @@ package tc.oc.pgm.controlpoint;
 
 import com.google.common.collect.Sets;
 import java.util.Set;
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -20,6 +21,8 @@ import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 /** Tracks which players are on a control point and answers some queries about them */
 public class RegionPlayerTracker implements Listener {
   private final Match match;
+
+  @Getter
   private final Set<MatchPlayer> players = Sets.newHashSet();
 
   // The region to check against
@@ -35,10 +38,6 @@ public class RegionPlayerTracker implements Listener {
     this.match = match;
     this.region = region.getStatic(match);
     this.staticFilter = staticFilter;
-  }
-
-  public Set<MatchPlayer> getPlayers() {
-    return this.players;
   }
 
   public void setRegion(Region.Static region) {

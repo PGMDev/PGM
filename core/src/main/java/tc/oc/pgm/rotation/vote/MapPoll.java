@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import lombok.Getter;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -68,7 +69,10 @@ public class MapPoll {
 
   private final WeakReference<Match> match;
 
+  @Getter
   private final Map<MapInfo, Set<UUID>> votes;
+
+  @Getter
   private boolean running = true;
 
   public MapPoll(Match match, List<MapInfo> maps) {
@@ -236,10 +240,6 @@ public class MapPoll {
     return 1;
   }
 
-  public boolean isRunning() {
-    return running;
-  }
-
   /**
    * Picks a winner and ends the vote, updating map scores based on votes
    *
@@ -258,9 +258,5 @@ public class MapPoll {
 
   public void cancel() {
     running = false;
-  }
-
-  public Map<MapInfo, Set<UUID>> getVotes() {
-    return votes;
   }
 }

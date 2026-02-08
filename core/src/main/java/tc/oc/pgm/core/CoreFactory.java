@@ -1,6 +1,7 @@
 package tc.oc.pgm.core;
 
 import com.google.common.collect.ImmutableSet;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.region.Region;
@@ -13,9 +14,15 @@ import tc.oc.pgm.util.material.MaterialMatcher;
 
 @FeatureInfo(name = "core")
 public class CoreFactory extends ProximityGoalDefinition {
+  @Getter
   protected final Region region;
+
+  @Getter
   protected final MaterialMatcher material;
+
+  @Getter
   protected final int leakLevel;
+
   protected final ImmutableSet<Mode> modeList;
   protected final boolean showProgress;
 
@@ -40,20 +47,8 @@ public class CoreFactory extends ProximityGoalDefinition {
     this.showProgress = showProgress;
   }
 
-  public Region getRegion() {
-    return this.region;
-  }
-
   public ImmutableSet<Mode> getModes() {
     return this.modeList;
-  }
-
-  public MaterialMatcher getMaterial() {
-    return this.material;
-  }
-
-  public int getLeakLevel() {
-    return this.leakLevel;
   }
 
   public boolean getShowProgress() {

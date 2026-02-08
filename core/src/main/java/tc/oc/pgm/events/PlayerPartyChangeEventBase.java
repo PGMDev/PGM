@@ -1,6 +1,7 @@
 package tc.oc.pgm.events;
 
 import javax.annotation.Nullable;
+import lombok.Getter;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -60,6 +61,8 @@ public abstract class PlayerPartyChangeEventBase extends MatchPlayerEvent {
 
   protected final @Nullable Party oldParty;
   protected final @Nullable Party newParty;
+
+  @Getter
   protected final JoinRequest request;
 
   protected PlayerPartyChangeEventBase(
@@ -84,9 +87,5 @@ public abstract class PlayerPartyChangeEventBase extends MatchPlayerEvent {
 
   public boolean isParticipating() {
     return newParty != null && newParty instanceof Competitor;
-  }
-
-  public JoinRequest getRequest() {
-    return request;
   }
 }

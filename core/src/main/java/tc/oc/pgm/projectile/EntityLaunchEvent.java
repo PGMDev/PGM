@@ -1,5 +1,7 @@
 package tc.oc.pgm.projectile;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
@@ -10,26 +12,17 @@ import org.bukkit.projectiles.ProjectileSource;
  * Called when a projectile is launched. Difference from the Bukkit version is that the projectile
  * can be any Entity, not necessarily a Projectile.
  */
+@Getter
 public class EntityLaunchEvent extends EntityEvent implements Cancellable {
 
   private final ProjectileSource source;
+
+  @Setter
   private boolean cancelled;
 
   public EntityLaunchEvent(Entity launched, ProjectileSource source) {
     super(launched);
     this.source = source;
-  }
-
-  public ProjectileSource getSource() {
-    return source;
-  }
-
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  public void setCancelled(boolean cancel) {
-    cancelled = cancel;
   }
 
   private static final HandlerList handlers = new HandlerList();

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.rotation.pools.VotingPool;
@@ -15,6 +16,7 @@ public class VotePoolOptions {
   // Added maps w/ nullable playerId to be used in custom vote selection
   private final Map<MapInfo, UUID> customVoteMaps;
   // Whether custom map selection should replace existing entries
+  @Getter
   private boolean replace;
 
   public VotePoolOptions() {
@@ -24,10 +26,6 @@ public class VotePoolOptions {
 
   public boolean shouldOverride() {
     return customVoteMaps.size() >= MapVotePicker.MIN_CUSTOM_VOTE_OPTIONS && !replace;
-  }
-
-  public boolean isReplace() {
-    return replace;
   }
 
   public boolean toggleMode() {

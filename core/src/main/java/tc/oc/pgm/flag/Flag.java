@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import lombok.Getter;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -75,17 +76,29 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   public static final Component DROPPED_SYMBOL = text("\u2691"); // ⚑
   public static final Component CARRIED_SYMBOL = text("\u2794"); // ➔
 
+  @Getter
   private final ImmutableSet<NetDefinition> nets;
+
   private final Location bannerLocation;
+
+  @Getter
   private final ColorUtils.BannerData bannerData;
+
+  @Getter
   private final ItemStack bannerItem;
+
+  @Getter
   private final ItemStack legacyBannerItem;
+
   private final AngleProvider bannerYawProvider;
   private final @Nullable Team owner;
   private Set<Team> capturers;
   private Set<Team> controllers;
   private Set<Team> completers;
+
+  @Getter
   private BaseState state;
+
   private boolean transitioning;
 
   protected Flag(Match match, FlagDefinition definition, ImmutableSet<NetDefinition> nets)
@@ -170,26 +183,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public String getColoredName() {
     return TextTranslations.translateLegacy(getComponentName());
-  }
-
-  public ImmutableSet<NetDefinition> getNets() {
-    return nets;
-  }
-
-  public ColorUtils.BannerData getBannerData() {
-    return bannerData;
-  }
-
-  public ItemStack getBannerItem() {
-    return bannerItem;
-  }
-
-  public ItemStack getLegacyBannerItem() {
-    return legacyBannerItem;
-  }
-
-  public BaseState getState() {
-    return state;
   }
 
   public Optional<Location> getLocation() {

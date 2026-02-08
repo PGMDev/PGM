@@ -1,29 +1,21 @@
 package tc.oc.pgm.util.skin;
 
 import java.util.Objects;
+import lombok.Getter;
 
 /** A self-contained skin */
+@Getter
 public class Skin {
   public static final Skin EMPTY = new Skin(null, null);
 
+  /** The base64 encoded data for this skin, or null if this is the empty skin i.e. Steve/Alex */
   private final String data;
+  /** The base64 encoded signature for this skin, or null if this skin has no signature */
   private final String signature;
 
   public Skin(String data, String signature) {
     this.data = data;
     this.signature = signature;
-  }
-
-  /**
-   * Return the base64 encoded data for this skin, or null if this is the empty skin i.e. Steve/Alex
-   */
-  public String getData() {
-    return data;
-  }
-
-  /** Return the base64 encoded signature for this skin, or null if this skin has no signature */
-  public String getSignature() {
-    return signature;
   }
 
   /** Return true if this is the empty skin i.e. Steve/Alex */

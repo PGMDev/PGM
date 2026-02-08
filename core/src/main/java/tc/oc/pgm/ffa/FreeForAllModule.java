@@ -3,6 +3,7 @@ package tc.oc.pgm.ffa;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.logging.Logger;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Document;
@@ -22,6 +23,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
+@Getter
 public class FreeForAllModule implements MapModule<FreeForAllMatchModule> {
 
   private static final Collection<MapTag> TAGS =
@@ -30,10 +32,6 @@ public class FreeForAllModule implements MapModule<FreeForAllMatchModule> {
 
   public FreeForAllModule(FreeForAllOptions options) {
     this.options = options;
-  }
-
-  public FreeForAllOptions getOptions() {
-    return options;
   }
 
   @Override
@@ -78,12 +76,10 @@ public class FreeForAllModule implements MapModule<FreeForAllMatchModule> {
               XMLUtils.parseNumber(elPlayers.getAttribute("min"), Integer.class, minPlayers);
           maxPlayers =
               XMLUtils.parseNumber(elPlayers.getAttribute("max"), Integer.class, maxPlayers);
-          maxOverfill =
-              XMLUtils.parseNumber(
-                  elPlayers.getAttribute("max-overfill"), Integer.class, maxOverfill);
-          nameTagVisibility =
-              XMLUtils.parseNameTagVisibility(
-                  Node.fromAttr(elPlayers, "show-name-tags"), nameTagVisibility);
+          maxOverfill = XMLUtils.parseNumber(
+              elPlayers.getAttribute("max-overfill"), Integer.class, maxOverfill);
+          nameTagVisibility = XMLUtils.parseNameTagVisibility(
+              Node.fromAttr(elPlayers, "show-name-tags"), nameTagVisibility);
           colors = XMLUtils.parseBoolean(Node.fromAttr(elPlayers, "colors"), colors);
         }
 

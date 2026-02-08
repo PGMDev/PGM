@@ -6,6 +6,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
@@ -18,13 +19,24 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.material.ItemMaterialData;
 
 public class PlayerClass implements ComponentLike {
+  @Getter
   private final String name;
+
+  @Getter
   private final String familyName;
+
   private final @Nullable String description;
   private final @Nullable String longdescription;
+
+  @Getter
   private final boolean sticky;
+
+  @Getter
   private final Set<Kit> kits;
+
+  @Getter
   private final ItemMaterialData icon;
+
   private final boolean restrict;
 
   public PlayerClass(
@@ -44,14 +56,6 @@ public class PlayerClass implements ComponentLike {
     this.kits = ImmutableSet.copyOf(assertNotNull(kits, "kits"));
     this.icon = assertNotNull(icon, "icon");
     this.restrict = restrict;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public String getFamilyName() {
-    return this.familyName;
   }
 
   public @Nullable String getDescription() {
@@ -74,18 +78,6 @@ public class PlayerClass implements ComponentLike {
     }
 
     return component.build();
-  }
-
-  public boolean isSticky() {
-    return this.sticky;
-  }
-
-  public Set<Kit> getKits() {
-    return this.kits;
-  }
-
-  public ItemMaterialData getIcon() {
-    return this.icon;
   }
 
   public boolean isRestricted() {

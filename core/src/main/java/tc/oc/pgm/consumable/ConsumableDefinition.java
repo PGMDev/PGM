@@ -1,5 +1,6 @@
 package tc.oc.pgm.consumable;
 
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -7,7 +8,10 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
 public class ConsumableDefinition extends SelfIdentifyingFeatureDefinition {
 
+  @Getter
   private final Action<? super MatchPlayer> action;
+
+  @Getter
   private final ConsumeCause cause;
   /** If true, replaces vanilla behaviour, otherwise keeps vanilla behaviour */
   private final boolean override;
@@ -25,14 +29,6 @@ public class ConsumableDefinition extends SelfIdentifyingFeatureDefinition {
     this.cause = cause;
     this.override = override;
     this.consume = consume;
-  }
-
-  public Action<? super MatchPlayer> getAction() {
-    return action;
-  }
-
-  public ConsumeCause getCause() {
-    return cause;
   }
 
   public boolean getOverride() {

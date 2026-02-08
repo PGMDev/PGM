@@ -1,6 +1,7 @@
 package tc.oc.pgm.flag;
 
 import com.google.common.collect.ImmutableSet;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
@@ -15,26 +16,43 @@ import tc.oc.pgm.teams.TeamFactory;
 @FeatureInfo(name = "net")
 public class NetDefinition extends SelfIdentifyingFeatureDefinition {
 
+  @Getter
   private final Region region; // Region flag carrier must enter to capture
+
+  @Getter
   private final Filter captureFilter; // Carrier must pass this filter to capture
+
+  @Getter
   private final Filter respawnFilter; // Captured flags will not respawn until they pass this filter
+
   private final @Nullable FeatureReference<TeamFactory>
       owner; // Team that gets points for captures in this net, null to give points to flag carrier
+
+  @Getter
   private final double pointsPerCapture; // Points awarded per capture
+
+  @Getter
   private final boolean
       sticky; // If capture is delayed by filter, carrier does not have to stay inside the net
+
   private final @Nullable Component
       denyMessage; // Message to show carrier when capture is prevented by filter
   private final @Nullable Component
       respawnMessage; // Message to broadcast when respawn is prevented by filter or respawnTogether
   private final @Nullable PostDefinition
       returnPost; // Post to send flags after capture, null to send to their current post
+
+  @Getter
   private final ImmutableSet<FlagDefinition>
       capturableFlags; // Flags that can be captured in this net
+
+  @Getter
   private final ImmutableSet<FlagDefinition>
       recoverableFlags; // Flags that are force returned on capture, aside from the flag being
   // captured
+  @Getter
   private final boolean respawnTogether; // Delay respawn until all capturableFlags are captured
+
   private @Nullable Vector proximityLocation;
 
   public NetDefinition(
@@ -69,18 +87,6 @@ public class NetDefinition extends SelfIdentifyingFeatureDefinition {
     this.proximityLocation = proximityLocation;
   }
 
-  public Region getRegion() {
-    return this.region;
-  }
-
-  public Filter getCaptureFilter() {
-    return captureFilter;
-  }
-
-  public Filter getRespawnFilter() {
-    return respawnFilter;
-  }
-
   public @Nullable Component getRespawnMessage() {
     return respawnMessage;
   }
@@ -89,32 +95,12 @@ public class NetDefinition extends SelfIdentifyingFeatureDefinition {
     return this.owner == null ? null : this.owner.get();
   }
 
-  public double getPointsPerCapture() {
-    return pointsPerCapture;
-  }
-
-  public boolean isSticky() {
-    return sticky;
-  }
-
   public @Nullable Component getDenyMessage() {
     return denyMessage;
   }
 
   public @Nullable PostDefinition getReturnPost() {
     return this.returnPost;
-  }
-
-  public ImmutableSet<FlagDefinition> getCapturableFlags() {
-    return capturableFlags;
-  }
-
-  public ImmutableSet<FlagDefinition> getRecoverableFlags() {
-    return recoverableFlags;
-  }
-
-  public boolean isRespawnTogether() {
-    return respawnTogether;
   }
 
   public Vector getProximityLocation() {

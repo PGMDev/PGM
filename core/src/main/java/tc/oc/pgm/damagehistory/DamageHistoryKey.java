@@ -4,9 +4,11 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.util.Objects;
 import java.util.UUID;
+import lombok.Getter;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.ParticipantState;
 
+@Getter
 public class DamageHistoryKey {
 
   private final ParticipantState state;
@@ -19,10 +21,6 @@ public class DamageHistoryKey {
     ParticipantState damager = damageEntry.getDamager();
     assertNotNull(damager);
     return new DamageHistoryKey(damager);
-  }
-
-  public ParticipantState getState() {
-    return state;
   }
 
   public UUID getPlayer() {

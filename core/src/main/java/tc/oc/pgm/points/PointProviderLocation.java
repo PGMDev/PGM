@@ -1,5 +1,7 @@
 package tc.oc.pgm.points;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
 import org.bukkit.Location;
 import org.bukkit.World;
 
@@ -9,6 +11,8 @@ import org.bukkit.World;
  *
  * <p>The other potential solutions were even more hacky.
  */
+@Accessors(fluent = true)
+@Getter
 public class PointProviderLocation extends Location {
 
   private boolean hasYaw;
@@ -21,14 +25,6 @@ public class PointProviderLocation extends Location {
   public PointProviderLocation(World world, double x, double y, double z, float yaw, float pitch) {
     super(world, x, y, z, yaw, pitch);
     hasYaw = hasPitch = true;
-  }
-
-  public boolean hasYaw() {
-    return hasYaw;
-  }
-
-  public boolean hasPitch() {
-    return hasPitch;
   }
 
   void setHasYaw(boolean yes) {

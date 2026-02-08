@@ -2,6 +2,7 @@ package tc.oc.pgm.goals;
 
 import java.util.EnumSet;
 import java.util.Set;
+import lombok.Getter;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -13,6 +14,8 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class ShowOptions {
 
   private final Set<ShowOption> options;
+
+  @Getter
   private final Filter scoreboardFilter;
 
   private ShowOptions(Set<ShowOption> options, Filter scoreboardFilter) {
@@ -28,18 +31,13 @@ public class ShowOptions {
         options.add(option);
       }
     }
-    Filter scoreboardFilter =
-        parser.parseProperty(
-            el, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.MATCH);
+    Filter scoreboardFilter = parser.parseProperty(
+        el, "scoreboard-filter", StaticFilter.ALLOW, DynamicFilterValidation.MATCH);
     return new ShowOptions(options, scoreboardFilter);
   }
 
   public boolean hasOption(ShowOption option) {
     return options.contains(option);
-  }
-
-  public Filter getScoreboardFilter() {
-    return scoreboardFilter;
   }
 
   @Override

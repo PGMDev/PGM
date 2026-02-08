@@ -3,11 +3,13 @@ package tc.oc.pgm.rotation.pools;
 import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
+import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.rotation.MapPoolManager;
 
+@Getter
 public class Rotation extends MapPool {
 
   private int position;
@@ -44,10 +46,6 @@ public class Rotation extends MapPool {
 
   public void setPosition(int position) {
     this.position = position % maps.size();
-  }
-
-  public int getPosition() {
-    return position;
   }
 
   public int getNextPosition() {

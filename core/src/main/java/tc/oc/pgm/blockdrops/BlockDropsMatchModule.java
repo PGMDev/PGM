@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import lombok.Getter;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -45,6 +46,7 @@ import tc.oc.pgm.util.material.MaterialData;
 public class BlockDropsMatchModule implements MatchModule, Listener {
   private static final double BASE_FALL_SPEED = 3d;
 
+  @Getter
   private final BlockDropsRuleSet ruleSet;
 
   // Tracks FallingBlocks created by explosions that have been randomly chosen
@@ -61,10 +63,6 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   public BlockDropsMatchModule(Match match, BlockDropsRuleSet ruleSet) {
     this.match = match;
     this.ruleSet = ruleSet;
-  }
-
-  public BlockDropsRuleSet getRuleSet() {
-    return ruleSet;
   }
 
   public static boolean causesDrops(final Event event) {

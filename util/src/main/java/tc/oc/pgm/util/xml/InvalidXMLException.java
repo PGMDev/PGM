@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.xml;
 
 import java.lang.reflect.InvocationTargetException;
+import lombok.Getter;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -11,7 +12,15 @@ public class InvalidXMLException extends Exception {
 
   private final @Nullable Node node;
   private final @Nullable String documentPath;
-  private final int startLine, endLine, column;
+
+  @Getter
+  private final int startLine;
+
+  @Getter
+  private final int endLine;
+
+  @Getter
+  private final int column;
 
   protected InvalidXMLException(
       String message,
@@ -101,18 +110,6 @@ public class InvalidXMLException extends Exception {
 
   public @Nullable String getDocumentPath() {
     return documentPath;
-  }
-
-  public int getStartLine() {
-    return startLine;
-  }
-
-  public int getEndLine() {
-    return endLine;
-  }
-
-  public int getColumn() {
-    return column;
   }
 
   public @Nullable String getWhere() {

@@ -3,6 +3,7 @@ package tc.oc.pgm.destroyable;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collection;
+import lombok.Getter;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
@@ -27,15 +28,13 @@ import tc.oc.pgm.util.material.MaterialData;
 @ListenerScope(MatchScope.RUNNING)
 public class DestroyableMatchModule implements MatchModule, Listener {
   protected final Match match;
+
+  @Getter
   protected final Collection<Destroyable> destroyables;
 
   public DestroyableMatchModule(Match match, Collection<Destroyable> destroyables) {
     this.match = match;
     this.destroyables = destroyables;
-  }
-
-  public Collection<Destroyable> getDestroyables() {
-    return destroyables;
   }
 
   private boolean anyDestroyableAffected(BlockTransformEvent event) {

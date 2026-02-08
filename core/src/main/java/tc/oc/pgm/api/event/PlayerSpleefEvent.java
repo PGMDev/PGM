@@ -2,6 +2,7 @@ package tc.oc.pgm.api.event;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.Vector;
@@ -12,8 +13,12 @@ import tc.oc.pgm.tracker.info.SpleefInfo;
 
 public class PlayerSpleefEvent extends Event {
 
+  @Getter
   private final MatchPlayer victim;
+
+  @Getter
   private final Vector block;
+
   private final SpleefInfo info;
 
   public PlayerSpleefEvent(MatchPlayer victim, Vector block, SpleefInfo info) {
@@ -22,16 +27,8 @@ public class PlayerSpleefEvent extends Event {
     this.info = assertNotNull(info);
   }
 
-  public MatchPlayer getVictim() {
-    return victim;
-  }
-
   public SpleefInfo getSpleefInfo() {
     return info;
-  }
-
-  public Vector getBlock() {
-    return block;
   }
 
   public @Nullable ParticipantState getBreaker() {

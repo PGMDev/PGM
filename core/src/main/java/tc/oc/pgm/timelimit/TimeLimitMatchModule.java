@@ -1,6 +1,9 @@
 package tc.oc.pgm.timelimit;
 
 import java.time.Duration;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -8,10 +11,21 @@ import tc.oc.pgm.api.party.VictoryCondition;
 
 public class TimeLimitMatchModule implements MatchModule {
   private final Match match;
+
+  @Getter
   private @Nullable TimeLimit timeLimit;
+
   private @Nullable TimeLimitCountdown countdown;
+
+  @Getter
   private @Nullable OvertimeCountdown overtime;
+
+  @Accessors(fluent = true)
+  @Getter
   private boolean willUseProximity;
+
+  @Getter
+  @Setter
   private boolean finished; // If Time limit ended this match
 
   public TimeLimitMatchModule(Match match, @Nullable TimeLimit timeLimit) {
@@ -30,22 +44,6 @@ public class TimeLimitMatchModule implements MatchModule {
   @Override
   public void enable() {
     this.start();
-  }
-
-  public boolean isFinished() {
-    return finished;
-  }
-
-  public void setFinished(boolean finished) {
-    this.finished = finished;
-  }
-
-  public @Nullable TimeLimit getTimeLimit() {
-    return this.timeLimit;
-  }
-
-  public boolean willUseProximity() {
-    return this.willUseProximity;
   }
 
   public void setTimeLimit(@Nullable TimeLimit timeLimit) {

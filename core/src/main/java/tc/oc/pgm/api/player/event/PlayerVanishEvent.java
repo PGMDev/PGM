@@ -1,9 +1,11 @@
 package tc.oc.pgm.api.player.event;
 
+import lombok.Getter;
 import org.bukkit.event.HandlerList;
 import tc.oc.pgm.api.player.MatchPlayer;
 
 /** PlayerVanishEvent - Called when a player's vanish status changes * */
+@Getter
 public class PlayerVanishEvent extends MatchPlayerEvent {
 
   private final boolean quiet;
@@ -13,14 +15,6 @@ public class PlayerVanishEvent extends MatchPlayerEvent {
     super(vanisher);
     this.quiet = quiet;
     this.vanished = vanished;
-  }
-
-  public boolean isVanished() {
-    return vanished;
-  }
-
-  public boolean isQuiet() {
-    return quiet;
   }
 
   private static final HandlerList handlers = new HandlerList();

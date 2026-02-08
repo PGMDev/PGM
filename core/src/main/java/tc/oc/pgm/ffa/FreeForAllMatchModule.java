@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -70,7 +71,10 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   }
 
   private final Match match;
+
+  @Getter
   private final FreeForAllOptions options;
+
   private @Nullable Integer minPlayers, maxPlayers, maxOverfill;
   private int minPlayersNeeded = Integer.MAX_VALUE;
   private final Map<UUID, Tribute> tributes = new HashMap<>();
@@ -95,10 +99,6 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
       jmm = match.needModule(JoinMatchModule.class);
     }
     return jmm;
-  }
-
-  public FreeForAllOptions getOptions() {
-    return options;
   }
 
   public int getMinPlayers() {

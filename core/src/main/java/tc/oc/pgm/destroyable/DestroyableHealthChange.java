@@ -2,6 +2,7 @@ package tc.oc.pgm.destroyable;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,8 @@ public class DestroyableHealthChange {
   private final @NotNull BlockState oldState;
   private final @NotNull BlockState newState;
   private final @Nullable ParticipantState playerCause;
+
+  @Getter
   private final int healthChange;
 
   /**
@@ -68,9 +71,5 @@ public class DestroyableHealthChange {
    */
   public @Nullable ParticipantState getPlayerCause() {
     return this.playerCause;
-  }
-
-  public int getHealthChange() {
-    return healthChange;
   }
 }

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import lombok.Getter;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
@@ -34,7 +35,10 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class ClassModule implements MapModule<ClassMatchModule> {
 
   private static final Collection<MapTag> TAGS = ImmutableList.of(new MapTag("classes", "Classes"));
+
+  @Getter
   final String family;
+
   final Map<String, PlayerClass> classes;
   final PlayerClass defaultClass;
 
@@ -52,10 +56,6 @@ public class ClassModule implements MapModule<ClassMatchModule> {
   @Override
   public ClassMatchModule createMatchModule(Match match) {
     return new ClassMatchModule(match, this.family, this.classes, this.defaultClass);
-  }
-
-  public String getFamily() {
-    return this.family;
   }
 
   public @Nullable PlayerClass getPlayerClass(String name) {

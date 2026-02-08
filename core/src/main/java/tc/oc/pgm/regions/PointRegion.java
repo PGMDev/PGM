@@ -1,19 +1,17 @@
 package tc.oc.pgm.regions;
 
 import java.util.Random;
+import lombok.Getter;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
+@Getter
 public class PointRegion implements RegionDefinition.HardStatic {
 
   private final Vector position;
 
   public PointRegion(Vector position) {
     this.position = position;
-  }
-
-  public Vector getPosition() {
-    return position;
   }
 
   @Override

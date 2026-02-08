@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.event;
 
+import lombok.Setter;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Cancellable;
@@ -27,6 +28,9 @@ import org.jspecify.annotations.Nullable;
 public abstract class GeneralizedEvent extends PreemptiveEvent {
 
   private final @Nullable Event cause;
+
+  /** Whether cancelling this event, will also cancel the cause. */
+  @Setter
   private boolean propagate;
 
   protected GeneralizedEvent(final @Nullable Event cause) {
@@ -43,15 +47,6 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
   @Nullable
   public Event getCause() {
     return this.cause;
-  }
-
-  /**
-   * Set whether cancelling this event, will also cancel the cause.
-   *
-   * @param propagate if the event should propagate cancellations
-   */
-  public void setPropagate(final boolean propagate) {
-    this.propagate = propagate;
   }
 
   @Override

@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import lombok.Getter;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Effect;
@@ -39,7 +40,10 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 public class BlitzMatchModule implements MatchModule, Listener {
 
   private final Match match;
+
+  @Getter
   private final BlitzConfig config;
+
   private final LifeManager lifeManager;
   private final Set<UUID> eliminatedPlayers = new HashSet<>();
 
@@ -52,10 +56,6 @@ public class BlitzMatchModule implements MatchModule, Listener {
   @Override
   public void load() {
     match.addVictoryCondition(new BlitzVictoryCondition());
-  }
-
-  public BlitzConfig getConfig() {
-    return this.config;
   }
 
   public Filter getScoreboardFilter() {

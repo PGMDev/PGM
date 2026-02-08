@@ -2,6 +2,7 @@ package tc.oc.pgm.structure;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,8 +14,13 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition {
 
   private final StructureDefinition structure;
+  /** The dynamic filter triggering place/clear commands for this dynamic */
+  @Getter
   private final Filter trigger;
+  /** The filter used to filter weather a structure gets placed when the dynamic filter rises */
+  @Getter
   private final Filter passive;
+
   private final @Nullable BlockVector position;
   private final @NotNull BlockVector offset;
   private final boolean update;
@@ -43,24 +49,6 @@ public class DynamicStructureDefinition extends SelfIdentifyingFeatureDefinition
    */
   public StructureDefinition getStructureDefinition() {
     return structure;
-  }
-
-  /**
-   * The dynamic filter triggering place/clear commands for this dynamic
-   *
-   * @return The dynamic filter triggering place/clear commands for this dynamic
-   */
-  public Filter getTrigger() {
-    return trigger;
-  }
-
-  /**
-   * The filter used to filter weather a structure gets placed when the dynamic filter rises
-   *
-   * @return The filter used to filter weather a structure gets placed when the dynamic filter rises
-   */
-  public Filter getPassive() {
-    return passive;
   }
 
   /** @return If this dynamic should generate block updates when placing */

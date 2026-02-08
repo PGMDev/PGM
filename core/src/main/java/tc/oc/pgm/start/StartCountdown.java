@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.time.Duration;
+import lombok.Getter;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -25,6 +26,8 @@ public class StartCountdown extends PreMatchCountdown {
   private final @Nullable TeamMatchModule tmm;
   private final Duration huddle;
   private boolean autoBalanced, balanceWarningSent;
+
+  @Getter
   protected final boolean forced;
 
   public StartCountdown(Match match, boolean forced, Duration huddle) {
@@ -97,10 +100,6 @@ public class StartCountdown extends PreMatchCountdown {
     } else {
       getMatch().start();
     }
-  }
-
-  public boolean isForced() {
-    return forced;
   }
 
   private boolean isBalanceBroadcasted() {

@@ -1,6 +1,7 @@
 package tc.oc.pgm.action;
 
 import com.google.common.collect.ImmutableList;
+import lombok.Getter;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -11,6 +12,8 @@ import tc.oc.pgm.filters.Filterable;
 public class ActionMatchModule implements MatchModule {
   private final Match match;
   private final ImmutableList<Trigger<?>> triggers;
+
+  @Getter
   private final ImmutableList<ExposedAction> exposedActions;
 
   public ActionMatchModule(
@@ -32,16 +35,9 @@ public class ActionMatchModule implements MatchModule {
   }
 
   private <T extends Filterable<?>> void setupTrigger(Trigger<T> rule, FilterMatchModule fmm) {
-    fmm.onChange(
-        rule.getScope(),
-        rule.getFilter(),
-        (filterable, response) -> {
-          if (response) rule.getAction().trigger(filterable);
-          else rule.getAction().untrigger(filterable);
-        });
-  }
-
-  public ImmutableList<ExposedAction> getExposedActions() {
-    return exposedActions;
+    fmm.onChange(rule.getScope(), rule.getFilter(), (filterable, response) -> {
+      if (response) rule.getAction().trigger(filterable);
+      else rule.getAction().untrigger(filterable);
+    });
   }
 }

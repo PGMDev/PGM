@@ -1,5 +1,8 @@
 package tc.oc.pgm.util.parser;
 
+import lombok.Getter;
+
+@Getter
 public class SyntaxException extends RuntimeException {
   private final int startIdx;
   private final int endIdx;
@@ -14,13 +17,5 @@ public class SyntaxException extends RuntimeException {
     super(message);
     this.startIdx = node.getStart();
     this.endIdx = node.getEnd();
-  }
-
-  public int getStartIdx() {
-    return startIdx;
-  }
-
-  public int getEndIdx() {
-    return endIdx;
   }
 }

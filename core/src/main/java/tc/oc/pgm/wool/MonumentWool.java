@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
 import java.util.Collections;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -38,7 +39,9 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   public static final Component SYMBOL_WOOL_TOUCHED = text("\u2592"); // ▒
   public static final Component SYMBOL_WOOL_COMPLETE = text("\u2b1b"); // ⬛
 
+  @Getter
   protected boolean placed = false;
+
   private final Location woolLocation;
   private final Location monumentLocation;
 
@@ -127,17 +130,13 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   public void onArmorKitApplication(ApplyKitEvent event) {
     if (event.getKit() instanceof ArmorKit ak) {
       for (ArmorKit.ArmorItem armorPiece : ak.getArmorItems()) {
-        handleWoolAcquisition(event.getPlayer().getBukkit(), armorPiece.stack);
+        handleWoolAcquisition(event.getPlayer().getBukkit(), armorPiece.stack());
       }
     }
   }
 
   public DyeColor getDyeColor() {
     return this.definition.getColor();
-  }
-
-  public boolean isPlaced() {
-    return this.placed;
   }
 
   public void markPlaced() {

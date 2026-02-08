@@ -3,10 +3,12 @@ package tc.oc.pgm.shops.menu;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 
+@Getter
 public class Category {
 
   // Max amount of icons a category can hold
@@ -24,27 +26,10 @@ public class Category {
     this.icons = ImmutableList.copyOf(icons);
   }
 
-  public String getId() {
-    return id;
-  }
-
-  public ItemStack getCategoryIcon() {
-    return categoryIcon;
-  }
-
-  public ImmutableList<Icon> getIcons() {
-    return icons;
-  }
-
   public ImmutableList<Icon> getVisibleIcons(MatchPlayer player) {
-    return ImmutableList.copyOf(
-        icons.stream()
-            .filter(icon -> icon.getFilter().query(player).isAllowed())
-            .collect(Collectors.toList()));
-  }
-
-  public Filter getFilter() {
-    return filter;
+    return ImmutableList.copyOf(icons.stream()
+        .filter(icon -> icon.getFilter().query(player).isAllowed())
+        .collect(Collectors.toList()));
   }
 
   @Override

@@ -2,6 +2,7 @@ package tc.oc.pgm.api.setting;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.DyeColor;
 
 /**
@@ -60,7 +61,17 @@ public enum SettingValue {
       DyeColor.YELLOW); // Only send death messages involving yourself, friends, or squad members
 
   private final String key;
+
+  /** Get the name of {@link SettingValue}. */
+  @Getter
   private final String name;
+
+  /**
+   * {@link DyeColor} related to this setting value .
+   *
+   * @see tc.oc.pgm.settings.SettingsMenu for usage.
+   */
+  @Getter
   private final DyeColor color;
 
   SettingValue(String group, String name, DyeColor color) {
@@ -76,25 +87,6 @@ public enum SettingValue {
    */
   public SettingKey getKey() {
     return SettingKey.valueOf(key.toUpperCase());
-  }
-
-  /**
-   * Get the name of {@link SettingValue}.
-   *
-   * @return The name.
-   */
-  public String getName() {
-    return name;
-  }
-
-  /**
-   * Get {@link DyeColor} related to this setting value .
-   *
-   * @see tc.oc.pgm.settings.SettingsMenu for usage.
-   * @return {@link DyeColor} for this setting value.
-   */
-  public DyeColor getColor() {
-    return color;
   }
 
   @Override

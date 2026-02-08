@@ -6,6 +6,8 @@ import static tc.oc.pgm.util.text.TemporalComponent.clock;
 
 import java.time.Duration;
 import java.util.Collection;
+import lombok.AccessLevel;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
@@ -18,9 +20,12 @@ import tc.oc.pgm.result.ImmediateVictoryCondition;
 import tc.oc.pgm.util.collection.RankedSet;
 
 @FeatureInfo(name = "time-limit")
+@Getter
 public class TimeLimit extends SelfIdentifyingFeatureDefinition implements VictoryCondition {
   private final Duration duration, overtime, maxOvertime, endOvertime;
   private final @Nullable VictoryCondition result;
+
+  @Getter(AccessLevel.NONE)
   private final boolean show;
 
   public TimeLimit(
@@ -48,26 +53,6 @@ public class TimeLimit extends SelfIdentifyingFeatureDefinition implements Victo
     this.endOvertime = timeLimit.getEndOvertime();
     this.result = timeLimit.getResult();
     this.show = timeLimit.getShow();
-  }
-
-  public Duration getDuration() {
-    return duration;
-  }
-
-  public @Nullable Duration getOvertime() {
-    return overtime;
-  }
-
-  public @Nullable Duration getMaxOvertime() {
-    return maxOvertime;
-  }
-
-  public @Nullable Duration getEndOvertime() {
-    return endOvertime;
-  }
-
-  public @Nullable VictoryCondition getResult() {
-    return result;
   }
 
   public boolean isProximityRelevant(boolean includeOvertime) {

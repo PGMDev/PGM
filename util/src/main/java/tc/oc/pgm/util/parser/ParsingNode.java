@@ -3,7 +3,9 @@ package tc.oc.pgm.util.parser;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
 
+@Getter
 public class ParsingNode {
   private int start = -1;
   private String base = "";
@@ -18,14 +20,6 @@ public class ParsingNode {
     node.parse(reader);
     reader.done();
     return node;
-  }
-
-  public int getStart() {
-    return start;
-  }
-
-  public int getEnd() {
-    return end;
   }
 
   public void parse(StringReader str) {
@@ -58,16 +52,8 @@ public class ParsingNode {
     this.end = str.getPosition();
   }
 
-  public String getBase() {
-    return base;
-  }
-
   public int getChildrenCount() {
     return children == null ? -1 : children.size();
-  }
-
-  public List<ParsingNode> getChildren() {
-    return children;
   }
 
   public String toString() {

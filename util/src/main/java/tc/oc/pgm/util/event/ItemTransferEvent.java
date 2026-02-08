@@ -1,11 +1,12 @@
 package tc.oc.pgm.util.event;
 
+import lombok.Getter;
 import org.bukkit.entity.Item;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /** An event when an {@link ItemStack} moves in or out of an {@link Inventory}. */
 public class ItemTransferEvent extends GeneralizedEvent {
@@ -20,10 +21,20 @@ public class ItemTransferEvent extends GeneralizedEvent {
     PLUGIN // Item transferred somehow by a plugin
   }
 
+  /** The reason for the item transfer. */
+  @Getter
   private final Reason reason;
+
+  /** The {@link ItemStack} that was transferred. */
+  @Getter
   private final ItemStack item;
+
   private final @Nullable Item entity;
+
+  /** The {@link ItemStack} quantity. */
+  @Getter
   private final int quantity;
+
   private final @Nullable Inventory from;
   private final @Nullable Inventory to;
 
@@ -42,24 +53,6 @@ public class ItemTransferEvent extends GeneralizedEvent {
     this.quantity = quantity;
     this.from = from;
     this.to = to;
-  }
-
-  /**
-   * Gets the reason for the item transfer.
-   *
-   * @return a reason
-   */
-  public Reason getReason() {
-    return this.reason;
-  }
-
-  /**
-   * Gets the {@link ItemStack} that was transferred.
-   *
-   * @return an item stack
-   */
-  public ItemStack getItem() {
-    return this.item;
   }
 
   /**
@@ -90,15 +83,6 @@ public class ItemTransferEvent extends GeneralizedEvent {
   @Nullable
   public Inventory getTo() {
     return this.to;
-  }
-
-  /**
-   * Gets the {@link ItemStack} quantity.
-   *
-   * @return a number of items
-   */
-  public int getQuantity() {
-    return this.quantity;
   }
 
   private static final HandlerList handlers = new HandlerList();

@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -57,10 +58,18 @@ public class ChatManager implements Listener {
           .expireAfterWrite(15, TimeUnit.SECONDS)
           .build();
 
+  @Getter
   private final GlobalChannel globalChannel;
+
+  @Getter
   private final AdminChannel adminChannel;
+
+  @Getter
   private final TeamChannel teamChannel;
+
+  @Getter
   private final Set<Channel<?>> channels;
+
   private final Map<Character, Channel<?>> shortcuts;
   private final OnlinePlayerUUIDMapAdapter<Channel<?>> selectedChannel;
 
@@ -304,22 +313,6 @@ public class ChatManager implements Listener {
 
   public Channel<?> getSelectedChannel(MatchPlayer player) {
     return selectedChannel.getOrDefault(player.getId(), globalChannel);
-  }
-
-  public Set<Channel<?>> getChannels() {
-    return channels;
-  }
-
-  public GlobalChannel getGlobalChannel() {
-    return globalChannel;
-  }
-
-  public AdminChannel getAdminChannel() {
-    return adminChannel;
-  }
-
-  public TeamChannel getTeamChannel() {
-    return teamChannel;
   }
 
   public static void broadcastMessage(Component message) {

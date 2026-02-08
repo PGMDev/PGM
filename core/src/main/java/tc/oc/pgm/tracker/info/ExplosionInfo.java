@@ -2,6 +2,7 @@ package tc.oc.pgm.tracker.info;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
+import lombok.Getter;
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -11,6 +12,7 @@ import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.RangedInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
 
+@Getter
 public class ExplosionInfo implements DamageInfo, RangedInfo, CauseInfo {
 
   private final PhysicalInfo explosive;
@@ -20,10 +22,6 @@ public class ExplosionInfo implements DamageInfo, RangedInfo, CauseInfo {
   }
 
   public @Nullable PhysicalInfo getDamager() {
-    return explosive;
-  }
-
-  public PhysicalInfo getExplosive() {
     return explosive;
   }
 

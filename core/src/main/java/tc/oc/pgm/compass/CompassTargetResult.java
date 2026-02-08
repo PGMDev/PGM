@@ -1,8 +1,10 @@
 package tc.oc.pgm.compass;
 
+import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 
+@Getter
 public class CompassTargetResult {
   private final Location location;
   private final double distance;
@@ -20,22 +22,6 @@ public class CompassTargetResult {
   public static CompassTargetResult of(Location target, Location holder, Component component) {
     double yDifference = target.getY() - holder.getY();
     return new CompassTargetResult(target, holder.distance(target), yDifference, component);
-  }
-
-  public Location getLocation() {
-    return location;
-  }
-
-  public double getDistance() {
-    return distance;
-  }
-
-  public double getYDifference() {
-    return yDifference;
-  }
-
-  public Component getComponent() {
-    return component;
   }
 
   public int compareTo(CompassTargetResult other) {
