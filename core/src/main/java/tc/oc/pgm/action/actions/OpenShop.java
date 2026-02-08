@@ -21,6 +21,8 @@ public class OpenShop extends AbstractAction<MatchPlayer> {
         .getShops()
         .get(shopId);
 
+    if (shop == null) return;
+
     new ShopMenu(shop, player);
   }
 }
