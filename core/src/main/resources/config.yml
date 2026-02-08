@@ -236,7 +236,7 @@ modern:
   # In an ABSOLUTE MAJORITY of cases you will NEVER NEED TO have to enable this setting. If you do need to do so, please
   # let us know why at https://github.com/PGMDev/PGM/issues.
   #
-  # Command blocks run with operator permissions and can be used to perform potentially malicious actions on the server.
+  # Command blocks run with elevated permissions and can be used to perform potentially malicious actions on the server.
   #
   # ENABLE IF AND ONLY IF YOU TRUST ALL LOADED MAPS ON THE SERVER, and are aware of the risks involved.
   allow-command-blocks: false
