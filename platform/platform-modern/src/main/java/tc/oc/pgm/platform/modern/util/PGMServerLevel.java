@@ -22,6 +22,7 @@ import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 
 public class PGMServerLevel extends ServerLevel {
   public PGMServerLevel(
@@ -99,5 +100,12 @@ public class PGMServerLevel extends ServerLevel {
   @Override
   public @NonNull MapId getFreeMapId() {
     return getDataStorage().computeIfAbsent(MapIndex.TYPE).getNextMapId();
+  }
+
+  // Allow command blocks to be disabled via config
+  @Override
+  public boolean isCommandBlockEnabled() {
+    if (!PGM.get().getConfiguration().allowCommandBlocks()) return false;
+    return super.isCommandBlockEnabled();
   }
 }
