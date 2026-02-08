@@ -1,8 +1,9 @@
 package tc.oc.pgm.api.setting;
 
-import static tc.oc.pgm.util.Assert.assertNotNull;
-
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.DyeColor;
 
 /**
@@ -10,6 +11,7 @@ import org.bukkit.DyeColor;
  *
  * @see SettingKey
  */
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum SettingValue {
   CHAT_TEAM("chat", "team", DyeColor.GREEN), // Only send to members on the player's team
   CHAT_GLOBAL("chat", "global", DyeColor.ORANGE), // Send to all players in the same match
@@ -60,11 +62,11 @@ public enum SettingValue {
       "squad",
       DyeColor.YELLOW); // Only send death messages involving yourself, friends, or squad members
 
-  private final String key;
+  private final @NonNull String key;
 
   /** Get the name of {@link SettingValue}. */
   @Getter
-  private final String name;
+  private final @NonNull String name;
 
   /**
    * {@link DyeColor} related to this setting value .
@@ -72,13 +74,7 @@ public enum SettingValue {
    * @see tc.oc.pgm.settings.SettingsMenu for usage.
    */
   @Getter
-  private final DyeColor color;
-
-  SettingValue(String group, String name, DyeColor color) {
-    this.key = assertNotNull(group);
-    this.name = assertNotNull(name);
-    this.color = assertNotNull(color);
-  }
+  private final @NonNull DyeColor color;
 
   /**
    * Get the parent {@link SettingKey}, which defines its mutual-exclusion members.

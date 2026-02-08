@@ -1,41 +1,32 @@
 package tc.oc.pgm.api.event;
 
-import static tc.oc.pgm.util.Assert.assertNotNull;
-
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.info.SpleefInfo;
 
+@RequiredArgsConstructor
 public class PlayerSpleefEvent extends Event {
 
   @Getter
-  private final MatchPlayer victim;
+  private final @NonNull MatchPlayer victim;
 
   @Getter
-  private final Vector block;
+  private final @NonNull Vector block;
 
-  private final SpleefInfo info;
-
-  public PlayerSpleefEvent(MatchPlayer victim, Vector block, SpleefInfo info) {
-    this.victim = assertNotNull(victim);
-    this.block = assertNotNull(block);
-    this.info = assertNotNull(info);
-  }
-
-  public SpleefInfo getSpleefInfo() {
-    return info;
-  }
+  @Getter
+  private final @NonNull SpleefInfo spleefInfo;
 
   public @Nullable ParticipantState getBreaker() {
-    return info.getBreaker().getAttacker();
+    return spleefInfo.getBreaker().getAttacker();
   }
 
-  // Bukkit event junk
   public static final HandlerList handlers = new HandlerList();
 
   @Override

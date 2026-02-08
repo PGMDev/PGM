@@ -14,7 +14,8 @@ public class MapException extends Exception {
   @Getter
   private final String location;
 
-  private final @Nullable MapInfo info;
+  @Getter
+  private final @Nullable MapInfo map;
 
   public MapException(String location, String message) {
     this(location, message, null);
@@ -25,18 +26,14 @@ public class MapException extends Exception {
   }
 
   public MapException(
-      MapSource source, @Nullable MapInfo info, String message, @Nullable Throwable cause) {
-    this(source.getId(), info, message, cause);
+      MapSource source, @Nullable MapInfo map, String message, @Nullable Throwable cause) {
+    this(source.getId(), map, message, cause);
   }
 
   public MapException(
-      String location, @Nullable MapInfo info, String message, @Nullable Throwable cause) {
+      String location, @Nullable MapInfo map, String message, @Nullable Throwable cause) {
     super(assertNotNull(message), cause);
     this.location = assertNotNull(location);
-    this.info = info;
-  }
-
-  public @Nullable MapInfo getMap() {
-    return info;
+    this.map = map;
   }
 }

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -43,8 +44,11 @@ import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(MatchScope.RUNNING)
+@AllArgsConstructor
 public class BlockDropsMatchModule implements MatchModule, Listener {
   private static final double BASE_FALL_SPEED = 3d;
+
+  private final Match match;
 
   @Getter
   private final BlockDropsRuleSet ruleSet;
@@ -58,12 +62,6 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
   // die that do not fire an event e.g. the tick age limit, but this should be
   // rare and they will only leak until the end of the match.
   private final Set<FallingBlock> fallingBlocksThatWillNotLand = new HashSet<>();
-  private final Match match;
-
-  public BlockDropsMatchModule(Match match, BlockDropsRuleSet ruleSet) {
-    this.match = match;
-    this.ruleSet = ruleSet;
-  }
 
   public static boolean causesDrops(final Event event) {
     return event instanceof BlockBreakEvent

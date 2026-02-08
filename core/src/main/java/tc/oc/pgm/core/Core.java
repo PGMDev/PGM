@@ -58,7 +58,9 @@ public class Core extends TouchableGoal<CoreFactory>
   protected final Region leakRegion;
 
   protected final int leakRequired;
-  protected final boolean isShared;
+
+  @Getter
+  protected final boolean shared;
 
   protected MaterialMatcher material;
   protected int leak = 0;
@@ -93,7 +95,7 @@ public class Core extends TouchableGoal<CoreFactory>
     this.leakRegion = new CuboidRegion(min, max);
 
     this.leakRequired = lavaRegion.getBounds().getMin().getBlockY() - max.getBlockY() + 1;
-    this.isShared = match.getCompetitors().stream().filter(this::canComplete).count() != 1;
+    this.shared = match.getCompetitors().stream().filter(this::canComplete).count() != 1;
   }
 
   // Remove @Nullable
@@ -163,11 +165,6 @@ public class Core extends TouchableGoal<CoreFactory>
 
   public boolean hasLeaked() {
     return this.leaked;
-  }
-
-  @Override
-  public boolean isShared() {
-    return isShared;
   }
 
   @Override

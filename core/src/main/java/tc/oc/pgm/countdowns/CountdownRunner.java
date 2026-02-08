@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.ClassLogger;
@@ -22,11 +22,17 @@ public class CountdownRunner extends BukkitRunnable {
 
   protected final Match match;
   protected final Logger logger;
-  protected final Countdown countdown;
-
   private int count;
+
+  @Getter
+  protected final @NonNull Countdown countdown;
+
   private @Nullable Duration interval;
+
+  @Getter
   private @Nullable Instant start;
+
+  @Getter
   private @Nullable Instant end;
 
   // The remaining seconds that will be passed to onTick for the next cycle
@@ -35,7 +41,7 @@ public class CountdownRunner extends BukkitRunnable {
 
   private Future<?> task = null;
 
-  public CountdownRunner(@NotNull Match match, Logger parentLogger, @NotNull Countdown countdown) {
+  public CountdownRunner(@NonNull Match match, Logger parentLogger, @NonNull Countdown countdown) {
     assertNotNull(match, "match");
     assertNotNull(countdown, "countdown");
 
@@ -48,15 +54,15 @@ public class CountdownRunner extends BukkitRunnable {
     return this.task != null;
   }
 
-  public @NotNull CountdownRunner start(Duration remaining) {
+  public @NonNull CountdownRunner start(Duration remaining) {
     return this.start(remaining, null);
   }
 
-  public @NotNull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
+  public @NonNull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
     return this.start(remaining, interval, 1);
   }
 
-  public @NotNull CountdownRunner start(
+  public @NonNull CountdownRunner start(
       Duration remaining, @Nullable Duration interval, int count) {
     logger.fine("STARTING countdown " + countdown + " for duration " + remaining);
 
@@ -101,14 +107,6 @@ public class CountdownRunner extends BukkitRunnable {
     }
   }
 
-  public @Nullable Instant getStart() {
-    return this.start;
-  }
-
-  public @Nullable Instant getEnd() {
-    return this.end;
-  }
-
   public Duration getTotalTime() {
     return Duration.between(this.start, this.end);
   }
@@ -147,9 +145,5 @@ public class CountdownRunner extends BukkitRunnable {
             this.count == Integer.MAX_VALUE ? this.count : this.count - 1);
       }
     }
-  }
-
-  public @NotNull Countdown getCountdown() {
-    return this.countdown;
   }
 }

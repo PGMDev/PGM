@@ -27,6 +27,7 @@ public final class MapTag implements Comparable<MapTag> {
   @Getter
   private final Component name;
 
+  @Getter
   private final @Nullable Gamemode gamemode;
   /**
    * Whether this tag is an auxiliary gamemode, that works as a 2nd level gamemode. Eg: blitz or
@@ -64,11 +65,6 @@ public final class MapTag implements Comparable<MapTag> {
    */
   public boolean isGamemode() {
     return this.gamemode != null;
-  }
-
-  /** @return the gamemode if this tag represents one, null otherwise. */
-  public @Nullable Gamemode getGamemode() {
-    return this.gamemode;
   }
 
   @Override

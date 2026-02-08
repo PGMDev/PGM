@@ -1,6 +1,7 @@
 package tc.oc.pgm.action;
 
 import com.google.common.collect.ImmutableList;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.api.match.Match;
@@ -9,21 +10,13 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.Filterable;
 
+@AllArgsConstructor
 public class ActionMatchModule implements MatchModule {
   private final Match match;
   private final ImmutableList<Trigger<?>> triggers;
 
   @Getter
   private final ImmutableList<ExposedAction> exposedActions;
-
-  public ActionMatchModule(
-      Match match,
-      ImmutableList<Trigger<?>> triggers,
-      ImmutableList<ExposedAction> exposedActions) {
-    this.match = match;
-    this.triggers = triggers;
-    this.exposedActions = exposedActions;
-  }
 
   @Override
   public void load() throws ModuleLoadException {

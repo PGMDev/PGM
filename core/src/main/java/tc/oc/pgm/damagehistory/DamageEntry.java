@@ -1,28 +1,19 @@
 package tc.oc.pgm.damagehistory;
 
 import java.util.UUID;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 
+@AllArgsConstructor
 public class DamageEntry {
-
-  @Nullable
-  private ParticipantState damager;
+  @Getter
+  private @Nullable ParticipantState damager;
 
   @Getter
   private double damage;
-
-  public DamageEntry(@Nullable ParticipantState damager, double damage) {
-    this.damager = damager;
-    this.damage = damage;
-  }
-
-  @Nullable
-  public ParticipantState getDamager() {
-    return damager;
-  }
 
   public void addDamage(@Nullable ParticipantState damager, double damage) {
     this.damager = damager;

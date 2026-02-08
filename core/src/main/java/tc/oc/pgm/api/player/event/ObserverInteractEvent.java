@@ -3,6 +3,7 @@ package tc.oc.pgm.api.player.event;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
@@ -27,9 +28,20 @@ public class ObserverInteractEvent extends MatchPlayerEvent implements Cancellab
   @Getter
   private final ClickType clickType;
 
+  /** The optional {@link Block} that was clicked. */
+  @Getter
   private final @Nullable Block clickedBlock;
+
+  /** The optional {@link Entity} that was clicked. */
+  @Getter
   private final @Nullable Entity clickedEntity;
+
+  /** The optional {@link ItemStack} that was clicked. */
+  @Getter
   private final @Nullable ItemStack clickedItem;
+
+  @Getter
+  @Setter
   private boolean cancelled;
 
   public ObserverInteractEvent(
@@ -46,39 +58,12 @@ public class ObserverInteractEvent extends MatchPlayerEvent implements Cancellab
   }
 
   /**
-   * Get the optional {@link Block} that was clicked.
-   *
-   * @return The {@link Block}, or {@code null} if no {@link Block} was clicked.
-   */
-  public @Nullable Block getClickedBlock() {
-    return clickedBlock;
-  }
-
-  /**
    * Get the optional {@link BlockState} that was clicked.
    *
    * @return The {@link BlockState}, or {@code null} if no {@link BlockState} was clicked.
    */
   public @Nullable BlockState getClickedBlockState() {
     return getClickedBlock() == null ? null : getClickedBlock().getState();
-  }
-
-  /**
-   * Get the optional {@link Entity} that was clicked.
-   *
-   * @return The {@link Entity}, or {@code null} if no {@link Entity} was clicked.
-   */
-  public @Nullable Entity getClickedEntity() {
-    return clickedEntity;
-  }
-
-  /**
-   * Get the optional {@link ItemStack} that was clicked.
-   *
-   * @return The {@link ItemStack}, or {@code null} if no {@link ItemStack} was clicked.
-   */
-  public @Nullable ItemStack getClickedItem() {
-    return clickedItem;
   }
 
   /**
@@ -97,16 +82,6 @@ public class ObserverInteractEvent extends MatchPlayerEvent implements Cancellab
    */
   public @Nullable MatchPlayer getClickedParticipant() {
     return getMatch().getParticipant(getClickedEntity());
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancel) {
-    cancelled = cancel;
   }
 
   private static final HandlerList handlers = new HandlerList();

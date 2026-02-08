@@ -11,18 +11,20 @@ import static tc.oc.pgm.util.text.TemporalComponent.seconds;
 
 import java.time.Duration;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.events.CountdownCancelEvent;
 import tc.oc.pgm.events.CountdownEndEvent;
 import tc.oc.pgm.events.CountdownStartEvent;
 
+@RequiredArgsConstructor
 public abstract class MatchCountdown extends Countdown {
   @Getter
   protected final Match match;
@@ -34,11 +36,6 @@ public abstract class MatchCountdown extends Countdown {
   protected Duration remaining;
 
   protected Duration total;
-
-  public MatchCountdown(Match match, BossBar bossBar) {
-    this.match = match;
-    this.bossBar = bossBar;
-  }
 
   public MatchCountdown(Match match, BossBar.Color color) {
     this(match, bossBar(space(), 1, color, BossBar.Overlay.PROGRESS));
@@ -146,8 +143,7 @@ public abstract class MatchCountdown extends Countdown {
     }
   }
 
-  @Nullable
-  protected BossBar.Color barColor() {
+  protected BossBar.@Nullable Color barColor() {
     return null;
   }
 

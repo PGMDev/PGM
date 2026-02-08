@@ -21,6 +21,7 @@ import tc.oc.pgm.util.material.Materials;
  *
  * @see SettingValue
  */
+@Getter
 public enum SettingKey implements Aliased {
   CHAT("chat", Materials.SIGN, CHAT_TEAM, CHAT_GLOBAL, CHAT_ADMIN) {
     @Override
@@ -91,20 +92,20 @@ public enum SettingKey implements Aliased {
   }; // Changes player preference for time of day
 
   /** All aliases of this {@link SettingKey}. First index is always equal to {@code #getName}. */
-  @Getter
   private final List<String> aliases;
+  /** Get a list of the possible {@link SettingValue}s. */
+  private final SettingValue[] possibleValues;
+  /** Get the {@link Material} used to visually represent this setting in GUI menus. */
+  private final Material iconMaterial;
 
-  private final SettingValue[] values;
-  private final Material icon;
-
-  SettingKey(String name, Material icon, SettingValue... values) {
-    this(Collections.singletonList(name), icon, values);
+  SettingKey(String name, Material iconMaterial, SettingValue... possibleValues) {
+    this(Collections.singletonList(name), iconMaterial, possibleValues);
   }
 
-  SettingKey(List<String> aliases, Material icon, SettingValue... values) {
+  SettingKey(List<String> aliases, Material iconMaterial, SettingValue... possibleValues) {
     this.aliases = ImmutableList.copyOf(aliases);
-    this.icon = icon;
-    this.values = values;
+    this.iconMaterial = iconMaterial;
+    this.possibleValues = possibleValues;
   }
 
   /**
@@ -123,30 +124,12 @@ public enum SettingKey implements Aliased {
   }
 
   /**
-   * Get a list of the possible {@link SettingValue}s.
-   *
-   * @return An array of {@link SettingValue}s, sorted by defined order.
-   */
-  public SettingValue[] getPossibleValues() {
-    return values;
-  }
-
-  /**
    * Get the default {@link SettingValue}, which should always be defined first.
    *
    * @return The default {@link SettingValue}.
    */
   public SettingValue getDefaultValue() {
     return getPossibleValues()[0];
-  }
-
-  /**
-   * Get the {@link Material} used to visually represent this setting in GUI menus.
-   *
-   * @return {@link Material} to visually represent setting.
-   */
-  public Material getIconMaterial() {
-    return icon;
   }
 
   @Override

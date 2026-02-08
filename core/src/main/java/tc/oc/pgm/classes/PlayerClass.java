@@ -18,52 +18,34 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.util.material.ItemMaterialData;
 
+@Getter
 public class PlayerClass implements ComponentLike {
-  @Getter
   private final String name;
-
-  @Getter
   private final String familyName;
-
   private final @Nullable String description;
-  private final @Nullable String longdescription;
-
-  @Getter
+  private final @Nullable String longDescription;
   private final boolean sticky;
-
-  @Getter
   private final Set<Kit> kits;
-
-  @Getter
   private final ItemMaterialData icon;
-
-  private final boolean restrict;
+  private final boolean restricted;
 
   public PlayerClass(
       String name,
       String familyName,
       @Nullable String description,
-      @Nullable String longdescription,
+      @Nullable String longDescription,
       boolean sticky,
       Set<Kit> kits,
       ItemMaterialData icon,
-      boolean restrict) {
+      boolean restricted) {
     this.name = assertNotNull(name, "name");
     this.familyName = assertNotNull(familyName, "family name");
     this.description = description;
-    this.longdescription = longdescription;
+    this.longDescription = longDescription;
     this.sticky = sticky;
     this.kits = ImmutableSet.copyOf(assertNotNull(kits, "kits"));
     this.icon = assertNotNull(icon, "icon");
-    this.restrict = restrict;
-  }
-
-  public @Nullable String getDescription() {
-    return this.description;
-  }
-
-  public @Nullable String getLongDescription() {
-    return this.longdescription;
+    this.restricted = restricted;
   }
 
   @Override
@@ -71,17 +53,13 @@ public class PlayerClass implements ComponentLike {
     TextComponent.Builder component =
         text().content(this.name).color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
 
-    String desc = this.description != null ? this.description : this.longdescription;
+    String desc = this.description != null ? this.description : this.longDescription;
     if (desc != null) {
       component.hoverEvent(showText(
           text(this.name + ": ", NamedTextColor.GOLD).append(text(desc, NamedTextColor.GRAY))));
     }
 
     return component.build();
-  }
-
-  public boolean isRestricted() {
-    return this.restrict;
   }
 
   public boolean canUse(Player player) {
@@ -116,9 +94,9 @@ public class PlayerClass implements ComponentLike {
     if (this.description == null) {
       if (other.description != null) return false;
     } else if (!this.description.equals(other.description)) return false;
-    if (this.longdescription == null) {
-      if (other.longdescription != null) return false;
-    } else if (!this.longdescription.equals(other.longdescription)) return false;
+    if (this.longDescription == null) {
+      if (other.longDescription != null) return false;
+    } else if (!this.longDescription.equals(other.longDescription)) return false;
     if (this.sticky != other.sticky) return false;
     if (!this.kits.equals(other.kits)) return false;
     if (!this.icon.equals(other.icon)) return false;

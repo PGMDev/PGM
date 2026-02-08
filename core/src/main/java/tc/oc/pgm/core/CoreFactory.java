@@ -23,7 +23,9 @@ public class CoreFactory extends ProximityGoalDefinition {
   @Getter
   protected final int leakLevel;
 
-  protected final ImmutableSet<Mode> modeList;
+  @Getter
+  protected final ImmutableSet<Mode> modes;
+
   protected final boolean showProgress;
 
   public CoreFactory(
@@ -36,19 +38,15 @@ public class CoreFactory extends ProximityGoalDefinition {
       Region region,
       MaterialMatcher material,
       int leakLevel,
-      @Nullable ImmutableSet<Mode> modeList,
+      @Nullable ImmutableSet<Mode> modes,
       boolean showProgress) {
 
     super(id, name, required, showOptions, owner, proximityMetric);
     this.region = region;
     this.material = material;
     this.leakLevel = leakLevel;
-    this.modeList = modeList;
+    this.modes = modes;
     this.showProgress = showProgress;
-  }
-
-  public ImmutableSet<Mode> getModes() {
-    return this.modeList;
   }
 
   public boolean getShowProgress() {

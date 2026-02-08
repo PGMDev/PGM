@@ -5,6 +5,7 @@ import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -35,17 +36,13 @@ import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
 
 @ListenerScope(MatchScope.RUNNING)
+@AllArgsConstructor
 public class CoreMatchModule implements MatchModule, Listener {
 
   protected final Match match;
 
   @Getter
   protected final List<Core> cores;
-
-  public CoreMatchModule(Match match, List<Core> cores) {
-    this.match = match;
-    this.cores = cores;
-  }
 
   @Override
   public void enable() {

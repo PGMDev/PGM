@@ -8,6 +8,8 @@ import tc.oc.pgm.api.match.Match;
 
 public class MatchStatsEvent extends MatchEvent implements Cancellable {
 
+  @Getter
+  @Setter
   private boolean cancelled = false;
 
   @Getter
@@ -22,16 +24,6 @@ public class MatchStatsEvent extends MatchEvent implements Cancellable {
     super(match);
     this.showBest = showBest;
     this.showOwn = showOwn;
-  }
-
-  @Override
-  public boolean isCancelled() {
-    return cancelled;
-  }
-
-  @Override
-  public void setCancelled(boolean cancelled) {
-    this.cancelled = cancelled;
   }
 
   private static final HandlerList handlers = new HandlerList();

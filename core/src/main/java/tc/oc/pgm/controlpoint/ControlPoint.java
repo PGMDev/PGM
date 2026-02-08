@@ -55,33 +55,29 @@ public class ControlPoint extends SimpleGoal<ControlPointDefinition>
   protected boolean capturable = true;
 
   /**
-   * -- GETTER -- The team that owns (is receiving points from) this ControlPoint, or null if the
-   * ControlPoint is unowned.
+   * The team that currently owns the point. The goal is completed for this team. If this is null
+   * then the point is unowned, either because it is in the neutral state, or because it has no
+   * initial owner and has not yet been captured.
    */
-  // The team that currently owns the point. The goal is completed for this team.
-  // If this is null then the point is unowned, either because it is in the
-  // neutral state, or because it has no initial owner and has not yet been captured.
   @Getter
   protected Competitor controllingTeam = null;
 
   /**
-   * -- GETTER -- The team that is "capturing" the ControlPoint. This is the team that the current
-   * capturingTime counts towards. The capturingTime goes up whenever this team has the most players
-   * on the point, and goes down when any other team has the most players on the point. If
-   * capturingTime reaches timeToCapture, this team will take ownership of the point, if they don't
-   * own it already. When capturingTime goes below zero, the capturingTeam changes to the team with
-   * the most players on the point, and the point becomes unowned.
+   * The team that is "capturing" the ControlPoint. This is the team that the current capturingTime
+   * counts towards. The capturingTime goes up whenever this team has the most players on the point,
+   * and goes down when any other team has the most players on the point. If capturingTime reaches
+   * timeToCapture, this team will take ownership of the point, if they don't own it already. When
+   * capturingTime goes below zero, the capturingTeam changes to the team with the most players on
+   * the point, and the point becomes unowned.
    */
-  // The team that will own the CP if the current capture is successful.
-  // If this is null then either the point is not being captured or it is
-  // being "uncaptured" toward the neutral state.
   @Getter
   protected Competitor capturingTeam = null;
 
-  /** -- GETTER -- Progress towards "capturing" the ControlPoint for the current capturingTeam */
-  // Time accumulated towards the owner change. When this passes timeToCaptureMillis,
-  // it is reset to zero and the capturingTeam becomes the controllingTeam. When this is zero,
-  // the capturingTeam is null.
+  /**
+   * Time accumulated towards the owner change. When this passes timeToCaptureMillis, it is reset to
+   * zero and the capturingTeam becomes the controllingTeam. When this is zero, the capturingTeam is
+   * null.
+   */
   @Getter
   protected Duration capturingTime = Duration.ZERO;
 

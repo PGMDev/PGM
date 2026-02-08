@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.jetbrains.annotations.NotNull;
 
+@Getter
 public enum Gamemode implements ComponentLike {
   ARCADE("arcade", "Arcade", "Arcade"),
   ATTACK_DEFEND("ad", "Attack/Defend", "A/D"),
@@ -34,17 +35,15 @@ public enum Gamemode implements ComponentLike {
   SKYWARS("skywars", "Skywars", "Skywars"),
   SURVIVAL_GAMES("sg", "Survival Games", "SG");
 
-  @Getter
   private final String id;
 
-  private final String name;
+  private final String fullName;
 
-  @Getter
   private final String acronym;
 
-  Gamemode(String id, String name, String acronym) {
+  Gamemode(String id, String fullName, String acronym) {
     this.id = id;
-    this.name = name;
+    this.fullName = fullName;
     this.acronym = acronym;
   }
 
@@ -55,10 +54,6 @@ public enum Gamemode implements ComponentLike {
       }
     }
     return null;
-  }
-
-  public String getFullName() {
-    return name;
   }
 
   @Override
