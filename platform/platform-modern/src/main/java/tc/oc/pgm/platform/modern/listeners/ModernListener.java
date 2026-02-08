@@ -5,10 +5,9 @@ import static tc.oc.pgm.util.event.EventUtil.handleCall;
 import com.destroystokyo.paper.ClientOption;
 import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRules;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -33,7 +32,6 @@ import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
-import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 /**
  * TODO: fix unsupported events: <br>
@@ -110,8 +108,8 @@ public class ModernListener implements Listener {
     }
   }
 
-  private static final Field WAITING_FOR_RESPAWN =
-      ReflectionUtils.getField(ServerGamePacketListenerImpl.class, "waitingForRespawn");
+  private final ServerboundPlayerLoadedPacket PLAYER_LOADED_PACKET =
+      new ServerboundPlayerLoadedPacket();
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
@@ -120,11 +118,9 @@ public class ModernListener implements Listener {
     // "unloaded"), since players don't really die in PGM. This has to be done the next tick, as
     // ServerGamePacketListenerImpl#waitingForRespawn is set after the event.
     Bukkit.getScheduler().runTask(PGM.get(), () -> {
-      try {
-        WAITING_FOR_RESPAWN.set(((CraftPlayer) event.getEntity()).getHandle().connection, false);
-      } catch (IllegalAccessException e) {
-        throw new RuntimeException(e);
-      }
+      var conn = ((CraftPlayer) event.getEntity()).getHandle().connection;
+      conn.restartClientLoadTimerAfterRespawn();
+      conn.handleAcceptPlayerLoad(PLAYER_LOADED_PACKET);
     });
   }
 }
