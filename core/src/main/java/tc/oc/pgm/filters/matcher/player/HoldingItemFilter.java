@@ -15,6 +15,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.Slot;
 
 public class HoldingItemFilter extends ParticipantItemFilter {
   public HoldingItemFilter(ItemMatcher matcher) {
@@ -36,6 +37,6 @@ public class HoldingItemFilter extends ParticipantItemFilter {
 
   @Override
   protected Stream<ItemStack> getItems(MatchPlayer player) {
-    return Stream.of(player.getBukkit().getItemInHand());
+    return Slot.Equipment.hands().map(s -> s.getItem(player));
   }
 }

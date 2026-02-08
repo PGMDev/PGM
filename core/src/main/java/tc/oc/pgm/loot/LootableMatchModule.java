@@ -264,7 +264,7 @@ public class LootableMatchModule implements MatchModule, Listener {
     }
 
     private void putItem(ItemStack item) {
-      this.slot.putItem(inventory, item);
+      this.slot.setItem(inventory, item);
     }
   }
 }

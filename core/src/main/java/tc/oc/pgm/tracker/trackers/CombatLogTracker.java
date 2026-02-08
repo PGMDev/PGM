@@ -7,10 +7,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -31,6 +31,7 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.util.bukkit.PotionEffects;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.Materials;
 
 /**
@@ -161,13 +162,8 @@ public class CombatLogTracker implements Listener {
 
     // Simulate the player's death. The tracker will assume the death was caused by the
     // last damage event, which was either a real one or the fake one we generated above.
-    ArrayList<ItemStack> drops = new ArrayList<>();
-    for (ItemStack stack : player.getInventory().getContents()) {
-      if (stack != null && stack.getType() != Material.AIR) drops.add(stack);
-    }
-    for (ItemStack stack : player.getInventory().getArmorContents()) {
-      if (stack != null && stack.getType() != Material.AIR) drops.add(stack);
-    }
+    List<ItemStack> drops = new ArrayList<>();
+    Slot.Player.forEach(player.getInventory(), (slot, stack) -> drops.add(stack));
 
     try {
       currentDeathEvent = MISC_UTILS.createDeathEvent(

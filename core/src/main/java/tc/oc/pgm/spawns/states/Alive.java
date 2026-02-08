@@ -15,7 +15,6 @@ import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.events.PlayerChangePartyEvent;
 import tc.oc.pgm.killreward.KillRewardMatchModule;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
@@ -54,15 +53,6 @@ public class Alive extends Participating {
 
     // Teleport the player
     player.getBukkit().teleport(spawnEvent.getLocation());
-
-    // Return kept items
-    // TODO: Module should do this itself, maybe from ParticipantSpawnEvent
-    ItemKeepMatchModule ikmm = player.getMatch().getModule(ItemKeepMatchModule.class);
-    if (ikmm != null) {
-      ikmm.restoreKeptArmor(player);
-      ikmm.restoreKeptInventory(player);
-    }
-
     player.setVisible(true);
     player.resetVisibility();
     player.setGameMode(GameMode.SURVIVAL);
