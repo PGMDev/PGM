@@ -121,8 +121,8 @@ public class KitModule implements MapModule<KitMatchModule> {
       }
 
       if (imm != null) {
-        if (kit instanceof ArmorKit) {
-          for (ArmorKit.ArmorItem armor : ((ArmorKit) kit).getArmor().values()) {
+        if (kit instanceof ArmorKit ak) {
+          for (ArmorKit.ArmorItem armor : ak.getArmorItems()) {
             imm.applyRules(armor.stack);
           }
         }

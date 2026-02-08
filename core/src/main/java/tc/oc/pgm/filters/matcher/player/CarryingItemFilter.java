@@ -18,6 +18,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.Slot;
 
 public class CarryingItemFilter extends ParticipantItemFilter {
   public CarryingItemFilter(ItemMatcher matcher) {
@@ -39,9 +40,7 @@ public class CarryingItemFilter extends ParticipantItemFilter {
 
   @Override
   protected Stream<ItemStack> getItems(MatchPlayer player) {
-    Stream<ItemStack> inventory = Stream.concat(
-        Arrays.stream(player.getBukkit().getInventory().getContents()),
-        Stream.of(player.getBukkit().getItemOnCursor()));
+    Stream<ItemStack> inventory = Slot.Player.player().map(s -> s.getItem(player));
 
     // Potentially add the crafting grid if that's the currently open inventory
     InventoryView invView = player.getBukkit().getOpenInventory();

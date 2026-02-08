@@ -1,7 +1,6 @@
 package tc.oc.pgm.filters.matcher.player;
 
 import com.google.common.collect.ImmutableList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Stream;
 import org.bukkit.event.Event;
@@ -13,6 +12,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.ApplyKitEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.Slot;
 
 public class WearingItemFilter extends ParticipantItemFilter {
   public WearingItemFilter(ItemMatcher matcher) {
@@ -31,6 +31,6 @@ public class WearingItemFilter extends ParticipantItemFilter {
 
   @Override
   protected Stream<ItemStack> getItems(MatchPlayer player) {
-    return Arrays.stream(player.getBukkit().getInventory().getArmorContents());
+    return Slot.Armor.armor().map(s -> s.getItem(player));
   }
 }

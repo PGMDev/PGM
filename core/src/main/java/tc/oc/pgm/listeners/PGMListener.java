@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -53,6 +52,7 @@ import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -257,15 +257,7 @@ public class PGMListener implements Listener {
 
     var world = quitter.getBukkit().getWorld();
     var location = quitter.getBukkit().getLocation();
-    for (ItemStack item : quitter.getInventory().getContents()) {
-      if (item == null || item.getType() == Material.AIR) continue;
-      world.dropItemNaturally(location, item);
-    }
-
-    for (ItemStack armor : quitter.getInventory().getArmorContents()) {
-      if (armor == null || armor.getType() == Material.AIR) continue;
-      world.dropItemNaturally(location, armor);
-    }
+    Slot.Player.forEach(quitter.getInventory(), (s, is) -> world.dropItemNaturally(location, is));
   }
 
   @EventHandler
