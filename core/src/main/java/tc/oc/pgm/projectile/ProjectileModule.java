@@ -6,11 +6,11 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -25,6 +25,7 @@ import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ProjectileModule implements MapModule<ProjectileMatchModule> {
@@ -62,10 +63,10 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
             Node.fromChildOrAttr(projectileElement, "velocity"), Double.class, 1.0);
         ClickAction clickAction = XMLUtils.parseEnum(
             Node.fromAttr(projectileElement, "click"), ClickAction.class, ClickAction.BOTH);
-        Class<? extends Entity> entity =
-            XMLUtils.parseEntityTypeAttribute(projectileElement, "projectile", Arrow.class);
-        BlockMaterialData blockMaterial = entity.isAssignableFrom(FallingBlock.class)
-            ? XMLUtils.parseBlockMaterialData(Node.fromAttr(projectileElement, "material"))
+        ProjectileDefinition.ProjectileEntity entity =
+            parseProjectileEntity(projectileElement, factory.getParser());
+        BlockMaterialData blockMaterial = entity.requiresBlockMaterial()
+            ? XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(projectileElement, "material"))
             : null;
         Float power = XMLUtils.parseNumber(
             Node.fromChildOrAttr(projectileElement, "power"), Float.class, null);
@@ -97,6 +98,25 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
       }
 
       return projectiles.isEmpty() ? null : new ProjectileModule(ImmutableSet.copyOf(projectiles));
+    }
+
+    private static ProjectileDefinition.ProjectileEntity parseProjectileEntity(
+        final Element el, final XMLFluentParser parser) throws InvalidXMLException {
+      final String attributeName = "projectile";
+      final Class<? extends Entity> def = Arrow.class;
+      final Node node = Node.fromAttr(el, attributeName);
+      if (node == null) return new ProjectileDefinition.RealEntity(def);
+      final String entityText = node.getValue();
+      return switch (entityText.toLowerCase(Locale.ROOT)) {
+        case "block" ->
+          new ProjectileDefinition.BlockEntityType(
+              parser.parseFloat(el, "size").optional(1.0f),
+              parser.parseBool(el, "solid-block-collision").orTrue(),
+              parser.duration(el, "max-travel-time").optional(Duration.ofSeconds(1)));
+        default ->
+          new ProjectileDefinition.RealEntity(
+              XMLUtils.parseEntityTypeAttribute(el, attributeName, def));
+      };
     }
   }
 }

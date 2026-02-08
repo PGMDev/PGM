@@ -4,8 +4,14 @@ import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
@@ -37,6 +43,7 @@ import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
@@ -44,7 +51,10 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.util.MatchPlayers;
+import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.bukkit.entities.BlockEntity;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.nms.NMSHacks;
 
@@ -78,67 +88,77 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     ParticipantState playerState = match.getParticipantState(player);
     if (playerState == null) return;
 
-    ProjectileDefinition projectileDefinition =
-        this.getProjectileDefinition(player.getItemInHand());
+    var definition = this.getProjectileDefinition(player.getItemInHand());
 
-    if (projectileDefinition != null
-        && isValidProjectileAction(event.getAction(), projectileDefinition.clickAction)) {
-      // Prevent the original projectile from being fired
-      event.setCancelled(true);
+    if (definition == null || !isValidProjectileAction(event.getAction(), definition.clickAction))
+      return;
 
-      if (this.isCooldownActive(player, projectileDefinition)) return;
+    // Prevent the original projectile from being fired
+    event.setCancelled(true);
 
-      boolean realProjectile = Projectile.class.isAssignableFrom(projectileDefinition.projectile);
-      Vector velocity =
-          player.getEyeLocation().getDirection().multiply(projectileDefinition.velocity);
-      Entity projectile;
-      try {
-        assertTrue(launchingDefinition.get() == null, "nested projectile launch");
-        launchingDefinition.set(projectileDefinition);
-        if (realProjectile) {
-          projectile = player.launchProjectile(
-              projectileDefinition.projectile.asSubclass(Projectile.class), velocity);
-          if (projectile instanceof Fireball fireball && projectileDefinition.precise) {
-            NMSHacks.NMS_HACKS.setFireballDirection(fireball, velocity);
-          }
-        } else {
-          if (FallingBlock.class.isAssignableFrom(projectileDefinition.projectile)) {
-            projectile =
-                projectileDefinition.blockMaterial.spawnFallingBlock(player.getEyeLocation());
+    if (this.isCooldownActive(player, definition)) return;
+
+    var projType = definition.projectile;
+    boolean needsEvent = true;
+    Vector velocity = player.getEyeLocation().getDirection().multiply(definition.velocity);
+    Entity projectile = null;
+    try {
+      assertTrue(launchingDefinition.get() == null, "nested projectile launch");
+      launchingDefinition.set(definition);
+      switch (projType) {
+        case ProjectileDefinition.RealEntity(Class<? extends Entity> entityType) -> {
+          if (Projectile.class.isAssignableFrom(entityType)) {
+            needsEvent = false;
+
+            projectile = player.launchProjectile(entityType.asSubclass(Projectile.class), velocity);
+            if (projectile instanceof Fireball fireball && definition.precise) {
+              NMSHacks.NMS_HACKS.setFireballDirection(fireball, velocity);
+            }
           } else {
-            projectile =
-                player.getWorld().spawn(player.getEyeLocation(), projectileDefinition.projectile);
+            if (FallingBlock.class.isAssignableFrom(entityType)) {
+              projectile = definition.blockMaterial.spawnFallingBlock(player.getEyeLocation());
+            } else {
+              projectile = player.getWorld().spawn(player.getEyeLocation(), entityType);
+            }
+            projectile.setVelocity(velocity);
           }
-          projectile.setVelocity(velocity);
         }
-        if (projectileDefinition.power != null && projectile instanceof Explosive) {
-          ((Explosive) projectile).setYield(projectileDefinition.power);
+        case ProjectileDefinition.BlockEntityType ce -> {
+          Location loc = player.getEyeLocation();
+          var be = BlockEntity.spawnBlockEntity(loc, definition.blockMaterial, ce.size(), velocity);
+          new BlockRunner(definition, be, player, loc);
         }
+      }
+
+      if (definition.power != null && projectile instanceof Explosive) {
+        ((Explosive) projectile).setYield(definition.power);
+      }
+      if (projectile != null) {
         projectile.setMetadata(
-            "projectileDefinition", new FixedMetadataValue(PGM.get(), projectileDefinition));
-      } finally {
-        launchingDefinition.remove();
+            "projectileDefinition", new FixedMetadataValue(PGM.get(), definition));
       }
+    } finally {
+      launchingDefinition.remove();
+    }
 
-      // If the entity implements Projectile, it will have already generated a
-      // ProjectileLaunchEvent.
-      // Otherwise, we fire our custom event.
-      if (!realProjectile) {
-        EntityLaunchEvent launchEvent = new EntityLaunchEvent(projectile, event.getPlayer());
-        match.callEvent(launchEvent);
-        if (launchEvent.isCancelled()) {
-          projectile.remove();
-          return;
-        }
+    // If the entity implements Projectile, it will have already generated a
+    // ProjectileLaunchEvent.
+    // Otherwise, we fire our custom event.
+    if (needsEvent && projectile != null) {
+      EntityLaunchEvent launchEvent = new EntityLaunchEvent(projectile, event.getPlayer());
+      match.callEvent(launchEvent);
+      if (launchEvent.isCancelled()) {
+        projectile.remove();
+        return;
       }
+    }
 
-      if (projectileDefinition.throwable) {
-        InventoryUtils.consumeItem(event);
-      }
+    if (definition.throwable) {
+      InventoryUtils.consumeItem(event);
+    }
 
-      if (projectileDefinition.coolDown != null) {
-        startCooldown(player, projectileDefinition);
-      }
+    if (definition.coolDown != null) {
+      startCooldown(player, definition);
     }
   }
 
@@ -283,5 +303,96 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   public boolean isCooldownActive(Player player, ProjectileDefinition definition) {
     ProjectileCooldowns playerCooldowns = projectileCooldowns.get(player.getUniqueId());
     return (playerCooldowns != null && playerCooldowns.isActive(definition));
+  }
+
+  private class BlockRunner {
+    private final ProjectileDefinition definition;
+    private final BlockEntity blockEntity;
+    private final Player player;
+    private final Party shooterParty;
+    private final ProjectileDefinition.BlockEntityType ce;
+    private final Location currentLocation;
+    private final Vector increment;
+    private final int substeps;
+    private Vector substep;
+    private final Future<?> runner;
+    private int remainingTime;
+    private boolean collided = false;
+
+    public BlockRunner(
+        ProjectileDefinition definition,
+        BlockEntity blockEntity,
+        Player player,
+        Location spawnLocation) {
+      this.definition = definition;
+      this.blockEntity = blockEntity;
+      this.player = player;
+      this.shooterParty = Objects.requireNonNull(match.getPlayer(player)).getParty();
+      this.ce = (ProjectileDefinition.BlockEntityType) definition.projectile;
+
+      this.currentLocation = spawnLocation.clone();
+      var normalizedDirection = currentLocation.getDirection().normalize();
+      this.currentLocation.setPitch(0);
+      this.currentLocation.setYaw(0);
+
+      this.increment = normalizedDirection.clone().multiply(definition.velocity);
+      this.substeps = Math.min(10, Math.max(1, (int) (definition.velocity / Math.max(0.1, ce.size()))));
+      this.substep = increment.clone().divide(new Vector(substeps, substeps, substeps));
+      if (this.substep.length() < 0.1) this.substep = normalizedDirection.clone().multiply(0.1);
+
+      this.remainingTime = (int) TimeUtils.toTicks(ce.maxTravelTime());
+      this.runner = match
+          .getExecutor(MatchScope.RUNNING)
+          .scheduleAtFixedRate(this::tick, 0L, 50L, TimeUnit.MILLISECONDS);
+    }
+
+    public void tick() {
+      if (remainingTime-- <= 0 || collided) {
+        cancel();
+        return;
+      }
+      if (definition.damage != null || ce.solidBlockCollision()) {
+        if (blockDisplayCollision(currentLocation)) {
+          collided = true;
+          return;
+        }
+      }
+
+      currentLocation.add(increment);
+      blockEntity.teleport(currentLocation);
+    }
+
+    private void cancel() {
+      this.runner.cancel(true);
+      blockEntity.remove();
+    }
+
+    private boolean blockDisplayCollision(Location location) {
+      double halfSize = 0.5 * ce.size();
+      
+      if (ce.solidBlockCollision() && NMSHacks.NMS_HACKS.collidesWithBlock(currentLocation, halfSize, increment, substeps, substep)) {
+        return true;
+      }
+      if (definition.damage != null) {
+        Entity hitEntity = NMSHacks.NMS_HACKS.collidesWithPlayer(location, halfSize, increment, this::isEnemyPlayer);
+        if (hitEntity != null) {
+          ((Player) hitEntity).damage(definition.damage, player);
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    private boolean isEnemyPlayer(Entity entity) {
+      if (!(entity instanceof Player victim)) {
+        return false;
+      }
+      var mpVictim = match.getPlayer(victim);
+      if (MatchPlayers.canInteract(mpVictim) && mpVictim.getParty() != shooterParty) {
+        return true;
+      }
+      return false;
+    }
   }
 }

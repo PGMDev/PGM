@@ -3,6 +3,7 @@ package tc.oc.pgm.projectile;
 import java.time.Duration;
 import java.util.List;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
@@ -15,7 +16,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
   protected @Nullable Float power;
   protected double velocity;
   protected ClickAction clickAction;
-  protected Class<? extends Entity> projectile;
+  protected ProjectileEntity projectile;
   protected List<PotionEffect> potion;
   protected Filter destroyFilter;
   protected Duration coolDown;
@@ -30,7 +31,7 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
       @Nullable Float power,
       double velocity,
       ClickAction clickAction,
-      Class<? extends Entity> entity,
+      ProjectileEntity entity,
       List<PotionEffect> potion,
       Filter destroyFilter,
       Duration coolDown,
@@ -50,6 +51,25 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
     this.throwable = throwable;
     this.precise = precise;
     this.blockMaterial = blockMaterial;
+  }
+
+  public sealed interface ProjectileEntity permits RealEntity, BlockEntityType {
+    boolean requiresBlockMaterial();
+  }
+
+  record RealEntity(Class<? extends Entity> entityType) implements ProjectileEntity {
+    @Override
+    public boolean requiresBlockMaterial() {
+      return FallingBlock.class.isAssignableFrom(entityType);
+    }
+  }
+
+  record BlockEntityType(float size, boolean solidBlockCollision, Duration maxTravelTime)
+      implements ProjectileEntity {
+    @Override
+    public boolean requiresBlockMaterial() {
+      return true;
+    }
   }
 
   public @Nullable String getName() {

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalLong;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.HolderLookup;
@@ -46,8 +47,11 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.validation.ContentValidationException;
+import net.minecraft.world.phys.AABB;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
 import org.bukkit.World;
@@ -75,7 +79,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.platform.modern.PgmBootstrap;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
@@ -450,5 +456,46 @@ public class ModernNMSHacks implements NMSHacks {
   @Override
   public int allocateEntityId() {
     return Bukkit.getUnsafe().nextEntityId();
+  }
+
+  @Override
+  public boolean collidesWithBlock(Location center, double halfSize, Vector delta, int substeps, Vector substep) {
+    Location pos = center.clone();
+    AABB AABB = new AABB(
+      pos.getX() - halfSize + Math.min(0, delta.getX()),
+      pos.getY() - halfSize + Math.min(0, delta.getY()),
+      pos.getZ() - halfSize + Math.min(0, delta.getZ()),
+
+      pos.getX() + halfSize + Math.max(0, delta.getX()),
+      pos.getY() + halfSize + Math.max(0, delta.getY()),
+      pos.getZ() + halfSize + Math.max(0, delta.getZ())
+    );
+    
+    CraftWorld world = (CraftWorld) pos.getWorld();
+    if (!world.getHandle().getLevel().noCollision(null, AABB)) {
+      for (int i = 0; i < substeps; i++) {
+        AABB = new AABB(
+          pos.getX() - halfSize,
+          pos.getY() - halfSize,
+          pos.getZ() - halfSize,
+
+          pos.getX() + halfSize,
+          pos.getY() + halfSize,
+          pos.getZ() + halfSize
+        );
+
+        if (!world.getHandle().getLevel().noCollision(null, AABB)) {
+        return true;
+        }
+        pos.add(substep);
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public Entity collidesWithPlayer(Location center, double halfSize, Vector delta, Predicate<Entity> predicate) {
+    RayTraceResult result = center.getWorld().rayTraceEntities(center, delta.normalize(), delta.length(), halfSize, predicate);
+    return result != null ? result.getHitEntity() : null;
   }
 }
