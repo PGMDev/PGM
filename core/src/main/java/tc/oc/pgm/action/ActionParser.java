@@ -17,7 +17,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
@@ -59,6 +58,7 @@ import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.modules.WeatherMatchModule;
+import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
@@ -392,10 +392,8 @@ public class ActionParser {
 
   @MethodParser("open-shop")
   public OpenShop parseOpenShop(Element el, Class<?> scope) throws InvalidXMLException {
-    Attribute shopAttr = XMLUtils.getRequiredAttribute(el, "shop");
-    String shopId = shopAttr.getValue();
-
-    return new OpenShop(shopId);
+    var shop = parser.reference(Shop.class, el, "shop").required();
+    return new OpenShop(shop);
   }
 
   @MethodParser("replace-item")

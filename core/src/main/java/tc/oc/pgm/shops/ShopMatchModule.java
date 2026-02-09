@@ -43,10 +43,6 @@ public class ShopMatchModule implements MatchModule, Listener {
     }
   }
 
-  public Map<String, Shop> getShops() {
-    return shops;
-  }
-
   @EventHandler(priority = EventPriority.HIGH)
   public void onShopKeeperDamage(EntityDamageEvent event) {
     if (isKeeper(event.getEntity())) {

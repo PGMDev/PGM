@@ -1,28 +1,20 @@
 package tc.oc.pgm.action.actions;
 
-import java.util.Objects;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.shops.Shop;
-import tc.oc.pgm.shops.ShopMatchModule;
 import tc.oc.pgm.shops.menu.ShopMenu;
 
 public class OpenShop extends AbstractAction<MatchPlayer> {
-  final String shopId;
+  final FeatureReference<Shop> shop;
 
-  public OpenShop(String shopId) {
+  public OpenShop(FeatureReference<Shop> shop) {
     super(MatchPlayer.class);
-    this.shopId = shopId;
+    this.shop = shop;
   }
 
   @Override
   public void trigger(MatchPlayer player) {
-
-    Shop shop = Objects.requireNonNull(player.getMatch().getModule(ShopMatchModule.class))
-        .getShops()
-        .get(shopId);
-
-    if (shop == null) return;
-
-    new ShopMenu(shop, player);
+    new ShopMenu(this.shop.get(), player);
   }
 }
