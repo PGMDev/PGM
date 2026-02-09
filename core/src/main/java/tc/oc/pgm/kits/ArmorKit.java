@@ -47,8 +47,8 @@ public class ArmorKit extends AbstractKit {
     this.armor.forEach((slot, item) -> {
       var wearing = slot.getItem(player);
       if (force || wearing == null) {
-        slot.setItem(player, wearing = item.stack.clone());
-        ItemModifier.apply(wearing, player);
+        ItemModifier.apply(wearing = item.stack.clone(), player);
+        slot.setItem(player, wearing);
       }
     });
   }
