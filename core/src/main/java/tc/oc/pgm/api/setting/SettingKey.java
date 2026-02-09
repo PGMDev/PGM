@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import org.bukkit.Material;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.modules.PlayerTimeMatchModule;
@@ -109,7 +109,7 @@ public enum SettingKey implements Aliased {
    * @return The name.
    */
   public String getName() {
-    return aliases.get(0);
+    return aliases.getFirst();
   }
 
   /**
@@ -121,7 +121,7 @@ public enum SettingKey implements Aliased {
     return aliases;
   }
 
-  @NotNull
+  @NonNull
   @Override
   public Iterator<String> iterator() {
     return aliases.iterator();

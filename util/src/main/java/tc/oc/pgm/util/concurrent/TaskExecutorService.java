@@ -17,7 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.util.TimeUtils;
 
 /** An executor service that is backed by a runnable executor. */
@@ -61,7 +61,7 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
   }
 
   @Override
-  public List<Runnable> shutdownNow() {
+  public @NonNull List<Runnable> shutdownNow() {
     if (!isShutdown()) shutdown();
     List<Runnable> pending = ImmutableList.copyOf(tasks);
 
@@ -83,7 +83,8 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
   }
 
   @Override
-  public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+  public boolean awaitTermination(long timeout, @NonNull TimeUnit unit)
+      throws InterruptedException {
     if (terminated == null) return false;
 
     terminated.await(timeout, unit);
@@ -91,52 +92,54 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
   }
 
   @Override
-  public <T> CompletableFuture<T> submit(Callable<T> task) {
+  public <T> @NonNull CompletableFuture<T> submit(@NonNull Callable<T> task) {
     return new Task<>(task);
   }
 
   @Override
-  public <T> CompletableFuture<T> submit(Runnable task, T result) {
+  public <T> @NonNull CompletableFuture<T> submit(@NonNull Runnable task, T result) {
     return new Task<>(task, result);
   }
 
   @Override
-  public CompletableFuture<?> submit(Runnable task) {
+  public @NonNull CompletableFuture<?> submit(@NonNull Runnable task) {
     return new Task<>(task, null);
   }
 
   @Override
-  public ScheduledFuture<?> schedule(Runnable task, long delay, TimeUnit unit) {
+  public @NonNull ScheduledFuture<?> schedule(
+      @NonNull Runnable task, long delay, @NonNull TimeUnit unit) {
     return new Task<>(task, null, -1, delay, unit);
   }
 
   @Override
-  public <V> ScheduledFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+  public <V> @NonNull ScheduledFuture<V> schedule(
+      @NonNull Callable<V> callable, long delay, @NonNull TimeUnit unit) {
     return new Task<>(callable, -1, delay, unit);
   }
 
   @Override
-  public ScheduledFuture<?> scheduleAtFixedRate(
-      Runnable task, long initialDelay, long period, TimeUnit unit) {
+  public @NonNull ScheduledFuture<?> scheduleAtFixedRate(
+      @NonNull Runnable task, long initialDelay, long period, @NonNull TimeUnit unit) {
     return scheduleWithFixedDelay(
         task, initialDelay, period, unit); // FIXME: fixed rate != fixed delay
   }
 
   @Override
-  public ScheduledFuture<?> scheduleWithFixedDelay(
-      Runnable task, long initialDelay, long delay, TimeUnit unit) {
+  public @NonNull ScheduledFuture<?> scheduleWithFixedDelay(
+      @NonNull Runnable task, long initialDelay, long delay, @NonNull TimeUnit unit) {
     return new Task<>(task, null, delay, initialDelay, unit);
   }
 
   @Override
-  public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+  public <T> @NonNull List<Future<T>> invokeAll(@NonNull Collection<? extends Callable<T>> tasks)
       throws InterruptedException {
     return invokeAll(tasks, 1, TimeUnit.DAYS);
   }
 
   @Override
-  public <T> List<Future<T>> invokeAll(
-      Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+  public <T> @NonNull List<Future<T>> invokeAll(
+      Collection<? extends Callable<T>> tasks, long timeout, @NonNull TimeUnit unit)
       throws InterruptedException {
     CompletableFuture<T>[] futures = new CompletableFuture[tasks.size()];
 
@@ -155,7 +158,7 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
   }
 
   @Override
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
+  public <T> @NonNull T invokeAny(@NonNull Collection<? extends Callable<T>> tasks)
       throws InterruptedException, ExecutionException {
     try {
       return invokeAny(tasks, 1, TimeUnit.DAYS);
@@ -165,7 +168,8 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
   }
 
   @Override
-  public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+  public <T> T invokeAny(
+      Collection<? extends Callable<T>> tasks, long timeout, @NonNull TimeUnit unit)
       throws InterruptedException, ExecutionException, TimeoutException {
     CompletableFuture<T>[] futures = new CompletableFuture[tasks.size()];
 
@@ -178,7 +182,7 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
   }
 
   @Override
-  public void execute(Runnable task) {
+  public void execute(@NonNull Runnable task) {
     submit(task);
   }
 
@@ -249,12 +253,12 @@ public abstract class TaskExecutorService implements ScheduledExecutorService {
     }
 
     @Override
-    public long getDelay(@NotNull TimeUnit unit) {
+    public long getDelay(@NonNull TimeUnit unit) {
       return 0;
     }
 
     @Override
-    public int compareTo(@NotNull Delayed other) {
+    public int compareTo(@NonNull Delayed other) {
       if (!(other instanceof Task<?> ot)) return -1;
       return Integer.compare(taskId, ot.taskId);
     }

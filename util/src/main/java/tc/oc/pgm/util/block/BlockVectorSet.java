@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 import org.bukkit.util.BlockVector;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Optimized implementation of a set of block locations. Coordinates are encoded into a single long
@@ -50,7 +51,7 @@ public class BlockVectorSet implements Set<BlockVector> {
   }
 
   @Override
-  public Iterator<BlockVector> iterator() {
+  public @NonNull Iterator<BlockVector> iterator() {
     final var iter = this.set.iterator();
 
     return new Iterator<>() {
@@ -139,7 +140,7 @@ public class BlockVectorSet implements Set<BlockVector> {
   }
 
   @Override
-  public boolean retainAll(Collection<?> vectors) {
+  public boolean retainAll(@NonNull Collection<?> vectors) {
     return this.retainAll(BlockVectors.encodePosSet(vectors));
   }
 
@@ -148,7 +149,7 @@ public class BlockVectorSet implements Set<BlockVector> {
   }
 
   @Override
-  public boolean removeAll(Collection<?> vectors) {
+  public boolean removeAll(@NonNull Collection<?> vectors) {
     return this.removeAll(BlockVectors.encodePosSet(vectors));
   }
 
@@ -162,12 +163,12 @@ public class BlockVectorSet implements Set<BlockVector> {
   }
 
   @Override
-  public Object[] toArray() {
+  public Object @NonNull [] toArray() {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public <T> T[] toArray(T[] a) {
+  public <T> T @NonNull [] toArray(T @NonNull [] a) {
     throw new UnsupportedOperationException();
   }
 

@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.tablist;
 
-import static tc.oc.pgm.util.nms.Packets.*;
+import static tc.oc.pgm.util.nms.Packets.ENTITIES;
+import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
 
 import java.util.ArrayList;
 import java.util.Collection;

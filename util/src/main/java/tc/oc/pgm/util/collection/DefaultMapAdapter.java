@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Adapt a Map to return a default value for missing keys. The default value can be constant or
@@ -63,7 +64,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
 
   public V getOrDefault(K key) {
     V value = this.map.get(key);
-    return value != null ? value : this.defaultProvider.apply((K) key);
+    return value != null ? value : this.defaultProvider.apply(key);
   }
 
   public V getOrCreate(K key) {
@@ -90,7 +91,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
   }
 
   @Override
-  public Set<Entry<K, V>> entrySet() {
+  public @NonNull Set<Entry<K, V>> entrySet() {
     return map.entrySet();
   }
 
@@ -110,7 +111,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
   }
 
   @Override
-  public Set<K> keySet() {
+  public @NonNull Set<K> keySet() {
     return map.keySet();
   }
 
@@ -130,7 +131,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
     return map.put(key, value);
   }
 
-  public void putAll(Map<? extends K, ? extends V> m) {
+  public void putAll(@NonNull Map<? extends K, ? extends V> m) {
     map.putAll(m);
   }
 
@@ -145,7 +146,7 @@ public class DefaultMapAdapter<K, V> implements Map<K, V> {
   }
 
   @Override
-  public Collection<V> values() {
+  public @NonNull Collection<V> values() {
     return map.values();
   }
 }

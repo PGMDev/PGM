@@ -1,6 +1,6 @@
 package tc.oc.pgm.api.module.exception;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.module.Module;
 
 /** When a {@link Module} or its factory is unable to load. */
@@ -8,7 +8,8 @@ public class ModuleLoadException extends RuntimeException {
 
   private final @Nullable Class<? extends Module> key;
 
-  public ModuleLoadException(Class<? extends Module> key, String message, Throwable cause) {
+  public ModuleLoadException(
+      @Nullable Class<? extends Module> key, String message, Throwable cause) {
     super(getFullMessage(message, key), cause);
     this.key = key;
   }

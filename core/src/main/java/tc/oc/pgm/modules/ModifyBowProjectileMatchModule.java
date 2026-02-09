@@ -83,8 +83,7 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
       }
 
       // Save some special properties of Arrows
-      if (oldEntity instanceof Arrow) {
-        Arrow arrow = (Arrow) oldEntity;
+      if (oldEntity instanceof Arrow arrow) {
         newProjectile.setMetadata("critical", new FixedMetadataValue(plugin, arrow.isCritical()));
         newProjectile.setMetadata(
             "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
@@ -139,10 +138,9 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
         // If the projectile is not an arrow, play an impact sound.
         if (event.getEntity() instanceof Player
-            && (projectile instanceof Projectile && !(projectile instanceof Arrow))) {
-          Projectile customProjectile = (Projectile) projectile;
-          if (customProjectile.getShooter() instanceof Player) {
-            Player bukkitShooter = (Player) customProjectile.getShooter();
+            && (projectile instanceof Projectile customProjectile
+                && !(projectile instanceof Arrow))) {
+          if (customProjectile.getShooter() instanceof Player bukkitShooter) {
             MatchPlayer shooter = match.getPlayer(bukkitShooter);
             if (shooter != null && event.getEntity() != null) {
               shooter.playSound(Sounds.PROJECTILE_HIT);

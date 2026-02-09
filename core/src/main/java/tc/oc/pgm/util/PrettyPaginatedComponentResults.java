@@ -74,7 +74,7 @@ public abstract class PrettyPaginatedComponentResults<T> {
    * @throws TextException no match exceptions
    */
   public void display(Audience audience, List<? extends T> data, int page) throws TextException {
-    if (data.size() == 0) {
+    if (data.isEmpty()) {
       audience.sendMessage(formatEmpty());
       return;
     }

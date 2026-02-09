@@ -9,7 +9,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.projectiles.ProjectileSource;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -38,12 +38,12 @@ import tc.oc.pgm.tracker.trackers.TNTTracker;
 
 public class TrackerMatchModule implements MatchModule {
 
-  private EntityTracker entityTracker;
-  private BlockTracker blockTracker;
-  private FallTracker fallTracker;
-  private FireTracker fireTracker;
-  private FallingBlockTracker fallingBlockTracker;
-  private CactiTracker cactiTracker;
+  private final EntityTracker entityTracker;
+  private final BlockTracker blockTracker;
+  private final FallTracker fallTracker;
+  private final FireTracker fireTracker;
+  private final FallingBlockTracker fallingBlockTracker;
+  private final CactiTracker cactiTracker;
 
   private final Set<DamageResolver> damageResolvers = new LinkedHashSet<>();
   private final Match match;

@@ -1,12 +1,14 @@
 package tc.oc.pgm.kits;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.util.inventory.ArmorType;
+import tc.oc.pgm.util.inventory.Slot;
 
 public class ArmorKit extends AbstractKit {
   public static class ArmorItem {
@@ -19,14 +21,21 @@ public class ArmorKit extends AbstractKit {
     }
   }
 
-  private final Map<ArmorType, ArmorItem> armor;
+  private final Map<Slot.Armor, ArmorItem> armor;
 
-  public ArmorKit(Map<ArmorType, ArmorItem> armor) {
+  public ArmorKit(Map<Slot.Armor, ArmorItem> armor) {
     this.armor = armor;
   }
 
+  @Deprecated(forRemoval = true)
   public Map<ArmorType, ArmorItem> getArmor() {
-    return armor;
+    var remapped = new HashMap<ArmorType, ArmorItem>();
+    armor.forEach((slot, armorItem) -> remapped.put(slot.getArmorType(), armorItem));
+    return remapped;
+  }
+
+  public Collection<ArmorItem> getArmorItems() {
+    return armor.values();
   }
 
   /**
@@ -35,14 +44,12 @@ public class ArmorKit extends AbstractKit {
    */
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    ItemStack[] wearing = player.getBukkit().getInventory().getArmorContents();
-    for (Map.Entry<ArmorType, ArmorItem> entry : this.armor.entrySet()) {
-      int slot = entry.getKey().ordinal();
-      if (force || wearing[slot] == null || wearing[slot].getType() == Material.AIR) {
-        wearing[slot] = entry.getValue().stack.clone();
-        ItemModifier.apply(wearing[slot], player);
+    this.armor.forEach((slot, item) -> {
+      var wearing = slot.getItem(player);
+      if (force || wearing == null) {
+        ItemModifier.apply(wearing = item.stack.clone(), player);
+        slot.setItem(player, wearing);
       }
-    }
-    player.getBukkit().getInventory().setArmorContents(wearing);
+    });
   }
 }

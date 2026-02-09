@@ -44,7 +44,7 @@ public class CoreModule implements MapModule<CoreMatchModule> {
   protected final List<CoreFactory> coreFactories;
 
   public CoreModule(List<CoreFactory> coreFactories) {
-    assert coreFactories.size() > 0;
+    assert !coreFactories.isEmpty();
     this.coreFactories = coreFactories;
   }
 
@@ -161,7 +161,7 @@ public class CoreModule implements MapModule<CoreMatchModule> {
       }
 
       // only produce a valid core module if there are cores to handle
-      if (coreFactories.size() > 0) {
+      if (!coreFactories.isEmpty()) {
         return new CoreModule(coreFactories);
       } else {
         return null;

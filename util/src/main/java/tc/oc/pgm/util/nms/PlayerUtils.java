@@ -52,6 +52,8 @@ public interface PlayerUtils {
 
   RayBlockIntersection getTargetedBlock(Player player);
 
+  boolean willBeOnline(Player player);
+
   default void sendMultiBlockPacket(
       Player player, BlockVectorSet positions, @Nullable BlockMaterialData data) {
     var location = player.getLocation();

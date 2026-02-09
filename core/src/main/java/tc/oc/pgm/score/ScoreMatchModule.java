@@ -20,7 +20,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.PGM;
@@ -39,6 +38,7 @@ import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -180,40 +180,22 @@ public class ScoreMatchModule implements MatchModule, Listener {
     }
   }
 
-  private double redeemItems(ScoreBox box, ItemStack stack) {
-    if (stack == null) return 0;
-    double points = 0;
-    for (Entry<MaterialMatcher, Double> entry : box.getRedeemables().entrySet()) {
-      if (entry.getKey().matches(stack)) {
-        points += entry.getValue() * stack.getAmount();
-        stack.setAmount(0);
+  private double redeemItems(ScoreBox box, PlayerInventory inv, Slot.Player slot) {
+    var stack = slot.getItem(inv);
+    if (stack != null) {
+      for (Entry<MaterialMatcher, Double> entry : box.getRedeemables().entrySet()) {
+        if (!entry.getKey().matches(stack)) continue;
+        slot.setItem(inv, null);
+        return entry.getValue() * stack.getAmount();
       }
     }
-    return points;
-  }
-
-  private double redeemItems(ScoreBox box, ItemStack[] stacks) {
-    double total = 0;
-    for (int i = 0; i < stacks.length; i++) {
-      double points = redeemItems(box, stacks[i]);
-      if (points != 0) stacks[i] = null;
-      total += points;
-    }
-    return total;
+    return 0;
   }
 
   private double redeemItems(ScoreBox box, PlayerInventory inventory) {
-    ItemStack[] notArmor = inventory.getContents();
-    ItemStack[] armor = inventory.getArmorContents();
-
-    double points = redeemItems(box, notArmor) + redeemItems(box, armor);
-
-    if (points != 0) {
-      inventory.setContents(notArmor);
-      inventory.setArmorContents(armor);
-    }
-
-    return points;
+    return Slot.Player.player()
+        .mapToDouble(slot -> redeemItems(box, inventory, slot))
+        .sum();
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

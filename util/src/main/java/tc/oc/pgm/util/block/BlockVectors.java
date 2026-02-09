@@ -15,7 +15,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.material.Materials;
 
 public interface BlockVectors {
@@ -114,7 +114,7 @@ public interface BlockVectors {
     loc.setZ(unpack(encoded, SHIFT + SHIFT));
   }
 
-  static final long ENCODED_NULL_POS = Long.MIN_VALUE;
+  long ENCODED_NULL_POS = Long.MIN_VALUE;
 
   static long encodePos(long x, long y, long z) {
     return (x & MASK) | ((y & MASK) << SHIFT) | ((z & MASK) << (SHIFT + SHIFT));

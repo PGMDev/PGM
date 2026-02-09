@@ -8,12 +8,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
+import org.jspecify.annotations.NonNull;
 
 public class ContextStore<T> implements Iterable<Map.Entry<String, T>> {
   protected final Map<String, T> store = Maps.newTreeMap();
 
   @Override
-  public Iterator<Map.Entry<String, T>> iterator() {
+  public @NonNull Iterator<Map.Entry<String, T>> iterator() {
     return this.store.entrySet().iterator();
   }
 

@@ -68,7 +68,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
             ? XMLUtils.parseBlockMaterialData(Node.fromAttr(projectileElement, "material"))
             : null;
         Float power = XMLUtils.parseNumber(
-            Node.fromChildOrAttr(projectileElement, "power"), Float.class, (Float) null);
+            Node.fromChildOrAttr(projectileElement, "power"), Float.class, null);
         List<PotionEffect> potionKit = kitParser.parsePotions(projectileElement);
         Filter destroyFilter =
             filterParser.parseFilterProperty(projectileElement, "destroy-filter");

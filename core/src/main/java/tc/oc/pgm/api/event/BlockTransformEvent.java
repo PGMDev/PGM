@@ -155,8 +155,7 @@ public class BlockTransformEvent extends GeneralizedEvent {
         || event instanceof PlayerBucketEmptyEvent
         || event instanceof PlayerBucketFillEvent) return true;
 
-    if (event instanceof BlockIgniteEvent) {
-      BlockIgniteEvent igniteEvent = (BlockIgniteEvent) event;
+    if (event instanceof BlockIgniteEvent igniteEvent) {
       if (igniteEvent.getCause() == BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL
           && igniteEvent.getIgnitingEntity() != null) {
         return true;

@@ -1,15 +1,15 @@
 package tc.oc.pgm.api.match.event;
 
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 
 public class MatchVoteFinishEvent extends MatchEvent {
 
-  private @Nullable MapInfo pickedMap;
+  private final @Nullable MapInfo pickedMap;
 
-  public MatchVoteFinishEvent(Match match, MapInfo pickedMap) {
+  public MatchVoteFinishEvent(Match match, @Nullable MapInfo pickedMap) {
     super(match);
     this.pickedMap = pickedMap;
   }

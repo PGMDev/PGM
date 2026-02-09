@@ -14,8 +14,6 @@ import org.bukkit.Location;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -42,7 +40,7 @@ import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.5")
+@Supports(value = PAPER, minVersion = "1.21.11")
 public class ModernMiscUtil implements MiscUtils {
   @Override
   public EventException createEventException(Throwable cause, Event event) {
@@ -76,11 +74,7 @@ public class ModernMiscUtil implements MiscUtils {
 
   @Override
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
-    var world = ((CraftWorld) loc.getWorld()).getHandle();
-    var potion = new net.minecraft.world.entity.projectile.ThrownSplashPotion(
-        world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
-    world.addFreshEntity(potion);
-    return (ThrownPotion) potion.getBukkitEntity();
+    return loc.getWorld().spawn(loc, ThrownPotion.class, potion -> potion.setItem(item));
   }
 
   @Override

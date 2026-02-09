@@ -10,25 +10,24 @@ public interface BlockFaces {
     BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.UP, BlockFace.DOWN
   };
 
-  BlockFace[] CLOCKWISE =
-      new BlockFace[] {
-        BlockFace.SOUTH,
-        BlockFace.SOUTH_SOUTH_WEST,
-        BlockFace.SOUTH_WEST,
-        BlockFace.WEST_SOUTH_WEST,
-        BlockFace.WEST,
-        BlockFace.WEST_NORTH_WEST,
-        BlockFace.NORTH_WEST,
-        BlockFace.NORTH_NORTH_WEST,
-        BlockFace.NORTH,
-        BlockFace.NORTH_NORTH_EAST,
-        BlockFace.NORTH_EAST,
-        BlockFace.EAST_NORTH_EAST,
-        BlockFace.EAST,
-        BlockFace.EAST_SOUTH_EAST,
-        BlockFace.SOUTH_EAST,
-        BlockFace.SOUTH_SOUTH_EAST,
-      };
+  BlockFace[] CLOCKWISE = new BlockFace[] {
+    BlockFace.SOUTH,
+    BlockFace.SOUTH_SOUTH_WEST,
+    BlockFace.SOUTH_WEST,
+    BlockFace.WEST_SOUTH_WEST,
+    BlockFace.WEST,
+    BlockFace.WEST_NORTH_WEST,
+    BlockFace.NORTH_WEST,
+    BlockFace.NORTH_NORTH_WEST,
+    BlockFace.NORTH,
+    BlockFace.NORTH_NORTH_EAST,
+    BlockFace.NORTH_EAST,
+    BlockFace.EAST_NORTH_EAST,
+    BlockFace.EAST,
+    BlockFace.EAST_SOUTH_EAST,
+    BlockFace.SOUTH_EAST,
+    BlockFace.SOUTH_SOUTH_EAST,
+  };
 
   static BlockVector getRelative(BlockVector pos, BlockFace face) {
     return new BlockVector(
@@ -52,41 +51,23 @@ public interface BlockFaces {
   }
 
   static float faceToYaw(BlockFace face) {
-    switch (face) {
-      case SOUTH:
-        return 0f;
-      case SOUTH_SOUTH_WEST:
-        return 22.5f;
-      case SOUTH_WEST:
-        return 45f;
-      case WEST_SOUTH_WEST:
-        return 67.5f;
-      case WEST:
-        return 90f;
-      case WEST_NORTH_WEST:
-        return 112.5f;
-      case NORTH_WEST:
-        return 135f;
-      case NORTH_NORTH_WEST:
-        return 157.5f;
-      case NORTH:
-        return -180f;
-      case NORTH_NORTH_EAST:
-        return -157.5f;
-      case NORTH_EAST:
-        return -135f;
-      case EAST_NORTH_EAST:
-        return -112.5f;
-      case EAST:
-        return -90f;
-      case EAST_SOUTH_EAST:
-        return -67.5f;
-      case SOUTH_EAST:
-        return -45f;
-      case SOUTH_SOUTH_EAST:
-        return -22.5f;
-      default:
-        return 0f;
-    }
+    return switch (face) {
+      case SOUTH_SOUTH_WEST -> 22.5f;
+      case SOUTH_WEST -> 45f;
+      case WEST_SOUTH_WEST -> 67.5f;
+      case WEST -> 90f;
+      case WEST_NORTH_WEST -> 112.5f;
+      case NORTH_WEST -> 135f;
+      case NORTH_NORTH_WEST -> 157.5f;
+      case NORTH -> -180f;
+      case NORTH_NORTH_EAST -> -157.5f;
+      case NORTH_EAST -> -135f;
+      case EAST_NORTH_EAST -> -112.5f;
+      case EAST -> -90f;
+      case EAST_SOUTH_EAST -> -67.5f;
+      case SOUTH_EAST -> -45f;
+      case SOUTH_SOUTH_EAST -> -22.5f;
+      default -> 0f;
+    };
   }
 }

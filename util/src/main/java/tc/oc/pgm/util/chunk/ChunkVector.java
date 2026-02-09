@@ -84,8 +84,7 @@ public class ChunkVector {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof ChunkVector)) return false;
-    ChunkVector other = (ChunkVector) o;
+    if (!(o instanceof ChunkVector other)) return false;
     return getChunkX() == other.getChunkX() && getChunkZ() == other.getChunkZ();
   }
 

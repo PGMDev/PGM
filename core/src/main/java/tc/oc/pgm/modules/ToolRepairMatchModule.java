@@ -3,19 +3,17 @@ package tc.oc.pgm.modules;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.Packets.PLAYERS;
 
-import com.google.common.collect.Iterables;
-import java.util.Arrays;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -47,15 +45,9 @@ public class ToolRepairMatchModule implements MatchModule, Listener {
   public void processRepair(PlayerPickupItemEvent event) {
     ItemStack pickup = event.getItem().getItemStack();
 
-    if (this.toRepair.matches(pickup.getType())) {
-      PlayerInventory inv = event.getPlayer().getInventory();
-      for (ItemStack invStack : Iterables.concat(
-          Arrays.asList(inv.getContents()), Arrays.asList(inv.getArmorContents()))) {
-        if (this.canRepair(pickup, invStack)) {
-          this.doRepair(event, invStack);
-          return;
-        }
-      }
-    }
+    if (!this.toRepair.matches(pickup.getType())) return;
+    Slot.Player.forEach(event.getPlayer().getInventory(), (slot, stack) -> {
+      if (this.canRepair(pickup, stack)) this.doRepair(event, stack);
+    });
   }
 }

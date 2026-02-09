@@ -28,7 +28,7 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
   protected boolean lazyEnable = true;
 
   public ListeningMapAdapter(Plugin plugin) {
-    this(new HashMap<K, V>(), plugin);
+    this(new HashMap<>(), plugin);
   }
 
   public ListeningMapAdapter(Map<K, V> map, Plugin plugin) {
@@ -88,7 +88,7 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
       @NonNull V value,
       @NonNull BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
     this.assertEnabled();
-    return this.map.merge(key, value, remappingFunction);
+    return isValid(key) ? this.map.merge(key, value, remappingFunction) : null;
   }
 
   /** If the entry is a valid new entry */

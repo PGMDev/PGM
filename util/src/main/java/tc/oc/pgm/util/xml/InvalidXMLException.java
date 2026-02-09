@@ -5,7 +5,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.JDOMParseException;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class InvalidXMLException extends Exception {
 
@@ -137,10 +137,7 @@ public class InvalidXMLException extends Exception {
         return what + " @ " + where;
       }
       return what;
-    } else if (where != null) {
-      return where;
-    }
-    return null;
+    } else return where;
   }
 
   public @Nullable String getFullLocation() {

@@ -5,7 +5,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.material.MaterialData;
 
 public class MaterialQuery extends Query implements tc.oc.pgm.api.filter.query.MaterialQuery {
@@ -26,10 +26,8 @@ public class MaterialQuery extends Query implements tc.oc.pgm.api.filter.query.M
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof MaterialQuery)) return false;
-    MaterialQuery query = (MaterialQuery) o;
-    if (!material.equals(query.material)) return false;
-    return true;
+    if (!(o instanceof MaterialQuery query)) return false;
+    return material.equals(query.material);
   }
 
   @Override

@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.bukkit;
 
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.util.Map;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +23,7 @@ public class OnlinePlayerMapAdapter<V> extends ListeningMapAdapter<Player, V> im
 
   @Override
   public boolean isValid(Player key) {
-    return key.isOnline() && !LeavingPlayers.contains(key);
+    return key.isOnline() && PLAYER_UTILS.willBeOnline(key);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

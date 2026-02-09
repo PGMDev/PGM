@@ -7,7 +7,7 @@ import com.google.common.base.Objects;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.util.named.NameStyle;
 
@@ -22,7 +22,7 @@ public class PseudonymContributor implements Contributor {
   }
 
   @Override
-  public String getContribution() {
+  public @Nullable String getContribution() {
     return contribution;
   }
 
@@ -43,15 +43,14 @@ public class PseudonymContributor implements Contributor {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof PseudonymContributor)) return false;
-    final PseudonymContributor o = (PseudonymContributor) obj;
+    if (!(obj instanceof PseudonymContributor o)) return false;
     return this.name.equals(o.name) && Objects.equal(this.contribution, o.contribution);
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 31 * hash + (int) this.name.hashCode();
+    hash = 31 * hash + this.name.hashCode();
     hash = 31 * hash + (contribution == null ? 0 : contribution.hashCode());
     return hash;
   }

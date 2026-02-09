@@ -20,7 +20,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.match.Match;
@@ -90,8 +90,7 @@ public class BlitzMatchModule implements MatchModule, Listener {
   public void handleDeath(final MatchPlayerDeathEvent event) {
     MatchPlayer victim = event.getVictim();
     if (config.getFilter().query(victim).isDenied()) return;
-    if (victim.getParty() instanceof Competitor) {
-      Competitor competitor = (Competitor) victim.getParty();
+    if (victim.getParty() instanceof Competitor competitor) {
 
       int lives = this.lifeManager.addLives(event.getVictim().getId(), -1);
 

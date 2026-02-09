@@ -46,7 +46,6 @@ public class EnderChestMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onParticipantLeave(PlayerPartyChangeEvent event) {
     if (!isEnabled()) return;
-    if (dropoffs.isEmpty()) return;
     Party oldParty = event.getOldParty();
     if (!(oldParty instanceof Competitor)) return;
 

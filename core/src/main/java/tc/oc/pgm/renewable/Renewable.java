@@ -58,8 +58,8 @@ public class Renewable implements Listener, Tickable {
   // Cached queries of the renewable/shuffleable filters, invalidated every tick.
   // These are queries of the original blocks, not the current blocks.
   // This should cut down on repeated queries.
-  private Map<BlockVector, Filter.QueryResponse> renewableCache = new HashMap<>();
-  private Map<BlockVector, Filter.QueryResponse> shuffleableCache = new HashMap<>();
+  private final Map<BlockVector, Filter.QueryResponse> renewableCache = new HashMap<>();
+  private final Map<BlockVector, Filter.QueryResponse> shuffleableCache = new HashMap<>();
 
   public Renewable(RenewableDefinition definition, Match match, Logger parent) {
     this.definition = definition;

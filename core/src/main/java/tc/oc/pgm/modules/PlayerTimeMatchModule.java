@@ -35,13 +35,10 @@ public class PlayerTimeMatchModule implements MatchModule, Listener {
   }
 
   private static long getPreferencedTime(MatchPlayer player) {
-    switch (player.getSettings().getValue(SettingKey.TIME)) {
-      case TIME_DARK:
-        return 18000; // Midnight
-      case TIME_LIGHT:
-        return 6000; // Midday
-      default:
-        return player.getWorld().getFullTime();
-    }
+    return switch (player.getSettings().getValue(SettingKey.TIME)) {
+      case TIME_DARK -> 18000; // Midnight
+      case TIME_LIGHT -> 6000; // Midday
+      default -> player.getWorld().getFullTime();
+    };
   }
 }

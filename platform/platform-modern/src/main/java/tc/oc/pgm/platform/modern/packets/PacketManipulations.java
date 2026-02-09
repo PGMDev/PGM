@@ -14,6 +14,7 @@ import java.util.Map;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -141,6 +142,7 @@ public class PacketManipulations implements PacketSender {
   }
 
   private void handleServerPing(PacketEvent event) {
+    if (event.isCancelled()) return;
     JsonObject pingExtra = new JsonObject();
     new ExtraPingDataRequestEvent() {
       @Override
@@ -152,9 +154,9 @@ public class PacketManipulations implements PacketSender {
 
     if (!pingExtra.isEmpty()) {
       // Encode the response manually, otherwise the extra data will get lost
-      var serverPing = (ServerStatus) event.getPacket().getServerPings().read(0).getHandle();
+      var nmsPacket = (ClientboundStatusResponsePacket) event.getPacket().getHandle();
       var jsonData = ServerStatus.CODEC
-          .encodeStart(JsonOps.INSTANCE, serverPing)
+          .encodeStart(JsonOps.INSTANCE, nmsPacket.status())
           .getOrThrow()
           .getAsJsonObject();
 

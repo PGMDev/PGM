@@ -19,8 +19,8 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 public class ComponentRenderer extends TranslatableComponentRenderer<Pointered> {
 
@@ -35,8 +35,8 @@ public class ComponentRenderer extends TranslatableComponentRenderer<Pointered> 
   private ComponentRenderer() {}
 
   @Override
-  protected @NotNull Component renderVirtual(
-      @NotNull VirtualComponent vc, @NotNull Pointered pointer) {
+  protected @NonNull Component renderVirtual(
+      @NonNull VirtualComponent vc, @NonNull Pointered pointer) {
     var factory = contextFactory.get(vc.contextType());
     if (factory == null)
       throw new UnsupportedOperationException("Context type not supported: " + vc.contextType());
@@ -58,7 +58,7 @@ public class ComponentRenderer extends TranslatableComponentRenderer<Pointered> 
   }
 
   @Override
-  protected @Nullable MessageFormat translate(@NotNull String key, @NotNull Pointered context) {
+  protected @Nullable MessageFormat translate(@NonNull String key, @NonNull Pointered context) {
     return GlobalTranslator.translator().translate(key, TextTranslations.getLocale(context));
   }
 
@@ -68,8 +68,8 @@ public class ComponentRenderer extends TranslatableComponentRenderer<Pointered> 
    * See <a href="https://github.com/KyoriPowered/adventure/issues/1299">Adventure#1299</a>.
    */
   @Override
-  protected @NotNull Component renderTranslatable(
-      @NotNull TranslatableComponent component, final @NotNull Pointered context) {
+  protected @NonNull Component renderTranslatable(
+      @NonNull TranslatableComponent component, final @NonNull Pointered context) {
     final List<TranslationArgument> arguments = component.arguments();
 
     if (!arguments.isEmpty()) {
@@ -79,7 +79,7 @@ public class ComponentRenderer extends TranslatableComponentRenderer<Pointered> 
           translatedArguments.set(i, TranslationArgument.component(this.render(c, context)));
       }
 
-      component = component.toBuilder().arguments(translatedArguments).build();
+      component = component.arguments(translatedArguments);
     }
 
     return this.renderTranslatableInner(component, context);

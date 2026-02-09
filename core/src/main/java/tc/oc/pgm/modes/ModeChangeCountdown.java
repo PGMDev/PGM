@@ -7,6 +7,7 @@ import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.MatchCountdown;
@@ -43,7 +44,7 @@ public class ModeChangeCountdown extends MatchCountdown implements Comparable<Mo
    * @param that The mode to compare to.
    */
   @Override
-  public int compareTo(ModeChangeCountdown that) {
+  public int compareTo(@NonNull ModeChangeCountdown that) {
     boolean running = this.getMatch().isRunning();
 
     Duration d1 = running ? this.context.getTimeLeft(this) : this.getMode().getAfter();

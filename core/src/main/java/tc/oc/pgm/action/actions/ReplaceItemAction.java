@@ -5,6 +5,7 @@ import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.Slot;
 
 public class ReplaceItemAction extends AbstractAction<MatchPlayer> {
 
@@ -25,20 +26,9 @@ public class ReplaceItemAction extends AbstractAction<MatchPlayer> {
   @Override
   public void trigger(MatchPlayer player) {
     PlayerInventory inv = player.getInventory();
-
-    ItemStack[] armor = inv.getArmorContents();
-    for (int i = 0; i < armor.length; i++) {
-      ItemStack current = armor[i];
-      if (current == null || !matcher.matches(current)) continue;
-      armor[i] = replaceItem(current, player);
-    }
-    inv.setArmorContents(armor);
-
-    for (int i = 0; i < inv.getSize(); i++) {
-      ItemStack current = inv.getItem(i);
-      if (current == null || !matcher.matches(current)) continue;
-      inv.setItem(i, replaceItem(current, player));
-    }
+    Slot.Player.forEach(inv, (slot, stack) -> {
+      if (matcher.matches(stack)) slot.setItem(inv, replaceItem(stack, player));
+    });
   }
 
   private ItemStack replaceItem(ItemStack current, MatchPlayer player) {

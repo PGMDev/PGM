@@ -1,7 +1,7 @@
 package tc.oc.pgm.util;
 
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -44,7 +44,7 @@ public interface XMLParser<F, FD extends FeatureDefinition> {
     } else if (parent.getChildren().size() > 1) {
       throw new InvalidXMLException("Expected only one child " + type() + ", not multiple", parent);
     }
-    return this.parse(parent.getChildren().get(0));
+    return this.parse(parent.getChildren().getFirst());
   }
 
   /**
@@ -91,10 +91,9 @@ public interface XMLParser<F, FD extends FeatureDefinition> {
   default F parseProperty(Node node, @Nullable F def, @Nullable FeatureValidation<FD> validation)
       throws InvalidXMLException {
     if (node == null) return def;
-    F feature =
-        node.isAttribute()
-            ? this.parseReference(node)
-            : this.parsePropertyElement(node.getElement());
+    F feature = node.isAttribute()
+        ? this.parseReference(node)
+        : this.parsePropertyElement(node.getElement());
 
     if (validation != null) validate(feature, validation, node);
     return feature;

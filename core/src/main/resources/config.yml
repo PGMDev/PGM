@@ -227,3 +227,16 @@ vanish: true
 experiments:
   # Enable payload preview. This is not fully finished and xml syntax is likely to change at a later time.
   payload: false
+
+# Settings effective only on modern servers.
+modern:
+  # Whether to permit command blocks to run commands. Behaves similar to the "enable-command-block" server property
+  # that has been removed in favor of game rules in 1.21.9.
+  #
+  # In an ABSOLUTE MAJORITY of cases you will NEVER NEED TO have to enable this setting. If you do need to do so, please
+  # let us know why at https://github.com/PGMDev/PGM/issues.
+  #
+  # Command blocks run with elevated permissions and can be used to perform potentially malicious actions on the server.
+  #
+  # ENABLE IF AND ONLY IF YOU TRUST ALL LOADED MAPS ON THE SERVER, and are aware of the risks involved.
+  allow-command-blocks: false

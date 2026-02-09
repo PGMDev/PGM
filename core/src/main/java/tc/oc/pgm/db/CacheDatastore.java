@@ -25,32 +25,11 @@ public class CacheDatastore implements Datastore {
 
   public CacheDatastore(Datastore datastore) {
     this.datastore = datastore;
-    this.usernames = CacheBuilder.newBuilder()
-        .softValues()
-        .build(new CacheLoader<UUID, Username>() {
-          @Override
-          public Username load(UUID id) {
-            return datastore.getUsername(id);
-          }
-        });
-    this.settings = CacheBuilder.newBuilder().build(new CacheLoader<UUID, Settings>() {
-      @Override
-      public Settings load(UUID id) {
-        return datastore.getSettings(id);
-      }
-    });
-    this.skins = CacheBuilder.newBuilder().build(new CacheLoader<UUID, Skin>() {
-      @Override
-      public Skin load(UUID id) {
-        return datastore.getSkin(id);
-      }
-    });
-    this.activities = CacheBuilder.newBuilder().build(new CacheLoader<String, MapActivity>() {
-      @Override
-      public MapActivity load(String name) {
-        return datastore.getMapActivity(name);
-      }
-    });
+    this.usernames =
+        CacheBuilder.newBuilder().softValues().build(CacheLoader.from(datastore::getUsername));
+    this.settings = CacheBuilder.newBuilder().build(CacheLoader.from(datastore::getSettings));
+    this.skins = CacheBuilder.newBuilder().build(CacheLoader.from(datastore::getSkin));
+    this.activities = CacheBuilder.newBuilder().build(CacheLoader.from(datastore::getMapActivity));
   }
 
   @Override

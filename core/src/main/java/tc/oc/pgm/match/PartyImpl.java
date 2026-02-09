@@ -14,7 +14,8 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.PartyRenameEvent;
@@ -71,7 +72,7 @@ public abstract class PartyImpl implements Party, Audience {
   }
 
   @Override
-  public Audience audience() {
+  public @NonNull Audience audience() {
     return this.audience;
   }
 
