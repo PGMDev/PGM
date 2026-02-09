@@ -7,8 +7,9 @@ import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
 import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
+import org.bukkit.GameRules;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
@@ -97,7 +98,7 @@ public class ModernListener implements Listener {
 
   @EventHandler
   public void onMatchLoad(WorldLoadEvent event) {
-    event.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+    event.getWorld().setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
   }
 
   @EventHandler(priority = EventPriority.HIGH)
@@ -107,14 +108,19 @@ public class ModernListener implements Listener {
     }
   }
 
+  private final ServerboundPlayerLoadedPacket PLAYER_LOADED_PACKET =
+      new ServerboundPlayerLoadedPacket();
+
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerDeath(PlayerDeathEvent event) {
-    // Fix block break desync after death due to the world considered being unloaded by the player
-    // (the server ignores any player action packets coming from players who are considered
+    // Fix inability to interact after death due to the world considered being unloaded by the
+    // player (the server ignores any player action packets coming from players who are considered
     // "unloaded"), since players don't really die in PGM. This has to be done the next tick, as
-    // Player#clientLoaded is set after the event.
-    Bukkit.getScheduler()
-        .runTask(
-            PGM.get(), () -> ((CraftPlayer) event.getPlayer()).getHandle().setClientLoaded(true));
+    // ServerGamePacketListenerImpl#waitingForRespawn is set after the event.
+    Bukkit.getScheduler().runTask(PGM.get(), () -> {
+      var conn = ((CraftPlayer) event.getEntity()).getHandle().connection;
+      conn.restartClientLoadTimerAfterRespawn();
+      conn.handleAcceptPlayerLoad(PLAYER_LOADED_PACKET);
+    });
   }
 }

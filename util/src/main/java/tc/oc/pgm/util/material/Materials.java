@@ -47,7 +47,8 @@ public interface Materials {
           || m.name().endsWith("_PICKAXE")
           || m.name().endsWith("_SHOVEL")
           || m.name().endsWith("_SPADE") // 1.8 shovels
-          || m.name().endsWith("_HOE"))
+          || m.name().endsWith("_HOE")
+          || m.name().endsWith("_SPEAR"))
       .addAll(Material.BOW, Material.FLINT_AND_STEEL, Material.SHEARS, Material.STICK)
       .addNullable(Material.getMaterial("TRIDENT"))
       .addNullable(Material.getMaterial("MACE"))

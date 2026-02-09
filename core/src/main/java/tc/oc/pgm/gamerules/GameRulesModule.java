@@ -1,26 +1,30 @@
 package tc.oc.pgm.gamerules;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jspecify.annotations.NullMarked;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.modules.WorldTimeModule;
+import tc.oc.pgm.util.bukkit.GameRule;
+import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
+@NullMarked
 public class GameRulesModule implements MapModule<GameRulesMatchModule> {
+  private final Map<GameRule<?>, Object> gameRules;
 
-  private final Map<String, String> gameRules;
-
-  private GameRulesModule(Map<String, String> gamerules) {
-    this.gameRules = gamerules;
+  private GameRulesModule(Map<GameRule<?>, Object> gameRules) {
+    this.gameRules = gameRules;
   }
 
   public GameRulesMatchModule createMatchModule(Match match) {
@@ -30,33 +34,58 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
   public static class Factory implements MapModuleFactory<GameRulesModule> {
     @Override
     public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
-      return ImmutableList.of(WorldTimeModule.class);
+      return List.of(WorldTimeModule.class);
     }
 
     @Override
     public GameRulesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      Map<String, String> gameRules = new HashMap<>();
+      Map<GameRule<?>, Object> gameRules = new HashMap<>();
 
       for (Element gameRulesElement : doc.getRootElement().getChildren("gamerules")) {
         for (Element gameRuleElement : gameRulesElement.getChildren()) {
-          String rule = gameRuleElement.getName();
+          String ruleName = gameRuleElement.getName();
           String value = gameRuleElement.getValue();
 
           if (value == null) {
-            throw new InvalidXMLException("Missing value for gamerule " + rule, gameRuleElement);
-          } else if (gameRules.containsKey(rule)) {
-            throw new InvalidXMLException(rule + " has already been specified", gameRuleElement);
+            throw new InvalidXMLException(
+                "Missing value for game rule " + ruleName, gameRuleElement);
           }
 
-          gameRules.put(rule, value);
+          GameRule<?> rule = GameRules.getByName(ruleName);
+          if (rule == null) {
+            logger.log(
+                Level.WARNING,
+                null,
+                new InvalidXMLException(
+                    "Game rule " + ruleName + " does not exist or is unsupported by the platform",
+                    gameRuleElement));
+            continue;
+          } else if (gameRules.containsKey(rule)) {
+            throw new InvalidXMLException(
+                rule.name() + " has already been specified", gameRuleElement);
+          }
+
+          var maybeConflict = gameRules.keySet().stream()
+              .filter(Predicate.not(rule::canBeCombinedWith))
+              .findFirst();
+
+          if (maybeConflict.isPresent()) {
+            throw new InvalidXMLException(
+                "Game rule " + rule.name() + " cannot be combined with "
+                    + maybeConflict.get().name(),
+                gameRuleElement);
+          }
+
+          try {
+            gameRules.put(rule, rule.tryParse(value));
+          } catch (Throwable e) {
+            throw new InvalidXMLException(
+                "Failed to parse game rule value for " + rule.name(), gameRuleElement, e);
+          }
         }
       }
       return new GameRulesModule(gameRules);
     }
-  }
-
-  public ImmutableMap<String, String> getGameRules() {
-    return ImmutableMap.copyOf(this.gameRules);
   }
 }

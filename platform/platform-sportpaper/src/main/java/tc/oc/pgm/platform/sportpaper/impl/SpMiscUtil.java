@@ -10,7 +10,6 @@ import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.minecraft.server.v1_8_R3.EntityPotion;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
-import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -77,7 +76,7 @@ public class SpMiscUtil implements MiscUtils {
 
   @Override
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
-    World world = ((CraftWorld) loc.getWorld()).getHandle();
+    net.minecraft.server.v1_8_R3.World world = ((CraftWorld) loc.getWorld()).getHandle();
     EntityPotion potion =
         new EntityPotion(world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
     world.addEntity(potion);

@@ -17,7 +17,7 @@ import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.10", priority = HIGHEST)
+@Supports(value = PAPER, minVersion = "1.21.11", priority = HIGHEST)
 public class ModernPlatform implements Platform.Manifest {
   @Override
   public void onEnable(Plugin plugin) {

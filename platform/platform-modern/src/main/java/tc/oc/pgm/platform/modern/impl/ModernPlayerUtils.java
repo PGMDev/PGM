@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.NameAndId;
@@ -41,7 +41,7 @@ import tc.oc.pgm.util.nms.PlayerUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.21.9")
+@Supports(value = PAPER, minVersion = "1.21.11")
 public class ModernPlayerUtils implements PlayerUtils {
 
   private static final FixedMetadataValue TRUE = new FixedMetadataValue(PGM.get(), true);
@@ -117,8 +117,8 @@ public class ModernPlayerUtils implements PlayerUtils {
     player.setCollidable(collides);
   }
 
-  private final ResourceLocation KB_REDUCT =
-      ResourceLocation.fromNamespaceAndPath("pgm", "custom_kb_reduction");
+  private final Identifier KB_REDUCT =
+      Identifier.fromNamespaceAndPath("pgm", "custom_kb_reduction");
 
   @Override
   public void setKnockbackReduction(Player player, float reduction) {
