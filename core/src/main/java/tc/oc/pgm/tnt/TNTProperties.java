@@ -1,8 +1,8 @@
 package tc.oc.pgm.tnt;
 
 import java.time.Duration;
-import org.jspecify.annotations.Nullable;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @NullMarked
 public record TNTProperties(
