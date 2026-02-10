@@ -34,7 +34,7 @@ public class ShieldPlayerModule implements Tickable {
     this.player = player;
     this.bukkit = player.getBukkit();
     this.parameters = parameters;
-    this.shieldHealth = parameters.maxHealth;
+    this.shieldHealth = parameters.maxHealth();
   }
 
   double getAbsorption() {
@@ -62,17 +62,17 @@ public class ShieldPlayerModule implements Tickable {
    * shield strength, the excess is preserved.
    */
   void recharge() {
-    if (shieldHealth < parameters.maxHealth) {
-      double delta = parameters.maxHealth - shieldHealth;
+    if (shieldHealth < parameters.maxHealth()) {
+      double delta = parameters.maxHealth() - shieldHealth;
       logger.fine("Recharging shield: shield=" + shieldHealth + " delta=" + delta);
-      shieldHealth = parameters.maxHealth;
+      shieldHealth = parameters.maxHealth();
       addAbsorption(delta);
       player.playSound(Sounds.SHIELD_RECHARGE);
     }
   }
 
   void damage() {
-    rechargeTicks = TimeUtils.toTicks(parameters.rechargeDelay);
+    rechargeTicks = TimeUtils.toTicks(parameters.rechargeDelay());
   }
 
   @Override

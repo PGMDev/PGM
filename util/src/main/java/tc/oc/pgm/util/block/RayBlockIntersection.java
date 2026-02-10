@@ -4,35 +4,32 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.util.Vector;
 
-/** Result of a ray-block intersection test */
-public class RayBlockIntersection {
-  private final Block block;
-  private final BlockFace face;
-  private final Vector position;
+/**
+ * Result of a ray-block intersection test
+ *
+ * @param block The intersected block
+ * @param face The first intersected face of the block
+ * @param position The first intersected point on the surface of the block
+ */
+public record RayBlockIntersection(Block block, BlockFace face, Vector position) {
 
-  public RayBlockIntersection(Block block, BlockFace face, Vector position) {
-    this.block = block;
-    this.face = face;
-    this.position = position;
-  }
-
-  /** @return The intersected block */
-  public Block getBlock() {
-    return block;
-  }
-
-  /** @return The first intersected face of the block */
-  public BlockFace getFace() {
-    return face;
-  }
-
-  /** @return Where a new blockw would be placed */
+  /** @return Where a new block would be placed */
   public Block getPlaceAt() {
     return block.getRelative(face);
   }
 
-  /** @return The first intersected point on the surface of the block */
+  @Deprecated
+  public Block getBlock() {
+    return block();
+  }
+
+  @Deprecated
+  public BlockFace getFace() {
+    return face();
+  }
+
+  @Deprecated
   public Vector getPosition() {
-    return position;
+    return position();
   }
 }

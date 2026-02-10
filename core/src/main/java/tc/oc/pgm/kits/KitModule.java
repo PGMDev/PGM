@@ -116,8 +116,8 @@ public class KitModule implements MapModule<KitMatchModule> {
     }
 
     for (KitRule kitRule : this.kitRules) {
-      if ((kitRule.getAction() == KitRule.Action.TAKE || kitRule.getAction() == KitRule.Action.LEND)
-          && !kitRule.getKit().isRemovable()) {
+      if ((kitRule.action() == KitRule.Action.TAKE || kitRule.action() == KitRule.Action.LEND)
+          && !kitRule.kit().isRemovable()) {
         throw new InvalidXMLException(
             "kit is not removable", factory.getFeatures().getNode(kitRule));
       }

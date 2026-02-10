@@ -93,11 +93,11 @@ public class BlockTransformEvent extends GeneralizedEvent {
    * @return The current {@link BlockState}.
    */
   public final BlockState getNewState() {
-    if (drops == null || drops.replacement == null) {
+    if (drops == null || drops.replacement() == null) {
       return newState;
     } else {
       final BlockState state = newState.getBlock().getState();
-      drops.replacement.applyTo(state);
+      drops.replacement().applyTo(state);
       return state;
     }
   }

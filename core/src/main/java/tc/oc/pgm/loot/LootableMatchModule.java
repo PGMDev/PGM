@@ -64,7 +64,7 @@ public class LootableMatchModule implements MatchModule, Listener {
 
     fillers.forEach(filler -> fmm.onRise(Match.class, filler.getRefillTrigger(), m -> this.filledAt
         .keySet()
-        .removeIf(f -> filler.equals(f.getRight()))));
+        .removeIf(f -> filler.equals(f.right()))));
   }
 
   /**
@@ -243,16 +243,11 @@ public class LootableMatchModule implements MatchModule, Listener {
   }
 
   /** A wrapper of a slot that belongs to a specified {@link Inventory} */
-  private static class InventorySlot {
+  private record InventorySlot(Inventory inventory, Slot slot) {
 
-    private final Inventory inventory;
-    private final Slot slot;
-
-    private InventorySlot(Inventory inventory, Slot slot) {
+    private InventorySlot {
       assertNotNull(inventory, "inventory");
       assertNotNull(slot, "slot");
-      this.inventory = inventory;
-      this.slot = slot;
     }
 
     static InventorySlot fromInventoryIndex(Inventory inventory, int index) {

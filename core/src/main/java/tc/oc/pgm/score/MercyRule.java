@@ -27,11 +27,11 @@ public class MercyRule {
   }
 
   private double getLeaderScore() {
-    return leader.getRight();
+    return leader.right();
   }
 
   private double getTrailerScore() {
-    return trailer.getRight();
+    return trailer.right();
   }
 
   private void setLeader(Competitor competitor, Double score) {
@@ -43,11 +43,11 @@ public class MercyRule {
   }
 
   private boolean isLeader(Competitor competitor) {
-    return competitor.equals(leader.getLeft());
+    return competitor.equals(leader.left());
   }
 
   private boolean isTrailer(Competitor competitor) {
-    return competitor.equals(trailer.getLeft());
+    return competitor.equals(trailer.left());
   }
 
   public int getScoreLimit() {
@@ -84,7 +84,7 @@ public class MercyRule {
     if (event.getOldScore() > event.getNewScore()) {
       if (isLeader(event.getCompetitor())
           || isTrailer(event.getCompetitor())
-          || trailer.getLeft() == null) {
+          || trailer.left() == null) {
         calculateLeaders();
       }
     }

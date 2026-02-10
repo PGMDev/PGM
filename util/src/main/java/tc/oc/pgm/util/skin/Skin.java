@@ -2,28 +2,25 @@ package tc.oc.pgm.util.skin;
 
 import java.util.Objects;
 
-/** A self-contained skin */
-public class Skin {
+/**
+ * A self-contained skin
+ *
+ * @param data The base64 encoded data for this skin, or null if this is the empty skin i.e.
+ *     Steve/Alex
+ * @param signature The base64 encoded signature for this skin, or null if this skin has no
+ *     signature
+ */
+public record Skin(String data, String signature) {
   public static final Skin EMPTY = new Skin(null, null);
 
-  private final String data;
-  private final String signature;
-
-  public Skin(String data, String signature) {
-    this.data = data;
-    this.signature = signature;
-  }
-
-  /**
-   * Return the base64 encoded data for this skin, or null if this is the empty skin i.e. Steve/Alex
-   */
+  @Deprecated
   public String getData() {
-    return data;
+    return data();
   }
 
-  /** Return the base64 encoded signature for this skin, or null if this skin has no signature */
+  @Deprecated
   public String getSignature() {
-    return signature;
+    return signature();
   }
 
   /** Return true if this is the empty skin i.e. Steve/Alex */
@@ -36,13 +33,13 @@ public class Skin {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof Skin skin)) {
+    if (!(o instanceof Skin(String skinData, String skinSignature))) {
       return false;
     }
-    if (!Objects.equals(data, skin.data)) {
+    if (!Objects.equals(data, skinData)) {
       return false;
     }
-    return Objects.equals(signature, skin.signature);
+    return Objects.equals(signature, skinSignature);
   }
 
   @Override

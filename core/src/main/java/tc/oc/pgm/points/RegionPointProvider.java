@@ -7,8 +7,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.block.BlockVectors;
@@ -31,7 +31,7 @@ public class RegionPointProvider implements PointProvider {
 
   @Override
   public boolean canFail() {
-    return attributes.isSafe();
+    return attributes.safe();
   }
 
   @Override
@@ -42,20 +42,20 @@ public class RegionPointProvider implements PointProvider {
 
     if (location == null) return null;
 
-    if (attributes.getYawProvider() != null) {
-      location.setYaw(attributes.getYawProvider().getAngle(pos));
+    if (attributes.yawProvider() != null) {
+      location.setYaw(attributes.yawProvider().getAngle(pos));
       location.setHasYaw(true);
     }
 
-    if (attributes.getPitchProvider() != null) {
-      location.setPitch(attributes.getPitchProvider().getAngle(pos));
+    if (attributes.pitchProvider() != null) {
+      location.setPitch(attributes.pitchProvider().getAngle(pos));
       location.setHasPitch(true);
     }
 
     return location;
   }
 
-  private @Nullable PointProviderLocation makeSafe(@NotNull PointProviderLocation location) {
+  private @Nullable PointProviderLocation makeSafe(@NonNull PointProviderLocation location) {
     // If the initial point is safe, just return it
     if (isSpawnable(location)) return location;
 
@@ -67,7 +67,7 @@ public class RegionPointProvider implements PointProvider {
     if (isSpawnable(location)) return location;
 
     int scanDirection;
-    if (attributes.isOutdoors()) {
+    if (attributes.outdoors()) {
       location.setY(Math.max(location.getY(), location.getWorld().getHighestBlockYAt(location)));
       scanDirection = 1;
     } else {
@@ -90,8 +90,8 @@ public class RegionPointProvider implements PointProvider {
   }
 
   private boolean isSpawnable(Location location) {
-    return (!attributes.isSafe() || isSafe(location))
-        && (!attributes.isOutdoors() || isOutdoors(location));
+    return (!attributes.safe() || isSafe(location))
+        && (!attributes.outdoors() || isOutdoors(location));
   }
 
   /**

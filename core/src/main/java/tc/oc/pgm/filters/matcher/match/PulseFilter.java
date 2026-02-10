@@ -67,7 +67,7 @@ public class PulseFilter extends SingleFilterFunction
 
     boolean matches(Filterable<?> filterable, boolean response) {
       if (response) { // If inner filter still matches, check if the time has expired
-        final long now = this.match.getTick().tick;
+        final long now = this.match.getTick().tick();
 
         Long start = startTimes.get(filterable);
         if (start == null) {
@@ -86,7 +86,7 @@ public class PulseFilter extends SingleFilterFunction
 
     @Override
     public void tick(Match match, Tick tick) {
-      final long now = tick.tick;
+      final long now = tick.tick();
 
       startTimes.forEach((filterable, start) -> {
         long ticks = (now - start) % period;

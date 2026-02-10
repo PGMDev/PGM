@@ -3,7 +3,7 @@ package tc.oc.pgm.structure;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;

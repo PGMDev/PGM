@@ -5,16 +5,10 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.Teams;
 
-public class TeamOrder implements Comparator<Team> {
-
-  private final MatchPlayer viewer;
-
-  public TeamOrder(MatchPlayer viewer) {
-    this.viewer = viewer;
-  }
-
+public record TeamOrder(MatchPlayer viewer) implements Comparator<Team> {
+  @Deprecated
   public MatchPlayer getViewer() {
-    return viewer;
+    return viewer();
   }
 
   @Override

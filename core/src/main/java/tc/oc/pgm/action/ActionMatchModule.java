@@ -32,13 +32,10 @@ public class ActionMatchModule implements MatchModule {
   }
 
   private <T extends Filterable<?>> void setupTrigger(Trigger<T> rule, FilterMatchModule fmm) {
-    fmm.onChange(
-        rule.getScope(),
-        rule.getFilter(),
-        (filterable, response) -> {
-          if (response) rule.getAction().trigger(filterable);
-          else rule.getAction().untrigger(filterable);
-        });
+    fmm.onChange(rule.scope(), rule.filter(), (filterable, response) -> {
+      if (response) rule.action().trigger(filterable);
+      else rule.action().untrigger(filterable);
+    });
   }
 
   public ImmutableList<ExposedAction> getExposedActions() {

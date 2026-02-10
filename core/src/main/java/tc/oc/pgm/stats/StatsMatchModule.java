@@ -181,9 +181,9 @@ public class StatsMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onDestroyableBreak(DestroyableHealthChangeEvent event) {
     DestroyableHealthChange change = event.getChange();
-    if (change != null && change.getHealthChange() < 0 && change.getPlayerCause() != null)
+    if (change != null && change.healthChange() < 0 && change.playerCause() != null)
       // Health change will be a negative number, so we flip it here to positive for storage
-      getPlayerStat(change.getPlayerCause()).onDestroyablePieceBroken(-change.getHealthChange());
+      getPlayerStat(change.playerCause()).onDestroyablePieceBroken(-change.healthChange());
   }
 
   @EventHandler(priority = EventPriority.MONITOR)

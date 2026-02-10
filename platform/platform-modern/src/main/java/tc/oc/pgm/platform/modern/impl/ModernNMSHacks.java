@@ -174,7 +174,7 @@ public class ModernNMSHacks implements NMSHacks {
   @Override
   public void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin) {
     var profile = Bukkit.createProfile(uuid, name);
-    profile.setProperty(new ProfileProperty("textures", skin.getData(), skin.getSignature()));
+    profile.setProperty(new ProfileProperty("textures", skin.data(), skin.signature()));
     meta.setPlayerProfile(profile);
   }
 

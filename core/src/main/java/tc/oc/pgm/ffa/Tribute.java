@@ -13,8 +13,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -135,7 +135,7 @@ public class Tribute implements Competitor {
 
   @Override
   public NameTagVisibility getNameTagVisibility() {
-    return this.nameTagOverride != null ? nameTagOverride : ffa.getNameTagVisibility();
+    return this.nameTagOverride != null ? nameTagOverride : ffa.getOptions().nameTagVisibility();
   }
 
   @Override
@@ -184,7 +184,7 @@ public class Tribute implements Competitor {
   }
 
   @Override
-  public net.kyori.adventure.audience.@NotNull Audience audience() {
+  public net.kyori.adventure.audience.@NonNull Audience audience() {
     return player != null ? this.player : Audience.empty();
   }
 

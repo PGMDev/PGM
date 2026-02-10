@@ -3,23 +3,14 @@ package tc.oc.pgm.fallingblocks;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.util.material.Materials;
 
-public class FallingBlocksRule {
+public record FallingBlocksRule(Filter fall, Filter stick, int delay) {
   public static final int DEFAULT_DELAY = 2;
-
-  public final Filter fall;
-  public final Filter stick;
-  public final int delay;
-
-  public FallingBlocksRule(Filter fall, Filter stick, int delay) {
-    this.fall = fall;
-    this.stick = stick;
-    this.delay = delay;
-  }
 
   public boolean canFall(Block block) {
     return this.canFall(block.getState());
@@ -52,7 +43,7 @@ public class FallingBlocksRule {
   }
 
   @Override
-  public String toString() {
+  public @NonNull String toString() {
     return this.getClass().getSimpleName()
         + "{fall="
         + this.fall

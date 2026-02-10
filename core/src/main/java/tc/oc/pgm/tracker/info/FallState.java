@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.info;
 
 import org.bukkit.Location;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;
@@ -121,7 +121,7 @@ public class FallState implements FallInfo {
 
   /** Check if the victim has failed to become unsupported quickly enough after the fall began */
   public boolean isExpired(Tick now) {
-    return this.isSupported() && now.tick - startTime.tick > MAX_KNOCKBACK_TICKS;
+    return this.isSupported() && now.tick() - startTime.tick() > MAX_KNOCKBACK_TICKS;
   }
 
   /**
@@ -133,12 +133,12 @@ public class FallState implements FallInfo {
    * a ladder for MAX_CLIMBING_TICKS
    */
   public boolean isEndedSafely(Tick now) {
-    return (!isInLava && now.tick - outLavaTick > MAX_BURNING_TICKS)
+    return (!isInLava && now.tick() - outLavaTick > MAX_BURNING_TICKS)
         && ((victim.getBukkit().isOnGround()
-                && (now.tick - onGroundTick > MAX_ON_GROUND_TICKS
+                && (now.tick() - onGroundTick > MAX_ON_GROUND_TICKS
                     || groundTouchCount > MAX_GROUND_TOUCHES))
-            || (isSwimming && now.tick - swimmingTick > MAX_SWIMMING_TICKS)
-            || (isClimbing && now.tick - climbingTick > MAX_CLIMBING_TICKS));
+            || (isSwimming && now.tick() - swimmingTick > MAX_SWIMMING_TICKS)
+            || (isClimbing && now.tick() - climbingTick > MAX_CLIMBING_TICKS));
   }
 
   /**
@@ -151,7 +151,7 @@ public class FallState implements FallInfo {
    */
   public boolean isOngoing(Tick now) {
     return (isStarted && groundTouchCount == 0)
-        || (isInLava || now.tick - outLavaTick <= MAX_BURNING_TICKS);
+        || (isInLava || now.tick() - outLavaTick <= MAX_BURNING_TICKS);
   }
 
   @Override

@@ -38,7 +38,7 @@ public class ShieldMatchModule implements MatchModule, Listener, Tickable {
 
   public void applyShield(MatchPlayer player, ShieldParameters parameters) {
     removeShield(player);
-    if (parameters.maxHealth > 0) {
+    if (parameters.maxHealth() > 0) {
       ShieldPlayerModule shield = new ShieldPlayerModule(logger, player, parameters);
       shield.apply();
       playerShields.put(player, shield);

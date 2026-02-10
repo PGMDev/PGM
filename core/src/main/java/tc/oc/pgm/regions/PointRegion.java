@@ -4,16 +4,11 @@ import java.util.Random;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class PointRegion implements RegionDefinition.HardStatic {
+public record PointRegion(Vector position) implements RegionDefinition.HardStatic {
 
-  private final Vector position;
-
-  public PointRegion(Vector position) {
-    this.position = position;
-  }
-
+  @Deprecated
   public Vector getPosition() {
-    return position;
+    return position();
   }
 
   @Override

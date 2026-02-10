@@ -137,7 +137,7 @@ public class SpNMSHacks implements NMSHacks {
 
   @Override
   public void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin) {
-    meta.setOwner(name, uuid, new org.bukkit.Skin(skin.getData(), skin.getSignature()));
+    meta.setOwner(name, uuid, new org.bukkit.Skin(skin.data(), skin.signature()));
   }
 
   @Override

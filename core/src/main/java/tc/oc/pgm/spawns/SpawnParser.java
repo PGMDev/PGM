@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -43,17 +43,17 @@ public class SpawnParser {
     List<PointProvider> providers;
 
     if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
-      providers = this.pointParser.parse(el, attributes.providerAttributes);
+      providers = this.pointParser.parse(el, attributes.providerAttributes());
     }
     // Must have <regions>, <region> or region attribute in proto 1.3.6 and above
     else if (el.getChild("regions") != null
         || el.getChild("region") != null
         || el.getAttribute("region") != null) {
-      providers =
-          new ArrayList<>(
-              pointParser.parseMultiProperty(el, attributes.providerAttributes, "region"));
+      providers = new ArrayList<>(
+          pointParser.parseMultiProperty(el, attributes.providerAttributes(), "region"));
       for (Element elRegions : XMLUtils.getChildren(el, "regions")) {
-        providers.addAll(this.pointParser.parseChildren(elRegions, attributes.providerAttributes));
+        providers.addAll(
+            this.pointParser.parseChildren(elRegions, attributes.providerAttributes()));
       }
     } else {
       throw new InvalidXMLException(
@@ -61,10 +61,10 @@ public class SpawnParser {
     }
 
     PointProvider provider;
-    if (attributes.sequential) {
+    if (attributes.sequential()) {
       provider = new SequentialPointProvider(providers);
-    } else if (attributes.spread || attributes.spreadTeammates) {
-      provider = new SpreadPointProvider(providers, attributes.spreadTeammates);
+    } else if (attributes.spread() || attributes.spreadTeammates()) {
+      provider = new SpreadPointProvider(providers, attributes.spreadTeammates());
     } else {
       provider = new RandomPointProvider(providers);
     }
@@ -96,21 +96,21 @@ public class SpawnParser {
   public SpawnAttributes parseAttributes(Element el, SpawnAttributes parent)
       throws InvalidXMLException {
     PointProviderAttributes providerAttributes =
-        pointParser.parseAttributes(el, parent.providerAttributes);
-    Kit kit = factory.getKits().parseKitProperty(el, "kit", parent.kit);
+        pointParser.parseAttributes(el, parent.providerAttributes());
+    Kit kit = factory.getKits().parseKitProperty(el, "kit", parent.kit());
 
-    boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), parent.sequential);
-    boolean spread = XMLUtils.parseBoolean(el.getAttribute("spread"), parent.spread);
+    boolean sequential = XMLUtils.parseBoolean(el.getAttribute("sequential"), parent.sequential());
+    boolean spread = XMLUtils.parseBoolean(el.getAttribute("spread"), parent.spread());
     boolean spreadTeammates =
-        XMLUtils.parseBoolean(el.getAttribute("spread-teammates"), parent.spreadTeammates);
-    boolean exclusive = XMLUtils.parseBoolean(el.getAttribute("exclusive"), parent.exclusive);
-    boolean persistent = XMLUtils.parseBoolean(el.getAttribute("persistent"), parent.persistent);
+        XMLUtils.parseBoolean(el.getAttribute("spread-teammates"), parent.spreadTeammates());
+    boolean exclusive = XMLUtils.parseBoolean(el.getAttribute("exclusive"), parent.exclusive());
+    boolean persistent = XMLUtils.parseBoolean(el.getAttribute("persistent"), parent.persistent());
 
     boolean newFilters = false;
     List<Filter> filters = new ArrayList<>();
 
-    if (parent.filter != StaticFilter.ABSTAIN) {
-      filters.add(parent.filter);
+    if (parent.filter() != StaticFilter.ABSTAIN) {
+      filters.add(parent.filter());
     }
 
     Node nodeTeam = Node.fromAttr(el, "team");
@@ -128,13 +128,13 @@ public class SpawnParser {
       newFilters = true;
     }
 
-    if (providerAttributes == parent.providerAttributes
-        && kit == parent.kit
-        && sequential == parent.sequential
-        && spread == parent.spread
-        && spreadTeammates == parent.spreadTeammates
-        && exclusive == parent.exclusive
-        && persistent == parent.persistent
+    if (providerAttributes == parent.providerAttributes()
+        && kit == parent.kit()
+        && sequential == parent.sequential()
+        && spread == parent.spread()
+        && spreadTeammates == parent.spreadTeammates()
+        && exclusive == parent.exclusive()
+        && persistent == parent.persistent()
         && !newFilters) {
 
       return parent;

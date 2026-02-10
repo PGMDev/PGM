@@ -1,16 +1,10 @@
 package tc.oc.pgm.api.time;
 
 import java.time.Instant;
+import org.jspecify.annotations.NonNull;
 
 /** Represents a Minecraft server {@link Tick}. */
-public final class Tick implements Comparable<Tick> {
-  public final long tick;
-  public final Instant instant;
-
-  public Tick(long tick, Instant instant) {
-    this.tick = tick;
-    this.instant = instant;
-  }
+public record Tick(long tick, Instant instant) implements Comparable<Tick> {
 
   @Override
   public int compareTo(Tick o) {
@@ -28,7 +22,7 @@ public final class Tick implements Comparable<Tick> {
   }
 
   @Override
-  public String toString() {
+  public @NonNull String toString() {
     return "Tick{tick=" + this.tick + ", epoch=" + this.instant.toEpochMilli() + "}";
   }
 }

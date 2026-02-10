@@ -1,31 +1,26 @@
 package tc.oc.pgm.util;
 
 import java.util.Objects;
+import org.jspecify.annotations.NonNull;
 
-public class Pair<L, R> {
-
-  private final L left;
-  private final R right;
-
-  public Pair(L left, R right) {
-    this.left = left;
-    this.right = right;
-  }
+public record Pair<L, R>(L left, R right) {
 
   public static <L, R> Pair<L, R> of(L left, R right) {
     return new Pair<>(left, right);
   }
 
+  @Deprecated
   public L getLeft() {
-    return this.left;
+    return left();
   }
 
+  @Deprecated
   public R getRight() {
-    return this.right;
+    return right();
   }
 
   @Override
-  public String toString() {
+  public @NonNull String toString() {
     return "Pair{" + "left=" + left + ", right=" + right + '}';
   }
 

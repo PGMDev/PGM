@@ -175,8 +175,7 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     if (payments.isEmpty()) {
       payments.add(parsePayment(parent, parser));
     }
-    if (payments.size()
-        != payments.stream().map(Payment::getCurrency).distinct().count()) {
+    if (payments.size() != payments.stream().map(Payment::currency).distinct().count()) {
       throw new InvalidXMLException(
           "Payment materials must be unique within a purchasable", parent);
     }

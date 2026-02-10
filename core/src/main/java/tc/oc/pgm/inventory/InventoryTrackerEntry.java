@@ -3,18 +3,7 @@ package tc.oc.pgm.inventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 
-public class InventoryTrackerEntry {
-  protected final Inventory watched;
-  protected final Inventory preview;
-
-  public InventoryTrackerEntry(Inventory watched, Inventory preview) {
-    this.watched = watched;
-    this.preview = preview;
-  }
-
-  public Inventory getWatched() {
-    return this.watched;
-  }
+public record InventoryTrackerEntry(Inventory watched, Inventory preview) {
 
   public boolean isPlayerInventory() {
     return this.watched instanceof PlayerInventory;
@@ -24,7 +13,13 @@ public class InventoryTrackerEntry {
     return (PlayerInventory) this.watched;
   }
 
+  @Deprecated
+  public Inventory getWatched() {
+    return watched();
+  }
+
+  @Deprecated
   public Inventory getPreview() {
-    return this.preview;
+    return preview();
   }
 }

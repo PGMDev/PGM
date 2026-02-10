@@ -4,21 +4,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.Metadatable;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 
-public class Grenade {
-  public final float power;
-  public final boolean fire;
-  public final boolean destroy;
-
-  public Grenade(float power, boolean fire, boolean destroy) {
-    this.power = power;
-    this.fire = fire;
-    this.destroy = destroy;
-  }
+public record Grenade(float power, boolean fire, boolean destroy) {
 
   private static class Tag implements ItemTag<Grenade> {
 

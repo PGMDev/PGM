@@ -48,22 +48,20 @@ public class KitMatchModule implements MatchModule, Listener {
     FilterMatchModule fmm = match.needModule(FilterMatchModule.class);
 
     for (KitRule kitRule : kitRules) {
-      switch (kitRule.getAction()) {
+      switch (kitRule.action()) {
         case GIVE:
           fmm.onRise(
-              MatchPlayer.class,
-              kitRule.getFilter(),
-              player -> player.applyKit(kitRule.getKit(), true));
+              MatchPlayer.class, kitRule.filter(), player -> player.applyKit(kitRule.kit(), true));
           break;
         case TAKE:
-          fmm.onRise(MatchPlayer.class, kitRule.getFilter(), kitRule.getKit()::remove);
+          fmm.onRise(MatchPlayer.class, kitRule.filter(), kitRule.kit()::remove);
           break;
         case LEND:
-          fmm.onChange(MatchPlayer.class, kitRule.getFilter(), (player, response) -> {
+          fmm.onChange(MatchPlayer.class, kitRule.filter(), (player, response) -> {
             if (response) {
-              player.applyKit(kitRule.getKit(), true);
+              player.applyKit(kitRule.kit(), true);
             } else {
-              kitRule.getKit().remove(player);
+              kitRule.kit().remove(player);
             }
           });
           break;
@@ -147,7 +145,8 @@ public class KitMatchModule implements MatchModule, Listener {
     if (event.getEntity().getShooter() instanceof Player) {
       Grenade grenade = Grenade.get(event.getEntity());
       if (grenade != null) {
-        MISC_UTILS.createExplosion(event.getEntity(), grenade.power, grenade.fire, grenade.destroy);
+        MISC_UTILS.createExplosion(
+            event.getEntity(), grenade.power(), grenade.fire(), grenade.destroy());
         event.getEntity().remove();
       }
     }

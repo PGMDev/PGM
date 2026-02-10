@@ -15,8 +15,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -91,7 +91,7 @@ public class Core extends TouchableGoal<CoreFactory>
 
   // Remove @Nullable
   @Override
-  public @NotNull Team getOwner() {
+  public @NonNull Team getOwner() {
     Team owner = super.getOwner();
     if (owner == null) {
       throw new IllegalStateException("core " + getId() + " has no owner");
@@ -205,7 +205,7 @@ public class Core extends TouchableGoal<CoreFactory>
     return StringUtils.percentage(this.getCompletion());
   }
 
-  @NotNull
+  @NonNull
   @Override
   public String renderPreciseCompletion() {
     return this.leak + "/" + this.leakRequired;

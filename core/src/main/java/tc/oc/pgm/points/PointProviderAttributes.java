@@ -2,22 +2,11 @@ package tc.oc.pgm.points;
 
 import org.jspecify.annotations.Nullable;
 
-public class PointProviderAttributes {
-  private final @Nullable AngleProvider yawProvider;
-  private final @Nullable AngleProvider pitchProvider;
-  private final boolean safe;
-  private final boolean outdoors;
-
-  public PointProviderAttributes(
-      @Nullable AngleProvider yawProvider,
-      @Nullable AngleProvider pitchProvider,
-      boolean safe,
-      boolean outdoors) {
-    this.yawProvider = yawProvider;
-    this.pitchProvider = pitchProvider;
-    this.safe = safe;
-    this.outdoors = outdoors;
-  }
+public record PointProviderAttributes(
+    @Nullable AngleProvider yawProvider,
+    @Nullable AngleProvider pitchProvider,
+    boolean safe,
+    boolean outdoors) {
 
   public PointProviderAttributes() {
     this(null, null, false, false);
@@ -27,19 +16,23 @@ public class PointProviderAttributes {
     return yawProvider != null || pitchProvider != null;
   }
 
+  @Deprecated
   public @Nullable AngleProvider getYawProvider() {
-    return yawProvider;
+    return yawProvider();
   }
 
+  @Deprecated
   public @Nullable AngleProvider getPitchProvider() {
-    return pitchProvider;
+    return pitchProvider();
   }
 
+  @Deprecated
   public boolean isSafe() {
-    return safe;
+    return safe();
   }
 
+  @Deprecated
   public boolean isOutdoors() {
-    return outdoors;
+    return outdoors();
   }
 }

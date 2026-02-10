@@ -19,7 +19,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -87,7 +87,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     this.match = match;
     this.options = options;
 
-    if (options.colors) {
+    if (options.colors()) {
       final List<ChatColor> colors = Lists.newArrayList(COLORS);
       Collections.shuffle(colors);
       colors.forEach(this.colors::push);
@@ -108,29 +108,29 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   }
 
   public int getMinPlayers() {
-    return minPlayers != null ? minPlayers : options.minPlayers;
+    return minPlayers != null ? minPlayers : options.minPlayers();
   }
 
   public int getMaxPlayers() {
-    return maxPlayers != null ? maxPlayers : options.maxPlayers;
+    return maxPlayers != null ? maxPlayers : options.maxPlayers();
   }
 
   public int getMaxOverfill() {
-    return maxOverfill != null ? maxOverfill : options.maxOverfill;
+    return maxOverfill != null ? maxOverfill : options.maxOverfill();
   }
 
   public @Nullable NameTagVisibility getNameTagVisibility() {
-    return nameTagVisibility != null ? nameTagVisibility : options.nameTagVisibility;
+    return nameTagVisibility != null ? nameTagVisibility : options.nameTagVisibility();
   }
 
   public void setMinPlayers(@Nullable Integer minPlayers) {
-    this.minPlayers = minPlayers == null ? options.minPlayers : minPlayers;
+    this.minPlayers = minPlayers == null ? options.minPlayers() : minPlayers;
     updateReadiness();
   }
 
   public void setMaxPlayers(@Nullable Integer maxPlayers, @Nullable Integer maxOverfill) {
-    this.maxPlayers = maxPlayers == null ? options.maxPlayers : maxPlayers;
-    this.maxOverfill = maxOverfill == null ? options.maxOverfill : maxOverfill;
+    this.maxPlayers = maxPlayers == null ? options.maxPlayers() : maxPlayers;
+    this.maxOverfill = maxOverfill == null ? options.maxOverfill() : maxOverfill;
     match.setMaxPlayers(getMaxPlayers());
   }
 
@@ -155,10 +155,10 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
-    if (options.nameTagVisibilityFilter == null) return;
+    if (options.nameTagVisibilityFilter() == null) return;
 
     var fmm = match.needModule(FilterMatchModule.class);
-    fmm.onChange(Match.class, options.nameTagVisibilityFilter, (filterable, response) -> {
+    fmm.onChange(Match.class, options.nameTagVisibilityFilter(), (filterable, response) -> {
       setNameTagVisibility(response ? NameTagVisibility.ALWAYS : NameTagVisibility.NEVER);
     });
   }

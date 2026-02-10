@@ -9,12 +9,19 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.util.bukkit.Sounds;
 
-public class Broadcast implements Comparable<Broadcast> {
+public record Broadcast(
+    Type type,
+    Duration after,
+    int count,
+    @Nullable Duration every,
+    Component message,
+    @Nullable Filter filter)
+    implements Comparable<Broadcast> {
   public enum Type {
     TIP(translatable("misc.tip", NamedTextColor.BLUE), Sounds.TIP),
     ALERT(translatable("misc.alert", NamedTextColor.YELLOW), Sounds.ALERT);
@@ -42,30 +49,14 @@ public class Broadcast implements Comparable<Broadcast> {
     }
   }
 
-  public final Type type;
-  public final Duration after;
-  public final int count;
-  public final @Nullable Duration every;
-  public final Component message;
-  public final @Nullable Filter filter;
-
-  public Broadcast(
-      Type type,
-      Duration after,
-      int count,
-      @Nullable Duration every,
-      Component message,
-      @Nullable Filter filter) {
-    this.type = assertNotNull(type);
-    this.after = assertNotNull(after);
-    this.count = count;
-    this.every = every;
-    this.message = assertNotNull(message);
-    this.filter = filter;
+  public Broadcast {
+    assertNotNull(type);
+    assertNotNull(after);
+    assertNotNull(message);
   }
 
   @Override
-  public int compareTo(@NotNull Broadcast o) {
+  public int compareTo(@NonNull Broadcast o) {
     return this.after.compareTo(o.after);
   }
 

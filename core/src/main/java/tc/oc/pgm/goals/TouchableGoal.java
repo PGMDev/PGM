@@ -119,7 +119,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
     GoalTouchEvent event;
     if (toucher == null) {
-      event = new GoalTouchEvent(this, getMatch().getTick().instant);
+      event = new GoalTouchEvent(this, getMatch().getTick().instant());
     } else {
       if (!canTouch(toucher)) return;
 
@@ -134,7 +134,7 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
           toucher,
           firstForPlayer,
           firstForPlayerLife,
-          getMatch().getTick().instant);
+          getMatch().getTick().instant());
     }
 
     getMatch().callEvent(event);

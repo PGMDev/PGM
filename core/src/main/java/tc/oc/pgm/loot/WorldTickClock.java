@@ -37,7 +37,7 @@ public class WorldTickClock extends Clock {
 
   @Override
   public Instant instant() {
-    return this.now().instant;
+    return this.now().instant();
   }
 
   public Tick getTick() {
@@ -46,7 +46,7 @@ public class WorldTickClock extends Clock {
 
   private Tick now() {
     long tick = NMS_HACKS.getMonotonicTime(match.getWorld());
-    if (this.tick == null || tick != this.tick.tick) {
+    if (this.tick == null || tick != this.tick.tick()) {
       this.tick = new Tick(tick, Instant.now());
     }
     return this.tick;

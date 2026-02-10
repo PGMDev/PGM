@@ -144,8 +144,8 @@ public class Renewable implements Listener, Tickable {
   }
 
   long updateLastTick() {
-    long delta = match.getTick().tick - lastTick;
-    lastTick = match.getTick().tick;
+    long delta = match.getTick().tick() - lastTick;
+    lastTick = match.getTick().tick();
     return delta;
   }
 

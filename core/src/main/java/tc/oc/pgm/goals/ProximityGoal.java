@@ -12,7 +12,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -50,9 +50,9 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
     return getDefinition().getPreTouchMetric();
   }
 
-  public @Nullable ProximityMetric.Type getProximityMetricType(Competitor team) {
+  public ProximityMetric.@Nullable Type getProximityMetricType(Competitor team) {
     ProximityMetric metric = getProximityMetric(team);
-    return metric == null ? null : metric.type;
+    return metric == null ? null : metric.type();
   }
 
   /**
@@ -124,7 +124,7 @@ public abstract class ProximityGoal<T extends ProximityGoalDefinition> extends O
 
       // Note: distances stay squared as long as possible
       int distance;
-      if (metric.horizontal) {
+      if (metric.horizontal()) {
         distance = dx * dx + dz * dz;
       } else {
         distance = dx * dx + dy * dy + dz * dz;

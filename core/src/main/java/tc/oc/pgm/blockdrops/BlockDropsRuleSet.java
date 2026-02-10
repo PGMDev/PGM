@@ -14,7 +14,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
@@ -32,26 +32,25 @@ import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 
-public class BlockDropsRuleSet {
-  private final ImmutableList<BlockDropsRule> rules;
-
+public record BlockDropsRuleSet(ImmutableList<BlockDropsRule> rules) {
   public BlockDropsRuleSet(List<BlockDropsRule> rules) {
-    this.rules = ImmutableList.copyOf(rules);
+    this(ImmutableList.copyOf(rules));
   }
 
   public boolean isEmpty() {
-    return this.rules.isEmpty();
+    return rules().isEmpty();
   }
 
+  @Deprecated
   public ImmutableList<BlockDropsRule> getRules() {
-    return this.rules;
+    return rules();
   }
 
   /** Return the subset of rules that may act on the given region */
   public BlockDropsRuleSet subsetAffecting(Match match, FiniteBlockRegion region) {
     ImmutableList.Builder<BlockDropsRule> subset = ImmutableList.builder();
-    for (BlockDropsRule rule : this.rules) {
-      if (rule.region == null) {
+    for (BlockDropsRule rule : rules()) {
+      if (rule.region() == null) {
         subset.add(rule);
         continue;
       }
@@ -103,41 +102,41 @@ public class BlockDropsRuleSet {
       rightToolUsed = NMS_HACKS.canMineBlock(material, breakEvent.getPlayer());
     }
 
-    for (BlockDropsRule rule : this.rules) {
-      if (event instanceof PlayerPunchBlockEvent && !rule.punch) continue;
-      if (event instanceof PlayerTrampleBlockEvent && !rule.trample) continue;
-      if (rule.region != null && !rule.region.contains(block)) continue;
+    for (BlockDropsRule rule : rules()) {
+      if (event instanceof PlayerPunchBlockEvent && !rule.punch()) continue;
+      if (event instanceof PlayerTrampleBlockEvent && !rule.trample()) continue;
+      if (rule.region() != null && !rule.region().contains(block)) continue;
 
-      if (rule.filter != null) {
+      if (rule.filter() != null) {
         Query query = Queries.block(event, playerState, block);
-        if (!rule.filter.query(query).isAllowed()) continue;
+        if (!rule.filter().query(query).isAllowed()) continue;
       }
 
       custom = true;
 
-      if (rule.drops.kit != null) {
-        kits.add(rule.drops.kit);
+      if (rule.drops().kit() != null) {
+        kits.add(rule.drops().kit());
       }
 
-      if (rule.drops.replacement != null) {
-        replacement = rule.drops.replacement;
+      if (rule.drops().replacement() != null) {
+        replacement = rule.drops().replacement();
       }
 
-      if (rule.drops.fallChance != null) {
-        fallChance = rule.drops.fallChance;
+      if (rule.drops().fallChance() != null) {
+        fallChance = rule.drops().fallChance();
       }
 
-      if (rule.drops.landChance != null) {
-        landChance = rule.drops.landChance;
+      if (rule.drops().landChance() != null) {
+        landChance = rule.drops().landChance();
       }
 
-      if (rule.drops.fallSpeed != null) {
-        fallSpeed = rule.drops.fallSpeed;
+      if (rule.drops().fallSpeed() != null) {
+        fallSpeed = rule.drops().fallSpeed();
       }
 
-      if (rule.dropOnWrongTool || rightToolUsed) {
-        items.putAll(rule.drops.items);
-        experience += rule.drops.experience;
+      if (rule.dropOnWrongTool() || rightToolUsed) {
+        items.putAll(rule.drops().items());
+        experience += rule.drops().experience();
       }
     }
 

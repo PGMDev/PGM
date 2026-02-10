@@ -3,26 +3,20 @@ package tc.oc.pgm.action;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.Filterable;
 
-public class Trigger<T extends Filterable<?>> {
-  private final Class<T> scope;
-  private final Filter filter;
-  private final Action<? super T> action;
-
-  public Trigger(Class<T> scope, Filter filter, Action<? super T> action) {
-    this.scope = scope;
-    this.filter = filter;
-    this.action = action;
-  }
-
+public record Trigger<T extends Filterable<?>>(
+    Class<T> scope, Filter filter, Action<? super T> action) {
+  @Deprecated
   public Class<T> getScope() {
-    return scope;
+    return scope();
   }
 
+  @Deprecated
   public Filter getFilter() {
-    return filter;
+    return filter();
   }
 
+  @Deprecated
   public Action<? super T> getAction() {
-    return action;
+    return action();
   }
 }

@@ -8,8 +8,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.util.ClassLogger;
@@ -33,7 +33,7 @@ public class CountdownRunner extends BukkitRunnable {
 
   private Future<?> task = null;
 
-  public CountdownRunner(@NotNull Match match, Logger parentLogger, @NotNull Countdown countdown) {
+  public CountdownRunner(@NonNull Match match, Logger parentLogger, @NonNull Countdown countdown) {
     assertNotNull(match, "match");
     assertNotNull(countdown, "countdown");
 
@@ -46,15 +46,15 @@ public class CountdownRunner extends BukkitRunnable {
     return this.task != null;
   }
 
-  public @NotNull CountdownRunner start(Duration remaining) {
+  public @NonNull CountdownRunner start(Duration remaining) {
     return this.start(remaining, null);
   }
 
-  public @NotNull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
+  public @NonNull CountdownRunner start(Duration remaining, @Nullable Duration interval) {
     return this.start(remaining, interval, 1);
   }
 
-  public @NotNull CountdownRunner start(
+  public @NonNull CountdownRunner start(
       Duration remaining, @Nullable Duration interval, int count) {
     logger.fine("STARTING countdown " + countdown + " for duration " + remaining);
 
@@ -66,7 +66,7 @@ public class CountdownRunner extends BukkitRunnable {
     if (count > 0) {
       this.count = count;
       this.interval = interval;
-      this.start = match.getTick().instant;
+      this.start = match.getTick().instant();
       this.end = this.start.plus(remaining);
       this.secondsRemaining = remaining.getSeconds();
 
@@ -85,7 +85,7 @@ public class CountdownRunner extends BukkitRunnable {
       logger.fine("Cancelling countdown " + countdown);
 
       this.stop();
-      Duration remaining = Duration.between(match.getTick().instant, this.end);
+      Duration remaining = Duration.between(match.getTick().instant(), this.end);
       this.countdown.onCancel(
           TimeUtils.isShorterThan(remaining, Duration.ZERO) ? Duration.ZERO : remaining,
           this.getTotalTime());
@@ -126,7 +126,7 @@ public class CountdownRunner extends BukkitRunnable {
     for (;
         this.secondsRemaining >= 0
             && this.secondsRemaining * 20
-                >= TimeUtils.toTicks(Duration.between(match.getTick().instant, this.end));
+                >= TimeUtils.toTicks(Duration.between(match.getTick().instant(), this.end));
         this.secondsRemaining--) {
       this.countdown.onTick(Duration.ofSeconds(this.secondsRemaining), this.getTotalTime());
     }
@@ -151,7 +151,7 @@ public class CountdownRunner extends BukkitRunnable {
     }
   }
 
-  public @NotNull Countdown getCountdown() {
+  public @NonNull Countdown getCountdown() {
     return this.countdown;
   }
 }

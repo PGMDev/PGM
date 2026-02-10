@@ -30,9 +30,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
   }
 
   public List<Category> getVisibleCategories(MatchPlayer player) {
-    return categories.stream()
-        .filter(c -> c.getFilter().query(player).isAllowed())
-        .toList();
+    return categories.stream().filter(c -> c.filter().query(player).isAllowed()).toList();
   }
 
   public void purchase(Icon icon, MatchPlayer buyer) {
