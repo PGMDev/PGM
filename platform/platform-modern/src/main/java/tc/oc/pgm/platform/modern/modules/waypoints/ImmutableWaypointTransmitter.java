@@ -1,0 +1,19 @@
+package tc.oc.pgm.platform.modern.modules.waypoints;
+
+import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+
+public class ImmutableWaypointTransmitter extends AbstractWaypointTransmitter {
+  private final BlockPos blockPos;
+
+  public ImmutableWaypointTransmitter(BlockPos pos, Integer color) {
+    this.blockPos = pos;
+    this.waypointIcon.color = Optional.ofNullable(color);
+  }
+
+  @Override
+  public BlockPos position(ServerPlayer receiver) {
+    return blockPos;
+  }
+}
