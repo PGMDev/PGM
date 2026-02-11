@@ -10,14 +10,21 @@ import tc.oc.pgm.util.material.matcher.SingularMaterialMatcher;
 
 public class ModernItemData implements ItemMaterialData {
   private final Material material;
+  private final short damage;
 
   public ModernItemData(Material material) {
+    this(material, (short) 0);
+  }
+
+  public ModernItemData(Material material, short damage) {
     this.material = material;
+    this.damage = damage == 0 || material.getMaxDurability() == 0 ? 0 : damage;
   }
 
   @Override
   public ItemStack toItemStack(int amount) {
-    return new ItemStack(material, amount);
+    //noinspection deprecation
+    return new ItemStack(material, amount, damage);
   }
 
   @Override

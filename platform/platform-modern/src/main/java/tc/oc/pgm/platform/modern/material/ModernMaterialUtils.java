@@ -161,29 +161,32 @@ public class ModernMaterialUtils implements MaterialUtils {
 
     @Override
     public MaterialMatcher.Builder visit(Material material) {
-      return addAll(ModernMaterialParser.flatten(material));
+      return add(material, true);
     }
 
     @Override
     public MaterialMatcher.Builder visit(Material material, short data) {
       BlockData bd = Bukkit.getUnsafe().fromLegacy(material, (byte) data);
-      if (MATERIAL_UTILS.hasBlockStates(bd.getMaterial())) {
-        return add(new BlockStateMaterialMatcher(bd));
-      } else {
-        return add(bd.getMaterial());
-      }
+      // Just a plain block with no states now, add material directly,
+      if (!MATERIAL_UTILS.hasBlockStates(material)) return add(bd.getMaterial());
+
+      // This has block states, there's two options:
+      // a) 'data' is now bundled in the material itself (eg: stained-glass panes)
+      // b) 'data' defines a specific block state (eg: rails or water)
+      // A bit of a hack, but test by creating different data and check if materials match
+      var other = Bukkit.getUnsafe().fromLegacy(material, (byte) (data == 0 ? 1 : data - 1));
+      if (other.getMaterial() == bd.getMaterial()) add(new BlockStateMaterialMatcher(bd));
+      return add(bd.getMaterial());
     }
 
     @Override
     public MaterialMatcher.Builder add(Material material, boolean flatten) {
-      // TODO: PLATFORM 1.20 - flatten non-legacy itemstack into list of modern
-      return add(material);
+      return flatten ? addAll(ModernMaterialParser.flatten(material)) : add(material);
     }
 
     @Override
     public MaterialMatcher.Builder add(ItemStack item, boolean flatten) {
-      // TODO: PLATFORM 1.20 - flatten non-legacy itemstack into list of modern
-      return add(item.getType());
+      return add(item.getType(), flatten);
     }
 
     @Override

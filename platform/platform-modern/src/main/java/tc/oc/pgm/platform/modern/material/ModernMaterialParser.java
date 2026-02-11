@@ -66,7 +66,11 @@ class ModernMaterialParser {
   }
 
   public static Material[] flatten(Material material) {
-    if (!material.isLegacy()) return new Material[] {material};
+    if (!material.isLegacy()) {
+      var legacyMat = UNSAFE.toLegacy(material);
+      if (legacyMat.isAir()) return new Material[] {material};
+      material = legacyMat;
+    }
     var md = new org.bukkit.material.MaterialData(material, (byte) 0);
     var main = UNSAFE.fromLegacy(md);
     md.setData((byte) 1);
@@ -161,7 +165,7 @@ class ModernMaterialParser {
       public ItemMaterialData visit(Material material, short data) {
         return switch (material = upgrade(material, data)) {
           case POTION, SPLASH_POTION -> new PotionMaterialData(data);
-          default -> new ModernItemData(material);
+          default -> new ModernItemData(material, data);
         };
       }
     };

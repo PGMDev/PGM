@@ -184,9 +184,9 @@ public class SpMaterialUtils implements MaterialUtils {
 
     @Override
     public MaterialMatcher.Builder add(ItemStack item, boolean flatten) {
-      if (flatten) add(item.getType());
-      else add(new ExactMaterialMatcher(item.getType(), item.getData().getData()));
-      return this;
+      return flatten
+          ? visit(item.getType())
+          : visit(item.getType(), item.getData().getData());
     }
 
     @Override
