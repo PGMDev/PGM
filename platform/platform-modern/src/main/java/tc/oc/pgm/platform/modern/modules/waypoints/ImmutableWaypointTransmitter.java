@@ -8,6 +8,7 @@ public class ImmutableWaypointTransmitter extends AbstractWaypointTransmitter {
   private final BlockPos blockPos;
 
   public ImmutableWaypointTransmitter(BlockPos pos, Integer color) {
+    super(null);
     this.blockPos = pos;
     this.waypointIcon.color = Optional.ofNullable(color);
   }

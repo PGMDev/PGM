@@ -121,7 +121,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       if (stage instanceof Revertable) {
         ((Revertable) stage).revert();
       } else {
-        throw new IllegalStateException("Unable to revert a loaded match");
+        throw new IllegalStateException("Unable to revert a loaded match", err);
       }
     }
 

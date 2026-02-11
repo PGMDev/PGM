@@ -3,6 +3,7 @@ package tc.oc.pgm.payload;
 import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
 
 import java.time.Duration;
+import java.util.UUID;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -38,6 +39,7 @@ public class Payload extends ControlPoint {
 
   private Competitor dominantTeam;
   private Vector position;
+  private boolean shouldDisplay = true;
 
   public Payload(Match match, PayloadDefinition definition) {
     super(match, definition);
@@ -61,6 +63,15 @@ public class Payload extends ControlPoint {
     minecart.setSlowWhenEmpty(true);
     minecart.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), true));
     return minecart;
+  }
+
+  public UUID getMinecartUuid() {
+    return this.minecart.getUniqueId();
+  }
+
+  public boolean shouldDisplay(boolean update) {
+    if (update) shouldDisplay = definition.getDisplayFilter().query(match).isAllowed();
+    return this.shouldDisplay;
   }
 
   @Override
@@ -89,12 +100,12 @@ public class Payload extends ControlPoint {
     tickMinecart();
   }
 
-  private Competitor getDisplayTeam() {
+  public Competitor getDisplayTeam() {
     return dominantTeam != null ? dominantTeam : controllingTeam != null ? controllingTeam : null;
   }
 
   private void tickParticles(long tick) {
-    if (!definition.getDisplayFilter().query(match).isAllowed()) return;
+    if (!shouldDisplay(true)) return;
     Competitor display = getDisplayTeam();
     Color color = display != null ? display.getFullColor() : Color.WHITE;
 
