@@ -69,22 +69,20 @@ public class TNTModule implements MapModule<TNTMatchModule> {
       for (Element tntElement : doc.getRootElement().getChildren("tnt")) {
         exists = true;
         instantIgnite =
-            parser.parseBool(tntElement, "instantignite").child().optional(instantIgnite);
-        blockDamage = parser.parseBool(tntElement, "blockdamage").child().optional(blockDamage);
-        yield = parser.parseFloat(tntElement, "yield").child().optional(yield);
-        power = parser.parseFloat(tntElement, "power").child().optional(power);
+            parser.parseBool(tntElement, "instant-ignite", "instantignite").optional(instantIgnite);
+        blockDamage =
+            parser.parseBool(tntElement, "block-damage", "blockdamage").optional(blockDamage);
+        yield = parser.parseFloat(tntElement, "yield").optional(yield);
+        power = parser.parseFloat(tntElement, "power").optional(power);
         dispenserNukeLimit =
-            parser.parseInt(tntElement, "dispenser-tnt-limit").child().optional(dispenserNukeLimit);
+            parser.parseInt(tntElement, "dispenser-tnt-limit").optional(dispenserNukeLimit);
         dispenserNukeMultiplier = parser
             .parseFloat(tntElement, "dispenser-tnt-multiplier")
-            .child()
             .optional(dispenserNukeMultiplier);
-        licensing = parser.parseBool(tntElement, "licensing").child().optional(licensing);
-        friendlyDefuse =
-            parser.parseBool(tntElement, "friendly-defuse").child().optional(friendlyDefuse);
+        licensing = parser.parseBool(tntElement, "licensing").optional(licensing);
+        friendlyDefuse = parser.parseBool(tntElement, "friendly-defuse").optional(friendlyDefuse);
         fuse = parser
             .duration(tntElement, "fuse")
-            .child()
             .validate((duration, node) -> {
               if (TimeUtils.isLongerThan(duration, Duration.ofSeconds(4))) {
                 // TNT disappears on the client after 4 seconds, no way to extend it
