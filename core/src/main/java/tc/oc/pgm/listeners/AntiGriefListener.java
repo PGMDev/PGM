@@ -68,7 +68,7 @@ public class AntiGriefListener implements Listener {
     if (!(entity instanceof TNTPrimed)) return;
 
     TNTMatchModule tntmm = mm.getMatch(player.getWorld()).getModule(TNTMatchModule.class);
-    if (tntmm != null && !tntmm.getProperties().friendlyDefuse) return;
+    if (tntmm != null && !tntmm.getProperties().friendlyDefuse()) return;
 
     MatchPlayer clicker = this.mm.getPlayer(player);
     if (clicker == null || !clicker.canInteract()) return;

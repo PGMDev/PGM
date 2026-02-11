@@ -8,5 +8,7 @@ import tc.oc.pgm.util.platform.Supports;
 @Supports(PAPER)
 public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
   @Override
-  public void registerModules(Modules modules) {}
+  public void registerModules(Modules modules) {
+    modules.register(WaypointMatchModule.class, WaypointMatchModule::new);
+  }
 }
