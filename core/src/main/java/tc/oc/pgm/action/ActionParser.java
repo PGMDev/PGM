@@ -26,6 +26,7 @@ import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
+import tc.oc.pgm.action.actions.OpenShop;
 import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
@@ -57,6 +58,7 @@ import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.modules.WeatherMatchModule;
+import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
@@ -386,6 +388,12 @@ public class ActionParser {
   public KillEntitiesAction parseKillEntities(Element el, Class<?> scope)
       throws InvalidXMLException {
     return new KillEntitiesAction(parser.filter(el, "filter").required());
+  }
+
+  @MethodParser("open-shop")
+  public OpenShop parseOpenShop(Element el, Class<?> scope) throws InvalidXMLException {
+    var shop = parser.reference(Shop.class, el, "shop").required();
+    return new OpenShop(shop);
   }
 
   @MethodParser("replace-item")
