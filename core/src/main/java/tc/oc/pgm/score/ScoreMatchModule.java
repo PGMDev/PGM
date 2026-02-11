@@ -96,6 +96,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
     return this.config.scoreLimit();
   }
 
+  public Set<ScoreBox> getScoreBoxes() {
+    return this.scoreBoxes;
+  }
+
   public ScoreDefinition getDefinition() {
     return this.config;
   }

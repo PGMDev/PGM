@@ -4,10 +4,15 @@ import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 abstract class AbstractWaypointTransmitter implements PGMWaypointTransmitter {
-  private final UUID uuid = UUID.randomUUID();
+  private final UUID uuid;
   protected final Icon waypointIcon = new Icon();
+
+  protected AbstractWaypointTransmitter(@Nullable UUID uuid) {
+    this.uuid = uuid != null ? uuid : UUID.randomUUID();
+  }
 
   @Override
   public boolean isTransmittingWaypoint() {

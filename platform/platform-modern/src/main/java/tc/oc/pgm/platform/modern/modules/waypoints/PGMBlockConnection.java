@@ -36,10 +36,16 @@ class PGMBlockConnection implements WaypointTransmitter.Connection {
   }
 
   public void update() {
+    // It appears the client will not update the icon/color unless waypoint is removed and re-added
+    // Luckily this is pretty trivial for us to do instead of an update
     var icon = transmitter.waypointIcon();
-    if (iconChanged(icon) || newPosition.distManhattan(this.lastPosition) > 0) {
+    if (iconChanged(icon)) {
       this.lastPosition = this.newPosition;
-      this.lastIcon.color = transmitter.waypointIcon().color;
+      this.lastIcon.copyFrom(icon);
+      disconnect();
+      connect();
+    } else if (this.newPosition.distManhattan(this.lastPosition) > 0) {
+      this.lastPosition = this.newPosition;
 
       this.receiver.connection.send(ClientboundTrackedWaypointPacket.updateWaypointPosition(
           transmitter.uuid(), lastIcon, lastPosition));

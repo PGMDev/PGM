@@ -2,30 +2,29 @@ package tc.oc.pgm.platform.modern.modules.waypoints;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.wool.MonumentWool;
 
 public class WoolWaypointTransmitter extends GoalWaypoint<MonumentWool> {
-  private final @Nullable BlockPos woolLocation;
   private final BlockPos monumentLocation;
 
   WoolWaypointTransmitter(MonumentWool wool) {
     super(wool, wool.getColor().asRGB());
 
     var def = wool.getDefinition();
-    this.woolLocation = Waypoints.toBlockPos(def.getLocation());
-    this.monumentLocation =
-        Waypoints.toBlockPos(def.getPlacementRegion().getBounds().getCenterPoint());
+    var loc = def.getLocation();
+    var len = loc.lengthSquared();
+    setPosition(len == 0 || Double.isInfinite(len) ? null : loc);
+    this.monumentLocation = Waypoints.toBlockPos(wool.getMatch(), def.getPlacementRegion());
   }
 
   @Override
   public boolean shouldSee(ServerPlayer player) {
-    return isTransmittingWaypoint() && (woolLocation != null || hasWool(player));
+    return isTransmittingWaypoint() && (position != null || hasWool(player));
   }
 
   @Override
   public BlockPos position(ServerPlayer receiver) {
-    return woolLocation == null || hasWool(receiver) ? monumentLocation : woolLocation;
+    return position == null || hasWool(receiver) ? monumentLocation : position;
   }
 
   private boolean hasWool(ServerPlayer player) {
