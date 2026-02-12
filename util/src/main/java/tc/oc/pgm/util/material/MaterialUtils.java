@@ -55,8 +55,6 @@ public interface MaterialUtils {
 
   Set<BlockMaterialData> getPossibleBlocks(Material material);
 
-  boolean hasBlockStates(Material material);
-
   MaterialMatcher.Builder matcherBuilder();
 
   boolean isUpperHalfOfDoor(Block block);
