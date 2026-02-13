@@ -6,14 +6,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Bisected;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.craftbukkit.legacy.CraftLegacy;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.GlowItemFrame;
 import org.bukkit.entity.Hanging;
@@ -24,6 +25,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.ItemMaterialData;
@@ -140,12 +142,6 @@ public class ModernMaterialUtils implements MaterialUtils {
   }
 
   @Override
-  public boolean hasBlockStates(Material material) {
-    var block = CraftMagicNumbers.getBlock(material);
-    return !block.getStateDefinition().getPossibleStates().isEmpty();
-  }
-
-  @Override
   public MaterialMatcher.Builder matcherBuilder() {
     return new MaterialMatcherBuilderImpl();
   }
@@ -158,6 +154,7 @@ public class ModernMaterialUtils implements MaterialUtils {
 
   private static class MaterialMatcherBuilderImpl extends MaterialMatcher.BuilderImpl
       implements ModernMaterialParser.Adapter<MaterialMatcher.Builder> {
+    private Node currentNode = null;
 
     @Override
     public MaterialMatcher.Builder visit(Material material) {
@@ -166,22 +163,50 @@ public class ModernMaterialUtils implements MaterialUtils {
 
     @Override
     public MaterialMatcher.Builder visit(Material material, short data) {
-      BlockData bd = Bukkit.getUnsafe().fromLegacy(material, (byte) data);
-      // Just a plain block with no states now, add material directly,
-      if (!MATERIAL_UTILS.hasBlockStates(material)) return add(bd.getMaterial());
+      // Filter out air so any air=invalid later on, and any modern material
+      if (material.isAir() || !material.isLegacy()) return add(CraftLegacy.fromLegacy(material));
 
-      // This has block states, there's two options:
-      // a) 'data' is now bundled in the material itself (eg: stained-glass panes)
-      // b) 'data' defines a specific block state (eg: rails or water)
-      // A bit of a hack, but test by creating different data and check if materials match
-      var other = Bukkit.getUnsafe().fromLegacy(material, (byte) (data == 0 ? 1 : data - 1));
-      if (other.getMaterial() == bd.getMaterial()) add(new BlockStateMaterialMatcher(bd));
-      return add(bd.getMaterial());
+      var item = CraftLegacy.fromLegacyData(material, data);
+      var itemMaterial = CraftMagicNumbers.getMaterial(item);
+
+      // Treat as item, upgrade the material to its modern post-flattening version and we're done
+      if (!itemMaterial.isAir() && material.getId() > 255) return add(itemMaterial);
+
+      var block = CraftLegacy.fromLegacyData(material, (byte) data);
+      var blockMaterial = block.getBukkitMaterial();
+
+      if (itemMaterial.isAir() && blockMaterial.isAir()) {
+        var ex = new InvalidXMLException(
+            "Material doesn't exist (did it ever?)'" + material + ":" + data + "'", currentNode);
+        PGM.get().getGameLogger().log(Level.WARNING, null, ex);
+        return this;
+      }
+
+      return switch (ModernMaterialParser.getUpgradeStrategy(material, (byte) data)) {
+        // Exists as single-state in modern, eg: wool:0 -> white_wool
+        // Or a single legacy state can translate into it, eg:
+        // stained_glass_pane:8 -> light_gray_stained_glass_pane[*]
+        // wall:0 -> cobblestone_wall[*]
+        case MATERIAL -> add(blockMaterial);
+        // There is a 1:1 mapping between upgraded states and modern states eg:
+        // log:0 -> oak_log[axis=y],
+        // log:4 -> oak_log[axis=x],
+        // log:8 -> oak_log[axis=z]
+        case BLOCK_STATE -> add(new BlockStateMaterialMatcher(block.createCraftBlockData()));
+        // Legacy translates into LESS states than are available in modern, eg:
+        // step:0 -> smooth_stone_slab[type=bottom,waterlogged=false],
+        // step:8 -> smooth_stone_slab[type=top,waterlogged=false]
+        // TODO: step:0 could use a new matcher for smooth_stone_slab[type=bottom,waterlogged=*]
+        // Basically any water-loggable block goes thru here
+        case GOOD_LUCK -> add(blockMaterial);
+      };
     }
 
     @Override
     public MaterialMatcher.Builder add(Material material, boolean flatten) {
-      return flatten ? addAll(ModernMaterialParser.flatten(material)) : add(material);
+      return flatten
+          ? addAll(ModernMaterialParser.flatten(material))
+          : add(CraftLegacy.fromLegacy(material));
     }
 
     @Override
@@ -191,7 +216,12 @@ public class ModernMaterialUtils implements MaterialUtils {
 
     @Override
     protected void parseSingle(String text, @Nullable Node node) throws InvalidXMLException {
-      ModernMaterialParser.parse(text, node, materialsOnly, this);
+      try {
+        currentNode = node;
+        ModernMaterialParser.parse(text, node, materialsOnly, this);
+      } finally {
+        currentNode = null;
+      }
     }
   }
 }

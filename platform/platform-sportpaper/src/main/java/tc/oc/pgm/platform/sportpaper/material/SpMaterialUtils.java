@@ -148,12 +148,6 @@ public class SpMaterialUtils implements MaterialUtils {
   }
 
   @Override
-  public boolean hasBlockStates(Material material) {
-    Block block = CraftMagicNumbers.getBlock(material);
-    return !block.P().a().isEmpty();
-  }
-
-  @Override
   public MaterialMatcher.Builder matcherBuilder() {
     return new MaterialMatcherBuilderImpl();
   }
