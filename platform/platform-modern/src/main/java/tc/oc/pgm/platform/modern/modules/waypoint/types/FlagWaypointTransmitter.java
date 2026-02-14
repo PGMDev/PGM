@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.modules.waypoints;
+package tc.oc.pgm.platform.modern.modules.waypoint.types;
 
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
@@ -6,7 +6,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.state.Carried;
 
-public class FlagWaypointTransmitter extends GoalWaypoint<Flag> implements Tickable {
+class FlagWaypointTransmitter extends GoalWaypoint<Flag> implements Tickable {
 
   FlagWaypointTransmitter(Flag flag) {
     super(flag, flag.getDyeColor().getColor().asRGB());

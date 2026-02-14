@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.modules.waypoints;
+package tc.oc.pgm.platform.modern.modules.waypoint.types;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -9,7 +9,7 @@ import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.goals.Goal;
 
-public class GoalWaypoint<T extends Goal<?>> extends AbstractWaypointTransmitter {
+class GoalWaypoint<T extends Goal<?>> extends AbstractWaypointTransmitter {
   protected final T goal;
   protected BlockPos position;
 
@@ -23,7 +23,7 @@ public class GoalWaypoint<T extends Goal<?>> extends AbstractWaypointTransmitter
     this.waypointIcon.color = Optional.of(color);
   }
 
-  public static <T extends Goal<?>> GoalWaypoint<T> simple(T goal, BlockPos pos, int color) {
+  static <T extends Goal<?>> GoalWaypoint<T> simple(T goal, BlockPos pos, int color) {
     var waypoint = new GoalWaypoint<>(goal, color);
     waypoint.position = pos;
     return waypoint;

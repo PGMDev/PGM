@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.modules.waypoints;
+package tc.oc.pgm.platform.modern.modules.waypoint.types;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;

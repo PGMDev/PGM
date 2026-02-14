@@ -1,7 +1,8 @@
-package tc.oc.pgm.platform.modern.modules;
+package tc.oc.pgm.platform.modern.modules.waypoint;
 
 import java.util.Optional;
 import net.minecraft.server.waypoints.ServerWaypointManager;
+import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.Color;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -21,8 +22,7 @@ import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.state.Carried;
 import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.GoalMatchModule;
-import tc.oc.pgm.platform.modern.modules.waypoints.PGMWaypointTransmitter;
-import tc.oc.pgm.platform.modern.modules.waypoints.Waypoints;
+import tc.oc.pgm.platform.modern.modules.waypoint.types.Waypoints;
 import tc.oc.pgm.score.ScoreBox;
 import tc.oc.pgm.score.ScoreMatchModule;
 
@@ -37,7 +37,7 @@ public class WaypointMatchModule implements MatchModule, Listener {
     this.waypointManager = ((CraftWorld) match.getWorld()).getHandle().getWaypointManager();
   }
 
-  private void track(PGMWaypointTransmitter transmitter) {
+  private void track(WaypointTransmitter transmitter) {
     if (transmitter == null) return;
 
     waypointManager.trackWaypoint(transmitter);

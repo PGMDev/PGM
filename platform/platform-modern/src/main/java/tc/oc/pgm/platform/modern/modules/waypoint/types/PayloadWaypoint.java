@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.modules.waypoints;
+package tc.oc.pgm.platform.modern.modules.waypoint.types;
 
 import java.util.Optional;
 import org.bukkit.Color;
@@ -6,20 +6,23 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.time.Tick;
-import tc.oc.pgm.controlpoint.ControlPoint;
+import tc.oc.pgm.payload.Payload;
 
-public class ControlPointWaypoint extends GoalWaypoint<ControlPoint> implements Tickable {
+class PayloadWaypoint extends GoalWaypoint<Payload> implements Tickable {
 
   private Competitor lastCompetitor;
 
-  public ControlPointWaypoint(ControlPoint goal) {
-    super(goal, Color.WHITE.asRGB());
-    setPosition(goal.getCenterPoint());
+  PayloadWaypoint(Payload goal) {
+    super(goal, Color.WHITE.asRGB(), goal.getMinecartUuid());
+    // Force a first reload
+    goal.shouldDisplay(true);
   }
 
   @Override
   public void tick(Match match, Tick tick) {
-    var comp = goal.getControllingTeam();
+    setPosition(goal.getCenterPoint());
+
+    var comp = goal.getDisplayTeam();
     if (this.lastCompetitor != comp) {
       this.lastCompetitor = comp;
       var color = comp != null ? comp.getFullColor() : Color.WHITE;
@@ -29,6 +32,8 @@ public class ControlPointWaypoint extends GoalWaypoint<ControlPoint> implements 
 
   @Override
   public boolean isTransmittingWaypoint() {
-    return !goal.isCompleted() || !goal.getDefinition().isPermanent();
+    return super.isTransmittingWaypoint()
+        && (!goal.isCompleted() || !goal.getDefinition().isPermanent())
+        && goal.shouldDisplay(false);
   }
 }
