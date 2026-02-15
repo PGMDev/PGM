@@ -1,9 +1,8 @@
-package tc.oc.pgm.platform.modern.modules.waypoints;
+package tc.oc.pgm.platform.modern.modules.waypoint.types;
 
-import io.papermc.paper.math.Position;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.Color;
-import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
@@ -17,20 +16,19 @@ import tc.oc.pgm.payload.Payload;
 import tc.oc.pgm.regions.EmptyRegion;
 import tc.oc.pgm.wool.MonumentWool;
 
-@SuppressWarnings("UnstableApiUsage")
 public interface Waypoints {
 
-  static PGMWaypointTransmitter immutable(Vector loc, Color color) {
+  static WaypointTransmitter immutable(Vector loc, Color color) {
     return new ImmutableWaypointTransmitter(
         new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()), color.asRGB());
   }
 
-  static PGMWaypointTransmitter immutable(BlockPos pos, int color) {
+  static WaypointTransmitter immutable(BlockPos pos, int color) {
     if (pos == null) return null;
     return new ImmutableWaypointTransmitter(pos, color);
   }
 
-  static PGMWaypointTransmitter from(Goal<?> goal) {
+  static WaypointTransmitter from(Goal<?> goal) {
     if (!goal.hasShowOption(ShowOption.SHOW_WAYPOINT)) return null;
     return switch (goal) {
       case MonumentWool w -> new WoolWaypointTransmitter(w);
@@ -56,11 +54,6 @@ public interface Waypoints {
     return new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
   }
 
-  static BlockPos toBlockPos(Location loc) {
-    if (loc == null) return null;
-    return new BlockPos(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
-  }
-
   static <T extends Goal<?>> BlockPos toBlockPos(Match match, Region region) {
     return toBlockPos(match, region, EmptyRegion.INSTANCE);
   }
@@ -76,9 +69,5 @@ public interface Waypoints {
     if (isSmall || staticReg.contains(center) || containing.getStatic(match).contains(center))
       return toBlockPos(center);
     return null;
-  }
-
-  private static BlockPos toBlockPos(Position loc) {
-    return new BlockPos(loc.blockX(), loc.blockY(), loc.blockZ());
   }
 }

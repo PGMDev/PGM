@@ -235,7 +235,7 @@ public abstract class KitParser {
     Map<Slot.Armor, ArmorKit.ArmorItem> armor = new HashMap<>();
 
     for (Slot.Armor armorSlot : Slot.Armor.armor().toList()) {
-      var armorItem = parseArmorItem(el.getChild(armorSlot.getArmorType().name().toLowerCase()));
+      var armorItem = parseArmorItem(el.getChild(armorSlot.armorTypeName()));
       if (armorItem != null) armor.put(armorSlot, armorItem);
     }
 

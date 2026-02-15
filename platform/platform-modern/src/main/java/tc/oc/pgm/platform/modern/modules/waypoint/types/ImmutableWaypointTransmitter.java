@@ -1,13 +1,13 @@
-package tc.oc.pgm.platform.modern.modules.waypoints;
+package tc.oc.pgm.platform.modern.modules.waypoint.types;
 
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 
-public class ImmutableWaypointTransmitter extends AbstractWaypointTransmitter {
+class ImmutableWaypointTransmitter extends AbstractWaypointTransmitter {
   private final BlockPos blockPos;
 
-  public ImmutableWaypointTransmitter(BlockPos pos, Integer color) {
+  ImmutableWaypointTransmitter(BlockPos pos, Integer color) {
     super(null);
     this.blockPos = pos;
     this.waypointIcon.color = Optional.ofNullable(color);

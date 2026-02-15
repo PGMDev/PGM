@@ -6,6 +6,7 @@ import com.google.common.collect.Table;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -446,6 +447,10 @@ public abstract class Slot {
 
     public ArmorType getArmorType() {
       return armorType;
+    }
+
+    public String armorTypeName() {
+      return armorType.name().toLowerCase(Locale.ROOT);
     }
 
     public static Armor forType(ArmorType armorType) {

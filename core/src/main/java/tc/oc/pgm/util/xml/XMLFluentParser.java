@@ -2,6 +2,7 @@ package tc.oc.pgm.util.xml;
 
 import com.google.common.collect.Range;
 import java.time.Duration;
+import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
@@ -82,6 +83,15 @@ public class XMLFluentParser {
       @Override
       protected Duration parse(String text) throws TextException {
         return TextParser.parseDuration(text);
+      }
+    };
+  }
+
+  public <T> PrimitiveBuilder.Generic<T> parse(Function<String, T> fn, Element el, String... prop) {
+    return new PrimitiveBuilder.Generic<>(el, prop) {
+      @Override
+      protected T parse(String text) throws TextException {
+        return fn.apply(text);
       }
     };
   }

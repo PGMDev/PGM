@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.modules.waypoints;
+package tc.oc.pgm.platform.modern.modules.waypoint.types;
 
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.jetbrains.annotations.Nullable;
 
-public interface PGMWaypointTransmitter extends WaypointTransmitter {
+interface PGMWaypointTransmitter extends WaypointTransmitter {
   UUID uuid();
 
   @Nullable
