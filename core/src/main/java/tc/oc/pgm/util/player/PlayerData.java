@@ -6,8 +6,8 @@ import java.util.Objects;
 import java.util.UUID;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -19,14 +19,14 @@ class PlayerData {
 
   public final @Nullable String name;
   public final @Nullable String nick;
-  public final @NotNull TextColor teamColor;
+  public final @NonNull TextColor teamColor;
   public final boolean dead;
   public final boolean vanish;
   public final boolean online;
   public final boolean conceal; // If player is disguise, pretend they are offline?
-  public final @NotNull NameStyle style;
+  public final @NonNull NameStyle style;
 
-  public PlayerData(@NotNull Player player, @NotNull NameStyle style) {
+  public PlayerData(@NonNull Player player, @NonNull NameStyle style) {
     this.uuid = player.getUniqueId();
     this.name = player.getName();
     this.nick = Integration.getNick(player);
@@ -39,7 +39,7 @@ class PlayerData {
     this.style = style;
   }
 
-  public PlayerData(@NotNull MatchPlayer mp, @NotNull NameStyle style) {
+  public PlayerData(@NonNull MatchPlayer mp, @NonNull NameStyle style) {
     this.uuid = mp.getId();
 
     this.name = mp.getNameLegacy();
@@ -52,7 +52,7 @@ class PlayerData {
     this.style = style;
   }
 
-  public PlayerData(@NotNull MatchPlayerState mps, @NotNull NameStyle style) {
+  public PlayerData(@NonNull MatchPlayerState mps, @NonNull NameStyle style) {
     this.uuid = mps.getId();
 
     this.name = mps.getNameLegacy();
@@ -65,7 +65,7 @@ class PlayerData {
     this.style = style;
   }
 
-  public PlayerData(@Nullable Player player, @Nullable String username, @NotNull NameStyle style) {
+  public PlayerData(@Nullable Player player, @Nullable String username, @NonNull NameStyle style) {
     this.uuid = player != null ? player.getUniqueId() : null;
 
     this.name = player != null ? player.getName() : username;
@@ -83,9 +83,7 @@ class PlayerData {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof PlayerData)) return false;
-
-    PlayerData that = (PlayerData) o;
+    if (!(o instanceof PlayerData that)) return false;
 
     if (dead != that.dead) return false;
     if (vanish != that.vanish) return false;

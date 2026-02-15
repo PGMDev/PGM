@@ -239,7 +239,7 @@ public class ShopMenu extends InventoryMenu {
 
     // Display free or single item price on the same line as cost
     if (price.size() == 1) {
-      cost.append(price.get(0));
+      cost.append(price.getFirst());
     }
 
     Component click =

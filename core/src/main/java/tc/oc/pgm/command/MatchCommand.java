@@ -23,7 +23,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.CommandDescription;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchPhase;
@@ -51,21 +51,17 @@ public final class MatchCommand {
     boolean haveGameInfo =
         match.getPhase() == MatchPhase.RUNNING || match.getPhase() == MatchPhase.FINISHED;
 
-    viewer.sendMessage(
-        TextFormatter.horizontalLineHeading(
-            sender,
-            translatable("match.title")
-                .append(text(" #" + match.getId()))
-                .color(NamedTextColor.YELLOW),
-            NamedTextColor.WHITE,
-            TextFormatter.MAX_CHAT_WIDTH));
+    viewer.sendMessage(TextFormatter.horizontalLineHeading(
+        sender,
+        translatable("match.title").append(text(" #" + match.getId())).color(NamedTextColor.YELLOW),
+        NamedTextColor.WHITE,
+        TextFormatter.MAX_CHAT_WIDTH));
 
     if (haveGameInfo) {
       // show match time
-      viewer.sendMessage(
-          translatable("match.info.time", NamedTextColor.DARK_PURPLE)
-              .append(text(": ", NamedTextColor.DARK_PURPLE))
-              .append(clock(match.getDuration()).color(NamedTextColor.GOLD)));
+      viewer.sendMessage(translatable("match.info.time", NamedTextColor.DARK_PURPLE)
+          .append(text(": ", NamedTextColor.DARK_PURPLE))
+          .append(clock(match.getDuration()).color(NamedTextColor.GOLD)));
     }
 
     TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
@@ -80,9 +76,8 @@ public final class MatchCommand {
         if (teamName.endsWith(" Team")) teamName = teamName.substring(0, teamName.length() - 5);
 
         msg.append(text(teamName, TextFormatter.convert(team.getColor())))
-            .append(
-                text(": ", NamedTextColor.GRAY)
-                    .append(text(getNonVanishedCount(team.getPlayers()), NamedTextColor.WHITE)));
+            .append(text(": ", NamedTextColor.GRAY)
+                .append(text(getNonVanishedCount(team.getPlayers()), NamedTextColor.WHITE)));
 
         if (team.getMaxPlayers() != Integer.MAX_VALUE) {
           msg.append(text("/" + team.getMaxPlayers(), NamedTextColor.GRAY));
@@ -91,25 +86,20 @@ public final class MatchCommand {
         teamCountParts.add(msg.build());
       }
     } else if (ffamm != null) {
-      teamCountParts.add(
-          text()
-              .append(
-                  translatable("match.info.players", NamedTextColor.YELLOW)
-                      .append(text(": ", NamedTextColor.GRAY))
-                      .append(text(match.getParticipants().size(), NamedTextColor.WHITE))
-                      .append(text("/" + ffamm.getMaxPlayers(), NamedTextColor.GRAY)))
-              .build());
+      teamCountParts.add(text()
+          .append(translatable("match.info.players", NamedTextColor.YELLOW)
+              .append(text(": ", NamedTextColor.GRAY))
+              .append(text(match.getParticipants().size(), NamedTextColor.WHITE))
+              .append(text("/" + ffamm.getMaxPlayers(), NamedTextColor.GRAY)))
+          .build());
     }
 
-    teamCountParts.add(
-        text()
-            .append(
-                text(
-                    TextTranslations.translate("match.info.observers", sender),
-                    NamedTextColor.AQUA))
-            .append(text(": ", NamedTextColor.GRAY))
-            .append(text(getNonVanishedCount(match.getObservers()), NamedTextColor.WHITE))
-            .build());
+    teamCountParts.add(text()
+        .append(
+            text(TextTranslations.translate("match.info.observers", sender), NamedTextColor.AQUA))
+        .append(text(": ", NamedTextColor.GRAY))
+        .append(text(getNonVanishedCount(match.getObservers()), NamedTextColor.WHITE))
+        .build());
 
     viewer.sendMessage(
         join(JoinConfiguration.separator(text(" | ", NamedTextColor.DARK_GRAY)), teamCountParts));
@@ -117,7 +107,7 @@ public final class MatchCommand {
     if (!haveGameInfo) return;
 
     GoalMatchModule gmm = match.getModule(GoalMatchModule.class);
-    if (gmm != null && tmm != null && gmm.getGoalsByCompetitor().size() > 0) {
+    if (gmm != null && tmm != null && !gmm.getGoalsByCompetitor().isEmpty()) {
       Multimap<Team, Component> teamGoalTexts = LinkedHashMultimap.create();
       Map<Goal<?>, Component> sharedGoalTexts = new LinkedHashMap<>();
 
@@ -143,18 +133,18 @@ public final class MatchCommand {
             translatable("match.info.goals").append(text(":")).color(NamedTextColor.DARK_PURPLE));
 
         // Team goals
-        for (Map.Entry<Team, Collection<Component>> entry : teamGoalTexts.asMap().entrySet()) {
+        for (Map.Entry<Team, Collection<Component>> entry :
+            teamGoalTexts.asMap().entrySet()) {
           Team team = entry.getKey();
           Collection<Component> goalTexts = entry.getValue();
 
-          viewer.sendMessage(
-              text()
-                  .append(space())
-                  .append(space())
-                  .append(team.getName())
-                  .append(text(": ", NamedTextColor.GRAY))
-                  .append(join(JoinConfiguration.separator(text("  ")), goalTexts))
-                  .build());
+          viewer.sendMessage(text()
+              .append(space())
+              .append(space())
+              .append(team.getName())
+              .append(text(": ", NamedTextColor.GRAY))
+              .append(join(JoinConfiguration.separator(text("  ")), goalTexts))
+              .build());
         }
         // Shared goals
         viewer.sendMessage(join(JoinConfiguration.separator(text("  ")), sharedGoalTexts.values()));
@@ -183,13 +173,11 @@ public final class MatchCommand {
       Goal<?> goal, @Nullable Competitor competitor, Party viewingParty) {
     TextComponent.Builder sb = text().append(space());
 
-    sb.append(
-        goal.renderSidebarStatusText(competitor, viewingParty)
-            .color(goal.renderSidebarStatusColor(competitor, viewingParty)));
+    sb.append(goal.renderSidebarStatusText(competitor, viewingParty)
+        .color(goal.renderSidebarStatusColor(competitor, viewingParty)));
 
     sb.append(space());
-    if (goal instanceof ProximityGoal) {
-      ProximityGoal<?> proxGoal = (ProximityGoal<?>) goal;
+    if (goal instanceof ProximityGoal<?> proxGoal) {
       Component proximity = proxGoal.renderProximity(competitor, viewingParty);
       if (proximity != empty()) {
         TextColor proximityColor = proxGoal.renderProximityColor(competitor, viewingParty);
@@ -198,9 +186,8 @@ public final class MatchCommand {
       }
     }
 
-    sb.append(
-        goal.renderSidebarLabelText(competitor, viewingParty)
-            .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
+    sb.append(goal.renderSidebarLabelText(competitor, viewingParty)
+        .color(goal.renderSidebarLabelColor(competitor, viewingParty)));
 
     return sb.build();
   }

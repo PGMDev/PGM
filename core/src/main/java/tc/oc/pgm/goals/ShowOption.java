@@ -5,6 +5,7 @@ public enum ShowOption {
   SHOW_EFFECTS("show-effects"),
   SHOW_INFO("show-info"),
   SHOW_SIDEBAR("show-sidebar"),
+  SHOW_WAYPOINT("show-waypoint"),
   STATS("stats");
 
   private final String name;

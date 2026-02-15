@@ -17,7 +17,7 @@ public class WeatherMatchModule implements MatchModule, Listener {
   public enum WeatherType {
     CLEAR,
     RAIN,
-    THUNDER;
+    THUNDER
   }
 
   private final Match match;

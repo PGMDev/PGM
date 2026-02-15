@@ -7,7 +7,6 @@ import static tc.oc.pgm.util.text.TextException.unknown;
 
 import com.google.common.collect.Range;
 import com.google.gson.JsonSyntaxException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
@@ -28,7 +27,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Chunk;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.util.Aliased;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.TimeUtils;
@@ -99,7 +98,7 @@ public final class TextParser {
   }
 
   public static <T extends Comparable<T>> void assertInRange(
-      @NotNull T val, @NotNull Range<T> range) {
+      @NonNull T val, @NonNull Range<T> range) {
     if (!range.contains(val)) throw outOfRange(val.toString(), range);
   }
 
@@ -555,9 +554,8 @@ public final class TextParser {
 
     // Driver uris will always start with "jdbc:"
     try {
-      return DriverManager.getConnection(
-          URLDecoder.decode("jdbc:" + uri.toString(), StandardCharsets.UTF_8.name()));
-    } catch (UnsupportedEncodingException | SQLException e) {
+      return DriverManager.getConnection(URLDecoder.decode("jdbc:" + uri, StandardCharsets.UTF_8));
+    } catch (SQLException e) {
       throw unknown(e); // TODO: wrap common database errors with more friendly messages
     }
   }

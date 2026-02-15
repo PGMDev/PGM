@@ -20,7 +20,9 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.bukkit.World;
 import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 
 public class PGMServerLevel extends ServerLevel {
   public PGMServerLevel(
@@ -58,7 +60,7 @@ public class PGMServerLevel extends ServerLevel {
   // Redirect all map operations to world-level storage
   @Nullable
   @Override
-  public MapItemSavedData getMapData(MapId mapId) {
+  public MapItemSavedData getMapData(@NonNull MapId mapId) {
     // Paper start - Call missing map initialize event and set id
     final DimensionDataStorage storage = getDataStorage();
 
@@ -85,7 +87,7 @@ public class PGMServerLevel extends ServerLevel {
   }
 
   @Override
-  public void setMapData(MapId mapId, MapItemSavedData data) {
+  public void setMapData(@NonNull MapId mapId, MapItemSavedData data) {
     // CraftBukkit start
     data.id = mapId;
     org.bukkit.event.server.MapInitializeEvent event =
@@ -96,7 +98,14 @@ public class PGMServerLevel extends ServerLevel {
   }
 
   @Override
-  public MapId getFreeMapId() {
+  public @NonNull MapId getFreeMapId() {
     return getDataStorage().computeIfAbsent(MapIndex.TYPE).getNextMapId();
+  }
+
+  // Allow command blocks to be disabled via config
+  @Override
+  public boolean isCommandBlockEnabled() {
+    if (!PGM.get().getConfiguration().allowCommandBlocks()) return false;
+    return super.isCommandBlockEnabled();
   }
 }

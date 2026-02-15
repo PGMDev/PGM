@@ -101,9 +101,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
       throw e;
     } catch (IOException e) {
       throw new MapException(source, info, "Unable to read map document", e);
-    } catch (InvalidXMLException e) {
-      throw new MapException(source, info, e.getMessage(), e);
-    } catch (ModuleLoadException e) {
+    } catch (InvalidXMLException | ModuleLoadException e) {
       throw new MapException(source, info, e.getMessage(), e);
     } catch (JDOMParseException e) {
       // Set base uri so when error is displayed it shows what XML caused the issue

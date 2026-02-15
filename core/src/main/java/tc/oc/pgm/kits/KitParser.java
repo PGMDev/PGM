@@ -64,7 +64,6 @@ import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.inventory.ArmorType;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.Slot;
@@ -233,14 +232,11 @@ public abstract class KitParser {
   }
 
   public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
-    Map<ArmorType, ArmorKit.ArmorItem> armor = new HashMap<>();
+    Map<Slot.Armor, ArmorKit.ArmorItem> armor = new HashMap<>();
 
-    for (ArmorType armorType : ArmorType.values()) {
-      ArmorKit.ArmorItem armorItem =
-          this.parseArmorItem(el.getChild(armorType.name().toLowerCase()));
-      if (armorItem != null) {
-        armor.put(armorType, armorItem);
-      }
+    for (Slot.Armor armorSlot : Slot.Armor.armor().toList()) {
+      var armorItem = parseArmorItem(el.getChild(armorSlot.armorTypeName()));
+      if (armorItem != null) armor.put(armorSlot, armorItem);
     }
 
     if (!armor.isEmpty()) {

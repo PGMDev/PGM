@@ -44,11 +44,8 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     final int size = teams.size();
     return TAGS.computeIfAbsent(
         size,
-        s ->
-            ImmutableList.of(
-                new MapTag(
-                    size + "team" + (size == 1 ? "" : "s"),
-                    size + " Team" + (size == 1 ? "" : "s"))));
+        s -> ImmutableList.of(new MapTag(
+            size + "team" + (size == 1 ? "" : "s"), size + " Team" + (size == 1 ? "" : "s"))));
   }
 
   @Override
@@ -109,17 +106,16 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     String id = el.getAttributeValue("id");
 
     String name = el.getTextNormalize();
-    if ("".equals(name)) {
-      throw new InvalidXMLException("Team name cannot be blank", el);
+    if (name.isBlank() || "obs".equalsIgnoreCase(name)) {
+      throw new InvalidXMLException("Team name cannot be blank or 'obs'", el);
     }
 
     boolean plural = XMLUtils.parseBoolean(el.getAttribute("plural"), false);
 
     ChatColor color = XMLUtils.parseChatColor(Node.fromAttr(el, "color"), ChatColor.WHITE);
     DyeColor dyeColor = XMLUtils.parseDyeColor(el.getAttribute("dye-color"), null);
-    NameTagVisibility nameTagVisibility =
-        XMLUtils.parseNameTagVisibility(
-            Node.fromAttr(el, "show-name-tags"), NameTagVisibility.ALWAYS);
+    NameTagVisibility nameTagVisibility = XMLUtils.parseNameTagVisibility(
+        Node.fromAttr(el, "show-name-tags"), NameTagVisibility.ALWAYS);
 
     int minPlayers = XMLUtils.parseNumber(Node.fromAttr(el, "min"), Integer.class, 0);
     int maxPlayers = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "max"), Integer.class);
@@ -131,17 +127,8 @@ public class TeamModule implements MapModule<TeamMatchModule> {
       throw new InvalidXMLException("Max overfill can not be less then max players.", el);
     }
 
-    TeamFactory teamFactory =
-        new TeamFactory(
-            id,
-            name,
-            plural,
-            color,
-            dyeColor,
-            minPlayers,
-            maxPlayers,
-            maxOverfill,
-            nameTagVisibility);
+    TeamFactory teamFactory = new TeamFactory(
+        id, name, plural, color, dyeColor, minPlayers, maxPlayers, maxOverfill, nameTagVisibility);
     factory.getFeatures().addFeature(el, teamFactory);
 
     return teamFactory;

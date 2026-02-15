@@ -6,14 +6,14 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchEvent;
 
 public class FeatureChangeEvent extends MatchEvent {
-  private final Feature feature;
+  private final Feature<?> feature;
 
-  public FeatureChangeEvent(Match match, Feature feature) {
+  public FeatureChangeEvent(Match match, Feature<?> feature) {
     super(match);
     this.feature = feature;
   }
 
-  public Feature getFeature() {
+  public Feature<?> getFeature() {
     return feature;
   }
 

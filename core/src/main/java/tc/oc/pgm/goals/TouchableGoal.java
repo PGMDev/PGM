@@ -5,7 +5,6 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,7 +12,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -151,15 +150,8 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
   public void resetTouches(Competitor team) {
     if (touchingCompetitors.remove(team)) {
-      for (Iterator<ParticipantState> iterator = touchingPlayers.iterator(); iterator.hasNext(); ) {
-        if (iterator.next().getParty() == team) iterator.remove();
-        ;
-      }
-      for (Iterator<ParticipantState> iterator = recentTouchingPlayers.iterator();
-          iterator.hasNext(); ) {
-        if (iterator.next().getParty() == team) iterator.remove();
-        ;
-      }
+      touchingPlayers.removeIf(participantState -> participantState.getParty() == team);
+      recentTouchingPlayers.removeIf(participantState -> participantState.getParty() == team);
     }
   }
 

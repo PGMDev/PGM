@@ -21,8 +21,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
 import tc.oc.pgm.api.party.Party;
@@ -39,16 +39,9 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   private final MetadataValue METADATA_VALUE = new FixedMetadataValue(PGM.get(), this);
 
   private NameDecorationProvider provider;
-  private final LoadingCache<UUID, DecorationCacheEntry> decorationCache =
-      CacheBuilder.newBuilder()
-          .expireAfterAccess(15, TimeUnit.MINUTES)
-          .build(
-              new CacheLoader<UUID, DecorationCacheEntry>() {
-                @Override
-                public DecorationCacheEntry load(@NotNull UUID uuid) {
-                  return new DecorationCacheEntry(uuid);
-                }
-              });
+  private final LoadingCache<UUID, DecorationCacheEntry> decorationCache = CacheBuilder.newBuilder()
+      .expireAfterAccess(15, TimeUnit.MINUTES)
+      .build(CacheLoader.from(DecorationCacheEntry::new));
 
   public NameDecorationRegistryImpl(@Nullable NameDecorationProvider provider) {
     setProvider(provider);
@@ -107,10 +100,9 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   public Component getDecoratedNameComponent(Player player, ChatColor partyColor) {
     return text()
         .append(getPrefixComponent(player.getUniqueId()))
-        .append(
-            text(
-                player.getName(),
-                partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor)))
+        .append(text(
+            player.getName(),
+            partyColor == null ? NamedTextColor.WHITE : TextFormatter.convert(partyColor)))
         .append(getSuffixComponent(player.getUniqueId()))
         .build();
   }
@@ -144,7 +136,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   }
 
   @Override
-  @NotNull
+  @NonNull
   public NameDecorationProvider getProvider() {
     return provider;
   }

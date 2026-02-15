@@ -3,7 +3,7 @@ package tc.oc.pgm.filters.query;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 
@@ -29,10 +29,8 @@ public class PartyQuery extends Query implements tc.oc.pgm.api.filter.query.Part
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof PartyQuery)) return false;
-    PartyQuery query = (PartyQuery) o;
-    if (!party.equals(query.party)) return false;
-    return true;
+    if (!(o instanceof PartyQuery query)) return false;
+    return party.equals(query.party);
   }
 
   @Override

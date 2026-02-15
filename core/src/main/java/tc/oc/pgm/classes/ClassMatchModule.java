@@ -13,7 +13,7 @@ import java.util.UUID;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -40,14 +40,7 @@ public class ClassMatchModule implements MatchModule, Listener {
     this.classes = assertNotNull(classes, "classes");
     this.defaultClass = assertNotNull(defaultClass, "default class");
 
-    this.classesByName =
-        Sets.newTreeSet(
-            new Comparator<PlayerClass>() {
-              @Override
-              public int compare(PlayerClass o1, PlayerClass o2) {
-                return o1.getName().compareTo(o2.getName());
-              }
-            });
+    this.classesByName = Sets.newTreeSet(Comparator.comparing(PlayerClass::getName));
     this.classesByName.addAll(this.classes.values());
   }
 

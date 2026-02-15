@@ -7,7 +7,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import java.util.Map;
 import java.util.logging.Logger;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
@@ -20,6 +24,7 @@ import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.block.BlockVectorSet;
+import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.material.Materials;
 
@@ -43,14 +48,12 @@ public class WorldProblemListener implements Listener {
 
   @EventHandler
   public void warnRandomTickRate(WorldLoadEvent event) {
-    String str = event.getWorld().getGameRuleValue("randomTickSpeed");
-    if (str != null) {
-      int value = Integer.parseInt(str);
-      if (value > RANDOM_TICK_SPEED_LIMIT) {
-        broadcastDeveloperWarning("Gamerule 'randomTickSpeed' is set to "
-            + value
-            + " for this world (normal value is 3). This may overload the server.");
-      }
+    var randomTickSpeed = GameRules.RANDOM_TICK_SPEED.get(event.getWorld());
+
+    if (randomTickSpeed != null && randomTickSpeed > RANDOM_TICK_SPEED_LIMIT) {
+      broadcastDeveloperWarning("Gamerule " + GameRules.RANDOM_TICK_SPEED.name() + " is set to "
+          + randomTickSpeed
+          + " for this world (normal value is 3). This may overload the server.");
     }
   }
 

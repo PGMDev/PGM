@@ -41,19 +41,16 @@ public class Track {
     double scaledProgress = (progress * (track.size() - 1)) + 0.5;
     Rail rail = track.get((int) scaledProgress);
 
-    return rail.getOffset(scaledProgress % 1d);
+    return rail.offset(scaledProgress % 1d);
   }
 
-  private static class Rail {
-    private final BlockVector position;
-    private final RailOffset offset;
-
-    public Rail(BlockVector position, RailOffset offset) {
+  private record Rail(BlockVector position, RailOffset offset) {
+    private Rail(BlockVector position, RailOffset offset) {
       this.position = BlockVectors.center(position);
       this.offset = offset;
     }
 
-    public Vector getOffset(double progress) {
+    public Vector offset(double progress) {
       return offset.getOffset(progress).add(position);
     }
   }

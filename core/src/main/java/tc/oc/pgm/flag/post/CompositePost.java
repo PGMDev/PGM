@@ -1,7 +1,7 @@
 package tc.oc.pgm.flag.post;
 
 import com.google.common.collect.ImmutableList;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 
 public class CompositePost extends PostDefinition {
@@ -19,7 +19,7 @@ public class CompositePost extends PostDefinition {
 
     this.sequential = sequential;
     this.posts = posts;
-    this.fallback = fallback != null ? fallback : posts.get(0);
+    this.fallback = fallback != null ? fallback : posts.getFirst();
   }
 
   public boolean isSequential() {

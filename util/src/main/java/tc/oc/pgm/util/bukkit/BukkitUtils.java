@@ -3,9 +3,13 @@ package tc.oc.pgm.util.bukkit;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
@@ -31,20 +35,12 @@ public interface BukkitUtils {
 
   static ChatColor dyeColorToChatColor(DyeColor dyeColor) {
     ChatColor chatColor = DYE_CHAT_MAP.get(dyeColor);
-    if (chatColor != null) {
-      return chatColor;
-    } else {
-      return ChatColor.WHITE;
-    }
+    return Objects.requireNonNullElse(chatColor, ChatColor.WHITE);
   }
 
   static DyeColor chatColorToDyeColor(ChatColor chatColor) {
     DyeColor dyeColor = CHAT_DYE_MAP.get(chatColor);
-    if (dyeColor != null) {
-      return dyeColor;
-    } else {
-      return DyeColor.WHITE;
-    }
+    return Objects.requireNonNullElse(dyeColor, DyeColor.WHITE);
   }
 
   Map<DyeColor, ChatColor> DYE_CHAT_MAP = ImmutableMap.<DyeColor, ChatColor>builder()

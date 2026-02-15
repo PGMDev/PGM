@@ -26,6 +26,7 @@ import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
+import tc.oc.pgm.action.actions.OpenShop;
 import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
@@ -57,6 +58,7 @@ import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.modules.WeatherMatchModule;
+import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
@@ -388,6 +390,12 @@ public class ActionParser {
     return new KillEntitiesAction(parser.filter(el, "filter").required());
   }
 
+  @MethodParser("open-shop")
+  public OpenShop parseOpenShop(Element el, Class<?> scope) throws InvalidXMLException {
+    var shop = parser.reference(Shop.class, el, "shop").required();
+    return new OpenShop(shop);
+  }
+
   @MethodParser("replace-item")
   public ReplaceItemAction parseReplaceItem(Element el, Class<?> scope) throws InvalidXMLException {
     ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
@@ -418,10 +426,15 @@ public class ActionParser {
         parser.parseBool(el, "events").orFalse());
   }
 
+  private static final Pattern TEAM_NAME =
+      Pattern.compile(".*[a-z]{3}.*", Pattern.CASE_INSENSITIVE);
+
   @MethodParser("team-alias")
   public <T extends Filterable<?>> Action<?> parseTeamAliasAction(Element el, Class<T> scope)
       throws InvalidXMLException {
-    String alias = parser.string(el, "alias").required();
+    String alias = parser.string(el, "alias").validate(TEAM_NAME).required().trim();
+    if ("obs".equalsIgnoreCase(alias))
+      throw new InvalidXMLException("'obs' is a reserved team alias", el);
     var action = new TeamAliasAction(alias);
     var teamBuilder = parser.reference(TeamFactory.class, el, "team");
     var team = scope == Party.class ? teamBuilder.orNull() : teamBuilder.required();
@@ -456,14 +469,19 @@ public class ActionParser {
   @MethodParser("teleport")
   public Action<? super MatchPlayer> parseTeleport(Element el, Class<?> scope)
       throws InvalidXMLException {
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
+    var region = parser.region(el, "region").randomPoints().optional();
+
+    var xFormula = parser.formula(MatchPlayer.class, el, "x").optional();
+    var yFormula = parser.formula(MatchPlayer.class, el, "y").optional();
+    var zFormula = parser.formula(MatchPlayer.class, el, "z").optional();
 
     var pitchFormula = parser.formula(MatchPlayer.class, el, "pitch").optional();
     var yawFormula = parser.formula(MatchPlayer.class, el, "yaw").optional();
 
-    return new TeleportAction(xFormula, yFormula, zFormula, pitchFormula, yawFormula);
+    if (region.isEmpty() && (xFormula.isEmpty() || yFormula.isEmpty() || zFormula.isEmpty()))
+      throw new InvalidXMLException("Either 'region' or 'x','y' and 'z' are required", el);
+
+    return new TeleportAction(region, xFormula, yFormula, zFormula, pitchFormula, yawFormula);
   }
 
   @MethodParser("paste-structure")

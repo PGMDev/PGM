@@ -1,8 +1,6 @@
 package tc.oc.pgm.platform.modern.material;
 
 import static org.bukkit.potion.PotionType.*;
-import static org.bukkit.potion.PotionType.STRONG_HEALING;
-import static org.bukkit.potion.PotionType.STRONG_LEAPING;
 
 import java.util.Objects;
 import org.bukkit.Material;

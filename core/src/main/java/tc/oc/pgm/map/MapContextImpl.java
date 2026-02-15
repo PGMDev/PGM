@@ -12,7 +12,7 @@ import tc.oc.pgm.api.map.MapModule;
 public class MapContextImpl implements MapContext {
 
   private final MapInfo info;
-  private final List<MapModule> modules;
+  private final List<MapModule<?>> modules;
 
   public MapContextImpl(MapInfoImpl info, Collection<MapModule<?>> modules) {
     this.info = info;
@@ -27,12 +27,12 @@ public class MapContextImpl implements MapContext {
   }
 
   @Override
-  public Collection<MapModule> getModules() {
+  public Collection<MapModule<?>> getModules() {
     return modules;
   }
 
   @Override
-  public <N extends MapModule> N getModule(Class<? extends N> key) {
+  public <N extends MapModule<?>> N getModule(Class<? extends N> key) {
     throw new UnsupportedOperationException(
         "Not allowed to query for specific modules in " + getClass().getSimpleName());
   }

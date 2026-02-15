@@ -3,16 +3,31 @@ package tc.oc.pgm.util.xml;
 import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.*;
+import com.google.common.collect.BoundType;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Range;
+import com.google.common.collect.Sets;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.enchantments.Enchantment;
@@ -25,8 +40,8 @@ import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.Pair;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.Version;
@@ -118,22 +133,12 @@ public final class XMLUtils {
 
   public static Iterable<Element> getChildren(Element parent, String... names) {
     final Set<String> nameSet = new HashSet<>(Arrays.asList(names));
-    return Iterables.filter(parent.getChildren(), new Predicate<Element>() {
-      @Override
-      public boolean apply(Element child) {
-        return nameSet.contains(child.getName());
-      }
-    });
+    return Iterables.filter(parent.getChildren(), child -> nameSet.contains(child.getName()));
   }
 
   public static Iterable<Attribute> getAttributes(Element parent, String... names) {
     final Set<String> nameSet = new HashSet<>(Arrays.asList(names));
-    return Iterables.filter(parent.getAttributes(), new Predicate<Attribute>() {
-      @Override
-      public boolean apply(Attribute child) {
-        return nameSet.contains(child.getName());
-      }
-    });
+    return Iterables.filter(parent.getAttributes(), child -> nameSet.contains(child.getName()));
   }
 
   public static @Nullable Attribute getAttribute(Element parent, String... names) {
@@ -154,7 +159,7 @@ public final class XMLUtils {
     if (children.size() > 1) {
       throw new InvalidXMLException("multiple '" + aliases[0] + "' tags not allowed", parent);
     }
-    return children.isEmpty() ? null : children.get(0);
+    return children.isEmpty() ? null : children.getFirst();
   }
 
   public static Element getRequiredUniqueChild(Element parent, String... aliases)
@@ -169,7 +174,7 @@ public final class XMLUtils {
     } else if (children.isEmpty()) {
       throw new InvalidXMLException("child tag '" + aliases[0] + "' is required", parent);
     }
-    return children.get(0);
+    return children.getFirst();
   }
 
   public static Attribute getRequiredAttribute(Element el, String... aliases)
@@ -416,7 +421,7 @@ public final class XMLUtils {
   }
 
   public static <T extends Number & Comparable<T>> Range<T> parseNumericRange(
-      @NotNull Node node, Class<T> type) throws InvalidXMLException {
+      @NonNull Node node, Class<T> type) throws InvalidXMLException {
     return parseNumericRange(node, node.getValue(), type);
   }
 
@@ -1007,28 +1012,13 @@ public final class XMLUtils {
       throws InvalidXMLException {
     if (node == null) return def;
 
-    switch (node.getValue()) {
-      case "yes":
-      case "on":
-      case "true":
-        return NameTagVisibility.ALWAYS;
-
-      case "no":
-      case "off":
-      case "false":
-        return NameTagVisibility.NEVER;
-
-      case "ally":
-      case "allies":
-        return NameTagVisibility.HIDE_FOR_OTHER_TEAMS;
-
-      case "enemy":
-      case "enemies":
-        return NameTagVisibility.HIDE_FOR_OWN_TEAM;
-
-      default:
-        throw new InvalidXMLException("Invalid name tag visibility value", node);
-    }
+    return switch (node.getValue()) {
+      case "yes", "on", "true" -> NameTagVisibility.ALWAYS;
+      case "no", "off", "false" -> NameTagVisibility.NEVER;
+      case "ally", "allies" -> NameTagVisibility.HIDE_FOR_OTHER_TEAMS;
+      case "enemy", "enemies" -> NameTagVisibility.HIDE_FOR_OWN_TEAM;
+      default -> throw new InvalidXMLException("Invalid name tag visibility value", node);
+    };
   }
 
   public static Enchantment parseEnchantment(Node node) throws InvalidXMLException {

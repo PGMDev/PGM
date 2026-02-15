@@ -27,7 +27,7 @@ import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.filter.Filter.QueryResponse;
 import tc.oc.pgm.api.filter.query.BlockQuery;
@@ -417,23 +417,22 @@ public class RegionMatchModule implements MatchModule, Listener {
       return false;
     }
 
-    switch (rfa.filter.query(query)) {
-      case ALLOW:
-        if (query.getEvent() instanceof Cancellable) {
-          ((Cancellable) query.getEvent()).setCancelled(false);
+    return switch (rfa.filter.query(query)) {
+      case ALLOW -> {
+        if (query.getEvent() instanceof Cancellable cancellable) {
+          cancellable.setCancelled(false);
         }
-        return true;
-
-      case DENY:
-        if (query.getEvent() instanceof GeneralizedEvent) {
-          ((GeneralizedEvent) query.getEvent()).setCancelled(rfa.message);
-        } else if (query.getEvent() instanceof Cancellable) {
-          ((Cancellable) query.getEvent()).setCancelled(true);
+        yield true;
+      }
+      case DENY -> {
+        if (query.getEvent() instanceof GeneralizedEvent generalizedEvent) {
+          generalizedEvent.setCancelled(rfa.message);
+        } else if (query.getEvent() instanceof Cancellable cancellable) {
+          cancellable.setCancelled(true);
         }
-        return true;
-
-      default:
-        return false;
-    }
+        yield true;
+      }
+      default -> false;
+    };
   }
 }

@@ -8,7 +8,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.Inventory;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -67,10 +67,8 @@ public class PlayerStateQuery extends Query implements PlayerQuery {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof PlayerStateQuery)) return false;
-    PlayerStateQuery query = (PlayerStateQuery) o;
-    if (!playerState.equals(query.playerState)) return false;
-    return true;
+    if (!(o instanceof PlayerStateQuery query)) return false;
+    return playerState.equals(query.playerState);
   }
 
   @Override

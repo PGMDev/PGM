@@ -15,7 +15,7 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -53,23 +53,13 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
         }
 
         for (Element elRecipe : XMLUtils.getChildren(elCrafting, "shapeless", "shaped", "smelt")) {
-          Recipe recipe;
-          switch (elRecipe.getName()) {
-            case "shapeless":
-              recipe = parseShapelessRecipe(factory, elRecipe);
-              break;
-
-            case "shaped":
-              recipe = parseShapedRecipe(factory, elRecipe);
-              break;
-
-            case "smelt":
-              recipe = parseSmeltingRecipe(factory, elRecipe);
-              break;
-
-            default:
-              throw new IllegalStateException();
-          }
+          Recipe recipe =
+              switch (elRecipe.getName()) {
+                case "shapeless" -> parseShapelessRecipe(factory, elRecipe);
+                case "shaped" -> parseShapedRecipe(factory, elRecipe);
+                case "smelt" -> parseSmeltingRecipe(factory, elRecipe);
+                default -> throw new IllegalStateException();
+              };
 
           customRecipes.add(recipe);
           if (XMLUtils.parseBoolean(elRecipe.getAttribute("override"), false)) {
@@ -132,7 +122,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
             throw new InvalidXMLException(
                 "Shape must have no more than 3 columns (" + row + ")", elShape);
           }
-        } else if (row.length() != rows.get(0).length()) {
+        } else if (row.length() != rows.getFirst().length()) {
           throw new InvalidXMLException("All rows must be the same width", elShape);
         }
 
@@ -143,7 +133,7 @@ public class CraftingModule implements MapModule<CraftingMatchModule> {
         throw new InvalidXMLException("Shape must have at least one row", elShape);
       }
 
-      recipe.shape(rows.toArray(new String[rows.size()]));
+      recipe.shape(rows.toArray(new String[0]));
       Set<Character> keys = recipe
           .getIngredientMap()
           .keySet(); // All shape symbols are present and mapped to null at this point

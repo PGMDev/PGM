@@ -1,10 +1,12 @@
 package tc.oc.pgm.platform.modern.material;
 
+import com.google.common.collect.HashMultimap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.UnsafeValues;
@@ -23,10 +25,39 @@ class ModernMaterialParser {
 
   private static final UnsafeValues UNSAFE = Bukkit.getUnsafe();
   private static final Int2ObjectMap<Material> BY_ID = new Int2ObjectOpenHashMap<>(400);
+  private static final int[] UPGRADE_COUNT = new int[256];
 
   static {
+    HashMultimap<Material, BlockState> reachableStates = HashMultimap.create(256, 1);
     for (Material value : CraftLegacy.values()) {
       BY_ID.put(value.getId(), value);
+
+      // Legacy blocks 0..255, some legacy items may also respond true to isBlock
+      if (value.getId() >= 256) continue;
+
+      for (byte i = 0; i < 16; i++) {
+        var state = CraftLegacy.fromLegacyData(value, i);
+        if (!state.isAir()) reachableStates.put(state.getBukkitMaterial(), state);
+      }
+    }
+
+    for (Material value : CraftLegacy.values()) {
+      if (value.getId() >= 256) break;
+
+      // Compute for each material:data if we should match as material, blockstate, or a mix.
+      int result = 0;
+      for (byte i = 0; i < 16; i++) {
+        var state = CraftLegacy.fromLegacyData(value, i);
+        if (state.isAir()) continue;
+
+        var reachable = reachableStates.get(state.getBukkitMaterial()).size();
+        if (reachable == 1) continue; // no need to write USE_MATERIAL(0)
+        var modern = state.getBlock().getStateDefinition().getPossibleStates().size();
+        if (modern == 1) continue; // no need to write USE_MATERIAL(0)
+
+        result |= (reachable == modern ? UpgradeStrat.BLOCK_STATE : UpgradeStrat.GOOD_LUCK).to(i);
+      }
+      UPGRADE_COUNT[value.getId()] = result;
     }
   }
 
@@ -66,7 +97,11 @@ class ModernMaterialParser {
   }
 
   public static Material[] flatten(Material material) {
-    if (!material.isLegacy()) return new Material[] {material};
+    if (!material.isLegacy()) {
+      var legacyMat = UNSAFE.toLegacy(material);
+      if (legacyMat.isAir()) return new Material[] {material};
+      material = legacyMat;
+    }
     var md = new org.bukkit.material.MaterialData(material, (byte) 0);
     var main = UNSAFE.fromLegacy(md);
     md.setData((byte) 1);
@@ -82,6 +117,29 @@ class ModernMaterialParser {
     }
     materials.remove(Material.AIR);
     return materials.toArray(Material[]::new);
+  }
+
+  enum UpgradeStrat {
+    MATERIAL,
+    BLOCK_STATE,
+    GOOD_LUCK;
+
+    private static final UpgradeStrat[] VALUES = UpgradeStrat.values();
+
+    int to(byte data) {
+      return ordinal() << (data << 1);
+    }
+
+    static UpgradeStrat of(int value, byte data) {
+      return VALUES[(value >> (data << 1)) & 0b11];
+    }
+  }
+
+  public static UpgradeStrat getUpgradeStrategy(Material legacy, byte data) {
+    if (!legacy.isLegacy()) return UpgradeStrat.MATERIAL;
+    var id = legacy.getId();
+    if (id < 0 || id >= 256) return UpgradeStrat.MATERIAL;
+    return UpgradeStrat.of(UPGRADE_COUNT[id], data);
   }
 
   private static Material parseLegacyMaterial(String text, Node node) throws InvalidXMLException {
@@ -161,7 +219,7 @@ class ModernMaterialParser {
       public ItemMaterialData visit(Material material, short data) {
         return switch (material = upgrade(material, data)) {
           case POTION, SPLASH_POTION -> new PotionMaterialData(data);
-          default -> new ModernItemData(material);
+          default -> new ModernItemData(material, data);
         };
       }
     };

@@ -125,9 +125,8 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onArmorKitApplication(ApplyKitEvent event) {
-    if (event.getKit() instanceof ArmorKit) {
-      for (ArmorKit.ArmorItem armorPiece :
-          ((ArmorKit) event.getKit()).getArmor().values()) {
+    if (event.getKit() instanceof ArmorKit ak) {
+      for (ArmorKit.ArmorItem armorPiece : ak.getArmorItems()) {
         handleWoolAcquisition(event.getPlayer().getBukkit(), armorPiece.stack);
       }
     }

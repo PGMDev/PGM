@@ -42,14 +42,12 @@ public class ChatDispatcher {
     Collection<MatchPlayer> viewers = channel.getBroadcastViewers(null);
     channel.broadcastMessage(message, null);
 
-    sound.ifPresent(s -> {
-      viewers.stream()
-          .filter(player -> {
-            SettingValue settingValue = player.getSettings().getValue(SettingKey.SOUNDS);
-            return settingValue.equals(SettingValue.SOUNDS_ALL)
-                || settingValue.equals(SettingValue.SOUNDS_CHAT);
-          })
-          .forEach(player -> player.playSound(s));
-    });
+    sound.ifPresent(s -> viewers.stream()
+        .filter(player -> {
+          SettingValue settingValue = player.getSettings().getValue(SettingKey.SOUNDS);
+          return settingValue.equals(SettingValue.SOUNDS_ALL)
+              || settingValue.equals(SettingValue.SOUNDS_CHAT);
+        })
+        .forEach(player -> player.playSound(s)));
   }
 }

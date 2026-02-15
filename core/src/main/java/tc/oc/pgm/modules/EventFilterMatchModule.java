@@ -38,7 +38,7 @@ import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.event.world.PortalCreateEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -128,18 +128,11 @@ public class EventFilterMatchModule implements MatchModule, Listener {
 
   @Nullable
   ClickType convertClick(Action action, Player player) {
-    switch (action) {
-      case LEFT_CLICK_BLOCK:
-      case LEFT_CLICK_AIR:
-        return ClickType.LEFT;
-
-      case RIGHT_CLICK_BLOCK:
-      case RIGHT_CLICK_AIR:
-        return convertClick(ClickType.RIGHT, player);
-
-      default:
-        return null;
-    }
+    return switch (action) {
+      case LEFT_CLICK_BLOCK, LEFT_CLICK_AIR -> ClickType.LEFT;
+      case RIGHT_CLICK_BLOCK, RIGHT_CLICK_AIR -> convertClick(ClickType.RIGHT, player);
+      default -> null;
+    };
   }
 
   // -------------------------------------------------------------
@@ -288,8 +281,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onDamage(final EntityDamageEvent event) {
     cancelUnlessInteracting(event, event.getEntity());
-    if (event instanceof EntityDamageByEntityEvent) {
-      EntityDamageByEntityEvent entityEvent = (EntityDamageByEntityEvent) event;
+    if (event instanceof EntityDamageByEntityEvent entityEvent) {
       if (cancelUnlessInteracting(event, entityEvent.getDamager())) {
         MatchPlayer player = match.getPlayer(entityEvent.getDamager());
         if (player == null) return;

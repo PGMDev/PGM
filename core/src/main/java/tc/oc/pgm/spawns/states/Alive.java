@@ -5,9 +5,8 @@ import org.bukkit.Location;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -16,11 +15,11 @@ import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.events.PlayerChangePartyEvent;
 import tc.oc.pgm.killreward.KillRewardMatchModule;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.spawns.Spawn;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.bukkit.Sounds;
 
 /** Player is alive and participating */
@@ -54,15 +53,6 @@ public class Alive extends Participating {
 
     // Teleport the player
     player.getBukkit().teleport(spawnEvent.getLocation());
-
-    // Return kept items
-    // TODO: Module should do this itself, maybe from ParticipantSpawnEvent
-    ItemKeepMatchModule ikmm = player.getMatch().getModule(ItemKeepMatchModule.class);
-    if (ikmm != null) {
-      ikmm.restoreKeptArmor(player);
-      ikmm.restoreKeptInventory(player);
-    }
-
     player.setVisible(true);
     player.resetVisibility();
     player.setGameMode(GameMode.SURVIVAL);
@@ -149,8 +139,8 @@ public class Alive extends Participating {
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
       // Keep speed and NV for visual continuity
       if (effect.getType() != null
-          && !PotionEffectType.NIGHT_VISION.equals(effect.getType())
-          && !PotionEffectType.SPEED.equals(effect.getType())) {
+          && !PotionEffects.NIGHT_VISION.equals(effect.getType())
+          && !PotionEffects.SPEED.equals(effect.getType())) {
 
         bukkit.removePotionEffect(effect.getType());
       }

@@ -33,7 +33,7 @@ public class GoalsVictoryCondition implements VictoryCondition {
   public boolean isCompleted(Match match) {
     GoalMatchModule gmm = match.needModule(GoalMatchModule.class);
     competitors:
-    for (Map.Entry<Competitor, Collection<Goal>> entry :
+    for (Map.Entry<Competitor, Collection<Goal<?>>> entry :
         gmm.getGoalsByCompetitor().asMap().entrySet()) {
       boolean someRequired = false;
       for (Goal<?> goal : entry.getValue()) {

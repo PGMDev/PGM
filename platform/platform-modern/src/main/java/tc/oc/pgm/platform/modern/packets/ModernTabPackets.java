@@ -7,13 +7,13 @@ import static net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePac
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.mojang.authlib.GameProfile;
+import io.papermc.paper.adventure.PaperAdventure;
 import io.papermc.paper.profile.MutablePropertyMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
-import net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
@@ -33,7 +33,7 @@ import org.bukkit.Location;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.NameTagVisibility;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.platform.modern.util.Skins;
 import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 import tc.oc.pgm.util.nms.packets.Packet;
@@ -52,6 +52,7 @@ public class ModernTabPackets implements TabPackets {
   }
 
   @Override
+  @SuppressWarnings("ConstantConditions")
   public Packet spawnPlayerPacket(int entityId, UUID uuid, Location loc, Player player) {
     var data = ((CraftEntity) player).getHandle().getEntityData().packAll();
     if (data == null) return Packet.of();
@@ -135,7 +136,7 @@ public class ModernTabPackets implements TabPackets {
         String name,
         int ping,
         @Nullable Skin skin,
-        @Nullable net.kyori.adventure.text.Component displayName) {
+        net.kyori.adventure.text.@Nullable Component displayName) {
       packet.profileIds().add(uuid);
     }
 
@@ -145,12 +146,8 @@ public class ModernTabPackets implements TabPackets {
     }
   }
 
-  @SuppressWarnings("UnstableApiUsage")
   static class ModernPlayerInfo extends ModernPacket<ClientboundPlayerInfoUpdatePacket>
       implements PlayerInfo {
-    private static final MinecraftComponentSerializer SERIALIZER =
-        MinecraftComponentSerializer.get();
-
     public ModernPlayerInfo(EnumPlayerInfoAction action) {
       super(new ClientboundPlayerInfoUpdatePacket(toNmsAction(action), new ArrayList<Entry>()));
     }
@@ -161,17 +158,23 @@ public class ModernTabPackets implements TabPackets {
         String name,
         int ping,
         @Nullable Skin skin,
-        @Nullable net.kyori.adventure.text.Component displayName) {
+        net.kyori.adventure.text.@Nullable Component displayName) {
 
       GameProfile profile = new GameProfile(uuid, name, new MutablePropertyMap());
       if (skin != null) Skins.toProfile(profile, skin);
 
-      var nmsComponent = displayName == null ? null : (Component) SERIALIZER.serialize(displayName);
-
       packet
           .entries()
           .add(new Entry(
-              uuid, profile, true, ping, GameType.SURVIVAL, nmsComponent, true, -1, null));
+              uuid,
+              profile,
+              true,
+              ping,
+              GameType.SURVIVAL,
+              PaperAdventure.asVanilla(displayName),
+              true,
+              -1,
+              null));
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.channels.Channel;
 import tc.oc.pgm.api.player.MatchPlayer;
 
@@ -18,13 +18,13 @@ public final class Integration {
   private Integration() {}
 
   private static final AtomicReference<FriendIntegration> FRIENDS =
-      new AtomicReference<FriendIntegration>(new NoopFriendIntegration());
+      new AtomicReference<>(new NoopFriendIntegration());
   private static final AtomicReference<NickIntegration> NICKS =
-      new AtomicReference<NickIntegration>(new NoopNickIntegration());
+      new AtomicReference<>(new NoopNickIntegration());
   private static final AtomicReference<PunishmentIntegration> PUNISHMENTS =
-      new AtomicReference<PunishmentIntegration>(new NoopPunishmentIntegration());
+      new AtomicReference<>(new NoopPunishmentIntegration());
   private static final AtomicReference<VanishIntegration> VANISH =
-      new AtomicReference<VanishIntegration>(new NoopVanishIntegration());
+      new AtomicReference<>(new NoopVanishIntegration());
   private static final AtomicReference<SquadIntegration> SQUAD =
       new AtomicReference<>(new NoopSquadIntegration());
   private static Set<Channel<?>> CHANNELS = new HashSet<>();

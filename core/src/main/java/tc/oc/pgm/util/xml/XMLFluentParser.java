@@ -2,6 +2,7 @@ package tc.oc.pgm.util.xml;
 
 import com.google.common.collect.Range;
 import java.time.Duration;
+import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
@@ -65,7 +66,7 @@ public class XMLFluentParser {
 
   public <T extends Enum<T>> PrimitiveBuilder.Generic<T> parseEnum(
       Class<T> type, Element el, String... prop) {
-    return new PrimitiveBuilder.Generic<T>(el, prop) {
+    return new PrimitiveBuilder.Generic<>(el, prop) {
       @Override
       protected T parse(String text) throws TextException {
         return TextParser.parseEnum(text, type);
@@ -86,12 +87,25 @@ public class XMLFluentParser {
     };
   }
 
+  public <T> PrimitiveBuilder.Generic<T> parse(Function<String, T> fn, Element el, String... prop) {
+    return new PrimitiveBuilder.Generic<>(el, prop) {
+      @Override
+      protected T parse(String text) throws TextException {
+        return fn.apply(text);
+      }
+    };
+  }
+
   public NumberBuilder<Integer> parseInt(Element el, String... prop) {
     return number(Integer.class, el, prop);
   }
 
   public NumberBuilder<Double> parseDouble(Element el, String... prop) {
     return number(Double.class, el, prop);
+  }
+
+  public NumberBuilder<Float> parseFloat(Element el, String... prop) {
+    return number(Float.class, el, prop);
   }
 
   public <T extends Number> NumberBuilder<T> number(Class<T> cls, Element el, String... prop) {
@@ -160,7 +174,7 @@ public class XMLFluentParser {
   }
 
   public Builder.Generic<Component> component(Element el, String... prop) {
-    return new Builder.Generic<Component>(el, prop) {
+    return new Builder.Generic<>(el, prop) {
       @Override
       protected Component parse(Node node) throws InvalidXMLException {
         return XMLUtils.parseFormattedText(node);
@@ -169,7 +183,7 @@ public class XMLFluentParser {
   }
 
   public Builder.Generic<TextColor> textColor(Element el, String... prop) {
-    return new Builder.Generic<TextColor>(el, prop) {
+    return new Builder.Generic<>(el, prop) {
       @Override
       protected TextColor parse(Node node) throws InvalidXMLException {
         return TextFormatter.convert(XMLUtils.parseChatColor(node));
@@ -190,7 +204,7 @@ public class XMLFluentParser {
 
   public <T extends FeatureDefinition> ReferenceBuilder<T> reference(
       Class<T> clazz, Element el, String... prop) {
-    return new ReferenceBuilder<T>(features, clazz, el, prop);
+    return new ReferenceBuilder<>(features, clazz, el, prop);
   }
 
   public VariableBuilder<?> variable(Element el, String... prop) {

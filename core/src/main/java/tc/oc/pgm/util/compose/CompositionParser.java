@@ -29,39 +29,33 @@ public abstract class CompositionParser<T> {
       case 0:
         return new None<>();
       case 1:
-        return parseAtom(elements.get(0));
-      default:
-        {
-          List<Composition<T>> compositions = new ArrayList<>(elements.size());
-          for (Element element : elements) {
-            compositions.add(this.parseAtom(element));
-          }
-          return new All<>(compositions);
+        return parseAtom(elements.getFirst());
+      default: {
+        List<Composition<T>> compositions = new ArrayList<>(elements.size());
+        for (Element element : elements) {
+          compositions.add(this.parseAtom(element));
         }
+        return new All<>(compositions);
+      }
     }
   }
 
   public Composition<T> parseAtom(Element element) throws InvalidXMLException {
-    switch (element.getName()) {
-      case "none":
-        return new None<>();
-
-      case "maybe":
-        return new Maybe<>(
+    return switch (element.getName()) {
+      case "none" -> new None<>();
+      case "maybe" ->
+        new Maybe<>(
             this.factory.getFilters().parseFilterProperty(element, "filter"),
             parseElementList(element.getChildren()));
-      case "all":
-        return parseElementList(element.getChildren());
-
-      case "any":
-        return new Any<>(
+      case "all" -> parseElementList(element.getChildren());
+      case "any" ->
+        new Any<>(
             XMLUtils.parseBoundedNumericRange(
                 element.getAttribute("count"), Integer.class, Range.singleton(1)),
             XMLUtils.parseBoolean(element.getAttribute("unique"), true),
             this.parseOptions(element.getChildren()));
-      default:
-        return new Unit<>(this.parseUnit(element));
-    }
+      default -> new Unit<>(this.parseUnit(element));
+    };
   }
 
   private List<Any.Option<T>> parseOptions(List<Element> elements) throws InvalidXMLException {

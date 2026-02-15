@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
@@ -37,8 +37,9 @@ class SystemMapSource implements MapSource {
   }
 
   private File getDirectory(String subdir) throws MapMissingException {
-    final File dir =
-        subdir == null ? getAbsoluteDir().toFile() : getAbsoluteDir().resolve(subdir).toFile();
+    final File dir = subdir == null
+        ? getAbsoluteDir().toFile()
+        : getAbsoluteDir().resolve(subdir).toFile();
 
     if (!dir.exists()) {
       throw new MapMissingException(dir.getPath(), "Unable to find map folder (was it moved?)");
@@ -131,8 +132,7 @@ class SystemMapSource implements MapSource {
 
   @Override
   public boolean equals(Object obj) {
-    if (!(obj instanceof SystemMapSource)) return false;
-    SystemMapSource other = (SystemMapSource) obj;
+    if (!(obj instanceof SystemMapSource other)) return false;
     return dir.equals(other.dir) && Objects.equals(variant, other.variant);
   }
 

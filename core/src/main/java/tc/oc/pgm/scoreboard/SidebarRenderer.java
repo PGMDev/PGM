@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapInfo;
@@ -173,7 +173,7 @@ class SidebarRenderer {
     sortedCompetitors.retainAll(context.competitorGoals.keySet());
     // Bump viewing party to the top of the list
     if (viewer instanceof Competitor && sortedCompetitors.remove(viewer)) {
-      sortedCompetitors.add(0, (Competitor) viewer);
+      sortedCompetitors.addFirst((Competitor) viewer);
     }
     return sortedCompetitors;
   }
@@ -253,8 +253,7 @@ class SidebarRenderer {
                 ? NamedTextColor.BLACK
                 : goal.renderSidebarStatusColor(competitor, viewingParty)));
 
-    if (goal instanceof ProximityGoal) {
-      final ProximityGoal<?> proximity = (ProximityGoal<?>) goal;
+    if (goal instanceof ProximityGoal<?> proximity) {
       if (proximity.shouldShowProximity(competitor, viewingParty)) {
         line.append(space());
         line.append(proximity.renderProximity(competitor, viewingParty));

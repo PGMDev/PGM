@@ -12,13 +12,10 @@ public class InverseFilter extends SingleFilterFunction {
 
   @Override
   public QueryResponse query(Query query) {
-    switch (this.filter.query(query)) {
-      case ALLOW:
-        return QueryResponse.DENY;
-      case DENY:
-        return QueryResponse.ALLOW;
-      default:
-        return QueryResponse.ABSTAIN;
-    }
+    return switch (this.filter.query(query)) {
+      case ALLOW -> QueryResponse.DENY;
+      case DENY -> QueryResponse.ALLOW;
+      default -> QueryResponse.ABSTAIN;
+    };
   }
 }

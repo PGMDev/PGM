@@ -69,7 +69,7 @@ public class LegacyFilterParser extends FilterParser {
   }
 
   protected List<Filter> parseParents(Element el) throws InvalidXMLException {
-    List<Filter> parents = new ArrayList<Filter>();
+    List<Filter> parents = new ArrayList<>();
     if (el.getAttribute("parents") == null) {
       return parents;
     }
