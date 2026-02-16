@@ -14,17 +14,33 @@ public interface Payable {
   List<Payment> getPayments();
 
   default boolean canPurchase(MatchPlayer buyer) {
-    if (!buyer.getMatch().isRunning() || !buyer.isParticipating()) return false;
-    return isFree() || getPayments().stream().allMatch(p -> p.hasPayment(buyer.getInventory()));
+    return canPurchase(buyer, 1) > 0;
+  }
+
+  default int canPurchase(MatchPlayer buyer, int max) {
+    if (!buyer.getMatch().isRunning() || !buyer.isParticipating()) return 0;
+    if (isFree()) return max;
+
+    int affordable = max;
+    for (Payment payment : getPayments()) {
+      affordable = payment.getAffordableAmount(buyer.getInventory(), affordable);
+      if (affordable <= 0) break;
+    }
+    return affordable;
   }
 
   default boolean takePayment(MatchPlayer buyer) {
-    if (!canPurchase(buyer)) return false;
+    return takePayment(buyer, 1) > 0;
+  }
+
+  default int takePayment(MatchPlayer buyer, int max) {
+    int affordable = canPurchase(buyer, max);
+    if (affordable <= 0) return 0;
 
     if (!isFree()) {
       PlayerInventory inventory = buyer.getInventory();
       for (Payment payment : getPayments()) {
-        int remaining = payment.getPrice();
+        int remaining = payment.getPrice() * affordable;
         for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
           ItemStack item = inventory.getItem(slot);
           if (item == null || !payment.matches(item)) continue;
@@ -44,7 +60,7 @@ public interface Payable {
         }
       }
     }
-    return true;
+    return affordable;
   }
 
   static Payable of(List<Payment> payments) {

@@ -39,14 +39,7 @@ public class Payment {
   }
 
   public boolean hasPayment(PlayerInventory inventory) {
-    if (price <= 0) return true;
-
-    int remaining = price;
-    for (ItemStack item : inventory.getContents()) {
-      if (item == null || !matches(item)) continue;
-      if ((remaining -= item.getAmount()) <= 0) return true;
-    }
-    return false;
+    return getAffordableAmount(inventory, 1) > 0;
   }
 
   public boolean matches(ItemStack item) {
@@ -55,16 +48,22 @@ public class Payment {
         : item.getType() == currency;
   }
 
-  public int getAffordableAmount(PlayerInventory inventory) {
-    if (price <= 0) return 64 * 9 * 4; // Infinite (or very high) if its free.
+  public int getAffordableAmount(PlayerInventory inventory, int max) {
+    if (price <= 0) return max;
 
     int totalCurrency = 0;
+    int targetCurrency = max * price; // total desired
+
     for (ItemStack item : inventory.getContents()) {
       if (item != null && matches(item)) {
         totalCurrency += item.getAmount();
+
+        if (totalCurrency >= targetCurrency) {
+          return max;
+        }
       }
     }
-    // Whole division: If you have 10 gold and if it costs 3, return 3.
+
     return totalCurrency / price;
   }
 }

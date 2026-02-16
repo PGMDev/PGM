@@ -268,11 +268,7 @@ public class ShopMenu extends InventoryMenu {
     item.setItemMeta(meta);
 
     return ClickableItem.of(item, c -> {
-      if (c.isShiftClick()) {
-        shop.purchaseStack(icon, getViewer());
-      } else {
-        shop.purchase(icon, getViewer());
-      }
+      shop.purchase(icon, getViewer(), c.isShiftClick());
     });
   }
 

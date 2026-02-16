@@ -31,7 +31,7 @@ dependencies {
     api("org.incendo:cloud-minecraft-extras:2.0.0-beta.14")
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
-    api("fr.minuskube.inv:smart-invs:1.2.7") { isTransitive = false }
+    api("com.github.MinusKube:SmartInvs:9c9dbbe") { isTransitive = false }
     api("org.eclipse.jgit:org.eclipse.jgit:7.5.0.202512021534-r") { isTransitive = false }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
