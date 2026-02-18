@@ -19,6 +19,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
@@ -28,6 +29,7 @@ import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
+import tc.oc.pgm.action.actions.NametagVisibilityAction;
 import tc.oc.pgm.action.actions.OpenShop;
 import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
@@ -50,6 +52,7 @@ import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
@@ -398,6 +401,16 @@ public class ActionParser {
   public OpenShop parseOpenShop(Element el, Class<?> scope) throws InvalidXMLException {
     var shop = parser.reference(Shop.class, el, "shop").required();
     return new OpenShop(shop);
+  }
+
+  @MethodParser("nametag-visibility")
+  public <T extends Filterable<?>> Action<?> parseNametagVisibility(Element el, Class<?> scope)
+      throws InvalidXMLException {
+    var visibility = XMLUtils.parseNameTagVisibility(
+        Node.fromRequiredAttr(el, "show"), NameTagVisibility.ALWAYS);
+    var action = new NametagVisibilityAction(visibility);
+
+    return scope == Match.class ? ScopeSwitchAction.of(action, scope, Party.class) : action;
   }
 
   @MethodParser("replace-item")
