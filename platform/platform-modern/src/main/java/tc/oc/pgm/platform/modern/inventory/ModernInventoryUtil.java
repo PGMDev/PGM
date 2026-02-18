@@ -2,10 +2,18 @@ package tc.oc.pgm.platform.modern.inventory;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.item.ItemParser;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.Item;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.CraftRegistry;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -21,6 +29,8 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.platform.Supports;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 
 @Supports(value = PAPER, minVersion = "1.21.1")
 public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
@@ -92,5 +102,23 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   @Override
   public boolean isViewable(Inventory inventory) {
     return inventory.getType().isCreatable();
+  }
+
+  private static final Registry<Item> ITEMS =
+      CraftRegistry.getMinecraftRegistry().lookupOrThrow(Registries.ITEM);
+  private static final ItemParser ITEM_PARSER =
+      new ItemParser(Commands.createValidationContext(CraftRegistry.getMinecraftRegistry()));
+
+  public void applyComponents(ItemStack itemStack, Node components) throws InvalidXMLException {
+    var nmsStack = CraftItemStack.unwrap(itemStack);
+    try {
+      var key = ITEMS.getKey(nmsStack.getItem());
+      if (key == null) throw new IllegalStateException("Invalid item stack: " + nmsStack);
+
+      var str = new StringReader(key.toShortString() + "[" + components.getValueNormalize() + "]");
+      nmsStack.applyComponents(ITEM_PARSER.parse(str).components());
+    } catch (CommandSyntaxException ex) {
+      throw new InvalidXMLException("Failed to parse components", components, ex);
+    }
   }
 }
