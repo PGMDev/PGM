@@ -27,6 +27,8 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.platform.Platform;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 
 public final class InventoryUtils {
   public static final InventoryUtilsPlatform INVENTORY_UTILS =
@@ -195,5 +197,9 @@ public final class InventoryUtils {
     Set<Material> getCanPlaceOn(ItemMeta itemMeta);
 
     boolean isViewable(Inventory inventory);
+
+    default void applyComponents(ItemStack itemStack, Node components) throws InvalidXMLException {
+      // Default no-op for legacy
+    }
   }
 }
