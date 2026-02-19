@@ -39,6 +39,7 @@ import tc.oc.pgm.action.actions.TeamAliasAction;
 import tc.oc.pgm.action.actions.TeleportAction;
 import tc.oc.pgm.action.actions.VelocityAction;
 import tc.oc.pgm.action.actions.WeatherAction;
+import tc.oc.pgm.action.actions.WaitAction;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.action.replacements.ReplacementParser;
 import tc.oc.pgm.api.feature.FeatureValidation;
@@ -513,5 +514,14 @@ public class ActionParser {
   public PickupFlagAction parsePickupFlag(Element el, Class<?> scope) throws InvalidXMLException {
     return new PickupFlagAction(
         parser.reference(FlagDefinition.class, el, "flag").required());
+  }
+
+  @MethodParser("wait")
+  public <B extends Filterable<?>> Action<? super B> parseWait(Element el, Class<B> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+    Action<? super B> child = parseAction(el, scope, true);
+    var duration = parser.duration(el, "duration").required();
+    return new WaitAction<B>(scope, duration, child);
   }
 }
