@@ -6,7 +6,9 @@ import static net.kyori.adventure.text.Component.empty;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Range;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -516,12 +518,19 @@ public class ActionParser {
         parser.reference(FlagDefinition.class, el, "flag").required());
   }
 
+  private static final Range<Duration> WAIT_RANGE =
+      Range.closed(Duration.ZERO, Duration.ofMinutes(1));
+
   @MethodParser("wait")
-  public <B extends Filterable<?>> Action<? super B> parseWait(Element el, Class<B> scope)
+  @SuppressWarnings("unchecked")
+  public <B extends Filterable<?>> Action<?> parseWait(Element el, Class<B> scope)
       throws InvalidXMLException {
     scope = parseScope(el, scope);
-    Action<? super B> child = parseAction(el, scope, true);
-    var duration = parser.duration(el, "duration").required();
-    return new WaitAction<B>(scope, duration, child);
+    var action = parseAction(el, scope);
+    var duration = parser.duration(el, "duration").between(WAIT_RANGE).required();
+
+    return MatchPlayer.class.isAssignableFrom(scope)
+        ? new WaitAction.Player(duration, (Action<? super MatchPlayer>) action)
+        : new WaitAction<>(scope, duration, action);
   }
 }
