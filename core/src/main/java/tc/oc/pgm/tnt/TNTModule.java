@@ -1,5 +1,6 @@
 package tc.oc.pgm.tnt;
 
+import com.google.common.collect.Range;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +21,6 @@ import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RegionFilterApplication;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 @NullMarked
@@ -46,6 +46,9 @@ public class TNTModule implements MapModule<TNTMatchModule> {
   }
 
   public static class Factory implements MapModuleFactory<TNTModule> {
+
+    public static final Range<Duration> FUSE = Range.closed(Duration.ZERO, Duration.ofSeconds(4));
+
     @Override
     public Collection<Class<? extends MapModule<?>>> getSoftDependencies() {
       return List.of(RegionModule.class);
@@ -81,17 +84,9 @@ public class TNTModule implements MapModule<TNTMatchModule> {
             .optional(dispenserNukeMultiplier);
         licensing = parser.parseBool(tntElement, "licensing").optional(licensing);
         friendlyDefuse = parser.parseBool(tntElement, "friendly-defuse").optional(friendlyDefuse);
-        fuse = parser
-            .duration(tntElement, "fuse")
-            .validate((duration, node) -> {
-              if (TimeUtils.isLongerThan(duration, Duration.ofSeconds(4))) {
-                // TNT disappears on the client after 4 seconds, no way to extend it
-                // If this is ever really needed, we could spawn new entities on the client every 4
-                // seconds
-                throw new InvalidXMLException("TNT fuse cannot be longer than 4 seconds", node);
-              }
-            })
-            .optional(fuse);
+        // TNT disappears on the client after 4 seconds, no way to extend it
+        // If this is ever really needed, we could spawn new entities on the client every 4s
+        fuse = parser.duration(tntElement, "fuse").between(FUSE).optional(fuse);
       }
 
       if (!blockDamage) {

@@ -6,7 +6,8 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-public class NumberBuilder<T extends Number> extends Builder<T, NumberBuilder<T>> {
+public class NumberBuilder<T extends Number & Comparable<T>> extends Builder<T, NumberBuilder<T>>
+    implements Builder.WithRange<T, NumberBuilder<T>> {
 
   private final Class<T> type;
   private boolean infinity;
