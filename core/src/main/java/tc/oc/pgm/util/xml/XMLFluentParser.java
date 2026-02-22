@@ -78,8 +78,8 @@ public class XMLFluentParser {
     return new StringBuilder(el, prop);
   }
 
-  public PrimitiveBuilder.Generic<Duration> duration(Element el, String... prop) {
-    return new PrimitiveBuilder.Generic<>(el, prop) {
+  public PrimitiveBuilder.Ranged<Duration> duration(Element el, String... prop) {
+    return new PrimitiveBuilder.Ranged<>(el, prop) {
       @Override
       protected Duration parse(String text) throws TextException {
         return TextParser.parseDuration(text);
@@ -108,7 +108,8 @@ public class XMLFluentParser {
     return number(Float.class, el, prop);
   }
 
-  public <T extends Number> NumberBuilder<T> number(Class<T> cls, Element el, String... prop) {
+  public <T extends Number & Comparable<T>> NumberBuilder<T> number(
+      Class<T> cls, Element el, String... prop) {
     return new NumberBuilder<>(cls, el, prop);
   }
 

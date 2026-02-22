@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.xml.parsers;
 
+import com.google.common.collect.Range;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -109,6 +110,31 @@ public abstract class Builder<T, B extends Builder<T, B>> {
     @Override
     protected Generic<T> getThis() {
       return this;
+    }
+  }
+
+  /**
+   * Extension methods that can be adopted by any builder that uses a comparable value
+   *
+   * @param <T> type being parsed
+   * @param <B> builder type
+   */
+  public interface WithRange<T extends Comparable<T>, B extends Builder<T, B>> {
+    B validate(Validator<T> validation);
+
+    default B between(Range<T> range) throws InvalidXMLException {
+      return validate((value, node) -> {
+        if (!range.contains(value))
+          throw new InvalidXMLException(value + " is not in the range " + range, node);
+      });
+    }
+
+    default B min(T min) throws InvalidXMLException {
+      return between(Range.atLeast(min));
+    }
+
+    default B max(T max) throws InvalidXMLException {
+      return between(Range.atMost(max));
     }
   }
 }
