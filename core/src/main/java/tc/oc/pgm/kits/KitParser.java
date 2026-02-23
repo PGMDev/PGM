@@ -527,7 +527,7 @@ public abstract class KitParser {
     parseCustomNBT(el, itemStack);
 
     var components = Node.fromAttr(el, "components");
-    if (components != null) INVENTORY_UTILS.applyComponents(itemStack, components);
+    if (components != null) INVENTORY_UTILS.buildComponentApplicator(components).apply(itemStack);
 
     return itemStack;
   }

@@ -1,5 +1,7 @@
 package tc.oc.pgm.itemmeta;
 
+import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -9,14 +11,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public record ItemModifyModule(List<ItemRule> rules) implements MapModule<ItemModifyMatchModule> {
@@ -52,10 +56,15 @@ public record ItemModifyModule(List<ItemRule> rules) implements MapModule<ItemMo
 
         // Always use a PotionMeta so the rule can have potion effects, though it will only apply
         // those to potion items
+        Element elModify = XMLUtils.getRequiredUniqueChild(elRule, "modify");
         PotionMeta meta = (PotionMeta) Bukkit.getItemFactory().getItemMeta(Material.POTION);
-        factory.getKits().parseItemMeta(XMLUtils.getRequiredUniqueChild(elRule, "modify"), meta);
+        factory.getKits().parseItemMeta(elModify, meta);
 
-        ItemRule rule = new ItemRule(items, meta);
+        ComponentApplicator applicator = null;
+        Node components = Node.fromChildOrAttr(elModify, "components");
+        if (components != null) applicator = INVENTORY_UTILS.buildComponentApplicator(components);
+
+        ItemRule rule = new ItemRule(items, meta, applicator);
         rules.add(rule);
       }
 

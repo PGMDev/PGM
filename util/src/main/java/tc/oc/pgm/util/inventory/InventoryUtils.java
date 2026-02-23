@@ -25,6 +25,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -198,8 +199,10 @@ public final class InventoryUtils {
 
     boolean isViewable(Inventory inventory);
 
-    default void applyComponents(ItemStack itemStack, Node components) throws InvalidXMLException {
+    default ComponentApplicator buildComponentApplicator(Node components)
+        throws InvalidXMLException {
       // Default no-op for legacy
+      return itemStack -> {};
     }
   }
 }

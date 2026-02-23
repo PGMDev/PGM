@@ -10,16 +10,21 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 public class ItemRule {
   final MaterialMatcher items;
   final PotionMeta meta;
+  final @Nullable ComponentApplicator applicator;
 
-  public ItemRule(MaterialMatcher items, PotionMeta meta) {
+  public ItemRule(
+      MaterialMatcher items, PotionMeta meta, @Nullable ComponentApplicator applicator) {
     this.items = items;
     this.meta = meta;
+    this.applicator = applicator;
   }
 
   public boolean matches(ItemStack stack) {
@@ -58,6 +63,8 @@ public class ItemRule {
 
       stack.setItemMeta(meta);
     }
+
+    if (applicator != null) applicator.apply(stack);
   }
 
   private Set<Material> unionMaterials(Set<Material> a, Set<Material> b) {
