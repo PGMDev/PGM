@@ -7,11 +7,11 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.Filterable;
 
-public class WaitAction<B extends Filterable<?>> extends AbstractAction<B> {
+public class ScheduleAction<B extends Filterable<?>> extends AbstractAction<B> {
   protected final Duration duration;
   protected final Action<? super B> child;
 
-  public WaitAction(Class<B> scope, Duration duration, Action<? super B> child) {
+  public ScheduleAction(Class<B> scope, Duration duration, Action<? super B> child) {
     super(scope);
     this.duration = duration;
     this.child = child;
@@ -29,7 +29,7 @@ public class WaitAction<B extends Filterable<?>> extends AbstractAction<B> {
   }
 
   /** Specialization for running with a player, requires that the player did not change teams. */
-  public static class Player extends WaitAction<MatchPlayer> {
+  public static class Player extends ScheduleAction<MatchPlayer> {
     public Player(Duration duration, Action<? super MatchPlayer> child) {
       super(MatchPlayer.class, duration, child);
     }

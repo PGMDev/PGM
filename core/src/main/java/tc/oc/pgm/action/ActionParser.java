@@ -33,6 +33,7 @@ import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
+import tc.oc.pgm.action.actions.ScheduleAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.action.actions.SoundAction;
@@ -40,7 +41,6 @@ import tc.oc.pgm.action.actions.TakePaymentAction;
 import tc.oc.pgm.action.actions.TeamAliasAction;
 import tc.oc.pgm.action.actions.TeleportAction;
 import tc.oc.pgm.action.actions.VelocityAction;
-import tc.oc.pgm.action.actions.WaitAction;
 import tc.oc.pgm.action.actions.WeatherAction;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.action.replacements.ReplacementParser;
@@ -521,16 +521,16 @@ public class ActionParser {
   private static final Range<Duration> WAIT_RANGE =
       Range.closed(Duration.ZERO, Duration.ofMinutes(1));
 
-  @MethodParser("wait")
+  @MethodParser("schedule")
   @SuppressWarnings("unchecked")
-  public <B extends Filterable<?>> Action<?> parseWait(Element el, Class<B> scope)
+  public <B extends Filterable<?>> Action<?> parseSchedule(Element el, Class<B> scope)
       throws InvalidXMLException {
     scope = parseScope(el, scope);
     var action = parseAction(el, scope);
     var duration = parser.duration(el, "duration").between(WAIT_RANGE).required();
 
     return MatchPlayer.class.isAssignableFrom(scope)
-        ? new WaitAction.Player(duration, (Action<? super MatchPlayer>) action)
-        : new WaitAction<>(scope, duration, action);
+        ? new ScheduleAction.Player(duration, (Action<? super MatchPlayer>) action)
+        : new ScheduleAction<>(scope, duration, action);
   }
 }
