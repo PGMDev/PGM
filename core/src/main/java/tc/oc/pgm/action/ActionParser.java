@@ -527,10 +527,10 @@ public class ActionParser {
       throws InvalidXMLException {
     scope = parseScope(el, scope);
     var action = parseAction(el, scope);
-    var duration = parser.duration(el, "duration").between(WAIT_RANGE).required();
+    var after = parser.duration(el, "after").between(WAIT_RANGE).required();
 
     return MatchPlayer.class.isAssignableFrom(scope)
-        ? new ScheduleAction.Player(duration, (Action<? super MatchPlayer>) action)
-        : new ScheduleAction<>(scope, duration, action);
+        ? new ScheduleAction.Player(after, (Action<? super MatchPlayer>) action)
+        : new ScheduleAction<>(scope, after, action);
   }
 }
