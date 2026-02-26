@@ -42,15 +42,24 @@ public class ItemMatcher {
       // Strip all meta, then re-add if needed
       newItem.setItemMeta(null);
 
-      // Restore name or enchants
-      if (!ignoreName) newItem.getItemMeta().setDisplayName(item.getItemMeta().getDisplayName());
+      // Restore name
+      if (!ignoreName) {
+        ItemMeta meta = newItem.getItemMeta();
+        meta.setDisplayName(item.getItemMeta().getDisplayName());
+        newItem.setItemMeta(meta);
+      }
+
+      // Restore enchants
       if (!ignoreEnchantments) newItem.addUnsafeEnchantments(item.getEnchantments());
     } else {
       // Strip only specific parts
       ItemMeta meta = item.getItemMeta();
 
       if (ignoreName) meta.setDisplayName(null);
-      if (ignoreEnchantments) item.getEnchantments().keySet().forEach(item::removeEnchantment);
+      if (ignoreEnchantments)
+        newItem.getEnchantments().keySet().forEach(newItem::removeEnchantment);
+
+      newItem.setItemMeta(meta);
     }
 
     return newItem;
