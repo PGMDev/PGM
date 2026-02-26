@@ -47,7 +47,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -55,6 +55,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.consumable.ConsumableDefinition;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.kits.tag.ItemTags;
@@ -462,6 +463,9 @@ public abstract class KitParser {
     ItemStack stack = parseItem(parent.getChild(childName), false);
     if (stack == null)
       throw new InvalidXMLException("Child " + childName + " element expected", parent);
+
+    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
+    if (imm != null) imm.applyRules(stack);
 
     Range<Integer> amount =
         XMLUtils.parseNumericRange(Node.fromAttr(parent, "amount"), Integer.class, null);

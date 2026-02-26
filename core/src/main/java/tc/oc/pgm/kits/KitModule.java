@@ -66,7 +66,7 @@ public class KitModule implements MapModule<KitMatchModule> {
 
     @Override
     public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
-      return ImmutableList.of(ActionModule.class, TeamModule.class);
+      return ImmutableList.of(ActionModule.class, TeamModule.class, ItemModifyModule.class);
     }
 
     @Override
