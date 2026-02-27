@@ -62,7 +62,10 @@ public record ItemModifyModule(List<ItemRule> rules) implements MapModule<ItemMo
 
         ComponentApplicator applicator = null;
         Node components = Node.fromChildOrAttr(elModify, "components");
-        if (components != null) applicator = INVENTORY_UTILS.buildComponentApplicator(components);
+        if (components != null) {
+          Material material = items.getMaterials().iterator().next();
+          applicator = INVENTORY_UTILS.buildComponentApplicator(material, components);
+        }
 
         ItemRule rule = new ItemRule(items, meta, applicator);
         rules.add(rule);

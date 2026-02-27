@@ -15,6 +15,7 @@ import net.minecraft.world.item.Item;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftRegistry;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.Event;
@@ -111,11 +112,14 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
       new ItemParser(Commands.createValidationContext(CraftRegistry.getMinecraftRegistry()));
 
   @Override
-  public ComponentApplicator buildComponentApplicator(Node components) throws InvalidXMLException {
+  public ComponentApplicator buildComponentApplicator(Material type, Node components)
+      throws InvalidXMLException {
     try {
-      // We don't need the actual material we're applying the component to, just something to parse
-      // the components against
-      var str = new StringReader("minecraft:stone[" + components.getValueNormalize() + "]");
+      var nmsItem = CraftItemType.bukkitToMinecraft(type);
+      var key = ITEMS.getKey(nmsItem);
+      if (key == null) throw new IllegalStateException("Invalid material: " + type);
+
+      var str = new StringReader(key.toShortString() + "[" + components.getValueNormalize() + "]");
       var patch = ITEM_PARSER.parse(str).components();
       return is -> CraftItemStack.unwrap(is).applyComponents(patch);
     } catch (CommandSyntaxException ex) {

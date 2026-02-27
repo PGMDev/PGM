@@ -199,7 +199,7 @@ public final class InventoryUtils {
 
     boolean isViewable(Inventory inventory);
 
-    default ComponentApplicator buildComponentApplicator(Node components)
+    default ComponentApplicator buildComponentApplicator(Material type, Node components)
         throws InvalidXMLException {
       // Default no-op for legacy
       return itemStack -> {};
