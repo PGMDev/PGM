@@ -309,7 +309,7 @@ public final class InventoryUtils {
 
       @Override
       public void addItemFlags(ItemFlag... flags) {
-        register(meta -> meta.addItemFlags(flags));
+        if (flags.length > 0) register(meta -> meta.addItemFlags(flags));
       }
 
       @Override

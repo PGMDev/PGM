@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
@@ -38,7 +39,10 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
@@ -525,9 +529,12 @@ public abstract class KitParser {
       throws InvalidXMLException {
     var parser = factory.getParser();
     var builder = INVENTORY_UTILS.applicatorBuilder(merge);
+    var meta = Bukkit.getItemFactory().getItemMeta(type);
+
     builder.addEnchantments(parseEnchantments(el));
-    builder.addStoredEnchantments(parseEnchantments(el, "stored-"));
-    builder.addPotions(parsePotions(el));
+    if (meta instanceof EnchantmentStorageMeta)
+      builder.addStoredEnchantments(parseEnchantments(el, "stored-"));
+    if (meta instanceof PotionMeta) builder.addPotions(parsePotions(el));
     builder.addAttributeModifiers(parseAttributeModifiers(el));
 
     var customName = parser.string(el, "name").attr().colored().orNull();
@@ -537,22 +544,21 @@ public abstract class KitParser {
       builder.addDisplayName("Grenade");
     }
 
-    parser
-        .node(XMLUtils::parseHexColor, el, "color")
-        .attr()
-        .optional()
-        .ifPresent(builder::addColor);
-
-    String loreText = el.getAttributeValue("lore");
-    if (loreText != null) {
-      builder.addLore(ImmutableList.copyOf(Splitter.on('|').split(BukkitUtils.colorize(loreText))));
+    if (meta instanceof LeatherArmorMeta) {
+      parser.node(XMLUtils::parseHexColor, el, "color").attr().ifPresent(builder::addColor);
     }
+
+    parser
+        .string(el, "lore")
+        .attr()
+        .colored()
+        .ifPresent(lore -> builder.addLore(ImmutableList.copyOf(Splitter.on('|').split(lore))));
 
     Set<ItemFlag> flags = EnumSet.noneOf(ItemFlag.class);
     for (ItemFlag flag : ItemFlag.values()) {
       if (!parser.parseBool(el, "show-" + itemFlagName(flag)).attr().orTrue()) flags.add(flag);
     }
-    builder.addItemFlags(flags.toArray(ItemFlag[]::new));
+    if (!flags.isEmpty()) builder.addItemFlags(flags.toArray(ItemFlag[]::new));
 
     if (parser.parseBool(el, "unbreakable").attr().orFalse()) {
       builder.addUnbreakable();
@@ -561,17 +567,14 @@ public abstract class KitParser {
     parser
         .node(XMLUtils::parseMaterialMatcher, el, "can-destroy")
         .child()
-        .optional()
         .ifPresent(builder::addCanDestroy);
     parser
         .node(XMLUtils::parseMaterialMatcher, el, "can-place-on")
         .child()
-        .optional()
         .ifPresent(builder::addCanPlaceOn);
 
     parser
         .node(s -> INVENTORY_UTILS.parseComponents(type, s), el, "components")
-        .optional()
         .ifPresent(builder::addComponents);
     return builder.build();
   }
