@@ -20,6 +20,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.util.function.ThrowingFunction;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -87,7 +88,20 @@ public class XMLFluentParser {
     };
   }
 
-  public <T> PrimitiveBuilder.Generic<T> parse(Function<String, T> fn, Element el, String... prop) {
+  /** Generic node parser, parses from node to your desired type. */
+  public <T> Builder.Generic<T> node(
+      ThrowingFunction<Node, T, InvalidXMLException> fn, Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected T parse(Node node) throws InvalidXMLException {
+        return fn.apply(node);
+      }
+    };
+  }
+
+  /** Generic primitive parser, parses from string to your desired type. */
+  public <T> PrimitiveBuilder.Generic<T> primitive(
+      Function<String, T> fn, Element el, String... prop) {
     return new PrimitiveBuilder.Generic<>(el, prop) {
       @Override
       protected T parse(String text) throws TextException {

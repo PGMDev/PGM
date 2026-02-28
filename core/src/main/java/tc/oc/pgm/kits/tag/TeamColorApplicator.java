@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 
-public class ItemModifier {
+public class TeamColorApplicator {
 
   public static final ItemTag<Boolean> TEAM_COLOR = ItemTag.newBoolean("team-color");
 

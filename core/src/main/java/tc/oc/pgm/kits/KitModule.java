@@ -66,7 +66,7 @@ public class KitModule implements MapModule<KitMatchModule> {
 
     @Override
     public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
-      return ImmutableList.of(ActionModule.class, TeamModule.class);
+      return ImmutableList.of(ActionModule.class, TeamModule.class, ItemModifyModule.class);
     }
 
     @Override
@@ -100,30 +100,16 @@ public class KitModule implements MapModule<KitMatchModule> {
   @Override
   public void postParse(MapFactory factory, Logger logger, Document doc)
       throws InvalidXMLException {
-    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
     for (Kit kit : factory.getKits().getKits()) {
       if (kit instanceof RemoveKit && !((RemoveKit) kit).getKit().isRemovable()) {
         throw new InvalidXMLException(
             "kit is not removable", factory.getFeatures().getNode((FeatureDefinition) kit));
       }
 
-      // Apply any item-mods rules to item kits
       if (kit instanceof ItemKit itKit) {
         for (ItemStack is : Iterables.concat(itKit.getSlotItems().values(), itKit.getFreeItems())) {
           if (!hasTnt && is.getType() == Material.TNT && is.getAmount() >= 16) {
             hasTnt = true;
-            if (imm == null) break;
-          }
-          if (imm != null) {
-            imm.applyRules(is);
-          }
-        }
-      }
-
-      if (imm != null) {
-        if (kit instanceof ArmorKit ak) {
-          for (ArmorKit.ArmorItem armor : ak.getArmorItems()) {
-            imm.applyRules(armor.stack);
           }
         }
       }

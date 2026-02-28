@@ -4,8 +4,9 @@ import com.google.common.collect.Range;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.function.ThrowingSupplier;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -67,6 +68,10 @@ public abstract class Builder<T, B extends Builder<T, B>> {
   public Optional<T> optional() throws InvalidXMLException {
     Node node = getNode(false);
     return node == null ? Optional.empty() : Optional.of(handleParse(node));
+  }
+
+  public void ifPresent(Consumer<? super T> consumer) throws InvalidXMLException {
+    optional().ifPresent(consumer);
   }
 
   public T orNull() throws InvalidXMLException {

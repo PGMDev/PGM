@@ -15,6 +15,7 @@ import net.minecraft.world.item.Item;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.CraftRegistry;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.Event;
@@ -27,12 +28,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
+import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
-@Supports(value = PAPER, minVersion = "1.21.1")
+@Supports(value = PAPER, minVersion = "1.21.11")
 public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
 
   @Override
@@ -109,14 +111,16 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   private static final ItemParser ITEM_PARSER =
       new ItemParser(Commands.createValidationContext(CraftRegistry.getMinecraftRegistry()));
 
-  public void applyComponents(ItemStack itemStack, Node components) throws InvalidXMLException {
-    var nmsStack = CraftItemStack.unwrap(itemStack);
+  @Override
+  public ComponentApplicator parseComponents(Material type, Node components)
+      throws InvalidXMLException {
     try {
-      var key = ITEMS.getKey(nmsStack.getItem());
-      if (key == null) throw new IllegalStateException("Invalid item stack: " + nmsStack);
+      var key = ITEMS.getKey(CraftItemType.bukkitToMinecraft(type));
+      if (key == null) throw new IllegalStateException("Invalid material: " + type);
 
       var str = new StringReader(key.toShortString() + "[" + components.getValueNormalize() + "]");
-      nmsStack.applyComponents(ITEM_PARSER.parse(str).components());
+      var patch = ITEM_PARSER.parse(str).components();
+      return is -> CraftItemStack.unwrap(is).applyComponents(patch);
     } catch (CommandSyntaxException ex) {
       throw new InvalidXMLException("Failed to parse components", components, ex);
     }
