@@ -1,6 +1,5 @@
 package tc.oc.pgm.kits;
 
-import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
@@ -18,11 +17,11 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import org.bukkit.Color;
@@ -39,11 +38,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
-import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
@@ -57,14 +52,15 @@ import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.tag.Grenade;
-import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.Slot;
@@ -464,9 +460,6 @@ public abstract class KitParser {
     if (stack == null)
       throw new InvalidXMLException("Child " + childName + " element expected", parent);
 
-    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
-    if (imm != null) imm.applyRules(stack);
-
     Range<Integer> amount =
         XMLUtils.parseNumericRange(Node.fromAttr(parent, "amount"), Integer.class, null);
     if (amount == null) amount = Range.atLeast(stack.getAmount());
@@ -521,94 +514,66 @@ public abstract class KitParser {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }
 
-    ItemMeta meta = itemStack.getItemMeta();
-
-    if (meta != null) { // This happens if the item is "air"
-      parseItemMeta(el, meta);
-      itemStack.setItemMeta(meta);
-    }
-
+    parseItemMeta(material.getItemType(), el, false).apply(itemStack);
     parseCustomNBT(el, itemStack);
-
-    var components = Node.fromAttr(el, "components");
-    if (components != null) {
-      INVENTORY_UTILS
-          .buildComponentApplicator(material.getItemType(), components)
-          .apply(itemStack);
-    }
+    factory.needModule(ItemModifyModule.class).applyRules(itemStack);
 
     return itemStack;
   }
 
-  public void parseItemMeta(Element el, ItemMeta meta) throws InvalidXMLException {
-    for (Map.Entry<Enchantment, Integer> enchant : parseEnchantments(el).entrySet()) {
-      meta.addEnchant(enchant.getKey(), enchant.getValue(), true);
-    }
+  public ComponentApplicator parseItemMeta(Material type, Element el, boolean merge)
+      throws InvalidXMLException {
+    var parser = factory.getParser();
+    var builder = INVENTORY_UTILS.applicatorBuilder(merge);
+    builder.addEnchantments(parseEnchantments(el));
+    builder.addStoredEnchantments(parseEnchantments(el, "stored-"));
+    builder.addPotions(parsePotions(el));
+    builder.addAttributeModifiers(parseAttributeModifiers(el));
 
-    if (meta instanceof EnchantmentStorageMeta) {
-      for (Entry<Enchantment, Integer> enchant :
-          parseEnchantments(el, "stored-").entrySet()) {
-        ((EnchantmentStorageMeta) meta)
-            .addStoredEnchant(enchant.getKey(), enchant.getValue(), true);
-      }
-    }
-
-    List<PotionEffect> potions = parsePotions(el);
-    if (!potions.isEmpty() && meta instanceof PotionMeta potionMeta) {
-
-      for (PotionEffect effect : potionMeta.getCustomEffects()) {
-        potionMeta.removeCustomEffect(effect.getType());
-      }
-
-      for (PotionEffect effect : potions) {
-        potionMeta.addCustomEffect(effect, false);
-      }
-    }
-
-    ATTRIBUTE_UTILS.applyAttributeModifiers(parseAttributeModifiers(el), meta);
-
-    String customName = el.getAttributeValue("name");
+    var customName = parser.string(el, "name").attr().colored().orNull();
     if (customName != null) {
-      meta.setDisplayName(BukkitUtils.colorize(customName));
+      builder.addDisplayName(BukkitUtils.colorize(customName));
     } else if (XMLUtils.parseBoolean(el.getAttribute("grenade"), false)) {
-      meta.setDisplayName("Grenade");
+      builder.addDisplayName("Grenade");
     }
 
-    if (meta instanceof LeatherArmorMeta armorMeta) {
-      Node attrColor = Node.fromAttr(el, "color");
-      if (attrColor != null) {
-        armorMeta.setColor(XMLUtils.parseHexColor(attrColor));
-      }
-    }
+    parser
+        .node(XMLUtils::parseHexColor, el, "color")
+        .attr()
+        .optional()
+        .ifPresent(builder::addColor);
 
     String loreText = el.getAttributeValue("lore");
     if (loreText != null) {
-      List<String> lore =
-          ImmutableList.copyOf(Splitter.on('|').split(BukkitUtils.colorize(loreText)));
-      meta.setLore(lore);
+      builder.addLore(ImmutableList.copyOf(Splitter.on('|').split(BukkitUtils.colorize(loreText))));
     }
 
+    Set<ItemFlag> flags = EnumSet.noneOf(ItemFlag.class);
     for (ItemFlag flag : ItemFlag.values()) {
-      if (!XMLUtils.parseBoolean(Node.fromAttr(el, "show-" + itemFlagName(flag)), true)) {
-        meta.addItemFlags(flag);
-      }
+      if (!parser.parseBool(el, "show-" + itemFlagName(flag)).attr().orTrue()) flags.add(flag);
+    }
+    builder.addItemFlags(flags.toArray(ItemFlag[]::new));
+
+    if (parser.parseBool(el, "unbreakable").attr().orFalse()) {
+      builder.addUnbreakable();
     }
 
-    if (XMLUtils.parseBoolean(el.getAttribute("unbreakable"), false)) {
-      INVENTORY_UTILS.setUnbreakable(meta, true);
-    }
+    parser
+        .node(XMLUtils::parseMaterialMatcher, el, "can-destroy")
+        .child()
+        .optional()
+        .ifPresent(builder::addCanDestroy);
+    parser
+        .node(XMLUtils::parseMaterialMatcher, el, "can-place-on")
+        .child()
+        .optional()
+        .ifPresent(builder::addCanPlaceOn);
 
-    Element elCanDestroy = el.getChild("can-destroy");
-    if (elCanDestroy != null) {
-      INVENTORY_UTILS.setCanDestroy(
-          meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
-    }
-
-    Element elCanPlaceOn = el.getChild("can-place-on");
-    if (elCanPlaceOn != null) {
-      INVENTORY_UTILS.setCanPlaceOn(
-          meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
-    }
+    parser
+        .node(s -> INVENTORY_UTILS.parseComponents(type, s), el, "components")
+        .optional()
+        .ifPresent(builder::addComponents);
+    return builder.build();
   }
 
   String itemFlagName(ItemFlag flag) {
@@ -628,7 +593,7 @@ public abstract class KitParser {
 
   public void parseCustomNBT(Element el, ItemStack itemStack) throws InvalidXMLException {
     if (XMLUtils.parseBoolean(el.getAttribute("team-color"), false))
-      ItemModifier.TEAM_COLOR.set(itemStack, true);
+      TeamColorApplicator.TEAM_COLOR.set(itemStack, true);
 
     if (XMLUtils.parseBoolean(el.getAttribute("grenade"), false)) {
       Grenade.ITEM_TAG.set(

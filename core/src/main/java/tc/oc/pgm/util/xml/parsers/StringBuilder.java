@@ -1,8 +1,8 @@
 package tc.oc.pgm.util.xml.parsers;
 
 import java.util.regex.Pattern;
-import org.bukkit.ChatColor;
 import org.jdom2.Element;
+import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
@@ -20,7 +20,7 @@ public class StringBuilder extends PrimitiveBuilder<String, StringBuilder> {
 
   @Override
   protected String parse(String text) throws TextException {
-    if (colored) text = ChatColor.translateAlternateColorCodes('`', text);
+    if (colored) text = BukkitUtils.colorize(text);
     return text;
   }
 

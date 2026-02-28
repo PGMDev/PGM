@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
@@ -57,8 +56,6 @@ public class BlockDropsModule implements MapModule<BlockDropsMatchModule> {
       FilterParser filterParser = factory.getFilters();
       RegionParser regionParser = factory.getRegions();
       KitParser kitParser = factory.getKits();
-      final Optional<ItemModifyModule> itemModifier =
-          Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
       for (Element elRule : XMLUtils.flattenElements(
           doc.getRootElement(),
@@ -92,7 +89,6 @@ public class BlockDropsModule implements MapModule<BlockDropsMatchModule> {
         for (Element elDrops : elRule.getChildren("drops")) {
           for (Element elItem : elDrops.getChildren("item")) {
             final ItemStack itemStack = factory.getKits().parseItem(elItem, false);
-            itemModifier.ifPresent(imm -> imm.applyRules(itemStack));
             items.put(
                 itemStack, XMLUtils.parseNumber(elItem.getAttribute("chance"), Double.class, 1d));
           }
@@ -109,20 +105,6 @@ public class BlockDropsModule implements MapModule<BlockDropsMatchModule> {
       }
 
       return rules.isEmpty() ? null : new BlockDropsModule(new BlockDropsRuleSet(rules));
-    }
-  }
-
-  @Override
-  public void postParse(MapFactory factory, Logger logger, Document doc)
-      throws InvalidXMLException {
-    // Apply any item-mods to all drops
-    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
-    if (imm != null) {
-      for (BlockDropsRule rule : ruleSet.getRules()) {
-        for (Map.Entry<ItemStack, Double> entry : rule.drops.items.entrySet()) {
-          imm.applyRules(entry.getKey());
-        }
-      }
     }
   }
 }

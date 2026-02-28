@@ -112,11 +112,10 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
       new ItemParser(Commands.createValidationContext(CraftRegistry.getMinecraftRegistry()));
 
   @Override
-  public ComponentApplicator buildComponentApplicator(Material type, Node components)
+  public ComponentApplicator parseComponents(Material type, Node components)
       throws InvalidXMLException {
     try {
-      var nmsItem = CraftItemType.bukkitToMinecraft(type);
-      var key = ITEMS.getKey(nmsItem);
+      var key = ITEMS.getKey(CraftItemType.bukkitToMinecraft(type));
       if (key == null) throw new IllegalStateException("Invalid material: " + type);
 
       var str = new StringReader(key.toShortString() + "[" + components.getValueNormalize() + "]");

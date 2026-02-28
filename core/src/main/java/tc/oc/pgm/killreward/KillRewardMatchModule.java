@@ -24,7 +24,7 @@ import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.filters.query.DamageQuery;
-import tc.oc.pgm.kits.tag.ItemModifier;
+import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.ItemTransferEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -65,18 +65,17 @@ public class KillRewardMatchModule implements MatchModule, Listener {
 
       for (ItemStack stack : reward.items) {
         ItemStack clone = stack.clone();
-        ItemModifier.apply(clone, killer);
-        PlayerItemTransferEvent event =
-            new PlayerItemTransferEvent(
-                null,
-                ItemTransferEvent.Reason.PLUGIN,
-                killer.getBukkit(),
-                null,
-                killer.getBukkit().getInventory(),
-                clone,
-                null,
-                clone.getAmount(),
-                null);
+        TeamColorApplicator.apply(clone, killer);
+        PlayerItemTransferEvent event = new PlayerItemTransferEvent(
+            null,
+            ItemTransferEvent.Reason.PLUGIN,
+            killer.getBukkit(),
+            null,
+            killer.getBukkit().getInventory(),
+            clone,
+            null,
+            clone.getAmount(),
+            null);
         match.callEvent(event);
         if (!event.isCancelled() && event.getQuantity() > 0) {
           // BEWARE: addItem modifies its argument.. send in the clone!

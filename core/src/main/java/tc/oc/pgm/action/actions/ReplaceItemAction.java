@@ -3,7 +3,7 @@ package tc.oc.pgm.action.actions;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.kits.tag.ItemModifier;
+import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.Slot;
 
@@ -35,7 +35,7 @@ public class ReplaceItemAction extends AbstractAction<MatchPlayer> {
     ItemStack newItem = item.clone();
     if (keepAmount) newItem.setAmount(current.getAmount());
     if (keepEnchants) newItem.addEnchantments(current.getEnchantments());
-    ItemModifier.apply(newItem, player);
+    TeamColorApplicator.apply(newItem, player);
     return newItem;
   }
 }

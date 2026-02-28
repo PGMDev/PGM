@@ -801,6 +801,10 @@ public final class XMLUtils {
     return parseItemMaterialData(node, (ItemMaterialData) null);
   }
 
+  public static MaterialMatcher parseMaterialMatcher(Node node) throws InvalidXMLException {
+    return parseMaterialMatcher(node.getElement());
+  }
+
   public static MaterialMatcher parseMaterialMatcher(Element el) throws InvalidXMLException {
     MaterialMatcher.Builder builder = MaterialMatcher.builder();
 
