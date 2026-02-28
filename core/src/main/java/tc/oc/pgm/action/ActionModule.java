@@ -16,6 +16,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.filters.FilterMatchModule;
+import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.VariablesModule;
@@ -51,7 +52,7 @@ public class ActionModule implements MapModule<ActionMatchModule> {
 
     @Override
     public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
-      return ImmutableList.of(VariablesModule.class);
+      return ImmutableList.of(VariablesModule.class, ItemModifyModule.class);
     }
 
     @Nullable

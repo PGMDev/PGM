@@ -351,8 +351,10 @@ public final class InventoryUtils {
           @Override
           public void apply(ItemStack stack) {
             var meta = stack.getItemMeta();
-            modifiers.forEach(mod -> mod.accept(stack, meta));
-            stack.setItemMeta(meta);
+            if (meta != null) { // This happens if the item is "air"
+              modifiers.forEach(mod -> mod.accept(stack, meta));
+              stack.setItemMeta(meta);
+            }
           }
         }
 
