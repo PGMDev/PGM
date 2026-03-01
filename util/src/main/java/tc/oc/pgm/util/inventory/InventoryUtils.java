@@ -217,7 +217,7 @@ public final class InventoryUtils {
     boolean isViewable(Inventory inventory);
 
     default Collection<Class<? extends Event>> getRelevantEvents(SlotGroup group) {
-      // Legacy needs to additional events
+      // Legacy needs no additional events
       return List.of();
     }
 
