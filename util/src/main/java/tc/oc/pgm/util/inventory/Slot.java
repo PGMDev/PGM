@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -245,11 +246,13 @@ public abstract class Slot {
       Storage.init();
       Equipment.init();
       Cursor.init();
+      Crafting.init();
     }
 
     public static Stream<Player> player() {
       return Stream.concat(
-          Stream.concat(Storage.storage(), Equipment.equipment()), Stream.of(Cursor.cursor()));
+          Stream.concat(Storage.storage(), Equipment.equipment()),
+          Stream.concat(Stream.of(Cursor.cursor()), Crafting.crafting()));
     }
 
     public static void forEach(PlayerInventory inv, BiConsumer<Player, ItemStack> consumer) {
@@ -352,8 +355,8 @@ public abstract class Slot {
       return Stream.concat(OffHand.offHand().stream(), Armor.armor());
     }
 
-    public static Stream<Slot> hands() {
-      Slot main = MainHand.mainHand();
+    public static Stream<Slot.Player> hands() {
+      Slot.Player main = MainHand.mainHand();
       return OffHand.offHand().map(o -> Stream.of(main, o)).orElseGet(() -> Stream.of(main));
     }
 
@@ -503,6 +506,66 @@ public abstract class Slot {
     @Override
     public void setItem(InventoryHolder holder, @Nullable ItemStack stack) {
       asPlayer(holder).setItemOnCursor(stack);
+    }
+
+    @Override
+    public @Nullable ItemStack getItem(Inventory inv) {
+      return getItem(inv.getHolder());
+    }
+
+    @Override
+    public void setItem(Inventory inv, ItemStack stack) {
+      setItem(inv.getHolder(), stack);
+    }
+  }
+
+  public static class Crafting extends Player {
+    static void init() {
+      crafting = new Crafting[9];
+      for (int i = 0; i < 9; i++) {
+        crafting[i] = new Crafting(i);
+      }
+    }
+
+    private static Crafting[] crafting;
+
+    public static Stream<Slot.Crafting> crafting() {
+      return Stream.of(crafting);
+    }
+
+    private final int slot;
+
+    Crafting(int slot) {
+      super(null, -1);
+      this.slot = slot;
+    }
+
+    @Override
+    public String toString() {
+      return "crafting." + slot;
+    }
+
+    @Override
+    public @Nullable ItemStack getItem(InventoryHolder holder) {
+      var inv = getCraftingInventory(holder);
+      if (inv == null || slot >= inv.getSize()) return null;
+      return airToNull(inv.getItem(slot));
+    }
+
+    @Override
+    public void setItem(InventoryHolder holder, @Nullable ItemStack stack) {
+      var inv = getCraftingInventory(holder);
+      if (inv == null || slot >= inv.getSize()) return;
+      inv.setItem(slot, stack);
+    }
+
+    private Inventory getCraftingInventory(InventoryHolder holder) {
+      var pl = asPlayer(holder);
+      var view = pl.getOpenInventory();
+
+      var type = view.getType();
+      if (type != InventoryType.CRAFTING && type != InventoryType.WORKBENCH) return null;
+      return view.getTopInventory();
     }
 
     @Override

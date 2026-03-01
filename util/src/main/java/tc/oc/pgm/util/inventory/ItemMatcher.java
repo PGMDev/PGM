@@ -64,6 +64,10 @@ public class ItemMatcher {
     return newItem;
   }
 
+  public boolean hasAmount() {
+    return !amount.equals(Range.atLeast(1));
+  }
+
   public boolean matches(ItemStack query) {
     return amount.contains(query.getAmount())
         && Materials.itemsSimilarMaterial(base, query, ignoreDurability)

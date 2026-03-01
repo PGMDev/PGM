@@ -22,11 +22,19 @@ public class Ranges {
     }
   }
 
+  public static int optionalMinimum(Range<Integer> range, int fallback) {
+    return range == null || !range.hasLowerBound() ? fallback : needMinimum(range);
+  }
+
   public static int needMinimum(Range<Integer> range) {
     assertLowerBound(range);
     return range.lowerBoundType() == BoundType.CLOSED
         ? range.lowerEndpoint()
         : range.lowerEndpoint() + 1;
+  }
+
+  public static int optionalMaximum(Range<Integer> range, int fallback) {
+    return range == null || !range.hasUpperBound() ? fallback : needMaximum(range);
   }
 
   public static int needMaximum(Range<Integer> range) {

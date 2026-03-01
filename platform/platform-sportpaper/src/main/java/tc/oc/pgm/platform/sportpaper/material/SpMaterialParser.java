@@ -4,7 +4,7 @@ import java.util.Locale;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.util.material.Materials;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -20,7 +20,7 @@ class SpMaterialParser {
   }
 
   public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
-    int id = Materials.materialId(text);
+    int id = StringUtils.parseNumericId(text);
     if (id != -1) {
       var byId = Material.getMaterial(id);
       if (byId == null)
