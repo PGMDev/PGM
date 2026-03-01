@@ -10,7 +10,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.kits.tag.ItemModifier;
+import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.Slot;
 
@@ -75,7 +75,7 @@ public class ItemKit implements KitDefinition {
 
     // Apply all item modifications (eg: team-colors)
     for (ItemStack item : event.getItems()) {
-      ItemModifier.apply(item, player);
+      TeamColorApplicator.apply(item, player);
     }
 
     if (force) {

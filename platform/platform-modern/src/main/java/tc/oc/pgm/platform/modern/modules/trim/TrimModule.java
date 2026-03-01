@@ -55,7 +55,7 @@ public class TrimModule implements MapModule<TrimMatchModule> {
 
         for (Slot.Armor slot : Slot.Armor.armor().toList()) {
           var curr = patterns.get(slot.toEquipmentSlot());
-          var trim = parser.parse(this::parseTrim, el, slot.armorTypeName()).optional(curr);
+          var trim = parser.primitive(this::parseTrim, el, slot.armorTypeName()).optional(curr);
           if (curr == trim) continue;
 
           if (trim == null) patterns.remove(slot.toEquipmentSlot());

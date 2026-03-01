@@ -6,20 +6,12 @@ import java.util.List;
 import java.util.Map;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.kits.tag.ItemModifier;
+import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.util.inventory.ArmorType;
 import tc.oc.pgm.util.inventory.Slot;
 
 public class ArmorKit extends AbstractKit {
-  public static class ArmorItem {
-    public final ItemStack stack;
-    public final boolean locked;
-
-    public ArmorItem(ItemStack stack, boolean locked) {
-      this.stack = stack;
-      this.locked = locked;
-    }
-  }
+  public record ArmorItem(ItemStack stack, boolean locked) {}
 
   private final Map<Slot.Armor, ArmorItem> armor;
 
@@ -47,7 +39,7 @@ public class ArmorKit extends AbstractKit {
     this.armor.forEach((slot, item) -> {
       var wearing = slot.getItem(player);
       if (force || wearing == null) {
-        ItemModifier.apply(wearing = item.stack.clone(), player);
+        TeamColorApplicator.apply(wearing = item.stack.clone(), player);
         slot.setItem(player, wearing);
       }
     });

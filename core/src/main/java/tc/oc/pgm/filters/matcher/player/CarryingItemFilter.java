@@ -40,7 +40,9 @@ public class CarryingItemFilter extends ParticipantItemFilter {
 
   @Override
   protected Stream<ItemStack> getItems(MatchPlayer player) {
-    Stream<ItemStack> inventory = Slot.Player.player().map(s -> s.getItem(player));
+    Stream<ItemStack> inventory = Stream.concat(
+            Slot.Storage.storage(), Slot.OffHand.offHand().stream())
+        .map(s -> s.getItem(player));
 
     // Potentially add the crafting grid if that's the currently open inventory
     InventoryView invView = player.getBukkit().getOpenInventory();

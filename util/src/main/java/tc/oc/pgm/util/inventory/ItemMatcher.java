@@ -42,22 +42,31 @@ public class ItemMatcher {
       // Strip all meta, then re-add if needed
       newItem.setItemMeta(null);
 
-      // Restore name or enchants
-      if (!ignoreName) newItem.getItemMeta().setDisplayName(item.getItemMeta().getDisplayName());
-      if (!ignoreEnchantments) newItem.addUnsafeEnchantments(item.getEnchantments());
+      // Restore other meta if needed
+      if (!ignoreName || !ignoreEnchantments) {
+        ItemMeta original = item.getItemMeta();
+
+        ItemMeta meta = newItem.getItemMeta();
+        if (!ignoreName) meta.setDisplayName(original.getDisplayName());
+        if (!ignoreEnchantments)
+          original.getEnchants().forEach((e, l) -> meta.addEnchant(e, l, true));
+        newItem.setItemMeta(meta);
+      }
+
     } else {
       // Strip only specific parts
-      ItemMeta meta = item.getItemMeta();
-
+      ItemMeta meta = newItem.getItemMeta();
       if (ignoreName) meta.setDisplayName(null);
-      if (ignoreEnchantments) item.getEnchantments().keySet().forEach(item::removeEnchantment);
+      if (ignoreEnchantments) meta.getEnchants().forEach((e, l) -> meta.removeEnchant(e));
+      newItem.setItemMeta(meta);
     }
 
     return newItem;
   }
 
   public boolean matches(ItemStack query) {
-    return Materials.itemsSimilar(base, stripMeta(query), ignoreDurability)
-        && amount.contains(query.getAmount());
+    return amount.contains(query.getAmount())
+        && Materials.itemsSimilarMaterial(base, query, ignoreDurability)
+        && Materials.itemsSimilarMeta(base, stripMeta(query));
   }
 }

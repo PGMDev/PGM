@@ -2,6 +2,7 @@ package tc.oc.pgm.action.actions;
 
 import tc.oc.pgm.action.ActionDefinition;
 import tc.oc.pgm.api.feature.Feature;
+import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.Filterable;
 
@@ -35,6 +36,11 @@ public class ExposedAction extends SelfIdentifyingFeatureDefinition
   }
 
   @Override
+  public void trigger(Filterable<?> filterable, Query event) {
+    delegate.trigger(filterable, event);
+  }
+
+  @Override
   public void untrigger(Filterable<?> scope) {
     delegate.untrigger(getAncestor(scope));
   }
@@ -43,13 +49,12 @@ public class ExposedAction extends SelfIdentifyingFeatureDefinition
     Filterable<?> filterable = context.getFilterableAncestor(delegate.getScope());
     if (filterable != null) return filterable;
 
-    throw new IllegalStateException(
-        "Wrong exposed scope for '"
-            + getId()
-            + "', expected "
-            + delegate.getScope().getSimpleName()
-            + " which cannot be found in "
-            + context.getClass().getSimpleName());
+    throw new IllegalStateException("Wrong exposed scope for '"
+        + getId()
+        + "', expected "
+        + delegate.getScope().getSimpleName()
+        + " which cannot be found in "
+        + context.getClass().getSimpleName());
   }
 }
 

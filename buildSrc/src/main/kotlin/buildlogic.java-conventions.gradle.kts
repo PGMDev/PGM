@@ -40,15 +40,15 @@ dependencies {
     api("org.jspecify:jspecify:1.0.0")
     compileOnly("org.jetbrains:annotations:26.0.2-1")
 
-    // Optional plugin deps
+    // Optional runtime dependencies
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
     compileOnly("com.viaversion:viaversion-api:5.0.0")
 
-    // Minecraft includes these (or equivalents)
-    compileOnly("it.unimi.dsi:fastutil:8.1.0")
+    // Paper and SportPaper include these (or equivalents)
+    compileOnly("it.unimi.dsi:fastutil:8.5.15")
     compileOnly("com.google.guava:guava:17.0")
-    compileOnly("com.google.code.gson:gson:2.10.1")
-    compileOnly("commons-lang:commons-lang:2.6")
+    compileOnly("com.google.code.gson:gson:2.11.0")
+    compileOnly("org.apache.commons:commons-lang3:3.17.0")
 }
 
 group = "tc.oc.pgm"
@@ -70,7 +70,7 @@ spotless {
         removeUnusedImports()
         trimTrailingWhitespace()
         formatAnnotations()
-        palantirJavaFormat("2.86.0").style("GOOGLE").formatJavadoc(true)
+        palantirJavaFormat("2.87.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 

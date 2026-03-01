@@ -417,7 +417,7 @@ public class ModernNMSHacks implements NMSHacks {
 
   @Override
   public void cleanupPlayer(Player player) {
-    // no-op
+    player.setKiller(null);
   }
 
   @Override

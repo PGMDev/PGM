@@ -6,7 +6,9 @@ import static net.kyori.adventure.text.Component.empty;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Range;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +20,7 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.DropFlagAction;
 import tc.oc.pgm.action.actions.EnchantItemAction;
@@ -31,6 +33,7 @@ import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
+import tc.oc.pgm.action.actions.ScheduleAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.action.actions.SoundAction;
@@ -513,5 +516,21 @@ public class ActionParser {
   public PickupFlagAction parsePickupFlag(Element el, Class<?> scope) throws InvalidXMLException {
     return new PickupFlagAction(
         parser.reference(FlagDefinition.class, el, "flag").required());
+  }
+
+  private static final Range<Duration> WAIT_RANGE =
+      Range.closed(Duration.ZERO, Duration.ofMinutes(1));
+
+  @MethodParser("schedule")
+  @SuppressWarnings("unchecked")
+  public <B extends Filterable<?>> Action<?> parseSchedule(Element el, Class<B> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+    var action = parseAction(el, scope);
+    var after = parser.duration(el, "after").between(WAIT_RANGE).required();
+
+    return MatchPlayer.class.isAssignableFrom(scope)
+        ? new ScheduleAction.Player(after, (Action<? super MatchPlayer>) action)
+        : new ScheduleAction<>(scope, after, action);
   }
 }

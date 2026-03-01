@@ -9,7 +9,7 @@ import fr.minuskube.inv.content.InventoryContents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -71,12 +71,10 @@ public class SettingsMenu extends InventoryMenu {
   }
 
   private ClickableItem getSettingToggleItem(SettingKey key, ItemStack item) {
-    return ClickableItem.of(
-        item,
-        c -> {
-          getViewer().getSettings().toggleValue(key);
-          key.update(getViewer());
-        });
+    return ClickableItem.of(item, c -> {
+      getViewer().getSettings().toggleValue(key);
+      key.update(getViewer());
+    });
   }
 
   private ItemStack getSettingKeyItem(SettingKey key) {
@@ -91,9 +89,8 @@ public class SettingsMenu extends InventoryMenu {
 
   private ItemStack getSettingValueItem(SettingKey key) {
     SettingValue value = getViewer().getSettings().getValue(key);
-    Component current =
-        translatable(
-            "setting.get", NamedTextColor.GRAY, getSettingKeyName(key), getSettingValueName(value));
+    Component current = translatable(
+        "setting.get", NamedTextColor.GRAY, getSettingKeyName(key), getSettingValueName(value));
     Component desc = getSettingDescription(value);
     Component toggle = translatable("settings.menu.toggle", NamedTextColor.GRAY);
 
@@ -128,12 +125,11 @@ public class SettingsMenu extends InventoryMenu {
   }
 
   private String getSettingTranslationKey(SettingValue value) {
-    String valueKey =
-        value
-            .name()
-            .replace(value.getKey().name().toUpperCase(), "")
-            .replace("_", "")
-            .toLowerCase();
+    String valueKey = value
+        .name()
+        .replace(value.getKey().name().toUpperCase(), "")
+        .replace("_", "")
+        .toLowerCase();
     return String.format("settings.%s.%s", value.getKey().name().toLowerCase(), valueKey);
   }
 }

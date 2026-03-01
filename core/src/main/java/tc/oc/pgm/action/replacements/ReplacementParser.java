@@ -88,11 +88,9 @@ public class ReplacementParser {
     scope = parseScope(el, scope);
     var formula = parser.formula(scope, el, "value").required();
     var format = parser
-        .string(el, "format")
+        .<NumberFormat>primitive(DecimalFormat::new, el, "format")
         .attr()
-        .optional()
-        .<NumberFormat>map(DecimalFormat::new)
-        .orElse(DEFAULT_FORMAT);
+        .optional(DEFAULT_FORMAT);
 
     return ScopedReplacement.of(scope, ctx -> text(format.format(formula.applyAsDouble(ctx))));
   }

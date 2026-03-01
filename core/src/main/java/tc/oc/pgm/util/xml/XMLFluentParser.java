@@ -20,6 +20,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.util.function.ThrowingFunction;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -78,8 +79,8 @@ public class XMLFluentParser {
     return new StringBuilder(el, prop);
   }
 
-  public PrimitiveBuilder.Generic<Duration> duration(Element el, String... prop) {
-    return new PrimitiveBuilder.Generic<>(el, prop) {
+  public PrimitiveBuilder.Ranged<Duration> duration(Element el, String... prop) {
+    return new PrimitiveBuilder.Ranged<>(el, prop) {
       @Override
       protected Duration parse(String text) throws TextException {
         return TextParser.parseDuration(text);
@@ -87,7 +88,20 @@ public class XMLFluentParser {
     };
   }
 
-  public <T> PrimitiveBuilder.Generic<T> parse(Function<String, T> fn, Element el, String... prop) {
+  /** Generic node parser, parses from node to your desired type. */
+  public <T> Builder.Generic<T> node(
+      ThrowingFunction<Node, T, InvalidXMLException> fn, Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected T parse(Node node) throws InvalidXMLException {
+        return fn.apply(node);
+      }
+    };
+  }
+
+  /** Generic primitive parser, parses from string to your desired type. */
+  public <T> PrimitiveBuilder.Generic<T> primitive(
+      Function<String, T> fn, Element el, String... prop) {
     return new PrimitiveBuilder.Generic<>(el, prop) {
       @Override
       protected T parse(String text) throws TextException {
@@ -108,7 +122,8 @@ public class XMLFluentParser {
     return number(Float.class, el, prop);
   }
 
-  public <T extends Number> NumberBuilder<T> number(Class<T> cls, Element el, String... prop) {
+  public <T extends Number & Comparable<T>> NumberBuilder<T> number(
+      Class<T> cls, Element el, String... prop) {
     return new NumberBuilder<>(cls, el, prop);
   }
 
