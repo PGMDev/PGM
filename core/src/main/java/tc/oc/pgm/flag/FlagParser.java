@@ -11,7 +11,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -109,7 +109,7 @@ public class FlagParser {
 
   private SinglePost parseSinglePost(Element el) throws InvalidXMLException {
     String id = el.getAttributeValue("id");
-    @Nullable String name = el.getAttributeValue("name");
+    String name = el.getAttributeValue("name");
     if (id == null) id = PostDefinition.makeDefaultId(name, postIdSerial);
 
     FeatureReference<TeamFactory> owner =
@@ -263,6 +263,7 @@ public class FlagParser {
     Component carryMessage = XMLUtils.parseFormattedText(el, "carry-message");
     boolean showRespawnOnPickup =
         XMLUtils.parseBoolean(el.getAttribute("show-respawn-on-pickup"), false);
+    boolean canManuallyDrop = XMLUtils.parseBoolean(el.getAttribute("allow-manual-drop"), true);
     boolean dropOnWater = XMLUtils.parseBoolean(el.getAttribute("drop-on-water"), true);
     boolean showBeam = XMLUtils.parseBoolean(el.getAttribute("beam"), true);
     ProximityMetric flagProximityMetric = ProximityMetric.parse(
@@ -304,7 +305,8 @@ public class FlagParser {
         showBeam,
         flagProximityMetric,
         netProximityMetric,
-        showRespawnOnPickup);
+        showRespawnOnPickup,
+        canManuallyDrop);
     flags.add(flag);
     factory.getFeatures().addFeature(el, flag);
 
