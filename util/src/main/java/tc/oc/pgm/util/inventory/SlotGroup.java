@@ -107,14 +107,14 @@ public class SlotGroup implements Iterable<Slot.Player> {
       if (!groups.add(group))
         throw new InvalidXMLException("Duplicate slot group '" + text + "'", node);
       if (group.slots.isEmpty()) return; // Can happen with offhand on legacy, just no-op
-      if (slots.addAll(group.slots))
+      if (!slots.addAll(group.slots))
         throw new InvalidXMLException(
             "Slot group '" + text + "' is fully covered by earlier slots", node);
     }
 
     public void addSlot(String text, Slot.Player slot) throws InvalidXMLException {
       groupsOnly = false;
-      if (slots.add(slot))
+      if (!slots.add(slot))
         throw new InvalidXMLException(
             "Slot '" + text + "' is already defined by an earlier group", node);
     }
