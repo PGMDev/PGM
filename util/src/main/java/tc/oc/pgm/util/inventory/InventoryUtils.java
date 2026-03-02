@@ -216,6 +216,11 @@ public final class InventoryUtils {
 
     boolean isViewable(Inventory inventory);
 
+    default Collection<Class<? extends Event>> getRelevantEvents(SlotGroup group) {
+      // Legacy needs no additional events
+      return List.of();
+    }
+
     default ComponentApplicator parseComponents(Material type, Node components)
         throws InvalidXMLException {
       // Default no-op for legacy

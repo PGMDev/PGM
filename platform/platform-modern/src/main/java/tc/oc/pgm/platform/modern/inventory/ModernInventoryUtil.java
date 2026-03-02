@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemParser;
@@ -22,6 +23,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -30,6 +32,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -104,6 +107,13 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
   @Override
   public boolean isViewable(Inventory inventory) {
     return inventory.getType().isCreatable();
+  }
+
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents(SlotGroup group) {
+    if (group.containsAny(SlotGroup.HANDS) || group.containsAny(SlotGroup.HOTBAR))
+      return List.of(PlayerSwapHandItemsEvent.class);
+    return List.of();
   }
 
   private static final Registry<Item> ITEMS =

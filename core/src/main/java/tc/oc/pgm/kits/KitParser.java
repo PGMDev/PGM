@@ -63,11 +63,13 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.Slot;
+import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
@@ -260,7 +262,7 @@ public abstract class KitParser {
           freeItems.add(item);
         } else {
           Slot slot = parseInventorySlot(nodeSlot);
-          if (null != slotItems.put(slot, item)) {
+          if (slotItems.put(slot, item) != null) {
             throw new InvalidXMLException("Kit already has an item in " + slot.getKey(), nodeSlot);
           }
         }
@@ -289,26 +291,35 @@ public abstract class KitParser {
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
-    String value = node.getValue();
-    Slot slot;
-    try {
-      slot = Slot.Player.forIndex(Integer.parseInt(value));
-      if (slot == null) {
-        throw new InvalidXMLException(
-            "Invalid inventory slot index (must be between 0 and 39)", node);
-      }
-    } catch (NumberFormatException e) {
-      slot = Slot.forKey(value);
-      if (slot == null) {
-        throw new InvalidXMLException("Invalid inventory slot name", node);
-      }
-    }
+    return parseInventorySlot(node, node.getValue());
+  }
 
-    if (slot instanceof Slot.EnderChest) {
+  public Slot parseInventorySlot(Node node, String value) throws InvalidXMLException {
+    int num = StringUtils.parseNumericId(value);
+    Slot slot = num == -1 ? Slot.forKey(value) : Slot.Player.forIndex(num);
+
+    if (slot == null) throw new InvalidXMLException("Invalid inventory slot '" + value + "'", node);
+
+    if (slot instanceof Slot.EnderChest)
       throw new InvalidXMLException("Ender chest kits are not yet supported", node);
-    }
 
     return slot;
+  }
+
+  public SlotGroup parseSlotGroup(Node node) throws InvalidXMLException {
+    String value = node.getValue();
+    SlotGroup.Builder builder = SlotGroup.builder(node);
+    for (String str : Splitter.on(',').trimResults().split(value)) {
+      var group = SlotGroup.forKey(value);
+      if (group != null) {
+        builder.addGroup(str, group);
+        continue;
+      }
+      var slot = parseInventorySlot(node, str);
+      if (slot instanceof Slot.Player plSlot) builder.addSlot(str, plSlot);
+      else throw new InvalidXMLException("Invalid player slot '" + str + "'", node);
+    }
+    return builder.build();
   }
 
   public PotionKit parsePotionKit(Element el) throws InvalidXMLException {
