@@ -45,6 +45,13 @@ public interface Audience extends ForwardingAudience.Single {
   float soundDistance = 4096f;
   float maxVolume = 0.9999f;
 
+  /**
+   * Plays a sound "globally", without a particular location.
+   *
+   * <p>For non-global sounds, use {@link Audience#playSound(Sound, Location)}.
+   *
+   * @param sound a sound
+   */
   @Override
   default void playSound(@NotNull Sound sound) {
     var player = pointers().get(Identity.UUID).map(Bukkit::getPlayer);
