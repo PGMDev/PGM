@@ -3,6 +3,7 @@ package tc.oc.pgm.util.bukkit;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import net.kyori.adventure.sound.Sound;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.platform.Platform;
@@ -72,5 +73,9 @@ public interface Sounds {
 
   static void play(Player player, Sound sound) {
     Audience.get(player).playSound(sound);
+  }
+
+  static void play(Player player, Sound sound, Location location) {
+    Audience.get(player).playSound(sound, location);
   }
 }

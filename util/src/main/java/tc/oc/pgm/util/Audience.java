@@ -9,11 +9,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import net.kyori.adventure.audience.ForwardingAudience;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +41,34 @@ public interface Audience extends ForwardingAudience.Single {
   BukkitAudiences PROVIDER = BukkitAudiences.builder(BukkitUtils.getPlugin())
       .componentRenderer(ComponentRenderer.RENDERER)
       .build();
+
+  float soundDistance = 4096f;
+  float maxVolume = 0.9999f;
+
+  /**
+   * Plays a sound "globally", without a particular location.
+   *
+   * <p>For non-global sounds, use {@link Audience#playSound(Sound, Location)}.
+   *
+   * @param sound a sound
+   */
+  @Override
+  default void playSound(@NotNull Sound sound) {
+    var player = pointers().get(Identity.UUID).map(Bukkit::getPlayer);
+    if (player.isPresent()) {
+      var location = player.get().getEyeLocation();
+      var realVolume =
+          soundDistance / (16f * (1f - Math.max(0f, Math.min(maxVolume, sound.volume()))));
+      this.playSound(
+          Sound.sound(sound).volume(realVolume).build(),
+          location.getX(),
+          location.getY() + soundDistance,
+          location.getZ());
+      return;
+    }
+
+    Single.super.playSound(sound);
+  }
 
   static Audience console() {
     return PROVIDER::console;
