@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -29,6 +30,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class RegionFilterApplicationParser {
+  private static final Component MAX_BUILD_HEIGHT = translatable("match.maxBuildHeight");
   private final MapFactory factory;
   private final FilterParser filterParser;
   private final RegionParser regionParser;
@@ -83,18 +85,28 @@ public class RegionFilterApplicationParser {
             RFAScope.BLOCK_PLACE, new NegativeRegion(region), filter, message, false));
   }
 
-  public Integer parseMaxBuildHeight(Element el) throws InvalidXMLException {
-    // Always add the filter, will be no-op as long as the value stays null
-    prepend(
-        el,
-        new RegionFilterApplication(
-            RFAScope.BLOCK_PLACE,
-            EverywhereRegion.INSTANCE,
-            MaxBuildFilter.INSTANCE,
-            translatable("match.maxBuildHeight"),
-            false));
+  public @Nullable Integer parseMaxBuildHeight(Element el) throws InvalidXMLException {
+    prependMaxBuildHeight(
+        el, RFAScope.BLOCK_PLACE, filterParser.parseProperty(el, "place", StaticFilter.DENY));
+    prependMaxBuildHeight(
+        el, RFAScope.BLOCK_BREAK, filterParser.parseProperty(el, "break", StaticFilter.ABSTAIN));
+    prependMaxBuildHeight(
+        el, RFAScope.USE, filterParser.parseProperty(el, "use", StaticFilter.ABSTAIN));
+    return XMLUtils.parseNumber(el, Integer.class, (Integer) null);
+  }
 
-    return el == null ? null : XMLUtils.parseNumber(el, Integer.class);
+  private void prependMaxBuildHeight(Element el, RFAScope scope, Filter filter)
+      throws InvalidXMLException {
+    if (filter != StaticFilter.ABSTAIN) {
+      prepend(
+          el,
+          new RegionFilterApplication(
+              scope,
+              EverywhereRegion.INSTANCE,
+              MaxBuildFilter.of(filter),
+              MAX_BUILD_HEIGHT,
+              false));
+    }
   }
 
   public void parsePlayable(Element el) throws InvalidXMLException {
