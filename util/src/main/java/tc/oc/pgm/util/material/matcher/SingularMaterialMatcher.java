@@ -32,11 +32,6 @@ public class SingularMaterialMatcher implements MaterialMatcher.Singular {
   }
 
   @Override
-  public Set<Material> getMaterials() {
-    return Set.of(material);
-  }
-
-  @Override
   public Material getMaterial() {
     return material;
   }

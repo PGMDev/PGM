@@ -36,6 +36,11 @@ public class AllMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
+  public Material getRepresentativeMaterial() {
+    return Material.STONE;
+  }
+
+  @Override
   public Set<BlockMaterialData> getPossibleBlocks() {
     throw new UnsupportedOperationException("Cannot iterate material data for all materials");
   }

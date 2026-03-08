@@ -59,6 +59,15 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
+  public Material getRepresentativeMaterial() {
+    for (MaterialMatcher child : children) {
+      var mat = child.getRepresentativeMaterial();
+      if (mat != null) return mat;
+    }
+    return null;
+  }
+
+  @Override
   public Set<BlockMaterialData> getPossibleBlocks() {
     Set<BlockMaterialData> result = new HashSet<>(children.size());
     for (MaterialMatcher child : children) result.addAll(child.getPossibleBlocks());

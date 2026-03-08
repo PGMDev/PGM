@@ -16,11 +16,6 @@ public class BlockStateMaterialMatcher implements MaterialMatcher.Singular {
   }
 
   @Override
-  public Set<Material> getMaterials() {
-    return Set.of(data.getMaterial());
-  }
-
-  @Override
   public Material getMaterial() {
     return data.getMaterial();
   }

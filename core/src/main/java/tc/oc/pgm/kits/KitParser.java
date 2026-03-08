@@ -72,10 +72,12 @@ import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
+import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class KitParser {
@@ -83,10 +85,12 @@ public abstract class KitParser {
       Set.of("item", "book", "head", "firework", "banner");
 
   protected final MapFactory factory;
+  protected final XMLFluentParser parser;
   protected final Set<Kit> kits = new HashSet<>();
 
   public KitParser(MapFactory factory) {
     this.factory = factory;
+    this.parser = factory.getParser();
   }
 
   public Set<Kit> getKits() {
@@ -471,48 +475,51 @@ public abstract class KitParser {
   }
 
   public ItemMatcher parseItemMatcher(Element parent, String childName) throws InvalidXMLException {
-    ItemStack stack = parseItem(parent.getChild(childName), false);
+    var itemEl = parent.getChild(childName);
+
+    var matcher = parser.node(XMLUtils::parseMaterialMatcher, itemEl, "match")
+        .child().validate(MaterialMatcher.NOT_EMPTY).orNull();
+    var stack = matcher != null ?
+        parseItem(itemEl, matcher.getRepresentativeMaterial()) : parseItem(itemEl, false);
+
     if (stack == null)
       throw new InvalidXMLException("Child " + childName + " element expected", parent);
 
-    Range<Integer> amount =
-        XMLUtils.parseNumericRange(Node.fromAttr(parent, "amount"), Integer.class, null);
-    if (amount == null) amount = Range.atLeast(stack.getAmount());
-    else if (stack.getAmount() != 1)
-      throw new InvalidXMLException("Cannot combine amount range with an item amount", parent);
+    Range<Integer> amount = parser.intRange(parent, "amount")
+        .validate((r, n) -> {
+          if (stack.getAmount() != 1)
+                throw new InvalidXMLException("Cannot combine amount range with an item amount", n);
+        })
+        .optional(() -> Range.atLeast(stack.getAmount()));
 
-    boolean ignoreDurability =
-        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-durability"), true);
-    boolean ignoreMetadata = XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-metadata"), false);
-    boolean ignoreName =
-        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-name"), ignoreMetadata);
-    boolean ignoreEnchantments =
-        XMLUtils.parseBoolean(Node.fromAttr(parent, "ignore-enchantments"), ignoreMetadata);
+    boolean ignoreDurability = parser.parseBool(parent, "ignore-durability").orTrue();
+    boolean ignoreMetadata = parser.parseBool(parent, "ignore-metadata").orFalse();
+    boolean ignoreName = parser.parseBool(parent, "ignore-name").optional(ignoreMetadata);
+    boolean ignoreEnchantments = parser.parseBool(parent, "ignore-enchantments").optional(ignoreMetadata);
 
     return new ItemMatcher(
-        stack, amount, ignoreDurability, ignoreMetadata, ignoreName, ignoreEnchantments);
+        matcher, stack, amount, ignoreDurability, ignoreMetadata, ignoreName, ignoreEnchantments);
   }
 
   public ItemStack parseItem(Element el, boolean allowAir) throws InvalidXMLException {
     if (el == null) return null;
 
-    org.jdom2.Attribute attrMaterial = el.getAttribute("material");
-    String name = attrMaterial != null ? attrMaterial.getValue() : el.getValue();
-    short dmg = XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0);
-    var md = XMLUtils.parseItemMaterialData(new Node(el), name, dmg);
+    short dmg = parser.number(Short.class, el, "damage").optional((short) 0);
+    var materialData = parser
+        .node(n -> XMLUtils.parseItemMaterialData(n, n.getValue(), dmg), el, "material")
+        .validate((md, node) -> {
+          if (md == null || (!allowAir && md.getItemType() == Material.AIR))
+            throw new InvalidXMLException("Invalid material type '" + node.getValue() + "'", node);
+        })
+        .orSelf();
 
-    if (md == null || (md.getItemType() == Material.AIR && !allowAir)) {
-      throw new InvalidXMLException("Invalid material type '" + name + "'", el);
-    }
-
-    return parseItem(el, md);
+    return parseItem(el, materialData);
   }
 
   public ItemStack parseItem(Element el, Material type) throws InvalidXMLException {
     return parseItem(
         el,
-        MaterialData.item(
-            type, XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0)));
+        MaterialData.item(type, parser.number(Short.class, el, "damage").optional((short) 0)));
   }
 
   public ItemStack parseItem(Element el, ItemMaterialData material) throws InvalidXMLException {
@@ -538,7 +545,6 @@ public abstract class KitParser {
 
   public ComponentApplicator parseItemMeta(Material type, Element el, boolean merge)
       throws InvalidXMLException {
-    var parser = factory.getParser();
     var builder = INVENTORY_UTILS.applicatorBuilder(merge);
     var meta = Bukkit.getItemFactory().getItemMeta(type);
 
@@ -815,7 +821,6 @@ public abstract class KitParser {
   public ActionKit parseActionKit(Element parent) throws InvalidXMLException {
     if (parent.getChildren("action").isEmpty()) return null;
 
-    var parser = factory.getParser();
     ImmutableList.Builder<Action<? super MatchPlayer>> builder = ImmutableList.builder();
     for (Element action : parent.getChildren("action")) {
       builder.add(parser.action(MatchPlayer.class, action).required());
