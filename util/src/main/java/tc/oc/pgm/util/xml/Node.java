@@ -201,8 +201,9 @@ public class Node {
     return attr == null ? null : new Node(attr);
   }
 
-  public static @Nullable Node fromChildOrAttr(Element el, boolean unique, String... aliases)
-      throws InvalidXMLException {
+  public static @Nullable Node fromChildOrAttr(
+      @Nullable Element el, boolean unique, String... aliases) throws InvalidXMLException {
+    if (el == null) return null;
     Node node = null;
     for (String alias : aliases) {
       node = wrapUnique(node, unique, alias, el.getAttribute(alias));

@@ -57,20 +57,20 @@ public class RegionMatchModule implements MatchModule, Listener {
   private final RFAContext rfaContext;
   private final boolean useRegionPriority;
 
-  private Integer maxBuildHeight;
+  private @Nullable Integer maxBuildHeight;
 
-  public RegionMatchModule(Match match, RFAContext rfaContext, Integer maxBuildHeight) {
+  public RegionMatchModule(Match match, RFAContext rfaContext, @Nullable Integer maxBuildHeight) {
     this.match = match;
     this.rfaContext = rfaContext;
     this.useRegionPriority = match.getMap().getProto().isNoOlderThan(REGION_PRIORITY_VERSION);
     this.maxBuildHeight = maxBuildHeight;
   }
 
-  public Integer getMaxBuildHeight() {
+  public @Nullable Integer getMaxBuildHeight() {
     return maxBuildHeight;
   }
 
-  public void setMaxBuildHeight(Integer maxBuildHeight) {
+  public void setMaxBuildHeight(@Nullable Integer maxBuildHeight) {
     this.maxBuildHeight = maxBuildHeight;
   }
 
