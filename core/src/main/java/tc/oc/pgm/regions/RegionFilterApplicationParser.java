@@ -7,6 +7,8 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
@@ -24,6 +26,7 @@ import tc.oc.pgm.filters.operator.FilterNode;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.VectorUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -32,13 +35,16 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class RegionFilterApplicationParser {
   private static final Component MAX_BUILD_HEIGHT = translatable("match.maxBuildHeight");
   private final MapFactory factory;
+  private final Logger logger;
   private final FilterParser filterParser;
   private final RegionParser regionParser;
   private final RFAContext.Builder rfaContext;
   private final Version proto;
 
-  public RegionFilterApplicationParser(MapFactory factory, RFAContext.Builder rfaContext) {
+  public RegionFilterApplicationParser(
+      MapFactory factory, Logger logger, RFAContext.Builder rfaContext) {
     this.factory = factory;
+    this.logger = logger;
     this.rfaContext = rfaContext;
 
     this.filterParser = factory.getFilters();
@@ -143,6 +149,19 @@ public class RegionFilterApplicationParser {
       String velocityText = attrVelocity.getValue();
       if (velocityText.startsWith("@")) velocityText = velocityText.substring(1);
       Vector velocity = XMLUtils.parseVector(attrVelocity, velocityText);
+      if (factory.supportsLegacyServers()) {
+        Vector clampedVelocity = VectorUtils.clampVelocityVector(velocity);
+        if (!clampedVelocity.equals(velocity)) {
+          logger.log(
+              Level.WARNING,
+              null,
+              new InvalidXMLException(
+                  "Excessive velocity setting detected: (" + velocity + "). Clamping to ("
+                      + clampedVelocity + ") to ensure compatibility.",
+                  attrVelocity));
+          velocity = clampedVelocity;
+        }
+      }
       add(el, new RegionFilterApplication(RFAScope.EFFECT, region, effectFilter, velocity));
     }
 

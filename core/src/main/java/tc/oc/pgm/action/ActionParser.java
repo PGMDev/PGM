@@ -471,7 +471,7 @@ public class ActionParser {
     var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
     var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
 
-    return new VelocityAction(xFormula, yFormula, zFormula);
+    return new VelocityAction(xFormula, yFormula, zFormula, factory.supportsLegacyServers());
   }
 
   @MethodParser("teleport")

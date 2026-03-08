@@ -9,6 +9,7 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.util.CommonMCVersions;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 
@@ -65,4 +66,21 @@ public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
    * @throws MapException If there was an error loading the context.
    */
   MapContext load() throws MapException;
+
+  /**
+   * Checks if the underlying map supports the given server version.
+   *
+   * @param version The version to check.
+   * @return Whether the map supports the given version.
+   */
+  boolean supportsVersion(Version version);
+
+  /**
+   * Returns true if the map supports legacy (1.8.8) servers.
+   *
+   * @return Whether the map is legacy
+   */
+  default boolean supportsLegacyServers() {
+    return supportsVersion(CommonMCVersions.VERSION_1_8_8);
+  }
 }

@@ -117,6 +117,14 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     return new MapContextImpl(info, getModules());
   }
 
+  @Override
+  public boolean supportsVersion(Version version) {
+    if (info == null) {
+      throw new IllegalStateException("Tried to check map version before info was loaded");
+    }
+    return info.getServerVersions().contains(version);
+  }
+
   private void postLoad() throws InvalidXMLException {
     for (InvalidXMLException e : getFeatures().resolveReferences()) {
       throw e;

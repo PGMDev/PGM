@@ -48,6 +48,7 @@ import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.map.contrib.PseudonymContributor;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
+import tc.oc.pgm.util.CommonMCVersions;
 import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
@@ -382,7 +383,6 @@ public class MapInfoImpl implements MapInfo {
   }
 
   private class VariantData implements VariantInfo {
-    private static final Version VERSION_1_13 = new Version(1, 13, 0);
     private final String variantId;
     private final String mapName;
     private final String mapId;
@@ -472,7 +472,7 @@ public class MapInfoImpl implements MapInfo {
       var levelDat = (world != null ? sourceDir.resolve(world) : sourceDir).resolve("level.dat");
 
       var mapDataVersion = MISC_UTILS.getWorldDataVersion(levelDat);
-      if (mapDataVersion >= DataVersions.V1_13) return VERSION_1_13;
+      if (mapDataVersion >= DataVersions.V1_13) return CommonMCVersions.VERSION_1_13;
       return null;
     }
   }
