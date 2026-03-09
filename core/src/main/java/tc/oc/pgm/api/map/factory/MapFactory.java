@@ -10,7 +10,6 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.pgm.util.CommonMCVersions;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 
@@ -70,6 +69,7 @@ public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
 
   /**
    * Gets the logger of this map factory
+   *
    * @return A {@link Logger}.
    */
   Logger getLogger();
