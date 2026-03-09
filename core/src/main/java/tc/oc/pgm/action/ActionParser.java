@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.kyori.adventure.sound.Sound;
@@ -467,11 +468,42 @@ public class ActionParser {
   @MethodParser("velocity")
   public Action<? super MatchPlayer> parseVelocity(Element el, Class<?> scope)
       throws InvalidXMLException {
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
+    var xFormula = parser
+        .formula(MatchPlayer.class, el, "x")
+        .validate(this::validateVelocityActionFormula)
+        .required();
+    var yFormula = parser
+        .formula(MatchPlayer.class, el, "y")
+        .validate(this::validateVelocityActionFormula)
+        .required();
+    var zFormula = parser
+        .formula(MatchPlayer.class, el, "z")
+        .validate(this::validateVelocityActionFormula)
+        .required();
 
-    return new VelocityAction(xFormula, yFormula, zFormula, factory.supportsLegacyServers());
+    return new VelocityAction(xFormula, yFormula, zFormula);
+  }
+
+  private void validateVelocityActionFormula(Formula<MatchPlayer> formula, Node node) {
+    double velocity;
+    try {
+      // TODO: This looks a bit YOLO-esque.
+      velocity = formula.applyAsDouble(null);
+    } catch (Throwable e) {
+      velocity = 0;
+    }
+
+    if (Math.abs(velocity) > 3.9) {
+      factory
+          .getLogger()
+          .log(
+              Level.WARNING,
+              null,
+              new InvalidXMLException(
+                  "Excessive velocity component detected: " + velocity + "; will be clamped to "
+                      + (velocity < 0 ? "-" : "") + "3.9 at runtime.",
+                  node));
+    }
   }
 
   @MethodParser("teleport")

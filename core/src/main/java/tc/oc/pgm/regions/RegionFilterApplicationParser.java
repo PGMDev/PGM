@@ -149,18 +149,16 @@ public class RegionFilterApplicationParser {
       String velocityText = attrVelocity.getValue();
       if (velocityText.startsWith("@")) velocityText = velocityText.substring(1);
       Vector velocity = XMLUtils.parseVector(attrVelocity, velocityText);
-      if (factory.supportsLegacyServers()) {
-        Vector clampedVelocity = VectorUtils.clampVelocityVector(velocity);
-        if (!clampedVelocity.equals(velocity)) {
-          logger.log(
-              Level.WARNING,
-              null,
-              new InvalidXMLException(
-                  "Excessive velocity setting detected: (" + velocity + "). Clamping to ("
-                      + clampedVelocity + ") to ensure compatibility.",
-                  attrVelocity));
-          velocity = clampedVelocity;
-        }
+      Vector clampedVelocity = VectorUtils.clampVelocityVector(velocity);
+      if (!clampedVelocity.equals(velocity)) {
+        logger.log(
+            Level.WARNING,
+            null,
+            new InvalidXMLException(
+                "Excessive velocity setting detected: (" + velocity + "). Clamping to ("
+                    + clampedVelocity + ") to ensure compatibility.",
+                attrVelocity));
+        velocity = clampedVelocity;
       }
       add(el, new RegionFilterApplication(RFAScope.EFFECT, region, effectFilter, velocity));
     }
