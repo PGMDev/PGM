@@ -111,6 +111,7 @@ public class KitMatchModule implements MatchModule, Listener {
       case DROP_ONE_SLOT:
       case DROP_ALL_SLOT:
       case COLLECT_TO_CURSOR:
+      case NOTHING:
         if (ItemTags.LOCKED.has(event.getCurrentItem())) break;
       default:
         return;
