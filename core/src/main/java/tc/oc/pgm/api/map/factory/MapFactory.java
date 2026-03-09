@@ -68,5 +68,9 @@ public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
    */
   MapContext load() throws MapException;
 
+  /**
+   * Gets the logger of this map factory
+   * @return A {@link Logger}.
+   */
   Logger getLogger();
 }
