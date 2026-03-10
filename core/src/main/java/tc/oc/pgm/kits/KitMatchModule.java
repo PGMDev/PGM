@@ -71,15 +71,15 @@ public class KitMatchModule implements MatchModule, Listener {
     }
   }
 
-  private boolean isLocked(ItemStack item) {
+  public boolean isLocked(ItemStack item) {
     return item != null && ItemTags.LOCKED.has(item);
   }
 
-  private boolean isUnshareable(ItemStack item) {
+  public boolean isUnshareable(ItemStack item) {
     return item != null && (isLocked(item) || ItemTags.PREVENT_SHARING.has(item));
   }
 
-  private void sendLockWarning(HumanEntity player) {
+  public void sendLockWarning(HumanEntity player) {
     MatchPlayer matchPlayer = this.match.getPlayer(player);
     if (matchPlayer != null) {
       matchPlayer.sendWarning(translatable("match.item.locked"));
