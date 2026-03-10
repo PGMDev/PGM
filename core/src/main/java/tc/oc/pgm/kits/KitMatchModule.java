@@ -100,7 +100,7 @@ public class KitMatchModule implements MatchModule, Listener {
         Slot slot = Slot.Hotbar.forIndex(event.getHotbarButton());
         if (slot == null) return;
         ItemStack item = event.getWhoClicked().getInventory().getItem(slot.getIndex());
-        if (item != null && ItemTags.LOCKED.has(item)) break;
+        if (isLocked(item)) break;
 
       case PICKUP_ALL:
       case PICKUP_HALF:
@@ -112,7 +112,7 @@ public class KitMatchModule implements MatchModule, Listener {
       case DROP_ALL_SLOT:
       case COLLECT_TO_CURSOR:
       case NOTHING:
-        if (ItemTags.LOCKED.has(event.getCurrentItem())) break;
+        if (isLocked(event.getCurrentItem())) break;
       default:
         return;
     }
