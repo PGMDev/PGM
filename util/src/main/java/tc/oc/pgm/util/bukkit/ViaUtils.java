@@ -13,7 +13,6 @@ public class ViaUtils {
   public static final int VERSION_1_8 = 47;
   public static final int VERSION_1_13 = 393;
   public static final int VERSION_1_14 = 477;
-  public static final int VERSION_1_16_5 = 754;
   public static final int VERSION_1_21_10 = 773;
 
   private static final boolean ENABLED = isViaLoaded();
