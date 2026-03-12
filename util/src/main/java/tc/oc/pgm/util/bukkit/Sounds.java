@@ -61,7 +61,7 @@ public interface Sounds {
 
   // these sounds on ≈1.14+ do not get quieter with distance, as per MC-146721.
   // see: https://github.com/PGMDev/PGM/pull/1635#issuecomment-4035905537
-  Set<String> MODERN_GLOBAL_SOUNDS = Set.of(
+  Set<String> GLOBAL_SOUNDS = Set.of(
       "ambient.basalt_deltas.additions",
       "ambient.basalt_deltas.loop",
       "ambient.crimson_forest.additions",
