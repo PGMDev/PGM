@@ -21,7 +21,6 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.Sounds;
-import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.text.ComponentRenderer;
 
 /** Receiver of chat messages, sounds, titles, and other media. */
@@ -64,9 +63,7 @@ public interface Audience extends ForwardingAudience.Single {
     if (global) {
       if (player.isEmpty()) break omnipresent;
       // account for MC-146721 only on affected clients for affected sounds
-      var version = ViaUtils.getProtocolVersion(player.get());
-      if (Sounds.MODERN_GLOBAL_SOUNDS.contains(sound.name().value())
-          && version >= ViaUtils.VERSION_1_14) break omnipresent;
+      if (Sounds.MODERN_GLOBAL_SOUNDS.contains(sound.name().value())) break omnipresent;
       var location = player.get().getEyeLocation();
       var realVolume =
           soundDistance / (16f * (1f - Math.max(0f, Math.min(maxVolume, sound.volume()))));
