@@ -21,6 +21,8 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.Sounds;
+import tc.oc.pgm.util.bukkit.ViaUtils;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.text.ComponentRenderer;
 
 /** Receiver of chat messages, sounds, titles, and other media. */
@@ -54,8 +56,28 @@ public interface Audience extends ForwardingAudience.Single {
    */
   @Override
   default void playSound(@NotNull Sound sound) {
+    this.playSound(sound, true);
+  }
+
+  default void playSound(@NotNull Sound sound, boolean global) {
     var player = pointers().get(Identity.UUID).map(Bukkit::getPlayer);
-    if (player.isPresent()) {
+    omnipresent:
+    if (global) {
+      if (player.isEmpty()) break omnipresent;
+      // account for MC-146721 only on affected clients for affected sounds
+      var version = ViaUtils.getProtocolVersion(player.get());
+      if (Sounds.MODERN_GLOBAL_SOUNDS.contains(sound.name().value())
+          && version >= ViaUtils.VERSION_1_14) {
+        // emitter volume and pitch is completely ignored for 1.15.2-1.16.5, MC-138832
+        // has been observed on 1.14.4, either due to some Via translation error or the bug reaches
+        // that far back, so keeping this one a looser bound
+        if (version <= ViaUtils.VERSION_1_16_5) break omnipresent;
+        // adventure on modern platforms can move the sound with the entity (in flawed ways, but
+        // it's better than nothing)
+        if (!Platform.isModern()) break omnipresent;
+        this.playSound(sound, Sound.Emitter.self());
+        return;
+      }
       var location = player.get().getEyeLocation();
       var realVolume =
           soundDistance / (16f * (1f - Math.max(0f, Math.min(maxVolume, sound.volume()))));
