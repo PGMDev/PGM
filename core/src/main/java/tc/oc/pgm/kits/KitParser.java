@@ -477,25 +477,31 @@ public abstract class KitParser {
   public ItemMatcher parseItemMatcher(Element parent, String childName) throws InvalidXMLException {
     var itemEl = parent.getChild(childName);
 
-    var matcher = parser.node(XMLUtils::parseMaterialMatcher, itemEl, "match")
-        .child().validate(MaterialMatcher.NOT_EMPTY).orNull();
-    var stack = matcher != null ?
-        parseItem(itemEl, matcher.getRepresentativeMaterial()) : parseItem(itemEl, false);
+    var matcher = parser
+        .node(XMLUtils::parseMaterialMatcher, itemEl, "match")
+        .child()
+        .validate(MaterialMatcher.NOT_EMPTY)
+        .orNull();
+    var stack = matcher != null
+        ? parseItem(itemEl, matcher.getRepresentativeMaterial())
+        : parseItem(itemEl, false);
 
     if (stack == null)
       throw new InvalidXMLException("Child " + childName + " element expected", parent);
 
-    Range<Integer> amount = parser.intRange(parent, "amount")
+    Range<Integer> amount = parser
+        .intRange(parent, "amount")
         .validate((r, n) -> {
           if (stack.getAmount() != 1)
-                throw new InvalidXMLException("Cannot combine amount range with an item amount", n);
+            throw new InvalidXMLException("Cannot combine amount range with an item amount", n);
         })
         .optional(() -> Range.atLeast(stack.getAmount()));
 
     boolean ignoreDurability = parser.parseBool(parent, "ignore-durability").orTrue();
     boolean ignoreMetadata = parser.parseBool(parent, "ignore-metadata").orFalse();
     boolean ignoreName = parser.parseBool(parent, "ignore-name").optional(ignoreMetadata);
-    boolean ignoreEnchantments = parser.parseBool(parent, "ignore-enchantments").optional(ignoreMetadata);
+    boolean ignoreEnchantments =
+        parser.parseBool(parent, "ignore-enchantments").optional(ignoreMetadata);
 
     return new ItemMatcher(
         matcher, stack, amount, ignoreDurability, ignoreMetadata, ignoreName, ignoreEnchantments);
@@ -518,8 +524,7 @@ public abstract class KitParser {
 
   public ItemStack parseItem(Element el, Material type) throws InvalidXMLException {
     return parseItem(
-        el,
-        MaterialData.item(type, parser.number(Short.class, el, "damage").optional((short) 0)));
+        el, MaterialData.item(type, parser.number(Short.class, el, "damage").optional((short) 0)));
   }
 
   public ItemStack parseItem(Element el, ItemMaterialData material) throws InvalidXMLException {

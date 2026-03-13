@@ -51,9 +51,7 @@ public interface MaterialMatcher {
    */
   Set<Material> getMaterials();
 
-  /**
-   * Get a material that is representative of the matcher, usually the first material.
-   */
+  /** Get a material that is representative of the matcher, usually the first material. */
   Material getRepresentativeMaterial();
 
   Set<BlockMaterialData> getPossibleBlocks();

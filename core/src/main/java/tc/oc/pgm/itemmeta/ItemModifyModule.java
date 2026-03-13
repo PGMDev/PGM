@@ -52,13 +52,15 @@ public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
 
       List<ItemRule> rules = new ArrayList<>();
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "item-mods", "rule")) {
-        var items = parser.node(XMLUtils::parseMaterialMatcher, el, "match")
+        var items = parser
+            .node(XMLUtils::parseMaterialMatcher, el, "match")
             .child()
             .validate(MaterialMatcher.NOT_EMPTY)
             .required();
 
         var elModify = XMLUtils.getRequiredUniqueChild(el, "modify");
-        var applicator = factory.getKits().parseItemMeta(items.getRepresentativeMaterial(), elModify, true);
+        var applicator =
+            factory.getKits().parseItemMeta(items.getRepresentativeMaterial(), elModify, true);
 
         ItemRule rule = new ItemRule(items, applicator);
         rules.add(rule);
