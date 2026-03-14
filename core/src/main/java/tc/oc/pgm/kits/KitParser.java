@@ -482,9 +482,7 @@ public abstract class KitParser {
         .child()
         .validate(MaterialMatcher.NOT_EMPTY)
         .orNull();
-    var stack = matcher != null
-        ? parseItem(itemEl, matcher.getRepresentativeMaterial())
-        : parseItem(itemEl, false);
+    var stack = matcher != null ? parseItem(itemEl, matcher.getSample()) : parseItem(itemEl, false);
 
     if (stack == null)
       throw new InvalidXMLException("Child " + childName + " element expected", parent);

@@ -40,7 +40,7 @@ public class MultipleMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Material getRepresentativeMaterial() {
+  public Material getSample() {
     return materials.iterator().next();
   }
 

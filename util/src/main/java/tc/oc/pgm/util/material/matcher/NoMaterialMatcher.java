@@ -34,7 +34,7 @@ public class NoMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Material getRepresentativeMaterial() {
+  public Material getSample() {
     return null;
   }
 

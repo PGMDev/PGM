@@ -59,9 +59,9 @@ public class CompoundMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Material getRepresentativeMaterial() {
+  public Material getSample() {
     for (MaterialMatcher child : children) {
-      var mat = child.getRepresentativeMaterial();
+      var mat = child.getSample();
       if (mat != null) return mat;
     }
     return null;

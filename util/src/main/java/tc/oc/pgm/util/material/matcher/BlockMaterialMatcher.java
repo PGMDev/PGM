@@ -39,7 +39,7 @@ public class BlockMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
-  public Material getRepresentativeMaterial() {
+  public Material getSample() {
     return Material.STONE;
   }
 

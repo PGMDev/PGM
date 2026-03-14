@@ -59,8 +59,7 @@ public class ItemModifyModule implements MapModule<ItemModifyMatchModule> {
             .required();
 
         var elModify = XMLUtils.getRequiredUniqueChild(el, "modify");
-        var applicator =
-            factory.getKits().parseItemMeta(items.getRepresentativeMaterial(), elModify, true);
+        var applicator = factory.getKits().parseItemMeta(items.getSample(), elModify, true);
 
         ItemRule rule = new ItemRule(items, applicator);
         rules.add(rule);

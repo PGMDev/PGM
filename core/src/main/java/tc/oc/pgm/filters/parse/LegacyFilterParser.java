@@ -132,7 +132,7 @@ public class LegacyFilterParser extends FilterParser {
   @MethodParser("block")
   public Filter parseBlock(Element el) throws InvalidXMLException {
     MaterialMatcher pattern = MaterialMatcher.parse(el);
-    var mat = pattern.getRepresentativeMaterial();
+    var mat = pattern.getSample();
     if (mat == null || !mat.isBlock()) {
       throw new InvalidXMLException("Material is not a block", el);
     }

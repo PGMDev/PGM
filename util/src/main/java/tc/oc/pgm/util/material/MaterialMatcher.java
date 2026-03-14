@@ -16,7 +16,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.MultipleMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingularMaterialMatcher;
@@ -27,8 +27,7 @@ import tc.oc.pgm.util.xml.Validator;
 /** A predicate on world */
 public interface MaterialMatcher {
   Validator<MaterialMatcher> NOT_EMPTY = (mm, node) -> {
-    if (mm.getRepresentativeMaterial() == null)
-      throw new InvalidXMLException("No material specified", node);
+    if (mm.getSample() == null) throw new InvalidXMLException("No material specified", node);
   };
 
   boolean matches(Material material);
@@ -51,8 +50,9 @@ public interface MaterialMatcher {
    */
   Set<Material> getMaterials();
 
-  /** Get a material that is representative of the matcher, usually the first material. */
-  Material getRepresentativeMaterial();
+  /** Get a sample material for the matcher, usually the first material. */
+  @Nullable
+  Material getSample();
 
   Set<BlockMaterialData> getPossibleBlocks();
 
@@ -93,7 +93,7 @@ public interface MaterialMatcher {
     }
 
     @Override
-    default Material getRepresentativeMaterial() {
+    default Material getSample() {
       return getMaterial();
     }
   }
