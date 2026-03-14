@@ -55,7 +55,8 @@ public interface Audience extends ForwardingAudience.Single {
   @Override
   default void playSound(@NotNull Sound sound) {
     var player = pointers().get(Identity.UUID).map(Bukkit::getPlayer);
-    if (player.isPresent()) {
+    // account for MC-146721 only on affected clients for affected sounds
+    if (player.isPresent() && !Sounds.GLOBAL_SOUNDS.contains(sound.name().value())) {
       var location = player.get().getEyeLocation();
       var realVolume =
           soundDistance / (16f * (1f - Math.max(0f, Math.min(maxVolume, sound.volume()))));
