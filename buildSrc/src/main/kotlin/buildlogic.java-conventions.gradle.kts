@@ -31,13 +31,13 @@ dependencies {
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
     api("fr.minuskube.inv:smart-invs:1.2.7") { isTransitive = false }
-    api("org.eclipse.jgit:org.eclipse.jgit:7.5.0.202512021534-r") { isTransitive = false }
+    api("org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r") { isTransitive = false }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
     // Annotations
     api("org.jspecify:jspecify:1.0.0")
-    compileOnly("org.jetbrains:annotations:26.0.2-1")
+    compileOnly("org.jetbrains:annotations:26.1.0")
 
     // Optional runtime dependencies
     compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
@@ -69,7 +69,7 @@ spotless {
         removeUnusedImports()
         trimTrailingWhitespace()
         formatAnnotations()
-        palantirJavaFormat("2.87.0").style("GOOGLE").formatJavadoc(true)
+        palantirJavaFormat("2.89.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 
