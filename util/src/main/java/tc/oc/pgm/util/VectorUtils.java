@@ -1,7 +1,9 @@
 package tc.oc.pgm.util;
 
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NullMarked;
 
+@NullMarked
 public class VectorUtils {
   private VectorUtils() {}
 
