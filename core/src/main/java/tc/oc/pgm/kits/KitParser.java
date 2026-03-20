@@ -498,8 +498,11 @@ public abstract class KitParser {
 
     org.jdom2.Attribute attrMaterial = el.getAttribute("material");
     String name = attrMaterial != null ? attrMaterial.getValue() : el.getValue();
-    short dmg = XMLUtils.parseNumber(el.getAttribute("damage"), Short.class, (short) 0);
-    var md = XMLUtils.parseItemMaterialData(new Node(el), name, dmg);
+    org.jdom2.Attribute dmgAttr = el.getAttribute("damage");
+    var md = dmgAttr != null
+        ? XMLUtils.parseItemMaterialData(
+            new Node(el), name, XMLUtils.parseNumber(dmgAttr, Short.class))
+        : XMLUtils.parseItemMaterialData(new Node(el), name);
 
     if (md == null || (md.getItemType() == Material.AIR && !allowAir)) {
       throw new InvalidXMLException("Invalid material type '" + name + "'", el);

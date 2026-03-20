@@ -3,7 +3,7 @@ package tc.oc.pgm.platform.sportpaper.material;
 import java.util.Locale;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -28,16 +28,18 @@ class SpMaterialParser {
       return byId;
     }
 
-    text = text.toUpperCase(Locale.ROOT).replaceAll("\\s+", "_").replaceAll("\\W", "");
+    text = normalize(text);
 
     // At some point prior to legacy, this rename happened
     if (text.equals("SNOWBALL")) return Material.SNOW_BALL;
 
     var material = Material.getMaterial(text);
-    if (material == null) {
-      throw new InvalidXMLException("Could not find material '" + text + "'.", node);
-    }
-    return material;
+    if (material != null) return material;
+
+    var modern = ModernMaterialNames.get(text);
+    if (modern != null) return modern.getItemType();
+
+    throw new InvalidXMLException("Could not find material '" + text + "'.", node);
   }
 
   public static <T> T parse(String text, @Nullable Node node, boolean matOnly, Adapter<T> adapter)
@@ -50,15 +52,27 @@ class SpMaterialParser {
     }
 
     Material material = parseMaterial(pieces[0], node);
-    if (pieces.length == 1) {
-      return adapter.visit(material);
-    } else {
+    if (pieces.length == 2) {
       try {
         return adapter.visit(material, XMLUtils.parseNumber(node, pieces[1], Short.class));
       } catch (NumberFormatException e) {
         throw new InvalidXMLException("Invalid damage value: " + pieces[1], node, e);
       }
     }
+
+    String normalized = normalize(pieces[0]);
+    if (Material.getMaterial(normalized) == null) {
+      var modern = ModernMaterialNames.get(normalized);
+      if (modern != null && modern.getData() != 0) {
+        return adapter.visit(modern.getItemType(), modern.getData());
+      }
+    }
+
+    return adapter.visit(material);
+  }
+
+  private static String normalize(String text) {
+    return text.toUpperCase(Locale.ROOT).replaceAll("\\s+", "_").replaceAll("\\W", "");
   }
 
   interface Adapter<T> {
