@@ -44,8 +44,6 @@ class ModernMaterialNames {
     put("SPRUCE_SLAB", 1, "WOOD_STEP");
     put("SPRUCE_STAIRS", 0, "SPRUCE_WOOD_STAIRS");
     put("SPRUCE_DOOR", 0, "SPRUCE_DOOR_ITEM");
-    put("SPRUCE_FENCE", 0, "SPRUCE_FENCE");
-    put("SPRUCE_FENCE_GATE", 0, "SPRUCE_FENCE_GATE");
     put("SPRUCE_WALL_SIGN", 0, "WALL_SIGN");
 
     // Birch wood blocks
@@ -57,8 +55,6 @@ class ModernMaterialNames {
     put("BIRCH_SLAB", 2, "WOOD_STEP");
     put("BIRCH_STAIRS", 0, "BIRCH_WOOD_STAIRS");
     put("BIRCH_DOOR", 0, "BIRCH_DOOR_ITEM");
-    put("BIRCH_FENCE", 0, "BIRCH_FENCE");
-    put("BIRCH_FENCE_GATE", 0, "BIRCH_FENCE_GATE");
     put("BIRCH_WALL_SIGN", 0, "WALL_SIGN");
 
     // Jungle wood blocks
@@ -70,8 +66,6 @@ class ModernMaterialNames {
     put("JUNGLE_SLAB", 3, "WOOD_STEP");
     put("JUNGLE_STAIRS", 0, "JUNGLE_WOOD_STAIRS");
     put("JUNGLE_DOOR", 0, "JUNGLE_DOOR_ITEM");
-    put("JUNGLE_FENCE", 0, "JUNGLE_FENCE");
-    put("JUNGLE_FENCE_GATE", 0, "JUNGLE_FENCE_GATE");
     put("JUNGLE_WALL_SIGN", 0, "WALL_SIGN");
 
     // Acacia wood blocks
@@ -81,10 +75,7 @@ class ModernMaterialNames {
     put("ACACIA_PLANKS", 4, "WOOD");
     put("ACACIA_SAPLING", 4, "SAPLING");
     put("ACACIA_SLAB", 4, "WOOD_STEP");
-    put("ACACIA_STAIRS", 0, "ACACIA_STAIRS");
     put("ACACIA_DOOR", 0, "ACACIA_DOOR_ITEM");
-    put("ACACIA_FENCE", 0, "ACACIA_FENCE");
-    put("ACACIA_FENCE_GATE", 0, "ACACIA_FENCE_GATE");
     put("ACACIA_WALL_SIGN", 0, "WALL_SIGN");
 
     // Dark oak wood blocks
@@ -94,10 +85,7 @@ class ModernMaterialNames {
     put("DARK_OAK_PLANKS", 5, "WOOD");
     put("DARK_OAK_SAPLING", 5, "SAPLING");
     put("DARK_OAK_SLAB", 5, "WOOD_STEP");
-    put("DARK_OAK_STAIRS", 0, "DARK_OAK_STAIRS");
     put("DARK_OAK_DOOR", 0, "DARK_OAK_DOOR_ITEM");
-    put("DARK_OAK_FENCE", 0, "DARK_OAK_FENCE");
-    put("DARK_OAK_FENCE_GATE", 0, "DARK_OAK_FENCE_GATE");
     put("DARK_OAK_WALL_SIGN", 0, "WALL_SIGN");
 
     // Stone variants
@@ -215,8 +203,6 @@ class ModernMaterialNames {
     put("PLAYER_WALL_HEAD", 3, "SKULL_ITEM");
     put("CREEPER_HEAD", 4, "SKULL_ITEM");
     put("CREEPER_WALL_HEAD", 4, "SKULL_ITEM");
-    put("DRAGON_HEAD", 5, "SKULL_ITEM");
-    put("DRAGON_WALL_HEAD", 5, "SKULL_ITEM");
 
     // Misc
     put("CHARCOAL", 1, "COAL");
@@ -231,10 +217,10 @@ class ModernMaterialNames {
       put(c + "_STAINED_GLASS", i, "STAINED_GLASS");
       put(c + "_STAINED_GLASS_PANE", i, "STAINED_GLASS_PANE");
       put(c + "_TERRACOTTA", i, "STAINED_CLAY");
-      int b = 15 - i;
-      put(COLORS[i] + "_DYE", b, "INK_SACK");
-      put(c + "_BANNER", b, "BANNER");
-      put(c + "_WALL_BANNER", b, "WALL_BANNER");
+      // Black and white swapped for the below items
+      put(c + "_DYE", 15 - i, "INK_SACK");
+      put(c + "_BANNER", 15 - i, "BANNER");
+      put(c + "_WALL_BANNER", 15 - i, "WALL_BANNER");
     }
     put("INK_SAC", 0, "INK_SACK"); // Black dye
     put("COCOA_BEANS", 3, "INK_SACK"); // Brown dye
