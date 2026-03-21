@@ -6,7 +6,14 @@ import org.bukkit.Material;
 import org.jspecify.annotations.Nullable;
 
 class ModernMaterialNames {
-  private static final Map<String, SpMaterialData> NAMES = new HashMap<>();
+
+  record MaterialMapping(SpMaterialData item, SpMaterialData block) {
+    MaterialMapping(Material mat, short data) {
+      this(new SpMaterialData(mat, data), new SpMaterialData(mat, data));
+    }
+  }
+
+  private static final Map<String, MaterialMapping> NAMES = new HashMap<>();
 
   // Data values for colored blocks are 0-15 in this order
   // Dye and banners swap black and white, so we account for that
@@ -16,77 +23,79 @@ class ModernMaterialNames {
     "BROWN", "GREEN", "RED", "BLACK"
   };
 
+  // Data values for wood types are 0-5 in this order
+  private static final String[] WOODS = {"OAK", "SPRUCE", "BIRCH", "JUNGLE", "ACACIA", "DARK_OAK"};
+
   static {
-    // Oak wood blocks
-    put("OAK_LOG", 0, "LOG");
-    put("OAK_WOOD", 0, "LOG");
-    put("OAK_LEAVES", 0, "LEAVES");
-    put("OAK_PLANKS", 0, "WOOD");
-    put("OAK_SAPLING", 0, "SAPLING");
-    put("OAK_SLAB", 0, "WOOD_STEP");
+    // Colored items
+    for (int i = 0; i < COLORS.length; i++) {
+      String c = COLORS[i];
+      put(c + "_WOOL", i, "WOOL");
+      put(c + "_CARPET", i, "CARPET");
+      put(c + "_STAINED_GLASS", i, "STAINED_GLASS");
+      put(c + "_STAINED_GLASS_PANE", i, "STAINED_GLASS_PANE");
+      put(c + "_TERRACOTTA", i, "STAINED_CLAY");
+      // Black and white swapped for the below items
+      put(c + "_DYE", 15 - i, "INK_SACK");
+      put(c + "_BANNER", 15 - i, "BANNER");
+      put(c + "_WALL_BANNER", 15 - i, "WALL_BANNER");
+    }
+
+    put("INK_SAC", 0, "INK_SACK"); // Black dye
+    put("COCOA_BEANS", 3, "INK_SACK"); // Brown dye
+    put("LAPIS_LAZULI", 4, "INK_SACK"); // Blue dye
+    put("BONE_MEAL", 15, "INK_SACK"); // White dye
+    put("ROSE_RED", 1, "INK_SACK"); // Red dye pre-flattening, post 1.8
+    put("CACTUS_GREEN", 2, "INK_SACK"); // Green dye pre-flattening, post 1.8
+    put("DANDELION_YELLOW", 11, "INK_SACK"); // Yellow dye pre-flattening, post 1.8
+    put("TERRACOTTA", 0, "HARD_CLAY");
+
+    // Wood types
+    for (int i = 0; i < WOODS.length; i++) {
+      var type = WOODS[i];
+
+      var suffix = i >= 4 ? "_2" : "";
+      put(type + "_LOG", i % 4, "LOG" + suffix);
+      put(type + "_WOOD", 12 + (i % 4), "LOG" + suffix);
+      put(type + "_LEAVES", i % 4, "LEAVES" + suffix);
+
+      put(type + "_PLANKS", i, "WOOD");
+      put(type + "_SAPLING", i, "SAPLING");
+      put(type + "_SLAB", i, "WOOD_STEP");
+
+      // Map all below to oak, as per-wood variants did not exist in legacy
+      put(type + "_BOAT", 0, "BOAT");
+      put(type + "_BUTTON", 0, "WOOD_BUTTON");
+      put(type + "_PRESSURE_PLATE", 0, "WOOD_PLATE");
+      put(type + "_TRAPDOOR", 0, "TRAP_DOOR");
+      put(type + "_SIGN", 0, "SIGN", "SIGN_POST");
+      put(type + "_WALL_SIGN", 0, "WALL_SIGN");
+
+      // Exclude oak as we handle it separately
+      if (i > 0) {
+        // SPRUCE/BIRCH/JUNGLE use _WOOD_STAIRS; ACACIA/DARK_OAK use _STAIRS
+        if (i < 4) put(type + "_STAIRS", 0, type + "_WOOD_STAIRS");
+        put(type + "_DOOR", 0, type + "_DOOR_ITEM", type + "_DOOR");
+      }
+    }
+
+    // Map oak to generic legacy name
     put("OAK_STAIRS", 0, "WOOD_STAIRS");
-    put("OAK_BOAT", 0, "BOAT");
-    put("OAK_DOOR", 0, "WOOD_DOOR");
+    put("OAK_DOOR", 0, "WOOD_DOOR", "WOODEN_DOOR");
     put("OAK_FENCE", 0, "FENCE");
     put("OAK_FENCE_GATE", 0, "FENCE_GATE");
-    put("OAK_BUTTON", 0, "WOOD_BUTTON");
-    put("OAK_PRESSURE_PLATE", 0, "WOOD_PLATE");
-    put("OAK_TRAPDOOR", 0, "TRAP_DOOR");
-    put("OAK_SIGN", 0, "SIGN");
-    put("OAK_WALL_SIGN", 0, "WALL_SIGN");
 
-    // Spruce wood blocks
-    put("SPRUCE_LOG", 1, "LOG");
-    put("SPRUCE_WOOD", 1, "LOG");
-    put("SPRUCE_LEAVES", 1, "LEAVES");
-    put("SPRUCE_PLANKS", 1, "WOOD");
-    put("SPRUCE_SAPLING", 1, "SAPLING");
-    put("SPRUCE_SLAB", 1, "WOOD_STEP");
-    put("SPRUCE_STAIRS", 0, "SPRUCE_WOOD_STAIRS");
-    put("SPRUCE_DOOR", 0, "SPRUCE_DOOR_ITEM");
-    put("SPRUCE_WALL_SIGN", 0, "WALL_SIGN");
+    // Wooden tools
+    put("WOODEN_AXE", 0, "WOOD_AXE");
+    put("WOODEN_HOE", 0, "WOOD_HOE");
+    put("WOODEN_PICKAXE", 0, "WOOD_PICKAXE");
+    put("WOODEN_SHOVEL", 0, "WOOD_SPADE");
+    put("WOODEN_SWORD", 0, "WOOD_SWORD");
 
-    // Birch wood blocks
-    put("BIRCH_LOG", 2, "LOG");
-    put("BIRCH_WOOD", 2, "LOG");
-    put("BIRCH_LEAVES", 2, "LEAVES");
-    put("BIRCH_PLANKS", 2, "WOOD");
-    put("BIRCH_SAPLING", 2, "SAPLING");
-    put("BIRCH_SLAB", 2, "WOOD_STEP");
-    put("BIRCH_STAIRS", 0, "BIRCH_WOOD_STAIRS");
-    put("BIRCH_DOOR", 0, "BIRCH_DOOR_ITEM");
-    put("BIRCH_WALL_SIGN", 0, "WALL_SIGN");
-
-    // Jungle wood blocks
-    put("JUNGLE_LOG", 3, "LOG");
-    put("JUNGLE_WOOD", 3, "LOG");
-    put("JUNGLE_LEAVES", 3, "LEAVES");
-    put("JUNGLE_PLANKS", 3, "WOOD");
-    put("JUNGLE_SAPLING", 3, "SAPLING");
-    put("JUNGLE_SLAB", 3, "WOOD_STEP");
-    put("JUNGLE_STAIRS", 0, "JUNGLE_WOOD_STAIRS");
-    put("JUNGLE_DOOR", 0, "JUNGLE_DOOR_ITEM");
-    put("JUNGLE_WALL_SIGN", 0, "WALL_SIGN");
-
-    // Acacia wood blocks
-    put("ACACIA_LOG", 0, "LOG_2");
-    put("ACACIA_WOOD", 0, "LOG_2");
-    put("ACACIA_LEAVES", 0, "LEAVES_2");
-    put("ACACIA_PLANKS", 4, "WOOD");
-    put("ACACIA_SAPLING", 4, "SAPLING");
-    put("ACACIA_SLAB", 4, "WOOD_STEP");
-    put("ACACIA_DOOR", 0, "ACACIA_DOOR_ITEM");
-    put("ACACIA_WALL_SIGN", 0, "WALL_SIGN");
-
-    // Dark oak wood blocks
-    put("DARK_OAK_LOG", 1, "LOG_2");
-    put("DARK_OAK_WOOD", 1, "LOG_2");
-    put("DARK_OAK_LEAVES", 1, "LEAVES_2");
-    put("DARK_OAK_PLANKS", 5, "WOOD");
-    put("DARK_OAK_SAPLING", 5, "SAPLING");
-    put("DARK_OAK_SLAB", 5, "WOOD_STEP");
-    put("DARK_OAK_DOOR", 0, "DARK_OAK_DOOR_ITEM");
-    put("DARK_OAK_WALL_SIGN", 0, "WALL_SIGN");
+    // Misc
+    put("CHARCOAL", 1, "COAL");
+    put("PETRIFIED_OAK_SLAB", 43, "WOOD_STEP");
+    put("WOODEN_SLAB", 0, "WOOD_STEP");
 
     // Stone variants
     put("GRANITE", 1, "STONE");
@@ -193,43 +202,16 @@ class ModernMaterialNames {
     put("COOKED_SALMON", 1, "COOKED_FISH");
 
     // Skulls
-    put("SKELETON_SKULL", 0, "SKULL_ITEM");
-    put("SKELETON_WALL_SKULL", 0, "SKULL_ITEM");
-    put("WITHER_SKELETON_SKULL", 1, "SKULL_ITEM");
-    put("WITHER_SKELETON_WALL_SKULL", 1, "SKULL_ITEM");
-    put("ZOMBIE_HEAD", 2, "SKULL_ITEM");
-    put("ZOMBIE_WALL_HEAD", 2, "SKULL_ITEM");
-    put("PLAYER_HEAD", 3, "SKULL_ITEM");
-    put("PLAYER_WALL_HEAD", 3, "SKULL_ITEM");
-    put("CREEPER_HEAD", 4, "SKULL_ITEM");
-    put("CREEPER_WALL_HEAD", 4, "SKULL_ITEM");
-
-    // Misc
-    put("CHARCOAL", 1, "COAL");
-    put("PETRIFIED_OAK_SLAB", 43, "WOOD_STEP");
-    put("WOODEN_SLAB", 0, "WOOD_STEP");
-
-    // Colored items
-    for (int i = 0; i < COLORS.length; i++) {
-      String c = COLORS[i];
-      put(c + "_WOOL", i, "WOOL");
-      put(c + "_CARPET", i, "CARPET");
-      put(c + "_STAINED_GLASS", i, "STAINED_GLASS");
-      put(c + "_STAINED_GLASS_PANE", i, "STAINED_GLASS_PANE");
-      put(c + "_TERRACOTTA", i, "STAINED_CLAY");
-      // Black and white swapped for the below items
-      put(c + "_DYE", 15 - i, "INK_SACK");
-      put(c + "_BANNER", 15 - i, "BANNER");
-      put(c + "_WALL_BANNER", 15 - i, "WALL_BANNER");
-    }
-    put("INK_SAC", 0, "INK_SACK"); // Black dye
-    put("COCOA_BEANS", 3, "INK_SACK"); // Brown dye
-    put("LAPIS_LAZULI", 4, "INK_SACK"); // Blue dye
-    put("BONE_MEAL", 15, "INK_SACK"); // White dye
-    put("ROSE_RED", 1, "INK_SACK"); // Red dye pre-flattening, post 1.8
-    put("CACTUS_GREEN", 2, "INK_SACK"); // Green dye pre-flattening, post 1.8
-    put("DANDELION_YELLOW", 11, "INK_SACK"); // Yellow dye pre-flattening, post 1.8
-    put("TERRACOTTA", 0, "HARD_CLAY");
+    put("SKELETON_SKULL", 0, "SKULL_ITEM", "SKULL");
+    put("SKELETON_WALL_SKULL", 0, "SKULL_ITEM", "SKULL");
+    put("WITHER_SKELETON_SKULL", 1, "SKULL_ITEM", "SKULL");
+    put("WITHER_SKELETON_WALL_SKULL", 1, "SKULL_ITEM", "SKULL");
+    put("ZOMBIE_HEAD", 2, "SKULL_ITEM", "SKULL");
+    put("ZOMBIE_WALL_HEAD", 2, "SKULL_ITEM", "SKULL");
+    put("PLAYER_HEAD", 3, "SKULL_ITEM", "SKULL");
+    put("PLAYER_WALL_HEAD", 3, "SKULL_ITEM", "SKULL");
+    put("CREEPER_HEAD", 4, "SKULL_ITEM", "SKULL");
+    put("CREEPER_WALL_HEAD", 4, "SKULL_ITEM", "SKULL");
 
     // Spawn eggs
     put("CREEPER_SPAWN_EGG", 50, "MONSTER_EGG");
@@ -264,6 +246,7 @@ class ModernMaterialNames {
 
     // Renamed items and blocks
     put("BEEF", 0, "RAW_BEEF");
+    put("BREWING_STAND", 0, "BREWING_STAND_ITEM", "BREWING_STAND");
     put("BRICK", 0, "CLAY_BRICK");
     put("BRICKS", 0, "BRICK");
     put("BROWN_MUSHROOM_BLOCK", 0, "HUGE_MUSHROOM_1");
@@ -272,8 +255,9 @@ class ModernMaterialNames {
     put("CARROTS", 0, "CARROT");
     put("CARROT_ON_A_STICK", 0, "CARROT_STICK");
     put("CARVED_PUMPKIN", 0, "PUMPKIN");
-    put("CAULDRON", 0, "CAULDRON_ITEM");
+    put("CAULDRON", 0, "CAULDRON_ITEM", "CAULDRON");
     put("CAVE_AIR", 0, "AIR");
+    put("CHEST_MINECART", 0, "STORAGE_MINECART");
     put("CHICKEN", 0, "RAW_CHICKEN");
     put("CLOCK", 0, "WATCH");
     put("COBWEB", 0, "WEB");
@@ -297,7 +281,7 @@ class ModernMaterialNames {
     put("FIREWORK_ROCKET", 0, "FIREWORK");
     put("FIREWORK_STAR", 0, "FIREWORK_CHARGE");
     put("FIRE_CHARGE", 0, "FIREBALL");
-    put("FLOWER_POT", 0, "FLOWER_POT_ITEM");
+    put("FLOWER_POT", 0, "FLOWER_POT_ITEM", "FLOWER_POT");
     put("FURNACE", 0, "BURNING_FURNACE");
     put("FURNACE_MINECART", 0, "POWERED_MINECART");
     put("GLASS_PANE", 0, "THIN_GLASS");
@@ -356,16 +340,44 @@ class ModernMaterialNames {
     put("WATER", 0, "STATIONARY_WATER");
     put("WHEAT", 0, "CROPS");
     put("WHEAT_SEEDS", 0, "SEEDS");
+    put("WRITABLE_BOOK", 0, "BOOK_AND_QUILL");
+
+    // Music discs
+    put("MUSIC_DISC_13", 0, "GOLD_RECORD");
+    put("MUSIC_DISC_CAT", 0, "GREEN_RECORD");
+    put("MUSIC_DISC_BLOCKS", 0, "RECORD_3");
+    put("MUSIC_DISC_CHIRP", 0, "RECORD_4");
+    put("MUSIC_DISC_FAR", 0, "RECORD_5");
+    put("MUSIC_DISC_MALL", 0, "RECORD_6");
+    put("MUSIC_DISC_MELLOHI", 0, "RECORD_7");
+    put("MUSIC_DISC_STAL", 0, "RECORD_8");
+    put("MUSIC_DISC_STRAD", 0, "RECORD_9");
+    put("MUSIC_DISC_WARD", 0, "RECORD_10");
+    put("MUSIC_DISC_11", 0, "RECORD_11");
+    put("MUSIC_DISC_WAIT", 0, "RECORD_12");
   }
 
-  private static void put(String modern, int data, String legacyName) {
-    Material m = Material.getMaterial(legacyName);
-    if (m != null) {
-      NAMES.put(modern, new SpMaterialData(m, (short) data));
-    }
+  private static void put(String modern, int data, String legacy) {
+    Material m = Material.getMaterial(legacy);
+    if (m == null) throw new IllegalArgumentException("Unknown material: " + legacy);
+
+    NAMES.put(modern, new MaterialMapping(m, (short) data));
   }
 
-  static @Nullable SpMaterialData get(String normalized) {
-    return NAMES.get(normalized);
+  private static void put(String modern, int data, String itemLegacy, String blockLegacy) {
+    Material item = Material.getMaterial(itemLegacy);
+    if (item == null) throw new IllegalArgumentException("Unknown item material: " + itemLegacy);
+
+    Material block = Material.getMaterial(blockLegacy);
+    if (block == null) throw new IllegalArgumentException("Unknown block material: " + blockLegacy);
+
+    NAMES.put(
+        modern,
+        new MaterialMapping(
+            new SpMaterialData(item, (short) data), new SpMaterialData(block, (short) data)));
+  }
+
+  static @Nullable MaterialMapping get(String name) {
+    return NAMES.get(name);
   }
 }

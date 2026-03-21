@@ -94,13 +94,13 @@ public class SpMaterialUtils implements MaterialUtils {
 
   @Override
   public Material parseMaterial(String text, @Nullable Node node) throws InvalidXMLException {
-    return SpMaterialParser.parseMaterial(text, node);
+    return SpMaterialParser.parseMaterial(text, node, false);
   }
 
   @Override
   public ItemMaterialData parseItemMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
-    var md = SpMaterialParser.parsePgm(text, node);
+    var md = SpMaterialParser.parsePgm(text, node, true);
     validateItem(md.getItemType(), node);
     return md;
   }
@@ -108,7 +108,7 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData parseItemMaterialData(String text, short dmg, @Nullable Node node)
       throws InvalidXMLException {
-    var md = new SpMaterialData(SpMaterialParser.parseMaterial(text, node), dmg);
+    var md = new SpMaterialData(SpMaterialParser.parseMaterial(text, node, true), dmg);
     validateItem(md.getItemType(), node);
     return md;
   }
@@ -122,7 +122,7 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public BlockMaterialData parseBlockMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
-    var md = SpMaterialParser.parsePgm(text, node);
+    var md = SpMaterialParser.parsePgm(text, node, false);
     if (!md.getItemType().isBlock()) {
       throw new InvalidXMLException(
           "Material " + md.getItemType().name() + " is not a block", node);
@@ -185,7 +185,9 @@ public class SpMaterialUtils implements MaterialUtils {
 
     @Override
     protected void parseSingle(String text, @Nullable Node node) throws InvalidXMLException {
-      SpMaterialParser.parse(text, node, materialsOnly, this);
+      // Parse both block and item variants for modern names
+      SpMaterialParser.parse(text, node, materialsOnly, true, this);
+      SpMaterialParser.parse(text, node, materialsOnly, false, this);
     }
   }
 }
