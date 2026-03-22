@@ -88,7 +88,7 @@ public class ModernColorUtils implements ColorUtils {
   }
 
   @Override
-  public Material toColorableItem(Material material) {
+  public Material toColorable(Material material) {
     return material == Material.TERRACOTTA ? Material.WHITE_TERRACOTTA : material;
   }
 

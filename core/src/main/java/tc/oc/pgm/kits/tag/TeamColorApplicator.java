@@ -26,7 +26,7 @@ public class TeamColorApplicator {
       leather.setColor(player.getParty().getFullColor());
       item.setItemMeta(meta);
     } else {
-      Material colorable = COLOR_UTILS.toColorableItem(item.getType());
+      Material colorable = COLOR_UTILS.toColorable(item.getType());
 
       if (COLOR_UTILS.isColorAffected(colorable)) {
         if (colorable != item.getType()) item.setType(colorable);

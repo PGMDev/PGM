@@ -43,7 +43,7 @@ public class SpColorUtils implements ColorUtils {
   }
 
   @Override
-  public Material toColorableItem(Material material) {
+  public Material toColorable(Material material) {
     return material == Material.HARD_CLAY ? Material.STAINED_CLAY : material;
   }
 
