@@ -94,13 +94,13 @@ public class SpMaterialUtils implements MaterialUtils {
 
   @Override
   public Material parseMaterial(String text, @Nullable Node node) throws InvalidXMLException {
-    return SpMaterialParser.parseMaterial(text, node, false);
+    return SpMaterialParser.parseMaterial(text, node);
   }
 
   @Override
   public ItemMaterialData parseItemMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
-    var md = SpMaterialParser.parsePgm(text, node, true);
+    var md = SpMaterialParser.parseItem(text, node);
     validateItem(md.getItemType(), node);
     return md;
   }
@@ -108,7 +108,7 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData parseItemMaterialData(String text, short dmg, @Nullable Node node)
       throws InvalidXMLException {
-    var md = new SpMaterialData(SpMaterialParser.parseMaterial(text, node, true), dmg);
+    var md = new SpMaterialData(SpMaterialParser.parseItem(text, node).getItemType(), dmg);
     validateItem(md.getItemType(), node);
     return md;
   }
@@ -122,7 +122,7 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public BlockMaterialData parseBlockMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
-    var md = SpMaterialParser.parsePgm(text, node, false);
+    var md = SpMaterialParser.parseBlock(text, node);
     if (!md.getItemType().isBlock()) {
       throw new InvalidXMLException(
           "Material " + md.getItemType().name() + " is not a block", node);
@@ -171,6 +171,19 @@ public class SpMaterialUtils implements MaterialUtils {
     }
 
     @Override
+    public MaterialMatcher.Builder visit(ModernMaterialNames.MaterialMapping mapping) {
+      var item = mapping.item();
+      var block = mapping.block();
+
+      addMaterialData(item);
+      if (item.getItemType() != block.getItemType() || item.getData() != block.getData()) {
+        addMaterialData(block);
+      }
+
+      return this;
+    }
+
+    @Override
     public MaterialMatcher.Builder add(Material material, boolean flatten) {
       // No flattening required in legacy
       return add(material);
@@ -183,11 +196,17 @@ public class SpMaterialUtils implements MaterialUtils {
           : visit(item.getType(), item.getData().getData());
     }
 
+    private void addMaterialData(SpMaterialData md) {
+      if (materialsOnly || !md.hasData()) {
+        add(md.getItemType());
+      } else {
+        add(new ExactMaterialMatcher(md.getItemType(), md.getData()));
+      }
+    }
+
     @Override
     protected void parseSingle(String text, @Nullable Node node) throws InvalidXMLException {
-      // Parse both block and item variants for modern names
-      SpMaterialParser.parse(text, node, materialsOnly, true, this);
-      SpMaterialParser.parse(text, node, materialsOnly, false, this);
+      SpMaterialParser.parse(text, node, materialsOnly, this);
     }
   }
 }
