@@ -172,12 +172,15 @@ public class SpMaterialUtils implements MaterialUtils {
 
     @Override
     public MaterialMatcher.Builder visit(ModernMaterialNames.MaterialMapping mapping) {
-      var item = mapping.item();
-      var block = mapping.block();
+      if (mapping.single()) {
+        var type = mapping.type();
+        mapping.data().ifPresentOrElse(d -> visit(type, d), () -> visit(type));
+      } else {
+        var block = mapping.blockType();
+        mapping.blockData().ifPresentOrElse(data -> visit(block, data), () -> visit(block));
 
-      addMaterialData(item);
-      if (item.getItemType() != block.getItemType() || item.getData() != block.getData()) {
-        addMaterialData(block);
+        var item = mapping.itemType();
+        mapping.itemData().ifPresentOrElse(data -> visit(item, data), () -> visit(item));
       }
 
       return this;
@@ -194,14 +197,6 @@ public class SpMaterialUtils implements MaterialUtils {
       return flatten
           ? visit(item.getType())
           : visit(item.getType(), item.getData().getData());
-    }
-
-    private void addMaterialData(SpMaterialData md) {
-      if (materialsOnly || !md.hasData()) {
-        add(md.getItemType());
-      } else {
-        add(new ExactMaterialMatcher(md.getItemType(), md.getData()));
-      }
     }
 
     @Override

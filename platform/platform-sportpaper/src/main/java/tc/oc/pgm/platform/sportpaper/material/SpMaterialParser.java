@@ -24,19 +24,22 @@ class SpMaterialParser {
   }
 
   public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
+    // The set of legacy-mapped modern materials which have separate item
+    // and block forms do not consist of blocks that can be gotten as items
+    // legitimately or easily, so for shop currency we force the item here.
     return parse(text, node, true, Adapter.PGM_BLOCK).getItemType();
   }
 
   public static <T> T parse(String text, @Nullable Node node, boolean matOnly, Adapter<T> adapter)
       throws InvalidXMLException {
-    if (matOnly) return parse(normalize(text), node, adapter);
+    if (matOnly) return parseMaterial(normalize(text), node, adapter);
 
     String[] pieces = text.split(":");
     if (pieces.length > 2)
       throw new InvalidXMLException("Invalid material pattern '" + text + "'.", node);
 
     String head = normalize(pieces[0]);
-    if (pieces.length == 1) return parse(head, node, adapter);
+    if (pieces.length == 1) return parseMaterial(head, node, adapter);
 
     try {
       return adapter.visit(
@@ -60,13 +63,13 @@ class SpMaterialParser {
     if (material != null) return material;
 
     var modern = ModernMaterialNames.get(text);
-    if (modern != null) return modern.block().getItemType();
+    if (modern != null) return modern.blockType();
 
     throw new InvalidXMLException("Could not find material '" + text + "'.", node);
   }
 
   @SuppressWarnings("deprecation")
-  private static <T> T parse(String text, Node node, Adapter<T> adapter)
+  private static <T> T parseMaterial(String text, Node node, Adapter<T> adapter)
       throws InvalidXMLException {
     int id = StringUtils.parseNumericId(text);
     if (id != -1) {
@@ -79,11 +82,8 @@ class SpMaterialParser {
     var material = Material.getMaterial(text);
     var modern = ModernMaterialNames.get(text);
 
-    // Always use the modern material name if it exists.
-    // This permits materials with distinct item and block variants
-    // in legacy to be matched to the correct variant always.
-    if (modern != null
-        && (material == null || modern.item().getItemType() != modern.block().getItemType())) {
+    // Always parse modern item name if existent
+    if (modern != null && (material == null || !modern.single() || modern.type() != material)) {
       return adapter.visit(modern);
     }
 
@@ -108,6 +108,14 @@ class SpMaterialParser {
       public MaterialData visit(Material material, short data) {
         return new MaterialData(material, (byte) data);
       }
+
+      @Override
+      public MaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
+        return mapping
+            .blockData()
+            .map(d -> new MaterialData(mapping.blockType(), (byte) (short) d))
+            .orElseGet(() -> new MaterialData(mapping.blockType()));
+      }
     };
 
     Adapter<SpMaterialData> PGM_ITEM = new Adapter<>() {
@@ -123,7 +131,10 @@ class SpMaterialParser {
 
       @Override
       public SpMaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
-        return mapping.item();
+        return mapping
+            .itemData()
+            .map(data -> new SpMaterialData(mapping.itemType(), data))
+            .orElseGet(() -> new SpMaterialData(mapping.itemType()));
       }
     };
 
@@ -140,7 +151,10 @@ class SpMaterialParser {
 
       @Override
       public SpMaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
-        return mapping.block();
+        return mapping
+            .blockData()
+            .map(d -> new SpMaterialData(mapping.blockType(), d))
+            .orElseGet(() -> new SpMaterialData(mapping.blockType()));
       }
     };
 
@@ -148,9 +162,6 @@ class SpMaterialParser {
 
     T visit(Material material, short data);
 
-    default T visit(ModernMaterialNames.MaterialMapping mapping) {
-      var md = mapping.item();
-      return md.hasData() ? visit(md.getItemType(), md.getData()) : visit(md.getItemType());
-    }
+    T visit(ModernMaterialNames.MaterialMapping mapping);
   }
 }

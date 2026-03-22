@@ -2,12 +2,51 @@ package tc.oc.pgm.platform.sportpaper.material;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import org.bukkit.Material;
 import org.jspecify.annotations.Nullable;
 
 class ModernMaterialNames {
 
-  protected record MaterialMapping(SpMaterialData item, SpMaterialData block) {}
+  protected record MaterialMapping(
+      Material itemMaterial,
+      @Nullable Short itemDamage,
+      Material blockMaterial,
+      @Nullable Short blockDamage) {
+
+    MaterialMapping(Material material, @Nullable Short damage) {
+      this(material, damage, material, damage);
+    }
+
+    boolean single() {
+      return itemMaterial == blockMaterial && Objects.equals(itemDamage, blockDamage);
+    }
+
+    Material type() {
+      return itemMaterial;
+    }
+
+    Optional<Short> data() {
+      return Optional.ofNullable(itemDamage);
+    }
+
+    Material itemType() {
+      return itemMaterial;
+    }
+
+    Optional<Short> itemData() {
+      return Optional.ofNullable(itemDamage);
+    }
+
+    Material blockType() {
+      return blockMaterial;
+    }
+
+    Optional<Short> blockData() {
+      return Optional.ofNullable(blockDamage);
+    }
+  }
 
   private static final Map<String, MaterialMapping> NAMES = new HashMap<>();
 
@@ -37,7 +76,7 @@ class ModernMaterialNames {
       put(color + "_WALL_BANNER", "WALL_BANNER", 15 - i);
     }
 
-    put("INK_SAC", "INK_SACK"); // Black dye
+    put("INK_SAC", "INK_SACK:0"); // Black dye
     put("COCOA_BEANS", "INK_SACK:3"); // Brown dye
     put("LAPIS_LAZULI", "INK_SACK:4"); // Blue dye
     put("BONE_MEAL", "INK_SACK:15"); // White dye
@@ -112,7 +151,7 @@ class ModernMaterialNames {
     put("POLISHED_DIORITE", "STONE:4");
     put("ANDESITE", "STONE:5");
     put("POLISHED_ANDESITE", "STONE:6");
-    put("STONE_BRICKS", "SMOOTH_BRICK");
+    put("STONE_BRICKS", "SMOOTH_BRICK:0");
     put("MOSSY_STONE_BRICKS", "SMOOTH_BRICK:1");
     put("CRACKED_STONE_BRICKS", "SMOOTH_BRICK:2");
     put("CHISELED_STONE_BRICKS", "SMOOTH_BRICK:3");
@@ -129,17 +168,28 @@ class ModernMaterialNames {
 
     // Sandstone
     put("CHISELED_SANDSTONE", "SANDSTONE:1");
+    put("CUT_SANDSTONE", "SANDSTONE:2");
     put("SMOOTH_SANDSTONE", "SANDSTONE:2");
-    put("SANDSTONE_SLAB", "STEP:1");
     put("CHISELED_RED_SANDSTONE", "RED_SANDSTONE:1");
-    put("RED_SANDSTONE_SLAB", "STONE_SLAB2");
+    put("CUT_RED_SANDSTONE", "RED_SANDSTONE:2");
+    put("SMOOTH_RED_SANDSTONE", "RED_SANDSTONE:2");
 
     // Slabs
-    put("STONE_SLAB", "STEP");
+    put("STONE_SLAB", "STEP:0");
+    put("SMOOTH_STONE_SLAB", "STEP:0");
+    put("SANDSTONE_SLAB", "STEP:1");
+    put("PETRIFIED_OAK_SLAB", "STEP:2");
     put("COBBLESTONE_SLAB", "STEP:3");
     put("BRICK_SLAB", "STEP:4");
     put("NETHER_BRICK_SLAB", "STEP:6");
     put("QUARTZ_SLAB", "STEP:7");
+    put("RED_SANDSTONE_SLAB", "STONE_SLAB2:0");
+
+    // Modern-only slabs that reasonably remap backwards
+    put("SMOOTH_SANDSTONE_SLAB", "STEP:1"); // remap to sandstone slab
+    put("CUT_SANDSTONE_SLAB", "STEP:1"); // remap to sandstone slab
+    put("SMOOTH_RED_SANDSTONE_SLAB", "STONE_SLAB2:0"); // remap to red sandstone slab
+    put("CUT_RED_SANDSTONE_SLAB", "STONE_SLAB2:0"); // remap to red sandstone slab
 
     // Quartz
     put("CHISELED_QUARTZ_BLOCK", "QUARTZ_BLOCK:1");
@@ -165,7 +215,7 @@ class ModernMaterialNames {
     put("WET_SPONGE", "SPONGE:1");
 
     // Infested blocks
-    put("INFESTED_STONE", "MONSTER_EGGS");
+    put("INFESTED_STONE", "MONSTER_EGGS:0");
     put("INFESTED_COBBLESTONE", "MONSTER_EGGS:1");
     put("INFESTED_STONE_BRICKS", "MONSTER_EGGS:2");
     put("INFESTED_MOSSY_STONE_BRICKS", "MONSTER_EGGS:3");
@@ -174,7 +224,7 @@ class ModernMaterialNames {
 
     // Flowers
     put("DANDELION", "YELLOW_FLOWER");
-    put("POPPY", "RED_ROSE");
+    put("POPPY", "RED_ROSE:0");
     put("BLUE_ORCHID", "RED_ROSE:1");
     put("ALLIUM", "RED_ROSE:2");
     put("AZURE_BLUET", "RED_ROSE:3");
@@ -185,7 +235,7 @@ class ModernMaterialNames {
     put("OXEYE_DAISY", "RED_ROSE:8");
 
     // Double-tall plants
-    put("SUNFLOWER", "DOUBLE_PLANT");
+    put("SUNFLOWER", "DOUBLE_PLANT:0");
     put("LILAC", "DOUBLE_PLANT:1");
     put("TALL_GRASS", "DOUBLE_PLANT:2");
     put("LARGE_FERN", "DOUBLE_PLANT:3");
@@ -193,16 +243,16 @@ class ModernMaterialNames {
     put("PEONY", "DOUBLE_PLANT:5");
 
     // Short plants
+    put("DEAD_BUSH", "LONG_GRASS:0");
     put("SHORT_GRASS", "LONG_GRASS:1");
     put("FERN", "LONG_GRASS:2");
-    put("DEAD_BUSH", "LONG_GRASS");
 
     // Stems
     put("ATTACHED_MELON_STEM", "MELON_STEM:7");
     put("ATTACHED_PUMPKIN_STEM", "PUMPKIN_STEM:7");
 
     // Fish
-    put("COD", "RAW_FISH");
+    put("COD", "RAW_FISH:0");
     put("SALMON", "RAW_FISH:1");
     put("TROPICAL_FISH", "RAW_FISH:2");
     put("PUFFERFISH", "RAW_FISH:3");
@@ -255,15 +305,12 @@ class ModernMaterialNames {
     // Misc
     put("TERRACOTTA", "HARD_CLAY");
     put("CHARCOAL", "COAL:1");
-    put("PETRIFIED_OAK_SLAB", "WOOD_STEP:43");
-    put("WOODEN_SLAB", "WOOD_STEP");
     put("BEEF", "RAW_BEEF");
     put("BREWING_STAND", "BREWING_STAND_ITEM", "BREWING_STAND");
-    put("BRICK", "CLAY_BRICK");
     put("BRICKS", "BRICK");
     put("BROWN_MUSHROOM_BLOCK", "HUGE_MUSHROOM_1");
-    put("CAKE", "CAKE_BLOCK");
-    put("CARROT", "CARROT_ITEM");
+    put("CAKE", "CAKE", "CAKE_BLOCK");
+    put("CARROT", "CARROT_ITEM", "CARROT");
     put("CARROTS", "CARROT");
     put("CARROT_ON_A_STICK", "CARROT_STICK");
     put("CARVED_PUMPKIN", "PUMPKIN");
@@ -278,7 +325,6 @@ class ModernMaterialNames {
     put("COMPARATOR", "REDSTONE_COMPARATOR");
     put("COOKED_PORKCHOP", "GRILLED_PORK");
     put("CRAFTING_TABLE", "WORKBENCH");
-    put("DAYLIGHT_DETECTOR", "DAYLIGHT_DETECTOR_INVERTED");
     put("ENCHANTING_TABLE", "ENCHANTMENT_TABLE");
     put("ENCHANTED_GOLDEN_APPLE", "GOLDEN_APPLE:1");
     put("ENDER_EYE", "EYE_OF_ENDER");
@@ -292,36 +338,31 @@ class ModernMaterialNames {
     put("FIREWORK_STAR", "FIREWORK_CHARGE");
     put("FIRE_CHARGE", "FIREBALL");
     put("FLOWER_POT", "FLOWER_POT_ITEM", "FLOWER_POT");
-    put("FURNACE", "BURNING_FURNACE");
     put("FURNACE_MINECART", "POWERED_MINECART");
     put("GLASS_PANE", "THIN_GLASS");
     put("GLISTERING_MELON_SLICE", "SPECKLED_MELON");
     put("GUNPOWDER", "SULPHUR");
     put("HEAVY_WEIGHTED_PRESSURE_PLATE", "IRON_PLATE");
     put("IRON_BARS", "IRON_FENCE");
-    put("IRON_DOOR", "IRON_DOOR_BLOCK");
+    put("IRON_DOOR", "IRON_DOOR", "IRON_DOOR_BLOCK");
     put("LAVA", "STATIONARY_LAVA");
     put("LEAD", "LEASH");
     put("LIGHT_WEIGHTED_PRESSURE_PLATE", "GOLD_PLATE");
     put("LILY_PAD", "WATER_LILY");
-    put("MAP", "EMPTY_MAP");
-    put("MELON", "MELON_BLOCK");
     put("MELON_SLICE", "MELON");
     put("MOVING_PISTON", "PISTON_MOVING_PIECE");
     put("MUSHROOM_STEW", "MUSHROOM_SOUP");
     put("MYCELIUM", "MYCEL");
-    put("NETHER_BRICK", "NETHER_BRICK_ITEM");
     put("NETHER_PORTAL", "PORTAL");
     put("NETHER_QUARTZ_ORE", "QUARTZ_ORE");
-    put("NETHER_WART", "NETHER_WARTS");
+    put("NETHER_WART", "NETHER_WARTS", "NETHER_STALK");
     put("PISTON", "PISTON_BASE");
     put("PISTON_HEAD", "PISTON_EXTENSION");
     put("PORKCHOP", "PORK");
-    put("POTATO", "POTATO_ITEM");
+    put("POTATO", "POTATO_ITEM", "POTATO");
     put("POTATOES", "POTATO");
     put("RAIL", "RAILS");
     put("REDSTONE_LAMP", "REDSTONE_LAMP_OFF");
-    put("REDSTONE_ORE", "GLOWING_REDSTONE_ORE");
     put("REDSTONE_TORCH", "REDSTONE_TORCH_ON");
     put("RED_MUSHROOM_BLOCK", "HUGE_MUSHROOM_2");
     put("REPEATER", "DIODE");
@@ -330,12 +371,12 @@ class ModernMaterialNames {
     put("SPAWNER", "MOB_SPAWNER");
     put("STICKY_PISTON", "PISTON_STICKY_BASE");
     put("STONE_PRESSURE_PLATE", "STONE_PLATE");
-    put("SUGAR_CANE", "SUGAR_CANE_BLOCK");
+    put("SUGAR_CANE", "SUGAR_CANE", "SUGAR_CANE_BLOCK");
     put("TNT_MINECART", "EXPLOSIVE_MINECART");
     put("VOID_AIR", "AIR");
     put("WALL_TORCH", "TORCH");
     put("WATER", "STATIONARY_WATER");
-    put("WHEAT", "CROPS");
+    put("WHEAT", "WHEAT", "CROPS");
     put("WHEAT_SEEDS", "SEEDS");
     put("WRITABLE_BOOK", "BOOK_AND_QUILL");
 
@@ -354,38 +395,40 @@ class ModernMaterialNames {
     put("MUSIC_DISC_WAIT", "RECORD_12");
   }
 
-  private static SpMaterialData parse(String name) {
-    int split = name.indexOf(':');
-    if (split == -1) {
-      Material m = Material.getMaterial(name);
-      if (m == null) throw new IllegalArgumentException("Unknown material: " + name);
+  private static Material parseMaterial(String name) {
+    int split = name.indexOf(':', 2);
+    String materialName = split == -1 ? name : name.substring(0, split);
 
-      return new SpMaterialData(m);
-    } else {
-      Material m = Material.getMaterial(name.substring(0, split));
-      if (m == null)
-        throw new IllegalArgumentException("Unknown material: " + name.substring(0, split));
+    Material material = Material.getMaterial(materialName);
+    if (material == null) throw new IllegalArgumentException("Unknown material: " + materialName);
 
-      short data = Short.parseShort(name.substring(split + 1));
-      return new SpMaterialData(m, data);
-    }
+    return material;
+  }
+
+  private static @Nullable Short parseDamage(String name) {
+    int split = name.indexOf(':', 2);
+    if (split == -1) return null;
+
+    return Short.parseShort(name.substring(split + 1));
   }
 
   private static void put(String modern, String legacy) {
-    SpMaterialData md = parse(legacy);
-    NAMES.put(modern, new MaterialMapping(md, md));
+    NAMES.put(modern, new MaterialMapping(parseMaterial(legacy), parseDamage(legacy)));
   }
 
   private static void put(String modern, String legacy, int data) {
-    Material m = Material.getMaterial(legacy);
-    if (m == null) throw new IllegalArgumentException("Unknown material: " + legacy);
+    Material material = Material.getMaterial(legacy);
+    if (material == null) throw new IllegalArgumentException("Unknown material: " + legacy);
 
-    SpMaterialData md = new SpMaterialData(m, (short) data);
-    NAMES.put(modern, new MaterialMapping(md, md));
+    NAMES.put(modern, new MaterialMapping(material, (short) data));
   }
 
   private static void put(String modern, String itemLegacy, String blockLegacy) {
-    NAMES.put(modern, new MaterialMapping(parse(itemLegacy), parse(blockLegacy)));
+    NAMES.put(
+        modern,
+        new MaterialMapping(
+            parseMaterial(itemLegacy), parseDamage(itemLegacy),
+            parseMaterial(blockLegacy), parseDamage(blockLegacy)));
   }
 
   static @Nullable MaterialMapping get(String name) {

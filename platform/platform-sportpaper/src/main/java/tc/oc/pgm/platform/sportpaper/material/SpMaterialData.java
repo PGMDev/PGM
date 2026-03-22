@@ -15,28 +15,20 @@ import tc.oc.pgm.util.material.ItemMaterialData;
 class SpMaterialData implements LegacyMaterialData, ItemMaterialData, BlockMaterialData {
   private final Material material;
   private final short damage;
-  private final boolean hasData;
 
   public SpMaterialData(Material material, short damage) {
     this.material = material;
     this.damage = damage;
-    this.hasData = true;
   }
 
   public SpMaterialData(Material material) {
     this.material = material;
     this.damage = 0;
-    this.hasData = false;
   }
 
   public SpMaterialData(org.bukkit.material.MaterialData md) {
     this.material = md.getItemType();
     this.damage = md.getData();
-    this.hasData = true;
-  }
-
-  public boolean hasData() {
-    return hasData;
   }
 
   @Override
