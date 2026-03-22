@@ -7,7 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 class ModernMaterialNames {
 
-  record MaterialMapping(SpMaterialData item, SpMaterialData block) {
+  protected record MaterialMapping(SpMaterialData item, SpMaterialData block) {
     MaterialMapping(Material mat, short data) {
       this(new SpMaterialData(mat, data), new SpMaterialData(mat, data));
     }
