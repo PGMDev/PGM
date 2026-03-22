@@ -2,8 +2,7 @@ package tc.oc.pgm.platform.sportpaper.material;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
-import java.util.EnumMap;
-import java.util.Map;
+import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -29,36 +28,23 @@ import tc.oc.pgm.util.text.TextTranslations;
 @SuppressWarnings("deprecation")
 public class SpColorUtils implements ColorUtils {
 
-  private static final Map<Material, Material> COLORABLE_MATERIALS = new EnumMap<>(Material.class);
-
-  static {
-    registerColorable(Material.INK_SACK);
-    registerColorable(Material.WOOL);
-    registerColorable(Material.CARPET);
-    registerColorable(Material.HARD_CLAY, Material.STAINED_CLAY);
-    registerColorable(Material.STAINED_CLAY);
-    registerColorable(Material.STAINED_GLASS);
-    registerColorable(Material.STAINED_GLASS_PANE);
-    registerColorable(Material.BANNER);
-  }
-
-  private static void registerColorable(Material from, Material to) {
-    COLORABLE_MATERIALS.put(from, to);
-  }
-
-  private static void registerColorable(Material material) {
-    registerColorable(material, material);
-  }
+  public static final ImmutableSet<Material> COLOR_AFFECTED = ImmutableSet.of(
+      Material.INK_SACK,
+      Material.WOOL,
+      Material.CARPET,
+      Material.STAINED_CLAY,
+      Material.STAINED_GLASS,
+      Material.STAINED_GLASS_PANE,
+      Material.BANNER);
 
   @Override
   public boolean isColorAffected(Material material) {
-    return COLORABLE_MATERIALS.containsKey(material);
+    return COLOR_AFFECTED.contains(material);
   }
 
   @Override
   public void setColor(ItemStack item, DyeColor color) {
-    Material type = setColor(item.getType(), color);
-    item.setType(type);
+    Material type = item.getType();
     if (type == Material.WOOL) {
       item.setData(new Wool(color));
     } else if (type == Material.INK_SACK) {
@@ -72,15 +58,12 @@ public class SpColorUtils implements ColorUtils {
 
   @Override
   public Material setColor(Material material, DyeColor color) {
-    // Return the material or its mapped colorable material,
-    // but this is otherwise a no-op since the actual material
-    // never changes due to color in legacy.
-    return COLORABLE_MATERIALS.getOrDefault(material, material);
+    // This is a no-op because material never changes due to color in 1.8
+    return material;
   }
 
   @Override
   public void setColor(Block block, DyeColor color) {
-    block.setType(setColor(block.getType(), color));
     block.setData(color.getWoolData());
   }
 
