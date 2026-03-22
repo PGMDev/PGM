@@ -85,17 +85,29 @@ class ModernMaterialNames {
     put("OAK_FENCE", 0, "FENCE");
     put("OAK_FENCE_GATE", 0, "FENCE_GATE");
 
-    // Wooden tools
+    // Weapons and tools
     put("WOODEN_AXE", 0, "WOOD_AXE");
     put("WOODEN_HOE", 0, "WOOD_HOE");
     put("WOODEN_PICKAXE", 0, "WOOD_PICKAXE");
     put("WOODEN_SHOVEL", 0, "WOOD_SPADE");
     put("WOODEN_SWORD", 0, "WOOD_SWORD");
+    put("GOLDEN_AXE", 0, "GOLD_AXE");
+    put("GOLDEN_HOE", 0, "GOLD_HOE");
+    put("GOLDEN_PICKAXE", 0, "GOLD_PICKAXE");
+    put("GOLDEN_SHOVEL", 0, "GOLD_SPADE");
+    put("GOLDEN_SWORD", 0, "GOLD_SWORD");
+    put("STONE_SHOVEL", 0, "STONE_SPADE");
+    put("IRON_SHOVEL", 0, "IRON_SPADE");
+    put("DIAMOND_SHOVEL", 0, "DIAMOND_SPADE");
 
-    // Misc
-    put("CHARCOAL", 1, "COAL");
-    put("PETRIFIED_OAK_SLAB", 43, "WOOD_STEP");
-    put("WOODEN_SLAB", 0, "WOOD_STEP");
+    // Armor
+    put("GOLDEN_HELMET", 0, "GOLD_HELMET");
+    put("GOLDEN_CHESTPLATE", 0, "GOLD_CHESTPLATE");
+    put("GOLDEN_LEGGINGS", 0, "GOLD_LEGGINGS");
+    put("GOLDEN_BOOTS", 0, "GOLD_BOOTS");
+    put("GOLDEN_HORSE_ARMOR", 0, "GOLD_BARDING");
+    put("IRON_HORSE_ARMOR", 0, "IRON_BARDING");
+    put("DIAMOND_HORSE_ARMOR", 0, "DIAMOND_BARDING");
 
     // Stone variants
     put("GRANITE", 1, "STONE");
@@ -244,7 +256,10 @@ class ModernMaterialNames {
     put("RABBIT_SPAWN_EGG", 101, "MONSTER_EGG");
     put("VILLAGER_SPAWN_EGG", 120, "MONSTER_EGG");
 
-    // Renamed items and blocks
+    // Misc
+    put("CHARCOAL", 1, "COAL");
+    put("PETRIFIED_OAK_SLAB", 43, "WOOD_STEP");
+    put("WOODEN_SLAB", 0, "WOOD_STEP");
     put("BEEF", 0, "RAW_BEEF");
     put("BREWING_STAND", 0, "BREWING_STAND_ITEM", "BREWING_STAND");
     put("BRICK", 0, "CLAY_BRICK");
@@ -267,8 +282,6 @@ class ModernMaterialNames {
     put("COOKED_PORKCHOP", 0, "GRILLED_PORK");
     put("CRAFTING_TABLE", 0, "WORKBENCH");
     put("DAYLIGHT_DETECTOR", 0, "DAYLIGHT_DETECTOR_INVERTED");
-    put("DIAMOND_HORSE_ARMOR", 0, "DIAMOND_BARDING");
-    put("DIAMOND_SHOVEL", 0, "DIAMOND_SPADE");
     put("ENCHANTING_TABLE", 0, "ENCHANTMENT_TABLE");
     put("ENCHANTED_GOLDEN_APPLE", 1, "GOLDEN_APPLE");
     put("ENDER_EYE", 0, "EYE_OF_ENDER");
@@ -286,22 +299,10 @@ class ModernMaterialNames {
     put("FURNACE_MINECART", 0, "POWERED_MINECART");
     put("GLASS_PANE", 0, "THIN_GLASS");
     put("GLISTERING_MELON_SLICE", 0, "SPECKLED_MELON");
-    put("GOLDEN_AXE", 0, "GOLD_AXE");
-    put("GOLDEN_BOOTS", 0, "GOLD_BOOTS");
-    put("GOLDEN_CHESTPLATE", 0, "GOLD_CHESTPLATE");
-    put("GOLDEN_HELMET", 0, "GOLD_HELMET");
-    put("GOLDEN_HOE", 0, "GOLD_HOE");
-    put("GOLDEN_HORSE_ARMOR", 0, "GOLD_BARDING");
-    put("GOLDEN_LEGGINGS", 0, "GOLD_LEGGINGS");
-    put("GOLDEN_PICKAXE", 0, "GOLD_PICKAXE");
-    put("GOLDEN_SHOVEL", 0, "GOLD_SPADE");
-    put("GOLDEN_SWORD", 0, "GOLD_SWORD");
     put("GUNPOWDER", 0, "SULPHUR");
     put("HEAVY_WEIGHTED_PRESSURE_PLATE", 0, "IRON_PLATE");
     put("IRON_BARS", 0, "IRON_FENCE");
     put("IRON_DOOR", 0, "IRON_DOOR_BLOCK");
-    put("IRON_HORSE_ARMOR", 0, "IRON_BARDING");
-    put("IRON_SHOVEL", 0, "IRON_SPADE");
     put("LAVA", 0, "STATIONARY_LAVA");
     put("LEAD", 0, "LEASH");
     put("LIGHT_WEIGHTED_PRESSURE_PLATE", 0, "GOLD_PLATE");
@@ -332,7 +333,6 @@ class ModernMaterialNames {
     put("SPAWNER", 0, "MOB_SPAWNER");
     put("STICKY_PISTON", 0, "PISTON_STICKY_BASE");
     put("STONE_PRESSURE_PLATE", 0, "STONE_PLATE");
-    put("STONE_SHOVEL", 0, "STONE_SPADE");
     put("SUGAR_CANE", 0, "SUGAR_CANE_BLOCK");
     put("TNT_MINECART", 0, "EXPLOSIVE_MINECART");
     put("VOID_AIR", 0, "AIR");
