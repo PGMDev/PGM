@@ -3,6 +3,7 @@ package tc.oc.pgm.platform.sportpaper.material;
 import java.util.Locale;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -26,7 +27,7 @@ class SpMaterialParser {
     return parse(text, node, true, Adapter.PGM_BLOCK).getItemType();
   }
 
-  public static <T> T parse(String text, Node node, boolean matOnly, Adapter<T> adapter)
+  public static <T> T parse(String text, @Nullable Node node, boolean matOnly, Adapter<T> adapter)
       throws InvalidXMLException {
     if (matOnly) return parse(normalize(text), node, adapter);
 
@@ -50,7 +51,9 @@ class SpMaterialParser {
     int id = StringUtils.parseNumericId(text);
     if (id != -1) {
       var byId = Material.getMaterial(id);
-      if (byId != null) return byId;
+      if (byId == null)
+        throw new InvalidXMLException("Could not find material with id '" + text + "'.", node);
+      return byId;
     }
 
     var material = Material.getMaterial(text);
@@ -68,8 +71,9 @@ class SpMaterialParser {
     int id = StringUtils.parseNumericId(text);
     if (id != -1) {
       var byId = Material.getMaterial(id);
-      if (byId != null) return adapter.visit(byId);
-      throw new InvalidXMLException("Could not find material with id '" + text + "'.", node);
+      if (byId == null)
+        throw new InvalidXMLException("Could not find material with id '" + text + "'.", node);
+      return adapter.visit(byId);
     }
 
     var material = Material.getMaterial(text);
