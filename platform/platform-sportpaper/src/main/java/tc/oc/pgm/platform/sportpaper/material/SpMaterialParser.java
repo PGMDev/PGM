@@ -113,7 +113,7 @@ class SpMaterialParser {
       public MaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
         return mapping
             .blockData()
-            .map(d -> new MaterialData(mapping.blockType(), (byte) (short) d))
+            .map(data -> new MaterialData(mapping.blockType(), (byte) (short) data))
             .orElseGet(() -> new MaterialData(mapping.blockType()));
       }
     };
@@ -153,7 +153,7 @@ class SpMaterialParser {
       public SpMaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
         return mapping
             .blockData()
-            .map(d -> new SpMaterialData(mapping.blockType(), d))
+            .map(data -> new SpMaterialData(mapping.blockType(), data))
             .orElseGet(() -> new SpMaterialData(mapping.blockType()));
       }
     };

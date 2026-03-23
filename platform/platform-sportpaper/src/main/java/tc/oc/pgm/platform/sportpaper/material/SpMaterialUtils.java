@@ -108,7 +108,8 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData parseItemMaterialData(String text, short dmg, @Nullable Node node)
       throws InvalidXMLException {
-    var md = new SpMaterialData(SpMaterialParser.parseItem(text, node).getItemType(), dmg);
+    var md = SpMaterialParser.parseItem(text, node);
+    if (dmg != 0) md = new SpMaterialData(md.getItemType(), dmg);
     validateItem(md.getItemType(), node);
     return md;
   }
@@ -174,7 +175,7 @@ public class SpMaterialUtils implements MaterialUtils {
     public MaterialMatcher.Builder visit(ModernMaterialNames.MaterialMapping mapping) {
       if (mapping.single()) {
         var type = mapping.type();
-        mapping.data().ifPresentOrElse(d -> visit(type, d), () -> visit(type));
+        mapping.data().ifPresentOrElse(data -> visit(type, data), () -> visit(type));
       } else {
         var block = mapping.blockType();
         mapping.blockData().ifPresentOrElse(data -> visit(block, data), () -> visit(block));
