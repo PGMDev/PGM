@@ -156,35 +156,37 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     for (Team team : teams) {
       TeamFactory info = team.getInfo();
-      boolean[] alliesState = {true};
-      boolean[] enemiesState = {true};
 
       if (info.getNameTagAlliesFilter() != null) {
         fmm.onChange(Match.class, info.getNameTagAlliesFilter(), (filterable, response) -> {
-          alliesState[0] = response;
-          updateNameTagVisibility(team, alliesState[0], enemiesState[0], smm);
+          NameTagVisibility current = team.getNameTagVisibility();
+          team.setNameTagVisibility(
+              response
+                  ? (current == NameTagVisibility.HIDE_FOR_OWN_TEAM
+                      ? NameTagVisibility.ALWAYS
+                      : NameTagVisibility.HIDE_FOR_OTHER_TEAMS)
+                  : (current == NameTagVisibility.ALWAYS
+                      ? NameTagVisibility.HIDE_FOR_OWN_TEAM
+                      : NameTagVisibility.NEVER));
+          smm.updatePartyScoreboardTeam(team);
         });
       }
 
       if (info.getNameTagEnemiesFilter() != null) {
         fmm.onChange(Match.class, info.getNameTagEnemiesFilter(), (filterable, response) -> {
-          enemiesState[0] = response;
-          updateNameTagVisibility(team, alliesState[0], enemiesState[0], smm);
+          NameTagVisibility current = team.getNameTagVisibility();
+          team.setNameTagVisibility(
+              response
+                  ? (current == NameTagVisibility.HIDE_FOR_OTHER_TEAMS
+                      ? NameTagVisibility.ALWAYS
+                      : NameTagVisibility.HIDE_FOR_OWN_TEAM)
+                  : (current == NameTagVisibility.ALWAYS
+                      ? NameTagVisibility.HIDE_FOR_OTHER_TEAMS
+                      : NameTagVisibility.NEVER));
+          smm.updatePartyScoreboardTeam(team);
         });
       }
     }
-  }
-
-  private void updateNameTagVisibility(
-      Team team, boolean allies, boolean enemies, ScoreboardMatchModule smm) {
-    NameTagVisibility visibility;
-    if (allies && enemies) visibility = NameTagVisibility.ALWAYS;
-    else if (allies) visibility = NameTagVisibility.HIDE_FOR_OTHER_TEAMS;
-    else if (enemies) visibility = NameTagVisibility.HIDE_FOR_OWN_TEAM;
-    else visibility = NameTagVisibility.NEVER;
-
-    team.setNameTagVisibility(visibility);
-    smm.updatePartyScoreboardTeam(team);
   }
 
   protected void updateMaxPlayers() {
