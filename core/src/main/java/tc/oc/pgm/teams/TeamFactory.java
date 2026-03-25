@@ -8,6 +8,7 @@ import org.bukkit.event.Event;
 import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.PartyQuery;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
@@ -27,6 +28,8 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition
   protected final int maxPlayers;
   protected final int maxOverfill;
   protected final NameTagVisibility nameTagVisibility;
+  protected final Filter nameTagEnemiesFilter;
+  protected final Filter nameTagAlliesFilter;
 
   /**
    * Create a TeamInfo instance with the specified information.
@@ -38,6 +41,8 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition
    * @param dyeColor Dye color to be used for blocks on kits or control points
    * @param maxPlayers Maximum amount of players that may be on this team.
    * @param nameTagVisibility Who can see the name tags of players on this team
+   * @param nameTagAlliesFilter Filter to dynamically control name tag visibility for allies
+   * @param nameTagEnemiesFilter Filter to dynamically control name tag visibility for enemies
    */
   public TeamFactory(
       @Nullable String id,
@@ -48,7 +53,9 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition
       int minPlayers,
       int maxPlayers,
       int maxOverfill,
-      NameTagVisibility nameTagVisibility) {
+      NameTagVisibility nameTagVisibility,
+      Filter nameTagAlliesFilter,
+      Filter nameTagEnemiesFilter) {
     super(id);
     this.defaultName = defaultName;
     this.defaultNamePlural = defaultNamePlural;
@@ -58,6 +65,8 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition
     this.maxPlayers = maxPlayers;
     this.maxOverfill = maxOverfill;
     this.nameTagVisibility = nameTagVisibility;
+    this.nameTagAlliesFilter = nameTagAlliesFilter;
+    this.nameTagEnemiesFilter = nameTagEnemiesFilter;
   }
 
   @Override
@@ -143,6 +152,14 @@ public class TeamFactory extends SelfIdentifyingFeatureDefinition
 
   public NameTagVisibility getNameTagVisibility() {
     return nameTagVisibility;
+  }
+
+  public Filter getNameTagAlliesFilter() {
+    return nameTagAlliesFilter;
+  }
+
+  public Filter getNameTagEnemiesFilter() {
+    return nameTagEnemiesFilter;
   }
 
   // Filter implementation:

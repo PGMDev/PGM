@@ -22,18 +22,21 @@ import net.kyori.adventure.util.Ticks;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
@@ -42,6 +45,7 @@ import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.match.PartyImpl;
 import tc.oc.pgm.match.QueuedParty;
+import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
@@ -143,6 +147,44 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     updateMaxPlayers();
     updateReadiness();
+  }
+
+  @EventHandler
+  public void onMatchLoad(MatchLoadEvent event) {
+    var fmm = match.needModule(FilterMatchModule.class);
+    var smm = match.needModule(ScoreboardMatchModule.class);
+
+    for (Team team : teams) {
+      TeamFactory info = team.getInfo();
+      boolean[] alliesState = {true};
+      boolean[] enemiesState = {true};
+
+      if (info.getNameTagAlliesFilter() != null) {
+        fmm.onChange(Match.class, info.getNameTagAlliesFilter(), (filterable, response) -> {
+          alliesState[0] = response;
+          updateNameTagVisibility(team, alliesState[0], enemiesState[0], smm);
+        });
+      }
+
+      if (info.getNameTagEnemiesFilter() != null) {
+        fmm.onChange(Match.class, info.getNameTagEnemiesFilter(), (filterable, response) -> {
+          enemiesState[0] = response;
+          updateNameTagVisibility(team, alliesState[0], enemiesState[0], smm);
+        });
+      }
+    }
+  }
+
+  private void updateNameTagVisibility(
+      Team team, boolean allies, boolean enemies, ScoreboardMatchModule smm) {
+    NameTagVisibility visibility;
+    if (allies && enemies) visibility = NameTagVisibility.ALWAYS;
+    else if (allies) visibility = NameTagVisibility.HIDE_FOR_OTHER_TEAMS;
+    else if (enemies) visibility = NameTagVisibility.HIDE_FOR_OWN_TEAM;
+    else visibility = NameTagVisibility.NEVER;
+
+    team.setNameTagVisibility(visibility);
+    smm.updatePartyScoreboardTeam(team);
   }
 
   protected void updateMaxPlayers() {

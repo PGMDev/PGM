@@ -18,20 +18,24 @@ import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.QueuedParty;
+import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.util.bukkit.Sounds;
@@ -72,6 +76,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   private final Match match;
   private final FreeForAllOptions options;
   private @Nullable Integer minPlayers, maxPlayers, maxOverfill;
+  private @Nullable NameTagVisibility nameTagVisibility;
   private int minPlayersNeeded = Integer.MAX_VALUE;
   private final Map<UUID, Tribute> tributes = new HashMap<>();
   private final Deque<ChatColor> colors = new ArrayDeque<>();
@@ -113,6 +118,10 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     return maxOverfill != null ? maxOverfill : options.maxOverfill;
   }
 
+  public @Nullable NameTagVisibility getNameTagVisibility() {
+    return nameTagVisibility != null ? nameTagVisibility : options.nameTagVisibility;
+  }
+
   public void setMinPlayers(@Nullable Integer minPlayers) {
     this.minPlayers = minPlayers == null ? options.minPlayers : minPlayers;
     updateReadiness();
@@ -124,11 +133,29 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     match.setMaxPlayers(getMaxPlayers());
   }
 
+  public void setNameTagVisibility(@Nullable NameTagVisibility nameTagVisibility) {
+    this.nameTagVisibility = nameTagVisibility;
+  }
+
   @Override
   public void load() {
     match.needModule(JoinMatchModule.class).setJoinHandler(this);
     match.setMaxPlayers(getMaxPlayers());
     updateReadiness();
+  }
+
+  @EventHandler
+  public void onMatchLoad(MatchLoadEvent event) {
+    var fmm = match.needModule(FilterMatchModule.class);
+
+    fmm.onChange(Match.class, options.nameTagVisibilityFilter, ((filterable, response) -> {
+      setNameTagVisibility(response ? NameTagVisibility.ALWAYS : NameTagVisibility.NEVER);
+
+      var smm = match.needModule(ScoreboardMatchModule.class);
+      tributes.forEach((uuid, tribute) -> {
+        smm.updatePartyScoreboardTeam(tribute);
+      });
+    }));
   }
 
   protected void updateReadiness() {

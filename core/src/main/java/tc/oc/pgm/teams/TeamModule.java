@@ -14,6 +14,7 @@ import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -103,6 +104,8 @@ public class TeamModule implements MapModule<TeamMatchModule> {
 
   private static TeamFactory parseTeamDefinition(Element el, MapFactory factory)
       throws InvalidXMLException {
+    var parser = factory.getParser();
+
     String id = el.getAttributeValue("id");
 
     String name = el.getTextNormalize();
@@ -114,8 +117,22 @@ public class TeamModule implements MapModule<TeamMatchModule> {
 
     ChatColor color = XMLUtils.parseChatColor(Node.fromAttr(el, "color"), ChatColor.WHITE);
     DyeColor dyeColor = XMLUtils.parseDyeColor(el.getAttribute("dye-color"), null);
-    NameTagVisibility nameTagVisibility = XMLUtils.parseNameTagVisibility(
-        Node.fromAttr(el, "show-name-tags"), NameTagVisibility.ALWAYS);
+
+    NameTagVisibility nameTagVisibility =
+        XMLUtils.parseNameTagVisibility(Node.fromAttr(el, "show-name-tags"), null);
+    Filter nameTagAlliesFilter =
+        parser.filter(el, "name-tags-allies-filter").dynamic(Match.class).orNull();
+    Filter nameTagEnemiesFilter =
+        parser.filter(el, "name-tags-enemies-filter").dynamic(Match.class).orNull();
+
+    if (nameTagVisibility != null
+        && (nameTagAlliesFilter != null || nameTagEnemiesFilter != null)) {
+      throw new InvalidXMLException(
+          "Attribute 'show-name-tags' cannot be combined with 'name-tags-allies-filter' or 'name-tags-enemies-filter'",
+          el);
+    }
+
+    if (nameTagVisibility == null) nameTagVisibility = NameTagVisibility.ALWAYS;
 
     int minPlayers = XMLUtils.parseNumber(Node.fromAttr(el, "min"), Integer.class, 0);
     int maxPlayers = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "max"), Integer.class);
@@ -128,7 +145,17 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     }
 
     TeamFactory teamFactory = new TeamFactory(
-        id, name, plural, color, dyeColor, minPlayers, maxPlayers, maxOverfill, nameTagVisibility);
+        id,
+        name,
+        plural,
+        color,
+        dyeColor,
+        minPlayers,
+        maxPlayers,
+        maxOverfill,
+        nameTagVisibility,
+        nameTagAlliesFilter,
+        nameTagEnemiesFilter);
     factory.getFeatures().addFeature(el, teamFactory);
 
     return teamFactory;
