@@ -24,7 +24,7 @@ import org.bukkit.entity.Painting;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.material.BlockMaterialData;
