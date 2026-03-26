@@ -10,27 +10,41 @@ import org.jspecify.annotations.Nullable;
 class ModernMaterialNames {
 
   protected record MaterialMapping(
-      Material itemMaterial,
+      @Nullable Material itemMaterial,
       @Nullable Short itemDamage,
-      Material blockMaterial,
+      @Nullable Material blockMaterial,
       @Nullable Short blockDamage) {
 
-    MaterialMapping(Material material, @Nullable Short damage) {
+    protected MaterialMapping {
+      if (itemMaterial != null && !SpMaterialUtils.isItem(itemMaterial)) {
+        itemMaterial = null;
+        itemDamage = null;
+      }
+
+      if (blockMaterial != null && !blockMaterial.isBlock()) {
+        blockMaterial = null;
+        blockDamage = null;
+      }
+    }
+
+    MaterialMapping(@Nullable Material material, @Nullable Short damage) {
       this(material, damage, material, damage);
     }
 
     boolean single() {
+      if (itemMaterial == null || blockMaterial == null) return true;
       return itemMaterial == blockMaterial && Objects.equals(itemDamage, blockDamage);
     }
 
     Material type() {
-      return itemMaterial;
+      return itemMaterial != null ? itemMaterial : blockMaterial;
     }
 
     Optional<Short> data() {
-      return Optional.ofNullable(itemDamage);
+      return Optional.ofNullable(itemMaterial != null ? itemDamage : blockDamage);
     }
 
+    @Nullable
     Material itemType() {
       return itemMaterial;
     }
@@ -39,6 +53,7 @@ class ModernMaterialNames {
       return Optional.ofNullable(itemDamage);
     }
 
+    @Nullable
     Material blockType() {
       return blockMaterial;
     }

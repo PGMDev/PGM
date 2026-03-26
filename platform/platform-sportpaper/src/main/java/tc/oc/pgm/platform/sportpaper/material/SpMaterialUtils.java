@@ -21,7 +21,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.util.BlockVector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -114,8 +114,12 @@ public class SpMaterialUtils implements MaterialUtils {
     return md;
   }
 
+  static boolean isItem(Material material) {
+    return material == Material.AIR || CraftMagicNumbers.getItem(material) != null;
+  }
+
   static void validateItem(Material material, Node node) throws InvalidXMLException {
-    if (CraftMagicNumbers.getItem(material) == null && material != Material.AIR) {
+    if (!isItem(material)) {
       throw new InvalidXMLException("Invalid item/block " + material, node);
     }
   }
@@ -202,6 +206,13 @@ public class SpMaterialUtils implements MaterialUtils {
 
     @Override
     protected void parseSingle(String text, @Nullable Node node) throws InvalidXMLException {
+      if (blocksOnly) {
+        var md = SpMaterialParser.parseBlock(text, node);
+        if (!md.getItemType().isBlock())
+          throw new InvalidXMLException(
+              "Material " + md.getItemType().name() + " is not a block", node);
+      }
+
       SpMaterialParser.parse(text, node, materialsOnly, this);
     }
   }

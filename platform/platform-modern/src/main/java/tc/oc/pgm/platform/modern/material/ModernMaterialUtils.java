@@ -216,6 +216,13 @@ public class ModernMaterialUtils implements MaterialUtils {
 
     @Override
     protected void parseSingle(String text, @Nullable Node node) throws InvalidXMLException {
+      if (blocksOnly) {
+        var md = ModernMaterialParser.parseBlock(text, node);
+        if (!md.getItemType().isBlock())
+          throw new InvalidXMLException(
+              "Material " + md.getItemType().name() + " is not a block", node);
+      }
+
       try {
         currentNode = node;
         ModernMaterialParser.parse(text, node, materialsOnly, this);

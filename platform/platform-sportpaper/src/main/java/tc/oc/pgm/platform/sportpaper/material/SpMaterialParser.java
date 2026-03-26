@@ -63,7 +63,7 @@ class SpMaterialParser {
     if (material != null) return material;
 
     var modern = ModernMaterialNames.get(text);
-    if (modern != null) return modern.blockType();
+    if (modern != null) return modern.type();
 
     throw new InvalidXMLException("Could not find material '" + text + "'.", node);
   }
@@ -111,10 +111,11 @@ class SpMaterialParser {
 
       @Override
       public MaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
+        var mat = mapping.blockType() != null ? mapping.blockType() : mapping.itemType();
         return mapping
             .blockData()
-            .map(data -> new MaterialData(mapping.blockType(), (byte) (short) data))
-            .orElseGet(() -> new MaterialData(mapping.blockType()));
+            .map(data -> new MaterialData(mat, (byte) (short) data))
+            .orElseGet(() -> new MaterialData(mat));
       }
     };
 
@@ -131,10 +132,11 @@ class SpMaterialParser {
 
       @Override
       public SpMaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
+        var mat = mapping.itemType() != null ? mapping.itemType() : mapping.blockType();
         return mapping
             .itemData()
-            .map(data -> new SpMaterialData(mapping.itemType(), data))
-            .orElseGet(() -> new SpMaterialData(mapping.itemType()));
+            .map(data -> new SpMaterialData(mat, data))
+            .orElseGet(() -> new SpMaterialData(mat));
       }
     };
 
@@ -151,10 +153,11 @@ class SpMaterialParser {
 
       @Override
       public SpMaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
+        var mat = mapping.blockType() != null ? mapping.blockType() : mapping.itemType();
         return mapping
             .blockData()
-            .map(data -> new SpMaterialData(mapping.blockType(), data))
-            .orElseGet(() -> new SpMaterialData(mapping.blockType()));
+            .map(data -> new SpMaterialData(mat, data))
+            .orElseGet(() -> new SpMaterialData(mat));
       }
     };
 
