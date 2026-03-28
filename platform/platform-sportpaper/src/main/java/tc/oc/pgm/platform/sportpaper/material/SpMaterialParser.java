@@ -4,6 +4,7 @@ import java.util.Locale;
 import org.bukkit.Material;
 import org.bukkit.material.MaterialData;
 import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.platform.sportpaper.material.ModernMaterialNames.MaterialMapping;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -11,8 +12,8 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 class SpMaterialParser {
 
-  public static MaterialData parseBukkit(Node node) throws InvalidXMLException {
-    return parse(node.getValueNormalize(), node, false, Adapter.BUKKIT);
+  public static MaterialData parseBukkitItem(Node node) throws InvalidXMLException {
+    return parse(node.getValueNormalize(), node, false, Adapter.BUKKIT_ITEM);
   }
 
   public static SpMaterialData parseItem(String text, Node node) throws InvalidXMLException {
@@ -24,70 +25,45 @@ class SpMaterialParser {
   }
 
   public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
-    // The set of legacy-mapped modern materials which have separate item
-    // and block forms do not consist of blocks that can be gotten as items
-    // legitimately or easily, so for shop currency we force the item here.
-    return parse(text, node, true, Adapter.PGM_BLOCK).getItemType();
+    return parse(text, node, true, Adapter.MATERIAL);
   }
 
+  @SuppressWarnings("deprecation")
   public static <T> T parse(String text, @Nullable Node node, boolean matOnly, Adapter<T> adapter)
       throws InvalidXMLException {
-    if (matOnly) return parseMaterial(normalize(text), node, adapter);
+    String head = text;
+    Short data = null;
+    if (!matOnly) {
+      // If we're parsing more than just material, split material:data
+      String[] pieces = text.split(":");
+      if (pieces.length > 2)
+        throw new InvalidXMLException("Invalid material pattern '" + text + "'.", node);
 
-    String[] pieces = text.split(":");
-    if (pieces.length > 2)
-      throw new InvalidXMLException("Invalid material pattern '" + text + "'.", node);
-
-    String head = normalize(pieces[0]);
-    if (pieces.length == 1) return parseMaterial(head, node, adapter);
-
-    try {
-      return adapter.visit(
-          resolveMaterial(head, node), XMLUtils.parseNumber(node, pieces[1], Short.class));
-    } catch (NumberFormatException e) {
-      throw new InvalidXMLException("Invalid damage value: " + pieces[1], node, e);
+      head = pieces[0];
+      if (pieces.length == 2) data = XMLUtils.parseNumber(node, pieces[1], Short.class);
     }
-  }
 
-  @SuppressWarnings("deprecation")
-  private static Material resolveMaterial(String text, Node node) throws InvalidXMLException {
-    int id = StringUtils.parseNumericId(text);
+    // Attempt parsing as numberic id
+    int id = StringUtils.parseNumericId(head);
     if (id != -1) {
       var byId = Material.getMaterial(id);
       if (byId == null)
-        throw new InvalidXMLException("Could not find material with id '" + text + "'.", node);
-      return byId;
+        throw new InvalidXMLException("Could not find material with id '" + head + "'.", node);
+      return data != null ? adapter.visit(byId, data) : adapter.visit(byId);
     }
 
-    var material = Material.getMaterial(text);
-    if (material != null) return material;
+    head = normalize(head);
 
-    var modern = ModernMaterialNames.get(text);
-    if (modern != null) return modern.type();
-
-    throw new InvalidXMLException("Could not find material '" + text + "'.", node);
-  }
-
-  @SuppressWarnings("deprecation")
-  private static <T> T parseMaterial(String text, Node node, Adapter<T> adapter)
-      throws InvalidXMLException {
-    int id = StringUtils.parseNumericId(text);
-    if (id != -1) {
-      var byId = Material.getMaterial(id);
-      if (byId == null)
-        throw new InvalidXMLException("Could not find material with id '" + text + "'.", node);
-      return adapter.visit(byId);
+    // Attempt parsing as modern name, only if no data
+    if (data == null) {
+      var modern = ModernMaterialNames.get(head);
+      if (modern != null) return adapter.visit(node, modern);
     }
 
-    var material = Material.getMaterial(text);
-    var modern = ModernMaterialNames.get(text);
-
-    // Always parse modern item name if existent
-    if (modern != null && (material == null || !modern.single() || modern.type() != material)) {
-      return adapter.visit(modern);
-    }
-
-    if (material != null) return adapter.visit(material);
+    // Parse as legacy material name
+    var material = Material.getMaterial(head);
+    if (material != null)
+      return data != null ? adapter.visit(material, data) : adapter.visit(material);
 
     throw new InvalidXMLException("Could not find material '" + text + "'.", node);
   }
@@ -97,7 +73,7 @@ class SpMaterialParser {
   }
 
   interface Adapter<T> {
-    Adapter<MaterialData> BUKKIT = new Adapter<>() {
+    Adapter<MaterialData> BUKKIT_ITEM = new Adapter<>() {
       @Override
       public MaterialData visit(Material material) {
         return new MaterialData(material);
@@ -110,12 +86,8 @@ class SpMaterialParser {
       }
 
       @Override
-      public MaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
-        var mat = mapping.blockType() != null ? mapping.blockType() : mapping.itemType();
-        return mapping
-            .blockData()
-            .map(data -> new MaterialData(mat, (byte) (short) data))
-            .orElseGet(() -> new MaterialData(mat));
+      public MaterialData visit(Node node, MaterialMapping mapping) throws InvalidXMLException {
+        return mapping.mapItem(node, this::visit, this::visit);
       }
     };
 
@@ -131,12 +103,8 @@ class SpMaterialParser {
       }
 
       @Override
-      public SpMaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
-        var mat = mapping.itemType() != null ? mapping.itemType() : mapping.blockType();
-        return mapping
-            .itemData()
-            .map(data -> new SpMaterialData(mat, data))
-            .orElseGet(() -> new SpMaterialData(mat));
+      public SpMaterialData visit(Node node, MaterialMapping mapping) throws InvalidXMLException {
+        return mapping.mapItem(node, this::visit, this::visit);
       }
     };
 
@@ -152,12 +120,31 @@ class SpMaterialParser {
       }
 
       @Override
-      public SpMaterialData visit(ModernMaterialNames.MaterialMapping mapping) {
-        var mat = mapping.blockType() != null ? mapping.blockType() : mapping.itemType();
-        return mapping
-            .blockData()
-            .map(data -> new SpMaterialData(mat, data))
-            .orElseGet(() -> new SpMaterialData(mat));
+      public SpMaterialData visit(Node node, MaterialMapping mapping) throws InvalidXMLException {
+        return mapping.mapBlock(node, this::visit, this::visit);
+      }
+    };
+
+    Adapter<Material> MATERIAL = new Adapter<>() {
+      @Override
+      public Material visit(Material material) {
+        return material;
+      }
+
+      @Override
+      public Material visit(Material material, short data) {
+        // Should never happen, parsing does material-only and remapping should throw earlier.
+        throw new UnsupportedOperationException(
+            "Only supports materials, but got " + material + ":" + data);
+      }
+
+      @Override
+      public Material visit(Node node, MaterialMapping mapping) throws InvalidXMLException {
+        var material = mapping.mapSingle(node, (m, d) -> null, this::visit);
+        if (material == null)
+          throw new InvalidXMLException(
+              "Mapping does not have a material-only form " + mapping, node);
+        return material;
       }
     };
 
@@ -165,6 +152,6 @@ class SpMaterialParser {
 
     T visit(Material material, short data);
 
-    T visit(ModernMaterialNames.MaterialMapping mapping);
+    T visit(Node node, MaterialMapping mapping) throws InvalidXMLException;
   }
 }

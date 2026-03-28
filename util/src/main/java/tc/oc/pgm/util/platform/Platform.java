@@ -42,6 +42,7 @@ public abstract class Platform {
    * @throws Throwable could throw even class not found issues if loading in the wrong version
    */
   public static void init() throws Throwable {
+    MANIFEST.init();
     NMSHacks.NMS_HACKS.getTPS();
 
     var item = MaterialUtils.MATERIAL_UTILS.parseItemMaterialData("35:1", null);
@@ -92,6 +93,8 @@ public abstract class Platform {
   }
 
   public interface Manifest {
+    default void init() {}
+
     void onEnable(Plugin plugin);
   }
 }

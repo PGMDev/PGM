@@ -3,63 +3,86 @@ package tc.oc.pgm.platform.sportpaper.material;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import org.bukkit.Material;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 
-class ModernMaterialNames {
+public class ModernMaterialNames {
 
   protected record MaterialMapping(
-      @Nullable Material itemMaterial,
-      @Nullable Short itemDamage,
-      @Nullable Material blockMaterial,
-      @Nullable Short blockDamage) {
+      @Nullable Material itemType,
+      @Nullable Short itemData,
+      @Nullable Material blockType,
+      @Nullable Short blockData) {
 
     protected MaterialMapping {
-      if (itemMaterial != null && !SpMaterialUtils.isItem(itemMaterial)) {
-        itemMaterial = null;
-        itemDamage = null;
-      }
-
-      if (blockMaterial != null && !blockMaterial.isBlock()) {
-        blockMaterial = null;
-        blockDamage = null;
-      }
-    }
-
-    MaterialMapping(@Nullable Material material, @Nullable Short damage) {
-      this(material, damage, material, damage);
+      if (itemType != null && !SpMaterialUtils.isItem(itemType))
+        throw new IllegalArgumentException("Material is not an item " + itemType);
+      if (blockType != null && !SpMaterialUtils.isBlock(blockType))
+        throw new IllegalArgumentException("Material is not a block " + blockType);
+      if (itemType == null && blockType == null)
+        throw new IllegalArgumentException("Expected at least either item or block material");
     }
 
     boolean single() {
-      if (itemMaterial == null || blockMaterial == null) return true;
-      return itemMaterial == blockMaterial && Objects.equals(itemDamage, blockDamage);
+      return itemType == null
+          || blockType == null
+          || (itemType == blockType && Objects.equals(itemData, blockData));
     }
 
-    Material type() {
-      return itemMaterial != null ? itemMaterial : blockMaterial;
+    <T> T mapSingle(
+        Node node, BiFunction<Material, Short, T> withData, Function<Material, T> withoutData)
+        throws InvalidXMLException {
+      if (!single()) throw new InvalidXMLException("Mapping is ambiguous " + this, node);
+      return blockType != null
+          ? mapBlock(node, withData, withoutData)
+          : mapItem(node, withData, withoutData);
     }
 
-    Optional<Short> data() {
-      return Optional.ofNullable(itemMaterial != null ? itemDamage : blockDamage);
+    <T> T mapItem(
+        Node node, BiFunction<Material, Short, T> withData, Function<Material, T> withoutData)
+        throws InvalidXMLException {
+      if (itemType == null)
+        throw new InvalidXMLException("Mapping does not have an item form " + this, node);
+      return itemData != null ? withData.apply(itemType, itemData) : withoutData.apply(itemType);
     }
 
-    @Nullable
-    Material itemType() {
-      return itemMaterial;
+    <T> T mapBlock(
+        Node node, BiFunction<Material, Short, T> withData, Function<Material, T> withoutData)
+        throws InvalidXMLException {
+      if (blockType == null)
+        throw new InvalidXMLException("Mapping does not have a block form " + this, node);
+      return blockData != null
+          ? withData.apply(blockType, blockData)
+          : withoutData.apply(blockType);
     }
 
-    Optional<Short> itemData() {
-      return Optional.ofNullable(itemDamage);
+    void mapBoth(BiConsumer<Material, Short> withData, Consumer<Material> withoutData) {
+      if (blockType != null) {
+        if (blockData == null) withoutData.accept(blockType);
+        else withData.accept(blockType, blockData);
+        if (single()) return;
+      }
+      if (itemType != null) {
+        if (itemData == null) withoutData.accept(itemType);
+        else withData.accept(itemType, itemData);
+      }
     }
 
-    @Nullable
-    Material blockType() {
-      return blockMaterial;
-    }
-
-    Optional<Short> blockData() {
-      return Optional.ofNullable(blockDamage);
+    @Override
+    public @NonNull String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append("{block=").append(this.blockType);
+      if (blockData != null) sb.append(":").append(blockData);
+      sb.append(",item=").append(this.itemType);
+      if (itemData != null) sb.append(":").append(itemData);
+      return sb.append("}").toString();
     }
   }
 
@@ -171,7 +194,6 @@ class ModernMaterialNames {
     put("CRACKED_STONE_BRICKS", "SMOOTH_BRICK:2");
     put("CHISELED_STONE_BRICKS", "SMOOTH_BRICK:3");
     put("STONE_BRICK_STAIRS", "SMOOTH_STAIRS");
-    put("STONE_BRICK_SLAB", "STEP:5");
 
     // Dirt variants
     put("GRASS_BLOCK", "GRASS");
@@ -190,17 +212,18 @@ class ModernMaterialNames {
     put("SMOOTH_RED_SANDSTONE", "RED_SANDSTONE:2");
 
     // Slabs
-    put("STONE_SLAB", "STEP:0");
     put("SMOOTH_STONE_SLAB", "STEP:0");
     put("SANDSTONE_SLAB", "STEP:1");
     put("PETRIFIED_OAK_SLAB", "STEP:2");
     put("COBBLESTONE_SLAB", "STEP:3");
     put("BRICK_SLAB", "STEP:4");
+    put("STONE_BRICK_SLAB", "STEP:5");
     put("NETHER_BRICK_SLAB", "STEP:6");
     put("QUARTZ_SLAB", "STEP:7");
     put("RED_SANDSTONE_SLAB", "STONE_SLAB2:0");
 
     // Modern-only slabs that reasonably remap backwards
+    put("STONE_SLAB", "STEP:0"); // remap to smooth stone slab
     put("SMOOTH_SANDSTONE_SLAB", "STEP:1"); // remap to sandstone slab
     put("CUT_SANDSTONE_SLAB", "STEP:1"); // remap to sandstone slab
     put("SMOOTH_RED_SANDSTONE_SLAB", "STONE_SLAB2:0"); // remap to red sandstone slab
@@ -258,7 +281,6 @@ class ModernMaterialNames {
     put("PEONY", "DOUBLE_PLANT:5");
 
     // Short plants
-    put("DEAD_BUSH", "LONG_GRASS:0");
     put("SHORT_GRASS", "LONG_GRASS:1");
     put("FERN", "LONG_GRASS:2");
 
@@ -360,7 +382,6 @@ class ModernMaterialNames {
     put("HEAVY_WEIGHTED_PRESSURE_PLATE", "IRON_PLATE");
     put("IRON_BARS", "IRON_FENCE");
     put("IRON_DOOR", "IRON_DOOR", "IRON_DOOR_BLOCK");
-    put("LAVA", "STATIONARY_LAVA");
     put("LEAD", "LEASH");
     put("LIGHT_WEIGHTED_PRESSURE_PLATE", "GOLD_PLATE");
     put("LILY_PAD", "WATER_LILY");
@@ -370,7 +391,7 @@ class ModernMaterialNames {
     put("MYCELIUM", "MYCEL");
     put("NETHER_PORTAL", "PORTAL");
     put("NETHER_QUARTZ_ORE", "QUARTZ_ORE");
-    put("NETHER_WART", "NETHER_WARTS", "NETHER_STALK");
+    put("NETHER_WART", "NETHER_STALK", "NETHER_WARTS");
     put("PISTON", "PISTON_BASE");
     put("PISTON_HEAD", "PISTON_EXTENSION");
     put("PORKCHOP", "PORK");
@@ -390,7 +411,6 @@ class ModernMaterialNames {
     put("TNT_MINECART", "EXPLOSIVE_MINECART");
     put("VOID_AIR", "AIR");
     put("WALL_TORCH", "TORCH");
-    put("WATER", "STATIONARY_WATER");
     put("WHEAT", "WHEAT", "CROPS");
     put("WHEAT_SEEDS", "SEEDS");
     put("WRITABLE_BOOK", "BOOK_AND_QUILL");
@@ -410,43 +430,66 @@ class ModernMaterialNames {
     put("MUSIC_DISC_WAIT", "RECORD_12");
   }
 
-  private static Material parseMaterial(String name) {
-    int split = name.indexOf(':', 2);
-    String materialName = split == -1 ? name : name.substring(0, split);
+  private ModernMaterialNames() {}
 
-    Material material = Material.getMaterial(materialName);
-    if (material == null) throw new IllegalArgumentException("Unknown material: " + materialName);
-
-    return material;
-  }
-
-  private static @Nullable Short parseDamage(String name) {
-    int split = name.indexOf(':', 2);
-    if (split == -1) return null;
-
-    return Short.parseShort(name.substring(split + 1));
+  private static void put(String modern, String legacy, int data) {
+    put(modern, resolveMapping(Material.getMaterial(legacy), (short) data));
   }
 
   private static void put(String modern, String legacy) {
-    NAMES.put(modern, new MaterialMapping(parseMaterial(legacy), parseDamage(legacy)));
+    var split = legacy.split(":", 2);
+    var mat = Objects.requireNonNull(Material.getMaterial(split[0]), "Unknown material");
+    var data = split.length == 2 ? Short.parseShort(split[1]) : null;
+    put(modern, resolveMapping(mat, data));
   }
 
-  private static void put(String modern, String legacy, int data) {
-    Material material = Material.getMaterial(legacy);
-    if (material == null) throw new IllegalArgumentException("Unknown material: " + legacy);
+  private static void put(String modern, String legacyItem, String legacyBlock) {
+    var splitIt = legacyItem.split(":", 2);
+    var matIt = Objects.requireNonNull(Material.getMaterial(splitIt[0]), "Unknown item");
+    var dataIt = splitIt.length == 2 ? Short.parseShort(splitIt[1]) : null;
 
-    NAMES.put(modern, new MaterialMapping(material, (short) data));
+    var splitBl = legacyBlock.split(":", 2);
+    var matBl = Objects.requireNonNull(Material.getMaterial(splitBl[0]), "Unknown block");
+    var dataBl = splitBl.length == 2 ? Short.parseShort(splitBl[1]) : null;
+
+    put(modern, new MaterialMapping(matIt, dataIt, matBl, dataBl));
   }
 
-  private static void put(String modern, String itemLegacy, String blockLegacy) {
-    NAMES.put(
-        modern,
-        new MaterialMapping(
-            parseMaterial(itemLegacy), parseDamage(itemLegacy),
-            parseMaterial(blockLegacy), parseDamage(blockLegacy)));
+  private static MaterialMapping resolveMapping(Material mat, Short data) {
+    Material matIt = null, matBl = null;
+    Short dataIt = null, dataBl = null;
+    if (SpMaterialUtils.isItem(mat)) {
+      matIt = mat;
+      dataIt = data;
+    }
+    if (SpMaterialUtils.isBlock(mat)) {
+      matBl = mat;
+      dataBl = data;
+    }
+    return new MaterialMapping(matIt, dataIt, matBl, dataBl);
   }
 
-  static @Nullable MaterialMapping get(String name) {
+  private static void put(String modern, MaterialMapping mapping) {
+    if (NAMES.put(modern, mapping) != null)
+      throw new IllegalArgumentException("Duplicate mapping for: " + modern);
+  }
+
+  protected static @Nullable MaterialMapping get(String name) {
     return NAMES.get(name);
+  }
+
+  // Forces class initialization & validation
+  public static void validate() {
+    for (Material legacy : Material.values()) {
+      var m = get(legacy.name());
+      if (m == null) continue;
+
+      if (SpMaterialUtils.isItem(legacy) && (m.itemType() != legacy || m.itemData() != null))
+        throw new IllegalStateException(
+            "Legacy item material '" + legacy + "' is mapping to '" + m + "'");
+      if (SpMaterialUtils.isBlock(legacy) && (m.blockType() != legacy || m.blockData() != null))
+        throw new IllegalStateException(
+            "Legacy block material '" + legacy + "' is mapping to '" + m + "'");
+    }
   }
 }
