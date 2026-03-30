@@ -109,6 +109,7 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
 
         String id = destroyableEl.getAttributeValue("id");
         MaterialMatcher materials = MaterialMatcher.builder()
+            .blocksOnly()
             .multiPattern()
             .parse(Node.fromRequiredAttr(destroyableEl, "materials", "material"))
             .build();
