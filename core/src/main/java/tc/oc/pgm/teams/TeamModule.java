@@ -21,6 +21,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.util.StringUtils;
@@ -121,9 +122,9 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     NameTagVisibility nameTagVisibility =
         XMLUtils.parseNameTagVisibility(Node.fromAttr(el, "show-name-tags"), null);
     Filter nameTagAlliesFilter =
-        parser.filter(el, "name-tags-allies-filter").dynamic(Match.class).orNull();
+        parser.filter(el, "name-tags-allies-filter").dynamic(Party.class).orNull();
     Filter nameTagEnemiesFilter =
-        parser.filter(el, "name-tags-enemies-filter").dynamic(Match.class).orNull();
+        parser.filter(el, "name-tags-enemies-filter").dynamic(Party.class).orNull();
 
     if (nameTagVisibility != null
         && (nameTagAlliesFilter != null || nameTagEnemiesFilter != null)) {
