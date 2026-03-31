@@ -3,7 +3,7 @@ package tc.oc.pgm.tracker.info;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
@@ -24,32 +24,27 @@ public class ThrownPotionInfo extends EntityInfo implements PotionInfo {
   }
 
   @Override
-  public @Nullable PhysicalInfo getDamager() {
+  public @Nullable PhysicalInfo damager() {
     return this;
   }
 
   @Override
-  public @Nullable ParticipantState getAttacker() {
-    return getOwner();
+  public @Nullable ParticipantState attacker() {
+    return owner();
   }
 
   @Override
-  public @Nullable PotionEffectType getPotionEffect() {
+  public @Nullable PotionEffectType potionEffect() {
     return effectType;
   }
 
   @Override
-  public Component getName() {
-    return MinecraftComponent.potion(getPotionEffect());
+  public Component name() {
+    return MinecraftComponent.potion(potionEffect());
   }
 
   @Override
   public String toString() {
-    return getClass().getSimpleName()
-        + "{type="
-        + getEntityType()
-        + " potion="
-        + getPotionEffect()
-        + "}";
+    return getClass().getSimpleName() + "{type=" + entityType() + " potion=" + potionEffect() + "}";
   }
 }

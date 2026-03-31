@@ -81,7 +81,7 @@ public class DamageHistoryMatchModule implements MatchModule, Listener {
     if (victim == null) return;
 
     DamageInfo damageInfo = tracker().resolveDamage(event);
-    ParticipantState attacker = damageInfo.getAttacker() != null ? damageInfo.getAttacker() : null;
+    ParticipantState attacker = damageInfo.attacker() != null ? damageInfo.attacker() : null;
 
     damageHistory.addDamage(victim, getDamageAmount(event), attacker);
   }

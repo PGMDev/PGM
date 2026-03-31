@@ -74,7 +74,7 @@ public class DeathMessageBuilder {
 
   public DeathMessageBuilder(MatchPlayerDeathEvent event, Logger logger) {
     this.victim = event.getVictim();
-    this.killer = event.getDamageInfo().getAttacker();
+    this.killer = event.getDamageInfo().attacker();
     this.predicted = event.isPredicted();
     this.logger = logger;
 
@@ -191,8 +191,8 @@ public class DeathMessageBuilder {
   }
 
   boolean potion(PotionInfo potionInfo) {
-    if (potionInfo.getPotionEffect() != null && option("potion")) {
-      weapon = potionInfo.getName();
+    if (potionInfo.potionEffect() != null && option("potion")) {
+      weapon = potionInfo.name();
       return true;
     }
     return false;
@@ -201,7 +201,7 @@ public class DeathMessageBuilder {
   boolean item(ItemInfo itemInfo) {
     // TODO: Bukkit 1.13+ should be able to handle more than just weapons
     if (Materials.isWeapon(itemInfo.getItem().getType()) && option("item")) {
-      weapon = itemInfo.getName();
+      weapon = itemInfo.name();
       return true;
     }
     return false;
@@ -209,7 +209,7 @@ public class DeathMessageBuilder {
 
   boolean block(BlockInfo blockInfo) {
     if (option("block")) {
-      weapon = blockInfo.getName();
+      weapon = blockInfo.name();
       return true;
     }
     return false;
@@ -223,10 +223,10 @@ public class DeathMessageBuilder {
 
   boolean entity(EntityInfo entityInfo) {
     // Skip for entities that are weird and have no translations
-    if (IGNORED_ENTITIES.contains(entityInfo.getEntityType())) return false;
+    if (IGNORED_ENTITIES.contains(entityInfo.entityType())) return false;
 
     if (option("entity")) {
-      weapon = entityInfo.getName();
+      weapon = entityInfo.name();
       option(makeEntityIdentifier(entityInfo));
       return true;
     }
@@ -238,7 +238,7 @@ public class DeathMessageBuilder {
       if (potion(potionInfo)) {
         return true;
       } else if (option("entity")) {
-        // PotionInfo.getName returns a potion name,
+        // PotionInfo.name returns a potion name,
         // which doesn't work outside a potion death message.
         weapon = MinecraftComponent.material(Material.POTION);
         return true;
@@ -256,7 +256,7 @@ public class DeathMessageBuilder {
 
   boolean mob(MobInfo mobInfo) {
     if (option("mob")) {
-      mob = mobInfo.getName();
+      mob = mobInfo.name();
       option(makeEntityIdentifier(mobInfo));
       return true;
     }
@@ -296,7 +296,7 @@ public class DeathMessageBuilder {
 
   void generic(GenericDamageInfo info) throws NoMessage {
     require(
-        switch (info.getDamageType()) {
+        switch (info.damageType()) {
           case CONTACT -> "cactus";
           case DROWNING -> "drown";
           case LIGHTNING -> "lightning";
@@ -309,7 +309,7 @@ public class DeathMessageBuilder {
 
   void melee(MeleeInfo melee) throws NoMessage {
     require("melee");
-    attack(melee, melee.getWeapon());
+    attack(melee, melee.weapon());
   }
 
   void magic(PotionInfo potion, @Nullable PhysicalInfo attacker) throws NoMessage {
@@ -318,9 +318,9 @@ public class DeathMessageBuilder {
   }
 
   void projectile(ProjectileInfo projectile, Location distanceReference) throws NoMessage {
-    if (projectile.getProjectile() instanceof PotionInfo potionInfo) {
+    if (projectile.projectile() instanceof PotionInfo potionInfo) {
       try {
-        magic(potionInfo, projectile.getShooter());
+        magic(potionInfo, projectile.shooter());
         return;
       } catch (NoMessage ignored) {
         // If we can't generate a magic message (probably because it's part
@@ -330,18 +330,18 @@ public class DeathMessageBuilder {
 
     require("projectile");
 
-    PhysicalInfo info = projectile.getProjectile();
+    PhysicalInfo info = projectile.projectile();
     if (info instanceof EntityInfo entityInfo) {
-      info = switch (entityInfo.getEntityType()) {
+      info = switch (entityInfo.entityType()) {
         case UNKNOWN, ARROW, WITHER_SKULL -> null; // "shot by arrow" is redundant
         default -> info;
       };
     } else {
       // Projectile name may be different from entity name e.g. custom projectile
-      weapon = projectile.getName();
+      weapon = projectile.name();
     }
 
-    attack(projectile.getShooter(), info);
+    attack(projectile.shooter(), info);
     ranged(projectile, distanceReference);
   }
 
@@ -363,36 +363,36 @@ public class DeathMessageBuilder {
   void explosion(ExplosionInfo explosion, Location distanceReference) throws NoMessage {
     require("explosive");
     player();
-    physical(explosion.getExplosive());
+    physical(explosion.explosive());
     ranged(explosion, distanceReference);
   }
 
   void fire(FireInfo fire) throws NoMessage {
     require("fire");
     player();
-    if (!(fire.getIgniter() instanceof BlockInfo igniter
-        && igniter.getMaterial().getItemType() == Material.FIRE)) {
+    if (!(fire.igniter() instanceof BlockInfo igniter
+        && igniter.material().getItemType() == Material.FIRE)) {
       // "burned by fire" is redundant
-      physical(fire.getIgniter());
+      physical(fire.igniter());
     }
   }
 
   void fall(FallInfo fall) throws NoMessage {
     require("fall");
-    require(fall.getTo().name().toLowerCase());
+    require(fall.to().name().toLowerCase());
 
-    TrackerInfo cause = fall.getCause();
+    TrackerInfo cause = fall.cause();
     if (cause instanceof SpleefInfo spleefInfo) {
       require("spleef");
-      DamageInfo breaker = spleefInfo.getBreaker();
+      DamageInfo breaker = spleefInfo.breaker();
       if (breaker instanceof ExplosionInfo explosionInfo) {
-        explosion(explosionInfo, fall.getOrigin());
+        explosion(explosionInfo, fall.origin());
       } else {
         player();
       }
     } else if (cause instanceof DamageInfo damageInfo) {
-      damage(damageInfo, fall.getOrigin());
-    } else if (fall.getTo() == FallInfo.To.GROUND) {
+      damage(damageInfo, fall.origin());
+    } else if (fall.to() == FallInfo.To.GROUND) {
       setDistance(Trackers.distanceFromRanged(fall, victim.getBukkit().getLocation()));
 
       if (distance != null) {
@@ -422,7 +422,7 @@ public class DeathMessageBuilder {
       case PotionInfo potionInfo -> magic(potionInfo, null);
       case FallingBlockInfo fallingBlockInfo -> squash(fallingBlockInfo);
       case BlockInfo blockInfo -> {
-        switch (blockInfo.getMaterial().getItemType()) {
+        switch (blockInfo.material().getItemType()) {
           case ANVIL -> squash(blockInfo);
           case CACTUS -> cactus(blockInfo);
           default -> suffocate(blockInfo);
@@ -436,10 +436,10 @@ public class DeathMessageBuilder {
 
   // Converts an entity type into a legacy entity type name for translation purposes
   private String makeEntityIdentifier(EntityInfo entityInfo) {
-    var entityType = entityInfo.getEntityType();
+    var entityType = entityInfo.entityType();
     if (entityType == EntityType.CREEPER) return "Creeper";
     else if (entityType == EntityTypes.PRIMED_TNT) return "PrimedTnt";
-    return entityInfo.getIdentifier();
+    return entityInfo.identifier();
   }
 
   void build(DamageInfo damageInfo) {

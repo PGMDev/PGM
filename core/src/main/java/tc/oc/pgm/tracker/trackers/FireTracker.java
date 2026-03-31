@@ -12,7 +12,7 @@ import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -47,7 +47,7 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
       case FIRE_TICK:
         FireInfo info = resolveBurning(victim);
         if (info != null) return info;
-        // fall through
+      // fall through
 
       case FIRE:
       case LAVA:
@@ -95,7 +95,7 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
     FireInfo info = resolveBurning(event.getCombuster());
     if (info != null) {
       // First, try to resolve the player who ignited the combuster
-      info = new FireInfo(new EntityInfo(event.getCombuster(), info.getOwner()));
+      info = new FireInfo(new EntityInfo(event.getCombuster(), info.owner()));
     } else {
       // If an igniter is not found, fall back to the owner of the entity
       info = new FireInfo(entities().resolveEntity(event.getCombuster()));

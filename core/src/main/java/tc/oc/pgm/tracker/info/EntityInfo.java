@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.text.MinecraftComponent;
@@ -22,29 +22,45 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
     this.customName = entity.getCustomName();
   }
 
-  public Class<? extends Entity> getEntityClass() {
+  public Class<? extends Entity> entityClass() {
     return entityClass;
   }
 
-  public EntityType getEntityType() {
+  @Deprecated
+  public Class<? extends Entity> getEntityClass() {
+    return entityClass();
+  }
+
+  public EntityType entityType() {
     return entityType;
   }
 
-  public @Nullable String getCustomName() {
+  @Deprecated
+  public EntityType getEntityType() {
+    return entityType();
+  }
+
+  public @Nullable String customName() {
     return customName;
   }
 
-  @Override
-  public String getIdentifier() {
-    return getEntityType().getName();
+  @Deprecated
+  public @Nullable String getCustomName() {
+    return customName();
   }
 
   @Override
-  public Component getName() {
-    if (getCustomName() != null) {
-      return LegacyComponentSerializer.legacySection().deserialize(getCustomName());
+  public String identifier() {
+    return entityType().name();
+  }
+
+  @Override
+  public Component name() {
+    String customName = customName();
+    if (customName != null) {
+      return LegacyComponentSerializer.legacySection().deserialize(customName);
     } else {
-      return MinecraftComponent.entity(getEntityType());
+      return MinecraftComponent.entity(entityType());
     }
   }
 
@@ -52,11 +68,11 @@ public class EntityInfo extends OwnerInfoBase implements PhysicalInfo {
   public String toString() {
     return getClass().getSimpleName()
         + "{entity="
-        + getEntityType()
+        + entityType()
         + " name="
-        + getCustomName()
+        + customName()
         + " owner="
-        + getOwner()
+        + owner()
         + "}";
   }
 }

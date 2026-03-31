@@ -82,33 +82,33 @@ public class FallState implements FallInfo {
   }
 
   @Override
-  public @Nullable ParticipantState getAttacker() {
+  public @Nullable ParticipantState attacker() {
     if (cause instanceof OwnerInfo) {
-      return ((OwnerInfo) cause).getOwner();
+      return ((OwnerInfo) cause).owner();
     } else if (cause instanceof DamageInfo) {
-      return ((DamageInfo) cause).getAttacker();
+      return ((DamageInfo) cause).attacker();
     } else {
       return null;
     }
   }
 
   @Override
-  public Location getOrigin() {
+  public Location origin() {
     return origin;
   }
 
   @Override
-  public From getFrom() {
+  public From from() {
     return from;
   }
 
   @Override
-  public To getTo() {
+  public To to() {
     return to;
   }
 
   @Override
-  public TrackerInfo getCause() {
+  public TrackerInfo cause() {
     return cause;
   }
 

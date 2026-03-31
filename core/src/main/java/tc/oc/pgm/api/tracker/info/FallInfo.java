@@ -14,7 +14,17 @@ public interface FallInfo extends DamageInfo, CauseInfo, RangedInfo {
     VOID
   }
 
-  From getFrom();
+  From from();
 
-  To getTo();
+  To to();
+
+  @Deprecated
+  default From getFrom() {
+    return from();
+  }
+
+  @Deprecated
+  default To getTo() {
+    return to();
+  }
 }

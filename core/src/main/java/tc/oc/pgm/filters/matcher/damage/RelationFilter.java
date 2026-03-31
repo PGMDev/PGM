@@ -19,6 +19,6 @@ public class RelationFilter extends TypedFilter.Impl<DamageQuery> {
 
   @Override
   public boolean matches(DamageQuery query) {
-    return relation.are(query.getVictim(), query.getDamageInfo().getAttacker());
+    return relation.are(query.getVictim(), query.getDamageInfo().attacker());
   }
 }

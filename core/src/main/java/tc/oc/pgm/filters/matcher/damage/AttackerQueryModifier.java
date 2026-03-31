@@ -1,6 +1,6 @@
 package tc.oc.pgm.filters.matcher.damage;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.filter.query.PlayerQuery;
@@ -17,7 +17,7 @@ public class AttackerQueryModifier extends QueryModifier<DamageQuery, PlayerQuer
   @Nullable
   @Override
   protected PlayerQuery transformQuery(DamageQuery query) {
-    ParticipantState attacker = query.getDamageInfo().getAttacker();
+    ParticipantState attacker = query.getDamageInfo().attacker();
     return attacker != null ? new PlayerStateQuery(query.getEvent(), attacker) : null;
   }
 }

@@ -3,7 +3,7 @@ package tc.oc.pgm.filters.query;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 
@@ -30,7 +30,7 @@ public class DamageQuery extends PlayerStateQuery
 
   public static DamageQuery attackerDefault(
       @Nullable Event event, ParticipantState victim, DamageInfo damageInfo) {
-    return new DamageQuery(event, victim, damageInfo, damageInfo.getAttacker());
+    return new DamageQuery(event, victim, damageInfo, damageInfo.attacker());
   }
 
   @Override

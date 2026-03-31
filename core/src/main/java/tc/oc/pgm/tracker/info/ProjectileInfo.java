@@ -6,7 +6,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
@@ -14,79 +15,71 @@ import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.api.tracker.info.RangedInfo;
 import tc.oc.pgm.util.text.MinecraftComponent;
 
-public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
+public record ProjectileInfo(
+    PhysicalInfo projectile,
+    @Nullable PhysicalInfo shooter,
+    Location origin,
+    @Nullable String customName)
+    implements PhysicalInfo, DamageInfo, RangedInfo {
 
-  private final PhysicalInfo projectile;
-  private final @Nullable PhysicalInfo shooter;
-  private final Location origin;
-  private final @Nullable String customName;
-
-  public ProjectileInfo(
-      PhysicalInfo projectile,
-      @Nullable PhysicalInfo shooter,
-      Location origin,
-      @Nullable String customName) {
-    this.projectile = assertNotNull(projectile);
-    this.shooter = shooter;
-    this.origin = assertNotNull(origin);
-    this.customName = customName;
+  public ProjectileInfo {
+    assertNotNull(projectile);
+    assertNotNull(origin);
   }
 
   @Override
-  public @Nullable PhysicalInfo getDamager() {
-    return projectile;
+  public @Nullable PhysicalInfo damager() {
+    return projectile();
   }
 
+  @Deprecated
   public PhysicalInfo getProjectile() {
-    return projectile;
+    return projectile();
   }
 
+  @Deprecated
   public @Nullable PhysicalInfo getShooter() {
-    return shooter;
+    return shooter();
   }
 
   @Override
-  public Location getOrigin() {
-    return this.origin;
+  public @Nullable ParticipantState owner() {
+    return shooter == null ? null : shooter.owner();
   }
 
   @Override
-  public @Nullable ParticipantState getOwner() {
-    return shooter == null ? null : shooter.getOwner();
+  public @Nullable ParticipantState attacker() {
+    return owner();
   }
 
   @Override
-  public @Nullable ParticipantState getAttacker() {
-    return getOwner();
+  public String identifier() {
+    return projectile().identifier();
   }
 
   @Override
-  public String getIdentifier() {
-    return getProjectile().getIdentifier();
-  }
-
-  @Override
-  public Component getName() {
+  public Component name() {
+    String customName = customName();
     if (customName != null) {
       return LegacyComponentSerializer.legacySection().deserialize(customName);
-    } else if (getProjectile() instanceof PotionInfo) {
-      // PotionInfo.getName returns a potion name,
+    } else if (projectile() instanceof PotionInfo) {
+      // PotionInfo.name returns a potion name,
       // which doesn't work outside a potion death message.
       return MinecraftComponent.material(Material.POTION);
     } else {
-      return getProjectile().getName();
+      return projectile().name();
     }
   }
 
   @Override
-  public String toString() {
+  public @NonNull String toString() {
     return getClass().getSimpleName()
         + "{projectile="
-        + getProjectile()
+        + projectile()
         + " origin="
-        + getOrigin()
+        + origin()
         + " shooter="
-        + getShooter()
+        + shooter()
         + "}";
   }
 }

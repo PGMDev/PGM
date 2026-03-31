@@ -1,9 +1,14 @@
 package tc.oc.pgm.api.tracker.info;
 
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface PotionInfo extends PhysicalInfo, DamageInfo {
   @Nullable
-  PotionEffectType getPotionEffect();
+  PotionEffectType potionEffect();
+
+  @Deprecated
+  default @Nullable PotionEffectType getPotionEffect() {
+    return potionEffect();
+  }
 }

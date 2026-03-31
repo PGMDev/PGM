@@ -3,7 +3,7 @@ package tc.oc.pgm.tracker.info;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.FallingBlock;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
@@ -23,33 +23,38 @@ public class FallingBlockInfo extends EntityInfo implements DamageInfo {
   }
 
   @Override
-  public @Nullable PhysicalInfo getDamager() {
+  public @Nullable PhysicalInfo damager() {
     return this;
   }
 
   @Override
-  public @Nullable ParticipantState getAttacker() {
-    return getOwner();
+  public @Nullable ParticipantState attacker() {
+    return owner();
   }
 
-  public Material getMaterial() {
+  public Material material() {
     return material;
   }
 
+  @Deprecated
+  public Material getMaterial() {
+    return material();
+  }
+
   @Override
-  public Component getName() {
-    return MinecraftComponent.material(getMaterial());
+  public Component name() {
+    return MinecraftComponent.material(material());
   }
 
   @Override
   public String toString() {
     return getClass().getSimpleName()
         + "{world="
-        + getMaterial()
+        + material()
         + " name="
-        + getCustomName()
+        + customName()
         + " owner="
-        + getOwner()
+        + owner()
         + "}";
   }
 }

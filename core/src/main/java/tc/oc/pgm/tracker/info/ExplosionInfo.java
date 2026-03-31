@@ -3,7 +3,7 @@ package tc.oc.pgm.tracker.info;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Location;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.CauseInfo;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
@@ -11,34 +11,34 @@ import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.RangedInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
 
-public class ExplosionInfo implements DamageInfo, RangedInfo, CauseInfo {
+public record ExplosionInfo(PhysicalInfo explosive) implements DamageInfo, RangedInfo, CauseInfo {
 
-  private final PhysicalInfo explosive;
-
-  public ExplosionInfo(PhysicalInfo explosive) {
-    this.explosive = assertNotNull(explosive);
+  public ExplosionInfo {
+    assertNotNull(explosive);
   }
 
-  public @Nullable PhysicalInfo getDamager() {
-    return explosive;
+  @Override
+  public @Nullable PhysicalInfo damager() {
+    return explosive();
   }
 
+  @Override
+  public TrackerInfo cause() {
+    return explosive();
+  }
+
+  @Deprecated
   public PhysicalInfo getExplosive() {
-    return explosive;
+    return explosive();
   }
 
   @Override
-  public TrackerInfo getCause() {
-    return getExplosive();
+  public @Nullable Location origin() {
+    return explosive instanceof RangedInfo r ? r.origin() : null;
   }
 
   @Override
-  public @Nullable Location getOrigin() {
-    return explosive instanceof RangedInfo ? ((RangedInfo) explosive).getOrigin() : null;
-  }
-
-  @Override
-  public @Nullable ParticipantState getAttacker() {
-    return explosive == null ? null : explosive.getOwner();
+  public @Nullable ParticipantState attacker() {
+    return explosive == null ? null : explosive.owner();
   }
 }

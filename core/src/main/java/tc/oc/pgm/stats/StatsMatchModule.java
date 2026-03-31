@@ -247,7 +247,7 @@ public class StatsMatchModule implements MatchModule, Listener {
       assert killer != null;
       PlayerStats murdererStats = getPlayerStat(killer);
       if (event.getDamageInfo() instanceof ProjectileInfo projectile)
-        murdererStats.setLongestBowKill(victim.getLocation().distance(projectile.getOrigin()));
+        murdererStats.setLongestBowKill(victim.getLocation().distance(projectile.origin()));
       murdererStats.onMurder(killer.getPlayer().orElse(null));
     }
 

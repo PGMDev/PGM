@@ -1,5 +1,10 @@
 package tc.oc.pgm.api.tracker.info;
 
 public interface MeleeInfo extends PhysicalInfo, DamageInfo {
-  PhysicalInfo getWeapon();
+  PhysicalInfo weapon();
+
+  @Deprecated
+  default PhysicalInfo getWeapon() {
+    return weapon();
+  }
 }

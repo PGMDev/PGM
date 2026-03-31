@@ -9,7 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -51,7 +51,7 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
 
   private boolean canDamage(DamageCause cause, MatchPlayer victim, DamageInfo info) {
     return !this.causes.containsEntry(
-        cause, PlayerRelation.get(victim.getParticipantState(), info.getAttacker()));
+        cause, PlayerRelation.get(victim.getParticipantState(), info.attacker()));
   }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)

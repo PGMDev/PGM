@@ -290,7 +290,7 @@ public class FallTracker implements Listener, DamageResolver {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerSpleef(final PlayerSpleefEvent event) {
-    MatchPlayer victim = event.getVictim();
+    MatchPlayer victim = event.victim();
     FallState fall = this.falls.get(victim);
     if (fall == null || !fall.isStarted) {
       if (fall != null) {
@@ -298,7 +298,7 @@ public class FallTracker implements Listener, DamageResolver {
         endFall(fall);
       }
 
-      fall = new FallState(victim, FallInfo.From.GROUND, event.getSpleefInfo());
+      fall = new FallState(victim, FallInfo.From.GROUND, event.spleefInfo());
       fall.isStarted = true;
 
       Location loc = victim.getBukkit().getLocation();

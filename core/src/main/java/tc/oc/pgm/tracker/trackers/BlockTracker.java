@@ -18,7 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPistonEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -44,7 +44,7 @@ public class BlockTracker implements Listener {
     if (info instanceof PhysicalInfo) {
       return (PhysicalInfo) info;
     } else if (info instanceof OwnerInfo) {
-      return new BlockInfo(block.getState(), ((OwnerInfo) info).getOwner());
+      return new BlockInfo(block.getState(), ((OwnerInfo) info).owner());
     } else {
       return new BlockInfo(block.getState());
     }
@@ -61,7 +61,7 @@ public class BlockTracker implements Listener {
 
   public @Nullable ParticipantState getOwner(Block block) {
     OwnerInfo info = resolveInfo(block, OwnerInfo.class);
-    return info == null ? null : info.getOwner();
+    return info == null ? null : info.owner();
   }
 
   public void trackBlockState(

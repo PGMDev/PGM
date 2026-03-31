@@ -1,6 +1,6 @@
 package tc.oc.pgm.tracker.info;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 
@@ -8,9 +8,9 @@ import tc.oc.pgm.api.tracker.info.DamageInfo;
  * Returned by the master damage resolver to indicate that the damage is invalid, i.e. because one
  * of the players involved was not participating.
  */
-public class NullDamageInfo implements DamageInfo {
+public record NullDamageInfo() implements DamageInfo {
   @Override
-  public @Nullable ParticipantState getAttacker() {
+  public @Nullable ParticipantState attacker() {
     return null;
   }
 }

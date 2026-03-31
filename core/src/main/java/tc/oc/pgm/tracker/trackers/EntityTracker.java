@@ -11,7 +11,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -55,7 +55,7 @@ public class EntityTracker implements Listener {
     TrackerInfo info = entities.get(entity);
     if (info instanceof PhysicalInfo) return (PhysicalInfo) info;
 
-    ParticipantState owner = info instanceof OwnerInfo ? ((OwnerInfo) info).getOwner() : null;
+    ParticipantState owner = info instanceof OwnerInfo ? ((OwnerInfo) info).owner() : null;
     return createEntity(entity, owner);
   }
 
@@ -73,7 +73,7 @@ public class EntityTracker implements Listener {
       return match.getParticipantState(entity); // Players own themselves
     } else {
       OwnerInfo info = resolveInfo(entity, OwnerInfo.class);
-      return info == null ? null : info.getOwner();
+      return info == null ? null : info.owner();
     }
   }
 

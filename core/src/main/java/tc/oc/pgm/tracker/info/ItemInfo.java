@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.util.StringUtils;
@@ -30,12 +30,12 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
   }
 
   @Override
-  public String getIdentifier() {
+  public String identifier() {
     return getItem().getType().name();
   }
 
   @Override
-  public Component getName() {
+  public Component name() {
     if (getItem().hasItemMeta()) {
       String customName = getItem().getItemMeta().getDisplayName();
       if (!StringUtils.isNullOrEmpty(customName)) {
@@ -48,6 +48,6 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
 
   @Override
   public String toString() {
-    return getClass().getSimpleName() + "{item=" + getItem() + " owner=" + getOwner() + "}";
+    return getClass().getSimpleName() + "{item=" + getItem() + " owner=" + owner() + "}";
   }
 }

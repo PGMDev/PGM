@@ -4,7 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -29,13 +29,13 @@ public final class Trackers {
   }
 
   public static double distanceFromRanged(RangedInfo rangedInfo, @Nullable Location deathLocation) {
-    if (rangedInfo.getOrigin() == null || deathLocation == null) return Double.NaN;
+    if (rangedInfo.origin() == null || deathLocation == null) return Double.NaN;
 
     // When players fall in the void, use y=0 as their death location
     if (deathLocation.getY() < 0) {
       deathLocation = deathLocation.clone();
       deathLocation.setY(0);
     }
-    return deathLocation.distance(rangedInfo.getOrigin());
+    return deathLocation.distance(rangedInfo.origin());
   }
 }

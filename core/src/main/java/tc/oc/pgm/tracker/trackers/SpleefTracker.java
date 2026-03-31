@@ -92,7 +92,7 @@ public class SpleefTracker implements Listener {
     Vector pos = this.lastBlockBrokenUnderPlayer(player);
     if (pos != null) {
       SpleefInfo info = brokenBlocks.get(pos);
-      if (match.getTick().tick() - info.getTime().tick() <= MAX_SPLEEF_TICKS) {
+      if (match.getTick().tick() - info.time().tick() <= MAX_SPLEEF_TICKS) {
         match.callEvent(new PlayerSpleefEvent(player, pos, info));
       }
     }
@@ -117,7 +117,7 @@ public class SpleefTracker implements Listener {
         Vector pos = new Vector(x, y, z);
         SpleefInfo info = this.brokenBlocks.get(pos);
         if (info != null) {
-          long tick = info.getTime().tick();
+          long tick = info.time().tick();
           if (tick > latestTick) {
             latestTick = tick;
             latestPos = pos;

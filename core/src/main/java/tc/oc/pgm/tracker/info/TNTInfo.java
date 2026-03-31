@@ -16,7 +16,7 @@ public class TNTInfo extends OwnerInfoBase implements RangedInfo {
   }
 
   @Override
-  public Location getOrigin() {
+  public Location origin() {
     return origin;
   }
 }

@@ -2,7 +2,7 @@ package tc.oc.pgm.filters.matcher.damage;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.filter.query.EntityTypeQuery;
@@ -19,12 +19,12 @@ public class DamagerQueryModifier extends QueryModifier<DamageQuery, EntityTypeQ
   @Nullable
   @Override
   protected EntityTypeQuery transformQuery(DamageQuery query) {
-    var damager = query.getDamageInfo().getDamager();
+    var damager = query.getDamageInfo().damager();
     if (damager instanceof EntityInfo entityInfo) {
       return new EntityTypeQuery() {
         @Override
         public Class<? extends Entity> getEntityType() {
-          return entityInfo.getEntityClass();
+          return entityInfo.entityClass();
         }
 
         @Override

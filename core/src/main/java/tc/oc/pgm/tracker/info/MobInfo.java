@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.info;
 
 import org.bukkit.entity.LivingEntity;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.MeleeInfo;
 
@@ -19,12 +19,12 @@ public class MobInfo extends EntityInfo implements MeleeInfo {
   }
 
   @Override
-  public @Nullable ParticipantState getAttacker() {
-    return getOwner();
+  public @Nullable ParticipantState attacker() {
+    return owner();
   }
 
   @Override
-  public ItemInfo getWeapon() {
+  public ItemInfo weapon() {
     return weapon;
   }
 
@@ -32,13 +32,13 @@ public class MobInfo extends EntityInfo implements MeleeInfo {
   public String toString() {
     return getClass().getSimpleName()
         + "{entity="
-        + getEntityType()
+        + entityType()
         + " name="
-        + getCustomName()
+        + customName()
         + " owner="
-        + getOwner()
+        + owner()
         + " weapon="
-        + getWeapon()
+        + weapon()
         + "}";
   }
 }

@@ -77,8 +77,8 @@ public class DamageMatchModule implements MatchModule, Listener {
   public static boolean isAllowedSelfDamage(DamageInfo damageInfo) {
     // Disable self-damage with arrows
     if (damageInfo instanceof ProjectileInfo projectileInfo) {
-      if (projectileInfo.getProjectile() instanceof EntityInfo
-          && ((EntityInfo) projectileInfo.getProjectile()).getEntityType() == EntityType.ARROW) {
+      if (projectileInfo.projectile() instanceof EntityInfo
+          && ((EntityInfo) projectileInfo.projectile()).entityType() == EntityType.ARROW) {
         return false;
       }
     }
@@ -101,7 +101,7 @@ public class DamageMatchModule implements MatchModule, Listener {
 
   /** Test if the given damage/attack is allowed by the default damage policies */
   public Filter.QueryResponse queryDefaultRules(ParticipantState victim, DamageInfo damageInfo) {
-    switch (PlayerRelation.get(victim, damageInfo.getAttacker())) {
+    switch (PlayerRelation.get(victim, damageInfo.attacker())) {
       case SELF:
         if (!isAllowedSelfDamage(damageInfo)) {
           return Filter.QueryResponse.DENY;
@@ -144,7 +144,7 @@ public class DamageMatchModule implements MatchModule, Listener {
 
   /** Query whether the given damage is both allowed and incentivized for the attacker. */
   public Filter.QueryResponse queryHostile(ParticipantState victim, DamageInfo damageInfo) {
-    return switch (PlayerRelation.get(victim, damageInfo.getAttacker())) {
+    return switch (PlayerRelation.get(victim, damageInfo.attacker())) {
       case SELF, ALLY ->
         // Players don't want to hurt themselves or their teammates
         Filter.QueryResponse.DENY;
@@ -173,7 +173,7 @@ public class DamageMatchModule implements MatchModule, Listener {
       event.setCancelled(true);
     } else if (attackerAction != null || victimAction != null) {
       MatchPlayerState attacker;
-      if (attackerAction != null && (attacker = damageInfo.getAttacker()) != null) {
+      if (attackerAction != null && (attacker = damageInfo.attacker()) != null) {
         attacker
             .getPlayer()
             .ifPresent(p -> attackerAction.trigger(p, getAttackerQuery(event, victim, damageInfo)));

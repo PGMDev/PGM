@@ -5,7 +5,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.tracker.info.SpleefInfo;
@@ -14,28 +14,48 @@ public class PlayerSpleefEvent extends Event {
 
   private final MatchPlayer victim;
   private final Vector block;
-  private final SpleefInfo info;
+  private final SpleefInfo spleefInfo;
 
-  public PlayerSpleefEvent(MatchPlayer victim, Vector block, SpleefInfo info) {
+  public PlayerSpleefEvent(MatchPlayer victim, Vector block, SpleefInfo spleefInfo) {
     this.victim = assertNotNull(victim);
     this.block = assertNotNull(block);
-    this.info = assertNotNull(info);
+    this.spleefInfo = assertNotNull(spleefInfo);
   }
 
-  public MatchPlayer getVictim() {
+  public MatchPlayer victim() {
     return victim;
   }
 
-  public SpleefInfo getSpleefInfo() {
-    return info;
+  @Deprecated
+  public MatchPlayer getVictim() {
+    return victim();
   }
 
-  public Vector getBlock() {
+  public SpleefInfo spleefInfo() {
+    return spleefInfo;
+  }
+
+  @Deprecated
+  public SpleefInfo getSpleefInfo() {
+    return spleefInfo();
+  }
+
+  public Vector block() {
     return block;
   }
 
+  @Deprecated
+  public Vector getBlock() {
+    return block();
+  }
+
+  public @Nullable ParticipantState breaker() {
+    return spleefInfo.breaker().attacker();
+  }
+
+  @Deprecated
   public @Nullable ParticipantState getBreaker() {
-    return info.getBreaker().getAttacker();
+    return breaker();
   }
 
   // Bukkit event junk

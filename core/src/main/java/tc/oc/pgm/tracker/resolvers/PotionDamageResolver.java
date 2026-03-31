@@ -34,7 +34,7 @@ public class PotionDamageResolver implements DamageResolver {
     // If potion is already resolved (i.e. as a splash potion), leave it alone
     if (damager instanceof PotionInfo
         || damager instanceof ProjectileInfo
-            && ((ProjectileInfo) damager).getProjectile() instanceof PotionInfo) {
+            && ((ProjectileInfo) damager).projectile() instanceof PotionInfo) {
       return null;
     }
 

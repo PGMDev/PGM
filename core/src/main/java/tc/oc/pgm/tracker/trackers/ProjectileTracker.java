@@ -40,7 +40,7 @@ public class ProjectileTracker extends AbstractTracker<ProjectileInfo> {
   void handleLaunch(Entity projectile, ProjectileSource source) {
     PhysicalInfo projectileInfo = entities().resolveEntity(projectile);
     if (!(projectileInfo instanceof ProjectileInfo)
-        || (((ProjectileInfo) projectileInfo).getShooter() == null && source != null)) {
+        || (((ProjectileInfo) projectileInfo).shooter() == null && source != null)) {
       ProjectileDefinition definition = ProjectileMatchModule.getProjectileDefinition(projectile);
       String customName = definition == null ? null : definition.getName();
       entities()

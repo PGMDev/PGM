@@ -3,21 +3,18 @@ package tc.oc.pgm.tracker.info;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.CauseInfo;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 
-public class GenericDamageInfo implements DamageInfo, CauseInfo {
+public record GenericDamageInfo(
+    EntityDamageEvent.DamageCause damageType, @Nullable PhysicalInfo damager)
+    implements DamageInfo, CauseInfo {
 
-  private final @Nullable PhysicalInfo damager;
-  private final EntityDamageEvent.DamageCause damageType;
-
-  public GenericDamageInfo(
-      EntityDamageEvent.DamageCause damageType, @Nullable PhysicalInfo damager) {
-    this.damageType = assertNotNull(damageType);
-    this.damager = damager;
+  public GenericDamageInfo {
+    assertNotNull(damageType);
   }
 
   public GenericDamageInfo(EntityDamageEvent.DamageCause damageType) {
@@ -25,21 +22,17 @@ public class GenericDamageInfo implements DamageInfo, CauseInfo {
   }
 
   @Override
-  public @Nullable PhysicalInfo getDamager() {
-    return damager;
+  public @Nullable PhysicalInfo cause() {
+    return damager();
   }
 
-  @Override
-  public @Nullable PhysicalInfo getCause() {
-    return getDamager();
-  }
-
+  @Deprecated
   public EntityDamageEvent.DamageCause getDamageType() {
-    return damageType;
+    return damageType();
   }
 
   @Override
-  public @Nullable ParticipantState getAttacker() {
-    return damager == null ? null : damager.getOwner();
+  public @Nullable ParticipantState attacker() {
+    return damager == null ? null : damager.owner();
   }
 }

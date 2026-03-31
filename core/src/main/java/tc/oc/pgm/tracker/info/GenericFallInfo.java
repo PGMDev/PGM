@@ -3,19 +3,16 @@ package tc.oc.pgm.tracker.info;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.Location;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.FallInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
 
-public class GenericFallInfo implements FallInfo {
+public record GenericFallInfo(To to, Location origin) implements FallInfo {
 
-  private final To to;
-  private final Location origin;
-
-  public GenericFallInfo(To to, Location origin) {
-    this.to = assertNotNull(to);
-    this.origin = assertNotNull(origin);
+  public GenericFallInfo {
+    assertNotNull(to);
+    assertNotNull(origin);
   }
 
   public GenericFallInfo(To to, Location location, double distance) {
@@ -23,27 +20,17 @@ public class GenericFallInfo implements FallInfo {
   }
 
   @Override
-  public From getFrom() {
+  public From from() {
     return From.GROUND;
   }
 
   @Override
-  public To getTo() {
-    return to;
-  }
-
-  @Override
-  public @Nullable TrackerInfo getCause() {
+  public @Nullable TrackerInfo cause() {
     return null;
   }
 
   @Override
-  public @Nullable ParticipantState getAttacker() {
+  public @Nullable ParticipantState attacker() {
     return null;
-  }
-
-  @Override
-  public Location getOrigin() {
-    return origin;
   }
 }

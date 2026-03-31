@@ -4,7 +4,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.PlayerRelation;
@@ -55,7 +55,7 @@ public class MatchPlayerDeathEvent extends MatchPlayerEvent {
    * @return The killer {@link ParticipantState}, or {@code null} if no killer.
    */
   public final @Nullable ParticipantState getKiller() {
-    return damageInfo.getAttacker();
+    return damageInfo.attacker();
   }
 
   /**
