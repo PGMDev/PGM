@@ -29,19 +29,19 @@ public class SpRecipeUtils implements RecipeUtils {
   @Override
   public FurnaceRecipe createFurnaceRecipe(Node ingredient, ItemStack result)
       throws InvalidXMLException {
-    return new FurnaceRecipe(result, SpMaterialParser.parseBukkit(ingredient));
+    return new FurnaceRecipe(result, SpMaterialParser.parseBukkitItem(ingredient));
   }
 
   @Override
   public void addIngredient(Node ingredient, ShapelessRecipe recipe, int count)
       throws InvalidXMLException {
-    recipe.addIngredient(count, SpMaterialParser.parseBukkit(ingredient));
+    recipe.addIngredient(count, SpMaterialParser.parseBukkitItem(ingredient));
   }
 
   @Override
   public void setIngredient(Node ingredient, ShapedRecipe recipe, char key)
       throws InvalidXMLException {
-    recipe.setIngredient(key, SpMaterialParser.parseBukkit(ingredient));
+    recipe.setIngredient(key, SpMaterialParser.parseBukkitItem(ingredient));
   }
 
   @Override

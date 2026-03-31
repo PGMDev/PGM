@@ -116,6 +116,11 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
     return List.of();
   }
 
+  @Override
+  public ComponentApplicator.Builder applicatorBuilder(boolean merge) {
+    return new ModernComponentApplicatorBuilder(merge);
+  }
+
   private static final Registry<Item> ITEMS =
       CraftRegistry.getMinecraftRegistry().lookupOrThrow(Registries.ITEM);
   private static final ItemParser ITEM_PARSER =
@@ -133,6 +138,27 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
       return is -> CraftItemStack.unwrap(is).applyComponents(patch);
     } catch (CommandSyntaxException ex) {
       throw new InvalidXMLException("Failed to parse components", components, ex);
+    }
+  }
+
+  private static class ModernComponentApplicatorBuilder extends ComponentApplicatorBuilderImpl {
+    public ModernComponentApplicatorBuilder(boolean merge) {
+      super(merge);
+    }
+
+    @Override
+    public void addPotions(List<PotionEffect> potions) {
+      if (potions.isEmpty() || merge) {
+        super.addPotions(potions);
+        return;
+      }
+      register(PotionMeta.class, meta -> {
+        var color = meta.computeEffectiveColor();
+        meta.clearCustomEffects();
+        meta.setBasePotionType(null); // Modern needs to clear the base effect
+        potions.forEach(e -> meta.addCustomEffect(e, false));
+        meta.setColor(color);
+      });
     }
   }
 }

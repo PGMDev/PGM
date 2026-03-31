@@ -107,6 +107,13 @@ public interface MaterialMatcher {
     Builder materialsOnly();
 
     /**
+     * Set the builder to only accept block materials, error on non-block materials
+     *
+     * @return this
+     */
+    Builder blocksOnly();
+
+    /**
      * Set the builder to accept multi-block patterns, eg: wool;planks
      *
      * @return this
@@ -164,6 +171,7 @@ public interface MaterialMatcher {
 
   abstract class BuilderImpl implements MaterialMatcher.Builder {
     protected boolean materialsOnly = false;
+    protected boolean blocksOnly = false;
     protected boolean multiPattern = false;
     protected EnumSet<Material> materials = EnumSet.noneOf(Material.class);
     protected Set<MaterialMatcher> matchers = new HashSet<>();
@@ -171,6 +179,12 @@ public interface MaterialMatcher {
     @Override
     public MaterialMatcher.Builder materialsOnly() {
       this.materialsOnly = true;
+      return this;
+    }
+
+    @Override
+    public MaterialMatcher.Builder blocksOnly() {
+      this.blocksOnly = true;
       return this;
     }
 
