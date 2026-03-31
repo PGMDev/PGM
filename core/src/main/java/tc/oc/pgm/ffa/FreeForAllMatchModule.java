@@ -81,6 +81,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   private final Map<UUID, Tribute> tributes = new HashMap<>();
   private final Deque<ChatColor> colors = new ArrayDeque<>();
   private JoinMatchModule jmm;
+  private ScoreboardMatchModule smm;
 
   public FreeForAllMatchModule(Match match, FreeForAllOptions options) {
     this.match = match;
@@ -135,6 +136,14 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   public void setNameTagVisibility(@Nullable NameTagVisibility nameTagVisibility) {
     this.nameTagVisibility = nameTagVisibility;
+
+    if (smm == null) {
+      smm = match.needModule(ScoreboardMatchModule.class);
+    }
+
+    tributes.forEach((uuid, tribute) -> {
+      smm.updatePartyScoreboardTeam(tribute);
+    });
   }
 
   @Override
@@ -150,11 +159,6 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
     fmm.onChange(Match.class, options.nameTagVisibilityFilter, ((filterable, response) -> {
       setNameTagVisibility(response ? NameTagVisibility.ALWAYS : NameTagVisibility.NEVER);
-
-      var smm = match.needModule(ScoreboardMatchModule.class);
-      tributes.forEach((uuid, tribute) -> {
-        smm.updatePartyScoreboardTeam(tribute);
-      });
     }));
   }
 

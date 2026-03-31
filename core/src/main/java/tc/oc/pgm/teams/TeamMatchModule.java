@@ -45,7 +45,6 @@ import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.match.PartyImpl;
 import tc.oc.pgm.match.QueuedParty;
-import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.start.StartMatchModule;
 import tc.oc.pgm.start.UnreadyReason;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
@@ -152,7 +151,6 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
     var fmm = match.needModule(FilterMatchModule.class);
-    var smm = match.needModule(ScoreboardMatchModule.class);
 
     for (Team team : teams) {
       TeamFactory info = team.getInfo();
@@ -161,14 +159,12 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         fmm.onChange(Match.class, info.getNameTagAlliesFilter(), (filterable, response) -> {
           NameTagVisibility current = team.getNameTagVisibility();
           team.setNameTagVisibility(
-              response
-                  ? (current == NameTagVisibility.HIDE_FOR_OWN_TEAM
-                      ? NameTagVisibility.ALWAYS
-                      : NameTagVisibility.HIDE_FOR_OTHER_TEAMS)
-                  : (current == NameTagVisibility.ALWAYS
-                      ? NameTagVisibility.HIDE_FOR_OWN_TEAM
-                      : NameTagVisibility.NEVER));
-          smm.updatePartyScoreboardTeam(team);
+              switch (current) {
+                case ALWAYS, HIDE_FOR_OWN_TEAM ->
+                  response ? NameTagVisibility.ALWAYS : NameTagVisibility.HIDE_FOR_OWN_TEAM;
+                case HIDE_FOR_OTHER_TEAMS, NEVER ->
+                  response ? NameTagVisibility.HIDE_FOR_OTHER_TEAMS : NameTagVisibility.NEVER;
+              });
         });
       }
 
@@ -176,14 +172,12 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
         fmm.onChange(Match.class, info.getNameTagEnemiesFilter(), (filterable, response) -> {
           NameTagVisibility current = team.getNameTagVisibility();
           team.setNameTagVisibility(
-              response
-                  ? (current == NameTagVisibility.HIDE_FOR_OTHER_TEAMS
-                      ? NameTagVisibility.ALWAYS
-                      : NameTagVisibility.HIDE_FOR_OWN_TEAM)
-                  : (current == NameTagVisibility.ALWAYS
-                      ? NameTagVisibility.HIDE_FOR_OTHER_TEAMS
-                      : NameTagVisibility.NEVER));
-          smm.updatePartyScoreboardTeam(team);
+              switch (current) {
+                case ALWAYS, HIDE_FOR_OTHER_TEAMS ->
+                  response ? NameTagVisibility.ALWAYS : NameTagVisibility.HIDE_FOR_OTHER_TEAMS;
+                case HIDE_FOR_OWN_TEAM, NEVER ->
+                  response ? NameTagVisibility.HIDE_FOR_OWN_TEAM : NameTagVisibility.NEVER;
+              });
         });
       }
     }
