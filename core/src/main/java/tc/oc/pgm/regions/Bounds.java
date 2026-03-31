@@ -6,7 +6,8 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.block.CuboidBlockIterator;
 
-public class Bounds implements Cloneable {
+@SuppressWarnings("ClassCanBeRecord")
+public class Bounds {
   protected final Vector min;
   protected final Vector max;
 
@@ -35,11 +36,6 @@ public class Bounds implements Cloneable {
 
   public Bounds(Bounds other) {
     this(other.min, other.max);
-  }
-
-  @Override
-  public Bounds clone() {
-    return new Bounds(this);
   }
 
   public static Bounds unbounded() {

@@ -52,7 +52,7 @@ public class CuboidRegion implements RegionDefinition.HardStatic {
   }
 
   public Mutable asMutableCopy() {
-    return new Mutable(this.bounds.clone());
+    return new Mutable(new Bounds(this.bounds));
   }
 
   public static class Mutable extends CuboidRegion {
