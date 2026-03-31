@@ -10,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.function.ThrowingSupplier;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.Validator;
 
 public abstract class Builder<T, B extends Builder<T, B>> {
   protected final @Nullable Element el;
@@ -102,10 +103,6 @@ public abstract class Builder<T, B extends Builder<T, B>> {
   protected abstract T parse(Node node) throws InvalidXMLException;
 
   protected abstract B getThis();
-
-  public interface Validator<T> {
-    void validate(T t, Node node) throws InvalidXMLException;
-  }
 
   public abstract static class Generic<T> extends Builder<T, Generic<T>> {
     public Generic(@Nullable Element el, String... prop) {

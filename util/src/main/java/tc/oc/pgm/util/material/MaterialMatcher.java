@@ -22,9 +22,13 @@ import tc.oc.pgm.util.material.matcher.MultipleMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingularMaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.Validator;
 
 /** A predicate on world */
 public interface MaterialMatcher {
+  Validator<MaterialMatcher> NOT_EMPTY = (mm, node) -> {
+    if (mm.getSample() == null) throw new InvalidXMLException("No material specified", node);
+  };
 
   boolean matches(Material material);
 
@@ -45,6 +49,10 @@ public interface MaterialMatcher {
    * is very broad.
    */
   Set<Material> getMaterials();
+
+  /** Get a sample material for the matcher, usually the first material. */
+  @Nullable
+  Material getSample();
 
   Set<BlockMaterialData> getPossibleBlocks();
 
@@ -78,6 +86,16 @@ public interface MaterialMatcher {
 
   interface Singular extends MaterialMatcher {
     Material getMaterial();
+
+    @Override
+    default Set<Material> getMaterials() {
+      return Set.of(getMaterial());
+    }
+
+    @Override
+    default Material getSample() {
+      return getMaterial();
+    }
   }
 
   interface Builder {
