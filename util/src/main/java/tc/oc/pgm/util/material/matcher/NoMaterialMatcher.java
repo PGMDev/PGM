@@ -1,6 +1,5 @@
 package tc.oc.pgm.util.material.matcher;
 
-import java.util.Collections;
 import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +30,12 @@ public class NoMaterialMatcher implements MaterialMatcher {
 
   @Override
   public Set<Material> getMaterials() {
-    return Collections.emptySet();
+    return Set.of();
+  }
+
+  @Override
+  public Material getSample() {
+    return null;
   }
 
   @Override

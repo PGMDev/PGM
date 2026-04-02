@@ -116,14 +116,17 @@ public interface Materials {
   }
 
   static boolean itemsSimilar(ItemStack first, ItemStack second, boolean skipDur) {
-    return itemsSimilarMaterial(first, second, skipDur) && itemsSimilarMeta(first, second);
+    return itemsSimilarMaterial(first, second)
+        && itemsSimilarDurability(first, second, skipDur)
+        && itemsSimilarMeta(first, second);
   }
 
-  static boolean itemsSimilarMaterial(ItemStack first, ItemStack second, boolean skipDur) {
-    return first != null
-        && second != null
-        && first.getType().equals(second.getType())
-        && (skipDur || first.getDurability() == second.getDurability());
+  static boolean itemsSimilarDurability(ItemStack first, ItemStack second, boolean skipDur) {
+    return (skipDur || first.getDurability() == second.getDurability());
+  }
+
+  static boolean itemsSimilarMaterial(ItemStack first, ItemStack second) {
+    return first != null && second != null && first.getType().equals(second.getType());
   }
 
   static boolean itemsSimilarMeta(ItemStack first, ItemStack second) {

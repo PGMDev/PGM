@@ -70,6 +70,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -401,22 +402,26 @@ public class ActionParser {
 
   @MethodParser("replace-item")
   public ReplaceItemAction parseReplaceItem(Element el, Class<?> scope) throws InvalidXMLException {
-    ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
+    var kits = factory.getKits();
+    ItemMatcher matcher = kits.parseItemMatcher(el, "find");
+    SlotGroup slots = parser.node(kits::parseSlotGroup, el, "slots").optional(SlotGroup.ALL);
     ItemStack item = parser.item(el, "replace").allowAir().orNull();
 
     boolean keepAmount = parser.parseBool(el, "keep-amount").orFalse();
     boolean keepEnchants = parser.parseBool(el, "keep-enchants").orFalse();
 
-    return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants);
+    return new ReplaceItemAction(matcher, slots, item, keepAmount, keepEnchants);
   }
 
   @MethodParser("enchant-item")
   public EnchantItemAction parseEnchantItem(Element el, Class<?> scope) throws InvalidXMLException {
-    ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
+    var kits = factory.getKits();
+    ItemMatcher matcher = kits.parseItemMatcher(el, "find");
+    SlotGroup slots = parser.node(kits::parseSlotGroup, el, "slots").optional(SlotGroup.ALL);
     Enchantment enchant = XMLUtils.parseEnchantment(Node.fromRequiredAttr(el, "enchantment"));
     Formula<MatchPlayer> level = parser.formula(MatchPlayer.class, el, "level").required();
 
-    return new EnchantItemAction(matcher, enchant, level);
+    return new EnchantItemAction(matcher, slots, enchant, level);
   }
 
   @MethodParser("fill")

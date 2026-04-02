@@ -216,6 +216,11 @@ public final class InventoryUtils {
 
     boolean isViewable(Inventory inventory);
 
+    default Collection<Class<? extends Event>> getRelevantEvents(SlotGroup group) {
+      // Legacy needs no additional events
+      return List.of();
+    }
+
     default ComponentApplicator parseComponents(Material type, Node components)
         throws InvalidXMLException {
       // Default no-op for legacy
@@ -233,7 +238,7 @@ public final class InventoryUtils {
     }
 
     class ComponentApplicatorBuilderImpl implements ComponentApplicator.Builder {
-      private final boolean merge;
+      protected final boolean merge;
       private final List<BiConsumer<ItemStack, ItemMeta>> modifiers = new ArrayList<>();
       private ComponentApplicator other = ComponentApplicator.EMPTY;
 
@@ -241,17 +246,17 @@ public final class InventoryUtils {
         this.merge = merge;
       }
 
-      private void register(Consumer<ItemMeta> metaModifier) {
+      protected void register(Consumer<ItemMeta> metaModifier) {
         modifiers.add((is, meta) -> metaModifier.accept(meta));
       }
 
-      private <T extends ItemMeta> void register(Class<T> type, Consumer<T> metaModifier) {
+      protected <T extends ItemMeta> void register(Class<T> type, Consumer<T> metaModifier) {
         modifiers.add((is, meta) -> {
           if (type.isInstance(meta)) metaModifier.accept(type.cast(meta));
         });
       }
 
-      private <T extends ItemMeta> void register(
+      protected <T extends ItemMeta> void register(
           Class<T> type, BiConsumer<ItemStack, T> metaModifier) {
         modifiers.add((is, meta) -> {
           if (type.isInstance(meta)) metaModifier.accept(is, type.cast(meta));

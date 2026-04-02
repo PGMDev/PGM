@@ -40,6 +40,11 @@ public class MultipleMaterialMatcher implements MaterialMatcher {
   }
 
   @Override
+  public Material getSample() {
+    return materials.iterator().next();
+  }
+
+  @Override
   public Set<BlockMaterialData> getPossibleBlocks() {
     Set<BlockMaterialData> possibleBlocks = new HashSet<>(materials.size());
     for (Material material : materials) {

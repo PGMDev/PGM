@@ -16,15 +16,19 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.material.matcher.CompoundMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.MultipleMaterialMatcher;
 import tc.oc.pgm.util.material.matcher.SingularMaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.Validator;
 
 /** A predicate on world */
 public interface MaterialMatcher {
+  Validator<MaterialMatcher> NOT_EMPTY = (mm, node) -> {
+    if (mm.getSample() == null) throw new InvalidXMLException("No material specified", node);
+  };
 
   boolean matches(Material material);
 
@@ -45,6 +49,10 @@ public interface MaterialMatcher {
    * is very broad.
    */
   Set<Material> getMaterials();
+
+  /** Get a sample material for the matcher, usually the first material. */
+  @Nullable
+  Material getSample();
 
   Set<BlockMaterialData> getPossibleBlocks();
 
@@ -78,6 +86,16 @@ public interface MaterialMatcher {
 
   interface Singular extends MaterialMatcher {
     Material getMaterial();
+
+    @Override
+    default Set<Material> getMaterials() {
+      return Set.of(getMaterial());
+    }
+
+    @Override
+    default Material getSample() {
+      return getMaterial();
+    }
   }
 
   interface Builder {
@@ -87,6 +105,13 @@ public interface MaterialMatcher {
      * @return this
      */
     Builder materialsOnly();
+
+    /**
+     * Set the builder to only accept block materials, error on non-block materials
+     *
+     * @return this
+     */
+    Builder blocksOnly();
 
     /**
      * Set the builder to accept multi-block patterns, eg: wool;planks
@@ -146,6 +171,7 @@ public interface MaterialMatcher {
 
   abstract class BuilderImpl implements MaterialMatcher.Builder {
     protected boolean materialsOnly = false;
+    protected boolean blocksOnly = false;
     protected boolean multiPattern = false;
     protected EnumSet<Material> materials = EnumSet.noneOf(Material.class);
     protected Set<MaterialMatcher> matchers = new HashSet<>();
@@ -153,6 +179,12 @@ public interface MaterialMatcher {
     @Override
     public MaterialMatcher.Builder materialsOnly() {
       this.materialsOnly = true;
+      return this;
+    }
+
+    @Override
+    public MaterialMatcher.Builder blocksOnly() {
+      this.blocksOnly = true;
       return this;
     }
 

@@ -107,7 +107,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
       impulse.setY(0.75 + Math.abs(impulse.getY()) * 0.5);
       impulse.multiply(jumper.kit.power / 3f);
       player.setVelocity(impulse);
-      Sounds.play(player, Sounds.DOUBLE_JUMP);
+      Sounds.play(player, Sounds.DOUBLE_JUMP, player.getLocation());
     }
   }
 

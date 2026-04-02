@@ -71,15 +71,15 @@ public class KitMatchModule implements MatchModule, Listener {
     }
   }
 
-  private boolean isLocked(ItemStack item) {
+  public boolean isLocked(ItemStack item) {
     return item != null && ItemTags.LOCKED.has(item);
   }
 
-  private boolean isUnshareable(ItemStack item) {
+  public boolean isUnshareable(ItemStack item) {
     return item != null && (isLocked(item) || ItemTags.PREVENT_SHARING.has(item));
   }
 
-  private void sendLockWarning(HumanEntity player) {
+  public void sendLockWarning(HumanEntity player) {
     MatchPlayer matchPlayer = this.match.getPlayer(player);
     if (matchPlayer != null) {
       matchPlayer.sendWarning(translatable("match.item.locked"));
@@ -100,7 +100,7 @@ public class KitMatchModule implements MatchModule, Listener {
         Slot slot = Slot.Hotbar.forIndex(event.getHotbarButton());
         if (slot == null) return;
         ItemStack item = event.getWhoClicked().getInventory().getItem(slot.getIndex());
-        if (item != null && ItemTags.LOCKED.has(item)) break;
+        if (isLocked(item)) break;
 
       case PICKUP_ALL:
       case PICKUP_HALF:
@@ -111,7 +111,8 @@ public class KitMatchModule implements MatchModule, Listener {
       case DROP_ONE_SLOT:
       case DROP_ALL_SLOT:
       case COLLECT_TO_CURSOR:
-        if (ItemTags.LOCKED.has(event.getCurrentItem())) break;
+      case NOTHING:
+        if (isLocked(event.getCurrentItem())) break;
       default:
         return;
     }

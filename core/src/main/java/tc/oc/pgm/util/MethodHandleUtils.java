@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -27,7 +28,8 @@ public final class MethodHandleUtils {
       new HandleFinder(Match.class, "getMatch"),
       new HandleFinder(Player.class, "getPlayer", "getActor"),
       new HandleFinder(LivingEntity.class, "getEntity", "getActor"),
-      new HandleFinder(Entity.class, "getEntity", "getActor"));
+      new HandleFinder(Entity.class, "getEntity", "getActor"),
+      new HandleFinder(HumanEntity.class, "getWhoClicked"));
 
   public static MethodHandle getHandle(Class<? extends Event> event) throws NoSuchMethodException {
     MethodHandle handle = CACHED_HANDLES.computeIfAbsent(event, MethodHandleUtils::findHandle);

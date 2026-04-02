@@ -6,6 +6,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemParser;
@@ -22,6 +23,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -30,6 +32,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -106,6 +109,18 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
     return inventory.getType().isCreatable();
   }
 
+  @Override
+  public Collection<Class<? extends Event>> getRelevantEvents(SlotGroup group) {
+    if (group.containsAny(SlotGroup.HANDS) || group.containsAny(SlotGroup.HOTBAR))
+      return List.of(PlayerSwapHandItemsEvent.class);
+    return List.of();
+  }
+
+  @Override
+  public ComponentApplicator.Builder applicatorBuilder(boolean merge) {
+    return new ModernComponentApplicatorBuilder(merge);
+  }
+
   private static final Registry<Item> ITEMS =
       CraftRegistry.getMinecraftRegistry().lookupOrThrow(Registries.ITEM);
   private static final ItemParser ITEM_PARSER =
@@ -123,6 +138,27 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
       return is -> CraftItemStack.unwrap(is).applyComponents(patch);
     } catch (CommandSyntaxException ex) {
       throw new InvalidXMLException("Failed to parse components", components, ex);
+    }
+  }
+
+  private static class ModernComponentApplicatorBuilder extends ComponentApplicatorBuilderImpl {
+    public ModernComponentApplicatorBuilder(boolean merge) {
+      super(merge);
+    }
+
+    @Override
+    public void addPotions(List<PotionEffect> potions) {
+      if (potions.isEmpty() || merge) {
+        super.addPotions(potions);
+        return;
+      }
+      register(PotionMeta.class, meta -> {
+        var color = meta.computeEffectiveColor();
+        meta.clearCustomEffects();
+        meta.setBasePotionType(null); // Modern needs to clear the base effect
+        potions.forEach(e -> meta.addCustomEffect(e, false));
+        meta.setColor(color);
+      });
     }
   }
 }

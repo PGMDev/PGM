@@ -50,19 +50,17 @@ import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
 import tc.oc.pgm.filters.matcher.party.ScoreFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
+import tc.oc.pgm.filters.matcher.player.CarryingFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
-import tc.oc.pgm.filters.matcher.player.CarryingItemFilter;
 import tc.oc.pgm.filters.matcher.player.EffectFilter;
 import tc.oc.pgm.filters.matcher.player.FlyingFilter;
 import tc.oc.pgm.filters.matcher.player.GroundedFilter;
-import tc.oc.pgm.filters.matcher.player.HoldingItemFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
 import tc.oc.pgm.filters.matcher.player.LivesFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerClassFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerStateFilter;
-import tc.oc.pgm.filters.matcher.player.WearingItemFilter;
 import tc.oc.pgm.filters.modifier.LocationQueryModifier;
 import tc.oc.pgm.filters.modifier.PlayerQueryModifier;
 import tc.oc.pgm.filters.modifier.SameTeamQueryModifier;
@@ -89,8 +87,10 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.XMLParser;
 import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.collection.ContextStore;
+import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.math.OffsetVector;
+import tc.oc.pgm.util.range.Ranges;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
@@ -496,18 +496,34 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   @MethodParser("carrying")
-  public CarryingItemFilter parseHasItem(Element el) throws InvalidXMLException {
-    return new CarryingItemFilter(factory.getKits().parseItemMatcher(el));
+  public CarryingFilter parseHasItem(Element el) throws InvalidXMLException {
+    return parseCarrying(el, SlotGroup.CARRYING);
   }
 
   @MethodParser("holding")
-  public HoldingItemFilter parseHolding(Element el) throws InvalidXMLException {
-    return new HoldingItemFilter(factory.getKits().parseItemMatcher(el));
+  public CarryingFilter parseHolding(Element el) throws InvalidXMLException {
+    return parseCarrying(el, SlotGroup.HANDS);
   }
 
   @MethodParser("wearing")
-  public WearingItemFilter parseWearingItem(Element el) throws InvalidXMLException {
-    return new WearingItemFilter(factory.getKits().parseItemMatcher(el));
+  public CarryingFilter parseWearingItem(Element el) throws InvalidXMLException {
+    return parseCarrying(el, SlotGroup.ARMOR);
+  }
+
+  private CarryingFilter parseCarrying(Element el, SlotGroup defSlot) throws InvalidXMLException {
+    var matcher = factory.getKits().parseItemMatcher(el);
+    var totalAmount = parser
+        .intRange(el, "total-amount")
+        .validate((r, node) -> {
+          if (Ranges.optionalMinimum(r, 0) < 0)
+            throw new InvalidXMLException("Expected range minimum to be 0 or above", node);
+          if (matcher.hasAmount())
+            throw new InvalidXMLException("Cannot be combined with 'amount'", node);
+        })
+        .orNull();
+    var slotGroup = parser.node(factory.getKits()::parseSlotGroup, el, "slots").optional(defSlot);
+
+    return new CarryingFilter(matcher, totalAmount, slotGroup);
   }
 
   @MethodParser("effect")
