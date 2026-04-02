@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.Materials;
 
 public class Payment {
@@ -54,7 +55,9 @@ public class Payment {
     int totalCurrency = 0;
     int targetCurrency = max * price; // total desired
 
-    for (ItemStack item : inventory.getContents()) {
+    for (var slot : Slot.Storage.storage().toList()) {
+      ItemStack item = slot.getItem(inventory);
+
       if (item != null && matches(item)) {
         totalCurrency += item.getAmount();
 

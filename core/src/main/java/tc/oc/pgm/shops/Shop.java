@@ -36,15 +36,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
   }
 
   public void purchase(Icon icon, MatchPlayer buyer) {
-    if (icon.takePayment(buyer)) {
-      icon.getAction().trigger(buyer);
-      buyer.getBukkit().updateInventory();
-      buyer.playSound(Sounds.SHOP_PURCHASE);
-    } else if (!buyer.getMatch().isRunning()) {
-      buyer.sendWarning(translatable("match.error.noMatch"));
-    } else {
-      buyer.sendWarning(translatable("shop.currency.insufficient"));
-    }
+    purchase(icon, buyer, false);
   }
 
   public void purchase(Icon icon, MatchPlayer buyer, boolean stack) {

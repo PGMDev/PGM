@@ -4,6 +4,7 @@ import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.inventory.Slot;
 
 public interface Payable {
 
@@ -22,8 +23,9 @@ public interface Payable {
     if (isFree()) return max;
 
     int affordable = max;
+    var inv = buyer.getInventory();
     for (Payment payment : getPayments()) {
-      affordable = payment.getAffordableAmount(buyer.getInventory(), affordable);
+      affordable = Math.min(affordable, payment.getAffordableAmount(inv, affordable));
       if (affordable <= 0) break;
     }
     return affordable;
@@ -41,15 +43,16 @@ public interface Payable {
       PlayerInventory inventory = buyer.getInventory();
       for (Payment payment : getPayments()) {
         int remaining = payment.getPrice() * affordable;
-        for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
-          ItemStack item = inventory.getItem(slot);
+
+        for (var slot : Slot.Storage.storage().toList()) {
+          ItemStack item = slot.getItem(inventory);
           if (item == null || !payment.matches(item)) continue;
           if (item.getAmount() > remaining) {
             item.setAmount(item.getAmount() - remaining);
-            inventory.setItem(slot, item);
+            slot.setItem(inventory, item);
             remaining = 0;
           } else {
-            inventory.setItem(slot, null);
+            slot.setItem(inventory, null);
             remaining -= item.getAmount();
           }
         }
