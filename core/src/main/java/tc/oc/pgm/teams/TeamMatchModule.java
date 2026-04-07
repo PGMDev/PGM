@@ -156,7 +156,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       TeamFactory info = team.getInfo();
 
       if (info.getNameTagAlliesFilter() != null) {
-        fmm.onChange(Match.class, info.getNameTagAlliesFilter(), (filterable, response) -> {
+        fmm.onChange(Party.class, info.getNameTagAlliesFilter(), (filterable, response) -> {
           NameTagVisibility current = team.getNameTagVisibility();
           team.setNameTagVisibility(
               switch (current) {
@@ -169,7 +169,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
       }
 
       if (info.getNameTagEnemiesFilter() != null) {
-        fmm.onChange(Match.class, info.getNameTagEnemiesFilter(), (filterable, response) -> {
+        fmm.onChange(Party.class, info.getNameTagEnemiesFilter(), (filterable, response) -> {
           NameTagVisibility current = team.getNameTagVisibility();
           team.setNameTagVisibility(
               switch (current) {
