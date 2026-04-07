@@ -23,7 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -365,7 +367,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         var number = agg.type.makeNumber(value);
         return !best ? number : text("   ").append(translatable("match.stats.you.short", number));
       }));
-    return agg.type.component(who);
+    return agg.type.component(who).hoverEvent(buildTop10Hover(agg));
   }
 
   private Component credit(Set<UUID> players) {
@@ -491,5 +493,45 @@ public class StatsMatchModule implements MatchModule, Listener {
       case StatType.OfFormula formulaStats ->
         player != null ? formulaStats.formula().apply(player) : null;
     };
+  }
+
+  private Component buildTop10Hover(AggStat<?> agg) {
+    Map<Double, List<UUID>> byValue = new java.util.TreeMap<>(Comparator.reverseOrder());
+    Component header = text("Top ").append(agg.type.component(empty()));
+
+    allPlayerStats.forEach((uuid, playerStats) -> {
+      MatchPlayer player = match.getPlayer(uuid);
+      Number val = getStatValue(agg.type, player, playerStats);
+      if (val == null) return;
+      double d = val.doubleValue();
+      if (d <= 0) return;
+      byValue.computeIfAbsent(d, k -> new ArrayList<>()).add(uuid);
+    });
+
+    List<Component> lines = new ArrayList<>();
+    lines.add(header);
+    int rank = 1;
+    for (Map.Entry<Double, List<UUID>> entry : byValue.entrySet()) {
+      if (rank > 10) break;
+      double val = entry.getKey();
+      List<UUID> tied = entry.getValue();
+
+      List<Component> names =
+          tied.stream().map(this::getPlayerComponent).collect(Collectors.toList());
+      Component namesPart = TextFormatter.list(names, NamedTextColor.WHITE);
+
+      Component line = text(rank + ". ")
+          .color(NamedTextColor.WHITE)
+          .append(namesPart)
+          .append(text(" - ").color(NamedTextColor.GRAY))
+          .append(agg.type.makeNumber(val));
+
+      lines.add(line);
+      rank += tied.size();
+    }
+
+    if (lines.isEmpty()) return empty();
+
+    return Component.join(JoinConfiguration.newlines(), lines);
   }
 }
