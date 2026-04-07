@@ -35,10 +35,18 @@ public class TeamModule implements MapModule<TeamMatchModule> {
 
   private final Set<TeamFactory> teams;
   private final @Nullable Boolean requireEven;
+  private final @Nullable Filter nameTagEnemiesFilter;
+  private final @Nullable Filter nameTagAlliesFilter;
 
-  public TeamModule(Set<TeamFactory> teams, @Nullable Boolean requireEven) {
+  public TeamModule(
+      Set<TeamFactory> teams,
+      @Nullable Boolean requireEven,
+      @Nullable Filter nameTagAlliesFilter,
+      @Nullable Filter nameTagEnemiesFilter) {
     this.teams = teams;
     this.requireEven = requireEven;
+    this.nameTagAlliesFilter = nameTagAlliesFilter;
+    this.nameTagEnemiesFilter = nameTagEnemiesFilter;
   }
 
   @Override
@@ -59,24 +67,45 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     @Override
     public TeamModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
+      var parser = factory.getParser();
+
       Set<TeamFactory> teamFactories = Sets.newLinkedHashSet();
       Boolean requireEven = null;
+      Filter nameTagAlliesFilter = null;
+      Filter nameTagEnemiesFilter = null;
 
       for (Element teamRootElement : doc.getRootElement().getChildren("teams")) {
         requireEven = XMLUtils.parseBoolean(teamRootElement.getAttribute("even"), requireEven);
 
+        nameTagAlliesFilter = parser
+            .filter(teamRootElement, "name-tags-allies-filter")
+            .dynamic(Party.class)
+            .orNull();
+        nameTagEnemiesFilter = parser
+            .filter(teamRootElement, "name-tags-enemies-filter")
+            .dynamic(Party.class)
+            .orNull();
+
         for (Element teamElement : teamRootElement.getChildren("team")) {
+          if ((nameTagAlliesFilter != null || nameTagEnemiesFilter != null)
+              && Node.fromAttr(teamElement, "show-name-tags") != null) {
+            throw new InvalidXMLException(
+                "Attribute 'show-name-tags' cannot be combined with 'name-tags-allies-filter' or 'name-tags-enemies-filter'",
+                teamElement);
+          }
           teamFactories.add(parseTeamDefinition(teamElement, factory));
         }
       }
 
-      return teamFactories.isEmpty() ? null : new TeamModule(teamFactories, requireEven);
+      return teamFactories.isEmpty()
+          ? null
+          : new TeamModule(teamFactories, requireEven, nameTagAlliesFilter, nameTagEnemiesFilter);
     }
   }
 
   @Override
   public TeamMatchModule createMatchModule(Match match) {
-    return new TeamMatchModule(match, teams);
+    return new TeamMatchModule(match, teams, nameTagAlliesFilter, nameTagEnemiesFilter);
   }
 
   /**
@@ -105,8 +134,6 @@ public class TeamModule implements MapModule<TeamMatchModule> {
 
   private static TeamFactory parseTeamDefinition(Element el, MapFactory factory)
       throws InvalidXMLException {
-    var parser = factory.getParser();
-
     String id = el.getAttributeValue("id");
 
     String name = el.getTextNormalize();
@@ -119,21 +146,8 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     ChatColor color = XMLUtils.parseChatColor(Node.fromAttr(el, "color"), ChatColor.WHITE);
     DyeColor dyeColor = XMLUtils.parseDyeColor(el.getAttribute("dye-color"), null);
 
-    NameTagVisibility nameTagVisibility =
-        XMLUtils.parseNameTagVisibility(Node.fromAttr(el, "show-name-tags"), null);
-    Filter nameTagAlliesFilter =
-        parser.filter(el, "name-tags-allies-filter").dynamic(Party.class).orNull();
-    Filter nameTagEnemiesFilter =
-        parser.filter(el, "name-tags-enemies-filter").dynamic(Party.class).orNull();
-
-    if (nameTagVisibility != null
-        && (nameTagAlliesFilter != null || nameTagEnemiesFilter != null)) {
-      throw new InvalidXMLException(
-          "Attribute 'show-name-tags' cannot be combined with 'name-tags-allies-filter' or 'name-tags-enemies-filter'",
-          el);
-    }
-
-    if (nameTagVisibility == null) nameTagVisibility = NameTagVisibility.ALWAYS;
+    NameTagVisibility nameTagVisibility = XMLUtils.parseNameTagVisibility(
+        Node.fromAttr(el, "show-name-tags"), NameTagVisibility.ALWAYS);
 
     int minPlayers = XMLUtils.parseNumber(Node.fromAttr(el, "min"), Integer.class, 0);
     int maxPlayers = XMLUtils.parseNumber(Node.fromRequiredAttr(el, "max"), Integer.class);
@@ -146,17 +160,7 @@ public class TeamModule implements MapModule<TeamMatchModule> {
     }
 
     TeamFactory teamFactory = new TeamFactory(
-        id,
-        name,
-        plural,
-        color,
-        dyeColor,
-        minPlayers,
-        maxPlayers,
-        maxOverfill,
-        nameTagVisibility,
-        nameTagAlliesFilter,
-        nameTagEnemiesFilter);
+        id, name, plural, color, dyeColor, minPlayers, maxPlayers, maxOverfill, nameTagVisibility);
     factory.getFeatures().addFeature(el, teamFactory);
 
     return teamFactory;

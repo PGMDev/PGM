@@ -155,11 +155,12 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   @EventHandler
   public void onMatchLoad(MatchLoadEvent event) {
-    var fmm = match.needModule(FilterMatchModule.class);
+    if (options.nameTagVisibilityFilter == null) return;
 
-    fmm.onChange(Match.class, options.nameTagVisibilityFilter, ((filterable, response) -> {
+    var fmm = match.needModule(FilterMatchModule.class);
+    fmm.onChange(Match.class, options.nameTagVisibilityFilter, (filterable, response) -> {
       setNameTagVisibility(response ? NameTagVisibility.ALWAYS : NameTagVisibility.NEVER);
-    }));
+    });
   }
 
   protected void updateReadiness() {
