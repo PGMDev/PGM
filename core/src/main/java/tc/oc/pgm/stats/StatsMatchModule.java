@@ -20,10 +20,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -103,6 +104,8 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final int verboseItemSlot = PGM.get().getConfiguration().getVerboseItemSlot();
 
   private List<MenuItem> teams;
+
+  private static final int TOP_HOVER_LIMIT = 10;
 
   public StatsMatchModule(Match match, List<StatType.OfFormula> formulaStats) {
     this.match = match;
@@ -367,7 +370,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         var number = agg.type.makeNumber(value);
         return !best ? number : text("   ").append(translatable("match.stats.you.short", number));
       }));
-    return agg.type.component(who).hoverEvent(buildTop10Hover(agg));
+    return agg.type.component(who).hoverEvent(buildTopHover(agg));
   }
 
   private Component credit(Set<UUID> players) {
@@ -495,43 +498,46 @@ public class StatsMatchModule implements MatchModule, Listener {
     };
   }
 
-  private Component buildTop10Hover(AggStat<?> agg) {
-    Map<Double, List<UUID>> byValue = new java.util.TreeMap<>(Comparator.reverseOrder());
-    Component header = text("Top ").append(agg.type.component(empty()));
+  private Component buildTopHover(AggStat<?> agg) {
+    var top = allPlayerStats.entrySet().stream()
+        .map(e -> {
+          Number val = getStatValue(agg.type, match.getPlayer(e.getKey()), e.getValue());
+          return val != null && val.doubleValue() > 0
+              ? Map.entry(e.getKey(), val.doubleValue())
+              : null;
+        })
+        .filter(Objects::nonNull)
+        .sorted(Map.Entry.<UUID, Double>comparingByValue().reversed())
+        .toList();
 
-    allPlayerStats.forEach((uuid, playerStats) -> {
-      MatchPlayer player = match.getPlayer(uuid);
-      Number val = getStatValue(agg.type, player, playerStats);
-      if (val == null) return;
-      double d = val.doubleValue();
-      if (d <= 0) return;
-      byValue.computeIfAbsent(d, k -> new ArrayList<>()).add(uuid);
-    });
+    if (top.size() <= 1) return null;
 
-    List<Component> lines = new ArrayList<>();
-    lines.add(header);
-    int rank = 1;
-    for (Map.Entry<Double, List<UUID>> entry : byValue.entrySet()) {
-      if (rank > 10) break;
-      double val = entry.getKey();
-      List<UUID> tied = entry.getValue();
+    var lines = new ArrayList<Component>();
+    for (int i = 0; i < top.size() && lines.size() < TOP_HOVER_LIMIT; ) {
+      double value = top.get(i).getValue();
+      int j = i;
+      while (j < top.size() && Double.compare(top.get(j).getValue(), value) == 0) {
+        j++;
+      }
 
-      List<Component> names =
-          tied.stream().map(this::getPlayerComponent).collect(Collectors.toList());
-      Component namesPart = TextFormatter.list(names, NamedTextColor.WHITE);
+      var tiedPlayers = top.subList(i, j).stream()
+          .map(entry -> getPlayerComponent(entry.getKey()))
+          .toList();
 
-      Component line = text(rank + ". ")
+      lines.add(text((lines.size() + 1) + ". ")
           .color(NamedTextColor.WHITE)
-          .append(namesPart)
+          .append(list(tiedPlayers, NamedTextColor.GRAY))
           .append(text(" - ").color(NamedTextColor.GRAY))
-          .append(agg.type.makeNumber(val));
+          .append(agg.type.makeNumber(value)));
 
-      lines.add(line);
-      rank += tied.size();
+      i = j;
     }
 
-    if (lines.isEmpty()) return empty();
-
-    return Component.join(JoinConfiguration.newlines(), lines);
+    return Component.join(
+        JoinConfiguration.newlines(),
+        Stream.concat(
+                Stream.of(translatable("match.stats.top", agg.type.component(empty()))),
+                lines.stream())
+            .toList());
   }
 }
