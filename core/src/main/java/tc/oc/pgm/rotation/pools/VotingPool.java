@@ -1,12 +1,10 @@
 package tc.oc.pgm.rotation.pools;
 
 import java.time.Duration;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
@@ -19,6 +17,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.restart.RestartManager;
 import tc.oc.pgm.rotation.MapPoolManager;
+import tc.oc.pgm.rotation.vote.ElectoralSystem;
 import tc.oc.pgm.rotation.vote.MapPoll;
 import tc.oc.pgm.rotation.vote.MapVotePicker;
 import tc.oc.pgm.rotation.vote.VoteData;
@@ -105,18 +104,18 @@ public class VotingPool extends MapPool {
     getVoteData(match.getMap()).onMatchEnd(match, constants);
   }
 
-  private void updateScores(Map<MapInfo, Set<UUID>> votes) {
-    double voters =
-        votes.values().stream().flatMap(Collection::stream).distinct().count();
+  private void updateScores(MapPoll.Tally tally) {
+    double voters = tally.total().voters();
     if (voters == 0) return; // Literally no one voted
-    votes.forEach((m, v) -> getVoteData(m).setScore(constants.afterVoteScore(v.size() / voters)));
+    tally.maps().forEach((m, v) -> getVoteData(m)
+        .setScore(constants.afterVoteScore(v.voters() / voters)));
   }
 
   @Override
   public MapInfo popNextMap() {
     if (currentPoll == null) return mapPicker.getMap(List.of(), mapScores);
     MapInfo map = currentPoll.finishVote();
-    updateScores(currentPoll.getVotes());
+    updateScores(currentPoll.getTally());
     manager.getVoteOptions().clearMaps();
     currentPoll = null;
     return map != null ? map : getRandom();
@@ -153,7 +152,9 @@ public class VotingPool extends MapPool {
               if (RestartManager.isQueued()) return;
 
               currentPoll = new MapPoll(
-                  match, mapPicker.getMaps(match.getMap(), manager.getVoteOptions(), mapScores));
+                  match,
+                  constants,
+                  mapPicker.getMaps(match.getMap(), manager.getVoteOptions(), mapScores));
             },
             5,
             TimeUnit.SECONDS);
@@ -161,6 +162,7 @@ public class VotingPool extends MapPool {
 
   public record VoteConstants(
       int voteOptions,
+      // Score
       boolean persistScores,
       double defaultScore,
       double scoreDecay,
@@ -169,8 +171,13 @@ public class VotingPool extends MapPool {
       double scoreAfterVoteMax,
       double scoreMinToVote,
       Formula<Match> scoreAfterPlay,
+      // Cooldown
       int minCooldown,
-      int minutesPerDay) {
+      int minutesPerDay,
+      // Elections
+      ElectoralSystem system,
+      double minThreshold,
+      double maxThreshold) {
     private VoteConstants(ConfigurationSection section, int mapAmount) {
       this(
           section.getInt("vote-options", MapVotePicker.MAX_VOTE_OPTIONS), // Show 5 maps
@@ -184,11 +191,14 @@ public class VotingPool extends MapPool {
           Formula.of(section.getString("score.after-playing"), Context.variables(), c -> 0)
               .map(m -> new Context(m.getDuration())),
           section.getInt("cooldown.min-length", 30),
-          section.getInt("cooldown.minutes-per-day", 30));
+          section.getInt("cooldown.minutes-per-day", 30),
+          ElectoralSystem.of(section.getString("election.system")),
+          section.getDouble("election.min-threshold", 0),
+          section.getDouble("election.max-threshold", 0));
     }
 
     public double afterVoteScore(double score) {
-      return Math.max(Math.min(score, scoreAfterVoteMax), scoreAfterVoteMin);
+      return Math.clamp(score, scoreAfterVoteMin, scoreAfterVoteMax);
     }
 
     public double tickScore(double score) {
