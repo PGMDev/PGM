@@ -95,7 +95,9 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
       }
 
       RegionParser regionParser = factory.getRegions();
+      int initial = 0;
       int scoreLimit = -1;
+      Boolean enforceLimit = null;
       int deathScore = 0;
       int killScore = 0;
       int mercyLimit = -1;
@@ -105,7 +107,9 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
       ImmutableSet.Builder<ScoreBoxDefinition> scoreBoxes = ImmutableSet.builder();
 
       for (Element el : scoreElements) {
+        initial = parser.parseInt(el, "initial").optional(initial);
         scoreLimit = parser.parseInt(el, "limit").optional(-1);
+        enforceLimit = parser.parseBool(el, "enforce-limit").optional(enforceLimit);
 
         // For backwards compatibility, default kill/death points to 1 if proto is old and <king/>
         // tag is not present
@@ -143,9 +147,19 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
           scoreBoxes.add(new ScoreBoxDefinition(region, points, filter, redeemables, silent));
         }
       }
+      // by default, if limit is set and initial >= to it, do not enforce it
+      if (enforceLimit == null) enforceLimit = !(scoreLimit > 0 && initial >= scoreLimit);
 
       var config = new ScoreDefinition(
-          scoreLimit, deathScore, killScore, mercyLimit, mercyLimitMin, display, sbFilter);
+          initial,
+          scoreLimit,
+          enforceLimit,
+          deathScore,
+          killScore,
+          mercyLimit,
+          mercyLimitMin,
+          display,
+          sbFilter);
       return new ScoreModule(config, scoreBoxes.build());
     }
 

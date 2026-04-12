@@ -22,18 +22,22 @@ import net.kyori.adventure.util.Ticks;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.join.JoinHandler;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
@@ -50,6 +54,9 @@ import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.LOADED)
 public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
+
+  private final @Nullable Filter nameTagEnemiesFilter;
+  private final @Nullable Filter nameTagAlliesFilter;
 
   record NeedMorePlayers(@Nullable Team team, int players) implements UnreadyReason {
     @Override
@@ -122,9 +129,15 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   private final Map<UUID, Team> playerTeamMap = new HashMap<>();
 
-  public TeamMatchModule(Match match, Set<TeamFactory> teamFactories) {
+  public TeamMatchModule(
+      Match match,
+      Set<TeamFactory> teamFactories,
+      @Nullable Filter nameTagAlliesFilter,
+      @Nullable Filter nameTagEnemiesFilter) {
     this.match = match;
     this.teams = new HashSet<>(teamFactories.size());
+    this.nameTagAlliesFilter = nameTagAlliesFilter;
+    this.nameTagEnemiesFilter = nameTagEnemiesFilter;
 
     for (TeamFactory teamFactory : teamFactories) {
       this.teams.add(teamFactory.createTeam(match));
@@ -143,6 +156,37 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     updateMaxPlayers();
     updateReadiness();
+  }
+
+  @EventHandler
+  public void onMatchLoad(MatchLoadEvent event) {
+    var fmm = match.needModule(FilterMatchModule.class);
+
+    if (nameTagAlliesFilter != null) {
+      fmm.onChange(Party.class, nameTagAlliesFilter, (filterable, response) -> {
+        if (!(filterable instanceof Team team)) return;
+        team.setNameTagVisibility(
+            switch (team.getNameTagVisibility()) {
+              case ALWAYS, HIDE_FOR_OWN_TEAM ->
+                response ? NameTagVisibility.ALWAYS : NameTagVisibility.HIDE_FOR_OWN_TEAM;
+              case HIDE_FOR_OTHER_TEAMS, NEVER ->
+                response ? NameTagVisibility.HIDE_FOR_OTHER_TEAMS : NameTagVisibility.NEVER;
+            });
+      });
+    }
+
+    if (nameTagEnemiesFilter != null) {
+      fmm.onChange(Party.class, nameTagEnemiesFilter, (filterable, response) -> {
+        if (!(filterable instanceof Team team)) return;
+        team.setNameTagVisibility(
+            switch (team.getNameTagVisibility()) {
+              case ALWAYS, HIDE_FOR_OTHER_TEAMS ->
+                response ? NameTagVisibility.ALWAYS : NameTagVisibility.HIDE_FOR_OTHER_TEAMS;
+              case HIDE_FOR_OWN_TEAM, NEVER ->
+                response ? NameTagVisibility.HIDE_FOR_OWN_TEAM : NameTagVisibility.NEVER;
+            });
+      });
+    }
   }
 
   protected void updateMaxPlayers() {

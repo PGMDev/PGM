@@ -364,6 +364,7 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   }
 
   public void pickupFlag(MatchPlayer carrier, Location location) {
+    if (carrier == null || !carrier.canInteract() || carrier.getBukkit().isDead()) return;
     this.state.pickupFlag(carrier, location);
   }
 
