@@ -14,7 +14,7 @@ import tc.oc.pgm.util.xml.Validator;
 
 public abstract class Builder<T, B extends Builder<T, B>> {
   protected final @Nullable Element el;
-  protected final String[] prop;
+  protected String[] prop;
 
   protected List<Validator<T>> validators;
   protected boolean attr;
