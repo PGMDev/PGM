@@ -12,6 +12,7 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResultOption;
 import tc.oc.pgm.match.PartyImpl;
+import tc.oc.pgm.scoreboard.ScoreboardMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
 
 /** A team of players. */
@@ -29,6 +30,7 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
 
   private TeamMatchModule tmm;
   private JoinMatchModule jmm;
+  private ScoreboardMatchModule smm;
 
   public Team(final TeamFactory info, final Match match) {
     super(match, assertNotNull(info).getDefaultName(), info.getDefaultColor(), info.getDyeColor());
@@ -105,7 +107,12 @@ public class Team extends PartyImpl implements Competitor, Feature<TeamFactory> 
 
   @Override
   public void setNameTagVisibility(NameTagVisibility visibility) {
+    if (smm == null) {
+      smm = getMatch().needModule(ScoreboardMatchModule.class);
+    }
+
     this.nameTagVisibilityOverride = visibility;
+    smm.updatePartyScoreboardTeam(this);
   }
 
   public int getMinPlayers() {
