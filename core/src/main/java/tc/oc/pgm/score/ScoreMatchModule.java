@@ -57,7 +57,9 @@ public class ScoreMatchModule implements MatchModule, Listener {
     this.match = match;
     this.config = config;
     this.scoreBoxes = scoreBoxes;
-    this.match.getCompetitors().forEach(competitor -> this.scores.put(competitor, 0.0));
+    this.match
+        .getCompetitors()
+        .forEach(competitor -> this.scores.put(competitor, (double) config.initial()));
 
     if (this.config.mercyLimit() > 0) {
       this.mercyRule =
@@ -76,6 +78,10 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
   public boolean hasScoreLimit() {
     return this.config.scoreLimit() > 0 || hasMercyRule();
+  }
+
+  public boolean enforcesScoreLimit() {
+    return this.config.enforceLimit() && hasScoreLimit();
   }
 
   public boolean hasMercyRule() {
