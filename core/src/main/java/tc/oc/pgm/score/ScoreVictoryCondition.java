@@ -22,7 +22,7 @@ public class ScoreVictoryCondition implements VictoryCondition {
   @Override
   public boolean isCompleted(Match match) {
     ScoreMatchModule smm = match.needModule(ScoreMatchModule.class);
-    if (!smm.hasScoreLimit()) return false;
+    if (!smm.enforcesScoreLimit()) return false;
 
     double limit = smm.getScoreLimit();
     for (Competitor competitor : match.getCompetitors()) {
