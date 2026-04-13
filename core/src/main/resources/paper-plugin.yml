@@ -8,7 +8,7 @@ bootstrapper: tc.oc.pgm.platform.modern.PgmBootstrap
 
 dependencies:
   server:
-    ProtocolLib:
+    packetevents:
       load: BEFORE
       required: true
       join-classpath: true

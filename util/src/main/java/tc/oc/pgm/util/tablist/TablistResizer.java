@@ -1,32 +1,37 @@
 package tc.oc.pgm.util.tablist;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
-import org.bukkit.plugin.Plugin;
-import tc.oc.pgm.util.platform.Platform;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerCommon;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerJoinGame;
+import org.jspecify.annotations.NonNull;
 
 public class TablistResizer {
   private static final int TAB_SIZE = 80;
-  // In 1.20.6 the field to edit is 1, unsure what version exactly broke it
-  private static final int FIELD = Platform.isLegacy() ? 2 : 1;
+  private static PacketListenerCommon listener;
 
-  public static void registerAdapter(Plugin plugin) {
-    ProtocolLibrary.getProtocolManager().addPacketListener(new TablistResizePacketAdapter(plugin));
+  public static void registerListener() {
+    unregisterListener();
+    listener = PacketEvents.getAPI()
+        .getEventManager()
+        .registerListener(new PacketListenerAbstract(PacketListenerPriority.LOWEST) {
+          @Override
+          public void onPacketSend(@NonNull PacketSendEvent event) {
+            if (event.getPacketType() != PacketType.Play.Server.JOIN_GAME) return;
+            var wrapper = new WrapperPlayServerJoinGame(event);
+            wrapper.setMaxPlayers(TAB_SIZE);
+            event.markForReEncode(true);
+          }
+        });
   }
 
-  private static class TablistResizePacketAdapter extends PacketAdapter {
-
-    public TablistResizePacketAdapter(Plugin plugin) {
-      super(plugin, ListenerPriority.LOWEST, PacketType.Play.Server.LOGIN);
-    }
-
-    @Override
-    public void onPacketSending(PacketEvent event) {
-      if (event.getPacketType() == PacketType.Play.Server.LOGIN)
-        event.getPacket().getIntegers().write(FIELD, TAB_SIZE);
+  public static void unregisterListener() {
+    if (listener != null) {
+      PacketEvents.getAPI().getEventManager().unregisterListener(listener);
+      listener = null;
     }
   }
 }

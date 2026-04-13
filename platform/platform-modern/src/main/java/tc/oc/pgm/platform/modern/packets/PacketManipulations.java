@@ -1,23 +1,19 @@
 package tc.oc.pgm.platform.modern.packets;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.netty.WirePacket;
+import com.github.retrooper.packetevents.event.PacketListenerCommon;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus;
+import com.github.retrooper.packetevents.wrapper.status.server.WrapperStatusServerResponse;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
-import io.netty.buffer.Unpooled;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
-import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
-import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -28,7 +24,7 @@ import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
-public class PacketManipulations implements PacketSender {
+public class PacketManipulations {
 
   public static final String HIDE_PARTICLES_KEY = "hideParticles";
   public static final String SHOW_INVISIBLE_KEY = "showInvisible";
@@ -44,104 +40,109 @@ public class PacketManipulations implements PacketSender {
   private static final int INVISIBILITY = 0x20;
 
   private final PlayerTracker tracker;
+  private final PacketListenerCommon[] listeners;
 
-  public PacketManipulations(Plugin plugin, PlayerTracker tracker) {
+  public PacketManipulations(PlayerTracker tracker) {
     this.tracker = tracker;
 
-    Packets.register(
-        plugin,
-        ListenerPriority.LOWEST,
-        Map.of(
-            PacketType.Play.Server.ENTITY_STATUS, this::handleEntityStatus,
-            PacketType.Play.Server.PLAYER_COMBAT_KILL, this::handleCombatKill,
-            PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata));
-    Packets.register(
-        plugin,
-        ListenerPriority.HIGHEST,
-        Map.of(PacketType.Status.Server.SERVER_INFO, this::handleServerPing));
+    this.listeners = new PacketListenerCommon[] {
+      Packets.registerSend(
+          PacketListenerPriority.LOWEST,
+          Map.of(
+              PacketType.Play.Server.ENTITY_STATUS, this::handleEntityStatus,
+              PacketType.Play.Server.DEATH_COMBAT_EVENT, this::handleDeathCombatEvent,
+              PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata)),
+      Packets.registerSend(
+          PacketListenerPriority.HIGHEST,
+          Map.of(PacketType.Status.Server.RESPONSE, this::handleServerPing))
+    };
   }
 
-  private void handleEntityStatus(PacketEvent event) {
-    var playerId = event.getPlayer().getEntityId();
-    var packet = event.getPacket();
+  public void unregister() {
+    for (PacketListenerCommon listener : listeners) {
+      Packets.unregister(listener);
+    }
+  }
 
-    int entityId = packet.getIntegers().read(0);
+  private void handleEntityStatus(PacketSendEvent event) {
+    var wrapper = new WrapperPlayServerEntityStatus(event);
+    Player player = event.getPlayer();
     // Strip "Living entity dead" status=3 packets if they're for yourself.
     // This glitches hitboxes
-    if (playerId == entityId && packet.getBytes().read(0) == 3) {
+    if (player.getEntityId() == wrapper.getEntityId() && wrapper.getStatus() == 3) {
       event.setCancelled(true);
     }
   }
 
-  private void handleCombatKill(PacketEvent event) {
-    // Never show deaths screens, ever
+  private void handleDeathCombatEvent(PacketSendEvent event) {
+    // Never show death screens, ever
     event.setCancelled(true);
   }
 
-  private void handleEntityMetadata(PacketEvent event) {
-    ClientboundSetEntityDataPacket nmsPacket =
-        (ClientboundSetEntityDataPacket) event.getPacket().getHandle();
-    int entityId = nmsPacket.id();
-    var items = nmsPacket.packedItems();
+  private void handleEntityMetadata(PacketSendEvent event) {
+    var wrapper = new WrapperPlayServerEntityMetadata(event);
+    int entityId = wrapper.getEntityId();
+    var items = wrapper.getEntityMetadata();
 
     Player pl = tracker.get(entityId);
     // We're only interested in modifying players
     if (pl == null) return;
 
-    // Replace the packet without invisibility if needed
-    if (pl.isInvisible() && event.getPlayer().hasMetadata(SHOW_INVISIBLE_KEY)) {
+    Player receiver = event.getPlayer();
+    boolean modified = false;
+
+    // Strip the invisibility flag for players who can see invisible teammates
+    if (pl.isInvisible() && receiver.hasMetadata(SHOW_INVISIBLE_KEY)) {
       for (int i = 0; i < items.size(); i++) {
         var item = items.get(i);
-        if (item.id() == DATA_SHARED_FLAGS_ID.id()) {
-          byte val = (byte) item.value();
+        if (item.getIndex() == DATA_SHARED_FLAGS_ID.id()) {
+          byte val = (Byte) item.getValue();
           if ((val & INVISIBILITY) != 0) {
-            // Because multiple players could receive this packet, we can't mutate it.
-            // Make a clone to send instead, and cancel the original
-            var newItems = new ArrayList<>(items);
-            newItems.set(i, SynchedEntityData.DataValue.create(DATA_SHARED_FLAGS_ID, (byte)
+            items.set(i, new EntityData<>(item.getIndex(), EntityDataTypes.BYTE, (byte)
                 (val & ~INVISIBILITY)));
-
-            send(new ClientboundSetEntityDataPacket(entityId, newItems), event.getPlayer());
-            event.setCancelled(true);
-            return;
+            modified = true;
+            break;
           }
         }
       }
     }
 
-    boolean isSelf = event.getPlayer().getEntityId() == entityId;
+    boolean isSelf = receiver.getEntityId() == entityId;
     boolean isDead = pl.hasMetadata("isDead");
     boolean checkHealth = isSelf || isDead;
     boolean hideParticles = pl.hasMetadata(HIDE_PARTICLES_KEY);
 
-    // Nothing to check, move along
-    if (!checkHealth && !hideParticles) return;
+    if (!checkHealth && !hideParticles) {
+      if (modified) event.markForReEncode(true);
+      return;
+    }
 
-    for (int i = 0; i < items.size(); i++) {
-      var item = items.get(i);
-
-      if (checkHealth && item.id() == DATA_HEALTH_ID.id()) {
-        float val = (float) item.value();
+    for (EntityData<?> item : items) {
+      if (checkHealth && item.getIndex() == DATA_HEALTH_ID.id()) {
+        float val = (Float) item.getValue();
         if (isSelf ? val <= 0 : val > 0) {
-          val = isSelf ? Math.max(val, 1f) : 0f;
-          items.set(i, SynchedEntityData.DataValue.create(DATA_HEALTH_ID, val));
+          ((EntityData<Float>) item).setValue(isSelf ? Math.max(val, 1f) : 0f);
+          modified = true;
         }
         checkHealth = false;
       }
 
-      if (hideParticles && item.id() == DATA_EFFECT_PARTICLES.id()) {
-        List<?> val = (List<?>) item.value();
+      if (hideParticles && item.getIndex() == DATA_EFFECT_PARTICLES.id()) {
+        List<?> val = (List<?>) item.getValue();
         if (!val.isEmpty()) {
-          items.set(i, SynchedEntityData.DataValue.create(DATA_EFFECT_PARTICLES, List.of()));
+          ((EntityData<List<?>>) item).setValue(List.of());
+          modified = true;
         }
         hideParticles = false;
       }
 
-      if (!checkHealth && !hideParticles) return;
+      if (!checkHealth && !hideParticles) break;
     }
+
+    if (modified) event.markForReEncode(true);
   }
 
-  private void handleServerPing(PacketEvent event) {
+  private void handleServerPing(PacketSendEvent event) {
     if (event.isCancelled()) return;
     JsonObject pingExtra = new JsonObject();
     new ExtraPingDataRequestEvent() {
@@ -153,27 +154,11 @@ public class PacketManipulations implements PacketSender {
     }.callEvent();
 
     if (!pingExtra.isEmpty()) {
-      // Encode the response manually, otherwise the extra data will get lost
-      var nmsPacket = (ClientboundStatusResponsePacket) event.getPacket().getHandle();
-      var jsonData = ServerStatus.CODEC
-          .encodeStart(JsonOps.INSTANCE, nmsPacket.status())
-          .getOrThrow()
-          .getAsJsonObject();
-
+      var wrapper = new WrapperStatusServerResponse(event);
+      JsonObject jsonData = wrapper.getComponent();
       jsonData.add("bukkit_extra", pingExtra);
-
-      var byteBuf = Unpooled.buffer();
-      ByteBufCodecs.lenientJson(Short.MAX_VALUE).encode(byteBuf, jsonData);
-      // Trim the excess allocated by the buffer to make things behave more like vanilla
-      byteBuf.capacity(byteBuf.readableBytes());
-
-      ProtocolLibrary.getProtocolManager()
-          .sendWirePacket(
-              event.getPlayer(),
-              new WirePacket(PacketType.Status.Server.SERVER_INFO, byteBuf.array()));
-
-      byteBuf.release();
-      event.setCancelled(true);
+      wrapper.setComponent(jsonData);
+      event.markForReEncode(true);
     }
   }
 }

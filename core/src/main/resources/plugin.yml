@@ -1,5 +1,5 @@
 name: PGM
-softdepend: [ViaVersion, ProtocolLib]
+softdepend: [ViaVersion, packetevents]
 description: ${description}
 main: ${mainClass}
 version: ${version} (git-${commitHash})

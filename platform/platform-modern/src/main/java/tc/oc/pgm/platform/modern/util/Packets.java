@@ -1,30 +1,46 @@
 package tc.oc.pgm.platform.modern.util;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketEvent;
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListenerAbstract;
+import com.github.retrooper.packetevents.event.PacketListenerCommon;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import java.util.Map;
 import java.util.function.Consumer;
-import org.bukkit.plugin.Plugin;
+import org.jspecify.annotations.NonNull;
 
 public class Packets {
-  private static final Consumer<PacketEvent> NO_OP = event -> {};
+  private static final Consumer<PacketSendEvent> SEND_NO_OP = event -> {};
+  private static final Consumer<PacketReceiveEvent> RECEIVE_NO_OP = event -> {};
 
-  public static void register(
-      Plugin pl, ListenerPriority priority, Map<PacketType, Consumer<PacketEvent>> events) {
-    ProtocolLibrary.getProtocolManager()
-        .addPacketListener(new PacketAdapter(pl, priority, events.keySet()) {
+  public static PacketListenerCommon registerSend(
+      PacketListenerPriority priority, Map<PacketTypeCommon, Consumer<PacketSendEvent>> handlers) {
+    return PacketEvents.getAPI()
+        .getEventManager()
+        .registerListener(new PacketListenerAbstract(priority) {
           @Override
-          public void onPacketReceiving(PacketEvent event) {
-            events.getOrDefault(event.getPacketType(), NO_OP).accept(event);
-          }
-
-          @Override
-          public void onPacketSending(PacketEvent event) {
-            events.getOrDefault(event.getPacketType(), NO_OP).accept(event);
+          public void onPacketSend(@NonNull PacketSendEvent event) {
+            handlers.getOrDefault(event.getPacketType(), SEND_NO_OP).accept(event);
           }
         });
+  }
+
+  public static PacketListenerCommon registerReceive(
+      PacketListenerPriority priority,
+      Map<PacketTypeCommon, Consumer<PacketReceiveEvent>> handlers) {
+    return PacketEvents.getAPI()
+        .getEventManager()
+        .registerListener(new PacketListenerAbstract(priority) {
+          @Override
+          public void onPacketReceive(@NonNull PacketReceiveEvent event) {
+            handlers.getOrDefault(event.getPacketType(), RECEIVE_NO_OP).accept(event);
+          }
+        });
+  }
+
+  public static void unregister(PacketListenerCommon listener) {
+    PacketEvents.getAPI().getEventManager().unregisterListener(listener);
   }
 }
