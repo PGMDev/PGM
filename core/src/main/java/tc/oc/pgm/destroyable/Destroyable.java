@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -506,6 +507,12 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     } else {
       return super.renderSidebarStatusText(competitor, viewer);
     }
+  }
+
+  @Override
+  public TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
+    if (isShared && owner != null) return owner.getTextColor();
+    return super.renderSidebarLabelColor(competitor, viewer);
   }
 
   @Override
