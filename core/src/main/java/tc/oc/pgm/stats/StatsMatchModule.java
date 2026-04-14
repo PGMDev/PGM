@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -79,6 +78,7 @@ import tc.oc.pgm.stats.menu.items.VerboseStatsMenuItem;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
+import tc.oc.pgm.util.collection.RankedSet;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
@@ -106,6 +106,7 @@ public class StatsMatchModule implements MatchModule, Listener {
   private List<MenuItem> teams;
 
   private static final int TOP_HOVER_LIMIT = 10;
+  private static final int MAX_PLAYERS = 15;
 
   public StatsMatchModule(Match match, List<StatType.OfFormula> formulaStats) {
     this.match = match;
@@ -499,38 +500,43 @@ public class StatsMatchModule implements MatchModule, Listener {
   }
 
   private Component buildTopHover(AggStat<?> agg) {
-    var top = allPlayerStats.entrySet().stream()
-        .map(e -> {
-          Number val = getStatValue(agg.type, match.getPlayer(e.getKey()), e.getValue());
-          return val != null && val.doubleValue() > 0
-              ? Map.entry(e.getKey(), val.doubleValue())
-              : null;
-        })
-        .filter(Objects::nonNull)
-        .sorted(Map.Entry.<UUID, Double>comparingByValue().reversed())
-        .toList();
+    RankedSet<Map.Entry<UUID, Double>> ranked =
+        new RankedSet<>(Comparator.<Map.Entry<UUID, Double>, Double>comparing(Map.Entry::getValue)
+            .reversed());
 
-    if (top.size() <= 1) return null;
+    for (Map.Entry<UUID, PlayerStats> e : allPlayerStats.entrySet()) {
+      Number val = getStatValue(agg.type, match.getPlayer(e.getKey()), e.getValue());
+      if (val != null && val.doubleValue() > 0)
+        ranked.add(Map.entry(e.getKey(), val.doubleValue()));
+    }
 
-    var lines = new ArrayList<Component>();
-    for (int i = 0; i < top.size() && lines.size() < TOP_HOVER_LIMIT; ) {
-      double value = top.get(i).getValue();
-      int j = i;
-      while (j < top.size() && Double.compare(top.get(j).getValue(), value) == 0) {
-        j++;
+    if (ranked.size() <= 1) return null;
+
+    List<Component> lines = new ArrayList<>();
+    int playersShown = 0;
+    int rank = 1;
+
+    for (Set<Map.Entry<UUID, Double>> rankSet : ranked.ranksView()) {
+      if (lines.size() >= TOP_HOVER_LIMIT || playersShown >= MAX_PLAYERS) break;
+
+      List<Map.Entry<UUID, Double>> entries = new ArrayList<>(rankSet);
+      int rankSize = entries.size();
+
+      if (rankSize <= 3) {
+        List<Component> names =
+            entries.stream().map(e -> getPlayerComponent(e.getKey())).toList();
+        lines.add(rankLine(
+            rank, agg, list(names, NamedTextColor.GRAY), entries.getFirst().getValue()));
+        playersShown += rankSize;
+      } else {
+        for (Map.Entry<UUID, Double> entry : entries) {
+          if (lines.size() >= TOP_HOVER_LIMIT || playersShown >= MAX_PLAYERS) break;
+          lines.add(rankLine(rank, agg, getPlayerComponent(entry.getKey()), entry.getValue()));
+          playersShown++;
+        }
       }
 
-      var tiedPlayers = top.subList(i, j).stream()
-          .map(entry -> getPlayerComponent(entry.getKey()))
-          .toList();
-
-      lines.add(text((lines.size() + 1) + ". ")
-          .color(NamedTextColor.WHITE)
-          .append(list(tiedPlayers, NamedTextColor.GRAY))
-          .append(text(" - ").color(NamedTextColor.GRAY))
-          .append(agg.type.makeNumber(value)));
-
-      i = j;
+      rank += rankSize;
     }
 
     return Component.join(
@@ -539,5 +545,13 @@ public class StatsMatchModule implements MatchModule, Listener {
                 Stream.of(translatable("match.stats.top", agg.type.component(empty()))),
                 lines.stream())
             .toList());
+  }
+
+  private Component rankLine(int rank, AggStat<?> agg, Component who, double value) {
+    return text(rank + ". ")
+        .color(NamedTextColor.WHITE)
+        .append(who)
+        .append(text(" - ").color(NamedTextColor.GRAY))
+        .append(agg.type.makeNumber(value));
   }
 }
