@@ -45,6 +45,7 @@ import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariablesMatchModule;
+import tc.oc.pgm.variables.types.PlayerVariable;
 
 public class MapDevCommand {
 
@@ -61,10 +62,12 @@ public class MapDevCommand {
       @Argument("target") @Default(CURRENT) MatchPlayer target,
       @Argument("page") @Default("1") int page,
       @Flag(value = "query", aliases = "q") String query,
+      @Flag(value = "hideDefaults", aliases = "d") boolean hideDefaults,
       @Flag(value = "all", aliases = "a") boolean all) {
 
     List<Map.Entry<String, Variable<?>>> variables = vmm.getVariables()
         .filter(e -> query == null || e.getKey().contains(query))
+        .filter(e -> !(hideDefaults && e.getValue() instanceof PlayerVariable))
         .sorted(Map.Entry.comparingByKey())
         .collect(Collectors.toList());
 
