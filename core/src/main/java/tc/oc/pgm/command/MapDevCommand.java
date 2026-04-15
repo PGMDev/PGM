@@ -66,8 +66,8 @@ public class MapDevCommand {
       @Flag(value = "all", aliases = "a") boolean all) {
 
     List<Map.Entry<String, Variable<?>>> variables = vmm.getVariables()
-        .filter(e -> query == null || e.getKey().contains(query))
         .filter(e -> !(hideDefaults && e.getValue() instanceof PlayerVariable))
+        .filter(e -> query == null || e.getKey().contains(query))
         .sorted(Map.Entry.comparingByKey())
         .collect(Collectors.toList());
 
