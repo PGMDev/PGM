@@ -141,7 +141,7 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
     }
 
     public double parsePercent(Node n) throws InvalidXMLException {
-      return XMLUtils.parseNumber(n, n.getValue().replace("%", "").trim(), Double.class);
+      return XMLUtils.parseNumber(n, n.getValue().replace("%", "").trim(), Double.class) / 100.0;
     }
 
     public ImmutableSet<Mode> parseModeSet(MapFactory factory, Node node)
