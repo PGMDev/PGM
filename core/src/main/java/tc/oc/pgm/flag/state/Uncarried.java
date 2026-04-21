@@ -1,6 +1,7 @@
 package tc.oc.pgm.flag.state;
 
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,7 +11,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -95,7 +96,7 @@ public abstract class Uncarried extends Spawned {
     Location flagLoc = this.getLocation();
 
     if (playerLoc.getY() < flagLoc.getY() + 2
-        && (playerLoc.getY() >= flagLoc.getY() - (player.isOnGround() ? 1 : 0.7))) {
+        && (playerLoc.getY() >= flagLoc.getY() - (PLAYER_UTILS.isGrounded(player) ? 1 : 0.7))) {
       double dx = playerLoc.getX() - flagLoc.getX();
       double dz = playerLoc.getZ() - flagLoc.getZ();
 

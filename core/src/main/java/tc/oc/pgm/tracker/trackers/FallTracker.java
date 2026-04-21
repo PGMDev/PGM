@@ -26,10 +26,9 @@ import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.FallState;
 import tc.oc.pgm.tracker.info.GenericFallInfo;
+import tc.oc.pgm.tracker.info.PlayerSupportState;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
-import tc.oc.pgm.util.material.Materials;
 
 /** Tracks the state of falls caused by other players and resolves the damage caused by them. */
 public class FallTracker implements Listener, DamageResolver {
@@ -174,17 +173,15 @@ public class FallTracker implements Listener, DamageResolver {
     }
 
     Location loc = victim.getBukkit().getLocation();
-    boolean isInLava = Materials.isLava(loc);
-    boolean isClimbing = Materials.isClimbable(loc);
-    boolean isSwimming = Materials.isWater(loc);
+    PlayerSupportState support = PlayerSupportState.of(victim.getBukkit(), loc);
 
     DamageInfo cause = tracker.resolveDamage(event);
 
     // Note the victim's situation when the attack happened
     FallInfo.From from;
-    if (isClimbing) {
+    if (support.isClimbing) {
       from = FallInfo.From.LADDER;
-    } else if (isSwimming) {
+    } else if (support.isSwimming) {
       from = FallInfo.From.WATER;
     } else {
       from = FallInfo.From.GROUND;
@@ -193,9 +190,10 @@ public class FallTracker implements Listener, DamageResolver {
     FallState fall = new FallState(victim, from, cause);
     this.falls.put(victim, fall);
 
-    fall.isClimbing = isClimbing;
-    fall.isSwimming = isSwimming;
-    fall.isInLava = isInLava;
+    fall.isClimbing = support.isClimbing;
+    fall.isSwimming = support.isSwimming;
+    fall.isGrounded = support.isGrounded;
+    fall.isInLava = support.isInLava;
 
     // If the victim is already in the air, immediately confirm that they are falling.
     // Otherwise, the fall will be confirmed when they leave the ground, if it happens
@@ -215,19 +213,20 @@ public class FallTracker implements Listener, DamageResolver {
    */
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerMove(final PlayerMoveEvent event) {
+    if (event.getTo() == null) return;
+
     MatchPlayer player = match.getParticipant(event.getPlayer());
     if (player == null) return;
 
+    PlayerSupportState currentSupport = PlayerSupportState.of(event.getPlayer(), event.getTo());
+
     FallState fall = this.falls.get(player);
     if (fall != null) {
-      boolean isClimbing = Materials.isClimbable(event.getTo());
-      boolean isSwimming = Materials.isWater(event.getTo());
-      boolean isInLava = Materials.isLava(event.getTo());
       boolean becameUnsupported = false;
       Tick now = match.getTick();
 
-      if (isClimbing != fall.isClimbing) {
-        fall.isClimbing = isClimbing;
+      if (currentSupport.isClimbing != fall.isClimbing) {
+        fall.isClimbing = currentSupport.isClimbing;
         if (fall.isClimbing) {
           // Player moved onto a ladder, cancel the fall if they are still on it after
           // MAX_CLIMBING_TIME
@@ -238,8 +237,8 @@ public class FallTracker implements Listener, DamageResolver {
         }
       }
 
-      if (isSwimming != fall.isSwimming) {
-        fall.isSwimming = isSwimming;
+      if (currentSupport.isSwimming != fall.isSwimming) {
+        fall.isSwimming = currentSupport.isSwimming;
         if (fall.isSwimming) {
           // Player moved into water, cancel the fall if they are still in it after
           // MAX_SWIMMING_TIME
@@ -250,40 +249,33 @@ public class FallTracker implements Listener, DamageResolver {
         }
       }
 
+      if (currentSupport.isGrounded != fall.isGrounded) {
+        fall.isGrounded = currentSupport.isGrounded;
+        if (fall.isGrounded) {
+          // Falling player landed on the ground, cancel the fall if they are still there after
+          // MAX_ON_GROUND_TIME
+          fall.onGroundTick = now.tick;
+          fall.groundTouchCount++;
+          this.scheduleCheckFallTimeout(fall, FallState.MAX_ON_GROUND_TICKS + 1);
+        } else {
+          // Falling player left the ground, check if it was caused by the attack
+          becameUnsupported = true;
+        }
+      }
+
       if (becameUnsupported) {
-        // Player moved out of water or off a ladder, check if it was caused by the attack
+        // Player moved off of a support, check if it was caused by the attack
         this.playerBecameUnsupported(fall);
       }
 
-      if (isInLava != fall.isInLava) {
-        fall.isInLava = isInLava;
+      if (currentSupport.isInLava != fall.isInLava) {
+        fall.isInLava = currentSupport.isInLava;
         if (fall.isInLava) {
           fall.inLavaTick = now.tick;
         } else {
           fall.outLavaTick = now.tick;
           this.scheduleCheckFallTimeout(fall, FallState.MAX_BURNING_TICKS + 1);
         }
-      }
-    }
-  }
-
-  /** Called when the player touches or leaves the ground */
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onPlayerOnGroundChanged(final PlayerOnGroundEvent event) {
-    MatchPlayer player = match.getParticipant(event.getPlayer());
-    if (player == null) return;
-
-    FallState fall = this.falls.get(player);
-    if (fall != null) {
-      if (event.getOnGround()) {
-        // Falling player landed on the ground, cancel the fall if they are still there after
-        // MAX_ON_GROUND_TIME
-        fall.onGroundTick = match.getTick().tick;
-        fall.groundTouchCount++;
-        this.scheduleCheckFallTimeout(fall, FallState.MAX_ON_GROUND_TICKS + 1);
-      } else {
-        // Falling player left the ground, check if it was caused by the attack
-        this.playerBecameUnsupported(fall);
       }
     }
   }
@@ -301,10 +293,11 @@ public class FallTracker implements Listener, DamageResolver {
       fall = new FallState(victim, FallInfo.From.GROUND, event.getSpleefInfo());
       fall.isStarted = true;
 
-      Location loc = victim.getBukkit().getLocation();
-      fall.isClimbing = Materials.isClimbable(loc);
-      fall.isSwimming = Materials.isWater(loc);
-      fall.isInLava = Materials.isLava(loc);
+      PlayerSupportState support = PlayerSupportState.of(victim.getBukkit());
+      fall.isClimbing = support.isClimbing;
+      fall.isSwimming = support.isSwimming;
+      fall.isGrounded = support.isGrounded;
+      fall.isInLava = support.isInLava;
 
       this.falls.put(victim, fall);
 

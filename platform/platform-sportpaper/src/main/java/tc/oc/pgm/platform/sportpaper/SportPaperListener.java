@@ -17,7 +17,6 @@ import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
-import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
@@ -25,13 +24,6 @@ public class SportPaperListener implements Listener {
   @EventHandler(ignoreCancelled = true)
   public void onBlockFall(org.bukkit.event.block.BlockFallEvent sportEvent) {
     BlockFallEvent pgmEvent = new BlockFallEvent(sportEvent.getBlock(), sportEvent.getEntity());
-    handleCall(pgmEvent, sportEvent);
-  }
-
-  @EventHandler(ignoreCancelled = true)
-  public void onPlayerOnGround(org.bukkit.event.player.PlayerOnGroundEvent sportEvent) {
-    PlayerOnGroundEvent pgmEvent =
-        new PlayerOnGroundEvent(sportEvent.getPlayer(), sportEvent.getOnGround());
     handleCall(pgmEvent, sportEvent);
   }
 

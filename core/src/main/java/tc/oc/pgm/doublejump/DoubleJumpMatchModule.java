@@ -1,5 +1,7 @@
 package tc.oc.pgm.doublejump;
 
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.util.Iterator;
 import java.util.Map;
 import org.bukkit.GameMode;
@@ -10,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -50,7 +52,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
     for (Map.Entry<Player, Jumper> entry : jumpers.entrySetCopy()) {
       Player player = entry.getKey();
       Jumper jumper = entry.getValue();
-      if (player.isOnGround() || jumper.kit.rechargeInAir || jumper.charge > 0f) {
+      if (PLAYER_UTILS.isGrounded(player) || jumper.kit.rechargeInAir || jumper.charge > 0f) {
         setCharge(jumper, jumper.charge + jumper.kit.chargePerTick());
         refreshJump(player);
       }

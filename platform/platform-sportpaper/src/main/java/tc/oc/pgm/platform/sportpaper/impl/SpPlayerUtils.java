@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.server.v1_8_R3.AxisAlignedBB;
 import net.minecraft.server.v1_8_R3.ChunkCoordIntPair;
 import net.minecraft.server.v1_8_R3.IBlockData;
 import net.minecraft.server.v1_8_R3.MinecraftServer;
@@ -33,7 +34,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
 import tc.oc.pgm.platform.sportpaper.packets.PacketSender;
 import tc.oc.pgm.platform.sportpaper.utils.Skins;
@@ -47,6 +48,8 @@ import tc.oc.pgm.util.skin.Skin;
 
 @Supports(SPORTPAPER)
 public class SpPlayerUtils implements PlayerUtils, PacketSender {
+  private static final double SUPPORT_HEIGHT = 0.0625;
+  private static final double SUPPORT_INSET = 1.0E-3;
 
   @Override
   public boolean teleportRelative(
@@ -157,6 +160,22 @@ public class SpPlayerUtils implements PlayerUtils, PacketSender {
   @Override
   public boolean willBeOnline(Player player) {
     return player.willBeOnline();
+  }
+
+  @Override
+  public boolean isGrounded(Player player, Location location) {
+    var handle = ((CraftPlayer) player).getHandle();
+    AxisAlignedBB box = handle.getBoundingBox();
+
+    double minX = location.getX() + (box.a - handle.locX) + SUPPORT_INSET;
+    double minY = location.getY() + (box.b - handle.locY);
+    double minZ = location.getZ() + (box.c - handle.locZ) + SUPPORT_INSET;
+    double maxX = location.getX() + (box.d - handle.locX) - SUPPORT_INSET;
+    double maxZ = location.getZ() + (box.f - handle.locZ) - SUPPORT_INSET;
+
+    AxisAlignedBB supportBox =
+        new AxisAlignedBB(minX, minY - SUPPORT_HEIGHT, minZ, maxX, minY, maxZ);
+    return !handle.world.getCubes(handle, supportBox).isEmpty();
   }
 
   @Override

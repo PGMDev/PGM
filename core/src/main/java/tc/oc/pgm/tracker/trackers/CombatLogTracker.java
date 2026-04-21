@@ -2,6 +2,7 @@ package tc.oc.pgm.tracker.trackers;
 
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -206,7 +207,7 @@ public class CombatLogTracker implements Listener {
         || player.getGameMode() == GameMode.CREATIVE) return null;
 
     // If the player was on the ground, or is flying, or is able to fly, they are fine
-    if (!(player.isOnGround() || player.isFlying() || player.getAllowFlight())) {
+    if (!(PLAYER_UTILS.isGrounded(player) || player.isFlying() || player.getAllowFlight())) {
       // If the player is falling, detect an imminent falling death
       double fallDistance = player.getFallDistance();
       Block landingBlock = null;

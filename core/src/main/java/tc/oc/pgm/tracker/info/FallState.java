@@ -1,7 +1,7 @@
 package tc.oc.pgm.tracker.info;
 
 import org.bukkit.Location;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.time.Tick;
@@ -66,6 +66,9 @@ public class FallState implements FallInfo {
   public boolean isClimbing;
   public long climbingTick;
 
+  // Whether the player is currently on ground server-side
+  public boolean isGrounded;
+
   // The player's most recent in-lava state and the time it was last set true and false
   public boolean isInLava;
   public long inLavaTick, outLavaTick;
@@ -116,7 +119,7 @@ public class FallState implements FallInfo {
    * Check if the victim of this fall is current supported by any solid blocks, water, or ladders
    */
   public boolean isSupported() {
-    return this.isClimbing || this.isSwimming || victim.getBukkit().isOnGround();
+    return this.isClimbing || this.isSwimming || this.isGrounded;
   }
 
   /** Check if the victim has failed to become unsupported quickly enough after the fall began */
@@ -134,7 +137,7 @@ public class FallState implements FallInfo {
    */
   public boolean isEndedSafely(Tick now) {
     return (!isInLava && now.tick - outLavaTick > MAX_BURNING_TICKS)
-        && ((victim.getBukkit().isOnGround()
+        && ((this.isGrounded
                 && (now.tick - onGroundTick > MAX_ON_GROUND_TICKS
                     || groundTouchCount > MAX_GROUND_TOUCHES))
             || (isSwimming && now.tick - swimmingTick > MAX_SWIMMING_TICKS)
@@ -184,6 +187,8 @@ public class FallState implements FallInfo {
         + isClimbing
         + " climbingTick="
         + climbingTick
+        + " isGrounded="
+        + isGrounded
         + " isInLava="
         + isInLava
         + " inLavaTick="

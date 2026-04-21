@@ -1,11 +1,12 @@
 package tc.oc.pgm.util.nms;
 
 import java.util.UUID;
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.block.RayBlockIntersection;
@@ -53,6 +54,12 @@ public interface PlayerUtils {
   RayBlockIntersection getTargetedBlock(Player player);
 
   boolean willBeOnline(Player player);
+
+  default boolean isGrounded(Player player) {
+    return isGrounded(player, player.getLocation());
+  }
+
+  boolean isGrounded(Player player, Location location);
 
   default void sendMultiBlockPacket(
       Player player, BlockVectorSet positions, @Nullable BlockMaterialData data) {

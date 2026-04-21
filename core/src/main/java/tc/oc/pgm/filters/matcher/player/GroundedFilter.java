@@ -1,5 +1,7 @@
 package tc.oc.pgm.filters.matcher.player;
 
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.util.Collection;
 import java.util.Collections;
 import org.bukkit.event.Event;
@@ -18,6 +20,6 @@ public class GroundedFilter extends ParticipantFilter {
 
   @Override
   protected boolean matches(PlayerQuery query, MatchPlayer player) {
-    return player.getBukkit().isOnGround();
+    return PLAYER_UTILS.isGrounded(player.getBukkit());
   }
 }

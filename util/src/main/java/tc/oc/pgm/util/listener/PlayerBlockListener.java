@@ -32,7 +32,7 @@ public class PlayerBlockListener implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerCoarseMove(final PlayerCoarseMoveEvent event) {
-    if (!event.getPlayer().isOnGround()) return;
+    if (!PLAYER_UTILS.isGrounded(event.getPlayer())) return;
 
     Block block = event.getBlockTo().getBlock();
     if (!block.getType().isSolid()) {

@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.phys.AABB;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
@@ -45,6 +46,8 @@ import tc.oc.pgm.util.skin.Skin;
 public class ModernPlayerUtils implements PlayerUtils {
 
   private static final FixedMetadataValue TRUE = new FixedMetadataValue(PGM.get(), true);
+  private static final double SUPPORT_HEIGHT = 0.0625;
+  private static final double SUPPORT_INSET = 1.0E-3;
 
   @Override
   public boolean teleportRelative(
@@ -180,6 +183,21 @@ public class ModernPlayerUtils implements PlayerUtils {
   @Override
   public boolean willBeOnline(Player player) {
     return player.isConnected();
+  }
+
+  @Override
+  public boolean isGrounded(Player player, Location location) {
+    var handle = ((CraftPlayer) player).getHandle();
+    AABB box = handle.getBoundingBox();
+
+    double minX = location.getX() + (box.minX - handle.getX()) + SUPPORT_INSET;
+    double minY = location.getY() + (box.minY - handle.getY());
+    double minZ = location.getZ() + (box.minZ - handle.getZ()) + SUPPORT_INSET;
+    double maxX = location.getX() + (box.maxX - handle.getX()) - SUPPORT_INSET;
+    double maxZ = location.getZ() + (box.maxZ - handle.getZ()) - SUPPORT_INSET;
+
+    AABB supportBox = new AABB(minX, minY - SUPPORT_HEIGHT, minZ, maxX, minY, maxZ);
+    return !handle.level().noCollision(handle, supportBox);
   }
 
   @Override

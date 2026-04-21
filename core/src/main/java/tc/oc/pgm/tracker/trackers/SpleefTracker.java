@@ -9,6 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.event.PlayerSpleefEvent;
 import tc.oc.pgm.api.match.Match;
@@ -17,12 +19,14 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
+import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
+import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.PlayerInfo;
+import tc.oc.pgm.tracker.info.PlayerSupportState;
 import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.pgm.util.TimeUtils;
-import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.material.Materials;
 
 /**
@@ -30,6 +34,13 @@ import tc.oc.pgm.util.material.Materials;
  * player to leave the ground.
  */
 public class SpleefTracker implements Listener {
+  private static final class SpleefState {
+    private PlayerSupportState support;
+
+    private SpleefState(PlayerSupportState support) {
+      this.support = support;
+    }
+  }
 
   private static final float PLAYER_WIDTH = 0.6f;
   private static final float PLAYER_RADIUS = PLAYER_WIDTH / 2.0f;
@@ -42,6 +53,7 @@ public class SpleefTracker implements Listener {
   private final TrackerMatchModule tracker;
   private final Match match;
   private final Map<Vector, SpleefInfo> brokenBlocks = new HashMap<>();
+  private final Map<MatchPlayer, SpleefState> states = new HashMap<>();
 
   public SpleefTracker(TrackerMatchModule tracker) {
     this.tracker = tracker;
@@ -83,13 +95,22 @@ public class SpleefTracker implements Listener {
             TimeUnit.MILLISECONDS);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onPlayerOnGroundChanged(final PlayerOnGroundEvent event) {
-    if (event.getOnGround()) return;
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerMove(final PlayerMoveEvent event) {
+    if (event.getTo() == null) return;
+
     MatchPlayer player = match.getParticipant(event.getPlayer());
     if (player == null) return;
 
-    Vector pos = this.lastBlockBrokenUnderPlayer(player);
+    SpleefState state = states.computeIfAbsent(
+        player, p -> new SpleefState(PlayerSupportState.of(event.getPlayer(), event.getFrom())));
+    PlayerSupportState currentSupport = PlayerSupportState.of(event.getPlayer(), event.getTo());
+    PlayerSupportState previousSupport = state.support;
+    state.support = currentSupport;
+
+    if (!previousSupport.isSupported() || currentSupport.isSupported()) return;
+
+    Vector pos = this.lastBlockBrokenUnderLocation(event.getFrom());
     if (pos != null) {
       SpleefInfo info = brokenBlocks.get(pos);
       if (match.getTick().tick - info.getTime().tick <= MAX_SPLEEF_TICKS) {
@@ -98,8 +119,29 @@ public class SpleefTracker implements Listener {
     }
   }
 
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerSpawn(final ParticipantSpawnEvent event) {
+    states.put(
+        event.getPlayer(),
+        new SpleefState(PlayerSupportState.of(event.getPlayer().getBukkit())));
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerDeath(final PlayerDeathEvent event) {
+    MatchPlayer player = match.getParticipant(event.getEntity());
+    if (player != null) states.remove(player);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerDespawn(final ParticipantDespawnEvent event) {
+    states.remove(event.getPlayer());
+  }
+
   public Vector lastBlockBrokenUnderPlayer(MatchPlayer player) {
-    Location playerLocation = player.getBukkit().getLocation();
+    return lastBlockBrokenUnderLocation(player.getBukkit().getLocation());
+  }
+
+  private Vector lastBlockBrokenUnderLocation(Location playerLocation) {
 
     int y = (int) Math.floor(playerLocation.getY() - 0.1);
 
