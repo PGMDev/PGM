@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -81,6 +82,11 @@ public class Dropped extends Uncarried implements Missing {
     SidebarMatchModule smm = this.flag.getMatch().getModule(SidebarMatchModule.class);
     if (smm != null) smm.stopBlinkingGoal(this.flag);
     super.leaveState();
+  }
+
+  @Override
+  protected boolean canSeeParticles(Player player) {
+    return !Duration.ZERO.equals(this.getDuration());
   }
 
   @Override
