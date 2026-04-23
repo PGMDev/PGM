@@ -11,6 +11,7 @@ import tc.oc.pgm.flag.Flag;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.flag.event.FlagStateChangeEvent;
 import tc.oc.pgm.flag.post.PostDefinition;
+import tc.oc.pgm.flag.state.Captured;
 import tc.oc.pgm.flag.state.State;
 
 public class FlagStateFilter extends TypedFilter.Impl<MatchQuery> {
@@ -44,6 +45,8 @@ public class FlagStateFilter extends TypedFilter.Impl<MatchQuery> {
     // FIXME: This may occur at load time. We need a better fix for this.
     if (flag == null) return false;
 
-    return flag.isCurrent(this.state) && (this.post == null || flag.isAtPost(this.post.get()));
+    return (flag.isCurrent(this.state)
+            || (this.state == Captured.class && flag.isRespawningAfterCapture()))
+        && (this.post == null || flag.isAtPost(this.post.get()));
   }
 }

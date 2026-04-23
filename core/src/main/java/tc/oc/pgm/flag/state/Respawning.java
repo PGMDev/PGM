@@ -46,6 +46,10 @@ public class Respawning extends Spawned implements Returning {
     this.wasDelayed = wasDelayed;
   }
 
+  public boolean wasCaptured() {
+    return this.wasCaptured;
+  }
+
   @Override
   protected Duration getDuration() {
     return respawnTime;

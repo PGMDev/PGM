@@ -43,6 +43,7 @@ import tc.oc.pgm.flag.state.BaseState;
 import tc.oc.pgm.flag.state.Captured;
 import tc.oc.pgm.flag.state.Completed;
 import tc.oc.pgm.flag.state.Dropped;
+import tc.oc.pgm.flag.state.Respawning;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.Spawned;
 import tc.oc.pgm.flag.state.State;
@@ -443,6 +444,10 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
 
   public boolean isCaptured() {
     return isCompleted() || isCurrent(Captured.class);
+  }
+
+  public boolean isRespawningAfterCapture() {
+    return this.state instanceof Respawning respawning && respawning.wasCaptured();
   }
 
   @Override
