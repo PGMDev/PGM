@@ -27,12 +27,13 @@ public class PePacket implements Packet, PacketSender {
   @Override
   public void sendToViewers(Entity entity, boolean excludeSpectators) {
     for (var conn : getViewers(entity)) {
+      var viewer = conn.getPlayer().getBukkitEntity();
       if (excludeSpectators) {
-        Entity spectatorTarget = conn.getPlayer().getBukkitEntity().getSpectatorTarget();
+        Entity spectatorTarget = viewer.getSpectatorTarget();
         if (spectatorTarget != null && spectatorTarget.getUniqueId().equals(entity.getUniqueId()))
           continue;
       }
-      PE.sendPacket(conn.getPlayer().getBukkitEntity(), wrapper);
+      PE.sendPacket(viewer, wrapper);
     }
   }
 

@@ -40,22 +40,21 @@ public class PacketManipulations {
   private static final int INVISIBILITY = 0x20;
 
   private final PlayerTracker tracker;
-  private final PacketListenerCommon[] listeners;
+  private final List<PacketListenerCommon> listeners;
 
   public PacketManipulations(PlayerTracker tracker) {
     this.tracker = tracker;
 
-    this.listeners = new PacketListenerCommon[] {
-      PacketEventsUtil.registerSend(
-          PacketListenerPriority.LOWEST,
-          Map.of(
-              PacketType.Play.Server.ENTITY_STATUS, this::handleEntityStatus,
-              PacketType.Play.Server.DEATH_COMBAT_EVENT, this::handleDeathCombatEvent,
-              PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata)),
-      PacketEventsUtil.registerSend(
-          PacketListenerPriority.HIGHEST,
-          Map.of(PacketType.Status.Server.RESPONSE, this::handleServerPing))
-    };
+    this.listeners = List.of(
+        PacketEventsUtil.registerSend(
+            PacketListenerPriority.LOWEST,
+            Map.of(
+                PacketType.Play.Server.ENTITY_STATUS, this::handleEntityStatus,
+                PacketType.Play.Server.DEATH_COMBAT_EVENT, this::handleDeathCombatEvent,
+                PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata)),
+        PacketEventsUtil.registerSend(
+            PacketListenerPriority.HIGHEST,
+            Map.of(PacketType.Status.Server.RESPONSE, this::handleServerPing)));
   }
 
   public void unregister() {
