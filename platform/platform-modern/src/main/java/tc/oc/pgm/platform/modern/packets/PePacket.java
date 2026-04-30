@@ -1,6 +1,7 @@
 package tc.oc.pgm.platform.modern.packets;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.manager.player.PlayerManager;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
@@ -8,6 +9,8 @@ import org.bukkit.entity.Player;
 import tc.oc.pgm.util.nms.packets.Packet;
 
 public class PePacket implements Packet, PacketSender {
+  private static final PlayerManager PE = PacketEvents.getAPI().getPlayerManager();
+
   private final PacketWrapper<?> wrapper;
 
   public PePacket(PacketWrapper<?> wrapper) {
@@ -17,7 +20,7 @@ public class PePacket implements Packet, PacketSender {
   @Override
   public void send(Player viewer) {
     if (viewer.isOnline()) {
-      PacketEvents.getAPI().getPlayerManager().sendPacket(viewer, wrapper);
+      PE.sendPacket(viewer, wrapper);
     }
   }
 
@@ -29,16 +32,14 @@ public class PePacket implements Packet, PacketSender {
         if (spectatorTarget != null && spectatorTarget.getUniqueId().equals(entity.getUniqueId()))
           continue;
       }
-      PacketEvents.getAPI()
-          .getPlayerManager()
-          .sendPacket(conn.getPlayer().getBukkitEntity(), wrapper);
+      PE.sendPacket(conn.getPlayer().getBukkitEntity(), wrapper);
     }
   }
 
   @Override
   public void broadcast() {
     for (Player player : Bukkit.getOnlinePlayers()) {
-      PacketEvents.getAPI().getPlayerManager().sendPacket(player, wrapper);
+      PE.sendPacket(player, wrapper);
     }
   }
 }

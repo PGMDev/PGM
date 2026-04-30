@@ -19,8 +19,8 @@ import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
-import tc.oc.pgm.platform.modern.util.Packets;
 import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
+import tc.oc.pgm.util.packets.PacketEventsUtil;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 @SuppressWarnings("unchecked")
@@ -46,13 +46,13 @@ public class PacketManipulations {
     this.tracker = tracker;
 
     this.listeners = new PacketListenerCommon[] {
-      Packets.registerSend(
+      PacketEventsUtil.registerSend(
           PacketListenerPriority.LOWEST,
           Map.of(
               PacketType.Play.Server.ENTITY_STATUS, this::handleEntityStatus,
               PacketType.Play.Server.DEATH_COMBAT_EVENT, this::handleDeathCombatEvent,
               PacketType.Play.Server.ENTITY_METADATA, this::handleEntityMetadata)),
-      Packets.registerSend(
+      PacketEventsUtil.registerSend(
           PacketListenerPriority.HIGHEST,
           Map.of(PacketType.Status.Server.RESPONSE, this::handleServerPing))
     };
@@ -60,7 +60,7 @@ public class PacketManipulations {
 
   public void unregister() {
     for (PacketListenerCommon listener : listeners) {
-      Packets.unregister(listener);
+      PacketEventsUtil.unregister(listener);
     }
   }
 
