@@ -3,8 +3,8 @@ package tc.oc.pgm.platform.modern.packets;
 import static net.minecraft.world.entity.Entity.FLAG_INVISIBLE;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.events.PacketContainer;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityHeadLook;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers;
 import com.mojang.datafixers.util.Pair;
 import java.util.ArrayList;
 import java.util.List;
@@ -98,20 +98,12 @@ public class ModernEntityPackets implements EntityPackets {
 
   @Override
   public Packet updateHeadRotation(int entityId, Location location) {
-    PacketContainer packet = PlPacket.PL.createPacket(PacketType.Play.Server.ENTITY_HEAD_ROTATION);
-    packet.getIntegers().write(0, entityId);
-    packet.getBytes().write(0, (byte) (location.getYaw() * 256 / 360));
-    return new PlPacket(packet);
+    return new PePacket(new WrapperPlayServerEntityHeadLook(entityId, location.getYaw()));
   }
 
   @Override
   public Packet entityMount(int entityId, int vehicleId) {
-    PacketContainer packet = PlPacket.PL.createPacket(PacketType.Play.Server.MOUNT);
-
-    packet.getIntegers().write(0, vehicleId);
-    packet.getIntegerArrays().write(0, new int[] {entityId});
-
-    return new PlPacket(packet);
+    return new PePacket(new WrapperPlayServerSetPassengers(vehicleId, new int[] {entityId}));
   }
 
   @Override

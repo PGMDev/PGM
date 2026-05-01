@@ -103,6 +103,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ChatManager chatManager;
   private InventoryManager inventoryManager;
   private AfkTracker afkTracker;
+  private boolean tablistResizerEnabled;
 
   public PGMPlugin() {
     super();
@@ -233,10 +234,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     if (config.resizeTabList()) {
-      if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
-        TablistResizer.registerAdapter(this);
+      if (this.getServer().getPluginManager().isPluginEnabled("packetevents")) {
+        TablistResizer.registerListener();
+        tablistResizerEnabled = true;
       } else {
-        logger.warning("ProtocolLib is required when 'ui.resize' is enabled");
+        logger.warning("PacketEvents is required when 'ui.resize' is enabled");
       }
     }
 
@@ -252,6 +254,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
   @Override
   public void onDisable() {
+    if (tablistResizerEnabled) {
+      TablistResizer.unregisterListener();
+      tablistResizerEnabled = false;
+    }
+    Platform.MANIFEST.onDisable();
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
     if (executorService != null) executorService.shutdown();
