@@ -6,7 +6,7 @@ import com.github.retrooper.packetevents.event.PacketSendEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerJoinGame;
 import java.util.Map;
-import tc.oc.pgm.util.packets.PacketEventsUtil;
+import tc.oc.pgm.util.nms.packets.PacketEventsUtil;
 
 public class TablistResizer {
   private static final int TAB_SIZE = 80;

@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
 import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
-import tc.oc.pgm.util.packets.PacketEventsUtil;
+import tc.oc.pgm.util.nms.packets.PacketEventsUtil;
 import tc.oc.pgm.util.reflect.ReflectionUtils;
 
 @SuppressWarnings("unchecked")

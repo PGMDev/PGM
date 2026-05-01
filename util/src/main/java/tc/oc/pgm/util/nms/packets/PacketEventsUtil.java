@@ -1,4 +1,4 @@
-package tc.oc.pgm.util.packets;
+package tc.oc.pgm.util.nms.packets;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.EventManager;
