@@ -1,5 +1,7 @@
 package tc.oc.pgm;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+
 import com.google.common.collect.Lists;
 import fr.minuskube.inv.InventoryManager;
 import java.io.File;
@@ -24,7 +26,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
@@ -209,12 +211,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
         config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
 
     // Sometimes match folders need to be cleaned up if the server previously crashed
-    final File[] worldDirs = getServer().getWorldContainer().listFiles();
-    if (worldDirs != null) {
+    for (File root : MISC_UTILS.getWorldDirectories()) {
+      final File[] worldDirs = root.listFiles();
+      if (worldDirs == null) continue;
       for (File dir : worldDirs) {
-        if (dir.isDirectory() && Match.isMatchWorld(dir.getName())) {
-          FileUtils.delete(dir);
-        }
+        if (dir.isDirectory() && Match.isMatchWorld(dir.getName())) FileUtils.delete(dir);
       }
     }
 

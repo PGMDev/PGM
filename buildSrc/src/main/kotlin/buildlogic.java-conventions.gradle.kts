@@ -33,11 +33,11 @@ repositories {
 
 dependencies {
     api("org.jdom:jdom2:2.0.6.1")
-    api("net.kyori:adventure-api:4.26.1")
-    api("net.kyori:adventure-text-serializer-plain:4.26.1")
-    // adventure-platform fork with ViaVersion and 1.21.11+ fixes
+    api("net.kyori:adventure-api:5.2.0")
+    api("net.kyori:adventure-text-serializer-plain:5.2.0")
+    // adventure-platform fork supporting Adventure 5.x
     // https://github.com/OvercastCommunity/adventure-platform
-    api("com.github.OvercastCommunity.adventure-platform:adventure-platform-bukkit:04de657e85")
+    api("com.github.OvercastCommunity.adventure-platform:adventure-platform-bukkit:b4bfb8a6b4")
     api("org.incendo:cloud-core:2.1.0")
     api("org.incendo:cloud-annotations:2.1.0")
     api("org.incendo:cloud-paper:2.0.0")
