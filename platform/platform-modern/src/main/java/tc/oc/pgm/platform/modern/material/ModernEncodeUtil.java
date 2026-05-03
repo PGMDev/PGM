@@ -15,6 +15,6 @@ class ModernEncodeUtil {
     if (encoded == ENCODED_NULL_MATERIAL) return null;
     var vanillaBlockstate = Block.BLOCK_STATE_REGISTRY.byId(encoded);
     if (vanillaBlockstate == null) return null;
-    return new ModernBlockData(vanillaBlockstate.createCraftBlockData());
+    return new ModernBlockData(vanillaBlockstate.asBlockData());
   }
 }
