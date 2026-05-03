@@ -68,7 +68,7 @@ public class TabRender {
     this.removePacket.addPlayerInfo(entry.getId());
 
     int entityId = entry.getFakeEntityId(this.view);
-    if (entityId >= 0) {
+    if (entityId != TabEntry.NULL_ENTITY) {
       this.send(ENTITIES.destroyEntitiesPacket(entityId));
     }
   }
@@ -140,15 +140,17 @@ public class TabRender {
 
   public void updateFakeEntity(TabEntry entry, boolean create) {
     Player player = entry.getFakePlayer(this.view);
-    if (player != null) {
+    if (player == null) return;
+
+    if (create) {
+      this.deferredPackets.add(TAB_PACKETS.spawnPlayerPacket(
+          entry.allocateFakeEntityId(this.view),
+          entry.getId(),
+          new Location(this.view.getViewer().getWorld(), 0, Integer.MAX_VALUE / 2d, 0, 0, 0),
+          player));
+    } else {
       int entityId = entry.getFakeEntityId(this.view);
-      if (create) {
-        this.deferredPackets.add(TAB_PACKETS.spawnPlayerPacket(
-            entityId,
-            entry.getId(),
-            new Location(this.view.getViewer().getWorld(), 0, Integer.MAX_VALUE / 2d, 0, 0, 0),
-            player));
-      } else {
+      if (entityId != TabEntry.NULL_ENTITY) {
         this.deferredPackets.add(ENTITIES.entityMetadataPacket(entityId, player, true));
       }
     }
