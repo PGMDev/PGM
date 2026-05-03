@@ -3,7 +3,6 @@ package tc.oc.pgm.tracker.trackers;
 import java.lang.ref.WeakReference;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -19,7 +18,7 @@ import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 /** Updates the state of owned mobs with info about the owner. */
 public class OwnedMobTracker extends AbstractTracker<MobInfo> {
 
-  private WeakReference<Slime> splitter = new WeakReference<>(null);
+  private WeakReference<? extends LivingEntity> splitter = new WeakReference<>(null);
 
   public OwnedMobTracker(TrackerMatchModule tmm, Match match) {
     super(MobInfo.class, tmm, match);
@@ -58,7 +57,7 @@ public class OwnedMobTracker extends AbstractTracker<MobInfo> {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onSlimeSplit(CreatureSpawnEvent event) {
     if (event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.SLIME_SPLIT) {
-      Slime parent = splitter.get();
+      var parent = splitter.get();
       if (parent != null) {
         MobInfo info = resolveEntity(parent);
         if (info != null) {
@@ -70,8 +69,12 @@ public class OwnedMobTracker extends AbstractTracker<MobInfo> {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onSlimeSplit(SlimeSplitEvent event) {
-    if (event.getCount() > 0 && resolveEntity(event.getEntity()) != null) {
-      splitter = new WeakReference<>(event.getEntity());
+    // The event entity will always be an instance of a LivingEntity,
+    // but the intersect jar doesn't know that.
+    if (!(event.getEntity() instanceof LivingEntity entity)) return;
+
+    if (event.getCount() > 0 && resolveEntity(entity) != null) {
+      splitter = new WeakReference<>(entity);
     }
   }
 }

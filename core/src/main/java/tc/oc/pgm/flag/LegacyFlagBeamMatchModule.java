@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -144,13 +145,14 @@ public class LegacyFlagBeamMatchModule implements MatchModule, Listener {
 
       ItemStack wool =
           new ItemBuilder().material(Materials.WOOL).color(flag.getDyeColor()).build();
-      this.base = ENTITIES.fakeArmorStand(wool);
-      this.legacyBase = ENTITIES.fakeWitherSkull();
+      World world = match.getWorld();
+      this.base = ENTITIES.fakeArmorStand(world, wool);
+      this.legacyBase = ENTITIES.fakeWitherSkull(world);
       this.segments = range(
               0, 64) // ~100 blocks is the height which the particles appear to be reasonably
           // visible (similar amount to amount closest to the flag), we limit this to 64 blocks
           // to reduce load on the client
-          .mapToObj(i -> ENTITIES.fakeArmorStand(wool))
+          .mapToObj(_ -> ENTITIES.fakeArmorStand(world, wool))
           .collect(Collectors.toList());
     }
 

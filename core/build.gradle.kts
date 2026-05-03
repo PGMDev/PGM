@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly("dev.pgm.paper:paper-api:1.8_1.21.11-SNAPSHOT")
+    compileOnly("dev.pgm.paper:paper-api:1.8_26.2-SNAPSHOT")
 
     implementation(project(":util"))
     runtimeOnly(project(":platform-sportpaper")) { exclude("*") }
@@ -16,9 +16,6 @@ dependencies {
 
 
 tasks.named<ShadowJar>("shadowJar") {
-    manifest {
-        attributes["paperweight-mappings-namespace"] = "mojang"
-    }
     archiveFileName = "PGM.jar"
     archiveClassifier.set("")
     destinationDirectory = rootProject.projectDir.resolve("build/libs")
@@ -93,7 +90,7 @@ tasks {
                 mapOf(
                     "name" to name,
                     "description" to description,
-                    "apiVersion" to "1.21.11",
+                    "apiVersion" to "26.2",
                     "mainClass" to "tc.oc.pgm.PGMPlugin",
                     "version" to version,
                     "commitHash" to commitHash.get(),

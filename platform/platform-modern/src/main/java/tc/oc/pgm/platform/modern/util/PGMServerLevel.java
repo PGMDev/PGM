@@ -1,22 +1,22 @@
 package tc.oc.pgm.platform.modern.util;
 
+import io.papermc.paper.world.PaperWorldLoader;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
-import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import org.bukkit.World;
 import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
@@ -29,32 +29,36 @@ public class PGMServerLevel extends ServerLevel {
       MinecraftServer server,
       Executor dispatcher,
       LevelStorageSource.LevelStorageAccess levelStorageAccess,
-      PrimaryLevelData serverLevelData,
+      WorldGenSettings worldGenSettings,
       ResourceKey<Level> dimension,
       LevelStem levelStem,
       boolean isDebug,
       long biomeZoomSeed,
       List<CustomSpawner> customSpawners,
       boolean tickTime,
-      @Nullable RandomSequences randomSequences,
+      ResourceKey<LevelStem> typeKey,
       World.Environment env,
       ChunkGenerator gen,
-      BiomeProvider biomeProvider) {
+      BiomeProvider biomeProvider,
+      SavedDataStorage savedDataStorage,
+      PaperWorldLoader.LoadedWorldData loadedWorldData) {
     super(
         server,
         dispatcher,
         levelStorageAccess,
-        serverLevelData,
+        worldGenSettings,
         dimension,
         levelStem,
         isDebug,
         biomeZoomSeed,
         customSpawners,
         tickTime,
-        randomSequences,
+        typeKey,
         env,
         gen,
-        biomeProvider);
+        biomeProvider,
+        savedDataStorage,
+        loadedWorldData);
   }
 
   // Redirect all map operations to world-level storage
@@ -62,7 +66,7 @@ public class PGMServerLevel extends ServerLevel {
   @Override
   public MapItemSavedData getMapData(@NonNull MapId mapId) {
     // Paper start - Call missing map initialize event and set id
-    final DimensionDataStorage storage = getDataStorage();
+    final SavedDataStorage storage = getDataStorage();
 
     final Optional<SavedData> cacheEntry = storage.cache.get(MapItemSavedData.type(mapId));
     if (cacheEntry == null) { // Cache did not contain, try to load and may init
