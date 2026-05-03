@@ -25,11 +25,11 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.worldupdate.UpgradeProgress;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
@@ -80,7 +80,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "26.1.2")
+@Supports(value = PAPER, minVersion = "26.2")
 public class ModernNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
@@ -141,7 +141,6 @@ public class ModernNMSHacks implements NMSHacks {
     var nmsBlock = CraftMagicNumbers.getBlock(material);
     var chunk = craftChunk.getHandle(ChunkStatus.FULL);
 
-    int baseY = chunk.getMinY();
     for (int i = 0; i < chunk.getSections().length; i++) {
       var section = chunk.getSections()[i];
       if (section == null || section.hasOnlyAir()) continue;
@@ -149,7 +148,7 @@ public class ModernNMSHacks implements NMSHacks {
       var states = section.getStates();
       if (!states.maybeHas(bs -> bs.getBukkitMaterial() == material)) continue;
 
-      final int chunkY = baseY + (i * LevelChunkSection.SECTION_HEIGHT);
+      final int chunkY = chunk.getSectionYFromSectionIndex(i) << 4;
 
       // Iteration order is relevant, as indexes are packed as x | z << 4 | y << 8
       for (int y = 0; y < 16; y++) {
@@ -227,7 +226,7 @@ public class ModernNMSHacks implements NMSHacks {
     }
 
     ResourceKey<net.minecraft.world.level.Level> dimensionKey =
-        PaperWorldLoader.dimensionKey(worldKey);
+        CraftNamespacedKey.toResourceKey(Registries.DIMENSION, worldKey);
 
     // PGM: We need to read data version from level.dat pre-migration
     int dataVersion = MISC_UTILS.getWorldDataVersion(
@@ -303,7 +302,7 @@ public class ModernNMSHacks implements NMSHacks {
 
     ServerLevel serverLevel = new PGMServerLevel(
         console,
-        console.executor,
+        Util.backgroundExecutor(),
         console.storageSource,
         worldGenSettings,
         dimensionKey,
@@ -407,7 +406,7 @@ public class ModernNMSHacks implements NMSHacks {
   }
 
   @Override
-  public int allocateEntityId() {
-    return Bukkit.getUnsafe().nextEntityId();
+  public int allocateEntityId(World world) {
+    return Bukkit.getUnsafe().nextEntityId(world);
   }
 }

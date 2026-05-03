@@ -3,19 +3,25 @@ package tc.oc.pgm.platform.modern.impl;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -142,5 +148,16 @@ public class ModernMiscUtil implements MiscUtils {
   public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
     if (ev instanceof PlayerPickupArrowEvent arrowEvent) return arrowEvent.getArrow();
     return ev.getItem();
+  }
+
+  @Override
+  public List<File> getWorldDirectories() {
+    var console = ((CraftServer) Bukkit.getServer()).getServer();
+    // Probe a non-existent dimension to get the dimension root folder
+    var dimensionKey =
+        CraftNamespacedKey.toResourceKey(Registries.DIMENSION, new NamespacedKey("pgm", "world"));
+    return List.of(
+        console.storageSource.getDimensionPath(dimensionKey).getParent().toFile(),
+        Bukkit.getServer().getWorldContainer());
   }
 }
