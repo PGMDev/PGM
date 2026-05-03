@@ -60,11 +60,9 @@ import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.listener.AfkTracker;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.nms.packets.FakeEntity;
 
 public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
-
-  // TODO: Probably should be moved to a better location
-  private static final int FROZEN_VEHICLE_ENTITY_ID = NMS_HACKS.allocateEntityId();
 
   private static final String DEATH_KEY = "isDead";
   private static final MetadataValue DEATH_VALUE = new FixedMetadataValue(PGM.get(), true);
@@ -80,6 +78,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final AtomicBoolean visible;
   private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
+  private final FakeEntity frozenVehicle;
   private final AfkTracker.Activity activity;
   private long lastKitTick = 0;
 
@@ -96,6 +95,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
     this.visible = new AtomicBoolean(false);
     this.protocolReady = new AtomicBoolean(ViaUtils.isReady(player));
     this.protocolVersion = new AtomicInteger(ViaUtils.getProtocolVersion(player));
+    this.frozenVehicle = ENTITIES.fakeFreezeEntity(match.getWorld(), player, this::isLegacy);
     this.activity = PGM.get().getAfkTracker().getActivity(player);
   }
 
@@ -335,10 +335,10 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       if (bukkit == null) return;
 
       if (yes) {
-        ENTITIES.spawnFreezeEntity(bukkit, FROZEN_VEHICLE_ENTITY_ID, isLegacy()).send(bukkit);
-        ENTITIES.entityMount(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID).send(bukkit);
+        frozenVehicle.spawn(bukkit.getLocation()).send(bukkit);
+        frozenVehicle.ride(bukkit.getEntityId()).send(bukkit);
       } else {
-        ENTITIES.destroyEntitiesPacket(FROZEN_VEHICLE_ENTITY_ID).send(bukkit);
+        frozenVehicle.destroy().send(bukkit);
       }
       resetInteraction();
     }
@@ -453,7 +453,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       // If the player right-clicks on another vehicle while frozen, the client will
       // eject them from the freeze entity unconditionally, so we have to spam them
       // with these packets to keep them on it.
-      ENTITIES.entityMount(bukkit.getEntityId(), FROZEN_VEHICLE_ENTITY_ID).send(bukkit);
+      frozenVehicle.ride(bukkit.getEntityId()).send(bukkit);
     }
   }
 

@@ -6,8 +6,10 @@ import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -18,12 +20,12 @@ import tc.oc.pgm.util.nms.EnumPlayerInfoAction;
 
 public interface EntityPackets {
 
-  default int allocateEntityId() {
-    return NMS_HACKS.allocateEntityId();
+  default int allocateEntityId(World world) {
+    return NMS_HACKS.allocateEntityId(world);
   }
 
-  default FakeEntity fakeWitherSkull() {
-    return new FakeEntity.Impl(allocateEntityId()) {
+  default FakeEntity fakeWitherSkull(World world) {
+    return new FakeEntity.Impl(allocateEntityId(world)) {
       @Override
       public Packet spawn(Location location, Vector velocity) {
         return spawnWitherSkull(location, entityId(), velocity);
@@ -31,12 +33,21 @@ public interface EntityPackets {
     };
   }
 
-  default FakeEntity fakeArmorStand(@Nullable ItemStack helmet) {
-    return new FakeEntity.Impl(allocateEntityId()) {
+  default FakeEntity fakeArmorStand(World world, @Nullable ItemStack helmet) {
+    return new FakeEntity.Impl(allocateEntityId(world)) {
       @Override
       public Packet spawn(Location location, Vector velocity) {
         Packet spawn = spawnArmorStand(location, entityId(), velocity);
         return helmet != null ? Packet.of(spawn, wearHead(helmet)) : spawn;
+      }
+    };
+  }
+
+  default FakeEntity fakeFreezeEntity(World world, Player player, BooleanSupplier legacy) {
+    return new FakeEntity.Impl(allocateEntityId(world)) {
+      @Override
+      public Packet spawn(Location location, Vector velocity) {
+        return spawnFreezeEntity(player, entityId(), legacy.getAsBoolean());
       }
     };
   }
@@ -61,7 +72,7 @@ public interface EntityPackets {
     // Add color to void matching real name. Cut to avoid exceeding 16 chars
     String playerName = color + StringUtils.substring(original.getName(), 0, 14);
     String suffix = StringUtils.substring(original.getName(), 14, 16);
-    return new FakeEntity.Impl(allocateEntityId()) {
+    return new FakeEntity.Impl(allocateEntityId(original.getWorld())) {
       @Override
       public Packet spawn(Location location, Vector velocity) {
         var tabInfo = TAB_PACKETS.createPlayerInfoPacket(EnumPlayerInfoAction.ADD_PLAYER);
