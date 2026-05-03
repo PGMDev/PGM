@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.bukkit;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
@@ -22,6 +23,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Team;
+import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
@@ -63,4 +65,10 @@ public interface MiscUtils {
   boolean isEntityDestroyed(EntityRemoveFromWorldEvent ev);
 
   Entity getFakePickupEntity(PlayerPickupItemEvent ev);
+
+  List<File> getWorldDirectories();
+
+  default void deleteWorldDirectories(String worldName) {
+    for (File root : getWorldDirectories()) FileUtils.delete(new File(root, worldName));
+  }
 }

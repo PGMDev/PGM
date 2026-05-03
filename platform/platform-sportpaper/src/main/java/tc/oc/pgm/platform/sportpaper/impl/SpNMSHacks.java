@@ -226,7 +226,7 @@ public class SpNMSHacks implements NMSHacks {
   }
 
   @Override
-  public int allocateEntityId() {
+  public int allocateEntityId(World world) {
     return Bukkit.allocateEntityId();
   }
 }

@@ -1,6 +1,7 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
 
@@ -37,7 +38,6 @@ import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.SpawnMatchModule;
-import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.text.TextTranslations;
@@ -231,7 +231,8 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     }
 
     private InitWorldStage advanceSync() throws MapMissingException {
-      FileUtils.delete(getDirectory()); // Always ensure the directory is empty first
+      // Always ensure the directory is empty first
+      MISC_UTILS.deleteWorldDirectories(getDirectory().getName());
 
       final File dir = getDirectory();
       if (dir.mkdirs()) {
@@ -251,7 +252,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     @Override
     public void revert() {
       counter.getAndDecrement();
-      FileUtils.delete(getDirectory());
+      MISC_UTILS.deleteWorldDirectories(getDirectory().getName());
     }
   }
 

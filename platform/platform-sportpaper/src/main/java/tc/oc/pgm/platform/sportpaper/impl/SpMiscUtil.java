@@ -5,12 +5,14 @@ import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.minecraft.server.v1_8_R3.EntityPotion;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -129,5 +131,10 @@ public class SpMiscUtil implements MiscUtils {
   @Override
   public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
     return ev.getItem();
+  }
+
+  @Override
+  public List<File> getWorldDirectories() {
+    return List.of(Bukkit.getServer().getWorldContainer());
   }
 }
