@@ -8,7 +8,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -19,32 +19,43 @@ repositories {
     maven("https://oss.sonatype.org/content/repositories/snapshots/") // Snapshots
     maven("https://repo.viaversion.com/") // ViaVersion
     maven("https://repo.pgm.fyi/snapshots") // SportPaper & other PGM-specific stuff
-    maven("https://jitpack.io") // MinusKube SmartsInv fix for shift click
     maven("https://repo.codemc.io/repository/maven-releases/") // PacketEvents
+    exclusiveContent {
+        forRepository {
+            maven("https://jitpack.io")
+        }
+        filter {
+            includeGroup("com.github.OvercastCommunity.adventure-platform")
+            includeGroup("com.github.MinusKube")
+        }
+    }
 }
 
 dependencies {
     api("org.jdom:jdom2:2.0.6.1")
     api("net.kyori:adventure-api:4.26.1")
     api("net.kyori:adventure-text-serializer-plain:4.26.1")
-    api("net.kyori:adventure-platform-bukkit:4.4.1")
-    api("org.incendo:cloud-core:2.0.0")
-    api("org.incendo:cloud-annotations:2.0.0")
-    api("org.incendo:cloud-paper:2.0.0-beta.14")
-    api("org.incendo:cloud-minecraft-extras:2.0.0-beta.14")
+    // adventure-platform fork with ViaVersion and 1.21.11+ fixes
+    // https://github.com/OvercastCommunity/adventure-platform
+    api("com.github.OvercastCommunity.adventure-platform:adventure-platform-bukkit:04de657e85")
+    api("org.incendo:cloud-core:2.1.0")
+    api("org.incendo:cloud-annotations:2.1.0")
+    api("org.incendo:cloud-paper:2.0.0")
+    api("org.incendo:cloud-minecraft-extras:2.0.0")
     api("me.lucko:commodore:2.2")
-    api("fr.mrmicky:fastboard:2.1.5")
+    api("fr.mrmicky:fastboard:2.2.0")
+    // Latest SmartInvs commit
     api("com.github.MinusKube:SmartInvs:9c9dbbe") { isTransitive = false }
-    api("org.eclipse.jgit:org.eclipse.jgit:7.5.0.202512021534-r") { isTransitive = false }
+    api("org.eclipse.jgit:org.eclipse.jgit:7.7.1.202607240634-r") { isTransitive = false }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
     // Annotations
-    api("org.jspecify:jspecify:1.0.0")
-    compileOnly("org.jetbrains:annotations:26.0.2-1")
+    api("org.jspecify:jspecify:1.0.1")
+    compileOnly("org.jetbrains:annotations:26.1.0")
 
     // Optional runtime dependencies
-    compileOnly("com.github.retrooper:packetevents-spigot:2.12.0")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
     compileOnly("com.viaversion:viaversion-api:5.0.0")
 
     // Paper and SportPaper include these (or equivalents)
@@ -73,7 +84,7 @@ spotless {
         removeUnusedImports()
         trimTrailingWhitespace()
         formatAnnotations()
-        palantirJavaFormat("2.87.0").style("GOOGLE").formatJavadoc(true)
+        palantirJavaFormat("2.96.0").style("GOOGLE").formatJavadoc(true)
     }
 }
 

@@ -86,6 +86,8 @@ tasks {
         val version = project.version.toString()
         val commitHash = project.latestCommitHash()
 
+        inputs.property("commitHash", commitHash)
+
         filesMatching(listOf("plugin.yml", "paper-plugin.yml")) {
             expand(
                 mapOf(
@@ -94,7 +96,7 @@ tasks {
                     "apiVersion" to "1.21.11",
                     "mainClass" to "tc.oc.pgm.PGMPlugin",
                     "version" to version,
-                    "commitHash" to commitHash,
+                    "commitHash" to commitHash.get(),
                     "url" to "https://pgm.dev/"
                 )
             )
