@@ -71,16 +71,21 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
       Component component, Function<MatchResult, String> replacer) {
     var click = component.clickEvent();
     if (click != null && click.payload() instanceof ClickEvent.Payload.Text payload) {
-      var matcher = PATTERN.matcher(payload.value());
-      var result = new StringBuilder();
-      while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
-      matcher.appendTail(result);
-      var resultPayload = ClickEvent.Payload.string(result.toString());
-      component = component.clickEvent(ClickEvent.clickEvent(click.action(), resultPayload));
+      component = component.clickEvent(replaceEvent(click, payload, replacer));
     }
     var children = new ArrayList<>(component.children());
     children.replaceAll(child -> replaceClickEvents(child, replacer));
     return component.children(children);
+  }
+
+  private static ClickEvent replaceEvent(
+      ClickEvent click, ClickEvent.Payload.Text payload, Function<MatchResult, String> replacer) {
+    var matcher = PATTERN.matcher(payload.value());
+    var result = new StringBuilder();
+    while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
+    matcher.appendTail(result);
+    var resultPayload = ClickEvent.Payload.string(result.toString());
+    return ClickEvent.clickEvent(click.action(), resultPayload);
   }
 
   private Title replace(Title title, T scope) {
