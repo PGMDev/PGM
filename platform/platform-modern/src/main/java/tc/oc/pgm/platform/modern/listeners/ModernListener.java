@@ -32,6 +32,7 @@ import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
+import tc.oc.pgm.util.event.player.PlayerSpawnLocationEvent;
 
 /**
  * TODO: fix unsupported events: <br>
@@ -122,5 +123,12 @@ public class ModernListener implements Listener {
       conn.restartClientLoadTimerAfterRespawn();
       conn.handleAcceptPlayerLoad(PLAYER_LOADED_PACKET);
     });
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onInitialSpawn(io.papermc.paper.event.player.AsyncPlayerSpawnLocationEvent event) {
+    var pgmEvent = new PlayerSpawnLocationEvent(event.getSpawnLocation());
+    handleCall(pgmEvent, event);
+    event.setSpawnLocation(pgmEvent.getSpawnLocation());
   }
 }
