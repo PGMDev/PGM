@@ -15,6 +15,7 @@ import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
 import tc.oc.pgm.platform.modern.listeners.RecipeUnlocker;
 import tc.oc.pgm.platform.modern.listeners.SpawnEggUseListener;
 import tc.oc.pgm.platform.modern.listeners.TntListener;
+import tc.oc.pgm.platform.modern.packets.OnGroundListener;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
@@ -22,6 +23,7 @@ import tc.oc.pgm.util.platform.Supports;
 @Supports(value = PAPER, minVersion = "1.21.11", priority = HIGHEST)
 public class ModernPlatform implements Platform.Manifest {
   private PacketManipulations packetManipulations;
+  private OnGroundListener onGroundListener;
 
   @Override
   public void onEnable(Plugin plugin) {
@@ -39,7 +41,8 @@ public class ModernPlatform implements Platform.Manifest {
             new RecipeUnlocker(),
             new SpawnEggUseListener(),
             new TntListener(),
-            new ModernBlockPhysicsListener())
+            new ModernBlockPhysicsListener(),
+            onGroundListener = new OnGroundListener())
         .forEach(l -> Bukkit.getServer().getPluginManager().registerEvents(l, plugin));
 
     new ModernBlockTransformListener(plugin).registerEvents();
@@ -63,6 +66,11 @@ public class ModernPlatform implements Platform.Manifest {
     if (packetManipulations != null) {
       packetManipulations.unregister();
       packetManipulations = null;
+    }
+
+    if (onGroundListener != null) {
+      onGroundListener.unregister();
+      onGroundListener = null;
     }
   }
 }
