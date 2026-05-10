@@ -36,8 +36,8 @@ public interface VariableDuration {
   static VariableDuration parse(Object object, String def) throws TextException {
     return switch (object) {
       case ConfigurationSection cs -> VariableDurationImpl.parse(cs);
-      case String str -> VariableDurationImpl.of(parseDuration(str));
-      case null, default -> VariableDurationImpl.of(parseDuration(def));
+      case null -> VariableDurationImpl.of(parseDuration(def));
+      default -> VariableDurationImpl.of(parseDuration(object.toString()));
     };
   }
 
