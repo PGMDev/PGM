@@ -96,5 +96,7 @@ public abstract class Platform {
     default void init() {}
 
     void onEnable(Plugin plugin);
+
+    default void onDisable() {}
   }
 }
