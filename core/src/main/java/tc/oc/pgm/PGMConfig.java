@@ -156,10 +156,9 @@ public final class PGMConfig implements Config {
 
     this.mapSourceFactories = new ArrayList<>();
 
-    for (var repo : config.getList("map.repositories")) {
-      if (repo instanceof String uri)
-        registerRemoteMapSource(mapSourceFactories, Map.of("uri", uri));
-      else if (repo instanceof Map<?, ?> map) registerRemoteMapSource(mapSourceFactories, map);
+    for (var repo : config.getList("map.repositories", List.of())) {
+      if (repo instanceof String uri) mapSourceFactories.add(parseGit(Map.of("uri", uri)));
+      else if (repo instanceof Map<?, ?> map) mapSourceFactories.add(parseGit(map));
     }
 
     for (String folder : new TreeSet<>(config.getStringList("map.folders"))) {
@@ -258,8 +257,7 @@ public final class PGMConfig implements Config {
   public static final Map<?, ?> DEFAULT_REMOTE_REPO =
       ImmutableMap.of("uri", "https://github.com/PGMDev/Maps", "path", "default-maps");
 
-  public static void registerRemoteMapSource(
-      List<MapSourceFactory> mapSources, Map<?, ?> repository) {
+  public static GitMapSourceFactory parseGit(Map<?, ?> repository) {
     final URI uri = parseUri(String.valueOf(repository.get("uri")));
 
     String branch = String.valueOf(repository.get("branch"));
@@ -286,7 +284,7 @@ public final class PGMConfig implements Config {
           .stream().map(Object::toString).map(Paths::get).collect(Collectors.toList());
     }
 
-    mapSources.add(new GitMapSourceFactory(base, children, uri, branch));
+    return new GitMapSourceFactory(base, children, uri, branch);
   }
 
   // TODO: Can be removed after 1.0 release
