@@ -33,6 +33,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
+import tc.oc.pgm.ffa.Tribute;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.named.NameStyle;
@@ -74,6 +75,8 @@ public class ScoreboardMatchModule implements MatchModule, Listener {
   }
 
   protected void updatePartyScoreboardTeam(Party party, Team team, boolean forObservers) {
+    // Tributes may be created but not populated, in which cases the scoreboard team is null.
+    if (party instanceof Tribute t && t.getPlayer() == null && team == null) return;
     match.getLogger().fine("Updating scoreboard team " + toString(team) + " for party " + party);
 
     team.setDisplayName(

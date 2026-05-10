@@ -136,14 +136,8 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
 
   public void setNameTagVisibility(@Nullable NameTagVisibility nameTagVisibility) {
     this.nameTagVisibility = nameTagVisibility;
-
-    if (smm == null) {
-      smm = match.needModule(ScoreboardMatchModule.class);
-    }
-
-    tributes.forEach((uuid, tribute) -> {
-      smm.updatePartyScoreboardTeam(tribute);
-    });
+    if (smm == null) smm = match.needModule(ScoreboardMatchModule.class);
+    tributes.forEach((uuid, tribute) -> smm.updatePartyScoreboardTeam(tribute));
   }
 
   @Override
