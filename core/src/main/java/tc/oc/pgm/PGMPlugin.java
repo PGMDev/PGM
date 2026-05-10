@@ -178,7 +178,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     if (!loadInitialMaps()) {
       logger.warning("No maps found, adding default repository as a fallback.");
-      PGMConfig.registerRemoteMapSource(mapSourceFactories, PGMConfig.DEFAULT_REMOTE_REPO);
+      mapSourceFactories.add(PGMConfig.parseGit(PGMConfig.DEFAULT_REMOTE_REPO));
       if (!loadInitialMaps()) {
         logger.severe("No maps were loaded in time, PGM will be disabled");
         getServer().getPluginManager().disablePlugin(this);

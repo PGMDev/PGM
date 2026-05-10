@@ -95,7 +95,6 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final List<StatType.OfFormula> formulaStats;
 
   private final boolean verboseStats = PGM.get().getConfiguration().showVerboseStats();
-  private final Duration showAfter = PGM.get().getConfiguration().showStatsAfter();
   private final boolean bestStats = PGM.get().getConfiguration().showBestStats();
   private final boolean ownStats = PGM.get().getConfiguration().showOwnStats();
   private final int verboseItemSlot = PGM.get().getConfiguration().getVerboseItemSlot();
@@ -265,7 +264,8 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchEnd(MatchFinishEvent event) {
-    if (allPlayerStats.isEmpty() || showAfter.isNegative()) return;
+    Duration delay = PGM.get().getConfiguration().showStatsAfter(match);
+    if (allPlayerStats.isEmpty() || delay.isNegative()) return;
 
     // Try to ensure that usernames for all relevant offline players will be loaded in the cache
     // when the inventory GUI is created. If usernames needs to be resolved using the mojang api
@@ -281,7 +281,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         .getExecutor(MatchScope.LOADED)
         .schedule(
             () -> match.callEvent(new MatchStatsEvent(match, bestStats, ownStats)),
-            showAfter.toMillis(),
+            delay.toMillis(),
             TimeUnit.MILLISECONDS);
   }
 

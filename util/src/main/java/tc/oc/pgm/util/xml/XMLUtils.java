@@ -488,21 +488,12 @@ public final class XMLUtils {
   public static <T extends Comparable<T>> Range<T> parseRange(
       Node node, @Nullable T lower, BoundType lowerBound, @Nullable T upper, BoundType upperBound)
       throws InvalidXMLException {
-    if (lower != null && upper != null) {
-      if (lower.compareTo(upper) > 0) {
-        throw new InvalidXMLException(
-            "range lower bound (" + lower + ") cannot be greater than upper bound (" + upper + ")",
-            node);
-      }
-
-      return Range.range(lower, lowerBound, upper, upperBound);
-    } else if (lower != null) {
-      return Range.downTo(lower, lowerBound);
-    } else if (upper != null) {
-      return Range.upTo(upper, upperBound);
-    } else {
-      return Range.all();
+    if (lower != null && upper != null && lower.compareTo(upper) > 0) {
+      throw new InvalidXMLException(
+          "range lower bound (" + lower + ") cannot be greater than upper bound (" + upper + ")",
+          node);
     }
+    return Ranges.createRange(lower, lowerBound, upper, upperBound);
   }
 
   /**
