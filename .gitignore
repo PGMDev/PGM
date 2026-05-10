@@ -5,6 +5,7 @@ dependency-reduced-pom.xml
 # Gradle generated files
 build/
 .gradle
+**/bin
 
 # Mac OSX generated files
 .DS_Store

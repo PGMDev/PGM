@@ -5,9 +5,13 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import org.bukkit.Material;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Wither;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.jdom2.Attribute;
@@ -19,6 +23,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
+import tc.oc.pgm.entity.SpawnableEntity;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -26,6 +31,7 @@ import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
+import tc.oc.pgm.spawner.objects.SpawnableMob;
 import tc.oc.pgm.spawner.objects.SpawnablePotion;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.xml.InheritingElement;
@@ -35,6 +41,8 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class SpawnerModule implements MapModule<SpawnerMatchModule> {
 
   private static final int SPLASH_BIT = 0x4000;
+  private static final Set<Class<? extends LivingEntity>> EXCLUDED_MOB_TYPES =
+      Set.of(Wither.class, EnderDragon.class);
 
   private final List<SpawnerDefinition> spawnerDefinitions = new ArrayList<>();
 
@@ -110,6 +118,10 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
           objects.add(new SpawnablePotion(potion, id));
         }
 
+        for (Element mobEl : XMLUtils.getChildren(spawnerEl, "mob")) {
+          objects.add(parseMob(mobEl, id));
+        }
+
         SpawnerDefinition spawnerDefinition = new SpawnerDefinition(
             id,
             objects,
@@ -125,6 +137,17 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
       }
 
       return spawnerModule.spawnerDefinitions.isEmpty() ? null : spawnerModule;
+    }
+
+    private static SpawnableMob parseMob(Element mobEl, String spawnerId)
+        throws InvalidXMLException {
+      var entity = SpawnableEntity.parse(mobEl);
+      if (EXCLUDED_MOB_TYPES.stream().anyMatch(c -> c.isAssignableFrom(entity.entityType()))) {
+        throw new InvalidXMLException(
+            "Spawner mob type " + entity.entityType().getSimpleName() + " cannot be spawned",
+            mobEl);
+      }
+      return new SpawnableMob(entity, spawnerId);
     }
   }
 }
