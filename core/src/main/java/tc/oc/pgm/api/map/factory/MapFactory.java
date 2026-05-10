@@ -9,6 +9,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.exception.MapException;
 import tc.oc.pgm.api.module.ModuleContext;
+import tc.oc.pgm.entity.kits.MobKitParser;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
@@ -47,6 +48,13 @@ public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
    * @return A {@link KitParser}.
    */
   KitParser getKits();
+
+  /**
+   * Get the {@link MobKitParser} for parsing mob-kit definitions and references.
+   *
+   * @return A {@link MobKitParser}.
+   */
+  MobKitParser getMobKits();
 
   /**
    * Get the {@link FeatureDefinitionContext} for registering feature references.

@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Bee;
 import org.bukkit.entity.Cat;
+import org.bukkit.entity.ChestedHorse;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Endermite;
 import org.bukkit.entity.Entity;
@@ -44,6 +45,8 @@ public class ModernMobProperties extends MobProperties {
     register(Mob.class, "aware", BOOL, Mob::setAware);
     register(Mob.class, "aggressive", BOOL, Mob::setAggressive);
     register(Mob.class, "left-handed", BOOL, Mob::setLeftHanded);
+
+    register(ChestedHorse.class, "carrying-chest", BOOL, ChestedHorse::setCarryingChest);
 
     register(Zombie.class, "can-break-doors", BOOL, Zombie::setCanBreakDoors);
     register(Zombie.class, "arms-raised", BOOL, Zombie::setArmsRaised);

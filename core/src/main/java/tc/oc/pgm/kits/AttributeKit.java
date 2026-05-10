@@ -6,6 +6,7 @@ import java.util.Map;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 
@@ -18,10 +19,15 @@ public class AttributeKit extends AbstractKit {
 
   @Override
   protected void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
+    applyModifiers(player.getBukkit(), modifiers);
+  }
+
+  public static void applyModifiers(
+      LivingEntity entity, SetMultimap<Attribute, AttributeModifier> modifiers) {
     for (Map.Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
-      AttributeInstance attributeValue = player.getAttribute(entry.getKey());
-      if (attributeValue != null && !attributeValue.getModifiers().contains(entry.getValue())) {
-        attributeValue.addModifier(entry.getValue());
+      AttributeInstance attr = entity.getAttribute(entry.getKey());
+      if (attr != null && !attr.getModifiers().contains(entry.getValue())) {
+        attr.addModifier(entry.getValue());
       }
     }
   }

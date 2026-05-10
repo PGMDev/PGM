@@ -24,6 +24,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.map.includes.MapIncludeProcessor;
 import tc.oc.pgm.api.module.ModuleGraph;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.entity.kits.MobKitParser;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.parse.FeatureFilterParser;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -53,6 +54,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   private RegionParser regions;
   private FilterParser filters;
   private KitParser kits;
+  private MobKitParser mobKits;
   private FeatureDefinitionContext features;
   private XMLFluentParser parser;
 
@@ -180,6 +182,14 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   }
 
   @Override
+  public MobKitParser getMobKits() {
+    if (mobKits == null) {
+      mobKits = new MobKitParser(this);
+    }
+    return mobKits;
+  }
+
+  @Override
   public FeatureDefinitionContext getFeatures() {
     if (features == null) {
       features = new FeatureDefinitionContext();
@@ -200,6 +210,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     regions = null;
     filters = null;
     kits = null;
+    mobKits = null;
     features = null;
   }
 }
