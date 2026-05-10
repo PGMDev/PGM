@@ -48,11 +48,21 @@ map:
 #  "1m5s" = 1 minute and 5 seconds
 #  "0s"   = immediately
 #  -1     = disabled
+# Additionally, some fields support variable durations, such as:
+# cycle:
+#   default: "30s"
+#   rules:
+#     - duration: "15s"
+#       max-players: 15
+#       max-match-length: "5m"
+#     - duration: "60s"
+#       min-match-length: "60m"
 #
 # See the examples above for how to format durations.
 countdown:
-  start: "30s"    # After a match cycles or /start
-  cycle: "30s"    # After a match ends or /cycle
+  start: "30s"    # After a match cycles or /start (supports variable durations)
+  cycle: "30s"    # After a match ends or /cycle (supports variable durations)
+  preload: "5s"   # Before a cycle ends to start loading the next match (supports variable durations)
   huddle: -1      # Before a match starts (only recommended for "ranked" matches)
   restart: "30s"  # After a restart countdown is queued or /qr
 
@@ -111,7 +121,7 @@ ui:
 # Changes how stats are shown.
 stats:
   verbose: true   # Enable more detailed stats?
-  show-after: 6s  # How long to wait after the match ends to show stats?
+  show-after: 6s  # How long to wait after the match ends to show stats? (supports variable durations)
   show-best: true # Should show best players stats?
   show-own: true  # Should show each players own stats?
   item-slot: 7    # In what slot should we place the verbose stats item?

@@ -14,6 +14,7 @@ import net.objecthunter.exp4j.ExpressionContext;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.VariableDuration;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -33,6 +34,8 @@ public class VotingPool extends MapPool {
   // The algorithm used to pick the maps for next vote.
   public final MapVotePicker mapPicker;
 
+  private final VariableDuration pollDelay;
+
   // The current rating of maps. Eventually should be persisted elsewhere.
   private final Map<MapInfo, VoteData> mapScores;
 
@@ -47,6 +50,7 @@ public class VotingPool extends MapPool {
     super(type, name, manager, section, parser);
     this.constants = new VoteConstants(section, maps.size());
     this.mapPicker = MapVotePicker.of(manager, constants, section);
+    this.pollDelay = VariableDuration.parse(section.get("poll-delay"), "5s");
     this.mapScores = buildMapScores(parser::getWeight);
   }
 
@@ -76,6 +80,7 @@ public class VotingPool extends MapPool {
     super(type, name, manager, enabled, players, dynamic, cycleTime, maps);
     this.constants = new VoteConstants(new MemoryConfiguration(), maps.size());
     this.mapPicker = MapVotePicker.of(manager, constants, null);
+    this.pollDelay = VariableDuration.constant(Duration.ofSeconds(5));
     this.mapScores = buildMapScores(m -> 1);
   }
 
@@ -143,6 +148,7 @@ public class VotingPool extends MapPool {
   @Override
   public void matchEnded(Match match) {
     tickScores(match);
+    Duration delay = pollDelay.getDuration(match);
     match
         .getExecutor(MatchScope.LOADED)
         .schedule(
@@ -155,8 +161,8 @@ public class VotingPool extends MapPool {
               currentPoll = new MapPoll(
                   match, mapPicker.getMaps(match.getMap(), manager.getVoteOptions(), mapScores));
             },
-            5,
-            TimeUnit.SECONDS);
+            delay.toMillis(),
+            TimeUnit.MILLISECONDS);
   }
 
   public record VoteConstants(

@@ -2,6 +2,7 @@ package tc.oc.pgm.util.range;
 
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Range;
+import org.jspecify.annotations.Nullable;
 
 /** Some {@link Range} utils ripped from ProjectAres :) */
 public class Ranges {
@@ -48,5 +49,23 @@ public class Ranges {
     return range.lowerBoundType() == BoundType.CLOSED && range.upperBoundType() == BoundType.CLOSED
         ? range
         : Range.closed(needMinimum(range), needMaximum(range));
+  }
+
+  public static <T extends Comparable<T>> Range<T> createClosedRange(
+      @Nullable T lower, @Nullable T upper) {
+    return createRange(lower, BoundType.CLOSED, upper, BoundType.CLOSED);
+  }
+
+  public static <T extends Comparable<T>> Range<T> createRange(
+      @Nullable T lower, BoundType lowerBound, @Nullable T upper, BoundType upperBound) {
+    if (lower != null && upper != null) {
+      return Range.range(lower, lowerBound, upper, upperBound);
+    } else if (lower != null) {
+      return Range.downTo(lower, lowerBound);
+    } else if (upper != null) {
+      return Range.upTo(upper, upperBound);
+    } else {
+      return Range.all();
+    }
   }
 }
