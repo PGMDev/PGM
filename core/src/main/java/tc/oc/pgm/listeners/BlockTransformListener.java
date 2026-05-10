@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.bukkit.Material;
@@ -28,6 +29,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.event.block.BlockFromToEvent;
@@ -39,6 +41,7 @@ import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
@@ -49,6 +52,7 @@ import org.bukkit.material.Door;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.BlockTransformEvent;
@@ -69,13 +73,14 @@ import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.material.Materials;
 
+@NullMarked
 public class BlockTransformListener implements Listener {
   private static final BlockFace[] NEIGHBORS = {
     BlockFace.WEST, BlockFace.EAST, BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH
   };
 
   @Retention(RetentionPolicy.RUNTIME)
-  @interface EventWrapper {}
+  public @interface EventWrapper {}
 
   protected final Logger logger;
   protected final Plugin plugin;
@@ -99,12 +104,6 @@ public class BlockTransformListener implements Listener {
 
           for (final EventPriority priority : EventPriority.values()) {
             EventExecutor executor = (listener, event) -> {
-              // if (event instanceof Physical
-              //    && PGM.get().getMatchManager().getMatch(((Physical) event).getWorld())
-              // ==
-              // null)
-              //  return;
-
               if (!Events.isCancelled(event)) {
                 // At the first priority level, call the event handler method.
                 // If it decides to generate a BlockTransformEvent, it will be stored in
@@ -148,12 +147,7 @@ public class BlockTransformListener implements Listener {
   private void finishCauseEvent(Event causeEvent) {
     List<BlockTransformEvent> wrapperEvents = currentEvents.removeAll(causeEvent);
 
-    // A few of the event handlers need to do some post-processing after the wrapper event returns.
-    if (causeEvent instanceof EntityExplodeEvent) {
-      finishEntityExplode((EntityExplodeEvent) causeEvent, wrapperEvents);
-    } else if (causeEvent instanceof BlockPistonEvent) {
-      finishPistonMove((BlockPistonEvent) causeEvent, wrapperEvents);
-    }
+    finishCauseEvent(causeEvent, wrapperEvents);
 
     for (BlockTransformEvent bte : wrapperEvents) {
       processCancelMessage(bte);
@@ -162,6 +156,21 @@ public class BlockTransformListener implements Listener {
     for (BlockTransformEvent bte : wrapperEvents) {
       processBlockDrops(bte);
     }
+  }
+
+  // A few of the event handlers need to do some post-processing after the wrapper events return.
+  protected void finishCauseEvent(Event causeEvent, List<BlockTransformEvent> wrapperEvents) {
+    if (causeEvent instanceof EntityExplodeEvent entityExplodeEvent)
+      removeCancelled(entityExplodeEvent.blockList(), wrapperEvents, Function.identity());
+
+    if (causeEvent instanceof BlockExplodeEvent blockExplodeEvent)
+      removeCancelled(blockExplodeEvent.blockList(), wrapperEvents, Function.identity());
+
+    if (causeEvent instanceof StructureGrowEvent structureGrowEvent)
+      removeCancelled(structureGrowEvent.getBlocks(), wrapperEvents, BlockState::getBlock);
+
+    if (causeEvent instanceof BlockPistonEvent blockPistonEvent)
+      finishPistonMove(blockPistonEvent, wrapperEvents);
   }
 
   private void handleDoor(BlockTransformEvent event, Door door) {
@@ -181,7 +190,7 @@ public class BlockTransformListener implements Listener {
     callEvent(toCall, true);
   }
 
-  private void callEvent(final BlockTransformEvent event, boolean checked) {
+  protected void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
       org.bukkit.material.MaterialData oldData = event.getOldState().getData();
       org.bukkit.material.MaterialData newData = event.getNewState().getData();
@@ -196,18 +205,18 @@ public class BlockTransformListener implements Listener {
     currentEvents.put(event.getCause(), event);
   }
 
-  private void callEvent(final BlockTransformEvent event) {
+  protected void callEvent(final BlockTransformEvent event) {
     callEvent(event, false);
   }
 
-  private BlockTransformEvent callEvent(
+  protected BlockTransformEvent callEvent(
       Event cause, BlockState oldState, BlockState newState, @Nullable Player player) {
     MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
     return callEvent(
         cause, oldState, newState, matchPlayer == null ? null : matchPlayer.getState());
   }
 
-  private BlockTransformEvent callEvent(
+  protected BlockTransformEvent callEvent(
       Event cause, BlockState oldState, BlockState newState, @Nullable MatchPlayerState player) {
     BlockTransformEvent event;
     if (player == null) {
@@ -253,8 +262,10 @@ public class BlockTransformListener implements Listener {
   @EventWrapper
   public void onStructureGrow(final StructureGrowEvent event) {
     for (BlockState block : event.getBlocks()) {
-      this.callEvent(
-          new BlockTransformEvent(event, block.getLocation().getBlock().getState(), block));
+      BlockTransformEvent transform =
+          new BlockTransformEvent(event, block.getLocation().getBlock().getState(), block);
+      transform.setPropagate(false);
+      callEvent(transform);
     }
   }
 
@@ -390,12 +401,23 @@ public class BlockTransformListener implements Listener {
     }
   }
 
-  private void finishEntityExplode(
-      EntityExplodeEvent causeEvent, Collection<BlockTransformEvent> wrapperEvents) {
-    // Remove blocks from the explosion if their wrapper event was cancelled
+  @EventWrapper
+  public void onBlockExplode(final BlockExplodeEvent event) {
+    for (Block block : event.blockList()) {
+      // Don't cancel the explosion when individual blocks are cancelled
+      BlockTransformEvent transform =
+          new BlockTransformEvent(event, block.getState(), BlockStates.toAir(block));
+      transform.setPropagate(false);
+      callEvent(transform);
+    }
+  }
+
+  protected <T> void removeCancelled(
+      List<T> elements, Collection<BlockTransformEvent> wrapperEvents, Function<T, Block> toBlock) {
     for (BlockTransformEvent wrapper : wrapperEvents) {
       if (wrapper.isCancelled()) {
-        causeEvent.blockList().remove(wrapper.getOldState().getBlock());
+        Block block = wrapper.getOldState().getBlock();
+        elements.removeIf(element -> toBlock.apply(element).equals(block));
       }
     }
   }
@@ -425,6 +447,12 @@ public class BlockTransformListener implements Listener {
   public void onBlockFade(final BlockFadeEvent event) {
     BlockState state = event.getBlock().getState();
     this.callEvent(new BlockTransformEvent(event, state, BlockStates.toAir(state)));
+  }
+
+  @EventWrapper
+  public void onLeavesDecay(final LeavesDecayEvent event) {
+    this.callEvent(new BlockTransformEvent(
+        event, event.getBlock().getState(), BlockStates.toAir(event.getBlock())));
   }
 
   // -----------------------
@@ -551,7 +579,7 @@ public class BlockTransformListener implements Listener {
         event, event.getBlock().getState(), BlockStates.toAir(event.getBlock().getState())));
   }
 
-  private static Material getTrampledType(Material newType) {
+  private static @Nullable Material getTrampledType(Material newType) {
     if (newType == Materials.SOIL) return Material.DIRT;
     return null;
   }
@@ -572,12 +600,13 @@ public class BlockTransformListener implements Listener {
     }
   }
 
+  @SuppressWarnings("deprecation")
   public void processBlockDrops(BlockTransformEvent event) {
     // If the event has been altered with custom block drops/replacement,
     // call on the BlockDropsMatchModule to handle this. We do this here
     // because doBlockDrops will cancel the event, and we don't want any
     // other listeners to think the event is cancelled when it isn't.
-    if (event != null && !event.isCancelled() && event.getDrops() != null) {
+    if (!event.isCancelled() && event.getDrops() != null) {
       Match match = PGM.get().getMatchManager().getMatch(event.getWorld());
       if (match != null) {
         BlockDropsMatchModule bdmm = match.getModule(BlockDropsMatchModule.class);

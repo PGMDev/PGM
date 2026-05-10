@@ -29,4 +29,11 @@ public interface WorldInfo {
    * @return The world environment type.
    */
   World.Environment getEnvironment();
+
+  /**
+   * Get whether block physics are allowed pre-match
+   *
+   * @return true if block physics are allowed pre-match, false otherwise
+   */
+  boolean initialPhysics();
 }

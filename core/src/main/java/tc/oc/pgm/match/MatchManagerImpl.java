@@ -101,14 +101,13 @@ public class MatchManagerImpl implements MatchManager, Listener {
   }
 
   private void onNonMatchUnload(World world) {
-    final String name = world.getName();
-    if (name.startsWith("match")) return;
+    if (Match.isMatchWorld(world)) return;
 
     NMS_HACKS.resetDimension(world);
     NMS_HACKS.cleanupWorld(world);
 
-    if (PGM.get().getServer().unloadWorld(name, false)) {
-      logger.info("Unloaded non-match " + name);
+    if (PGM.get().getServer().unloadWorld(world, false)) {
+      logger.info("Unloaded non-match " + world.getName());
     }
   }
 

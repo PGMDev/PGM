@@ -16,9 +16,10 @@ public class WorldInfoImpl implements WorldInfo {
   private final long seed; // 0 means random every time
   private final boolean terrain;
   private final World.Environment environment;
+  private final boolean initialPhysics;
 
   public WorldInfoImpl() {
-    this(0L, false, World.Environment.NORMAL);
+    this(0L, false, World.Environment.NORMAL, false);
   }
 
   public WorldInfoImpl(Element element) throws InvalidXMLException {
@@ -28,13 +29,16 @@ public class WorldInfoImpl implements WorldInfo {
         XMLUtils.parseEnum(
             Node.fromLastChildOrAttr(element, "environment"),
             World.Environment.class,
-            World.Environment.NORMAL));
+            World.Environment.NORMAL),
+        XMLUtils.parseBoolean(element.getAttribute("pre-match-physics"), false));
   }
 
-  private WorldInfoImpl(long seed, boolean terrain, World.Environment environment) {
+  private WorldInfoImpl(
+      long seed, boolean terrain, World.Environment environment, boolean initialPhysics) {
     this.seed = seed;
     this.terrain = terrain;
     this.environment = environment;
+    this.initialPhysics = initialPhysics;
   }
 
   @Override
@@ -50,6 +54,11 @@ public class WorldInfoImpl implements WorldInfo {
   @Override
   public World.Environment getEnvironment() {
     return environment;
+  }
+
+  @Override
+  public boolean initialPhysics() {
+    return initialPhysics;
   }
 
   private static long parseSeed(@Nullable String value) {

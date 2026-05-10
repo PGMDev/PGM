@@ -48,7 +48,6 @@ import tc.oc.pgm.db.SQLDatastore;
 import tc.oc.pgm.db.SqlUsernameResolver;
 import tc.oc.pgm.integrations.SimpleVanishIntegration;
 import tc.oc.pgm.listeners.AntiGriefListener;
-import tc.oc.pgm.listeners.BlockTransformListener;
 import tc.oc.pgm.listeners.FormattingListener;
 import tc.oc.pgm.listeners.InitialMatchLoader;
 import tc.oc.pgm.listeners.JoinLeaveAnnouncer;
@@ -216,7 +215,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     final File[] worldDirs = getServer().getWorldContainer().listFiles();
     if (worldDirs != null) {
       for (File dir : worldDirs) {
-        if (dir.isDirectory() && dir.getName().startsWith("match")) {
+        if (dir.isDirectory() && Match.isMatchWorld(dir.getName())) {
           FileUtils.delete(dir);
         }
       }
@@ -413,7 +412,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new PlayerMoveListener());
     registerEvents(new ItemTransferListener());
     registerEvents(new TNTMinecartPlacementListener());
-    new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
     inventoryManager.init();
     registerEvents(afkTracker);
