@@ -14,6 +14,7 @@ import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -85,7 +86,12 @@ public class FlagParser {
 
     ImmutableList.Builder<SinglePost> chBuilder = ImmutableList.builder();
     for (Element child : el.getChildren("post")) {
-      chBuilder.add(parseSinglePost(new InheritingElement(child)));
+      var sp = parseSinglePost(new InheritingElement(child));
+      chBuilder.add(sp);
+      if (factory.getProto().isNoOlderThan(MapProtos.INNER_POST_IDS)) {
+        posts.add(sp);
+        factory.getFeatures().addFeature(el, sp);
+      }
     }
     ImmutableList<SinglePost> children = chBuilder.build();
     // This should never happen, since it should've parsed single post instead.

@@ -1,5 +1,7 @@
 package tc.oc.pgm.filters;
 
+import static tc.oc.pgm.filters.PlatformFilters.PLATFORM_FILTERS;
+
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.logging.Logger;
@@ -59,7 +61,6 @@ public class FilterModule implements MapModule<FilterMatchModule> {
     public FilterModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       boolean unified = factory.getProto().isNoOlderThan(MapProtos.FILTER_FEATURES);
-      boolean featureIds = factory.getProto().isNoOlderThan(MapProtos.FEATURE_SINGLETON_IDS);
       FilterParser parser = factory.getFilters();
 
       var features = factory.getFeatures();
@@ -70,7 +71,7 @@ public class FilterModule implements MapModule<FilterMatchModule> {
         features.addFeature(null, "nowhere", EmptyRegion.INSTANCE);
       }
 
-      if (featureIds) {
+      if (factory.getProto().isNoOlderThan(MapProtos.FEATURE_SINGLETON_IDS)) {
         // Participating
         features.addFeature(null, "observing", ParticipatingFilter.OBSERVING);
         features.addFeature(null, "participating", ParticipatingFilter.PARTICIPATING);
@@ -95,10 +96,12 @@ public class FilterModule implements MapModule<FilterMatchModule> {
         features.addFeature(null, "sprinting", PlayerMovementFilter.SPRINTING);
         features.addFeature(null, "grounded", GroundedFilter.INSTANCE);
         features.addFeature(null, "flying", FlyingFilter.INSTANCE);
-        // TODO: support fallback feature ids being overriden without being a breaking change
-        // features.addFeature(null, "gliding", PLATFORM_FILTERS.gliding());
-        // features.addFeature(null, "riptiding", PLATFORM_FILTERS.riptiding());
         features.addFeature(null, "can-fly", CanFlyFilter.INSTANCE);
+      }
+
+      if (factory.getProto().isNoOlderThan(MapProtos.FEATURE_SINGLETON_IDS_2)) {
+        features.addFeature(null, "gliding", PLATFORM_FILTERS.gliding());
+        features.addFeature(null, "riptiding", PLATFORM_FILTERS.riptiding());
       }
 
       for (Element filtersEl : doc.getRootElement().getChildren("filters")) {
