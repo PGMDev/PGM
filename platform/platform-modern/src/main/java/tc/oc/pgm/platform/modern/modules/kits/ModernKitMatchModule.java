@@ -8,10 +8,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.kits.KitMatchModule;
 
+@ListenerScope(MatchScope.RUNNING)
 public class ModernKitMatchModule implements MatchModule, Listener {
 
   public static class Factory implements MatchModuleFactory<ModernKitMatchModule> {

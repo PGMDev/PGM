@@ -101,7 +101,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
     return cancel(event, !player.canInteract(), player.getBukkit().getWorld(), player, null);
   }
 
-  boolean cancelUnlessInteracting(Cancellable event, Entity entity) {
+  public boolean cancelUnlessInteracting(Cancellable event, Entity entity) {
     if (!(entity instanceof Player)) {
       return false;
     }
