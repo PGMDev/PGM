@@ -11,6 +11,9 @@ public final class DataVersions {
   /** Unknown/legacy (<1.9) version */
   public static final int LEGACY = -1;
 
+  /** Snapshot 18w21b */
+  public static final int V18W21B = 1496;
+
   /** 1.13 */
   public static final int V1_13 = 1519;
 
