@@ -137,7 +137,7 @@ public class PickerMatchModule implements MatchModule, Listener {
   }
 
   private boolean hasJoined(MatchPlayer joining) {
-    return joining.isParticipating()
+    return !(joining.getParty() instanceof ObserverParty)
         || match.needModule(JoinMatchModule.class).isQueuedToJoin(joining);
   }
 
