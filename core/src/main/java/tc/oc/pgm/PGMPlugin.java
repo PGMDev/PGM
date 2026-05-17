@@ -174,9 +174,9 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     UsernameResolvers.setResolvers(
         new BukkitUsernameResolver(),
         new SqlUsernameResolver((SQLDatastore) datastore),
-        new ElectroidApiUsernameResolver(),
         new PlayerDbApiUsernameResolver(),
-        new MojangApiUsernameResolver());
+        new MojangApiUsernameResolver(),
+        new ElectroidApiUsernameResolver());
 
     datastore = new CacheDatastore(datastore);
 

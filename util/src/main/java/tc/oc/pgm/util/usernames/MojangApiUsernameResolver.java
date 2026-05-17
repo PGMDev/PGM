@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.usernames;
 
 import com.google.gson.JsonObject;
-
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
