@@ -13,16 +13,13 @@ public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameR
 
   @Override
   public synchronized CompletableFuture<UsernameResponse> resolve(UUID uuid) {
-    CompletableFuture<UsernameResponse> response =
-        futures.computeIfAbsent(
-            uuid,
-            key -> {
-              if (currentBatch != null) currentBatch.add(uuid);
-              return createFuture(uuid);
-            });
-
-    if (currentBatch == null) getExecutor().execute(() -> process(uuid, response));
-
+    var response = futures.get(uuid);
+    if (response == null) {
+      var newFuture = response = createFuture(uuid);
+      futures.put(uuid, newFuture);
+      if (currentBatch != null) currentBatch.add(uuid);
+      else getExecutor().execute(() -> process(uuid, newFuture));
+    }
     return response;
   }
 
