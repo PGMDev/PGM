@@ -21,11 +21,13 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.ArrayVariable;
 import tc.oc.pgm.variables.types.CuboidVariable;
+import tc.oc.pgm.variables.types.CylindricalVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
 import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
+import tc.oc.pgm.variables.types.SphereVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
 import tc.oc.pgm.variables.types.WorldTimeVariable;
@@ -127,6 +129,28 @@ public class VariableParser {
     String baseId = FeatureDefinitionContext.parseId(el);
     var variable = new CuboidVariable(factory.getRegions().parseCuboid(el));
     for (CuboidVariable.Component component : CuboidVariable.Component.values()) {
+      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
+      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
+    }
+    return variable;
+  }
+
+  @MethodParser("cylinder")
+  public Variable<Match> parseCylinder(Element el) throws InvalidXMLException {
+    String baseId = FeatureDefinitionContext.parseId(el);
+    var variable = new CylindricalVariable(factory.getRegions().parseCylinder(el));
+    for (CylindricalVariable.Component component : CylindricalVariable.Component.values()) {
+      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
+      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
+    }
+    return variable;
+  }
+
+  @MethodParser("sphere")
+  public Variable<Match> parseSphere(Element el) throws InvalidXMLException {
+    String baseId = FeatureDefinitionContext.parseId(el);
+    var variable = new SphereVariable(factory.getRegions().parseSphere(el));
+    for (SphereVariable.Component component : SphereVariable.Component.values()) {
       var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
       factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
     }

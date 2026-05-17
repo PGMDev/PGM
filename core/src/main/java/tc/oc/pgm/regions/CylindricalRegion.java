@@ -7,10 +7,10 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
 public class CylindricalRegion implements RegionDefinition.HardStatic {
-  private final Vector base;
-  private final double radius;
-  private final double radiusSq;
-  private final double height;
+  protected Vector base;
+  protected double radius;
+  protected double radiusSq;
+  protected double height;
 
   public CylindricalRegion(Vector base, double radius, double height) {
     assertTrue(radius >= 0);
@@ -71,5 +71,36 @@ public class CylindricalRegion implements RegionDefinition.HardStatic {
         + ",height="
         + this.height
         + "}";
+  }
+
+  public Mutable asMutableCopy() {
+    return new Mutable(this.base.clone(), this.radius, this.height);
+  }
+
+  public static class Mutable extends CylindricalRegion {
+    public Mutable(Vector base, double radius, double height) {
+      super(base, radius, height);
+    }
+
+    public Vector getMutableBase() {
+      return base;
+    }
+
+    public double getMutableRadius() {
+      return radius;
+    }
+
+    public double getMutableHeight() {
+      return height;
+    }
+
+    public void setRadius(double radius) {
+      this.radius = radius;
+      this.radiusSq = radius * radius;
+    }
+
+    public void setHeight(double height) {
+      this.height = height;
+    }
   }
 }
