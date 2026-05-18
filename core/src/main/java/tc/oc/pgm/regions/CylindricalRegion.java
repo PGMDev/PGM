@@ -6,8 +6,9 @@ import java.util.Random;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class CylindricalRegion implements RegionDefinition.HardStatic {
-  protected Vector base;
+public class CylindricalRegion
+    implements RegionDefinition.HardStatic, RegionDefinition.MutableSource {
+  protected final Vector base;
   protected double radius;
   protected double radiusSq;
   protected double height;
@@ -77,7 +78,7 @@ public class CylindricalRegion implements RegionDefinition.HardStatic {
     return new Mutable(this.base.clone(), this.radius, this.height);
   }
 
-  public static class Mutable extends CylindricalRegion {
+  public static class Mutable extends CylindricalRegion implements RegionDefinition.Mutable {
     public Mutable(Vector base, double radius, double height) {
       super(base, radius, height);
     }
@@ -86,11 +87,11 @@ public class CylindricalRegion implements RegionDefinition.HardStatic {
       return base;
     }
 
-    public double getMutableRadius() {
+    public double getRadius() {
       return radius;
     }
 
-    public double getMutableHeight() {
+    public double getHeight() {
       return height;
     }
 
