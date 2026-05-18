@@ -58,8 +58,11 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
     Plugin plugin = PGM.get();
     Entity newProjectile;
 
-    if (this.cls == Arrow.class && event.getProjectile() instanceof Arrow) {
-      // Don't change the projectile if it's an Arrow and the custom entity type is also Arrow
+    // Don't replace non-arrow projectiles
+    if (!(event.getProjectile() instanceof Arrow)) return;
+
+    if (this.cls.isInstance(event.getProjectile())) {
+      // Don't change the projectile if it matches the custom entity type
       newProjectile = event.getProjectile();
     } else {
       // Replace the projectile
