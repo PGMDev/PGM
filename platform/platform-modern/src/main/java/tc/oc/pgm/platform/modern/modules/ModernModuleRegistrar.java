@@ -13,7 +13,10 @@ import tc.oc.pgm.util.platform.Supports;
 public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
   @Override
   public void registerModules(Modules modules) {
+    modules.register(
+        ModernEventFilterMatchModule.class, new ModernEventFilterMatchModule.Factory());
     modules.register(ModernKitMatchModule.class, new ModernKitMatchModule.Factory());
+    modules.register(ModernMobsMatchModule.class, new ModernMobsMatchModule.Factory());
     modules.register(TrimModule.class, TrimMatchModule.class, new TrimModule.Factory());
     modules.register(WaypointMatchModule.class, WaypointMatchModule::new);
   }
