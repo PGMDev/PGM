@@ -176,7 +176,8 @@ public class VotingPool extends MapPool {
       double scoreMinToVote,
       Formula<Match> scoreAfterPlay,
       int minCooldown,
-      int minutesPerDay) {
+      int minutesPerDay,
+      boolean excludeCurrentGamemode) {
     private VoteConstants(ConfigurationSection section, int mapAmount) {
       this(
           section.getInt("vote-options", MapVotePicker.MAX_VOTE_OPTIONS), // Show 5 maps
@@ -190,7 +191,8 @@ public class VotingPool extends MapPool {
           Formula.of(section.getString("score.after-playing"), Context.variables(), c -> 0)
               .map(m -> new Context(m.getDuration())),
           section.getInt("cooldown.min-length", 30),
-          section.getInt("cooldown.minutes-per-day", 30));
+          section.getInt("cooldown.minutes-per-day", 30),
+          section.getBoolean("exclude-current-gamemode", true));
     }
 
     public double afterVoteScore(double score) {

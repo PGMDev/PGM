@@ -104,7 +104,8 @@ public class MapVotePicker {
       @Nullable MapInfo prevMap, @Nullable List<MapInfo> selected, Map<MapInfo, VoteData> scores) {
     if (selected == null) selected = new ArrayList<>();
 
-    List<MapInfo> previousMaps = prependedUnmodifiableList(prevMap, selected);
+    List<MapInfo> previousMaps =
+        prependedUnmodifiableList(constants.excludeCurrentGamemode() ? prevMap : null, selected);
     while (selected.size() < constants.voteOptions()) {
       MapInfo map = getMap(previousMaps, scores);
 
