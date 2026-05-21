@@ -73,9 +73,29 @@ class ModernMaterialParser {
 
   public static ItemMaterialData parseItem(String text, short dmg, Node node)
       throws InvalidXMLException {
-    var res = Adapter.PGM_ITEM.visit(parseLegacyMaterial(text, node), dmg);
-    validateItem(res.getItemType(), node);
-    return res;
+    String[] pieces = text.split(":");
+    if (pieces.length > 2) {
+      throw new InvalidXMLException("Invalid material pattern '" + text + "'.", node);
+    }
+
+    Material material = parseLegacyMaterial(pieces[0], node);
+    short mdData = pieces.length == 2 ? XMLUtils.parseNumber(node, pieces[1], Short.class) : 0;
+    if (mdData != dmg && mdData != 0 && dmg != 0) {
+      throw new InvalidXMLException(
+          "Mismatching damage, parsed '" + text + ":" + dmg + "' but should be '" + text + ":"
+              + mdData + "'",
+          node);
+    }
+    short data = dmg != 0 ? dmg : mdData;
+
+    if (data != 0 && !material.isLegacy() && !canUseMeta(material)) {
+      throw new InvalidXMLException(
+          "Material '" + material + "' cannot have a damage/meta value of " + data, node);
+    }
+
+    var md = Adapter.PGM_ITEM.visit(material, data);
+    validateItem(md.getItemType(), node);
+    return md;
   }
 
   public static Material parseMaterial(String text, Node node) throws InvalidXMLException {
@@ -175,15 +195,15 @@ class ModernMaterialParser {
     }
 
     Material material = parseLegacyMaterial(pieces[0], node);
-    if (pieces.length == 1) {
-      return adapter.visit(material);
-    } else {
-      try {
-        return adapter.visit(material, XMLUtils.parseNumber(node, pieces[1], Short.class));
-      } catch (NumberFormatException e) {
-        throw new InvalidXMLException("Invalid damage value: " + pieces[1], node, e);
-      }
-    }
+    return pieces.length == 1
+        ? adapter.visit(material)
+        : adapter.visit(material, XMLUtils.parseNumber(node, pieces[1], Short.class));
+  }
+
+  private static boolean canUseMeta(Material material) {
+    return material.getMaxDurability() > 0
+        || material == Material.POTION
+        || material == Material.SPLASH_POTION;
   }
 
   private static Material upgrade(Material material, short data) {
