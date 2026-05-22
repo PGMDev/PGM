@@ -307,7 +307,7 @@ public class EventFilterMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPotionSplash(final PotionSplashEvent event) {
     for (LivingEntity entity : event.getAffectedEntities()) {
-      if (entity instanceof Player && match.getParticipant(entity) == null) {
+      if (entity instanceof Player && !MatchPlayers.canInteract(match.getParticipant(entity))) {
         event.setIntensity(entity, 0);
       }
     }
