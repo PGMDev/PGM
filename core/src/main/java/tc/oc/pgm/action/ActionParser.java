@@ -489,6 +489,8 @@ public class ActionParser {
     try {
       velocity = formula.applyAsDouble(null);
     } catch (Throwable e) {
+      // If trying to evaluate a formula results in an exception, it likely depends on player/match
+      // data, and thus we can't determine if it is excessive or not at parse time
       velocity = 0;
     }
 
