@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -15,6 +14,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.modules.WorldTimeModule;
+import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.bukkit.GameRule;
 import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -54,12 +54,10 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
 
           GameRule<?> rule = GameRules.getByName(ruleName);
           if (rule == null) {
-            logger.log(
-                Level.WARNING,
-                null,
-                new InvalidXMLException(
-                    "Game rule " + ruleName + " does not exist or is unsupported by the platform",
-                    gameRuleElement));
+            LoggingUtils.warn(
+                logger,
+                "Game rule " + ruleName + " does not exist or is unsupported by the platform",
+                gameRuleElement);
             continue;
           } else if (gameRules.containsKey(rule)) {
             throw new InvalidXMLException(

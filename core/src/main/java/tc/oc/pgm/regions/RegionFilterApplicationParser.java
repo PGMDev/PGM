@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
@@ -26,6 +25,7 @@ import tc.oc.pgm.filters.operator.FilterNode;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.VectorUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -151,13 +151,11 @@ public class RegionFilterApplicationParser {
       Vector velocity = XMLUtils.parseVector(attrVelocity, velocityText);
       Vector clampedVelocity = VectorUtils.clampVelocityVector(velocity);
       if (!clampedVelocity.equals(velocity)) {
-        logger.log(
-            Level.WARNING,
-            null,
-            new InvalidXMLException(
-                "Excessive velocity setting detected: (" + velocity + "). Clamping to ("
-                    + clampedVelocity + ") to ensure compatibility.",
-                attrVelocity));
+        LoggingUtils.warn(
+            logger,
+            "Excessive velocity setting detected: (" + velocity + "). Clamping to ("
+                + clampedVelocity + ") to ensure compatibility.",
+            attrVelocity);
         velocity = clampedVelocity;
       }
       add(el, new RegionFilterApplication(RFAScope.EFFECT, region, effectFilter, velocity));

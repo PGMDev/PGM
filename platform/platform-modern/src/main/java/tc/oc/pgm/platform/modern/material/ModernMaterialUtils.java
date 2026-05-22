@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
@@ -26,6 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.ItemMaterialData;
@@ -176,9 +176,10 @@ public class ModernMaterialUtils implements MaterialUtils {
       var blockMaterial = block.getBukkitMaterial();
 
       if (itemMaterial.isAir() && blockMaterial.isAir()) {
-        var ex = new InvalidXMLException(
-            "Material doesn't exist (did it ever?)'" + material + ":" + data + "'", currentNode);
-        PGM.get().getGameLogger().log(Level.WARNING, null, ex);
+        LoggingUtils.warn(
+            PGM.get().getGameLogger(),
+            "Material doesn't exist (did it ever?)'" + material + ":" + data + "'",
+            currentNode);
         return this;
       }
 

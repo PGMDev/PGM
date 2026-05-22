@@ -63,6 +63,7 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ComponentApplicator;
@@ -744,6 +745,21 @@ public abstract class KitParser {
           child.getAttribute("recharge-time"), DoubleJumpKit.DEFAULT_RECHARGE);
       boolean rechargeInAir =
           XMLUtils.parseBoolean(child.getAttribute("recharge-before-landing"), false);
+
+      // The resulting jump velocity is dependent on the look vector, and the maximum safe values
+      // per axis are as follows:
+      // Y: <9.36 for 0 loss, >15.6 for always loss
+      // X/Z: <11.7 for 0 loss, >16.54 for guaranteed loss if looking straight, >20.26 for always
+      // loss
+      // The warning threshold of 15 is chosen as a reasonable maximum that is still relatively
+      // accurate
+      if (power > 15) {
+        LoggingUtils.warn(
+            factory.getLogger(),
+            "Potentially excessive double jump power detected: " + power
+                + "; will be clamped at runtime.",
+            child);
+      }
 
       return new DoubleJumpKit(enabled, power, rechargeTime, rechargeInAir);
     } else {

@@ -12,7 +12,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.kyori.adventure.sound.Sound;
@@ -68,6 +67,7 @@ import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -487,22 +487,17 @@ public class ActionParser {
   private void validateVelocityActionFormula(Formula<MatchPlayer> formula, Node node) {
     double velocity;
     try {
-      // TODO: This looks a bit YOLO-esque.
       velocity = formula.applyAsDouble(null);
     } catch (Throwable e) {
       velocity = 0;
     }
 
     if (Math.abs(velocity) > 3.9) {
-      factory
-          .getLogger()
-          .log(
-              Level.WARNING,
-              null,
-              new InvalidXMLException(
-                  "Excessive velocity component detected: " + velocity + "; will be clamped to "
-                      + (velocity < 0 ? "-" : "") + "3.9 at runtime.",
-                  node));
+      LoggingUtils.warn(
+          factory.getLogger(),
+          "Excessive velocity component detected: " + velocity + "; will be clamped to "
+              + (velocity < 0 ? "-" : "") + "3.9 at runtime.",
+          node);
     }
   }
 
