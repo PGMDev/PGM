@@ -58,7 +58,7 @@ public class RegionModule implements MapModule<RegionMatchModule> {
       // parse filter applications
       RFAContext.Builder rfaContext = new RFAContext.Builder();
       RegionFilterApplicationParser rfaParser =
-          new RegionFilterApplicationParser(factory, logger, rfaContext);
+          new RegionFilterApplicationParser(factory, rfaContext);
 
       for (Element regionRootElement : doc.getRootElement().getChildren("regions")) {
         for (Element applyEl : regionRootElement.getChildren("apply")) {
