@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import org.bukkit.Bukkit;
 
 public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameResolver
     implements UsernameResolver {
@@ -33,12 +32,12 @@ public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameR
     List<UUID> batch = currentBatch;
     currentBatch = null;
     if (batch != null && !batch.isEmpty()) {
-      Bukkit.getLogger().info(LOG_PREFIX + "Batch resolving " + batch.size() + " uuids");
+      info("Batch resolving " + batch.size() + " uuids");
 
       return CompletableFuture.runAsync(
           () -> {
             process(batch);
-            Bukkit.getLogger().info(LOG_PREFIX + "Done resolving " + batch.size() + " uuids");
+            info("Done resolving " + batch.size() + " uuids");
           },
           getExecutor());
     } else {

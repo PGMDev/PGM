@@ -1,9 +1,5 @@
 package tc.oc.pgm.util.usernames;
 
-import com.google.gson.JsonObject;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-
 /**
  * Resolves using mojang's official minecraft api
  *
@@ -13,21 +9,11 @@ import java.util.concurrent.Executors;
  *     response</a>
  */
 public class MojangApiUsernameResolver extends ApiUsernameResolver {
-  // Given the known rate-limit, pin everything to a single thread and make resolving wait
-  private static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
-
   public MojangApiUsernameResolver() {
-    super("https://api.minecraftservices.com/minecraft/profile/lookup/{uuid}");
-  }
-
-  @Override
-  protected Executor getExecutor() {
-    return EXECUTOR;
-  }
-
-  @Override
-  protected String getUsername(JsonObject response) {
-    var name = response.get("name");
-    return name == null ? null : name.getAsString();
+    super(
+        "mojang",
+        "https://api.minecraftservices.com/minecraft/profile/lookup/{uuid}",
+        true,
+        "name");
   }
 }

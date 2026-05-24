@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public interface UsernameResolvers {
 
   AtomicReference<UsernameResolver> INSTANCE =
-      new AtomicReference<>(of(new BukkitUsernameResolver(), new ElectroidApiUsernameResolver()));
+      new AtomicReference<>(of(new BukkitUsernameResolver(), new PlayerDbApiUsernameResolver()));
 
   static UsernameResolver get() {
     return INSTANCE.get();

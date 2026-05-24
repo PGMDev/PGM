@@ -4,6 +4,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.net.NoRouteToHostException;
@@ -19,13 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
-import org.bukkit.Bukkit;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 /** Utility to resolve Minecraft usernames from an external HTTP API. */
-public abstract class ApiUsernameResolver extends AbstractBatchingUsernameResolver {
+public class ApiUsernameResolver extends AbstractBatchingUsernameResolver {
   private static final int HTTP_OK = 200;
   private static final int HTTP_TOO_MANY_REQUESTS = 429;
 
@@ -46,18 +47,35 @@ public abstract class ApiUsernameResolver extends AbstractBatchingUsernameResolv
     }
   }
 
+  private final String logPrefix;
   private final String path;
   private final HttpClient httpClient;
+  private final Executor executor;
+  private final String[] jsonPath;
 
   private long backoffMs = MIN_BACKOFF;
 
-  public ApiUsernameResolver(String path) {
+  public ApiUsernameResolver(String name, String path, boolean singleThreaded, String jsonPath) {
     assertTrue(path.contains("{uuid}"));
+    this.logPrefix = "[ApiUsernameResolver:" + name + "] ";
     this.path = path;
     this.httpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(10))
         .followRedirects(HttpClient.Redirect.ALWAYS)
         .build();
+    this.executor =
+        singleThreaded ? Executors.newSingleThreadExecutor() : AbstractUsernameResolver.EXECUTOR;
+    this.jsonPath = jsonPath.split("\\.");
+  }
+
+  @Override
+  protected Executor getExecutor() {
+    return executor;
+  }
+
+  @Override
+  protected String logPrefix() {
+    return logPrefix;
   }
 
   @Override
@@ -66,9 +84,9 @@ public abstract class ApiUsernameResolver extends AbstractBatchingUsernameResolv
     try {
       name = resolveSync(uuid, 5);
     } catch (Throwable t) {
-      Bukkit.getLogger().log(Level.WARNING, "Could not resolve username for " + uuid, t);
+      warn("Could not resolve username for " + uuid, t);
     } finally {
-      future.complete(UsernameResponse.of(name, ApiUsernameResolver.class));
+      future.complete(UsernameResponse.of(name, getClass()));
     }
   }
 
@@ -100,20 +118,17 @@ public abstract class ApiUsernameResolver extends AbstractBatchingUsernameResolv
             || t instanceof UnknownHostException
             || t instanceof NoRouteToHostException) {
           stopped = true;
-          Bukkit.getLogger().log(Level.WARNING, LOG_PREFIX + "Stopped resolving usernames", t);
+          warn("Stopped resolving usernames", t);
         }
       } finally {
         complete(id, UsernameResponse.of(name, now, getClass()));
       }
     }
 
-    if (!errors.isEmpty()) {
-      Bukkit.getLogger()
-          .log(
-              Level.WARNING,
-              LOG_PREFIX + "Could not resolve " + errors.size() + " usernames",
-              errors.values().iterator().next());
-    }
+    if (!errors.isEmpty())
+      warn(
+          "Could not resolve " + errors.size() + " usernames",
+          errors.values().iterator().next());
   }
 
   private String resolveSync(UUID id, int maxRetries) throws Exception {
@@ -151,5 +166,12 @@ public abstract class ApiUsernameResolver extends AbstractBatchingUsernameResolv
   }
 
   // Each API impl has to decide how to extract the username
-  protected abstract String getUsername(JsonObject response);
+  protected String getUsername(JsonObject response) {
+    JsonElement curr = response;
+    for (String s : jsonPath) {
+      if (curr == null || !curr.isJsonObject()) return null;
+      curr = curr.getAsJsonObject().get(s);
+    }
+    return curr.getAsString();
+  }
 }

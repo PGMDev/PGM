@@ -5,6 +5,7 @@ import fr.minuskube.inv.InventoryManager;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -85,6 +86,7 @@ import tc.oc.pgm.util.usernames.BukkitUsernameResolver;
 import tc.oc.pgm.util.usernames.ElectroidApiUsernameResolver;
 import tc.oc.pgm.util.usernames.MojangApiUsernameResolver;
 import tc.oc.pgm.util.usernames.PlayerDbApiUsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolver;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
@@ -171,12 +173,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       return;
     }
 
-    UsernameResolvers.setResolvers(
-        new BukkitUsernameResolver(),
-        new SqlUsernameResolver((SQLDatastore) datastore),
-        new PlayerDbApiUsernameResolver(),
-        new MojangApiUsernameResolver(),
-        new ElectroidApiUsernameResolver());
+    setupUsernameResolvers();
 
     datastore = new CacheDatastore(datastore);
 
@@ -254,6 +251,33 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     registerListeners();
     registerCommands();
+  }
+
+  private void setupUsernameResolvers() {
+    var custom = config.getCustomUsernameResolvers().iterator();
+    var types = config.getUsernameResolvers();
+    if (types.isEmpty()) {
+      PGM.get()
+          .getLogger()
+          .warning("No username resolvers were configured, falling back to defaults.");
+      var nonCustom = EnumSet.allOf(Config.UsernameResolverType.class);
+      nonCustom.remove(Config.UsernameResolverType.CUSTOM);
+      types = List.copyOf(nonCustom);
+    }
+
+    List<UsernameResolver> resolvers = new ArrayList<>();
+    for (var type : types) {
+      resolvers.add(
+          switch (type) {
+            case BUKKIT -> new BukkitUsernameResolver();
+            case SQL -> new SqlUsernameResolver((SQLDatastore) datastore);
+            case PLAYER_DB -> new PlayerDbApiUsernameResolver();
+            case MOJANG -> new MojangApiUsernameResolver();
+            case ELECTROID -> new ElectroidApiUsernameResolver();
+            case CUSTOM -> custom.next();
+          });
+    }
+    UsernameResolvers.setResolvers(resolvers.toArray(UsernameResolver[]::new));
   }
 
   @Override

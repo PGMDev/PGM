@@ -233,6 +233,28 @@ database-max-connections: 5
 # Enable the simple vanish manager, disable if you want other plugins to handle this
 vanish: true
 
+# Resolvers pgm should use to convert uuid -> username, mainly for map author names
+# The defined order will be respected by pgm, if one fails or doesn't
+# give a valid answer, the next is checked.
+username-resolvers:
+  # Resolve using bukkit directly first, heavily recommended
+  - type: BUKKIT
+  # Resolve using pgm's SQL table, used as a cache, heavily recommended
+  - type: SQL
+  # See https://playerdb.co, recommended
+  - type: PLAYER_DB
+  # Official minecraft API, heavily rate-limited, but reliable
+  - type: MOJANG
+  # See https://github.com/Electroid/mojang-api, outdated
+  - type: ELECTROID
+  # You may add custom apis of your own, as long as they respond with JSON.
+  # The following is an example of how you'd setup player-db
+#  - type: CUSTOM
+#    name: "playerdb-copy" # Used for debug/logs
+#    uri: "https://playerdb.co/api/player/minecraft/{uuid}" # Template for the uri to hit
+#    single-threaded: false # Optional, use true for rate-limited APIs, ensures non-overlapping requests.
+#    json-path: "data.player.username" # dot-separated JSON object properties, does not support arrays.
+
 # Experimental features that are not yet stable.
 experiments:
   # Enable payload preview. This is not fully finished and xml syntax is likely to change at a later time.

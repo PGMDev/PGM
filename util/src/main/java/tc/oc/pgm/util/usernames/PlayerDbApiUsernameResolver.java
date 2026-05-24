@@ -1,7 +1,5 @@
 package tc.oc.pgm.util.usernames;
 
-import com.google.gson.JsonObject;
-
 /**
  * Resolves using PlayerDb
  *
@@ -13,18 +11,10 @@ import com.google.gson.JsonObject;
  */
 public class PlayerDbApiUsernameResolver extends ApiUsernameResolver {
   public PlayerDbApiUsernameResolver() {
-    super("https://playerdb.co/api/player/minecraft/{uuid}");
-  }
-
-  @Override
-  protected String getUsername(JsonObject response) {
-    var success = response.get("success");
-    if (success == null || !success.getAsBoolean()) return null;
-    var data = response.getAsJsonObject("data");
-    if (data == null) return null;
-    var player = data.getAsJsonObject("player");
-    if (player == null) return null;
-    var username = player.get("username");
-    return username == null ? null : username.getAsString();
+    super(
+        "playerdb",
+        "https://playerdb.co/api/player/minecraft/{uuid}",
+        false,
+        "data.player.username");
   }
 }

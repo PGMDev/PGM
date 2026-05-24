@@ -1,7 +1,5 @@
 package tc.oc.pgm.util.usernames;
 
-import com.google.gson.JsonObject;
-
 /**
  * Resolves using electroid's mojang-api
  *
@@ -13,11 +11,6 @@ import com.google.gson.JsonObject;
 public class ElectroidApiUsernameResolver extends ApiUsernameResolver {
 
   public ElectroidApiUsernameResolver() {
-    super("https://api.ashcon.app/mojang/v2/user/{uuid}");
-  }
-
-  protected String getUsername(JsonObject response) {
-    var name = response.get("username");
-    return name == null ? null : name.getAsString();
+    super("electroid", "https://api.ashcon.app/mojang/v2/user/{uuid}", false, "username");
   }
 }
