@@ -129,8 +129,7 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     }
 
     if (PGM.get().getConfiguration().showUnusedXml()) {
-      ((DocumentWrapper) document)
-          .checkUnvisited(node -> warn("Unused node, maybe a typo?", node));
+      ((DocumentWrapper) document).checkUnvisited(node -> warn("Unused node, maybe a typo?", node));
     }
   }
 
