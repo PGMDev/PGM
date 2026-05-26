@@ -63,7 +63,6 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ComponentApplicator;
@@ -754,8 +753,7 @@ public abstract class KitParser {
       // The warning threshold of 15 is chosen as a reasonable maximum that is still relatively
       // accurate
       if (power > 15) {
-        LoggingUtils.warn(
-            factory.getLogger(),
+        factory.warn(
             "Potentially excessive double jump power detected: " + power
                 + "; will be clamped at runtime.",
             child);

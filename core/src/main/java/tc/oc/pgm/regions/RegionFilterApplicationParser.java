@@ -24,7 +24,6 @@ import tc.oc.pgm.filters.operator.FilterNode;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.teams.Teams;
-import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.VectorUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -147,8 +146,7 @@ public class RegionFilterApplicationParser {
       Vector velocity = XMLUtils.parseVector(attrVelocity, velocityText);
       Vector clampedVelocity = VectorUtils.clampVelocityVector(velocity);
       if (!clampedVelocity.equals(velocity)) {
-        LoggingUtils.warn(
-            factory.getLogger(),
+        factory.warn(
             "Excessive velocity setting detected: (" + velocity + "). Clamping to ("
                 + clampedVelocity + ") to ensure compatibility.",
             attrVelocity);

@@ -14,7 +14,6 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.bukkit.GameRule;
 import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -54,8 +53,7 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
 
           GameRule<?> rule = GameRules.getByName(ruleName);
           if (rule == null) {
-            LoggingUtils.warn(
-                logger,
+            factory.warn(
                 "Game rule " + ruleName + " does not exist or is unsupported by the platform",
                 gameRuleElement);
             continue;

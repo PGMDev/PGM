@@ -1,6 +1,9 @@
 package tc.oc.pgm.api.map.factory;
 
-import java.util.logging.Logger;
+import org.jdom2.Attribute;
+import org.jdom2.Element;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapContext;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapModule;
@@ -11,6 +14,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.Version;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 
 /** A factory for creating {@link MapInfo}s and {@link MapContext}s. */
@@ -68,9 +72,40 @@ public interface MapFactory extends ModuleContext<MapModule<?>>, AutoCloseable {
   MapContext load() throws MapException;
 
   /**
-   * Gets the logger of this map factory
+   * Logs an XML warning without a reference to a specific node. Prefer calling
+   * {@link MapFactory#warn(String, Node)} instead.
    *
-   * @return A {@link Logger}.
+   * @param message The warning message
    */
-  Logger getLogger();
+  default void warn(@NonNull String message) {
+    warn(message, (Node) null);
+  }
+
+  /**
+   * Logs an XML warning, possibly related to the given node.
+   *
+   * @param message The warning message
+   * @param node The node involved in the warning, if any
+   */
+  void warn(@NonNull String message, @Nullable Node node);
+
+  /**
+   * Logs an XML warning, possibly related to the given element.
+   *
+   * @param message The warning message
+   * @param el The element involved in the warning, if any
+   */
+  default void warn(@NonNull String message, @Nullable Element el) {
+    warn(message, Node.fromNullable(el));
+  }
+
+  /**
+   * Logs an XML warning, possibly related to the given attribute.
+   *
+   * @param message The warning message
+   * @param attr The attribute involved in the warning, if any
+   */
+  default void warn(@NonNull String message, @Nullable Attribute attr) {
+    warn(message, Node.fromNullable(attr));
+  }
 }

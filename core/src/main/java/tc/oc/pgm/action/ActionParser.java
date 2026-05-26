@@ -67,7 +67,6 @@ import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
-import tc.oc.pgm.util.LoggingUtils;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -495,8 +494,7 @@ public class ActionParser {
     }
 
     if (Math.abs(velocity) > 3.9) {
-      LoggingUtils.warn(
-          factory.getLogger(),
+      factory.warn(
           "Excessive velocity component detected: " + velocity + "; will be clamped to "
               + (velocity < 0 ? "-" : "") + "3.9 at runtime.",
           node);

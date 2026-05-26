@@ -9,6 +9,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.input.JDOMParseException;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapContext;
@@ -127,13 +129,9 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
     }
 
     if (PGM.get().getConfiguration().showUnusedXml()) {
-      ((DocumentWrapper) document).checkUnvisited(this::printUnvisitedNode);
+      ((DocumentWrapper) document)
+          .checkUnvisited(node -> warn("Unused node, maybe a typo?", node));
     }
-  }
-
-  private void printUnvisitedNode(Node node) {
-    InvalidXMLException ex = new InvalidXMLException("Unused node, maybe a typo?", node);
-    logger.log(Level.WARNING, ex.getMessage(), ex);
   }
 
   @Override
@@ -191,8 +189,9 @@ public class MapFactoryImpl extends ModuleGraph<MapModule<?>, MapModuleFactory<?
   }
 
   @Override
-  public Logger getLogger() {
-    return logger;
+  public void warn(@NonNull String message, @Nullable Node node) {
+    var ex = new InvalidXMLException(message, node);
+    logger.log(Level.WARNING, message, ex);
   }
 
   @Override
