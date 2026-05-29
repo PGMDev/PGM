@@ -178,8 +178,10 @@ public class ClassModule implements MapModule<ClassMatchModule> {
 
       boolean restrict = XMLUtils.parseBoolean(classEl.getAttribute("restrict"), false);
 
+      int max = XMLUtils.parseNumber(Node.fromAttr(classEl, "max"), Integer.class, -1);
+
       return new PlayerClass(
-          name, family, description, longdescription, sticky, kits.build(), icon, restrict);
+          name, family, description, longdescription, sticky, kits.build(), icon, restrict, max);
     }
   }
 }

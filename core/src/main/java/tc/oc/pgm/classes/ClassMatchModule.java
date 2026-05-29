@@ -17,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.kits.Kit;
@@ -135,6 +136,26 @@ public class ClassMatchModule implements MatchModule, Listener {
     return result;
   }
 
+/**
+   * Gets the number of players on a specific party/team who are currently playing as or
+   * have selected a given class.
+   *
+   * @param party party to check
+   * @param cls class to count
+   * @return amount of players currently occupying this class slot
+   */
+  public int getPartyClassCount(Party party, PlayerClass cls) {
+    int count = 0;
+    for (MatchPlayer player : this.match.getPlayers()) {
+      if (party.equals(player.getParty())) {
+        if (getPlayingClass(player.getId()).equals(cls)) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
   /**
    * Get whether the given player can change classes.
    *
@@ -163,10 +184,28 @@ public class ClassMatchModule implements MatchModule, Listener {
       throw exception("match.class.sticky");
     }
 
+    MatchPlayer matchPlayer = this.match.getPlayer(userId);
+    if (matchPlayer != null && matchPlayer.getParty() != null && cls.getMax() > 0 && !cls.equals(this.defaultClass)) {
+      PlayerClass currentPlaying = getPlayingClass(userId);
+      PlayerClass currentSelected = this.selectedClasses.get(userId);
+
+      if (!cls.equals(currentPlaying) && !cls.equals(currentSelected)) {
+        int currentCount = this.getPartyClassCount(matchPlayer.getParty(), cls);
+
+        if (currentCount >= cls.getMax()) {
+          matchPlayer.sendWarning(net.kyori.adventure.text.Component.text(
+              "That class is full! Maximum limit reached for your team. (" + cls.getMax() + " max)",
+              net.kyori.adventure.text.format.NamedTextColor.RED
+          ));
+
+          throw exception("That class is full! Maximum limit reached for your team.");
+        }
+      }
+    }
+
     PlayerClass oldClass = this.selectedClasses.put(userId, cls);
     if (oldClass == null) oldClass = this.defaultClass;
-
-    MatchPlayer matchPlayer = this.match.getPlayer(userId);
+    
     if (matchPlayer != null) {
       this.match.callEvent(new PlayerClassChangeEvent(matchPlayer, this.family, oldClass, cls));
     }

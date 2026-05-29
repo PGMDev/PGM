@@ -26,6 +26,7 @@ public class PlayerClass implements ComponentLike {
   private final Set<Kit> kits;
   private final ItemMaterialData icon;
   private final boolean restrict;
+  private final int max;
 
   public PlayerClass(
       String name,
@@ -35,7 +36,8 @@ public class PlayerClass implements ComponentLike {
       boolean sticky,
       Set<Kit> kits,
       ItemMaterialData icon,
-      boolean restrict) {
+      boolean restrict,
+      int max) {
     this.name = assertNotNull(name, "name");
     this.familyName = assertNotNull(familyName, "family name");
     this.description = description;
@@ -44,6 +46,7 @@ public class PlayerClass implements ComponentLike {
     this.kits = ImmutableSet.copyOf(assertNotNull(kits, "kits"));
     this.icon = assertNotNull(icon, "icon");
     this.restrict = restrict;
+    this.max = name.equalsIgnoreCase("default") ? -1 : max;
   }
 
   public String getName() {
@@ -78,6 +81,10 @@ public class PlayerClass implements ComponentLike {
 
   public boolean isSticky() {
     return this.sticky;
+  }
+
+  public int getMax() {
+    return this.max;
   }
 
   public Set<Kit> getKits() {
