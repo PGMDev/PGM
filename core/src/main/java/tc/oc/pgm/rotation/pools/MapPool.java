@@ -1,11 +1,10 @@
 package tc.oc.pgm.rotation.pools;
 
-import static tc.oc.pgm.util.text.TextParser.parseDuration;
-
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import org.bukkit.configuration.ConfigurationSection;
+import tc.oc.pgm.api.VariableDuration;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
@@ -20,7 +19,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
   protected final boolean enabled;
   protected final List<MapInfo> maps;
   protected final int players;
-  protected final Duration cycleTime;
+  protected final VariableDuration cycleTime;
 
   protected final boolean dynamic;
 
@@ -30,15 +29,14 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
       MapPoolManager manager,
       ConfigurationSection section,
       MapParser maps) {
-    this(
-        type,
-        name,
-        manager,
-        section.getBoolean("enabled"),
-        section.getInt("players"),
-        section.getBoolean("dynamic", true),
-        parseDuration(section.getString("cycle-time", "-1s")),
-        maps.getMaps());
+    this.type = type;
+    this.name = name;
+    this.manager = manager;
+    this.enabled = section.getBoolean("enabled");
+    this.players = section.getInt("players");
+    this.dynamic = section.getBoolean("dynamic", true);
+    this.cycleTime = VariableDuration.parse(section.get("cycle-time"), "-1s");
+    this.maps = Collections.unmodifiableList(maps.getMaps());
   }
 
   MapPool(
@@ -56,7 +54,7 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
     this.enabled = enabled;
     this.players = players;
     this.dynamic = dynamic;
-    this.cycleTime = cycleTime;
+    this.cycleTime = VariableDuration.constant(cycleTime);
     this.maps = Collections.unmodifiableList(maps);
   }
 
@@ -90,7 +88,12 @@ public abstract class MapPool implements MapOrder, Comparable<MapPool> {
 
   @Override
   public Duration getCycleTime() {
-    return cycleTime;
+    return cycleTime.getDefault();
+  }
+
+  @Override
+  public Duration getCycleTime(Match match) {
+    return cycleTime.getDuration(match);
   }
 
   /**

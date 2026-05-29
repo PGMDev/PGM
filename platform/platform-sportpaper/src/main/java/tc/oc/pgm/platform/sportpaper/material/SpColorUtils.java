@@ -43,6 +43,11 @@ public class SpColorUtils implements ColorUtils {
   }
 
   @Override
+  public Material toColorable(Material material) {
+    return material == Material.HARD_CLAY ? Material.STAINED_CLAY : material;
+  }
+
+  @Override
   public void setColor(ItemStack item, DyeColor color) {
     Material type = item.getType();
     if (type == Material.WOOL) {

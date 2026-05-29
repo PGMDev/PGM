@@ -19,7 +19,6 @@ import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
-import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
@@ -81,12 +80,8 @@ public class PortalModule implements MapModule<PortalMatchModule> {
             parseDoubleProvider(portalEl, "yaw", RelativeDoubleProvider.ZERO),
             parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO));
 
-        Region.Static entrance;
-        if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
-          entrance = parser.staticRegion(portalEl).children().orNull();
-        } else {
-          entrance = parser.staticRegion(portalEl, "region").orNull();
-        }
+        Region.Static entrance =
+            parser.staticRegion(portalEl, "region").legacy(factory).orNull();
 
         Region.Static exit =
             parser.staticRegion(portalEl, "destination").randomPoints().orNull();

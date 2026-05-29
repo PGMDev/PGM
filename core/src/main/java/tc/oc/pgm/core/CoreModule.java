@@ -90,8 +90,10 @@ public class CoreModule implements MapModule<CoreMatchModule> {
       HashMap<TeamFactory, Integer> serialNumbers = new HashMap<>();
 
       for (Element coreEl : XMLUtils.flattenElements(doc.getRootElement(), "cores", "core")) {
-        MaterialMatcher material =
-            MaterialMatcher.builder().parse(Node.fromAttr(coreEl, "material")).ifEmpty(OBSIDIAN);
+        MaterialMatcher material = MaterialMatcher.builder()
+            .blocksOnly()
+            .parse(Node.fromAttr(coreEl, "material"))
+            .ifEmpty(OBSIDIAN);
 
         int leakLevel = Integer.parseInt(coreEl.getAttributeValue("leak", "5"));
 

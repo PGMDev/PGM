@@ -15,8 +15,9 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/") // Paper builds & paperweight plugin
     maven("https://oss.sonatype.org/content/repositories/snapshots/") // Snapshots
-    maven("https://repo.viaversion.com/") // Viaversion
-    maven("https://repo.pgm.fyi/snapshots") // Sportpaper & other pgm-specific stuff
+    maven("https://repo.viaversion.com/") // ViaVersion
+    maven("https://repo.pgm.fyi/snapshots") // SportPaper & other PGM-specific stuff
+    maven("https://repo.codemc.io/repository/maven-releases/") // PacketEvents
 }
 
 dependencies {
@@ -40,7 +41,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:26.0.2-1")
 
     // Optional runtime dependencies
-    compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.12.0")
     compileOnly("com.viaversion:viaversion-api:5.0.0")
 
     // Paper and SportPaper include these (or equivalents)

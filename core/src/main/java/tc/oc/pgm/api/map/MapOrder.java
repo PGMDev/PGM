@@ -5,8 +5,8 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 
 /**
- * A provider of {@link MapInfo} ordering order. It is responsible for providing the next map the
- * server should play.
+ * A provider of {@link MapInfo} ordering. It is responsible for providing the next map the server
+ * should play.
  */
 public interface MapOrder {
 
@@ -40,6 +40,16 @@ public interface MapOrder {
    */
   default Duration getCycleTime() {
     return PGM.get().getConfiguration().getCycleTime();
+  }
+
+  /**
+   * Returns the duration used for cycles in {@link tc.oc.pgm.cycle.CycleMatchModule}.
+   *
+   * @param match The match.
+   * @return The cycle duration
+   */
+  default Duration getCycleTime(Match match) {
+    return PGM.get().getConfiguration().getCycleTime(match);
   }
 
   /**

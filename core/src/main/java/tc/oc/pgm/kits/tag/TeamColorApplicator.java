@@ -2,6 +2,7 @@ package tc.oc.pgm.kits.tag;
 
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -24,8 +25,13 @@ public class TeamColorApplicator {
     if (meta instanceof LeatherArmorMeta leather) {
       leather.setColor(player.getParty().getFullColor());
       item.setItemMeta(meta);
-    } else if (COLOR_UTILS.isColorAffected(item.getType())) {
-      COLOR_UTILS.setColor(item, player.getParty().getDyeColor());
+    } else {
+      Material colorable = COLOR_UTILS.toColorable(item.getType());
+
+      if (COLOR_UTILS.isColorAffected(colorable)) {
+        if (colorable != item.getType()) item.setType(colorable);
+        COLOR_UTILS.setColor(item, player.getParty().getDyeColor());
+      }
     }
   }
 }

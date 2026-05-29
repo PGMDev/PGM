@@ -52,7 +52,7 @@ public class StartMatchModule implements MatchModule, Listener {
   private StartMatchModule(Match match) {
     this.match = match;
     this.unreadyBar = bossBar(space(), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
-    this.autoStart = !PGM.get().getConfiguration().getStartTime().isNegative();
+    this.autoStart = !PGM.get().getConfiguration().getStartTime(match).isNegative();
   }
 
   @Override
@@ -198,7 +198,7 @@ public class StartMatchModule implements MatchModule, Listener {
   private boolean startCountdown(
       @Nullable Duration duration, @Nullable Duration huddle, boolean force) {
     final Config config = PGM.get().getConfiguration();
-    if (duration == null) duration = config.getStartTime();
+    if (duration == null) duration = config.getStartTime(match);
     // In case the start config is set to -1 used to disable autostart
     if (duration.isNegative()) duration = Duration.ofSeconds(30);
     if (huddle == null) huddle = config.getHuddleTime();

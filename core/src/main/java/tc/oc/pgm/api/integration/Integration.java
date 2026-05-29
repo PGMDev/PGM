@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.channels.Channel;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.skin.Skin;
 
 public final class Integration {
 
@@ -63,6 +64,11 @@ public final class Integration {
   @Nullable
   public static String getNick(Player player) {
     return NICKS.get().getNick(player);
+  }
+
+  @Nullable
+  public static Skin getPlayerSkin(Player player, Player viewer) {
+    return NICKS.get().getPlayerSkin(player, viewer);
   }
 
   public static boolean isMuted(Player player) {

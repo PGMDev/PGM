@@ -2,6 +2,8 @@ package tc.oc.pgm.util.xml.parsers;
 
 import org.jdom2.Element;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.api.map.MapProtos;
+import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RandomPointsValidation;
@@ -19,6 +21,17 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
     this.regions = regions;
   }
 
+  /** Use children parsing for legacy xml versions only * */
+  public RegionBuilder<T> legacy(MapFactory context) {
+    if (!context.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) return this;
+    this.prop = new String[] {};
+    this.attr = false;
+    this.child = false;
+    this.self = true;
+    this.children = true;
+    return this;
+  }
+
   public RegionBuilder<T> blockBounded() {
     validate((r, n) -> regions.validate(r, BlockBoundedValidation.INSTANCE, n));
     return this;
@@ -26,12 +39,6 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
 
   public RegionBuilder<T> randomPoints() {
     validate((r, n) -> regions.validate(r, RandomPointsValidation.INSTANCE, n));
-    return this;
-  }
-
-  /** Sets up to parse for a union of all inner regions, legacy only! */
-  public RegionBuilder<T> children() {
-    this.children = true;
     return this;
   }
 

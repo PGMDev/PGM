@@ -21,7 +21,8 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.util.BlockVector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.platform.sportpaper.material.ModernMaterialNames.MaterialMapping;
 import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -100,7 +101,7 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData parseItemMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
-    var md = SpMaterialParser.parsePgm(text, node);
+    var md = SpMaterialParser.parseItem(text, node);
     validateItem(md.getItemType(), node);
     return md;
   }
@@ -108,25 +109,36 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData parseItemMaterialData(String text, short dmg, @Nullable Node node)
       throws InvalidXMLException {
-    var md = new SpMaterialData(SpMaterialParser.parseMaterial(text, node), dmg);
+    var md = SpMaterialParser.parseItem(text, dmg, node);
     validateItem(md.getItemType(), node);
     return md;
   }
 
-  static void validateItem(Material material, Node node) throws InvalidXMLException {
-    if (CraftMagicNumbers.getItem(material) == null && material != Material.AIR) {
-      throw new InvalidXMLException("Invalid item/block " + material, node);
+  public static boolean isItem(Material material) {
+    return material == Material.AIR || CraftMagicNumbers.getItem(material) != null;
+  }
+
+  public static boolean isBlock(Material material) {
+    return material.isBlock();
+  }
+
+  public static void validateItem(Material material, Node node) throws InvalidXMLException {
+    if (!isItem(material)) {
+      throw new InvalidXMLException("Material '" + material + "' is not an item", node);
+    }
+  }
+
+  public static void validateBlock(Material material, Node node) throws InvalidXMLException {
+    if (!isBlock(material)) {
+      throw new InvalidXMLException("Material '" + material + "' is not a block", node);
     }
   }
 
   @Override
   public BlockMaterialData parseBlockMaterialData(String text, @Nullable Node node)
       throws InvalidXMLException {
-    var md = SpMaterialParser.parsePgm(text, node);
-    if (!md.getItemType().isBlock()) {
-      throw new InvalidXMLException(
-          "Material " + md.getItemType().name() + " is not a block", node);
-    }
+    var md = SpMaterialParser.parseBlock(text, node);
+    validateBlock(md.getItemType(), node);
     return md;
   }
 
@@ -162,12 +174,28 @@ public class SpMaterialUtils implements MaterialUtils {
 
     @Override
     public MaterialMatcher.Builder visit(Material material) {
+      if (blocksOnly && !isBlock(material))
+        throw new InvalidMaterialException("Material '" + material + "' is not a block");
       return add(material);
     }
 
     @Override
     public MaterialMatcher.Builder visit(Material material, short data) {
+      if (materialsOnly)
+        throw new InvalidMaterialException(
+            "Only supports materials, but got " + material + ":" + data);
+      if (blocksOnly && !isBlock(material))
+        throw new InvalidMaterialException("Material '" + material + "' is not a block");
+
       return add(new ExactMaterialMatcher(material, (byte) data));
+    }
+
+    @Override
+    public MaterialMatcher.Builder visit(Node node, MaterialMapping mapping)
+        throws InvalidXMLException {
+      if (blocksOnly) return mapping.mapBlock(node, this::visit, this::visit);
+      mapping.mapBoth(this::visit, this::visit);
+      return this;
     }
 
     @Override
@@ -185,7 +213,17 @@ public class SpMaterialUtils implements MaterialUtils {
 
     @Override
     protected void parseSingle(String text, @Nullable Node node) throws InvalidXMLException {
-      SpMaterialParser.parse(text, node, materialsOnly, this);
+      try {
+        SpMaterialParser.parse(text, node, materialsOnly, this);
+      } catch (InvalidMaterialException e) {
+        throw new InvalidXMLException(e.getMessage(), node);
+      }
+    }
+
+    static class InvalidMaterialException extends RuntimeException {
+      public InvalidMaterialException(String message) {
+        super(message);
+      }
     }
   }
 }

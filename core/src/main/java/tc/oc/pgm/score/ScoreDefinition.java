@@ -11,7 +11,9 @@ import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.util.named.NameStyle;
 
 public record ScoreDefinition(
+    int initial,
     int scoreLimit,
+    boolean enforceLimit,
     int deathScore,
     int killScore,
     int mercyLimit,

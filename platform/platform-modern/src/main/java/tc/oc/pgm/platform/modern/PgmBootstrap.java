@@ -2,7 +2,9 @@ package tc.oc.pgm.platform.modern;
 
 import ca.spottedleaf.dataconverter.converters.DataConverter;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
+import ca.spottedleaf.dataconverter.types.ListType;
 import ca.spottedleaf.dataconverter.types.MapType;
+import ca.spottedleaf.dataconverter.types.ObjectType;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
@@ -63,6 +65,29 @@ public class PgmBootstrap implements PluginBootstrap {
         if (context == null) return data;
         if ("minecraft:overworld".equals(context.getString("dimension", ""))) {
           context.setString("dimension", "pgm:legacy_overworld");
+        }
+        return data;
+      }
+    });
+
+    // Mark all legacy leaves as persistent to avoid decay
+    MCTypeRegistry.CHUNK.addStructureConverter(new DataConverter<>(DataVersions.V18W21B) {
+      @Override
+      public MapType convert(MapType data, final long sourceVersion, final long toVersion) {
+        final MapType level = data.getMap("Level");
+        if (level == null) return data;
+        final ListType sections = level.getList("Sections", ObjectType.MAP);
+        if (sections == null) return data;
+        for (int i = 0; i < sections.size(); i++) {
+          final MapType section = sections.getMap(i);
+          final ListType palette = section.getList("Palette", ObjectType.MAP);
+          if (palette == null) continue;
+          for (int j = 0; j < palette.size(); j++) {
+            final MapType entry = palette.getMap(j);
+            final String name = entry.getString("Name", "");
+            if (!name.endsWith("_leaves")) continue;
+            entry.getOrCreateMap("Properties").setString("persistent", "true");
+          }
         }
         return data;
       }

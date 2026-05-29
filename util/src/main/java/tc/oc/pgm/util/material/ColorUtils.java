@@ -18,6 +18,8 @@ public interface ColorUtils {
 
   boolean isColorAffected(Material material);
 
+  Material toColorable(Material material);
+
   void setColor(ItemStack item, DyeColor color);
 
   Material setColor(Material material, DyeColor color);
