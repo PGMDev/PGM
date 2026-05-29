@@ -7,7 +7,8 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
 public class CylindricalRegion
-    implements RegionDefinition.HardStatic, RegionDefinition.MutableSource {
+    implements RegionDefinition.HardStatic,
+        RegionDefinition.MutableSource<CylindricalRegion.Mutable> {
   protected final Vector base;
   protected double radius;
   protected double radiusSq;
@@ -74,7 +75,7 @@ public class CylindricalRegion
         + "}";
   }
 
-  public Mutable asMutableCopy() {
+  public CylindricalRegion.Mutable asMutableCopy() {
     return new Mutable(this.base.clone(), this.radius, this.height);
   }
 

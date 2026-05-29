@@ -6,18 +6,11 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.regions.CylindricalRegion;
 import tc.oc.pgm.variables.Variable;
 
-public class CylindricalVariable extends RegionVariable<CylindricalRegion.Mutable> {
-
-  private final CylindricalRegion initial;
+public class CylindricalVariable
+    extends RegionVariable<CylindricalRegion.Mutable, CylindricalRegion> {
 
   public CylindricalVariable(CylindricalRegion initial) {
     super(Component.values(), initial);
-    this.initial = initial;
-  }
-
-  @Override
-  protected CylindricalRegion.Mutable createState() {
-    return initial.asMutableCopy();
   }
 
   public Variable<Match> getComponent(Component component) {

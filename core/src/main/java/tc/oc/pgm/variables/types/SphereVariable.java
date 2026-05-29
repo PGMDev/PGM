@@ -6,18 +6,10 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.regions.SphereRegion;
 import tc.oc.pgm.variables.Variable;
 
-public class SphereVariable extends RegionVariable<SphereRegion.Mutable> {
-
-  private final SphereRegion initial;
+public class SphereVariable extends RegionVariable<SphereRegion.Mutable, SphereRegion> {
 
   public SphereVariable(SphereRegion initial) {
     super(Component.values(), initial);
-    this.initial = initial;
-  }
-
-  @Override
-  protected SphereRegion.Mutable createState() {
-    return initial.asMutableCopy();
   }
 
   public Variable<Match> getComponent(Component component) {

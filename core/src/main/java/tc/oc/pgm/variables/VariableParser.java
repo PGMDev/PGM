@@ -1,6 +1,7 @@
 package tc.oc.pgm.variables;
 
 import com.google.common.collect.Range;
+import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
@@ -20,12 +21,14 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.ArrayVariable;
+import tc.oc.pgm.variables.types.BlockVariable;
 import tc.oc.pgm.variables.types.CuboidVariable;
 import tc.oc.pgm.variables.types.CylindricalVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
 import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
+import tc.oc.pgm.variables.types.PointVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.SphereVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
@@ -122,6 +125,28 @@ public class VariableParser {
     var component =
         XMLUtils.parseEnum(Node.fromAttr(el, "component"), PlayerVariable.Component.class);
     return PlayerVariable.of(component);
+  }
+
+  @MethodParser("point")
+  public Variable<Match> parsePoint(Element el) throws InvalidXMLException {
+    String baseId = FeatureDefinitionContext.parseId(el);
+    var variable = new PointVariable(factory.getRegions().parsePoint(el));
+    for (PointVariable.Component component : PointVariable.Component.values()) {
+      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
+      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
+    }
+    return variable;
+  }
+
+  @MethodParser("block")
+  public Variable<Match> parseBlock(Element el) throws InvalidXMLException {
+    String baseId = FeatureDefinitionContext.parseId(el);
+    var variable = new BlockVariable(factory.getRegions().parseBlock(el));
+    for (BlockVariable.Component component : BlockVariable.Component.values()) {
+      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
+      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
+    }
+    return variable;
   }
 
   @MethodParser("cuboid")

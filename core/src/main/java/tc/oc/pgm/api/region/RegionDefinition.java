@@ -34,7 +34,7 @@ public interface RegionDefinition extends FilterDefinition, Region {
   interface Mutable extends RegionDefinition {}
 
   /** Implemented by regions that can produce a mutable copy of themselves */
-  interface MutableSource {
-    Mutable asMutableCopy();
+  interface MutableSource<T extends RegionDefinition.Mutable> {
+    T asMutableCopy();
   }
 }

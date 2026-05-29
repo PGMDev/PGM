@@ -4,7 +4,8 @@ import java.util.Random;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class CuboidRegion implements RegionDefinition.HardStatic, RegionDefinition.MutableSource {
+public class CuboidRegion
+    implements RegionDefinition.HardStatic, RegionDefinition.MutableSource<CuboidRegion.Mutable> {
   protected final Bounds bounds;
 
   public CuboidRegion(Vector pos1, Vector pos2) {
@@ -51,7 +52,7 @@ public class CuboidRegion implements RegionDefinition.HardStatic, RegionDefiniti
     return (max - min) * random.nextDouble() + min;
   }
 
-  public Mutable asMutableCopy() {
+  public CuboidRegion.Mutable asMutableCopy() {
     return new Mutable(this.bounds.clone());
   }
 

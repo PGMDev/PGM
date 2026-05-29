@@ -6,18 +6,10 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.regions.CuboidRegion;
 import tc.oc.pgm.variables.Variable;
 
-public class CuboidVariable extends RegionVariable<CuboidRegion.Mutable> {
-
-  private final CuboidRegion initial;
+public class CuboidVariable extends RegionVariable<CuboidRegion.Mutable, CuboidRegion> {
 
   public CuboidVariable(CuboidRegion initial) {
     super(Component.values(), initial);
-    this.initial = initial;
-  }
-
-  @Override
-  protected CuboidRegion.Mutable createState() {
-    return initial.asMutableCopy();
   }
 
   public Variable<Match> getComponent(Component component) {

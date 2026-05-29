@@ -2,7 +2,9 @@ package tc.oc.pgm.variables.types;
 
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 import org.bukkit.Location;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
@@ -12,21 +14,24 @@ import tc.oc.pgm.regions.Bounds;
 import tc.oc.pgm.regions.Component;
 import tc.oc.pgm.variables.Variable;
 
-public abstract class RegionVariable<R extends RegionDefinition.Mutable & Region.Static>
+public abstract class RegionVariable<
+        R extends RegionDefinition.Mutable, I extends Region & RegionDefinition.MutableSource<R>>
     extends AbstractVariable<Match>
     implements Variable.Indexed<Match>, StateHolder<R>, RegionDefinition {
 
   private final Component<R>[] components;
-  private final Region initial;
+  protected final I initial;
   private final Map<Match, R> states = new WeakHashMap<>();
 
-  protected RegionVariable(Component<R>[] components, Region initial) {
+  protected RegionVariable(Component<R>[] components, I initial) {
     super(Match.class);
     this.components = components;
     this.initial = initial;
   }
 
-  protected abstract R createState();
+  protected R createState() {
+    return initial.asMutableCopy();
+  }
 
   @Override
   public void load(Match match) {
@@ -39,7 +44,7 @@ public abstract class RegionVariable<R extends RegionDefinition.Mutable & Region
 
   @Override
   public Region.Static getStaticImpl(Match match) {
-    return getState(match);
+    return (Region.Static) getState(match);
   }
 
   @Override
@@ -59,11 +64,23 @@ public abstract class RegionVariable<R extends RegionDefinition.Mutable & Region
 
   @Override
   public double getValue(Filterable<?> context, int index) {
+    if (index < 0 || index >= components.length) {
+      String msg =
+          String.format("Index %d out of bounds for %s", index, getClass().getSimpleName());
+      PGM.get().getGameLogger().log(Level.SEVERE, msg);
+      return 0;
+    }
     return components[index].getter().applyAsDouble(getState(getAncestor(context)));
   }
 
   @Override
   public void setValue(Filterable<?> context, int index, double value) {
+    if (index < 0 || index >= components.length) {
+      String msg =
+          String.format("Index %d out of bounds for %s", index, getClass().getSimpleName());
+      PGM.get().getGameLogger().log(Level.SEVERE, msg);
+      return;
+    }
     components[index].setter().accept(getState(getAncestor(context)), value);
   }
 
@@ -83,11 +100,16 @@ public abstract class RegionVariable<R extends RegionDefinition.Mutable & Region
   }
 
   @Override
-  public boolean isDynamic() {
-    return Variable.Indexed.super.isDynamic();
+  public boolean canGetRandom() {
+    return initial.canGetRandom();
   }
 
-  protected Variable<Match> getComponent(tc.oc.pgm.regions.Component<R> component) {
+  @Override
+  public boolean isDynamic() {
+    return false;
+  }
+
+  protected Variable<Match> getComponent(Component<R> component) {
     return new AbstractVariable<>(Match.class) {
       @Override
       protected double getValueImpl(Match match) {

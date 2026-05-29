@@ -1,28 +1,44 @@
 package tc.oc.pgm.variables.types;
 
-import tc.oc.pgm.api.region.RegionDefinition;
-import tc.oc.pgm.regions.BlockRegion;
-import tc.oc.pgm.regions.Component;
-
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ToDoubleFunction;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.regions.BlockRegion;
+import tc.oc.pgm.variables.Variable;
 
-public class BlockRegion extends RegionVariable<RegionDefinition.Mutable, tc.oc.pgm.regions.BlockRegion> {
+public class BlockVariable extends RegionVariable<BlockRegion.Mutable, BlockRegion> {
 
-    public BlockVariable(BlockRegion initial) {
-        super(Component.values(), initial);
+  public BlockVariable(BlockRegion initial) {
+    super(Component.values(), initial);
+  }
+
+  public Variable<Match> getComponent(Component component) {
+    return super.getComponent(component);
+  }
+
+  public enum Component implements tc.oc.pgm.regions.Component<BlockRegion.Mutable> {
+    X(r -> r.getMutableLocation().getBlockX(), (r, v) -> r.getMutableLocation().setX(v)),
+    Y(r -> r.getMutableLocation().getBlockY(), (r, v) -> r.getMutableLocation().setY(v)),
+    Z(r -> r.getMutableLocation().getBlockZ(), (r, v) -> r.getMutableLocation().setZ(v));
+
+    private final ToDoubleFunction<BlockRegion.Mutable> getter;
+    private final ObjDoubleConsumer<BlockRegion.Mutable> setter;
+
+    Component(
+        ToDoubleFunction<BlockRegion.Mutable> getter,
+        ObjDoubleConsumer<BlockRegion.Mutable> setter) {
+      this.getter = getter;
+      this.setter = setter;
     }
 
-    public Variable<Match> getComponent(Component component) {
-        return super.getComponent(component);
+    @Override
+    public ToDoubleFunction<BlockRegion.Mutable> getter() {
+      return getter;
     }
 
-    public enum Component implements tc.oc.pgm.regions.Component<RegionDefinition.Mutable> {
-        X(r -> r.getMutableX().getX(), (r, v) -> r.getMutableX().setX(v)),
-        Y(r -> r.getMutableY().getY(), (r, v) -> r.getMutableY().setY(v)),
-        Z(r -> r.getMutableZ().getZ(), (r, v) -> r.getMutableZ().setZ(v));
+    @Override
+    public ObjDoubleConsumer<BlockRegion.Mutable> setter() {
+      return setter;
     }
-
-    private final ToDoubleFunction<RegionDefinition.Mutable> getter;
-    private final ObjDoubleConsumer<RegionDefinition.Mutable> setter;
+  }
 }
