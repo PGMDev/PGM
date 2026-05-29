@@ -155,6 +155,11 @@ public class SpPlayerUtils implements PlayerUtils, PacketSender {
   }
 
   @Override
+  public boolean willBeOnline(Player player) {
+    return player.willBeOnline();
+  }
+
+  @Override
   public void sendMultiBlockPacket(
       Player pl, BlockVectorSet positions, @Nullable BlockMaterialData data) {
     // Build a map of chunk -> block[]
@@ -181,12 +186,6 @@ public class SpPlayerUtils implements PlayerUtils, PacketSender {
         send(new PacketPlayOutMultiBlockChange(bl.size(), bl.elements(), chunk.getHandle()), pl);
       }
     }
-  }
-
-  @Override
-  public boolean isGliding(Player player) {
-    // Gliding is not possible in 1.8
-    return false;
   }
 
   private static final Field CHUNK = getField(PacketPlayOutMultiBlockChange.class, "a");

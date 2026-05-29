@@ -109,15 +109,12 @@ public class Node {
   }
 
   private static int getStartLine(Object node) {
-    if (node instanceof InheritingElement) {
-      return ((InheritingElement) node).getStartLine();
-    } else if (node instanceof Located) {
-      return ((Located) node).getLine();
-    } else if (node instanceof Attribute) {
-      return getStartLine(((Attribute) node).getParent());
-    } else {
-      return 0;
-    }
+    return switch (node) {
+      case InheritingElement inheritingElement -> inheritingElement.getStartLine();
+      case Located located -> located.getLine();
+      case Attribute attribute -> getStartLine(attribute.getParent());
+      case null, default -> 0;
+    };
   }
 
   public int getEndLine() {
@@ -125,15 +122,12 @@ public class Node {
   }
 
   public static int getEndLine(Object node) {
-    if (node instanceof InheritingElement) {
-      return ((InheritingElement) node).getEndLine();
-    } else if (node instanceof Located) {
-      return ((Located) node).getLine();
-    } else if (node instanceof Attribute) {
-      return getEndLine(((Attribute) node).getParent());
-    } else {
-      return 0;
-    }
+    return switch (node) {
+      case InheritingElement inheritingElement -> inheritingElement.getEndLine();
+      case Located located -> located.getLine();
+      case Attribute attribute -> getEndLine(attribute.getParent());
+      case null, default -> 0;
+    };
   }
 
   public int getColumn() {
@@ -207,8 +201,9 @@ public class Node {
     return attr == null ? null : new Node(attr);
   }
 
-  public static @Nullable Node fromChildOrAttr(Element el, boolean unique, String... aliases)
-      throws InvalidXMLException {
+  public static @Nullable Node fromChildOrAttr(
+      @Nullable Element el, boolean unique, String... aliases) throws InvalidXMLException {
+    if (el == null) return null;
     Node node = null;
     for (String alias : aliases) {
       node = wrapUnique(node, unique, alias, el.getAttribute(alias));

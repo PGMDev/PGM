@@ -52,6 +52,8 @@ public interface PlayerUtils {
 
   RayBlockIntersection getTargetedBlock(Player player);
 
+  boolean willBeOnline(Player player);
+
   default void sendMultiBlockPacket(
       Player player, BlockVectorSet positions, @Nullable BlockMaterialData data) {
     var location = player.getLocation();
@@ -62,6 +64,4 @@ public interface PlayerUtils {
           .sendBlockChange(player, location);
     });
   }
-
-  boolean isGliding(Player player);
 }

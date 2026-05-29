@@ -4,14 +4,12 @@ import static net.kyori.adventure.key.Key.key;
 import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
-import com.google.gson.JsonObject;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.minecraft.server.v1_8_R3.EntityPotion;
 import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
-import net.minecraft.server.v1_8_R3.World;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -30,9 +28,8 @@ import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
 import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
@@ -47,11 +44,6 @@ public class SpMiscUtil implements MiscUtils {
   public boolean yield(Event event) {
     event.yield();
     return true;
-  }
-
-  @Override
-  public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
-    return event.getOrCreateExtra(plugin);
   }
 
   @Override
@@ -84,7 +76,7 @@ public class SpMiscUtil implements MiscUtils {
 
   @Override
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
-    World world = ((CraftWorld) loc.getWorld()).getHandle();
+    net.minecraft.server.v1_8_R3.World world = ((CraftWorld) loc.getWorld()).getHandle();
     EntityPotion potion =
         new EntityPotion(world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
     world.addEntity(potion);
@@ -125,5 +117,10 @@ public class SpMiscUtil implements MiscUtils {
   public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
     // All explosions in 1.8 are destructive
     return true;
+  }
+
+  @Override
+  public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
+    return ev.getItem();
   }
 }

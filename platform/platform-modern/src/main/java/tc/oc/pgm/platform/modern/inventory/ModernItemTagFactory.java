@@ -1,10 +1,12 @@
 package tc.oc.pgm.platform.modern.inventory;
 
+import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
+
 import org.bukkit.persistence.PersistentDataType;
 import tc.oc.pgm.util.inventory.tag.ItemTag;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = Supports.Variant.PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "1.20.6")
 public class ModernItemTagFactory implements ItemTag.Factory {
 
   @Override

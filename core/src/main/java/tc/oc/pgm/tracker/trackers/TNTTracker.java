@@ -36,9 +36,8 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onPrime(ExplosionPrimeEvent event) {
-    if (event.getEntity() instanceof TNTPrimed) {
+    if (event.getEntity() instanceof TNTPrimed tnt) {
       // Some TNT was activated, try to figure out why
-      TNTPrimed tnt = (TNTPrimed) event.getEntity();
       TNTInfo info = null;
 
       if (event instanceof ExplosionPrimeByEntityEvent) {

@@ -493,4 +493,11 @@ public interface Config {
     Object exp = getExperiments().getOrDefault(key, def);
     return exp instanceof Boolean ? (Boolean) exp : exp.toString().equals("true");
   }
+
+  /**
+   * Gets whether command blocks are enabled. Effective only on modern servers.
+   *
+   * @return Whether command blocks are enabled in PGM-loaded worlds or not.
+   */
+  boolean allowCommandBlocks();
 }

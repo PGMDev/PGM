@@ -1,7 +1,10 @@
 package tc.oc.pgm.kits;
 
 import com.google.common.collect.Iterables;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.inventory.Slot;
@@ -50,8 +53,8 @@ public class ApplyItemKitEvent extends ApplyKitEvent {
 
   /**
    * Return all items that will be applied by the kit. Iterators from the returned iterable support
-   * {@link Iterator#remove} to prevent the item from being applied, without modifying the original
-   * kit.
+   * {@link java.util.Iterator#remove} to prevent the item from being applied, without modifying the
+   * original kit.
    */
   public Iterable<ItemStack> getItems() {
     return Iterables.concat(slotItems.values(), freeItems);

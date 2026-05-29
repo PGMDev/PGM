@@ -1,29 +1,25 @@
 package tc.oc.pgm.spawns.states;
 
-import java.util.List;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.event.Event;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.classes.ClassMatchModule;
-import tc.oc.pgm.events.PlayerJoinPartyEvent;
+import tc.oc.pgm.events.PlayerChangePartyEvent;
 import tc.oc.pgm.killreward.KillRewardMatchModule;
 import tc.oc.pgm.kits.Kit;
-import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.spawns.Spawn;
-import tc.oc.pgm.spawns.SpawnMatchModule;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
 import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.bukkit.Sounds;
 
 /** Player is alive and participating */
@@ -32,8 +28,8 @@ public class Alive extends Participating {
   protected final Spawn spawn;
   protected final Location location;
 
-  public Alive(SpawnMatchModule smm, MatchPlayer player, Spawn spawn, Location location) {
-    super(smm, player);
+  public Alive(MatchPlayer player, Spawn spawn, Location location) {
+    super(player);
     this.spawn = spawn;
     this.location = location;
   }
@@ -57,15 +53,6 @@ public class Alive extends Participating {
 
     // Teleport the player
     player.getBukkit().teleport(spawnEvent.getLocation());
-
-    // Return kept items
-    // TODO: Module should do this itself, maybe from ParticipantSpawnEvent
-    ItemKeepMatchModule ikmm = player.getMatch().getModule(ItemKeepMatchModule.class);
-    if (ikmm != null) {
-      ikmm.restoreKeptArmor(player);
-      ikmm.restoreKeptInventory(player);
-    }
-
     player.setVisible(true);
     player.resetVisibility();
     player.setGameMode(GameMode.SURVIVAL);
@@ -101,19 +88,19 @@ public class Alive extends Participating {
   }
 
   @Override
-  public void leaveState(List<Event> events) {
-    events.add(new ParticipantDespawnEvent(player, player.getBukkit().getLocation()));
-    super.leaveState(events);
+  public void leaveState() {
+    match.callEvent(new ParticipantDespawnEvent(player, player.getBukkit().getLocation()));
+    super.leaveState();
   }
 
   @Override
-  public void onEvent(PlayerJoinPartyEvent event) {
+  public void onEvent(PlayerChangePartyEvent event) {
     super.onEvent(event);
 
     if (event.getNewParty() instanceof Competitor) {
-      transition(new Joining(smm, player, smm.getJoinPenalty(event), true));
+      transition(new Joining(player, smm.getJoinPenalty(event), true));
     } else {
-      transition(new Observing(smm, player, true, true));
+      transition(new Observing(player, true, true));
     }
   }
 
@@ -144,7 +131,7 @@ public class Alive extends Participating {
 
     playDeathEffect(killer);
 
-    transition(new Dead(smm, player));
+    transition(new Dead(player));
   }
 
   private void playDeathEffect(@Nullable ParticipantState killer) {
@@ -152,8 +139,8 @@ public class Alive extends Participating {
     for (PotionEffect effect : bukkit.getActivePotionEffects()) {
       // Keep speed and NV for visual continuity
       if (effect.getType() != null
-          && !PotionEffectType.NIGHT_VISION.equals(effect.getType())
-          && !PotionEffectType.SPEED.equals(effect.getType())) {
+          && !PotionEffects.NIGHT_VISION.equals(effect.getType())
+          && !PotionEffects.SPEED.equals(effect.getType())) {
 
         bukkit.removePotionEffect(effect.getType());
       }

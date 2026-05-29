@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.logging.Level;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -90,7 +91,7 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
    * Create the FilterMatchModule
    *
    * @param match the match this module exists in
-   * @param filterContext the context where all {@link Filters} for the relevant match can be found.
+   * @param filterContext the context where all {@link Filter} for the relevant match can be found.
    *     Important to find {@link ReactorFactory}s
    */
   public FilterMatchModule(Match match, ContextStore<? super Filter> filterContext) {
@@ -421,15 +422,19 @@ public class FilterMatchModule implements MatchModule, FilterDispatcher, Tickabl
         result = (l, e) -> {
           try {
             final Object o = handle.invoke(e);
-            if (o instanceof Player) {
-              MatchPlayer mp = this.match.getPlayer((Player) o);
-              if (mp != null) invalidate(mp);
-              else match.getLogger().warning("MatchPlayer not found for player " + o);
-            } else if (o instanceof Filterable) {
-              this.invalidate((Filterable<?>) o);
-            } else {
-              throw new IllegalStateException(
-                  "A cached MethodHandle returned a non-expected type. Was: " + o.getClass());
+            switch (o) {
+              case Player player -> {
+                MatchPlayer mp = this.match.getPlayer(player);
+                if (mp != null) invalidate(mp);
+                else match.getLogger().warning("MatchPlayer not found for player " + player);
+              }
+              case Filterable<?> filterable -> this.invalidate(filterable);
+              case Entity entity ->
+                // No-op, non-player entities can be returned from events and should just be ignored
+                match.getLogger().finer("Non-player entity was filtered " + entity.getClass());
+              default ->
+                throw new IllegalStateException(
+                    "A cached MethodHandle returned a non-expected type. Was: " + o.getClass());
             }
           } catch (Throwable t) {
             match.getLogger().log(Level.SEVERE, "Error extracting Filterable for " + e, t);

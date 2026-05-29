@@ -12,7 +12,7 @@ public class SequentialPostResolver implements PostResolver {
   public SequentialPostResolver(ImmutableList<SinglePost> posts, SinglePost fallback) {
     this.posts = posts;
     this.fallback = fallback;
-    this.currentIdx = posts.get(0) == fallback ? 0 : -1;
+    this.currentIdx = posts.getFirst() == fallback ? 0 : -1;
   }
 
   @Override
@@ -25,7 +25,7 @@ public class SequentialPostResolver implements PostResolver {
   public SinglePost peekNext(Flag flag) {
     for (int offset = 1; offset < posts.size(); offset++) {
       final SinglePost post = posts.get((currentIdx + offset) % posts.size());
-      if (post.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) return post;
+      if (post.getRespawnFilter().query(new GoalQuery<>(flag)).isAllowed()) return post;
     }
     return fallback;
   }
@@ -34,7 +34,7 @@ public class SequentialPostResolver implements PostResolver {
   public SinglePost getNext(Flag flag) {
     for (int offset = 1; offset < posts.size(); offset++) {
       final SinglePost post = posts.get((currentIdx + offset) % posts.size());
-      if (post.getRespawnFilter().query(new GoalQuery(flag)).isAllowed()) {
+      if (post.getRespawnFilter().query(new GoalQuery<>(flag)).isAllowed()) {
         this.currentIdx = (currentIdx + offset) % posts.size();
         return post;
       }

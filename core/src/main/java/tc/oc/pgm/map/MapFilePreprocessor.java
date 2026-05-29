@@ -19,7 +19,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Text;
 import org.jdom2.input.SAXBuilder;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapSource;
 import tc.oc.pgm.api.map.exception.MapMissingException;
 import tc.oc.pgm.api.map.includes.MapInclude;
@@ -44,6 +44,7 @@ public class MapFilePreprocessor {
   private final MapSource source;
   private final String variant;
   private final List<MapInclude> includes;
+  private @Nullable MapInclude global; // Once included becomes null
 
   private final Map<String, String> constants;
   private final Set<String> variantIds;
@@ -60,6 +61,7 @@ public class MapFilePreprocessor {
     this.includes = new ArrayList<>();
     this.constants = new HashMap<>();
     this.variantIds = new HashSet<>();
+    this.global = includeProcessor.getGlobalInclude();
   }
 
   public Document getDocument()
@@ -75,16 +77,11 @@ public class MapFilePreprocessor {
       variantIds.add(XMLUtils.parseRequiredId(variant));
     }
 
-    document.runWithoutVisitation(() -> {
-      MapInclude global = includeProcessor.getGlobalInclude();
-      if (global != null) {
-        document.getRootElement().addContent(0, global.getContent());
-        includes.add(global);
-      }
+    document.runWithoutVisitation(() -> preprocessChildren(document.getRootElement(), true));
+    source.setIncludes(includes);
 
-      preprocessChildren(document.getRootElement());
-      source.setIncludes(includes);
-    });
+    if (global != null)
+      throw new InvalidXMLException("Did not find a place to inject global xml! :(", document);
 
     // If no constants are set, assume we can skip the step
     if (!constants.isEmpty()) {
@@ -106,26 +103,36 @@ public class MapFilePreprocessor {
     return constants;
   }
 
-  private void preprocessChildren(Element parent) throws InvalidXMLException {
+  private void preprocessChildren(Element parent, boolean isRoot) throws InvalidXMLException {
     for (int i = 0; i < parent.getContentSize(); i++) {
       Content content = parent.getContent(i);
       if (!(content instanceof Element child)) continue;
 
+      boolean processChildren = true;
       List<Content> replacement =
           switch (child.getName()) {
             case "include" -> processIncludeElement(child);
             case "if" -> processConditional(child, true);
             case "unless" -> processConditional(child, false);
             case "constant" -> processConstant(child);
-            default -> null;
+            case "constants" -> null;
+            default -> {
+              if (isRoot && global != null) {
+                parent.addContent(i, global.getContent());
+                includes.add(global);
+                global = null;
+                i--; // Go back and process newly injected global
+                processChildren = false;
+              }
+              yield null;
+            }
           };
-
       if (replacement != null) {
         parent.removeContent(i);
         parent.addContent(i, replacement);
         i--; // Process replacement content
-      } else {
-        preprocessChildren(child);
+      } else if (processChildren) {
+        preprocessChildren(child, false);
       }
     }
   }

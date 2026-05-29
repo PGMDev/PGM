@@ -5,13 +5,13 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
+import static tc.oc.pgm.util.text.TemporalComponent.duration;
 
 import java.util.Random;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -36,7 +36,6 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
-import tc.oc.pgm.api.map.GameRule;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
@@ -49,11 +48,12 @@ import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeavePartyEvent;
 import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
+import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.skin.Skin;
-import tc.oc.pgm.util.text.TemporalComponent;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
@@ -160,25 +160,22 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void initGamerules(final MatchLoadEvent event) {
-    setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
+    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(event.getMatch().getWorld(), 0);
   }
 
   @EventHandler
   public void unlockFireTick(final MatchStartEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(
-            GameRule.DO_FIRE_TICK.getId(),
-            event
-                .getMatch()
-                .needModule(GameRulesMatchModule.class)
-                .getGameRule(GameRule.DO_FIRE_TICK.getId()));
+    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(
+        event.getMatch().getWorld(),
+        event
+            .getMatch()
+            .needModule(GameRulesMatchModule.class)
+            .getGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER));
   }
 
   @EventHandler
   public void postGamerules(final MatchFinishEvent event) {
-    setGameRule(event, GameRule.DO_FIRE_TICK.getId(), false);
+    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(event.getMatch().getWorld(), 0);
   }
 
   //
@@ -187,25 +184,22 @@ public class PGMListener implements Listener {
   //
   @EventHandler
   public void lockTime(final MatchLoadEvent event) {
-    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
+    GameRules.ADVANCE_TIME.set(event.getMatch().getWorld(), false);
   }
 
   @EventHandler
   public void unlockTime(final MatchStartEvent event) {
-    event
-        .getMatch()
-        .getWorld()
-        .setGameRuleValue(
-            GameRule.DO_DAYLIGHT_CYCLE.getId(),
-            event
-                .getMatch()
-                .needModule(GameRulesMatchModule.class)
-                .getGameRule(GameRule.DO_DAYLIGHT_CYCLE.getId()));
+    GameRules.ADVANCE_TIME.set(
+        event.getMatch().getWorld(),
+        event
+            .getMatch()
+            .needModule(GameRulesMatchModule.class)
+            .getGameRule(GameRules.ADVANCE_TIME));
   }
 
   @EventHandler
   public void lockTime(final MatchFinishEvent event) {
-    setGameRule(event, GameRule.DO_DAYLIGHT_CYCLE.getId(), false);
+    GameRules.ADVANCE_TIME.set(event.getMatch().getWorld(), false);
   }
 
   @EventHandler
@@ -241,8 +235,8 @@ public class PGMListener implements Listener {
 
   @EventHandler
   public void nerfFishing(PlayerFishEvent event) {
-    if (event.getCaught() instanceof Item) {
-      Item caught = (Item) event.getCaught();
+    if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH
+        && event.getCaught() instanceof Item caught) {
       if (caught.getItemStack().getType() != Materials.RAW_FISH) {
         caught.setItemStack(new ItemStack(Materials.RAW_FISH));
       }
@@ -254,15 +248,9 @@ public class PGMListener implements Listener {
     MatchPlayer quitter = event.getPlayer();
     if (!quitter.isAlive()) return;
 
-    for (ItemStack item : quitter.getInventory().getContents()) {
-      if (item == null || item.getType() == Material.AIR) continue;
-      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), item);
-    }
-
-    for (ItemStack armor : quitter.getInventory().getArmorContents()) {
-      if (armor == null || armor.getType() == Material.AIR) continue;
-      quitter.getBukkit().getWorld().dropItemNaturally(quitter.getBukkit().getLocation(), armor);
-    }
+    var world = quitter.getBukkit().getWorld();
+    var location = quitter.getBukkit().getLocation();
+    Slot.Player.forEach(quitter.getInventory(), (s, is) -> world.dropItemNaturally(location, is));
   }
 
   @EventHandler
@@ -281,8 +269,7 @@ public class PGMListener implements Listener {
       // No limit
       Component forced = translatable("pool.change.force", poolName, staffName);
       if (event.getTimeLimit() != null) {
-        Component time = TemporalComponent.briefNaturalApproximate(event.getTimeLimit())
-            .color(NamedTextColor.GREEN);
+        Component time = duration(event.getTimeLimit()).color(NamedTextColor.GREEN);
 
         // If time & match limit are present, display both
         if (event.getMatchLimit() != 0) {
@@ -323,14 +310,6 @@ public class PGMListener implements Listener {
     if (playerSkin != null) {
       PGM.get().getDatastore().setSkin(player.getId(), playerSkin);
     }
-  }
-
-  public void setGameRule(MatchLoadEvent event, String gameRule, boolean gameRuleValue) {
-    event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
-  }
-
-  public void setGameRule(MatchFinishEvent event, String gameRule, boolean gameRuleValue) {
-    event.getMatch().getWorld().setGameRuleValue(gameRule, Boolean.toString(gameRuleValue));
   }
 
   /** Prevent teleporting outside the border */

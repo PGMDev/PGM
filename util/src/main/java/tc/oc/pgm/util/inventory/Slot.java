@@ -6,11 +6,14 @@ import com.google.common.collect.Table;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -181,8 +184,8 @@ public abstract class Slot {
     return Optional.ofNullable(getItem(holder));
   }
 
-  public void putItem(InventoryHolder holder, ItemStack stack) {
-    putItem(getInventory(holder), stack);
+  public void setItem(InventoryHolder holder, ItemStack stack) {
+    setItem(getInventory(holder), stack);
   }
 
   /**
@@ -206,7 +209,7 @@ public abstract class Slot {
   }
 
   /** Put the given stack in this slot of the given holder's inventory. */
-  public void putItem(Inventory inv, ItemStack stack) {
+  public void setItem(Inventory inv, ItemStack stack) {
     inv.setItem(getIndex(), airToNull(stack));
   }
 
@@ -217,6 +220,8 @@ public abstract class Slot {
 
   protected org.bukkit.entity.Player asPlayer(InventoryHolder holder) {
     if (holder instanceof org.bukkit.entity.Player player) return player;
+    if (holder.getInventory() instanceof PlayerInventory pi
+        && pi.getHolder() instanceof org.bukkit.entity.Player player) return player;
     throw new IllegalArgumentException("Slot " + this + " is player-only inventory slot");
   }
 
@@ -241,11 +246,20 @@ public abstract class Slot {
       Storage.init();
       Equipment.init();
       Cursor.init();
+      Crafting.init();
     }
 
     public static Stream<Player> player() {
       return Stream.concat(
-          Stream.concat(Storage.storage(), Equipment.equipment()), Stream.of(Cursor.cursor()));
+          Stream.concat(Storage.storage(), Equipment.equipment()),
+          Stream.concat(Stream.of(Cursor.cursor()), Crafting.crafting()));
+    }
+
+    public static void forEach(PlayerInventory inv, BiConsumer<Player, ItemStack> consumer) {
+      player().forEach(s -> {
+        var item = s.getItem(inv);
+        if (item != null) consumer.accept(s, s.getItem(inv));
+      });
     }
 
     Player(String key, int index) {
@@ -257,18 +271,18 @@ public abstract class Slot {
     }
 
     @Override
-    public @Nullable ItemStack getItem(Inventory generic) {
-      var inv = asPlayerInventory(generic);
-      return isEquipment() ? airToNull(inv.getItem(toEquipmentSlot())) : super.getItem(inv);
+    public @Nullable ItemStack getItem(Inventory inv) {
+      return isEquipment()
+          ? airToNull(asPlayerInventory(inv).getItem(toEquipmentSlot()))
+          : super.getItem(inv);
     }
 
     @Override
-    public void putItem(Inventory generic, ItemStack stack) {
-      var inv = asPlayerInventory(generic);
+    public void setItem(Inventory inv, ItemStack stack) {
       if (isEquipment()) {
-        inv.setItem(toEquipmentSlot(), stack);
+        asPlayerInventory(inv).setItem(toEquipmentSlot(), stack);
       } else {
-        super.putItem(inv, stack);
+        super.setItem(inv, stack);
       }
     }
   }
@@ -338,7 +352,12 @@ public abstract class Slot {
     }
 
     public static Stream<? extends Equipment> equipment() {
-      return Stream.concat(Stream.of(OffHand.offHand()), Armor.armor());
+      return Stream.concat(OffHand.offHand().stream(), Armor.armor());
+    }
+
+    public static Stream<Slot.Player> hands() {
+      Slot.Player main = MainHand.mainHand();
+      return OffHand.offHand().map(o -> Stream.of(main, o)).orElseGet(() -> Stream.of(main));
     }
 
     private final EquipmentSlot equipmentSlot;
@@ -392,15 +411,12 @@ public abstract class Slot {
 
   public static class OffHand extends Equipment {
     static void init() {
-      if (Platform.isLegacy()) return;
-      offHand = new OffHand();
+      offHand = Platform.isLegacy() ? Optional.empty() : Optional.of(new OffHand());
     }
 
-    private static OffHand offHand;
+    private static Optional<OffHand> offHand;
 
-    public static OffHand offHand() {
-      if (Platform.isLegacy())
-        throw new UnsupportedOperationException("OffHand is not supported on legacy platform");
+    public static Optional<OffHand> offHand() {
       return offHand;
     }
 
@@ -410,14 +426,15 @@ public abstract class Slot {
   }
 
   public static class Armor extends Equipment {
+    private static Map<ArmorType, Armor> byArmorType;
+
     static void init() {
+      byArmorType = new EnumMap<>(ArmorType.class);
       new Armor("armor.feet", EquipmentSlot.FEET, ArmorType.BOOTS);
       new Armor("armor.legs", EquipmentSlot.LEGS, ArmorType.LEGGINGS);
       new Armor("armor.chest", EquipmentSlot.CHEST, ArmorType.CHESTPLATE);
       new Armor("armor.head", EquipmentSlot.HEAD, ArmorType.HELMET);
     }
-
-    private static final Map<ArmorType, Armor> byArmorType = new EnumMap<>(ArmorType.class);
 
     public static Stream<? extends Armor> armor() {
       return byArmorType.values().stream();
@@ -433,6 +450,10 @@ public abstract class Slot {
 
     public ArmorType getArmorType() {
       return armorType;
+    }
+
+    public String armorTypeName() {
+      return armorType.name().toLowerCase(Locale.ROOT);
     }
 
     public static Armor forType(ArmorType armorType) {
@@ -483,18 +504,78 @@ public abstract class Slot {
     }
 
     @Override
-    public void putItem(InventoryHolder holder, @Nullable ItemStack stack) {
+    public void setItem(InventoryHolder holder, @Nullable ItemStack stack) {
       asPlayer(holder).setItemOnCursor(stack);
     }
 
     @Override
     public @Nullable ItemStack getItem(Inventory inv) {
-      return getItem(asPlayerInventory(inv).getHolder());
+      return getItem(inv.getHolder());
     }
 
     @Override
-    public void putItem(Inventory inv, ItemStack stack) {
-      putItem(asPlayerInventory(inv).getHolder(), stack);
+    public void setItem(Inventory inv, ItemStack stack) {
+      setItem(inv.getHolder(), stack);
+    }
+  }
+
+  public static class Crafting extends Player {
+    static void init() {
+      crafting = new Crafting[9];
+      for (int i = 0; i < 9; i++) {
+        crafting[i] = new Crafting(i);
+      }
+    }
+
+    private static Crafting[] crafting;
+
+    public static Stream<Slot.Crafting> crafting() {
+      return Stream.of(crafting);
+    }
+
+    private final int slot;
+
+    Crafting(int slot) {
+      super(null, -1);
+      this.slot = slot;
+    }
+
+    @Override
+    public String toString() {
+      return "crafting." + slot;
+    }
+
+    @Override
+    public @Nullable ItemStack getItem(InventoryHolder holder) {
+      var inv = getCraftingInventory(holder);
+      if (inv == null || slot >= inv.getSize()) return null;
+      return airToNull(inv.getItem(slot));
+    }
+
+    @Override
+    public void setItem(InventoryHolder holder, @Nullable ItemStack stack) {
+      var inv = getCraftingInventory(holder);
+      if (inv == null || slot >= inv.getSize()) return;
+      inv.setItem(slot, stack);
+    }
+
+    private Inventory getCraftingInventory(InventoryHolder holder) {
+      var pl = asPlayer(holder);
+      var view = pl.getOpenInventory();
+
+      var type = view.getType();
+      if (type != InventoryType.CRAFTING && type != InventoryType.WORKBENCH) return null;
+      return view.getTopInventory();
+    }
+
+    @Override
+    public @Nullable ItemStack getItem(Inventory inv) {
+      return getItem(inv.getHolder());
+    }
+
+    @Override
+    public void setItem(Inventory inv, ItemStack stack) {
+      setItem(inv.getHolder(), stack);
     }
   }
 }

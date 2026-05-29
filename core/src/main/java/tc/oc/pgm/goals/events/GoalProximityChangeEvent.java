@@ -2,7 +2,7 @@ package tc.oc.pgm.goals.events;
 
 import org.bukkit.Location;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.goals.ProximityGoal;
 
@@ -12,7 +12,7 @@ public class GoalProximityChangeEvent extends GoalEvent {
   private final double newDistance;
 
   public GoalProximityChangeEvent(
-      ProximityGoal goal,
+      ProximityGoal<?> goal,
       Competitor team,
       @Nullable Location location,
       double oldDistance,

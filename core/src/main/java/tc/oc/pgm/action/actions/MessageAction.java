@@ -14,7 +14,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.filters.Filterable;
 
@@ -70,12 +70,13 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
   private Component replaceClickEvents(
       Component component, Function<MatchResult, String> replacer) {
     var click = component.clickEvent();
-    if (click != null) {
-      var matcher = PATTERN.matcher(click.value());
+    if (click != null && click.payload() instanceof ClickEvent.Payload.Text payload) {
+      var matcher = PATTERN.matcher(payload.value());
       var result = new StringBuilder();
       while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
       matcher.appendTail(result);
-      component = component.clickEvent(ClickEvent.clickEvent(click.action(), result.toString()));
+      var resultPayload = ClickEvent.Payload.string(result.toString());
+      component = component.clickEvent(ClickEvent.clickEvent(click.action(), resultPayload));
     }
     var children = new ArrayList<>(component.children());
     children.replaceAll(child -> replaceClickEvents(child, replacer));

@@ -7,8 +7,10 @@ import com.destroystokyo.paper.event.player.PlayerClientOptionsChangeEvent;
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent;
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
 import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
+import org.bukkit.GameRules;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -18,9 +20,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
@@ -81,8 +84,7 @@ public class ModernListener implements Listener {
     }
     if (!pgmEvents.isEmpty()) {
       Bukkit.getScheduler()
-          .runTask(
-              BukkitUtils.getPlugin(), () -> pgmEvents.forEach(pgmEv -> handleCall(pgmEv, event)));
+          .runTask(PGM.get(), () -> pgmEvents.forEach(pgmEv -> handleCall(pgmEv, event)));
     }
   }
 
@@ -96,7 +98,7 @@ public class ModernListener implements Listener {
 
   @EventHandler
   public void onMatchLoad(WorldLoadEvent event) {
-    event.getWorld().setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
+    event.getWorld().setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
   }
 
   @EventHandler(priority = EventPriority.HIGH)
@@ -104,5 +106,21 @@ public class ModernListener implements Listener {
     switch (event.getCause()) {
       case NETHER_PORTAL, END_PORTAL -> event.setCancelled(true);
     }
+  }
+
+  private final ServerboundPlayerLoadedPacket PLAYER_LOADED_PACKET =
+      new ServerboundPlayerLoadedPacket();
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerDeath(PlayerDeathEvent event) {
+    // Fix inability to interact after death due to the world considered being unloaded by the
+    // player (the server ignores any player action packets coming from players who are considered
+    // "unloaded"), since players don't really die in PGM. This has to be done the next tick, as
+    // ServerGamePacketListenerImpl#waitingForRespawn is set after the event.
+    Bukkit.getScheduler().runTask(PGM.get(), () -> {
+      var conn = ((CraftPlayer) event.getEntity()).getHandle().connection;
+      conn.restartClientLoadTimerAfterRespawn();
+      conn.handleAcceptPlayerLoad(PLAYER_LOADED_PACKET);
+    });
   }
 }

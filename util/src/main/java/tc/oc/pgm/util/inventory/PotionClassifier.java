@@ -107,10 +107,8 @@ public final class PotionClassifier {
   public static double getScore(ThrownPotion potion) {
     double score = 0;
 
-    for (PotionEffect effect :
-        Iterables.concat(
-            potion.getEffects(),
-            ((PotionMeta) potion.getItem().getItemMeta()).getCustomEffects())) {
+    for (PotionEffect effect : Iterables.concat(
+        potion.getEffects(), ((PotionMeta) potion.getItem().getItemMeta()).getCustomEffects())) {
       score += getScore(effect);
     }
 

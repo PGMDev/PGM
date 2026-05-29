@@ -7,7 +7,7 @@ import java.time.Duration;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.teams.Team;
@@ -56,7 +56,6 @@ public class StartCountdown extends PreMatchCountdown {
   }
 
   @Override
-  @SuppressWarnings("deprecation")
   public void onTick(Duration remaining, Duration total) {
     super.onTick(remaining, total);
 

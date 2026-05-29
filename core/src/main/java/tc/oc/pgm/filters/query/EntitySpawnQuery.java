@@ -5,7 +5,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class EntitySpawnQuery extends EntityQuery
     implements tc.oc.pgm.api.filter.query.EntitySpawnQuery {
@@ -26,11 +26,9 @@ public class EntitySpawnQuery extends EntityQuery
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof EntitySpawnQuery)) return false;
+    if (!(o instanceof EntitySpawnQuery query)) return false;
     if (!super.equals(o)) return false;
-    EntitySpawnQuery query = (EntitySpawnQuery) o;
-    if (spawnReason != query.spawnReason) return false;
-    return true;
+    return spawnReason == query.spawnReason;
   }
 
   @Override

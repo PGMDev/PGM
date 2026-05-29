@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -29,6 +30,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class RegionFilterApplicationParser {
+  private static final Component MAX_BUILD_HEIGHT = translatable("match.maxBuildHeight");
   private final MapFactory factory;
   private final FilterParser filterParser;
   private final RegionParser regionParser;
@@ -71,10 +73,8 @@ public class RegionFilterApplicationParser {
   }
 
   public void parseLane(Element el) throws InvalidXMLException {
-    final Filter filter =
-        new DenyFilter(
-            new TeamFilter(
-                Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory)));
+    final Filter filter = new DenyFilter(new TeamFilter(
+        Teams.getTeamRef(new Node(XMLUtils.getRequiredAttribute(el, "team")), factory)));
     final Region region = parseRegion(el);
     final Component message = translatable("match.laneExit");
 
@@ -85,18 +85,28 @@ public class RegionFilterApplicationParser {
             RFAScope.BLOCK_PLACE, new NegativeRegion(region), filter, message, false));
   }
 
-  public Integer parseMaxBuildHeight(Element el) throws InvalidXMLException {
-    // Always add the filter, will be no-op as long as the value stays null
-    prepend(
-        el,
-        new RegionFilterApplication(
-            RFAScope.BLOCK_PLACE,
-            EverywhereRegion.INSTANCE,
-            MaxBuildFilter.INSTANCE,
-            translatable("match.maxBuildHeight"),
-            false));
+  public @Nullable Integer parseMaxBuildHeight(Element el) throws InvalidXMLException {
+    prependMaxBuildHeight(
+        el, RFAScope.BLOCK_PLACE, filterParser.parseProperty(el, "place", StaticFilter.DENY));
+    prependMaxBuildHeight(
+        el, RFAScope.BLOCK_BREAK, filterParser.parseProperty(el, "break", StaticFilter.ABSTAIN));
+    prependMaxBuildHeight(
+        el, RFAScope.USE, filterParser.parseProperty(el, "use", StaticFilter.ABSTAIN));
+    return XMLUtils.parseNumber(el, Integer.class, (Integer) null);
+  }
 
-    return el == null ? null : XMLUtils.parseNumber(el, Integer.class);
+  private void prependMaxBuildHeight(Element el, RFAScope scope, Filter filter)
+      throws InvalidXMLException {
+    if (filter != StaticFilter.ABSTAIN) {
+      prepend(
+          el,
+          new RegionFilterApplication(
+              scope,
+              EverywhereRegion.INSTANCE,
+              MaxBuildFilter.of(filter),
+              MAX_BUILD_HEIGHT,
+              false));
+    }
   }
 
   public void parsePlayable(Element el) throws InvalidXMLException {
@@ -150,18 +160,11 @@ public class RegionFilterApplicationParser {
           for (String name : Splitter.on(" ").split(node.getValue())) {
             filters.add(filterParser.parseReference(node, name));
           }
-          switch (filters.size()) {
-            case 0:
-              filter = null;
-              break;
-            case 1:
-              filter = filters.get(0);
-              break;
-            default:
-              filter =
-                  new FilterNode(
-                      filters, Collections.<Filter>emptyList(), Collections.<Filter>emptyList());
-          }
+          filter = switch (filters.size()) {
+            case 0 -> null;
+            case 1 -> filters.getFirst();
+            default -> new FilterNode(filters, Collections.emptyList(), Collections.emptyList());
+          };
         }
       }
 

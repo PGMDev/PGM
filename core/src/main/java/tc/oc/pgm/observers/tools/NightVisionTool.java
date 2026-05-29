@@ -10,8 +10,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import tc.oc.pgm.menu.MenuItem;
+import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class NightVisionTool implements MenuItem {
@@ -23,10 +23,9 @@ public class NightVisionTool implements MenuItem {
 
   @Override
   public List<String> getLore(Player player) {
-    Component status =
-        translatable(
-            hasNightVision(player) ? "misc.on" : "misc.off",
-            hasNightVision(player) ? NamedTextColor.GREEN : NamedTextColor.RED);
+    Component status = translatable(
+        hasNightVision(player) ? "misc.on" : "misc.off",
+        hasNightVision(player) ? NamedTextColor.GREEN : NamedTextColor.RED);
     Component lore = translatable("setting.nightvision.lore", NamedTextColor.GRAY, status);
     return Lists.newArrayList(TextTranslations.translateLegacy(lore, player));
   }
@@ -39,14 +38,14 @@ public class NightVisionTool implements MenuItem {
   @Override
   public void onClick(Player player, ClickType click) {
     if (hasNightVision(player)) {
-      player.removePotionEffect(PotionEffectType.NIGHT_VISION);
+      player.removePotionEffect(PotionEffects.NIGHT_VISION);
     } else {
       player.addPotionEffect(
-          new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
+          new PotionEffect(PotionEffects.NIGHT_VISION, Integer.MAX_VALUE, 0, true, false));
     }
   }
 
   private boolean hasNightVision(Player player) {
-    return player.hasPotionEffect(PotionEffectType.NIGHT_VISION);
+    return player.hasPotionEffect(PotionEffects.NIGHT_VISION);
   }
 }

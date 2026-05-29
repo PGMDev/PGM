@@ -10,7 +10,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.kits.tag.ItemModifier;
+import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.Slot;
 
@@ -75,12 +75,12 @@ public class ItemKit implements KitDefinition {
 
     // Apply all item modifications (eg: team-colors)
     for (ItemStack item : event.getItems()) {
-      ItemModifier.apply(item, player);
+      TeamColorApplicator.apply(item, player);
     }
 
     if (force) {
       for (Entry<Slot, ItemStack> kitEntry : event.getSlotItems().entrySet()) {
-        kitEntry.getKey().putItem(holder, kitEntry.getValue().clone());
+        kitEntry.getKey().setItem(holder, kitEntry.getValue().clone());
       }
     } else {
       // Tools in the player's inv are repaired using matching tools in the kit with less damage
@@ -144,7 +144,7 @@ public class ItemKit implements KitDefinition {
 
         Slot kitSlot = kitEntry.getKey();
         if (InventoryUtils.isNothing(kitSlot.getItem(holder))) {
-          kitSlot.putItem(holder, kitStack);
+          kitSlot.setItem(holder, kitStack);
         } else {
           displacedItems.add(kitStack);
         }

@@ -4,7 +4,7 @@ import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
 import net.kyori.adventure.text.Component;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.DyeColor;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.Inventory;

@@ -20,7 +20,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -43,12 +43,12 @@ import tc.oc.pgm.util.TimeUtils;
  */
 public class MapPoolManager implements MapOrder {
 
-  private Logger logger;
+  private final Logger logger;
 
-  private File mapPoolsFile;
+  private final File mapPoolsFile;
   private FileConfiguration mapPoolFileConfig;
 
-  private Map<MapPool, MapActivity> mapPools = Maps.newHashMap();
+  private final Map<MapPool, MapActivity> mapPools = Maps.newHashMap();
   private MapPool activeMapPool;
   private MapOrder fallback; // Fallback map order in case no pool exists
 
@@ -111,18 +111,20 @@ public class MapPoolManager implements MapOrder {
           .filter(MapPool::isEnabled)
           .forEach(pool -> mapPools.put(pool, database.getMapActivity(pool.getName())));
 
-      activeMapPool =
-          mapPools.entrySet().stream()
-              .filter(e -> e.getValue().isActive())
-              .findFirst()
-              .map(Map.Entry::getKey)
-              .orElse(null);
+      activeMapPool = mapPools.entrySet().stream()
+          .filter(e -> e.getValue().isActive())
+          .findFirst()
+          .map(Map.Entry::getKey)
+          .orElse(null);
     }
 
     if (activeMapPool == null) {
       logger.log(Level.WARNING, "No active map pool was found, defaulting to first dynamic pool.");
-      activeMapPool =
-          mapPools.keySet().stream().sorted().filter(MapPool::isDynamic).findFirst().orElse(null);
+      activeMapPool = mapPools.keySet().stream()
+          .sorted()
+          .filter(MapPool::isDynamic)
+          .findFirst()
+          .orElse(null);
       if (activeMapPool == null) {
         logger.log(
             Level.SEVERE,
@@ -134,19 +136,17 @@ public class MapPoolManager implements MapOrder {
   }
 
   public void saveMapPools() {
-    mapPools.forEach(
-        (key, value) -> {
-          String nextMap = null;
-          if (key instanceof Rotation) {
-            nextMap = key.getNextMap().getName();
-          }
+    mapPools.forEach((key, value) -> {
+      String nextMap = null;
+      if (key instanceof Rotation) {
+        nextMap = key.getNextMap().getName();
+      }
 
-          boolean active =
-              getActiveMapPool() != null
-                  && getActiveMapPool().getName().equalsIgnoreCase(key.getName())
-                  && key.isDynamic();
-          value.update(nextMap, active);
-        });
+      boolean active = getActiveMapPool() != null
+          && getActiveMapPool().getName().equalsIgnoreCase(key.getName())
+          && key.isDynamic();
+      value.update(nextMap, active);
+    });
   }
 
   public MapPool getActiveMapPool() {
@@ -201,9 +201,8 @@ public class MapPoolManager implements MapOrder {
     }
 
     // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
-    match.callEvent(
-        new MapPoolAdjustEvent(
-            activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
+    match.callEvent(new MapPoolAdjustEvent(
+        activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
   }
 
   /**

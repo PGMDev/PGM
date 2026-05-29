@@ -12,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.PlayerSpleefEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
@@ -77,16 +77,13 @@ public class FallTracker implements Listener, DamageResolver {
 
       return fall;
     } else {
-      switch (damageType) {
-        case FALL:
-          return new GenericFallInfo(
-              FallInfo.To.GROUND, victim.getLocation(), victim.getFallDistance());
-        case VOID:
-          return new GenericFallInfo(
-              FallInfo.To.VOID, victim.getLocation(), victim.getFallDistance());
-      }
-
-      return null;
+      return switch (damageType) {
+        case FALL ->
+          new GenericFallInfo(FallInfo.To.GROUND, victim.getLocation(), victim.getFallDistance());
+        case VOID ->
+          new GenericFallInfo(FallInfo.To.VOID, victim.getLocation(), victim.getFallDistance());
+        default -> null;
+      };
     }
   }
 
@@ -230,7 +227,8 @@ public class FallTracker implements Listener, DamageResolver {
       Tick now = match.getTick();
 
       if (isClimbing != fall.isClimbing) {
-        if ((fall.isClimbing = isClimbing)) {
+        fall.isClimbing = isClimbing;
+        if (fall.isClimbing) {
           // Player moved onto a ladder, cancel the fall if they are still on it after
           // MAX_CLIMBING_TIME
           fall.climbingTick = now.tick;
@@ -241,7 +239,8 @@ public class FallTracker implements Listener, DamageResolver {
       }
 
       if (isSwimming != fall.isSwimming) {
-        if ((fall.isSwimming = isSwimming)) {
+        fall.isSwimming = isSwimming;
+        if (fall.isSwimming) {
           // Player moved into water, cancel the fall if they are still in it after
           // MAX_SWIMMING_TIME
           fall.swimmingTick = now.tick;
@@ -257,7 +256,8 @@ public class FallTracker implements Listener, DamageResolver {
       }
 
       if (isInLava != fall.isInLava) {
-        if (!(fall.isInLava = isInLava)) {
+        fall.isInLava = isInLava;
+        if (fall.isInLava) {
           fall.inLavaTick = now.tick;
         } else {
           fall.outLavaTick = now.tick;

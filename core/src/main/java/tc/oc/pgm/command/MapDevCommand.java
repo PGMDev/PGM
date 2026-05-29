@@ -4,7 +4,7 @@ import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
-import static tc.oc.pgm.util.nms.PlayerUtils.*;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.text.TextException.exception;
 
 import java.util.List;
@@ -137,7 +137,10 @@ public class MapDevCommand {
     var pl = viewer.getBukkit();
     var world = pl.getWorld();
     var reg = region.getStatic(world);
-    if (!reg.getBounds().isBlockFinite()) {
+    var bounds = reg.getBounds();
+    if (bounds.isEmpty()) {
+      throw exception("Region is empty");
+    } else if (!bounds.isBlockFinite()) {
       throw exception("Region is not finite");
     }
 

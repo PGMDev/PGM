@@ -17,7 +17,7 @@ import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.20.6", priority = HIGHEST)
+@Supports(value = PAPER, minVersion = "1.21.11", priority = HIGHEST)
 public class ModernPlatform implements Platform.Manifest {
   @Override
   public void onEnable(Plugin plugin) {
@@ -40,10 +40,7 @@ public class ModernPlatform implements Platform.Manifest {
     new PacketManipulations(plugin, tracker);
 
     if (!SpigotConfig.disabledAdvancements.contains("*")) {
-      plugin
-          .getLogger()
-          .warning(
-              """
+      plugin.getLogger().warning("""
               You have not disabled advancements in your spigot config.
               If you want to remove them you should modify your spigot.yml config to have:
               advancements:

@@ -57,21 +57,17 @@ public class GamemodeTool implements MenuItem {
   }
 
   private Component getToggleMessage() {
-    Component command =
-        text("/tools", NamedTextColor.AQUA)
-            .hoverEvent(showText(translatable("setting.gamemode.hover", NamedTextColor.GRAY)))
-            .clickEvent(runCommand("/tools"));
+    Component command = text("/tools", NamedTextColor.AQUA)
+        .hoverEvent(showText(translatable("setting.gamemode.hover", NamedTextColor.GRAY)))
+        .clickEvent(runCommand("/tools"));
     return translatable("setting.gamemode.warning", NamedTextColor.GRAY, command);
   }
 
   private GameMode getOppositeMode(GameMode mode) {
-    switch (mode) {
-      case CREATIVE:
-        return GameMode.SPECTATOR;
-      case SPECTATOR:
-        return GameMode.CREATIVE;
-      default:
-        return mode;
-    }
+    return switch (mode) {
+      case CREATIVE -> GameMode.SPECTATOR;
+      case SPECTATOR -> GameMode.CREATIVE;
+      default -> mode;
+    };
   }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.incendo.cloud.annotation.specifier.Range;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
@@ -41,7 +41,7 @@ public final class ModeCommand {
     TextComponent.Builder builder = text()
         .append(translatable("command.nextMode", NamedTextColor.DARK_PURPLE).append(space()));
 
-    ModeChangeCountdown next = countdowns.get(0);
+    ModeChangeCountdown next = countdowns.getFirst();
     Duration timeLeft = modes.getCountdown().getTimeLeft(next);
 
     if (timeLeft == null) {

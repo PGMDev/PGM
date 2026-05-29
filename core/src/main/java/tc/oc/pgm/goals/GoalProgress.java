@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 
@@ -82,9 +82,9 @@ public class GoalProgress implements Comparable<GoalProgress> {
         if (goal.isCompleted(competitor)) {
           completed++;
         } else {
-          if (goal instanceof ProximityGoal) {
-            ProximityGoal proximity = (ProximityGoal) goal;
-            TouchableGoal touchable = goal instanceof TouchableGoal ? (TouchableGoal) goal : null;
+          if (goal instanceof ProximityGoal<?> proximity) {
+            TouchableGoal<?> touchable =
+                goal instanceof TouchableGoal ? (TouchableGoal<?>) goal : null;
 
             if (touchable != null && touchable.hasTouched(competitor)) {
               touched++;
@@ -97,8 +97,7 @@ public class GoalProgress implements Comparable<GoalProgress> {
               }
             }
 
-            if (goal instanceof IncrementalGoal) {
-              IncrementalGoal incrementalGoal = (IncrementalGoal) goal;
+            if (goal instanceof IncrementalGoal<?> incrementalGoal) {
               progress.add(incrementalGoal.getCompletion());
             } else if (touchable != null && touchable.hasTouched(competitor)) {
               // A touched, non-incremental goal is worth 50% completion
@@ -109,7 +108,7 @@ public class GoalProgress implements Comparable<GoalProgress> {
       }
     }
 
-    Collections.sort(progress, Collections.reverseOrder());
+    progress.sort(Collections.reverseOrder());
     Collections.sort(completionProximity);
     Collections.sort(touchProximity);
 
@@ -121,7 +120,7 @@ public class GoalProgress implements Comparable<GoalProgress> {
   }
 
   @Override
-  public int compareTo(@NotNull GoalProgress that) {
+  public int compareTo(@NonNull GoalProgress that) {
     // This team has more completed goals, so they take the lead
     if (this.completed > that.completed) return -1;
     if (this.completed < that.completed) return 1;

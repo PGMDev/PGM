@@ -13,6 +13,9 @@ import tc.oc.pgm.util.text.TextTranslations;
 /** Basic information about a map. The most bare-bones part is in {@link VariantInfo} */
 public interface MapInfo extends VariantInfo.Forwarding, Comparable<MapInfo>, Cloneable {
 
+  /** @return The id of the default variant of the map * */
+  String getBaseId();
+
   /** @return The map variant info for this map */
   VariantInfo getVariant();
 

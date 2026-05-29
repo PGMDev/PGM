@@ -19,14 +19,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarFile;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.PluginClassLoader;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.util.DataVersions;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -36,10 +36,10 @@ public class PgmBootstrap implements PluginBootstrap {
   private static final String PATH = "legacy_overworld";
 
   public static final ResourceKey<DimensionType> LEGACY_OVERWORLD = ResourceKey.create(
-      Registries.DIMENSION_TYPE, ResourceLocation.fromNamespaceAndPath(NAMESPACE, PATH));
+      Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(NAMESPACE, PATH));
 
   @Override
-  public void bootstrap(@NotNull BootstrapContext context) {
+  public void bootstrap(@NonNull BootstrapContext context) {
     // Register the compatibility datapack
     context.getLifecycleManager().registerEventHandler(LifecycleEvents.DATAPACK_DISCOVERY, e -> {
       var registrar = e.registrar();
@@ -70,7 +70,7 @@ public class PgmBootstrap implements PluginBootstrap {
   }
 
   @Override
-  public JavaPlugin createPlugin(PluginProviderContext context) {
+  public @NonNull JavaPlugin createPlugin(PluginProviderContext context) {
     var ourClassLoader = (PaperPluginClassLoader) getClass().getClassLoader();
     var pluginMeta = (PaperPluginMeta) ourClassLoader.getConfiguration();
     var descriptor = new PluginDescriptionFile(

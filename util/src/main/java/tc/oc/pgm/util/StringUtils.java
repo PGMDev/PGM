@@ -230,4 +230,41 @@ public final class StringUtils {
   public static boolean isNullOrEmpty(String str) {
     return str == null || str.isEmpty();
   }
+
+  /**
+   * Replacement for Integer#parseInt, but with key differences that tailor it to fast small number
+   * parsing. Since any text id will be non-numbers, fail quickly to a -1 instead of a costly
+   * exception asap. Strings sized 1,2 or 3 chars have an unrolled loop for a faster codepath.
+   *
+   * @param text The possible id to parse
+   * @return the id as int, or -1 if not a numeric id
+   */
+  public static int parseNumericId(String text) {
+    return switch (text.length()) {
+      case 1 -> Character.digit(text.charAt(0), 10);
+      case 2 -> {
+        int a = Character.digit(text.charAt(0), 10);
+        if (a == -1) yield -1;
+        int b = Character.digit(text.charAt(1), 10);
+        yield Math.min(a, b) == -1 ? -1 : ((a * 10) + b);
+      }
+      case 3 -> {
+        int a = Character.digit(text.charAt(0), 10);
+        if (a == -1) yield -1;
+        int b = Character.digit(text.charAt(1), 10);
+        int c = Character.digit(text.charAt(2), 10);
+        yield Math.min(b, c) == -1 ? -1 : ((a * 10) + b) * 10 + c;
+      }
+      default -> {
+        int result = 0;
+        int len = text.length();
+        for (int i = 0; i < len; i++) {
+          int digit = Character.digit(text.charAt(i), 10);
+          if (digit == -1) yield -1;
+          result = (result * 10) + digit;
+        }
+        yield result;
+      }
+    };
+  }
 }

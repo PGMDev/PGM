@@ -46,7 +46,7 @@ public class RFAContext {
     /** Prepend the given RFA, giving it the highest priority */
     public void prepend(RegionFilterApplication rfa) {
       rfa.useRegionPriority = true; // Allows region priority to work on older maps
-      this.byPriority.add(0, rfa);
+      this.byPriority.addFirst(rfa);
     }
 
     @Override

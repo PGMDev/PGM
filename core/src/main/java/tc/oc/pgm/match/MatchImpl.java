@@ -9,7 +9,20 @@ import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,8 +42,8 @@ import org.bukkit.event.EventException;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.RegisteredListener;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.Feature;
@@ -65,6 +78,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.countdowns.CountdownContext;
 import tc.oc.pgm.countdowns.SingleCountdownContext;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerChangePartyEvent;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerLeaveMatchEvent;
@@ -315,7 +329,7 @@ public class MatchImpl implements Match {
   }
 
   @Override
-  public @NotNull Audience audience() {
+  public @NonNull Audience audience() {
     final Collection<Audience> audiences = new ArrayList<>(getPlayers());
     audiences.add(Audience.console());
     return Audience.get(audiences);
@@ -488,7 +502,7 @@ public class MatchImpl implements Match {
    * (and bail if either are cancelled) -
    */
   private boolean setOrClearPlayerParty(
-      MatchPlayer player, @Nullable Party newParty, @NotNull JoinRequest joinRequest) {
+      MatchPlayer player, @Nullable Party newParty, @NonNull JoinRequest joinRequest) {
     Party oldParty = player.getParty();
 
     assertTrue(this == player.getMatch(), "Player belongs to a different match");
@@ -545,46 +559,56 @@ public class MatchImpl implements Match {
         addParty(newParty);
       }
 
-      if (oldParty == null) {
-        // Player is joining the match
-        this.players.put(player.getId(), player);
-        addTickable(player, MatchScope.LOADED);
-      } else {
-        // Player is leaving a party
-        if (newParty == null) {
-          // If they are not joining a new party, they are also leaving the match
-          callEvent(new PlayerLeaveMatchEvent(player, oldParty));
-        } else {
-          callEvent(new PlayerLeavePartyEvent(player, oldParty));
-        }
-
-        // Update the old party's state
-        oldParty.removePlayer(player.getId());
+      // Fire pre-change events
+      if (newParty == null) {
+        callEvent(new PlayerLeaveMatchEvent(player, oldParty, joinRequest));
+      } else if (oldParty != null) {
+        callEvent(new PlayerLeavePartyEvent(player, oldParty, joinRequest));
       }
 
-      // Update the player's state
-      player.internalSetParty(newParty);
-
-      if (newParty == null) {
-        // Player is leaving the match, remove them before calling the event.
-        // Passing an orphan player to the event is probably safer than leaving them in
-        // the match with a null party. Anything that needs to be called before the player
-        // is removed should listen for PlayerMatchLeaveEvent.
-        removeTickable(player);
-        this.players.remove(player.getId());
-
-        callEvent(new PlayerPartyChangeEvent(player, oldParty, null, joinRequest));
-      } else {
-        // Player is joining a party
-        // Update the new party's state
-        newParty.addPlayer(player);
-
+      // Fire around-change event
+      PlayerChangePartyEvent changeEvent =
+          new PlayerChangePartyEvent(player, oldParty, newParty, joinRequest);
+      try {
+        callEvent(changeEvent);
+        // Update the actual party
         if (oldParty == null) {
-          // If they are not leaving an old party, they are also joining the match
-          callEvent(new PlayerJoinMatchEvent(player, newParty, joinRequest));
+          // Player is joining the match
+          this.players.put(player.getId(), player);
+          addTickable(player, MatchScope.LOADED);
         } else {
-          callEvent(new PlayerJoinPartyEvent(player, oldParty, newParty, joinRequest));
+          // Player is leaving a party, update the old party's state
+          oldParty.removePlayer(player.getId());
         }
+
+        // Update the player's state
+        player.internalSetParty(newParty);
+
+        if (newParty == null) {
+          // Player is leaving the match, remove them before calling events.
+          //
+          // In this case, handlers of the events fired below will get the MatchPlayer
+          // object after it has been removed from the match and invalidated, so they
+          // need to check for this case and be careful. If you need to access a
+          // MatchPlayer when it leaves the match, listen for PlayerChangePartyEvent
+          // and do your thing before the post join handlers.
+          removeTickable(player);
+          this.players.remove(player.getId());
+        } else {
+          // Player is joining a party, update the new party's state
+          newParty.addPlayer(player);
+        }
+      } finally {
+        changeEvent.runHandlers();
+      }
+
+      // Fire post-change events
+      if (newParty == null) {
+        callEvent(new PlayerPartyChangeEvent(player, oldParty, null, joinRequest));
+      } else if (oldParty == null) {
+        callEvent(new PlayerJoinMatchEvent(player, newParty, joinRequest));
+      } else {
+        callEvent(new PlayerJoinPartyEvent(player, oldParty, newParty, joinRequest));
       }
 
       // Removing the party will fire an event, so do it after all other state changes
@@ -838,7 +862,7 @@ public class MatchImpl implements Match {
     try {
       new ModuleLoader(); // Will load all map and match modules and throw any errors
 
-      for (Feature feature : getFeatureContext().getAll()) {
+      for (Feature<?> feature : getFeatureContext().getAll()) {
         if (feature instanceof Listener) {
           addListener((Listener) feature, getListenerScope((Listener) feature, MatchScope.RUNNING));
         }

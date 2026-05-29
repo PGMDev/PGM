@@ -23,16 +23,15 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtException;
 import net.minecraft.nbt.ReportedNbtException;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.WorldLoader;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -57,7 +56,6 @@ import org.bukkit.craftbukkit.CraftChunk;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.entity.CraftFirework;
 import org.bukkit.craftbukkit.generator.CraftWorldInfo;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.Entity;
@@ -76,24 +74,24 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.NonNull;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.platform.modern.PgmBootstrap;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.platform.modern.util.PGMServerLevel;
 import tc.oc.pgm.util.DataVersions;
-import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.21.9")
+@Supports(value = PAPER, minVersion = "1.21.11")
 public class ModernNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
-    FireworkRocketEntity entityFirework = ((CraftFirework) firework).getHandle();
-    entityFirework.lifetime = 2;
-    entityFirework.life = 2;
+    firework.setTicksToDetonate(2);
+    firework.setTicksFlown(2);
     ENTITIES
         .entityMetadataPacket(firework.getEntityId(), firework, false)
         .sendToViewers(firework, false);
@@ -188,9 +186,7 @@ public class ModernNMSHacks implements NMSHacks {
           .generator(terrain ? null : NullChunkGenerator.INSTANCE)
           .seed(terrain ? seed : 0));
     } catch (Throwable t) {
-      BukkitUtils.getPlugin()
-          .getLogger()
-          .log(Level.SEVERE, "Failed to create world " + worldName, t);
+      PGM.get().getLogger().log(Level.SEVERE, "Failed to create world " + worldName, t);
       return null;
     }
   }
@@ -230,7 +226,7 @@ public class ModernNMSHacks implements NMSHacks {
       biomeProvider = server.getBiomeProvider(name);
     }
 
-    ResourceKey<LevelStem> actualDimension =
+    ResourceKey<@NonNull LevelStem> actualDimension =
         switch (creator.environment()) {
           case NORMAL -> LevelStem.OVERWORLD;
           case NETHER -> LevelStem.NETHER;
@@ -251,7 +247,7 @@ public class ModernNMSHacks implements NMSHacks {
     PrimaryLevelData primaryLevelData;
     WorldLoader.DataLoadContext context = console.worldLoaderContext;
     RegistryAccess.Frozen registryAccess = context.datapackDimensions();
-    Registry<LevelStem> contextLevelStemRegistry =
+    Registry<@NonNull LevelStem> contextLevelStemRegistry =
         registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
     Dynamic<?> dataTag = getLevelData(levelStorageAccess).dataTag();
 
@@ -277,6 +273,8 @@ public class ModernNMSHacks implements NMSHacks {
     long i = BiomeManager.obfuscateSeed(primaryLevelData.worldGenOptions().seed());
     LevelStem customStem = contextLevelStemRegistry.getValue(actualDimension);
 
+    if (customStem == null) return null;
+
     WorldInfo worldInfo = new CraftWorldInfo(
         primaryLevelData,
         levelStorageAccess,
@@ -298,11 +296,10 @@ public class ModernNMSHacks implements NMSHacks {
       customStem = new LevelStem(dimHolder, customStem.generator());
     }
 
-    ResourceKey<net.minecraft.world.level.Level> dimensionKey;
+    ResourceKey<net.minecraft.world.level.@NonNull Level> dimensionKey;
     dimensionKey = ResourceKey.create(
         Registries.DIMENSION,
-        ResourceLocation.fromNamespaceAndPath(
-            creator.key().namespace(), creator.key().value()));
+        Identifier.fromNamespaceAndPath(creator.key().namespace(), creator.key().value()));
 
     ServerLevel serverLevel = new PGMServerLevel(
         console,
@@ -327,7 +324,7 @@ public class ModernNMSHacks implements NMSHacks {
     if (dataVersion >= DataVersions.V1_13)
       serverLevel
           .getWorld()
-          .setMetadata("is-post-flattening", new FixedMetadataValue(BukkitUtils.getPlugin(), true));
+          .setMetadata("is-post-flattening", new FixedMetadataValue(PGM.get(), true));
 
     console.addLevel(serverLevel);
     console.initWorld(serverLevel, primaryLevelData, primaryLevelData.worldGenOptions());
@@ -382,7 +379,7 @@ public class ModernNMSHacks implements NMSHacks {
   private static LevelDataAndDimensions getLevelDataAndDimensions(
       Dynamic<?> levelData,
       WorldDataConfiguration dataConfiguration,
-      Registry<LevelStem> levelStemRegistry,
+      Registry<@NonNull LevelStem> levelStemRegistry,
       HolderLookup.Provider registries,
       long seed) {
     Dynamic<?> worldDataTag = RegistryOps.injectRegistryContext(levelData, registries);
@@ -420,7 +417,7 @@ public class ModernNMSHacks implements NMSHacks {
 
   @Override
   public void cleanupPlayer(Player player) {
-    // no-op
+    player.setKiller(null);
   }
 
   @Override

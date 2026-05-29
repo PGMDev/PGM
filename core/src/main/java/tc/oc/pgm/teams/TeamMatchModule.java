@@ -22,7 +22,7 @@ import net.kyori.adventure.util.Ticks;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
@@ -402,8 +402,7 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
   @Override
   public boolean join(MatchPlayer joining, JoinRequest request, JoinResult result) {
-    if (result instanceof TeamJoinResult) {
-      TeamJoinResult teamResult = (TeamJoinResult) result;
+    if (result instanceof TeamJoinResult teamResult) {
       Team lastTeam = getLastTeam(joining.getId());
 
       switch (teamResult.getOption()) {

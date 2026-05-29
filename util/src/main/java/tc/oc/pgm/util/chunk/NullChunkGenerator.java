@@ -31,17 +31,24 @@ public class NullChunkGenerator extends ChunkGenerator {
 
   @Override
   public ChunkData generateChunkData(
-      World world, Random random, int chunkX, int chunkZ, BiomeGrid biome) {
+      World world, Random random, int chunkX, int chunkZ, BiomeGrid biomeGrid) {
     if (SKIP_BIOMES) {
-      return super.generateChunkData(world, random, chunkX, chunkZ, biome);
+      return super.generateChunkData(world, random, chunkX, chunkZ, biomeGrid);
     }
 
     ChunkData chunkData = super.createChunkData(world);
 
-    // For everyblock in the chunk set the biome to plains
+    Biome biome =
+        switch (world.getEnvironment()) {
+          case NETHER -> Biome.valueOf("NETHER_WASTES");
+          case THE_END -> Biome.valueOf("THE_END");
+          default -> Biome.PLAINS;
+        };
+
+    // For every block in the chunk set the biome
     for (int x = 0; x < 16; x++) {
       for (int z = 0; z < 16; z++) {
-        biome.setBiome(x, z, Biome.PLAINS);
+        biomeGrid.setBiome(x, z, biome);
       }
     }
     return chunkData;

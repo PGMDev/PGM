@@ -37,7 +37,7 @@ public class FilterModule implements MapModule<FilterMatchModule> {
   /**
    * Create the FilterModule.
    *
-   * @param filterContext the context where all {@link Filters} for the relevant match can be found.
+   * @param filterContext the context where all {@link Filter}s for the relevant match can be found.
    *     Important to find {@link ReactorFactory}s
    */
   private FilterModule(ContextStore<? super Filter> filterContext) {
@@ -96,7 +96,8 @@ public class FilterModule implements MapModule<FilterMatchModule> {
         features.addFeature(null, "grounded", GroundedFilter.INSTANCE);
         features.addFeature(null, "flying", FlyingFilter.INSTANCE);
         // TODO: support fallback feature ids being overriden without being a breaking change
-        // features.addFeature(null, "gliding", GlidingFilter.INSTANCE);
+        // features.addFeature(null, "gliding", PLATFORM_FILTERS.gliding());
+        // features.addFeature(null, "riptiding", PLATFORM_FILTERS.riptiding());
         features.addFeature(null, "can-fly", CanFlyFilter.INSTANCE);
       }
 

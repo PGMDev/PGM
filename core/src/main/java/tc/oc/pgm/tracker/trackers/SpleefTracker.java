@@ -14,7 +14,8 @@ import tc.oc.pgm.api.event.PlayerSpleefEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.api.tracker.info.*;
+import tc.oc.pgm.api.tracker.info.DamageInfo;
+import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
@@ -57,9 +58,8 @@ public class SpleefTracker implements Listener {
     DamageInfo breaker = null;
 
     if (event.getCause() instanceof EntityExplodeEvent) {
-      PhysicalInfo explosive =
-          tracker.resolveInfo(
-              ((EntityExplodeEvent) event.getCause()).getEntity(), PhysicalInfo.class);
+      PhysicalInfo explosive = tracker.resolveInfo(
+          ((EntityExplodeEvent) event.getCause()).getEntity(), PhysicalInfo.class);
       if (explosive != null) {
         breaker = new ExplosionInfo(explosive);
       }

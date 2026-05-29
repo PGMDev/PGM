@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -18,9 +19,9 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public class RegionModule implements MapModule<RegionMatchModule> {
   // Can't be final as this is initially the builder, later replaced by the built copy.
   private RFAContext rfaContext;
-  private final Integer maxBuildHeight;
+  private final @Nullable Integer maxBuildHeight;
 
-  public RegionModule(RFAContext rfaContext, Integer maxBuildHeight) {
+  public RegionModule(RFAContext rfaContext, @Nullable Integer maxBuildHeight) {
     this.rfaContext = rfaContext;
     this.maxBuildHeight = maxBuildHeight;
   }
@@ -86,9 +87,8 @@ public class RegionModule implements MapModule<RegionMatchModule> {
       }
 
       // Support <maxbuildheight> syntax
-      Integer maxBuild =
-          rfaParser.parseMaxBuildHeight(
-              XMLUtils.getUniqueChild(doc.getRootElement(), "maxbuildheight"));
+      Integer maxBuild = rfaParser.parseMaxBuildHeight(
+          XMLUtils.getUniqueChild(doc.getRootElement(), "maxbuildheight"));
 
       return new RegionModule(rfaContext, maxBuild);
     }

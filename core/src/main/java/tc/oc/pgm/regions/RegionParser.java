@@ -7,7 +7,7 @@ import java.util.Map;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
@@ -49,7 +49,7 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
   }
 
   public List<Element> getRegionChildren(Element parent) {
-    List<Element> elements = new ArrayList<Element>();
+    List<Element> elements = new ArrayList<>();
     for (Element el : parent.getChildren()) {
       if (this.isRegion(el)) {
         elements.add(el);
@@ -223,14 +223,11 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
   @MethodParser("intersect")
   public Region parseIntersect(Element el) throws InvalidXMLException {
     Region[] regions = this.parseSubRegionsArray(el);
-    switch (regions.length) {
-      case 0:
-        throw new InvalidXMLException("Intersect must have at least one region.", el);
-      case 1:
-        return regions[0];
-      default:
-        return new Intersect(regions);
-    }
+    return switch (regions.length) {
+      case 0 -> throw new InvalidXMLException("Intersect must have at least one region.", el);
+      case 1 -> regions[0];
+      default -> new Intersect(regions);
+    };
   }
 
   @MethodParser("complement")
@@ -240,7 +237,7 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
       throw new InvalidXMLException("Complement requires at least 2 regions.", el);
     }
     return new Complement(
-        regions.get(0), regions.subList(1, regions.size()).toArray(new Region[0]));
+        regions.getFirst(), regions.subList(1, regions.size()).toArray(new Region[0]));
   }
 
   @MethodParser("negative")

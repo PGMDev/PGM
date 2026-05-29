@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -70,15 +71,15 @@ public class KitMatchModule implements MatchModule, Listener {
     }
   }
 
-  private boolean isLocked(ItemStack item) {
+  public boolean isLocked(ItemStack item) {
     return item != null && ItemTags.LOCKED.has(item);
   }
 
-  private boolean isUnshareable(ItemStack item) {
+  public boolean isUnshareable(ItemStack item) {
     return item != null && (isLocked(item) || ItemTags.PREVENT_SHARING.has(item));
   }
 
-  private void sendLockWarning(HumanEntity player) {
+  public void sendLockWarning(HumanEntity player) {
     MatchPlayer matchPlayer = this.match.getPlayer(player);
     if (matchPlayer != null) {
       matchPlayer.sendWarning(translatable("match.item.locked"));
@@ -99,7 +100,7 @@ public class KitMatchModule implements MatchModule, Listener {
         Slot slot = Slot.Hotbar.forIndex(event.getHotbarButton());
         if (slot == null) return;
         ItemStack item = event.getWhoClicked().getInventory().getItem(slot.getIndex());
-        if (item != null && ItemTags.LOCKED.has(item)) break;
+        if (isLocked(item)) break;
 
       case PICKUP_ALL:
       case PICKUP_HALF:
@@ -110,7 +111,8 @@ public class KitMatchModule implements MatchModule, Listener {
       case DROP_ONE_SLOT:
       case DROP_ALL_SLOT:
       case COLLECT_TO_CURSOR:
-        if (ItemTags.LOCKED.has(event.getCurrentItem())) break;
+      case NOTHING:
+        if (isLocked(event.getCurrentItem())) break;
       default:
         return;
     }
@@ -121,8 +123,7 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onGrenadeLaunch(final ProjectileLaunchEvent event) {
-    if (event.getEntity().getShooter() instanceof Player) {
-      Player player = (Player) event.getEntity().getShooter();
+    if (event.getEntity().getShooter() instanceof Player player) {
       ItemStack stack = player.getItemInHand();
 
       if (stack != null) {
@@ -159,6 +160,14 @@ public class KitMatchModule implements MatchModule, Listener {
       sendLockWarning(event.getPlayer());
     } else if (isUnshareable(event.getItemDrop().getItemStack())) {
       event.getItemDrop().remove();
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void processItemRemoval(ItemSpawnEvent event) {
+    ItemStack item = event.getEntity().getItemStack();
+    if (isUnshareable(item)) {
+      event.setCancelled(true);
     }
   }
 

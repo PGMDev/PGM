@@ -14,7 +14,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.ClassLogger;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
@@ -48,7 +48,7 @@ public abstract class TabManager implements Listener {
 
   protected final DefaultMapAdapter<Player, TabEntry> playerEntries;
   final Map<Integer, TabEntry> blankEntries =
-      new DefaultMapAdapter<Integer, TabEntry>(key -> new BlankTabEntry(), true);
+      new DefaultMapAdapter<>(key -> new BlankTabEntry(), true);
 
   protected TabManagerDirtyTracker dirty;
 

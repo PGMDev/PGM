@@ -1,25 +1,45 @@
 package tc.oc.pgm.platform.modern.listeners;
 
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.network.protocol.game.ClientboundRecipeBookAddPacket;
 import net.minecraft.server.MinecraftServer;
-import org.bukkit.Bukkit;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.spigotmc.event.player.PlayerSpawnLocationEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.platform.modern.packets.PacketSender;
 
-public class RecipeUnlocker implements Listener {
+public class RecipeUnlocker implements PacketSender, Listener {
 
-  // PlayerJoinEvent is too late as recipe init packet was already sent, so we use spawn location
-  // event
-  @EventHandler
-  public void onPlayerJoin(PlayerSpawnLocationEvent event) {
-    // Non-joined players haven't been added to the player list yet
-    if (Bukkit.getPlayer(event.getPlayer().getUniqueId()) != null) return;
+  private static final List<ClientboundRecipeBookAddPacket.Entry> ENTRIES = new ArrayList<>();
+  private static final RecipeManager RECIPE_MANAGER =
+      MinecraftServer.getServer().getRecipeManager();
 
-    var player = ((CraftPlayer) event.getPlayer()).getHandle();
-    player
-        .getRecipeBook()
-        .known
-        .addAll(MinecraftServer.getServer().getRecipeManager().recipes.byKey.keySet());
+  static {
+    for (RecipeHolder<?> recipe : RECIPE_MANAGER.getRecipes()) {
+      RECIPE_MANAGER.listDisplaysForRecipe(
+          recipe.id(),
+          display -> ENTRIES.add(new ClientboundRecipeBookAddPacket.Entry(display, false, false)));
+    }
+  }
+
+  @EventHandler(priority = EventPriority.LOWEST)
+  public void onPlayerJoin(PlayerJoinEvent event) {
+    var player = event.getPlayer();
+    PGM.get().getExecutor().submit(() -> {
+      if (!player.isConnected()) return;
+
+      send(new ClientboundRecipeBookAddPacket(ENTRIES, true), player);
+      ((CraftPlayer) player)
+          .getHandle()
+          .getRecipeBook()
+          .known
+          .addAll(RECIPE_MANAGER.recipes.byKey.keySet());
+    });
   }
 }

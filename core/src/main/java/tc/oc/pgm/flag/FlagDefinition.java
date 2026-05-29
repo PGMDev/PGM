@@ -3,7 +3,7 @@ package tc.oc.pgm.flag;
 import java.util.Collection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.DyeColor;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
@@ -48,6 +48,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
   private final boolean showBeam;
   private final boolean
       showRespawnOnPickup; // Display where the flag will respawn when it is picked up.
+  private final boolean canManuallyDrop; // Whether flag carriers can manually drop the flag
 
   public FlagDefinition(
       @Nullable String id,
@@ -71,7 +72,8 @@ public class FlagDefinition extends ProximityGoalDefinition {
       boolean showBeam,
       @Nullable ProximityMetric flagProximityMetric,
       @Nullable ProximityMetric netProximityMetric,
-      boolean showRespawnOnPickup) {
+      boolean showRespawnOnPickup,
+      boolean canManuallyDrop) {
 
     // We can't use the owner field in OwnedGoal because our owner
     // is a reference that can't be resolved until after parsing.
@@ -100,6 +102,7 @@ public class FlagDefinition extends ProximityGoalDefinition {
     this.dropOnWater = dropOnWater;
     this.showBeam = showBeam;
     this.showRespawnOnPickup = showRespawnOnPickup;
+    this.canManuallyDrop = canManuallyDrop;
   }
 
   public @Nullable DyeColor getColor() {
@@ -181,6 +184,10 @@ public class FlagDefinition extends ProximityGoalDefinition {
 
   public boolean willShowRespawnOnPickup() {
     return showRespawnOnPickup;
+  }
+
+  public boolean canManuallyDrop() {
+    return canManuallyDrop;
   }
 
   @Override

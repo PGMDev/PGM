@@ -5,7 +5,6 @@ import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,7 +12,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
@@ -24,7 +23,6 @@ import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalTouchEvent;
 import tc.oc.pgm.spawns.events.ParticipantDespawnEvent;
-import tc.oc.pgm.util.Audience;
 
 /**
  * A {@link Goal} that may be 'touched' by players, meaning the player has made some tangible
@@ -152,15 +150,8 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
   public void resetTouches(Competitor team) {
     if (touchingCompetitors.remove(team)) {
-      for (Iterator<ParticipantState> iterator = touchingPlayers.iterator(); iterator.hasNext(); ) {
-        if (iterator.next().getParty() == team) iterator.remove();
-        ;
-      }
-      for (Iterator<ParticipantState> iterator = recentTouchingPlayers.iterator();
-          iterator.hasNext(); ) {
-        if (iterator.next().getParty() == team) iterator.remove();
-        ;
-      }
+      touchingPlayers.removeIf(participantState -> participantState.getParty() == team);
+      recentTouchingPlayers.removeIf(participantState -> participantState.getParty() == team);
     }
   }
 
@@ -190,7 +181,6 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
     if (!hasShowOption(ShowOption.SHOW_MESSAGES)) return;
 
     Component message = getTouchMessage(toucher, false);
-    Audience.console().sendMessage(message);
 
     if (shouldShowTouched(toucher.getParty())) {
       if (showEnemyTouches())

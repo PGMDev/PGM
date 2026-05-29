@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.logging.Logger;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Document;
@@ -52,8 +51,6 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
     public KillRewardModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       ImmutableList.Builder<KillReward> rewards = ImmutableList.builder();
-      final Optional<ItemModifyModule> itemModifier =
-          Optional.ofNullable(factory.getModule(ItemModifyModule.class));
 
       var parser = factory.getParser();
 
@@ -65,9 +62,7 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
           0)) {
         ImmutableList.Builder<ItemStack> items = ImmutableList.builder();
         for (Element itemEl : elKillReward.getChildren("item")) {
-          final ItemStack itemStack = parser.item(itemEl).required();
-          itemModifier.ifPresent(imm -> imm.applyRules(itemStack));
-          items.add(itemStack);
+          items.add(parser.item(itemEl).required());
         }
 
         Filter filter = parser.filter(elKillReward, "filter").orAllow();
@@ -92,20 +87,6 @@ public class KillRewardModule implements MapModule<KillRewardMatchModule> {
         return null;
       } else {
         return new KillRewardModule(list);
-      }
-    }
-  }
-
-  @Override
-  public void postParse(MapFactory factory, Logger logger, Document doc)
-      throws InvalidXMLException {
-    // Apply any item-mods to all reward items
-    ItemModifyModule imm = factory.getModule(ItemModifyModule.class);
-    if (imm != null) {
-      for (KillReward reward : rewards) {
-        for (ItemStack stack : reward.items) {
-          imm.applyRules(stack);
-        }
       }
     }
   }

@@ -3,6 +3,8 @@ package tc.oc.pgm.command;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,19 +29,14 @@ public final class ClassCommand {
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
     if (newClass == null) {
-      player.sendMessage(
-          translatable("match.class.current", NamedTextColor.GREEN)
-              .append(space())
-              .append(text(currentClass.getName(), NamedTextColor.GOLD, TextDecoration.BOLD)));
+      player.sendMessage(translatable("match.class.current", NamedTextColor.GREEN)
+          .append(space())
+          .append(currentClass));
       player.sendMessage(translatable("match.class.view", NamedTextColor.GOLD));
     } else {
       classes.setPlayerClass(player.getId(), newClass);
 
-      player.sendMessage(
-          translatable(
-              "match.class.ok",
-              NamedTextColor.GREEN,
-              text(newClass.getName(), NamedTextColor.GOLD, TextDecoration.UNDERLINED)));
+      player.sendMessage(translatable("match.class.ok", NamedTextColor.GREEN, newClass));
       if (player.isParticipating()) {
         player.sendMessage(translatable("match.class.queue", NamedTextColor.GREEN));
       }
@@ -51,11 +48,10 @@ public final class ClassCommand {
   public void classList(ClassMatchModule classes, MatchPlayer player) {
     final PlayerClass currentClass = classes.getSelectedClass(player.getId());
 
-    player.sendMessage(
-        TextFormatter.horizontalLineHeading(
-            player.getBukkit(),
-            translatable("match.class.title").color(NamedTextColor.GOLD),
-            NamedTextColor.RED));
+    player.sendMessage(TextFormatter.horizontalLineHeading(
+        player.getBukkit(),
+        translatable("match.class.title").color(NamedTextColor.GOLD),
+        NamedTextColor.RED));
 
     int i = 1;
     for (PlayerClass cls : classes.getClasses()) {
@@ -71,8 +67,11 @@ public final class ClassCommand {
         color = NamedTextColor.RED;
       }
 
-      result.append(
-          text(cls.getName(), color).decoration(TextDecoration.UNDERLINED, cls == currentClass));
+      result.append(text(cls.getName(), color)
+          .decoration(TextDecoration.UNDERLINED, cls == currentClass)
+          .hoverEvent(showText(translatable(
+              "match.class.select", NamedTextColor.GRAY, text(cls.getName(), NamedTextColor.GOLD))))
+          .clickEvent(runCommand("/class " + cls.getName())));
 
       if (cls.getDescription() != null) {
         result.append(text(" - ", NamedTextColor.DARK_PURPLE)).append(text(cls.getDescription()));

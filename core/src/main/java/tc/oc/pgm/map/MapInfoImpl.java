@@ -2,6 +2,8 @@ package tc.oc.pgm.map;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
@@ -13,7 +15,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import java.lang.ref.SoftReference;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -21,8 +30,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Difficulty;
 import org.jdom2.Element;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapContext;
@@ -112,7 +121,7 @@ public class MapInfoImpl implements MapInfo {
         Node.fromLastChildOrAttr(root, "friendlyfire", "friendly-fire"), false);
   }
 
-  @NotNull
+  @NonNull
   private Map<String, VariantInfo> createVariantMap(Element root) throws InvalidXMLException {
     LinkedHashMap<String, VariantInfo> variants = new LinkedHashMap<>();
     for (Element el : root.getChildren("variant")) {
@@ -123,6 +132,11 @@ public class MapInfoImpl implements MapInfo {
     if (!variants.containsKey(DEFAULT_VARIANT))
       variants.putFirst(DEFAULT_VARIANT, new VariantData(root, null));
     return ImmutableMap.copyOf(variants);
+  }
+
+  @Override
+  public String getBaseId() {
+    return variants.get(DEFAULT_VARIANT).getId();
   }
 
   @Override
@@ -247,11 +261,14 @@ public class MapInfoImpl implements MapInfo {
 
     if (style.isColor) name.color(NamedTextColor.GOLD);
     if (style.isHighlight) name.decoration(TextDecoration.UNDERLINED, true);
+
+    Component component = name.build();
+
     if (style.showAuthors) {
-      return translatable(
+      component = translatable(
           "misc.authorship",
           NamedTextColor.DARK_PURPLE,
-          name.build(),
+          component,
           TextFormatter.list(
               getAuthors().stream()
                   .map(c -> c.getName(NameStyle.PLAIN).color(NamedTextColor.RED))
@@ -259,10 +276,17 @@ public class MapInfoImpl implements MapInfo {
               NamedTextColor.DARK_PURPLE));
     }
 
-    return name.build();
+    if (style.isInteractive) {
+      component = component
+          .hoverEvent(showText(translatable(
+              "command.maps.hover", NamedTextColor.GRAY, text(getName(), NamedTextColor.GOLD))))
+          .clickEvent(runCommand("/map " + getName()));
+    }
+
+    return component;
   }
 
-  private static @NotNull List<String> parseRules(Element root) {
+  private static @NonNull List<String> parseRules(Element root) {
     return XMLUtils.flattenElements(root, "rules", "rule").stream()
         .map(Element::getTextNormalize)
         .collect(StreamUtils.toImmutableList());
@@ -285,7 +309,7 @@ public class MapInfoImpl implements MapInfo {
     return gamemode;
   }
 
-  private static @NotNull List<Gamemode> parseGamemodes(Element root) throws InvalidXMLException {
+  private static @NonNull List<Gamemode> parseGamemodes(Element root) throws InvalidXMLException {
     ImmutableList.Builder<Gamemode> gamemodes = ImmutableList.builder();
     for (Element gamemodeEl : root.getChildren("gamemode")) {
       Gamemode gm = Gamemode.byId(gamemodeEl.getText());
@@ -295,7 +319,7 @@ public class MapInfoImpl implements MapInfo {
     return gamemodes.build();
   }
 
-  private static @NotNull List<Contributor> parseContributors(Element root, String tag)
+  private static @NonNull List<Contributor> parseContributors(Element root, String tag)
       throws InvalidXMLException {
     List<Contributor> contributors = new ArrayList<>();
     for (Element child : XMLUtils.flattenElements(root, tag + "s", tag)) {
@@ -315,7 +339,7 @@ public class MapInfoImpl implements MapInfo {
     return contributors;
   }
 
-  private static @NotNull WorldInfo parseWorld(Element root) throws InvalidXMLException {
+  private static @NonNull WorldInfo parseWorld(Element root) throws InvalidXMLException {
     final Element world = root.getChild("terrain");
     return world == null ? new WorldInfoImpl() : new WorldInfoImpl(world);
   }

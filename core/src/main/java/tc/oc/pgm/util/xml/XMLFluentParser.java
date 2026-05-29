@@ -2,6 +2,7 @@ package tc.oc.pgm.util.xml;
 
 import com.google.common.collect.Range;
 import java.time.Duration;
+import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
@@ -19,6 +20,7 @@ import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.util.function.ThrowingFunction;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -65,7 +67,7 @@ public class XMLFluentParser {
 
   public <T extends Enum<T>> PrimitiveBuilder.Generic<T> parseEnum(
       Class<T> type, Element el, String... prop) {
-    return new PrimitiveBuilder.Generic<T>(el, prop) {
+    return new PrimitiveBuilder.Generic<>(el, prop) {
       @Override
       protected T parse(String text) throws TextException {
         return TextParser.parseEnum(text, type);
@@ -77,11 +79,33 @@ public class XMLFluentParser {
     return new StringBuilder(el, prop);
   }
 
-  public PrimitiveBuilder.Generic<Duration> duration(Element el, String... prop) {
-    return new PrimitiveBuilder.Generic<>(el, prop) {
+  public PrimitiveBuilder.Ranged<Duration> duration(Element el, String... prop) {
+    return new PrimitiveBuilder.Ranged<>(el, prop) {
       @Override
       protected Duration parse(String text) throws TextException {
         return TextParser.parseDuration(text);
+      }
+    };
+  }
+
+  /** Generic node parser, parses from node to your desired type. */
+  public <T> Builder.Generic<T> node(
+      ThrowingFunction<Node, T, InvalidXMLException> fn, Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected T parse(Node node) throws InvalidXMLException {
+        return fn.apply(node);
+      }
+    };
+  }
+
+  /** Generic primitive parser, parses from string to your desired type. */
+  public <T> PrimitiveBuilder.Generic<T> primitive(
+      Function<String, T> fn, Element el, String... prop) {
+    return new PrimitiveBuilder.Generic<>(el, prop) {
+      @Override
+      protected T parse(String text) throws TextException {
+        return fn.apply(text);
       }
     };
   }
@@ -94,7 +118,12 @@ public class XMLFluentParser {
     return number(Double.class, el, prop);
   }
 
-  public <T extends Number> NumberBuilder<T> number(Class<T> cls, Element el, String... prop) {
+  public NumberBuilder<Float> parseFloat(Element el, String... prop) {
+    return number(Float.class, el, prop);
+  }
+
+  public <T extends Number & Comparable<T>> NumberBuilder<T> number(
+      Class<T> cls, Element el, String... prop) {
     return new NumberBuilder<>(cls, el, prop);
   }
 
@@ -160,7 +189,7 @@ public class XMLFluentParser {
   }
 
   public Builder.Generic<Component> component(Element el, String... prop) {
-    return new Builder.Generic<Component>(el, prop) {
+    return new Builder.Generic<>(el, prop) {
       @Override
       protected Component parse(Node node) throws InvalidXMLException {
         return XMLUtils.parseFormattedText(node);
@@ -169,7 +198,7 @@ public class XMLFluentParser {
   }
 
   public Builder.Generic<TextColor> textColor(Element el, String... prop) {
-    return new Builder.Generic<TextColor>(el, prop) {
+    return new Builder.Generic<>(el, prop) {
       @Override
       protected TextColor parse(Node node) throws InvalidXMLException {
         return TextFormatter.convert(XMLUtils.parseChatColor(node));
@@ -190,7 +219,7 @@ public class XMLFluentParser {
 
   public <T extends FeatureDefinition> ReferenceBuilder<T> reference(
       Class<T> clazz, Element el, String... prop) {
-    return new ReferenceBuilder<T>(features, clazz, el, prop);
+    return new ReferenceBuilder<>(features, clazz, el, prop);
   }
 
   public VariableBuilder<?> variable(Element el, String... prop) {

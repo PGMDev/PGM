@@ -1,7 +1,5 @@
 package tc.oc.pgm.picker;
 
-import static net.kyori.adventure.key.Key.key;
-import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
@@ -28,7 +26,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.match.Match;
@@ -126,16 +124,16 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   protected boolean settingEnabled(MatchPlayer player, boolean playerTriggered) {
     boolean hasPermission = player.getBukkit().hasPermission(Permissions.JOIN_CHOOSE);
-    switch (player.getSettings().getValue(SettingKey.PICKER)) {
-      case PICKER_OFF: // When off never show GUI
-        return false;
-      case PICKER_ON: // When on always show the GUI
-        return true;
-      case PICKER_MANUAL: // Only show the GUI when right clicked
-        return playerTriggered;
-      default: // Display after map cycle, but check perms when clicking button.
-        return !playerTriggered || hasPermission || hasClasses;
-    }
+    return switch (player.getSettings().getValue(SettingKey.PICKER)) {
+      case PICKER_OFF -> // When off never show GUI
+        false;
+      case PICKER_ON -> // When on always show the GUI
+        true;
+      case PICKER_MANUAL -> // Only show the GUI when right clicked
+        playerTriggered;
+      default -> // Display after map cycle, but check perms when clicking button.
+        !playerTriggered || hasPermission || hasClasses;
+    };
   }
 
   private boolean hasJoined(MatchPlayer joining) {
@@ -242,12 +240,9 @@ public class PickerMatchModule implements MatchModule, Listener {
         ChatColor.DARK_PURPLE + TextTranslations.translate("picker.tooltip", player.getBukkit())));
 
     // Color the leather helmet to match player team
-    if (player != null
-        && player.getParty() != null
-        && !(player.getParty() instanceof ObserverParty)) {
+    if (player.getParty() != null && !(player.getParty() instanceof ObserverParty)) {
       LeatherArmorMeta armorMeta = (LeatherArmorMeta) meta;
       armorMeta.setColor(player.getParty().getFullColor());
-      meta = armorMeta;
     }
 
     stack.setItemMeta(meta);
@@ -559,7 +554,7 @@ public class PickerMatchModule implements MatchModule, Listener {
       }
     }
 
-    return slots.toArray(new ItemStack[slots.size()]);
+    return slots.toArray(new ItemStack[0]);
   }
 
   private ItemStack createClassButton(MatchPlayer viewer, PlayerClass cls) {
@@ -619,11 +614,6 @@ public class PickerMatchModule implements MatchModule, Listener {
     JoinResult result = jmm.queryJoin(player, JoinRequest.fromPlayer(player, team));
     if (result instanceof JoinResultOption) {
       switch ((JoinResultOption) result) {
-        default:
-          lore.add(ChatColor.GREEN
-              + TextTranslations.translate("picker.clickToJoin", player.getBukkit()));
-          break;
-
         case REJOINED:
           lore.add(ChatColor.GREEN
               + TextTranslations.translate("picker.clickToRejoin", player.getBukkit()));
@@ -637,6 +627,11 @@ public class PickerMatchModule implements MatchModule, Listener {
         case FULL:
           lore.add(ChatColor.DARK_RED
               + TextTranslations.translate("picker.capacity", player.getBukkit()));
+          break;
+
+        default:
+          lore.add(ChatColor.GREEN
+              + TextTranslations.translate("picker.clickToJoin", player.getBukkit()));
           break;
       }
     }
@@ -673,8 +668,8 @@ public class PickerMatchModule implements MatchModule, Listener {
         if (cls != cmm.getSelectedClass(player.getId())) {
           if (cmm.getCanChangeClass(player.getId())) {
             cmm.setPlayerClass(player.getId(), cls);
-            player.sendMessage(translatable(
-                "match.class.ok", NamedTextColor.GOLD, text(name, NamedTextColor.GREEN)));
+
+            player.sendMessage(translatable("match.class.ok", NamedTextColor.GREEN, cls));
             scheduleRefresh(player);
           } else {
             player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));

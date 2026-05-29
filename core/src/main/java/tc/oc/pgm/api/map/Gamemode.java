@@ -1,6 +1,12 @@
 package tc.oc.pgm.api.map;
 
-public enum Gamemode {
+import static net.kyori.adventure.text.Component.text;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import org.jetbrains.annotations.NotNull;
+
+public enum Gamemode implements ComponentLike {
   ARCADE("arcade", "Arcade", "Arcade"),
   ATTACK_DEFEND("ad", "Attack/Defend", "A/D"),
   BEDWARS("bedwars", "Bed Wars", "Bed Wars"),
@@ -57,5 +63,10 @@ public enum Gamemode {
 
   public String getAcronym() {
     return acronym;
+  }
+
+  @Override
+  public @NotNull Component asComponent() {
+    return text(getFullName());
   }
 }

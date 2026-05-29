@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.bukkit;
 
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
+
 import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Bukkit;
@@ -22,7 +24,7 @@ public class OnlinePlayerUUIDMapAdapter<V> extends ListeningMapAdapter<UUID, V>
 
   public boolean isValid(UUID key) {
     Player player = Bukkit.getPlayer(key);
-    return player != null && player.isOnline();
+    return player != null && player.isOnline() && PLAYER_UTILS.willBeOnline(player);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

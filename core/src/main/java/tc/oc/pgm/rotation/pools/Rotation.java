@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.configuration.ConfigurationSection;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.rotation.MapPoolManager;
@@ -21,7 +20,7 @@ public class Rotation extends MapPool {
       MapParser maps) {
     super(type, name, manager, section, maps);
 
-    @Nullable MapInfo nextMap = PGM.get().getMapLibrary().getMap(manager.getNextMapForPool(name));
+    MapInfo nextMap = PGM.get().getMapLibrary().getMap(manager.getNextMapForPool(name));
     if (nextMap != null) this.position = getMapPosition(nextMap);
     else {
       PGM.get()
@@ -81,7 +80,7 @@ public class Rotation extends MapPool {
                   + " from rotation with size "
                   + maps.size()
                   + " has been issued. Returning map in position 0 instead.");
-      return maps.get(0);
+      return maps.getFirst();
     }
 
     return maps.get(position);

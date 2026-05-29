@@ -6,7 +6,9 @@ import static net.kyori.adventure.text.Component.empty;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Range;
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +20,7 @@ import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.DropFlagAction;
 import tc.oc.pgm.action.actions.EnchantItemAction;
@@ -26,10 +28,12 @@ import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
+import tc.oc.pgm.action.actions.OpenShop;
 import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
+import tc.oc.pgm.action.actions.ScheduleAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.action.actions.SoundAction;
@@ -57,6 +61,7 @@ import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.modules.WeatherMatchModule;
+import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
 import tc.oc.pgm.structure.StructureDefinition;
@@ -65,6 +70,7 @@ import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
+import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -388,24 +394,34 @@ public class ActionParser {
     return new KillEntitiesAction(parser.filter(el, "filter").required());
   }
 
+  @MethodParser("open-shop")
+  public OpenShop parseOpenShop(Element el, Class<?> scope) throws InvalidXMLException {
+    var shop = parser.reference(Shop.class, el, "shop").required();
+    return new OpenShop(shop);
+  }
+
   @MethodParser("replace-item")
   public ReplaceItemAction parseReplaceItem(Element el, Class<?> scope) throws InvalidXMLException {
-    ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
+    var kits = factory.getKits();
+    ItemMatcher matcher = kits.parseItemMatcher(el, "find");
+    SlotGroup slots = parser.node(kits::parseSlotGroup, el, "slots").optional(SlotGroup.ALL);
     ItemStack item = parser.item(el, "replace").allowAir().orNull();
 
     boolean keepAmount = parser.parseBool(el, "keep-amount").orFalse();
     boolean keepEnchants = parser.parseBool(el, "keep-enchants").orFalse();
 
-    return new ReplaceItemAction(matcher, item, keepAmount, keepEnchants);
+    return new ReplaceItemAction(matcher, slots, item, keepAmount, keepEnchants);
   }
 
   @MethodParser("enchant-item")
   public EnchantItemAction parseEnchantItem(Element el, Class<?> scope) throws InvalidXMLException {
-    ItemMatcher matcher = factory.getKits().parseItemMatcher(el, "find");
+    var kits = factory.getKits();
+    ItemMatcher matcher = kits.parseItemMatcher(el, "find");
+    SlotGroup slots = parser.node(kits::parseSlotGroup, el, "slots").optional(SlotGroup.ALL);
     Enchantment enchant = XMLUtils.parseEnchantment(Node.fromRequiredAttr(el, "enchantment"));
     Formula<MatchPlayer> level = parser.formula(MatchPlayer.class, el, "level").required();
 
-    return new EnchantItemAction(matcher, enchant, level);
+    return new EnchantItemAction(matcher, slots, enchant, level);
   }
 
   @MethodParser("fill")
@@ -418,10 +434,15 @@ public class ActionParser {
         parser.parseBool(el, "events").orFalse());
   }
 
+  private static final Pattern TEAM_NAME =
+      Pattern.compile(".*[a-z]{3}.*", Pattern.CASE_INSENSITIVE);
+
   @MethodParser("team-alias")
   public <T extends Filterable<?>> Action<?> parseTeamAliasAction(Element el, Class<T> scope)
       throws InvalidXMLException {
-    String alias = parser.string(el, "alias").required();
+    String alias = parser.string(el, "alias").validate(TEAM_NAME).required().trim();
+    if ("obs".equalsIgnoreCase(alias))
+      throw new InvalidXMLException("'obs' is a reserved team alias", el);
     var action = new TeamAliasAction(alias);
     var teamBuilder = parser.reference(TeamFactory.class, el, "team");
     var team = scope == Party.class ? teamBuilder.orNull() : teamBuilder.required();
@@ -456,14 +477,19 @@ public class ActionParser {
   @MethodParser("teleport")
   public Action<? super MatchPlayer> parseTeleport(Element el, Class<?> scope)
       throws InvalidXMLException {
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
+    var region = parser.region(el, "region").randomPoints().optional();
+
+    var xFormula = parser.formula(MatchPlayer.class, el, "x").optional();
+    var yFormula = parser.formula(MatchPlayer.class, el, "y").optional();
+    var zFormula = parser.formula(MatchPlayer.class, el, "z").optional();
 
     var pitchFormula = parser.formula(MatchPlayer.class, el, "pitch").optional();
     var yawFormula = parser.formula(MatchPlayer.class, el, "yaw").optional();
 
-    return new TeleportAction(xFormula, yFormula, zFormula, pitchFormula, yawFormula);
+    if (region.isEmpty() && (xFormula.isEmpty() || yFormula.isEmpty() || zFormula.isEmpty()))
+      throw new InvalidXMLException("Either 'region' or 'x','y' and 'z' are required", el);
+
+    return new TeleportAction(region, xFormula, yFormula, zFormula, pitchFormula, yawFormula);
   }
 
   @MethodParser("paste-structure")
@@ -495,5 +521,21 @@ public class ActionParser {
   public PickupFlagAction parsePickupFlag(Element el, Class<?> scope) throws InvalidXMLException {
     return new PickupFlagAction(
         parser.reference(FlagDefinition.class, el, "flag").required());
+  }
+
+  private static final Range<Duration> WAIT_RANGE =
+      Range.closed(Duration.ZERO, Duration.ofMinutes(1));
+
+  @MethodParser("schedule")
+  @SuppressWarnings("unchecked")
+  public <B extends Filterable<?>> Action<?> parseSchedule(Element el, Class<B> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+    var action = parseAction(el, scope);
+    var after = parser.duration(el, "after").between(WAIT_RANGE).required();
+
+    return MatchPlayer.class.isAssignableFrom(scope)
+        ? new ScheduleAction.Player(after, (Action<? super MatchPlayer>) action)
+        : new ScheduleAction<>(scope, after, action);
   }
 }

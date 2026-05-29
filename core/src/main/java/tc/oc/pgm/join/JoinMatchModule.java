@@ -8,7 +8,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
@@ -130,34 +130,34 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   }
 
   @Override
-  public boolean join(MatchPlayer joining, JoinRequest request, @NotNull JoinResult result) {
+  public boolean join(MatchPlayer joining, JoinRequest request, @NonNull JoinResult result) {
     if (result.isSuccess()) {
       requests.put(joining.getBukkit(), request);
     }
 
-    switch (result.getOption()) {
-      case QUEUED:
+    return switch (result.getOption()) {
+      case QUEUED -> {
         queueToJoin(joining);
-        return true;
-
-      case MATCH_STARTED:
+        yield true;
+      }
+      case MATCH_STARTED -> {
         joining.sendWarning(translatable("join.err.afterStart"));
-        return true;
-
-      case MATCH_FINISHED:
+        yield true;
+      }
+      case MATCH_FINISHED -> {
         joining.sendWarning(translatable("join.err.afterFinish"));
-        return true;
-
-      case NO_PERMISSION:
+        yield true;
+      }
+      case NO_PERMISSION -> {
         joining.sendWarning(translatable("join.err.noPermission"));
-        return true;
-
-      case VANISHED:
+        yield true;
+      }
+      case VANISHED -> {
         joining.sendWarning(translatable("join.err.vanish"));
-        return true;
-    }
-
-    return handler.join(joining, request, result);
+        yield true;
+      }
+      default -> handler.join(joining, request, result);
+    };
   }
 
   public boolean leave(MatchPlayer leaving, JoinRequest request) {

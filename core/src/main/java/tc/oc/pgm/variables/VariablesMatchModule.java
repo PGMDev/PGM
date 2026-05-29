@@ -37,7 +37,7 @@ public class VariablesMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST)
   public void onMatchLoad(MatchLoadEvent event) {
-    for (Variable var : context.getAll(Variable.class)) {
+    for (Variable<?> var : context.getAll(Variable.class)) {
       var.load(match);
     }
   }

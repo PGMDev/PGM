@@ -11,7 +11,9 @@ import org.jdom2.Namespace;
 
 public class DocumentWrapper extends Document {
 
-  private static final Set<String> IGNORED =
+  private static final Set<String> IGNORED_ATTRIBUTES =
+      Set.of("min-server-version", "max-server-version");
+  private static final Set<String> IGNORED_ELEMENTS =
       Set.of("constants", "edition", "name", "tutorial", "variant");
 
   private boolean visitingAllowed = true;
@@ -51,19 +53,21 @@ public class DocumentWrapper extends Document {
   }
 
   private void checkVisited(Element el, Consumer<Node> unvisited) {
-    for (Attribute attribute : el.getAttributes()) {
-      if (attribute.getNamespace() == Namespace.NO_NAMESPACE
-          && !((VisitableAttribute) attribute).wasVisited())
-        unvisited.accept(Node.fromNullable(attribute));
-    }
-
     boolean canIgnore = el == getRootElement();
+
+    for (Attribute a : el.getAttributes()) {
+      if (!(a instanceof VisitableAttribute visitable)) continue;
+      if (a.getNamespace() != Namespace.NO_NAMESPACE) continue;
+      if (canIgnore && IGNORED_ATTRIBUTES.contains(a.getName())) continue;
+
+      if (!visitable.wasVisited()) unvisited.accept(Node.fromNullable(a));
+    }
 
     for (int i = 0; i < el.getContentSize(); i++) {
       Content c = el.getContent(i);
       if (!(c instanceof InheritingElement child)) continue;
       if (child.getNamespace() != Namespace.NO_NAMESPACE) continue;
-      if (canIgnore && IGNORED.contains(child.getName())) continue;
+      if (canIgnore && IGNORED_ELEMENTS.contains(child.getName())) continue;
 
       if (!child.wasVisited()) unvisited.accept(Node.fromNullable(child));
       else checkVisited(child, unvisited);

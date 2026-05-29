@@ -2,7 +2,6 @@ package tc.oc.pgm.platform.modern.impl;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
-import com.google.gson.JsonObject;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
@@ -15,8 +14,6 @@ import org.bukkit.Location;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -33,9 +30,9 @@ import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.event.player.PlayerPickupArrowEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.util.DataVersions;
@@ -43,14 +40,8 @@ import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.5")
+@Supports(value = PAPER, minVersion = "1.21.11")
 public class ModernMiscUtil implements MiscUtils {
-  @Override
-  public JsonObject getServerListExtra(ServerListPingEvent event, Plugin plugin) {
-    // TODO: PLATFORM 1.20 no support for extra fields in server ping
-    return new JsonObject();
-  }
-
   @Override
   public EventException createEventException(Throwable cause, Event event) {
     return new EventException(cause);
@@ -83,11 +74,7 @@ public class ModernMiscUtil implements MiscUtils {
 
   @Override
   public ThrownPotion spawnPotion(Location loc, ItemStack item) {
-    var world = ((CraftWorld) loc.getWorld()).getHandle();
-    var potion = new net.minecraft.world.entity.projectile.ThrownSplashPotion(
-        world, loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(item));
-    world.addFreshEntity(potion);
-    return (ThrownPotion) potion.getBukkitEntity();
+    return loc.getWorld().spawn(loc, ThrownPotion.class, potion -> potion.setItem(item));
   }
 
   @Override
@@ -139,5 +126,11 @@ public class ModernMiscUtil implements MiscUtils {
   public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
     return ev.getExplosionResult() == ExplosionResult.DESTROY
         || ev.getExplosionResult() == ExplosionResult.DESTROY_WITH_DECAY;
+  }
+
+  @Override
+  public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
+    if (ev instanceof PlayerPickupArrowEvent arrowEvent) return arrowEvent.getArrow();
+    return ev.getItem();
   }
 }

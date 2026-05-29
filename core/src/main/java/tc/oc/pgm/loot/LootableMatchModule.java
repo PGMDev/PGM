@@ -24,7 +24,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.InventoryQuery;
 import tc.oc.pgm.api.match.Match;
@@ -72,21 +72,23 @@ public class LootableMatchModule implements MatchModule, Listener {
    * InventoryHolder is not something that we should be filling.
    */
   private static @Nullable Predicate<Filter> filterPredicate(InventoryHolder holder) {
-    if (holder instanceof DoubleChest doubleChest) {
-      return filter -> !filter
-              .query(new BlockQuery((Chest) doubleChest.getLeftSide()))
-              .isDenied()
-          || !filter.query(new BlockQuery((Chest) doubleChest.getRightSide())).isDenied();
-    } else if (holder instanceof BlockState) {
-      return filter -> !filter.query(new BlockQuery((BlockState) holder)).isDenied();
-    } else if (holder instanceof Entity && !(holder instanceof Player)) {
-      return filter -> !filter.query(new EntityQuery((Entity) holder)).isDenied();
-    } else {
-      // This happens with crafting inventories, and possibly other transient inventory types
-      // Pretty sure we never want to fill an inventory held by the player, or one we don't know
-      // about
-      return null;
-    }
+    return switch (holder) {
+      case DoubleChest doubleChest ->
+        filter -> !filter
+                .query(new BlockQuery((Chest) doubleChest.getLeftSide()))
+                .isDenied()
+            || !filter.query(new BlockQuery((Chest) doubleChest.getRightSide())).isDenied();
+      case BlockState blockState ->
+        filter -> !filter.query(new BlockQuery(blockState)).isDenied();
+      case Entity entity
+      when !(holder instanceof Player) ->
+        filter -> !filter.query(new EntityQuery(entity)).isDenied();
+      case null, default ->
+        // This happens with crafting inventories, and possibly other transient inventory types
+        // Pretty sure we never want to fill an inventory held by the player, or one we don't know
+        // about
+        null;
+    };
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -262,7 +264,7 @@ public class LootableMatchModule implements MatchModule, Listener {
     }
 
     private void putItem(ItemStack item) {
-      this.slot.putItem(inventory, item);
+      this.slot.setItem(inventory, item);
     }
   }
 }

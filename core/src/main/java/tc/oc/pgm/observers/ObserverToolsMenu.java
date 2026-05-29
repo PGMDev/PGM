@@ -15,13 +15,12 @@ import tc.oc.pgm.observers.tools.SettingsTool;
 
 public class ObserverToolsMenu extends InventoryMenu {
 
-  private List<MenuItem> items;
+  private final List<MenuItem> items;
 
   public ObserverToolsMenu(MatchPlayer viewer) {
     super("setting.title", NamedTextColor.AQUA, 1, viewer);
-    this.items =
-        Lists.newArrayList(
-            new FlySpeedTool(), new NightVisionTool(), new SettingsTool(), new GamemodeTool());
+    this.items = Lists.newArrayList(
+        new FlySpeedTool(), new NightVisionTool(), new SettingsTool(), new GamemodeTool());
     open();
   }
 

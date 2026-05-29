@@ -48,15 +48,11 @@ public class MotdListener implements Listener {
   }
 
   private ChatColor getPhaseColor(MatchPhase phase) {
-    switch (phase) {
-      case STARTING:
-        return ChatColor.YELLOW;
-      case RUNNING:
-        return ChatColor.GREEN;
-      case FINISHED:
-        return ChatColor.RED;
-      default:
-        return ChatColor.GRAY;
-    }
+    return switch (phase) {
+      case STARTING -> ChatColor.YELLOW;
+      case RUNNING -> ChatColor.GREEN;
+      case FINISHED -> ChatColor.RED;
+      default -> ChatColor.GRAY;
+    };
   }
 }

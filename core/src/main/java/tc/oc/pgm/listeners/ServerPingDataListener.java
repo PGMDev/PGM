@@ -1,7 +1,6 @@
 package tc.oc.pgm.listeners;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -30,6 +29,7 @@ import tc.oc.pgm.api.match.MatchManager;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
 import tc.oc.pgm.map.contrib.PlayerContributor;
 import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
 
 public class ServerPingDataListener implements Listener {
 
@@ -37,7 +37,6 @@ public class ServerPingDataListener implements Listener {
   private final MapOrder mapOrder;
   private final Logger logger;
   private final AtomicBoolean ready;
-  private final AtomicBoolean legacySportPaper;
   private final LoadingCache<Match, JsonObject> matchCache;
 
   public ServerPingDataListener(MatchManager matchManager, MapOrder mapOrder, Logger parentLogger) {
@@ -45,18 +44,14 @@ public class ServerPingDataListener implements Listener {
     this.mapOrder = assertNotNull(mapOrder);
     this.logger = ClassLogger.get(assertNotNull(parentLogger), ServerPingDataListener.class);
     this.ready = new AtomicBoolean();
-    this.legacySportPaper = new AtomicBoolean();
     this.matchCache = CacheBuilder.newBuilder()
         .weakKeys()
         .expireAfterWrite(5L, TimeUnit.SECONDS)
-        .build(new CacheLoader<Match, JsonObject>() {
-          @Override
-          public JsonObject load(Match match) throws Exception {
-            JsonObject jsonObject = new JsonObject();
-            serializeMatch(match, jsonObject);
-            return jsonObject;
-          }
-        });
+        .build(CacheLoader.from(match -> {
+          JsonObject jsonObject = new JsonObject();
+          serializeMatch(match, jsonObject);
+          return jsonObject;
+        }));
   }
 
   @EventHandler
@@ -66,7 +61,7 @@ public class ServerPingDataListener implements Listener {
 
   @EventHandler
   public void onServerListPing(ServerListPingEvent event) {
-    if (!ready.get() || legacySportPaper.get()) return;
+    if (!ready.get()) return;
 
     // Remove vanished players from player sample/ping count
     Iterator<Player> playerSample = event.iterator();
@@ -76,20 +71,19 @@ public class ServerPingDataListener implements Listener {
         playerSample.remove();
       }
     }
+  }
 
-    try {
-      JsonObject root = MISC_UTILS.getServerListExtra(event, PGM.get());
-      this.matchManager.getMatches().forEachRemaining(match -> {
-        String matchId = match.getId();
-        try {
-          root.add(matchId, this.matchCache.get(match));
-        } catch (ExecutionException e) {
-          this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
-        }
-      });
-    } catch (NoSuchMethodError ex) {
-      legacySportPaper.compareAndSet(false, true);
-    }
+  @EventHandler
+  public void onExtraDataRequest(ExtraPingDataRequestEvent event) {
+    JsonObject root = event.getServerListExtra(PGM.get());
+    this.matchManager.getMatches().forEachRemaining(match -> {
+      String matchId = match.getId();
+      try {
+        root.add(matchId, this.matchCache.get(match));
+      } catch (ExecutionException e) {
+        this.logger.log(Level.SEVERE, "Could not load server ping data for match: " + matchId, e);
+      }
+    });
   }
 
   private void serializeMatch(Match match, JsonObject jsonObject) {

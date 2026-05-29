@@ -1,6 +1,5 @@
 package tc.oc.pgm.kits;
 
-import static tc.oc.pgm.util.attribute.AttributeUtils.ATTRIBUTE_UTILS;
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
@@ -18,13 +17,14 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
@@ -41,13 +41,12 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -55,19 +54,22 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.consumable.ConsumableDefinition;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.tag.Grenade;
-import tc.oc.pgm.kits.tag.ItemModifier;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
-import tc.oc.pgm.util.inventory.ArmorType;
+import tc.oc.pgm.util.bukkit.ComponentApplicator;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.Slot;
+import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.Materials;
@@ -233,14 +235,11 @@ public abstract class KitParser {
   }
 
   public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
-    Map<ArmorType, ArmorKit.ArmorItem> armor = new HashMap<>();
+    Map<Slot.Armor, ArmorKit.ArmorItem> armor = new HashMap<>();
 
-    for (ArmorType armorType : ArmorType.values()) {
-      ArmorKit.ArmorItem armorItem =
-          this.parseArmorItem(el.getChild(armorType.name().toLowerCase()));
-      if (armorItem != null) {
-        armor.put(armorType, armorItem);
-      }
+    for (Slot.Armor armorSlot : Slot.Armor.armor().toList()) {
+      var armorItem = parseArmorItem(el.getChild(armorSlot.armorTypeName()));
+      if (armorItem != null) armor.put(armorSlot, armorItem);
     }
 
     if (!armor.isEmpty()) {
@@ -263,7 +262,7 @@ public abstract class KitParser {
           freeItems.add(item);
         } else {
           Slot slot = parseInventorySlot(nodeSlot);
-          if (null != slotItems.put(slot, item)) {
+          if (slotItems.put(slot, item) != null) {
             throw new InvalidXMLException("Kit already has an item in " + slot.getKey(), nodeSlot);
           }
         }
@@ -292,26 +291,35 @@ public abstract class KitParser {
   }
 
   public Slot parseInventorySlot(Node node) throws InvalidXMLException {
-    String value = node.getValue();
-    Slot slot;
-    try {
-      slot = Slot.Player.forIndex(Integer.parseInt(value));
-      if (slot == null) {
-        throw new InvalidXMLException(
-            "Invalid inventory slot index (must be between 0 and 39)", node);
-      }
-    } catch (NumberFormatException e) {
-      slot = Slot.forKey(value);
-      if (slot == null) {
-        throw new InvalidXMLException("Invalid inventory slot name", node);
-      }
-    }
+    return parseInventorySlot(node, node.getValue());
+  }
 
-    if (slot instanceof Slot.EnderChest) {
+  public Slot parseInventorySlot(Node node, String value) throws InvalidXMLException {
+    int num = StringUtils.parseNumericId(value);
+    Slot slot = num == -1 ? Slot.forKey(value) : Slot.Player.forIndex(num);
+
+    if (slot == null) throw new InvalidXMLException("Invalid inventory slot '" + value + "'", node);
+
+    if (slot instanceof Slot.EnderChest)
       throw new InvalidXMLException("Ender chest kits are not yet supported", node);
-    }
 
     return slot;
+  }
+
+  public SlotGroup parseSlotGroup(Node node) throws InvalidXMLException {
+    String value = node.getValue();
+    SlotGroup.Builder builder = SlotGroup.builder(node);
+    for (String str : Splitter.on(',').trimResults().split(value)) {
+      var group = SlotGroup.forKey(value);
+      if (group != null) {
+        builder.addGroup(str, group);
+        continue;
+      }
+      var slot = parseInventorySlot(node, str);
+      if (slot instanceof Slot.Player plSlot) builder.addSlot(str, plSlot);
+      else throw new InvalidXMLException("Invalid player slot '" + str + "'", node);
+    }
+    return builder.build();
   }
 
   public PotionKit parsePotionKit(Element el) throws InvalidXMLException {
@@ -521,87 +529,65 @@ public abstract class KitParser {
       throw new InvalidXMLException("infinity can only be applied to a block material", el);
     }
 
-    ItemMeta meta = itemStack.getItemMeta();
-
-    if (meta != null) { // This happens if the item is "air"
-      parseItemMeta(el, meta);
-      itemStack.setItemMeta(meta);
-    }
-
+    parseItemMeta(material.getItemType(), el, false).apply(itemStack);
     parseCustomNBT(el, itemStack);
+    factory.needModule(ItemModifyModule.class).applyRules(itemStack);
 
     return itemStack;
   }
 
-  public void parseItemMeta(Element el, ItemMeta meta) throws InvalidXMLException {
-    for (Map.Entry<Enchantment, Integer> enchant : parseEnchantments(el).entrySet()) {
-      meta.addEnchant(enchant.getKey(), enchant.getValue(), true);
-    }
+  public ComponentApplicator parseItemMeta(Material type, Element el, boolean merge)
+      throws InvalidXMLException {
+    var parser = factory.getParser();
+    var builder = INVENTORY_UTILS.applicatorBuilder(merge);
+    var meta = Bukkit.getItemFactory().getItemMeta(type);
 
-    if (meta instanceof EnchantmentStorageMeta) {
-      for (Entry<Enchantment, Integer> enchant :
-          parseEnchantments(el, "stored-").entrySet()) {
-        ((EnchantmentStorageMeta) meta)
-            .addStoredEnchant(enchant.getKey(), enchant.getValue(), true);
-      }
-    }
+    builder.addEnchantments(parseEnchantments(el));
+    if (meta instanceof EnchantmentStorageMeta)
+      builder.addStoredEnchantments(parseEnchantments(el, "stored-"));
+    if (meta instanceof PotionMeta) builder.addPotions(parsePotions(el));
+    builder.addAttributeModifiers(parseAttributeModifiers(el));
 
-    List<PotionEffect> potions = parsePotions(el);
-    if (!potions.isEmpty() && meta instanceof PotionMeta potionMeta) {
-
-      for (PotionEffect effect : potionMeta.getCustomEffects()) {
-        potionMeta.removeCustomEffect(effect.getType());
-      }
-
-      for (PotionEffect effect : potions) {
-        potionMeta.addCustomEffect(effect, false);
-      }
-    }
-
-    ATTRIBUTE_UTILS.applyAttributeModifiers(parseAttributeModifiers(el), meta);
-
-    String customName = el.getAttributeValue("name");
+    var customName = parser.string(el, "name").attr().colored().orNull();
     if (customName != null) {
-      meta.setDisplayName(BukkitUtils.colorize(customName));
+      builder.addDisplayName(BukkitUtils.colorize(customName));
     } else if (XMLUtils.parseBoolean(el.getAttribute("grenade"), false)) {
-      meta.setDisplayName("Grenade");
+      builder.addDisplayName("Grenade");
     }
 
-    if (meta instanceof LeatherArmorMeta armorMeta) {
-      Node attrColor = Node.fromAttr(el, "color");
-      if (attrColor != null) {
-        armorMeta.setColor(XMLUtils.parseHexColor(attrColor));
-      }
+    if (meta instanceof LeatherArmorMeta) {
+      parser.node(XMLUtils::parseHexColor, el, "color").attr().ifPresent(builder::addColor);
     }
 
-    String loreText = el.getAttributeValue("lore");
-    if (loreText != null) {
-      List<String> lore =
-          ImmutableList.copyOf(Splitter.on('|').split(BukkitUtils.colorize(loreText)));
-      meta.setLore(lore);
-    }
+    parser
+        .string(el, "lore")
+        .attr()
+        .colored()
+        .ifPresent(lore -> builder.addLore(ImmutableList.copyOf(Splitter.on('|').split(lore))));
 
+    Set<ItemFlag> flags = EnumSet.noneOf(ItemFlag.class);
     for (ItemFlag flag : ItemFlag.values()) {
-      if (!XMLUtils.parseBoolean(Node.fromAttr(el, "show-" + itemFlagName(flag)), true)) {
-        meta.addItemFlags(flag);
-      }
+      if (!parser.parseBool(el, "show-" + itemFlagName(flag)).attr().orTrue()) flags.add(flag);
+    }
+    if (!flags.isEmpty()) builder.addItemFlags(flags.toArray(ItemFlag[]::new));
+
+    if (parser.parseBool(el, "unbreakable").attr().orFalse()) {
+      builder.addUnbreakable();
     }
 
-    if (XMLUtils.parseBoolean(el.getAttribute("unbreakable"), false)) {
-      INVENTORY_UTILS.setUnbreakable(meta, true);
-    }
+    parser
+        .node(XMLUtils::parseMaterialMatcher, el, "can-destroy")
+        .child()
+        .ifPresent(builder::addCanDestroy);
+    parser
+        .node(XMLUtils::parseMaterialMatcher, el, "can-place-on")
+        .child()
+        .ifPresent(builder::addCanPlaceOn);
 
-    Element elCanDestroy = el.getChild("can-destroy");
-    if (elCanDestroy != null) {
-      INVENTORY_UTILS.setCanDestroy(
-          meta, XMLUtils.parseMaterialMatcher(elCanDestroy).getMaterials());
-    }
-
-    Element elCanPlaceOn = el.getChild("can-place-on");
-    if (elCanPlaceOn != null) {
-      INVENTORY_UTILS.setCanPlaceOn(
-          meta, XMLUtils.parseMaterialMatcher(elCanPlaceOn).getMaterials());
-    }
+    parser
+        .node(s -> INVENTORY_UTILS.parseComponents(type, s), el, "components")
+        .ifPresent(builder::addComponents);
+    return builder.build();
   }
 
   String itemFlagName(ItemFlag flag) {
@@ -621,7 +607,7 @@ public abstract class KitParser {
 
   public void parseCustomNBT(Element el, ItemStack itemStack) throws InvalidXMLException {
     if (XMLUtils.parseBoolean(el.getAttribute("team-color"), false))
-      ItemModifier.TEAM_COLOR.set(itemStack, true);
+      TeamColorApplicator.TEAM_COLOR.set(itemStack, true);
 
     if (XMLUtils.parseBoolean(el.getAttribute("grenade"), false)) {
       Grenade.ITEM_TAG.set(

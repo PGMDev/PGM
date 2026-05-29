@@ -6,7 +6,7 @@ import org.bukkit.plugin.Plugin;
 
 public class RequestRestartEvent extends Event {
 
-  public class Deferral {
+  public static class Deferral {
     private final Plugin plugin;
 
     public Deferral(Plugin plugin) {

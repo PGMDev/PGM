@@ -1,6 +1,6 @@
 package tc.oc.pgm.points;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class PointProviderAttributes {
   private final @Nullable AngleProvider yawProvider;
@@ -9,7 +9,10 @@ public class PointProviderAttributes {
   private final boolean outdoors;
 
   public PointProviderAttributes(
-      AngleProvider yawProvider, AngleProvider pitchProvider, boolean safe, boolean outdoors) {
+      @Nullable AngleProvider yawProvider,
+      @Nullable AngleProvider pitchProvider,
+      boolean safe,
+      boolean outdoors) {
     this.yawProvider = yawProvider;
     this.pitchProvider = pitchProvider;
     this.safe = safe;
