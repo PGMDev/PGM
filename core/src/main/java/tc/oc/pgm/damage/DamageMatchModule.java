@@ -45,7 +45,7 @@ import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
 import tc.oc.pgm.tracker.info.GenericDamageInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.pgm.util.inventory.PotionClassifier;
+import tc.oc.pgm.util.bukkit.PotionClassification;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DamageMatchModule implements MatchModule, Listener {
@@ -67,7 +67,7 @@ public class DamageMatchModule implements MatchModule, Listener {
     this.victimAction = victimAction;
   }
 
-  TrackerMatchModule tracker() {
+  public TrackerMatchModule tracker() {
     return match.needModule(TrackerMatchModule.class);
   }
 
@@ -249,7 +249,7 @@ public class DamageMatchModule implements MatchModule, Listener {
   @EventHandler(ignoreCancelled = true)
   public void onPotionSplash(final PotionSplashEvent event) {
     ThrownPotion potion = event.getPotion();
-    if (!PotionClassifier.isHarmful(potion)) return;
+    if (!PotionClassification.isHarmful(potion)) return;
 
     for (LivingEntity entity : event.getAffectedEntities()) {
       ParticipantState victim = match.getParticipantState(entity);
