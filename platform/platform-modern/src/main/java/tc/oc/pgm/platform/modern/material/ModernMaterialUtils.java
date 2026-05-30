@@ -177,7 +177,7 @@ public class ModernMaterialUtils implements MaterialUtils {
 
       if (itemMaterial.isAir() && blockMaterial.isAir()) {
         var ex = new InvalidXMLException(
-            "Material doesn't exist (did it ever?)'" + material + ":" + data + "'", currentNode);
+            "Material doesn't exist (did it ever?) '" + material + ":" + data + "'", currentNode);
         PGM.get().getGameLogger().log(Level.WARNING, null, ex);
         return this;
       }
