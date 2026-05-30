@@ -1,5 +1,6 @@
 package tc.oc.pgm.classes;
 
+import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 import static tc.oc.pgm.util.text.TextException.exception;
@@ -10,6 +11,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -23,7 +25,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 
-@ListenerScope(MatchScope.RUNNING)
+@ListenerScope(MatchScope.LOADED)
 public class ClassMatchModule implements MatchModule, Listener {
   private final Match match;
   private final String family;
@@ -136,7 +138,7 @@ public class ClassMatchModule implements MatchModule, Listener {
     return result;
   }
 
-/**
+  /**
    * Gets the number of players on a specific party/team who are currently playing as or
    * have selected a given class.
    *
@@ -180,19 +182,22 @@ public class ClassMatchModule implements MatchModule, Listener {
 
     MatchPlayer matchPlayer = this.match.getPlayer(userId);
     if (matchPlayer != null && matchPlayer.getParty() != null && cls.getMax() > 0 && !cls.equals(this.defaultClass)) {
+      
+      if (!matchPlayer.getParty().isParticipating() || matchPlayer.isDead()) {
+        PlayerClass oldClass = this.selectedClasses.put(userId, cls);
+        if (oldClass == null) oldClass = this.defaultClass;
+        this.match.callEvent(new PlayerClassChangeEvent(matchPlayer, this.family, oldClass, cls));
+        return oldClass;
+      }
+
       PlayerClass currentPlaying = getPlayingClass(userId);
       PlayerClass currentSelected = this.selectedClasses.get(userId);
 
       if (!cls.equals(currentPlaying) && !cls.equals(currentSelected)) {
-        int currentCount = this.getPartyClassCount(matchPlayer.getParty(), cls);
+        int currentCount = (int) this.getPartyClassCount(matchPlayer.getParty(), cls);
 
         if (currentCount >= cls.getMax()) {
-          matchPlayer.sendWarning(net.kyori.adventure.text.Component.text(
-              "That class is full! Maximum limit reached for your team. (" + cls.getMax() + " max)",
-              net.kyori.adventure.text.format.NamedTextColor.RED
-          ));
-
-          throw exception("That class is full! Maximum limit reached for your team.");
+          throw exception("match.class.full", Component.text(cls.getMax()));
         }
       }
     }
@@ -209,8 +214,47 @@ public class ClassMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerSpawn(ParticipantSpawnEvent event) {
-    this.lastPlayedClass.put(
-        event.getPlayer().getId(), getSelectedClass(event.getPlayer().getId()));
+    MatchPlayer player = event.getPlayer();
+    UUID uuid = player.getId();
+    Party party = player.getParty();
+    PlayerClass selectedClass = getSelectedClass(uuid);
+
+    if (party != null && party.isParticipating() && !selectedClass.equals(this.defaultClass) && selectedClass.getMax() > 0) {
+      long currentCount = this.getPartyClassCount(party, selectedClass);
+
+      if (currentCount >= selectedClass.getMax()) {
+        PlayerClass prevClass = this.lastPlayedClass.get(uuid);
+
+        if (prevClass != null && !prevClass.equals(this.defaultClass)) {
+          this.selectedClasses.put(uuid, prevClass);
+          player.sendWarning(translatable("match.class.revert", Component.text(prevClass.getName())));
+        } else {
+          this.selectedClasses.put(uuid, this.defaultClass);
+          player.sendWarning(translatable("match.class.reset", Component.text(this.defaultClass.getName())));
+        }
+      }
+    }
+
+    this.lastPlayedClass.put(uuid, getSelectedClass(uuid));
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onPlayerChangeParty(tc.oc.pgm.events.PlayerChangePartyEvent event) {
+    MatchPlayer player = event.getPlayer();
+    Party newParty = event.getNewParty();
+
+    if (player != null && newParty != null && event.isParticipating()) {
+      PlayerClass selectedClass = this.getSelectedClass(player.getId());
+
+      if (!selectedClass.equals(this.defaultClass) && selectedClass.getMax() > 0) {
+        int currentCount = (int) this.getPartyClassCount(newParty, selectedClass);
+
+        if (currentCount >= selectedClass.getMax()) {
+          this.selectedClasses.put(player.getId(), this.defaultClass);
+          player.sendWarning(translatable("match.class.reset", Component.text(this.defaultClass.getName())));
+        }
+      }
+    }
   }
 
   public void giveClassKits(MatchPlayer player) {
