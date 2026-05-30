@@ -144,16 +144,10 @@ public class ClassMatchModule implements MatchModule, Listener {
    * @param cls class to count
    * @return amount of players currently occupying this class slot
    */
-  public int getPartyClassCount(Party party, PlayerClass cls) {
-    int count = 0;
-    for (MatchPlayer player : this.match.getPlayers()) {
-      if (party.equals(player.getParty())) {
-        if (getPlayingClass(player.getId()).equals(cls)) {
-          count++;
-        }
-      }
-    }
-    return count;
+  public long getPartyClassCount(Party party, PlayerClass cls) {
+    return party.getPlayers().stream()
+        .filter(player -> getPlayingClass(player.getId()).equals(cls))
+        .count();
   }
 
   /**
