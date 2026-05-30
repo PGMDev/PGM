@@ -2,6 +2,7 @@ package tc.oc.pgm.action.actions;
 
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.VectorUtils;
 import tc.oc.pgm.util.math.Formula;
 
 public class VelocityAction extends AbstractAction<MatchPlayer> {
@@ -22,6 +23,6 @@ public class VelocityAction extends AbstractAction<MatchPlayer> {
     double x = xformula.applyAsDouble(matchPlayer);
     double y = yformula.applyAsDouble(matchPlayer);
     double z = zformula.applyAsDouble(matchPlayer);
-    matchPlayer.getBukkit().setVelocity(new Vector(x, y, z));
+    matchPlayer.getBukkit().setVelocity(VectorUtils.clampVelocityVector(new Vector(x, y, z)));
   }
 }

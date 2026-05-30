@@ -745,6 +745,20 @@ public abstract class KitParser {
       boolean rechargeInAir =
           XMLUtils.parseBoolean(child.getAttribute("recharge-before-landing"), false);
 
+      // The resulting jump velocity is dependent on the look vector, and the maximum safe values
+      // per axis are as follows:
+      // Y: <9.36 for 0 loss, >15.6 for always loss
+      // X/Z: <11.7 for 0 loss, >16.54 for guaranteed loss if looking straight, >20.26 for always
+      // loss
+      // The warning threshold of 15 is chosen as a reasonable maximum that is still relatively
+      // accurate
+      if (power > 15) {
+        factory.warn(
+            "Potentially excessive double jump power detected: " + power
+                + "; will be clamped at runtime.",
+            child);
+      }
+
       return new DoubleJumpKit(enabled, power, rechargeTime, rechargeInAir);
     } else {
       return null;
