@@ -1,12 +1,16 @@
 package tc.oc.pgm.structure;
 
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.snapshot.WorldSnapshot;
+import tc.oc.pgm.util.block.BlockData;
+import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.MaterialData;
 
 public class Structure implements Feature<StructureDefinition> {
 
@@ -51,5 +55,19 @@ public class Structure implements Feature<StructureDefinition> {
   public void placeAbsolute(BlockVector vector, boolean update) {
     vector.subtract(getRegion().getBounds().getBlockMin());
     place(vector, update);
+  }
+
+  public boolean matchesWorld(World world, BlockVector origin) {
+    BlockVector offset =
+        origin.clone().subtract(this.getDefinition().getOrigin()).toBlockVector();
+
+    for (BlockData blockData : snapshot.getMaterials(region)) {
+      BlockMaterialData snapshotMaterial = snapshot.getOriginalMaterial(blockData.getBlockVector());
+      BlockMaterialData worldMaterial = MaterialData.block(blockData.getBlock(world, offset));
+
+      if (snapshotMaterial.encoded() != worldMaterial.encoded()) return false;
+    }
+
+    return true;
   }
 }
