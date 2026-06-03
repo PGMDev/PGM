@@ -34,7 +34,7 @@ public class CycleMatchModule implements MatchModule, Listener {
   }
 
   public void startCountdown(@Nullable Duration duration) {
-    if (duration == null) duration = PGM.get().getConfiguration().getCycleTime();
+    if (duration == null) duration = PGM.get().getConfiguration().getCycleTime(match);
     // In case the cycle config is set to -1 used to disable autocycle
     if (duration.isNegative()) duration = Duration.ofSeconds(30);
     match.finish();
@@ -61,7 +61,7 @@ public class CycleMatchModule implements MatchModule, Listener {
     mapOrder.matchEnded(match);
 
     if (!RestartManager.isQueued()) {
-      Duration duration = mapOrder.getCycleTime();
+      Duration duration = mapOrder.getCycleTime(match);
 
       if (!duration.isNegative()) {
         startCountdown(duration);

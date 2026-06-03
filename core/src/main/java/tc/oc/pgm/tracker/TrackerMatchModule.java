@@ -9,6 +9,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.projectiles.BlockProjectileSource;
 import org.bukkit.projectiles.ProjectileSource;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -27,6 +28,7 @@ import tc.oc.pgm.tracker.trackers.CactiTracker;
 import tc.oc.pgm.tracker.trackers.CombatLogTracker;
 import tc.oc.pgm.tracker.trackers.DeathTracker;
 import tc.oc.pgm.tracker.trackers.DispenserTracker;
+import tc.oc.pgm.tracker.trackers.EndCrystalTracker;
 import tc.oc.pgm.tracker.trackers.EntityTracker;
 import tc.oc.pgm.tracker.trackers.FallTracker;
 import tc.oc.pgm.tracker.trackers.FallingBlockTracker;
@@ -36,6 +38,7 @@ import tc.oc.pgm.tracker.trackers.ProjectileTracker;
 import tc.oc.pgm.tracker.trackers.SpleefTracker;
 import tc.oc.pgm.tracker.trackers.TNTTracker;
 
+@NullMarked
 public class TrackerMatchModule implements MatchModule {
 
   private final EntityTracker entityTracker;
@@ -79,6 +82,7 @@ public class TrackerMatchModule implements MatchModule {
     match.addListener(blockTracker, MatchScope.RUNNING);
     match.addListener(fallingBlockTracker, MatchScope.RUNNING);
     match.addListener(cactiTracker, MatchScope.RUNNING);
+    match.addListener(new EndCrystalTracker(this, match), MatchScope.RUNNING);
     match.addListener(new DispenserTracker(this, match), MatchScope.RUNNING);
     match.addListener(new TNTTracker(this, match), MatchScope.RUNNING);
     match.addListener(new SpleefTracker(this), MatchScope.RUNNING);
@@ -155,7 +159,7 @@ public class TrackerMatchModule implements MatchModule {
     return null;
   }
 
-  public TrackerInfo resolveInfo(Entity entity) {
+  public @Nullable TrackerInfo resolveInfo(Entity entity) {
     return entityTracker.resolveInfo(entity);
   }
 
@@ -168,7 +172,7 @@ public class TrackerMatchModule implements MatchModule {
     return entityTracker.getOwner(entity);
   }
 
-  public TrackerInfo resolveInfo(Block block) {
+  public @Nullable TrackerInfo resolveInfo(Block block) {
     return blockTracker.resolveInfo(block);
   }
 

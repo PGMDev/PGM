@@ -19,12 +19,14 @@ import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = PAPER, minVersion = "1.21.11", priority = HIGHEST)
 public class ModernPlatform implements Platform.Manifest {
+  private PacketManipulations packetManipulations;
+
   @Override
   public void onEnable(Plugin plugin) {
-    if (!plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
+    if (!plugin.getServer().getPluginManager().isPluginEnabled("packetevents")) {
       Bukkit.getServer().getPluginManager().disablePlugin(plugin);
       throw new IllegalStateException(
-          "ProtocolLib is not installed, and is required for PGM modern version support");
+          "PacketEvents is not installed, and is required for PGM modern version support");
     }
 
     PlayerTracker tracker;
@@ -37,7 +39,7 @@ public class ModernPlatform implements Platform.Manifest {
             new TntListener())
         .forEach(l -> Bukkit.getServer().getPluginManager().registerEvents(l, plugin));
 
-    new PacketManipulations(plugin, tracker);
+    packetManipulations = new PacketManipulations(tracker);
 
     if (!SpigotConfig.disabledAdvancements.contains("*")) {
       plugin.getLogger().warning("""
@@ -48,6 +50,14 @@ public class ModernPlatform implements Platform.Manifest {
                 disabled:
                 - '*'
               """);
+    }
+  }
+
+  @Override
+  public void onDisable() {
+    if (packetManipulations != null) {
+      packetManipulations.unregister();
+      packetManipulations = null;
     }
   }
 }

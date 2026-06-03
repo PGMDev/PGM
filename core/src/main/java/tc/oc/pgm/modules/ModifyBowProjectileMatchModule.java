@@ -19,6 +19,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -35,21 +36,21 @@ import tc.oc.pgm.util.bukkit.Sounds;
 public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
   private final Match match;
-  private final Class<? extends Entity> cls;
+  private final @Nullable Class<? extends Entity> cls;
   private final float velocityMod;
   private final Set<PotionEffect> potionEffects;
   private final Filter pickupFilter;
 
   public ModifyBowProjectileMatchModule(
       Match match,
-      Class<? extends Entity> cls,
+      @Nullable Class<? extends Entity> cls,
       float velocityMod,
       Set<PotionEffect> effects,
       Filter pickupFilter) {
     this.match = match;
     this.cls = cls;
     this.velocityMod = velocityMod;
-    potionEffects = effects;
+    this.potionEffects = effects;
     this.pickupFilter = pickupFilter;
   }
 
@@ -58,8 +59,8 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
     Plugin plugin = PGM.get();
     Entity newProjectile;
 
-    if (this.cls == Arrow.class && event.getProjectile() instanceof Arrow) {
-      // Don't change the projectile if it's an Arrow and the custom entity type is also Arrow
+    if (this.cls == null) {
+      // Don't replace the projectile, keep the original
       newProjectile = event.getProjectile();
     } else {
       // Replace the projectile

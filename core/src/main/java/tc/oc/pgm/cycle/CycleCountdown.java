@@ -3,7 +3,6 @@ package tc.oc.pgm.cycle;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
-import com.google.common.collect.Range;
 import java.time.Duration;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -15,33 +14,19 @@ import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.countdowns.MatchCountdown;
-import tc.oc.pgm.util.text.TextException;
-import tc.oc.pgm.util.text.TextParser;
 
 public class CycleCountdown extends MatchCountdown {
 
-  // Number of seconds before a cycle occurs to start loading the next match.
+  // How early to early-load the next match.
   // This eases stress on the main thread when handling lots of players.
-  private int preloadSecs;
+  private final Duration preload;
 
   private MapInfo nextMap;
   private MatchFactory nextMatch;
 
   public CycleCountdown(Match match) {
     super(match, BossBar.Color.BLUE);
-
-    try {
-      this.preloadSecs =
-          TextParser.parseInteger(
-              PGM.get()
-                  .getConfiguration()
-                  .getExperiments()
-                  .getOrDefault("match-preload-seconds", "")
-                  .toString(),
-              Range.atLeast(0));
-    } catch (TextException t) {
-      // No-op, since this is experimental
-    }
+    this.preload = PGM.get().getConfiguration().getPreloadTime(match);
   }
 
   @Override
@@ -54,10 +39,9 @@ public class CycleCountdown extends MatchCountdown {
           mapName != null ? translatable("map.cycledMap", mapName) : translatable("map.cycled");
     } else {
       Component secs = secondsRemaining(NamedTextColor.DARK_RED);
-      cycleComponent =
-          mapName != null
-              ? translatable("map.cycleMap", mapName, secs)
-              : translatable("map.cycle", secs);
+      cycleComponent = mapName != null
+          ? translatable("map.cycleMap", mapName, secs)
+          : translatable("map.cycle", secs);
     }
 
     return cycleComponent.color(NamedTextColor.DARK_AQUA);
@@ -65,7 +49,7 @@ public class CycleCountdown extends MatchCountdown {
 
   private void checkSetNext() {
     final MapOrder mapOrder = PGM.get().getMapOrder();
-    if (remaining.getSeconds() <= preloadSecs) {
+    if (remaining.compareTo(preload) <= 0) {
       if (nextMatch != null) return;
 
       nextMap = mapOrder.popNextMap();

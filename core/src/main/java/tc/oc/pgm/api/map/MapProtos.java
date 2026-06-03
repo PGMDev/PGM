@@ -46,4 +46,10 @@ public interface MapProtos {
 
   // Several fixes to actions & scopes
   Version ACTION_REVAMP = new Version(1, 5, 0);
+
+  // Single flag posts inside composite posts also get registered
+  Version INNER_POST_IDS = new Version(1, 5, 1);
+
+  // Make more singletons have built-in default ids
+  Version FEATURE_SINGLETON_IDS_2 = new Version(1, 5, 1);
 }

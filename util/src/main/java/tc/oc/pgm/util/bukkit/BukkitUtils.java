@@ -33,6 +33,10 @@ public interface BukkitUtils {
         '&', ChatColor.translateAlternateColorCodes('`', s));
   }
 
+  static String uncolorize(String s) {
+    return ChatColor.stripColor(s);
+  }
+
   static ChatColor dyeColorToChatColor(DyeColor dyeColor) {
     ChatColor chatColor = DYE_CHAT_MAP.get(dyeColor);
     return Objects.requireNonNullElse(chatColor, ChatColor.WHITE);

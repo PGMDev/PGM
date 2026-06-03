@@ -372,6 +372,9 @@ public class Carried extends Spawned implements Missing {
   }
 
   protected void checkCapture(Location to) {
+    // Prevents on match end, a player dropping the flag, allowing another flag to be captured.
+    if (!flag.getMatch().isRunning()) return;
+
     if (to == null) to = this.carrier.getBukkit().getLocation();
 
     this.deniedByFlag = null;
@@ -379,19 +382,16 @@ public class Carried extends Spawned implements Missing {
       this.deniedByNet = null;
     }
 
+    boolean useSticky = this.deniedByNet != null;
     for (NetDefinition net : this.flag.getNets()) {
       if (net.getRegion().contains(to)) {
-        if (tryCapture(net)) {
-          return;
-        } else {
-          this.deniedByNet = net;
-        }
+        if (tryCapture(net)) return;
+        this.deniedByNet = net;
+        useSticky = false;
       }
     }
 
-    if (this.deniedByNet != null) {
-      tryCapture(this.deniedByNet);
-    }
+    if (useSticky) tryCapture(this.deniedByNet);
   }
 
   protected boolean tryCapture(NetDefinition net) {

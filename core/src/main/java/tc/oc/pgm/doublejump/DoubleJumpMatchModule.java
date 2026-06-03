@@ -20,6 +20,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerResetEvent;
+import tc.oc.pgm.util.VectorUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.bukkit.Sounds;
 
@@ -106,7 +107,7 @@ public class DoubleJumpMatchModule implements MatchModule, Listener, Tickable {
 
       impulse.setY(0.75 + Math.abs(impulse.getY()) * 0.5);
       impulse.multiply(jumper.kit.power / 3f);
-      player.setVelocity(impulse);
+      player.setVelocity(VectorUtils.clampVelocityVector(impulse));
       Sounds.play(player, Sounds.DOUBLE_JUMP, player.getLocation());
     }
   }
