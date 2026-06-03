@@ -3,9 +3,14 @@ package tc.oc.pgm.shops;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collections;
 import java.util.List;
+import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.kits.ItemKit;
+import tc.oc.pgm.kits.KitNode;
+import tc.oc.pgm.kits.OverflowWarningKit;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.util.bukkit.Sounds;
@@ -58,7 +63,16 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
       return;
     }
 
-    for (int i = purchases; i > 0; i--) {
+    if (purchases > 1) { // already checked if isStackable, else purchases <= 1
+      ItemStack stackItem = icon.getItem().clone();
+      stackItem.setAmount(stackItem.getAmount() * purchases);
+
+      // clone itemkit action with correct qty
+      KitNode.of(
+              new ItemKit(null, Collections.singletonList(stackItem), false, false, false, true),
+              new OverflowWarningKit(translatable("shop.purchase.overflow")))
+          .trigger(buyer);
+    } else {
       icon.getAction().trigger(buyer);
     }
 
