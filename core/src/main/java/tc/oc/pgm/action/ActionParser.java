@@ -89,6 +89,10 @@ public class ActionParser {
   private final Map<String, Method> methodParsers;
   private final ReplacementParser replacementParser;
 
+  protected XMLFluentParser getParser() {
+    return parser;
+  }
+
   public ActionParser(MapFactory factory) {
     this.factory = factory;
     this.legacy = !factory.getProto().isNoOlderThan(MapProtos.ACTION_REVAMP);

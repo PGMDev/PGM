@@ -7,6 +7,8 @@ import tc.oc.pgm.platform.modern.modules.kits.ModernKitMatchModule;
 import tc.oc.pgm.platform.modern.modules.trim.TrimMatchModule;
 import tc.oc.pgm.platform.modern.modules.trim.TrimModule;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointMatchModule;
+import tc.oc.pgm.platform.modern.particle.ParticleMatchModule;
+import tc.oc.pgm.platform.modern.particle.ParticleModule;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(PAPER)
@@ -19,5 +21,6 @@ public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
     modules.register(ModernMobsMatchModule.class, new ModernMobsMatchModule.Factory());
     modules.register(TrimModule.class, TrimMatchModule.class, new TrimModule.Factory());
     modules.register(WaypointMatchModule.class, WaypointMatchModule::new);
+    modules.register(ParticleModule.class, ParticleMatchModule.class, new ParticleModule.Factory());
   }
 }
