@@ -27,6 +27,7 @@ import tc.oc.pgm.action.actions.EnchantItemAction;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
+import tc.oc.pgm.action.actions.LaunchProjectileAction;
 import tc.oc.pgm.action.actions.MessageAction;
 import tc.oc.pgm.action.actions.OpenShop;
 import tc.oc.pgm.action.actions.PasteStructureAction;
@@ -61,6 +62,7 @@ import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.flag.FlagDefinition;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.modules.WeatherMatchModule;
+import tc.oc.pgm.projectile.ProjectileDefinition;
 import tc.oc.pgm.shops.Shop;
 import tc.oc.pgm.shops.ShopModule;
 import tc.oc.pgm.shops.menu.Payable;
@@ -564,5 +566,17 @@ public class ActionParser {
     return MatchPlayer.class.isAssignableFrom(scope)
         ? new ScheduleAction.Player(after, (Action<? super MatchPlayer>) action)
         : new ScheduleAction<>(scope, after, action);
+  }
+
+  @MethodParser("launch-projectile")
+  public <T extends Filterable<?>> LaunchProjectileAction<T> parseProjectile(Element el, Class<T> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+    var projectile = parser.reference(ProjectileDefinition.class, el, "id").required();
+    var origin = parser.vector(el, "origin").required();
+    var destination = parser.vector(el, "destination").required();
+    Filter damageFilter = parser.filter(el, "damage-filter").orNull();
+
+    return new LaunchProjectileAction(scope, projectile, origin, destination, damageFilter);
   }
 }
