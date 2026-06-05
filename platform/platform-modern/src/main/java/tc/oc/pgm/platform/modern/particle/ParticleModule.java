@@ -5,7 +5,6 @@ import static tc.oc.pgm.platform.modern.particle.shapes.ParticleShapeType.TEXT;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -76,8 +75,6 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
         String id = XMLUtils.getRequiredAttribute(particleElement, "id").getValue();
         Particle type =
             XMLUtils.parseEnum(Node.fromRequiredAttr(particleElement, "type"), Particle.class);
-        Duration duration = XMLUtils.parseDuration(Node.fromAttr(particleElement, "duration"));
-        Duration period = XMLUtils.parseDuration(Node.fromAttr(particleElement, "period"));
         int amount =
             XMLUtils.parseNumber(Node.fromAttr(particleElement, "amount"), Integer.class, true, 1);
         if (amount == Integer.MAX_VALUE) amount = ParticleDefinition.INFINITE_PARTICLE_AMOUNT;
@@ -310,8 +307,6 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
         ParticleDefinition particleDefinition = new ParticleDefinition(
             id,
             type,
-            duration,
-            period,
             amount,
             dustOptions,
             color,

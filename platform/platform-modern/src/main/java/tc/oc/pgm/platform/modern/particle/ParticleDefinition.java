@@ -1,6 +1,5 @@
 package tc.oc.pgm.platform.modern.particle;
 
-import java.time.Duration;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.block.data.BlockData;
@@ -13,8 +12,6 @@ import tc.oc.pgm.platform.modern.particle.shapes.ParticleShape;
 public class ParticleDefinition extends SelfIdentifyingFeatureDefinition {
   public static final int INFINITE_PARTICLE_AMOUNT = 99;
   private final Particle type;
-  private final Duration duration;
-  private final Duration period;
   private final int amount;
   private final Particle.DustOptions dustOptions;
 
@@ -51,8 +48,6 @@ public class ParticleDefinition extends SelfIdentifyingFeatureDefinition {
   public ParticleDefinition(
       @Nullable String id,
       @Nullable Particle type,
-      Duration duration,
-      Duration period,
       int amount,
       Particle.DustOptions dustOptions,
       @Nullable Color color,
@@ -69,8 +64,6 @@ public class ParticleDefinition extends SelfIdentifyingFeatureDefinition {
 
     super(id);
     this.type = type;
-    this.duration = duration;
-    this.period = period;
     this.amount = amount;
     this.dustOptions = dustOptions;
     this.color = color;
@@ -88,14 +81,6 @@ public class ParticleDefinition extends SelfIdentifyingFeatureDefinition {
 
   public Particle getType() {
     return type;
-  }
-
-  public Duration getDuration() {
-    return duration;
-  }
-
-  public Duration getPeriod() {
-    return period;
   }
 
   public int getAmount() {
