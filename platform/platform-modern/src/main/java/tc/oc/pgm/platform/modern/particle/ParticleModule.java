@@ -140,7 +140,15 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
               XMLUtils.parseNumber(Node.fromAttr(particleElement, "amplifier"), Float.class, 1F);
 
           if (!teamColor && Node.fromAttr(particleElement, "color") != null) {
-            Color spellColor = XMLUtils.parseHexColor(Node.fromAttr(particleElement, "color"));
+            Node colorNode = Node.fromAttr(particleElement, "color");
+            Color spellColor = null;
+            try {
+              ParticleEffectColor effectColor =
+                  XMLUtils.parseEnum(colorNode, ParticleEffectColor.class, null);
+              if (effectColor != null) spellColor = effectColor.toColor();
+            } catch (InvalidXMLException ignored) {
+            }
+            if (spellColor == null) spellColor = XMLUtils.parseHexColor(colorNode);
             power = new Particle.Spell(spellColor, amplifier);
           } else if (teamColor && Node.fromAttr(particleElement, "color") == null) {
             power = new Particle.Spell(Color.WHITE, amplifier);
