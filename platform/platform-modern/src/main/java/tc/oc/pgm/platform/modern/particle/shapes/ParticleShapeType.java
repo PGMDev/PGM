@@ -2,7 +2,7 @@ package tc.oc.pgm.platform.modern.particle.shapes;
 
 public enum ParticleShapeType {
   CIRCLE,
-  //  SPHERE,
+  SPHERE,
   //  STAR
   SQUARE,
   CUBE,

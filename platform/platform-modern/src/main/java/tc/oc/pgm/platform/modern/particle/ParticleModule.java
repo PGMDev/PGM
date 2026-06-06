@@ -38,6 +38,7 @@ import tc.oc.pgm.platform.modern.particle.shapes.LineShape;
 import tc.oc.pgm.platform.modern.particle.shapes.ParticleShape;
 import tc.oc.pgm.platform.modern.particle.shapes.ParticleShapeType;
 import tc.oc.pgm.platform.modern.particle.shapes.PlaneShape;
+import tc.oc.pgm.platform.modern.particle.shapes.SphereShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SquareShape;
 import tc.oc.pgm.platform.modern.particle.shapes.TextShape;
 import tc.oc.pgm.platform.modern.particle.shapes.TriangleShape;
@@ -302,6 +303,7 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
 
             shape = switch (preset) {
               case CIRCLE -> new CircleShape(scale, yaw, pitch);
+              case SPHERE -> new SphereShape(scale, yaw, pitch);
               case SQUARE -> new SquareShape(scale, yaw, pitch);
               case CUBE -> new CubeShape(scale, yaw, pitch);
               case PLANE -> new PlaneShape(scale, yaw, pitch);
