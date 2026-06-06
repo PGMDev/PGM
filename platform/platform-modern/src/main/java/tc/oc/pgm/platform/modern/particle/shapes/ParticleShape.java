@@ -20,32 +20,34 @@ public interface ParticleShape {
     for (CurveShape.Curve curve : curves) {
       for (int i = 0; i < nodesPerCurve; i++) {
         double t = (double) i / nodesPerCurve;
+        double x;
+        double y;
+        double z;
         if (curve.controlB() == null) {
-          double x = Math.pow(1 - t, 2) * curve.origin().getX()
+          x = Math.pow(1 - t, 2) * curve.origin().getX()
               + 2 * (1 - t) * t * curve.controlA().getX()
               + Math.pow(t, 2) * curve.destination().getX();
-          double y = Math.pow(1 - t, 2) * curve.origin().getY()
+          y = Math.pow(1 - t, 2) * curve.origin().getY()
               + 2 * (1 - t) * t * curve.controlA().getY()
               + Math.pow(t, 2) * curve.destination().getY();
-          double z = Math.pow(1 - t, 2) * curve.origin().getZ()
+          z = Math.pow(1 - t, 2) * curve.origin().getZ()
               + 2 * (1 - t) * t * curve.controlA().getZ()
               + Math.pow(t, 2) * curve.destination().getZ();
-          nodes.add(new Vector(x, y, z));
         } else {
-          double x = Math.pow(1 - t, 3) * curve.origin().getX()
+          x = Math.pow(1 - t, 3) * curve.origin().getX()
               + 3 * Math.pow(1 - t, 2) * t * curve.controlA().getX()
               + 3 * (1 - t) * Math.pow(t, 2) * curve.controlB().getX()
               + Math.pow(t, 3) * curve.destination().getX();
-          double y = Math.pow(1 - t, 3) * curve.origin().getY()
+          y = Math.pow(1 - t, 3) * curve.origin().getY()
               + 3 * Math.pow(1 - t, 2) * t * curve.controlA().getY()
               + 3 * (1 - t) * Math.pow(t, 2) * curve.controlB().getY()
               + Math.pow(t, 3) * curve.destination().getY();
-          double z = Math.pow(1 - t, 3) * curve.origin().getZ()
+          z = Math.pow(1 - t, 3) * curve.origin().getZ()
               + 3 * Math.pow(1 - t, 2) * t * curve.controlA().getZ()
               + 3 * (1 - t) * Math.pow(t, 2) * curve.controlB().getZ()
               + Math.pow(t, 3) * curve.destination().getZ();
-          nodes.add(new Vector(x, y, z));
         }
+        nodes.add(new Vector(x, y, z));
       }
     }
   }
@@ -63,32 +65,34 @@ public interface ParticleShape {
   }
 
   static Vector sampleCurve(CurveShape.Curve curve, double t) {
+    double x;
+    double y;
+    double z;
     if (curve.controlB() == null) {
-      double x = Math.pow(1 - t, 2) * curve.origin().getX()
+      x = Math.pow(1 - t, 2) * curve.origin().getX()
           + 2 * (1 - t) * t * curve.controlA().getX()
           + Math.pow(t, 2) * curve.destination().getX();
-      double y = Math.pow(1 - t, 2) * curve.origin().getY()
+      y = Math.pow(1 - t, 2) * curve.origin().getY()
           + 2 * (1 - t) * t * curve.controlA().getY()
           + Math.pow(t, 2) * curve.destination().getY();
-      double z = Math.pow(1 - t, 2) * curve.origin().getZ()
+      z = Math.pow(1 - t, 2) * curve.origin().getZ()
           + 2 * (1 - t) * t * curve.controlA().getZ()
           + Math.pow(t, 2) * curve.destination().getZ();
-      return new Vector(x, y, z);
     } else {
-      double x = Math.pow(1 - t, 3) * curve.origin().getX()
+      x = Math.pow(1 - t, 3) * curve.origin().getX()
           + 3 * Math.pow(1 - t, 2) * t * curve.controlA().getX()
           + 3 * (1 - t) * Math.pow(t, 2) * curve.controlB().getX()
           + Math.pow(t, 3) * curve.destination().getX();
-      double y = Math.pow(1 - t, 3) * curve.origin().getY()
+      y = Math.pow(1 - t, 3) * curve.origin().getY()
           + 3 * Math.pow(1 - t, 2) * t * curve.controlA().getY()
           + 3 * (1 - t) * Math.pow(t, 2) * curve.controlB().getY()
           + Math.pow(t, 3) * curve.destination().getY();
-      double z = Math.pow(1 - t, 3) * curve.origin().getZ()
+      z = Math.pow(1 - t, 3) * curve.origin().getZ()
           + 3 * Math.pow(1 - t, 2) * t * curve.controlA().getZ()
           + 3 * (1 - t) * Math.pow(t, 2) * curve.controlB().getZ()
           + Math.pow(t, 3) * curve.destination().getZ();
-      return new Vector(x, y, z);
     }
+    return new Vector(x, y, z);
   }
 
   static void applyRotation(List<Vector> nodes, float yaw, float pitch) {

@@ -4,7 +4,6 @@ import static tc.oc.pgm.platform.modern.particle.shapes.ParticleShapeType.TEXT;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -39,6 +38,7 @@ import tc.oc.pgm.platform.modern.particle.shapes.ParticleShape;
 import tc.oc.pgm.platform.modern.particle.shapes.ParticleShapeType;
 import tc.oc.pgm.platform.modern.particle.shapes.PlaneShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SphereShape;
+import tc.oc.pgm.platform.modern.particle.shapes.SpiralShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SquareShape;
 import tc.oc.pgm.platform.modern.particle.shapes.TextShape;
 import tc.oc.pgm.platform.modern.particle.shapes.TriangleShape;
@@ -49,15 +49,10 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class ParticleModule implements MapModule<ParticleMatchModule> {
-  private final ImmutableSet<ParticleDefinition> particleDefinitions;
-
-  public ParticleModule(ImmutableSet<ParticleDefinition> particleDefinitions) {
-    this.particleDefinitions = particleDefinitions;
-  }
 
   @Override
   public ParticleMatchModule createMatchModule(Match match) {
-    return new ParticleMatchModule(match, particleDefinitions);
+    return new ParticleMatchModule();
   }
 
   public static class Factory implements MapModuleFactory<ParticleModule> {
@@ -86,12 +81,20 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
         Particle.DustOptions dustOptions = null;
         boolean teamColor =
             XMLUtils.parseBoolean(Node.fromAttr(particleElement, "team-color"), false);
+        boolean needsColor = type.getDataType() == Color.class;
+        Color color = null;
         boolean isSpell = type.getDataType() == Particle.Spell.class;
         Particle.Spell power = null;
 
-        if (teamColor && Node.fromAttr(particleElement, "color") != null)
-          throw new InvalidXMLException(
-              "team-color and color cannot both be defined", particleElement);
+        if (teamColor) {
+          if (Node.fromAttr(particleElement, "color") != null)
+            throw new InvalidXMLException(
+                "Cannot combine 'team-color' and 'color'", particleElement);
+          if (!needsDust && !needsColor && !isSpell)
+            throw new InvalidXMLException(
+                "Attribute 'team-color' is not supported for particle type " + type.name(),
+                particleElement);
+        }
 
         if (needsDust) {
           if (teamColor) {
@@ -117,22 +120,24 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
               dustOptions = new Particle.DustOptions(dustColor, dustSize);
             }
           }
-        }
-
-        boolean needsColor = type.getDataType() == Color.class;
-        Color color = null;
-        if (teamColor && !needsDust && !needsColor && !isSpell)
+        } else if (Node.fromAttr(particleElement, "end-color") != null) {
           throw new InvalidXMLException(
-              "Team-color is not supported for this particle type", particleElement);
+              "Attribute 'end-color' is only supported for particle type DUST_COLOR_TRANSITION",
+              particleElement);
+        } else if (Node.fromAttr(particleElement, "dust-size") != null) {
+          throw new InvalidXMLException(
+              "Attribute 'dust-size' is only supported for dust particles", particleElement);
+        }
 
         if (needsColor) {
           if (!teamColor) {
             color = XMLUtils.parseHexColor(Node.fromRequiredAttr(particleElement, "color"));
           }
-        } else if (!needsDust && !needsColor && !isSpell) {
+        } else if (!needsDust && !isSpell) {
           if (Node.fromAttr(particleElement, "color") != null) {
             throw new InvalidXMLException(
-                "Color is not supported for this particle type", particleElement);
+                "Attribute 'color' is not supported for particle type " + type.name(),
+                particleElement);
           }
         }
 
@@ -140,8 +145,8 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
           float amplifier =
               XMLUtils.parseNumber(Node.fromAttr(particleElement, "amplifier"), Float.class, 1F);
 
-          if (!teamColor && Node.fromAttr(particleElement, "color") != null) {
-            Node colorNode = Node.fromAttr(particleElement, "color");
+          Node colorNode = Node.fromAttr(particleElement, "color");
+          if (!teamColor && colorNode != null) {
             Color spellColor = null;
             try {
               ParticleEffectColor effectColor =
@@ -151,33 +156,35 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
             }
             if (spellColor == null) spellColor = XMLUtils.parseHexColor(colorNode);
             power = new Particle.Spell(spellColor, amplifier);
-          } else if (teamColor && Node.fromAttr(particleElement, "color") == null) {
+          } else if (teamColor && colorNode == null) {
             power = new Particle.Spell(Color.WHITE, amplifier);
           }
-          if (!teamColor && Node.fromAttr(particleElement, "color") == null) {
-            throw new InvalidXMLException("Missing color attribute", particleElement);
+          if (!teamColor && colorNode == null) {
+            throw new InvalidXMLException(
+                "Particle type " + type.name() + " requires a 'color' attribute", particleElement);
           }
+        } else if (Node.fromAttr(particleElement, "amplifier") != null) {
+          throw new InvalidXMLException(
+              "Attribute 'amplifier' is not supported for particle type " + type.name(),
+              particleElement);
         }
 
         boolean isSculkCharge = type == Particle.SCULK_CHARGE;
         Float angle = null;
-
         if (isSculkCharge) {
           angle = XMLUtils.parseNumber(Node.fromAttr(particleElement, "angle"), Float.class, 0F);
-        }
-        if (!isSculkCharge && Node.fromAttr(particleElement, "angle") != null) {
+        } else if (Node.fromAttr(particleElement, "angle") != null) {
           throw new InvalidXMLException(
-              "Angle is only supported for particle type SCULK_CHARGE", particleElement);
+              "Attribute 'angle' is only supported for SCULK_CHARGE", particleElement);
         }
 
         boolean isShriek = type == Particle.SHRIEK;
         Integer delay = null;
         if (isShriek) {
           delay = XMLUtils.parseNumber(Node.fromAttr(particleElement, "delay"), Integer.class, 0);
-        }
-        if (!isShriek && Node.fromAttr(particleElement, "delay") != null) {
+        } else if (Node.fromAttr(particleElement, "delay") != null) {
           throw new InvalidXMLException(
-              "Delay can only be used for particle type SHRIEK", particleElement);
+              "Attribute 'delay' is only supported for particle type SHRIEK", particleElement);
         }
 
         boolean isDragonBreath = type == Particle.DRAGON_BREATH;
@@ -185,10 +192,10 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
         if (isDragonBreath) {
           breathPower =
               XMLUtils.parseNumber(Node.fromAttr(particleElement, "power"), Float.class, 1F);
-        }
-        if (!isDragonBreath && Node.fromAttr(particleElement, "power") != null) {
+        } else if (Node.fromAttr(particleElement, "power") != null) {
           throw new InvalidXMLException(
-              "Power can only be used for particle type DRAGON_BREATH", particleElement);
+              "Attribute 'power' is only supported for particle type DRAGON_BREATH",
+              particleElement);
         }
 
         org.bukkit.block.data.BlockData blockData = null;
@@ -206,7 +213,8 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
           }
         } else if (Node.fromAttr(particleElement, "material") != null) {
           throw new InvalidXMLException(
-              "Material is only supported for block/item particles", particleElement);
+              "Attribute 'material' is only supported for block and item particle types",
+              particleElement);
         }
 
         boolean force = XMLUtils.parseBoolean(Node.fromAttr(particleElement, "force"), false);
@@ -216,26 +224,39 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
         ParticleShape shape = null;
         Element shapeElement = particleElement.getChild("shape");
         if (shapeElement != null) {
-          ParticleShapeType preset = XMLUtils.parseEnum(
-              Node.fromAttr(shapeElement, "preset"), ParticleShapeType.class, null);
+          ParticleShapeType preset;
+          try {
+            preset = XMLUtils.parseEnum(
+                Node.fromAttr(shapeElement, "preset"), ParticleShapeType.class, null);
+          } catch (InvalidXMLException e) {
+            Node presetNode = Node.fromAttr(shapeElement, "preset");
+            throw new InvalidXMLException(
+                "Invalid shape preset '" + (presetNode != null ? presetNode.getValue() : "") + "'",
+                shapeElement);
+          }
 
           if (preset == null) {
             if (Node.fromAttr(shapeElement, "scale") != null)
               throw new InvalidXMLException(
-                  "Scale is only supported when using a shape preset", shapeElement);
+                  "Attribute 'scale' is only supported for shape presets", shapeElement);
             if (Node.fromAttr(shapeElement, "yaw") != null)
               throw new InvalidXMLException(
-                  "Yaw is only supported when using a shape preset", shapeElement);
+                  "Attribute 'yaw' is only supported for shape presets", shapeElement);
             if (Node.fromAttr(shapeElement, "pitch") != null)
               throw new InvalidXMLException(
-                  "Pitch is only supported when using a shape preset", shapeElement);
+                  "Attribute 'pitch' is only supported for shape presets", shapeElement);
 
             List<Element> lineElements = shapeElement.getChildren("line");
             List<Element> curveElements = shapeElement.getChildren("curve");
-            if (lineElements.isEmpty() && curveElements.isEmpty())
+            List<Element> spiralElements = shapeElement.getChildren("spiral");
+            if (lineElements.isEmpty() && curveElements.isEmpty() && spiralElements.isEmpty())
               throw new InvalidXMLException(
-                  "Shape must have either a preset or at least one <line> or <curve> defined",
+                  "<shape> must have either a preset or at least one <line>, <curve>, or <spiral> defined",
                   shapeElement);
+
+            if (!spiralElements.isEmpty() && (!lineElements.isEmpty() || !curveElements.isEmpty()))
+              throw new InvalidXMLException(
+                  "<spiral> cannot be combined with <line> or <curve>", shapeElement);
 
             List<LineShape.Line> lines = new ArrayList<>();
             for (Element lineElement : lineElements) {
@@ -258,7 +279,18 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
               curves.add(new CurveShape.Curve(origin, controlA, destination, controlB));
             }
 
-            if (!lines.isEmpty() && !curves.isEmpty()) {
+            List<SpiralShape.Spiral> spirals = new ArrayList<>();
+            for (Element spiralElement : spiralElements) {
+              int turns = XMLUtils.parseNumber(
+                  Node.fromRequiredAttr(spiralElement, "turns"), Integer.class);
+              float radius =
+                  XMLUtils.parseNumber(Node.fromRequiredAttr(spiralElement, "radius"), Float.class);
+              spirals.add(new SpiralShape.Spiral(turns, radius));
+            }
+
+            if (!spiralElements.isEmpty()) {
+              shape = new SpiralShape(spirals);
+            } else if (!lines.isEmpty() && !curves.isEmpty()) {
               shape = new CompositeShape(lines, curves);
             } else if (!lines.isEmpty()) {
               shape = new LineShape(lines);
@@ -295,10 +327,11 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
 
             if (preset == TEXT) {
               if (messageElement == null)
-                throw new InvalidXMLException("missing message child element", shapeElement);
+                throw new InvalidXMLException(
+                    "TEXT preset requires a <message> child element", shapeElement);
             } else if (messageElement != null) {
               throw new InvalidXMLException(
-                  "Message can only be used with the TEXT preset", shapeElement);
+                  "<message> is only supported for the TEXT shape preset", shapeElement);
             }
 
             shape = switch (preset) {
@@ -309,8 +342,6 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
               case PLANE -> new PlaneShape(scale, yaw, pitch);
               case TRIANGLE -> new TriangleShape(scale, yaw, pitch);
               case TEXT -> new TextShape(messageText, replacementMap);
-              default ->
-                throw new InvalidXMLException("Unknown shape preset: " + preset, shapeElement);
             };
           }
         }
@@ -335,7 +366,7 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
         particles.add(particleDefinition);
       }
 
-      return particles.isEmpty() ? null : new ParticleModule(ImmutableSet.copyOf(particles));
+      return particles.isEmpty() ? null : new ParticleModule();
     }
   }
 }

@@ -16,8 +16,9 @@ public class SphereShape extends AbstractShapePreset {
     for (int i = 0; i < amount; i++) {
       double angle = 2 * Math.PI * i * (1 - 1 / phi);
       double y = 1 - (2.0 * i) / (amount - 1);
-      double x = Math.sqrt(1 - Math.pow(y, 2)) * Math.cos(angle);
-      double z = Math.sqrt(1 - Math.pow(y, 2)) * Math.sin(angle);
+      double r = Math.sqrt(1 - Math.pow(y, 2));
+      double x = r * Math.cos(angle);
+      double z = r * Math.sin(angle);
       nodes.add(new Vector(x * scale, y * scale, z * scale));
     }
 

@@ -1,11 +1,11 @@
 package tc.oc.pgm.platform.modern.particle;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -14,18 +14,11 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.util.block.BlockData;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ParticleMatchModule implements MatchModule, Listener {
 
-  private final Match match;
-  private final ImmutableSet<ParticleDefinition> particleDefinitions;
-
-  public ParticleMatchModule(Match match, ImmutableSet<ParticleDefinition> particleDefinitions) {
-    this.match = match;
-    this.particleDefinitions = particleDefinitions;
-  }
+  public ParticleMatchModule() {}
 
   public static void spawnParticle(
       ParticleDefinition def, Location origin, Color overrideColor, Match match) {
@@ -36,7 +29,6 @@ public class ParticleMatchModule implements MatchModule, Listener {
           .map(MatchPlayer::getBukkit)
           .collect(Collectors.toList());
     }
-    List<Player> receivers = null;
 
     Class<?> dataType = def.getType().getDataType();
 
@@ -116,7 +108,9 @@ public class ParticleMatchModule implements MatchModule, Listener {
               new Particle.Spell(color, def.getPower().getPower()),
               def.isForce());
     } else if (dataType == Float.class) {
-      float angleVal = def.getAngle() != null ? def.getAngle() : 0.0f;
+      float val = def.getType() == Particle.DRAGON_BREATH
+          ? (def.getAngle() != null ? def.getAngle() : 0f)
+          : (def.getBreathPower() != null ? def.getBreathPower() : 1f);
       origin
           .getWorld()
           .spawnParticle(
@@ -131,7 +125,7 @@ public class ParticleMatchModule implements MatchModule, Listener {
               0,
               0,
               0,
-              angleVal,
+              val,
               def.isForce());
     } else if (dataType == Integer.class) {
       origin
