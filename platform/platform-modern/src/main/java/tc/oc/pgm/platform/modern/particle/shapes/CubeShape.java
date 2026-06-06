@@ -4,15 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.util.Vector;
 
-public class CubeShape implements ParticleShape {
-  private final float scale;
-  private final float yaw;
-  private final float pitch;
-
+public class CubeShape extends AbstractShapePreset {
   public CubeShape(float scale, float yaw, float pitch) {
-    this.scale = scale;
-    this.yaw = yaw;
-    this.pitch = pitch;
+    super(scale, yaw, pitch);
   }
 
   @Override
