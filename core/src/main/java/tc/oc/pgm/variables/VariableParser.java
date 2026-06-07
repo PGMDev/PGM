@@ -1,7 +1,6 @@
 package tc.oc.pgm.variables;
 
 import com.google.common.collect.Range;
-import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
@@ -12,8 +11,10 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.regions.Component;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -29,6 +30,7 @@ import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.PointVariable;
+import tc.oc.pgm.variables.types.RegionVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.SphereVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
@@ -129,57 +131,37 @@ public class VariableParser {
 
   @MethodParser("point")
   public Variable<Match> parsePoint(Element el) throws InvalidXMLException {
-    String baseId = FeatureDefinitionContext.parseId(el);
-    var variable = new PointVariable(factory.getRegions().parsePoint(el));
-    for (PointVariable.Component component : PointVariable.Component.values()) {
-      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
-      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
-    }
-    return variable;
+    return registerComponents(el, new PointVariable(factory.getRegions().parsePoint(el)));
   }
 
   @MethodParser("block")
   public Variable<Match> parseBlock(Element el) throws InvalidXMLException {
-    String baseId = FeatureDefinitionContext.parseId(el);
-    var variable = new BlockVariable(factory.getRegions().parseBlock(el));
-    for (BlockVariable.Component component : BlockVariable.Component.values()) {
-      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
-      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
-    }
-    return variable;
+    return registerComponents(el, new BlockVariable(factory.getRegions().parseBlock(el)));
   }
 
   @MethodParser("cuboid")
   public Variable<Match> parseCuboid(Element el) throws InvalidXMLException {
-    String baseId = FeatureDefinitionContext.parseId(el);
-    var variable = new CuboidVariable(factory.getRegions().parseCuboid(el));
-    for (CuboidVariable.Component component : CuboidVariable.Component.values()) {
-      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
-      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
-    }
-    return variable;
+    return registerComponents(el, new CuboidVariable(factory.getRegions().parseCuboid(el)));
   }
 
   @MethodParser("cylinder")
   public Variable<Match> parseCylinder(Element el) throws InvalidXMLException {
-    String baseId = FeatureDefinitionContext.parseId(el);
-    var variable = new CylindricalVariable(factory.getRegions().parseCylinder(el));
-    for (CylindricalVariable.Component component : CylindricalVariable.Component.values()) {
-      var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
-      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
-    }
-    return variable;
+    return registerComponents(el, new CylindricalVariable(factory.getRegions().parseCylinder(el)));
   }
 
   @MethodParser("sphere")
   public Variable<Match> parseSphere(Element el) throws InvalidXMLException {
+    return registerComponents(el, new SphereVariable(factory.getRegions().parseSphere(el)));
+  }
+
+  private <R extends RegionDefinition.Mutable, T extends RegionVariable<R, ?>> T registerComponents(
+      Element el, T reg) throws InvalidXMLException {
     String baseId = FeatureDefinitionContext.parseId(el);
-    var variable = new SphereVariable(factory.getRegions().parseSphere(el));
-    for (SphereVariable.Component component : SphereVariable.Component.values()) {
+    for (Component<R> component : reg.getComponents()) {
       var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
-      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
+      factory.getFeatures().addFeature(el, subId, reg.getComponent(component));
     }
-    return variable;
+    return reg;
   }
 
   @MethodParser("worldtime")

@@ -2,18 +2,12 @@ package tc.oc.pgm.variables.types;
 
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ToDoubleFunction;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.regions.BlockRegion;
-import tc.oc.pgm.variables.Variable;
 
 public class BlockVariable extends RegionVariable<BlockRegion.Mutable, BlockRegion> {
 
   public BlockVariable(BlockRegion initial) {
     super(Component.values(), initial);
-  }
-
-  public Variable<Match> getComponent(Component component) {
-    return super.getComponent(component);
   }
 
   public enum Component implements tc.oc.pgm.regions.Component<BlockRegion.Mutable> {
