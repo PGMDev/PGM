@@ -10,7 +10,7 @@ import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.platform.modern.particle.shapes.ParticleShape;
 
 public class ParticleDefinition extends SelfIdentifyingFeatureDefinition {
-  public static final int INFINITE_PARTICLE_AMOUNT = 99;
+  public static final int INFINITE_PARTICLE_AMOUNT = 100;
   private final Particle type;
   private final int amount;
   private final Particle.DustOptions dustOptions;

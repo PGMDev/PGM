@@ -40,6 +40,7 @@ import tc.oc.pgm.platform.modern.particle.shapes.PlaneShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SphereShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SpiralShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SquareShape;
+import tc.oc.pgm.platform.modern.particle.shapes.StarShape;
 import tc.oc.pgm.platform.modern.particle.shapes.TextShape;
 import tc.oc.pgm.platform.modern.particle.shapes.TriangleShape;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -74,6 +75,7 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
         int amount =
             XMLUtils.parseNumber(Node.fromAttr(particleElement, "amount"), Integer.class, true, 1);
         if (amount == Integer.MAX_VALUE) amount = ParticleDefinition.INFINITE_PARTICLE_AMOUNT;
+        else amount = Math.min(amount, ParticleDefinition.INFINITE_PARTICLE_AMOUNT);
 
         boolean needsDust = type.getDataType() == Particle.DustOptions.class
             || type.getDataType() == Particle.DustTransition.class;
@@ -342,6 +344,7 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
               case PLANE -> new PlaneShape(scale, yaw, pitch);
               case TRIANGLE -> new TriangleShape(scale, yaw, pitch);
               case TEXT -> new TextShape(messageText, replacementMap);
+              case STAR -> new StarShape(scale, yaw, pitch);
             };
           }
         }
