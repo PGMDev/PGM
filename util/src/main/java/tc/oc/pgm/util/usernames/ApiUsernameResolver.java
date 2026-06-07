@@ -1,37 +1,39 @@
 package tc.oc.pgm.util.usernames;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.NoRouteToHostException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
-import org.bukkit.Bukkit;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
-/**
- * Utility to resolve Minecraft usernames from an external API.
- *
- * @link https://github.com/Electroid/mojang-api
- */
-public final class ApiUsernameResolver extends AbstractBatchingUsernameResolver {
+/** Utility to resolve Minecraft usernames from an external HTTP API. */
+public class ApiUsernameResolver extends AbstractBatchingUsernameResolver {
+  private static final int HTTP_OK = 200;
+  private static final int HTTP_TOO_MANY_REQUESTS = 429;
+
   private static final Gson GSON = new Gson();
   private static final int MAX_SEQUENTIAL_FAILURES = 5;
+  private static final int MIN_BACKOFF = 5_000;
+  private static final int MAX_BACKOFF = 60_000;
   private static String userAgent = "PGM";
 
   static {
@@ -45,15 +47,46 @@ public final class ApiUsernameResolver extends AbstractBatchingUsernameResolver 
     }
   }
 
+  private final String logPrefix;
+  private final String path;
+  private final HttpClient httpClient;
+  private final Executor executor;
+  private final String[] jsonPath;
+
+  private long backoffMs = MIN_BACKOFF;
+
+  public ApiUsernameResolver(String name, String path, boolean singleThreaded, String jsonPath) {
+    assertTrue(path.contains("{uuid}"));
+    this.logPrefix = "[ApiUsernameResolver:" + name + "] ";
+    this.path = path;
+    this.httpClient = HttpClient.newBuilder()
+        .connectTimeout(Duration.ofSeconds(10))
+        .followRedirects(HttpClient.Redirect.ALWAYS)
+        .build();
+    this.executor =
+        singleThreaded ? Executors.newSingleThreadExecutor() : AbstractUsernameResolver.EXECUTOR;
+    this.jsonPath = jsonPath.split("\\.");
+  }
+
+  @Override
+  protected Executor getExecutor() {
+    return executor;
+  }
+
+  @Override
+  protected String logPrefix() {
+    return logPrefix;
+  }
+
   @Override
   protected void process(UUID uuid, CompletableFuture<UsernameResponse> future) {
     String name = null;
     try {
-      name = resolveSync(uuid);
+      name = resolveSync(uuid, 5);
     } catch (Throwable t) {
-      Bukkit.getLogger().log(Level.WARNING, "Could not resolve username for " + uuid, t);
+      warn("Could not resolve username for " + uuid, t);
     } finally {
-      future.complete(UsernameResponse.of(name, ApiUsernameResolver.class));
+      future.complete(UsernameResponse.of(name, getClass()));
     }
   }
 
@@ -74,42 +107,71 @@ public final class ApiUsernameResolver extends AbstractBatchingUsernameResolver 
 
       String name = null;
       try {
-        name = resolveSync(id);
-        fails = 0;
+        name = resolveSync(id, 5);
+        if (name != null) {
+          backoffMs = backoff(0.95d, true);
+          fails = 0;
+        }
       } catch (Throwable t) {
         errors.put(id, t);
         if (++fails > MAX_SEQUENTIAL_FAILURES
             || t instanceof UnknownHostException
             || t instanceof NoRouteToHostException) {
           stopped = true;
+          warn("Stopped resolving usernames", t);
         }
       } finally {
-        complete(id, UsernameResponse.of(name, now, ApiUsernameResolver.class));
+        complete(id, UsernameResponse.of(name, now, getClass()));
       }
     }
 
-    if (!errors.isEmpty()) {
-      Bukkit.getLogger()
-          .log(
-              Level.WARNING,
-              LOG_PREFIX + "Could not resolve " + errors.size() + " usernames",
-              errors.values().iterator().next());
-    }
+    if (!errors.isEmpty())
+      warn(
+          "Could not resolve " + errors.size() + " usernames",
+          errors.values().iterator().next());
   }
 
-  private static String resolveSync(UUID id) throws IOException, URISyntaxException {
-    final URI uri = new URI("https://api.ashcon.app/mojang/v2/user/" + assertNotNull(id));
-    final HttpURLConnection url = (HttpURLConnection) uri.toURL().openConnection();
-    url.setRequestMethod("GET");
-    url.setRequestProperty("User-Agent", userAgent);
-    url.setRequestProperty("Accept", "application/json");
-    url.setInstanceFollowRedirects(true);
-    url.setConnectTimeout(10000);
-    url.setReadTimeout(10000);
+  private String resolveSync(UUID id, int maxRetries) throws Exception {
+    var response = httpClient.send(buildRequest(id), HttpResponse.BodyHandlers.ofString());
 
-    try (final BufferedReader br =
-        new BufferedReader(new InputStreamReader(url.getInputStream(), StandardCharsets.UTF_8))) {
-      return GSON.fromJson(br, JsonObject.class).get("username").getAsString();
+    return switch (response.statusCode()) {
+      case HTTP_OK -> getUsername(GSON.fromJson(response.body(), JsonObject.class));
+      case HTTP_TOO_MANY_REQUESTS -> {
+        if (maxRetries > 1) {
+          backoffMs = backoff(2d, true);
+          var jitter = (Math.random() * 0.5d);
+          Thread.sleep(backoff(1d + jitter, false));
+          yield resolveSync(id, maxRetries - 1);
+        }
+        throw new IOException("Too many requests");
+      }
+      default -> null;
+    };
+  }
+
+  private long backoff(double scaling, boolean clamp) {
+    long backoff = (long) (backoffMs * scaling);
+    if (clamp) backoff = Math.clamp(backoff, MIN_BACKOFF, MAX_BACKOFF);
+    return backoff;
+  }
+
+  protected HttpRequest buildRequest(UUID uuid) throws Exception {
+    return HttpRequest.newBuilder()
+        .GET()
+        .uri(new URI(path.replace("{uuid}", assertNotNull(uuid).toString())))
+        .header("User-Agent", userAgent)
+        .header("Accept", "application/json")
+        .timeout(Duration.ofSeconds(10))
+        .build();
+  }
+
+  // Each API impl has to decide how to extract the username
+  protected String getUsername(JsonObject response) {
+    JsonElement curr = response;
+    for (String s : jsonPath) {
+      if (curr == null || !curr.isJsonObject()) return null;
+      curr = curr.getAsJsonObject().get(s);
     }
+    return curr.getAsString();
   }
 }

@@ -471,11 +471,38 @@ public class ActionParser {
   @MethodParser("velocity")
   public Action<? super MatchPlayer> parseVelocity(Element el, Class<?> scope)
       throws InvalidXMLException {
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
+    var xFormula = parser
+        .formula(MatchPlayer.class, el, "x")
+        .validate(this::validateVelocityActionFormula)
+        .required();
+    var yFormula = parser
+        .formula(MatchPlayer.class, el, "y")
+        .validate(this::validateVelocityActionFormula)
+        .required();
+    var zFormula = parser
+        .formula(MatchPlayer.class, el, "z")
+        .validate(this::validateVelocityActionFormula)
+        .required();
 
     return new VelocityAction(xFormula, yFormula, zFormula);
+  }
+
+  private void validateVelocityActionFormula(Formula<MatchPlayer> formula, Node node) {
+    double velocity;
+    try {
+      velocity = formula.applyAsDouble(null);
+    } catch (Throwable e) {
+      // If trying to evaluate a formula results in an exception, it likely depends on player/match
+      // data, and thus we can't determine if it is excessive or not at parse time
+      velocity = 0;
+    }
+
+    if (Math.abs(velocity) > 3.9) {
+      factory.warn(
+          "Excessive velocity component detected: " + velocity + "; will be clamped to "
+              + (velocity < 0 ? "-" : "") + "3.9 at runtime.",
+          node);
+    }
   }
 
   @MethodParser("teleport")

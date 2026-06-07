@@ -5,16 +5,19 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import org.bukkit.Bukkit;
 
 public abstract class AbstractUsernameResolver implements UsernameResolver {
+  protected static final Executor EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 
   protected final String LOG_PREFIX = "[" + getClass().getSimpleName() + "] ";
   protected final Map<UUID, CompletableFuture<UsernameResponse>> futures =
       new ConcurrentHashMap<>();
 
   protected Executor getExecutor() {
-    return ForkJoinPool.commonPool();
+    return EXECUTOR;
   }
 
   @Override
@@ -42,6 +45,18 @@ public abstract class AbstractUsernameResolver implements UsernameResolver {
   protected void complete(UUID uuid, UsernameResponse response) {
     CompletableFuture<UsernameResponse> future = futures.get(uuid);
     if (future != null) future.complete(response);
+  }
+
+  protected String logPrefix() {
+    return LOG_PREFIX;
+  }
+
+  protected void info(String message) {
+    Bukkit.getLogger().log(Level.INFO, logPrefix() + message);
+  }
+
+  protected void warn(String message, Throwable t) {
+    Bukkit.getLogger().log(Level.WARNING, logPrefix() + message, t);
   }
 
   protected abstract void process(UUID uuid, CompletableFuture<UsernameResponse> future);
