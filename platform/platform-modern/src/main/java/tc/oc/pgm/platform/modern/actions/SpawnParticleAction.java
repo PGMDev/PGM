@@ -12,7 +12,6 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.particle.ParticleDefinition;
 import tc.oc.pgm.platform.modern.particle.ParticleMatchModule;
 import tc.oc.pgm.platform.modern.particle.shapes.ParticleShape;
-import tc.oc.pgm.platform.modern.particle.shapes.TextShape;
 import tc.oc.pgm.util.math.Formula;
 
 public class SpawnParticleAction<T extends Filterable<?>> extends AbstractAction<T> {
@@ -48,10 +47,6 @@ public class SpawnParticleAction<T extends Filterable<?>> extends AbstractAction
     }
 
     ParticleShape shape = def.getShape();
-    if (shape instanceof TextShape textShape) {
-      String resolved = textShape.resolve(t);
-      shape = new TextShape(resolved, null);
-    }
 
     if (shape != null) {
       List<Vector> nodes = shape.getNodes(def.getAmount());

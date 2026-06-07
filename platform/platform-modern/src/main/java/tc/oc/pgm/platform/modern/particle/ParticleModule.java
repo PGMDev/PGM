@@ -1,14 +1,10 @@
 package tc.oc.pgm.platform.modern.particle;
 
-import static tc.oc.pgm.platform.modern.particle.shapes.ParticleShapeType.TEXT;
-
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import org.bukkit.Color;
@@ -20,8 +16,6 @@ import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
-import tc.oc.pgm.action.replacements.Replacement;
-import tc.oc.pgm.action.replacements.ReplacementParser;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -41,7 +35,6 @@ import tc.oc.pgm.platform.modern.particle.shapes.SphereShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SpiralShape;
 import tc.oc.pgm.platform.modern.particle.shapes.SquareShape;
 import tc.oc.pgm.platform.modern.particle.shapes.StarShape;
-import tc.oc.pgm.platform.modern.particle.shapes.TextShape;
 import tc.oc.pgm.platform.modern.particle.shapes.TriangleShape;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
@@ -307,35 +300,6 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
             float pitch =
                 XMLUtils.parseNumber(Node.fromAttr(shapeElement, "pitch"), Float.class, 0f);
 
-            Element messageElement = shapeElement.getChild("message");
-            String messageText = null;
-            Map<String, Replacement> replacementMap = null;
-
-            if (messageElement != null) {
-              messageText = Node.fromRequiredAttr(messageElement, "text").getValue();
-              List<Element> replacementElements =
-                  XMLUtils.flattenElements(messageElement, "replacements");
-              if (!replacementElements.isEmpty()) {
-                ReplacementParser replacementParser = new ReplacementParser(factory);
-                ImmutableMap.Builder<String, Replacement> builder = ImmutableMap.builder();
-                for (Element replacement : replacementElements) {
-                  builder.put(
-                      XMLUtils.parseRequiredId(replacement),
-                      replacementParser.parse(replacement, null));
-                }
-                replacementMap = builder.build();
-              }
-            }
-
-            if (preset == TEXT) {
-              if (messageElement == null)
-                throw new InvalidXMLException(
-                    "TEXT preset requires a <message> child element", shapeElement);
-            } else if (messageElement != null) {
-              throw new InvalidXMLException(
-                  "<message> is only supported for the TEXT shape preset", shapeElement);
-            }
-
             shape = switch (preset) {
               case CIRCLE -> new CircleShape(scale, yaw, pitch);
               case SPHERE -> new SphereShape(scale, yaw, pitch);
@@ -343,7 +307,6 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
               case CUBE -> new CubeShape(scale, yaw, pitch);
               case PLANE -> new PlaneShape(scale, yaw, pitch);
               case TRIANGLE -> new TriangleShape(scale, yaw, pitch);
-              case TEXT -> new TextShape(messageText, replacementMap);
               case STAR -> new StarShape(scale, yaw, pitch);
             };
           }

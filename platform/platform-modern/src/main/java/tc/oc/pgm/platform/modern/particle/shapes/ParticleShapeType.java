@@ -7,6 +7,5 @@ public enum ParticleShapeType {
   CUBE,
   PLANE,
   TRIANGLE,
-  TEXT,
   STAR
 }
