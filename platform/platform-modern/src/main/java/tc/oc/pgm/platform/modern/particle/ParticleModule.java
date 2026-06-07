@@ -280,7 +280,11 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
                   Node.fromRequiredAttr(spiralElement, "turns"), Integer.class);
               float radius =
                   XMLUtils.parseNumber(Node.fromRequiredAttr(spiralElement, "radius"), Float.class);
-              spirals.add(new SpiralShape.Spiral(turns, radius));
+              SpiralShape.SpiralAxis axis = XMLUtils.parseEnum(
+                  Node.fromAttr(spiralElement, "axis"),
+                  SpiralShape.SpiralAxis.class,
+                  SpiralShape.SpiralAxis.Y);
+              spirals.add(new SpiralShape.Spiral(turns, radius, axis));
             }
 
             if (!spiralElements.isEmpty()) {

@@ -5,7 +5,13 @@ import java.util.List;
 import org.bukkit.util.Vector;
 
 public class SpiralShape implements ParticleShape {
-  public record Spiral(int turns, float radius) {}
+  public enum SpiralAxis {
+    X,
+    Y,
+    Z
+  }
+
+  public record Spiral(int turns, float radius, SpiralAxis axis) {}
 
   private final List<Spiral> spirals;
 
@@ -22,9 +28,14 @@ public class SpiralShape implements ParticleShape {
         double t = (double) i / nodesPerSpiral;
         double angle = t * spiral.turns() * 2 * Math.PI;
         double r = t * spiral.radius();
-        double x = r * Math.cos(angle);
-        double z = r * Math.sin(angle);
-        nodes.add(new Vector(x, 0, z));
+        double a = r * Math.cos(angle);
+        double b = r * Math.sin(angle);
+        nodes.add(
+            switch (spiral.axis()) {
+              case X -> new Vector(0, a, b);
+              case Y -> new Vector(a, 0, b);
+              case Z -> new Vector(a, b, 0);
+            });
       }
     }
     return nodes;
