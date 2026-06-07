@@ -20,6 +20,26 @@ class SpMaterialParser {
     return parse(text, node, false, Adapter.PGM_ITEM);
   }
 
+  public static SpMaterialData parseItem(String text, short dmg, Node node)
+      throws InvalidXMLException {
+    SpMaterialData md = parseItem(text, node);
+    short mdData = md.getData();
+    if (mdData != dmg && mdData != 0 && dmg != 0) {
+      throw new InvalidXMLException(
+          "Mismatching damage, parsed '" + text + ":" + dmg + "' but should be '" + text + ":"
+              + mdData + "'",
+          node);
+    }
+    short data = dmg != 0 ? dmg : mdData;
+
+    if (dmg != 0 && isModernName(text) && !canUseMeta(md.getItemType())) {
+      throw new InvalidXMLException(
+          "Material '" + md.getItemType() + "' cannot have a damage/meta value of " + data, node);
+    }
+
+    return new SpMaterialData(md.getItemType(), data);
+  }
+
   public static SpMaterialData parseBlock(String text, Node node) throws InvalidXMLException {
     return parse(text, node, false, Adapter.PGM_BLOCK);
   }
@@ -70,6 +90,14 @@ class SpMaterialParser {
 
   private static String normalize(String text) {
     return text.toUpperCase(Locale.ROOT).replaceAll("\\s+", "_").replaceAll("\\W", "");
+  }
+
+  private static boolean isModernName(String text) {
+    return ModernMaterialNames.get(normalize(text)) != null;
+  }
+
+  private static boolean canUseMeta(Material material) {
+    return material.getMaxDurability() > 0 || material == Material.POTION;
   }
 
   interface Adapter<T> {

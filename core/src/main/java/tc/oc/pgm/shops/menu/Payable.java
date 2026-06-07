@@ -4,6 +4,7 @@ import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.inventory.Slot;
 
 public interface Payable {
 
@@ -14,26 +15,44 @@ public interface Payable {
   List<Payment> getPayments();
 
   default boolean canPurchase(MatchPlayer buyer) {
-    if (!buyer.getMatch().isRunning() || !buyer.isParticipating()) return false;
-    return isFree() || getPayments().stream().allMatch(p -> p.hasPayment(buyer.getInventory()));
+    return canPurchase(buyer, 1) > 0;
+  }
+
+  default int canPurchase(MatchPlayer buyer, int max) {
+    if (!buyer.getMatch().isRunning() || !buyer.isParticipating()) return 0;
+    if (isFree()) return max;
+
+    int affordable = max;
+    var inv = buyer.getInventory();
+    for (Payment payment : getPayments()) {
+      affordable = Math.min(affordable, payment.getAffordableAmount(inv, affordable));
+      if (affordable <= 0) break;
+    }
+    return affordable;
   }
 
   default boolean takePayment(MatchPlayer buyer) {
-    if (!canPurchase(buyer)) return false;
+    return takePayment(buyer, 1) > 0;
+  }
+
+  default int takePayment(MatchPlayer buyer, int max) {
+    int affordable = canPurchase(buyer, max);
+    if (affordable <= 0) return 0;
 
     if (!isFree()) {
       PlayerInventory inventory = buyer.getInventory();
       for (Payment payment : getPayments()) {
-        int remaining = payment.getPrice();
-        for (int slot = 0; slot < inventory.getSize() && remaining > 0; slot++) {
-          ItemStack item = inventory.getItem(slot);
+        int remaining = payment.getPrice() * affordable;
+
+        for (var slot : Slot.Storage.storage().toList()) {
+          ItemStack item = slot.getItem(inventory);
           if (item == null || !payment.matches(item)) continue;
           if (item.getAmount() > remaining) {
             item.setAmount(item.getAmount() - remaining);
-            inventory.setItem(slot, item);
+            slot.setItem(inventory, item);
             remaining = 0;
           } else {
-            inventory.setItem(slot, null);
+            slot.setItem(inventory, null);
             remaining -= item.getAmount();
           }
         }
@@ -44,7 +63,7 @@ public interface Payable {
         }
       }
     }
-    return true;
+    return affordable;
   }
 
   static Payable of(List<Payment> payments) {

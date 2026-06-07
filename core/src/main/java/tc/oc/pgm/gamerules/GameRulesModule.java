@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -54,12 +53,9 @@ public class GameRulesModule implements MapModule<GameRulesMatchModule> {
 
           GameRule<?> rule = GameRules.getByName(ruleName);
           if (rule == null) {
-            logger.log(
-                Level.WARNING,
-                null,
-                new InvalidXMLException(
-                    "Game rule " + ruleName + " does not exist or is unsupported by the platform",
-                    gameRuleElement));
+            factory.warn(
+                "Game rule " + ruleName + " does not exist or is unsupported by the platform",
+                gameRuleElement);
             continue;
           } else if (gameRules.containsKey(rule)) {
             throw new InvalidXMLException(

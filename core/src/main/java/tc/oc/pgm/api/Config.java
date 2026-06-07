@@ -19,6 +19,7 @@ import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 
 /** A configuration for server owners to modify {@link PGM}. */
 public interface Config {
@@ -512,6 +513,19 @@ public interface Config {
    * @return If vanish is enabled.
    */
   boolean isVanishEnabled();
+
+  List<UsernameResolverType> getUsernameResolvers();
+
+  List<ApiUsernameResolver> getCustomUsernameResolvers();
+
+  enum UsernameResolverType {
+    BUKKIT,
+    SQL,
+    PLAYER_DB,
+    MOJANG,
+    ELECTROID,
+    CUSTOM
+  }
 
   /**
    * Gets experimental configuration settings that are not yet stable.
