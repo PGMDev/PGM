@@ -1,8 +1,11 @@
 package tc.oc.pgm.action.actions;
 
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -10,33 +13,28 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.projectile.ProjectileDefinition;
 
 public class LaunchProjectileAction<T extends Filterable<?>> extends AbstractAction<T> {
-  private final Match match;
   private final FeatureReference<ProjectileDefinition> projectileReference;
-  private Vector origin;
-  private final Vector destination;
+  private final Vector origin;
+  private final @Nullable Vector toward;
+  private final float yaw;
+  private final float pitch;
   private final Filter damageFilter;
 
   public LaunchProjectileAction(
       Class<T> scope,
-      Match match,
       FeatureReference<ProjectileDefinition> projectileReference,
       Vector origin,
-      Vector destination,
+      @Nullable Vector toward,
+      float yaw,
+      float pitch,
       @Nullable Filter damageFilter) {
     super(scope);
-    this.match = match;
     this.projectileReference = projectileReference;
     this.origin = origin;
-    this.destination = destination;
+    this.toward = toward;
+    this.yaw = yaw;
+    this.pitch = pitch;
     this.damageFilter = damageFilter;
-  }
-
-  public Vector getOrigin() {
-    return origin;
-  }
-
-  public Vector getDestination() {
-    return destination;
   }
 
   public @Nullable Filter getDamageFilter() {
@@ -44,18 +42,23 @@ public class LaunchProjectileAction<T extends Filterable<?>> extends AbstractAct
   }
 
   @Override
-  public void trigger (T t) {
-    ProjectileDefinition projectile = projectileReference.get();
-    Vector direction = destination.clone().subtract(origin.normalize());
-//    double velocity = direction.multiply(projectile.velocity);
-    Location loc = new Location(match.getWorld(), 0, 0, 0);
-//    boolean realProjectile = Projectile.class.isAssignableFrom(projectile.projectile);
-//
-//
-//    Entity entity
-//    if (realProjectile) {
-//      entity = spawn
-//    }
-//    Entity entity = loc.getWorld().spawnEntity(loc, projectile.getEntityType())
+  public void trigger(T t) {
+    Match match = t.getMatch();
+    ProjectileDefinition def = projectileReference.get();
+
+    Vector dir;
+    if (toward != null) {
+      dir = toward.clone().subtract(origin).normalize();
+    } else {
+      Location dirLoc = new Location(null, 0, 0, 0, yaw, pitch);
+      dir = dirLoc.getDirection();
+    }
+    dir.multiply(def.getVelocity());
+    Location loc = origin.toLocation(match.getWorld());
+
+    Entity proj = match.getWorld().spawn(loc, def.getProjectile());
+    proj.setVelocity(dir);
+    proj.setMetadata("projectileDefinition", new FixedMetadataValue(PGM.get(), def));
+    proj.setMetadata("launchProjectile", new FixedMetadataValue(PGM.get(), this));
   }
 }

@@ -19,6 +19,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
@@ -569,14 +570,32 @@ public class ActionParser {
   }
 
   @MethodParser("launch-projectile")
-  public <T extends Filterable<?>> LaunchProjectileAction<T> parseProjectile(Element el, Class<T> scope)
-      throws InvalidXMLException {
+  public <T extends Filterable<?>> LaunchProjectileAction<T> parseProjectile(
+      Element el, Class<T> scope) throws InvalidXMLException {
     scope = parseScope(el, scope);
-    var projectile = parser.reference(ProjectileDefinition.class, el, "id").required();
+    var projectile =
+        parser.reference(ProjectileDefinition.class, el, "projectile").required();
     var origin = parser.vector(el, "origin").required();
-    var destination = parser.vector(el, "destination").required();
+    Vector toward = XMLUtils.parseVector(Node.fromAttr(el, "toward"));
+    Node yawNode = Node.fromAttr(el, "yaw");
+    Node pitchNode = Node.fromAttr(el, "pitch");
+    float yaw = XMLUtils.parseNumber(yawNode, Float.class, 0F);
+    float pitch = XMLUtils.parseNumber(pitchNode, Float.class, 0F);
+    if (toward != null) {
+      if (yawNode != null) {
+        throw new InvalidXMLException("'toward' and 'yaw' cannot both be defined", el);
+      }
+      if (pitchNode != null) {
+        throw new InvalidXMLException("'toward' and 'pitch' cannot both be defined", el);
+      }
+    }
+    if (toward == null && yawNode == null && pitchNode == null) {
+      throw new InvalidXMLException("Either 'toward' or 'pitch/yaw' must be defined", el);
+    }
+
     Filter damageFilter = parser.filter(el, "damage-filter").orNull();
 
-    return new LaunchProjectileAction(scope, projectile, origin, destination, damageFilter);
+    return new LaunchProjectileAction<>(
+        scope, projectile, origin, toward, yaw, pitch, damageFilter);
   }
 }

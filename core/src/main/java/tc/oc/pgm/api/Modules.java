@@ -82,6 +82,8 @@ import tc.oc.pgm.modules.ItemDestroyMatchModule;
 import tc.oc.pgm.modules.ItemDestroyModule;
 import tc.oc.pgm.modules.ItemKeepMatchModule;
 import tc.oc.pgm.modules.ItemKeepModule;
+import tc.oc.pgm.modules.LaunchProjectileMatchModule;
+import tc.oc.pgm.modules.LaunchProjectileModule;
 import tc.oc.pgm.modules.MapmakerMatchModule;
 import tc.oc.pgm.modules.MobsMatchModule;
 import tc.oc.pgm.modules.MobsModule;
@@ -313,6 +315,10 @@ public final class Modules {
         new FallingBlocksModule.Factory());
     register(FlagModule.class, FlagMatchModule.class, new FlagModule.Factory());
     register(ProjectileModule.class, ProjectileMatchModule.class, new ProjectileModule.Factory());
+    register(
+        LaunchProjectileModule.class,
+        LaunchProjectileMatchModule.class,
+        new LaunchProjectileModule.Factory());
     register(ConsumableModule.class, ConsumableMatchModule.class, new ConsumableModule.Factory());
     register(
         DiscardPotionBottlesModule.class,

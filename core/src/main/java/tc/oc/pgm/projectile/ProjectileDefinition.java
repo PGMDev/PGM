@@ -52,6 +52,14 @@ public class ProjectileDefinition extends SelfIdentifyingFeatureDefinition {
     this.blockMaterial = blockMaterial;
   }
 
+  public Class<? extends Entity> getProjectile() {
+    return projectile;
+  }
+
+  public Double getVelocity() {
+    return velocity;
+  }
+
   public @Nullable String getName() {
     return name;
   }
