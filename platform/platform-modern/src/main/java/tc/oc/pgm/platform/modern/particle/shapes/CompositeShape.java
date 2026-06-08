@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.util.Vector;
 
-public class CompositeShape implements ParticleShape {
-  private final List<LineShape.Line> lines;
-  private final List<CurveShape.Curve> curves;
-
+public record CompositeShape(List<LineShape.Line> lines, List<CurveShape.Curve> curves) implements ParticleShape {
   public CompositeShape(List<LineShape.Line> lines, List<CurveShape.Curve> curves) {
     this.lines = new ArrayList<>(lines);
     this.curves = new ArrayList<>(curves);
@@ -29,7 +26,7 @@ public class CompositeShape implements ParticleShape {
     for (LineShape.Line line : lines) {
       double ratio = line.origin().distance(line.destination()) / totalLength;
       int nodeCount = (int) (amount * ratio);
-      ParticleShape.addEdgeNodes(nodes, new LineShape.Line[] {line}, nodeCount);
+      ParticleShape.addEdgeNodes(nodes, new LineShape.Line[]{line}, nodeCount);
     }
     for (CurveShape.Curve curve : curves) {
       double ratio = ParticleShape.curveLength(curve, 16) / totalLength;

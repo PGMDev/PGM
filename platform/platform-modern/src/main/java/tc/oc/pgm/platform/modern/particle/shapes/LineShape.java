@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.util.Vector;
 
-public class LineShape implements ParticleShape {
-  public record Line(Vector origin, Vector destination) {}
-
-  private final List<Line> lines;
+public record LineShape(List<Line> lines) implements ParticleShape {
+  public record Line(Vector origin, Vector destination) {
+  }
 
   public LineShape(List<Line> lines) {
     this.lines = new ArrayList<>(lines);

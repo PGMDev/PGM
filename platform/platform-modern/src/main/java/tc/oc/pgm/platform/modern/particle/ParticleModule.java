@@ -146,7 +146,7 @@ public class ParticleModule implements MapModule<ParticleMatchModule> {
             try {
               ParticleEffectColor effectColor =
                   XMLUtils.parseEnum(colorNode, ParticleEffectColor.class, null);
-              if (effectColor != null) spellColor = effectColor.toColor();
+              spellColor = effectColor.toColor();
             } catch (InvalidXMLException ignored) {
             }
             if (spellColor == null) spellColor = XMLUtils.parseHexColor(colorNode);

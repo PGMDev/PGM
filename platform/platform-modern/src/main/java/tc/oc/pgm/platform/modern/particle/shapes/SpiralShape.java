@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.util.Vector;
 
-public class SpiralShape implements ParticleShape {
+public record SpiralShape(List<Spiral> spirals) implements ParticleShape {
   public enum SpiralAxis {
     X,
     Y,
     Z
   }
 
-  public record Spiral(int turns, float radius, SpiralAxis axis) {}
-
-  private final List<Spiral> spirals;
+  public record Spiral(int turns, float radius, SpiralAxis axis) {
+  }
 
   public SpiralShape(List<Spiral> spirals) {
     this.spirals = new ArrayList<>(spirals);

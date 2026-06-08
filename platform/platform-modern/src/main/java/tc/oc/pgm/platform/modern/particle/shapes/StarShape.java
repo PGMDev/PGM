@@ -14,13 +14,12 @@ public class StarShape extends AbstractShapePreset {
     int nodesPerLine = amount / 10;
     List<Vector> nodes = new ArrayList<>();
 
-    double outerRadius = scale;
     double innerRadius = scale * 0.4;
 
     Vector[] points = new Vector[10];
     for (int i = 0; i < 10; i++) {
       double angle = Math.toRadians(i * 36 - 90);
-      double r = (i % 2 == 0) ? outerRadius : innerRadius;
+      double r = (i % 2 == 0) ? (double) scale : innerRadius;
       points[i] = new Vector(r * Math.cos(angle), 0, r * Math.sin(angle));
     }
 
