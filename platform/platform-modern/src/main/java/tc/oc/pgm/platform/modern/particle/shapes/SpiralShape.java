@@ -11,8 +11,7 @@ public record SpiralShape(List<Spiral> spirals) implements ParticleShape {
     Z
   }
 
-  public record Spiral(int turns, float radius, SpiralAxis axis) {
-  }
+  public record Spiral(int turns, float radius, SpiralAxis axis) {}
 
   public SpiralShape(List<Spiral> spirals) {
     this.spirals = new ArrayList<>(spirals);

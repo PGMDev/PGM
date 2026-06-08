@@ -10,8 +10,7 @@ public record CurveShape(List<Curve> curves) implements ParticleShape {
       Vector origin,
       Vector controlA,
       Vector destination,
-      @Nullable Vector controlB) {
-  }
+      @Nullable Vector controlB) {}
 
   public CurveShape(List<Curve> curves) {
     this.curves = new ArrayList<>(curves);

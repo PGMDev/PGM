@@ -5,8 +5,7 @@ import java.util.List;
 import org.bukkit.util.Vector;
 
 public record LineShape(List<Line> lines) implements ParticleShape {
-  public record Line(Vector origin, Vector destination) {
-  }
+  public record Line(Vector origin, Vector destination) {}
 
   public LineShape(List<Line> lines) {
     this.lines = new ArrayList<>(lines);
