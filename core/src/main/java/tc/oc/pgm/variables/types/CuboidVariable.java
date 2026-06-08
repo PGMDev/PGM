@@ -2,21 +2,18 @@ package tc.oc.pgm.variables.types;
 
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ToDoubleFunction;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.regions.Component;
 import tc.oc.pgm.regions.CuboidRegion;
-import tc.oc.pgm.variables.Variable;
 
 public class CuboidVariable extends RegionVariable<CuboidRegion.Mutable, CuboidRegion> {
 
+  private static final Component<CuboidRegion.Mutable>[] COMPONENTS = CuboidComponent.values();
+
   public CuboidVariable(CuboidRegion initial) {
-    super(Component.values(), initial);
+    super(COMPONENTS, initial);
   }
 
-  public Variable<Match> getComponent(Component component) {
-    return super.getComponent(component);
-  }
-
-  public enum Component implements tc.oc.pgm.regions.Component<CuboidRegion.Mutable> {
+  public enum CuboidComponent implements Component<CuboidRegion.Mutable> {
     MIN_X(r -> r.getMutableMin().getX(), (r, v) -> r.getMutableMin().setX(v)),
     MIN_Y(r -> r.getMutableMin().getY(), (r, v) -> r.getMutableMin().setY(v)),
     MIN_Z(r -> r.getMutableMin().getZ(), (r, v) -> r.getMutableMin().setZ(v)),
@@ -27,7 +24,7 @@ public class CuboidVariable extends RegionVariable<CuboidRegion.Mutable, CuboidR
     private final ToDoubleFunction<CuboidRegion.Mutable> getter;
     private final ObjDoubleConsumer<CuboidRegion.Mutable> setter;
 
-    Component(
+    CuboidComponent(
         ToDoubleFunction<CuboidRegion.Mutable> getter,
         ObjDoubleConsumer<CuboidRegion.Mutable> setter) {
       this.getter = getter;

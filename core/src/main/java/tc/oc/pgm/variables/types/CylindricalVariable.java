@@ -2,22 +2,20 @@ package tc.oc.pgm.variables.types;
 
 import java.util.function.ObjDoubleConsumer;
 import java.util.function.ToDoubleFunction;
-import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.regions.Component;
 import tc.oc.pgm.regions.CylindricalRegion;
-import tc.oc.pgm.variables.Variable;
 
 public class CylindricalVariable
     extends RegionVariable<CylindricalRegion.Mutable, CylindricalRegion> {
 
+  private static final Component<CylindricalRegion.Mutable>[] COMPONENTS =
+      CylindricalVariable.CylindricalComponent.values();
+
   public CylindricalVariable(CylindricalRegion initial) {
-    super(Component.values(), initial);
+    super(COMPONENTS, initial);
   }
 
-  public Variable<Match> getComponent(Component component) {
-    return super.getComponent(component);
-  }
-
-  public enum Component implements tc.oc.pgm.regions.Component<CylindricalRegion.Mutable> {
+  public enum CylindricalComponent implements Component<CylindricalRegion.Mutable> {
     X(r -> r.getMutableBase().getX(), (r, v) -> r.getMutableBase().setX(v)),
     Y(r -> r.getMutableBase().getY(), (r, v) -> r.getMutableBase().setY(v)),
     Z(r -> r.getMutableBase().getZ(), (r, v) -> r.getMutableBase().setZ(v)),
@@ -27,7 +25,7 @@ public class CylindricalVariable
     private final ToDoubleFunction<CylindricalRegion.Mutable> getter;
     private final ObjDoubleConsumer<CylindricalRegion.Mutable> setter;
 
-    Component(
+    CylindricalComponent(
         ToDoubleFunction<CylindricalRegion.Mutable> getter,
         ObjDoubleConsumer<CylindricalRegion.Mutable> setter) {
       this.getter = getter;
