@@ -234,8 +234,14 @@ public abstract class KitParser {
     }
     ItemStack stack = parseItem(el, true);
     boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
+    Float dropChance = parseDropChance(el);
 
-    return new ArmorKit.ArmorItem(stack, locked);
+    return new ArmorKit.ArmorItem(stack, locked, dropChance);
+  }
+
+  protected @Nullable Float parseDropChance(Element el) throws InvalidXMLException {
+    var attr = el.getAttribute("drop-chance");
+    return attr == null ? null : XMLUtils.parseNumber(attr, Float.class, Range.closed(0f, 1f));
   }
 
   public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
@@ -255,6 +261,7 @@ public abstract class KitParser {
 
   public ItemKit parseItemKit(Element el) throws InvalidXMLException {
     Map<Slot, ItemStack> slotItems = Maps.newHashMap();
+    Map<Slot, Float> slotDropChances = Maps.newHashMap();
     List<ItemStack> freeItems = new ArrayList<>();
 
     for (Element itemEl : ((InheritingElement) el).getChildren(ITEM_TYPES)) {
@@ -262,12 +269,23 @@ public abstract class KitParser {
 
       if (item != null) {
         Node nodeSlot = Node.fromAttr(itemEl, "slot");
+        Float dropChance = parseDropChance(itemEl);
         if (nodeSlot == null) {
+          if (dropChance != null) {
+            throw new InvalidXMLException("drop-chance requires an equipment slot", itemEl);
+          }
           freeItems.add(item);
         } else {
           Slot slot = parseInventorySlot(nodeSlot);
           if (slotItems.put(slot, item) != null) {
             throw new InvalidXMLException("Kit already has an item in " + slot.getKey(), nodeSlot);
+          }
+          if (dropChance != null) {
+            if (!slot.isEquipment()) {
+              throw new InvalidXMLException(
+                  "drop-chance is only supported on equipment slots", itemEl);
+            }
+            slotDropChances.put(slot, dropChance);
           }
         }
       }
@@ -280,7 +298,8 @@ public abstract class KitParser {
     boolean deductItems = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-items"), true);
     boolean dropOverflow = XMLUtils.parseBoolean(Node.fromAttr(el, "drop-overflow"), false);
 
-    return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems, dropOverflow);
+    return new ItemKit(
+        slotItems, slotDropChances, freeItems, repairTools, deductTools, deductItems, dropOverflow);
   }
 
   public @Nullable ItemStack parseItemStack(Element el) throws InvalidXMLException {

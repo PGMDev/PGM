@@ -19,17 +19,22 @@ public class AttributeKit extends AbstractKit {
 
   @Override
   protected void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
-    applyModifiers(player.getBukkit(), modifiers);
+    apply(player.getBukkit());
   }
 
-  public static void applyModifiers(
-      LivingEntity entity, SetMultimap<Attribute, AttributeModifier> modifiers) {
+  @Override
+  public void apply(LivingEntity entity) {
     for (Map.Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
       AttributeInstance attr = entity.getAttribute(entry.getKey());
       if (attr != null && !attr.getModifiers().contains(entry.getValue())) {
         attr.addModifier(entry.getValue());
       }
     }
+  }
+
+  @Override
+  public boolean mobCompatible() {
+    return true;
   }
 
   @Override

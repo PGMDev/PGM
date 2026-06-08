@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -213,6 +214,16 @@ public abstract class Slot {
     inv.setItem(getIndex(), airToNull(stack));
   }
 
+  /** Set this equipment slot on a non-player {@link LivingEntity}. Equipment slots only. */
+  public void setEquipment(LivingEntity entity, ItemStack stack) {
+    throw new UnsupportedOperationException("Slot " + this + " is not a mob equipment slot");
+  }
+
+  /** Set the drop chance for this equipment slot on a non-player {@link LivingEntity}. */
+  public void setDropChance(LivingEntity entity, float chance) {
+    throw new UnsupportedOperationException("Slot " + this + " is not a mob equipment slot");
+  }
+
   protected PlayerInventory asPlayerInventory(Inventory inv) {
     if (inv instanceof PlayerInventory plInv) return plInv;
     throw new IllegalArgumentException("Slot " + this + " is player-only inventory slot");
@@ -407,6 +418,16 @@ public abstract class Slot {
     public EquipmentSlot toEquipmentSlot() {
       return EquipmentSlot.HAND;
     }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      entity.getEquipment().setItemInHand(stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      entity.getEquipment().setItemInHandDropChance(chance);
+    }
   }
 
   public static class OffHand extends Equipment {
@@ -422,6 +443,16 @@ public abstract class Slot {
 
     protected OffHand() {
       super("weapon.offhand", 40, EquipmentSlot.valueOf("OFF_HAND"));
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      EntityEquipmentUtil.EQUIPMENT.setOffHand(entity, stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      EntityEquipmentUtil.EQUIPMENT.setOffHandDropChance(entity, chance);
     }
   }
 
@@ -458,6 +489,28 @@ public abstract class Slot {
 
     public static Armor forType(ArmorType armorType) {
       return byArmorType.get(armorType);
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      var eq = entity.getEquipment();
+      switch (armorType) {
+        case HELMET -> eq.setHelmet(stack);
+        case CHESTPLATE -> eq.setChestplate(stack);
+        case LEGGINGS -> eq.setLeggings(stack);
+        case BOOTS -> eq.setBoots(stack);
+      }
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      var eq = entity.getEquipment();
+      switch (armorType) {
+        case HELMET -> eq.setHelmetDropChance(chance);
+        case CHESTPLATE -> eq.setChestplateDropChance(chance);
+        case LEGGINGS -> eq.setLeggingsDropChance(chance);
+        case BOOTS -> eq.setBootsDropChance(chance);
+      }
     }
   }
 

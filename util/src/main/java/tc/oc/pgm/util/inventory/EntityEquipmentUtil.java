@@ -1,11 +1,11 @@
-package tc.oc.pgm.entity.kits;
+package tc.oc.pgm.util.inventory;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.platform.Platform;
 
-public interface MobEquipmentUtil {
-  MobEquipmentUtil EQUIPMENT = Platform.get(MobEquipmentUtil.class);
+public interface EntityEquipmentUtil {
+  EntityEquipmentUtil EQUIPMENT = Platform.get(EntityEquipmentUtil.class);
 
   void setOffHand(LivingEntity entity, ItemStack stack);
 

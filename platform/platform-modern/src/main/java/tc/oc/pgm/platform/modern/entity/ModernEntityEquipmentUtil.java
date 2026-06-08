@@ -5,11 +5,11 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Llama;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.entity.kits.MobEquipmentUtil;
+import tc.oc.pgm.util.inventory.EntityEquipmentUtil;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(PAPER)
-public class ModernMobEquipmentUtil implements MobEquipmentUtil {
+public class ModernEntityEquipmentUtil implements EntityEquipmentUtil {
   @Override
   public void setOffHand(LivingEntity entity, ItemStack stack) {
     entity.getEquipment().setItemInOffHand(stack);

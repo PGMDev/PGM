@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -18,6 +19,7 @@ public class ItemKit implements KitDefinition {
   public static final int INFINITE_STACK_SIZE = 99;
 
   protected final ImmutableMap<Slot, ItemStack> slotItems;
+  protected final ImmutableMap<Slot, Float> slotDropChances;
   protected final ImmutableList<ItemStack> freeItems;
   protected final boolean repairTools;
   protected final boolean deductTools;
@@ -35,7 +37,27 @@ public class ItemKit implements KitDefinition {
       boolean deductTools,
       boolean deductItems,
       boolean dropOverflow) {
+    this(
+        slotItems,
+        ImmutableMap.of(),
+        freeItems,
+        repairTools,
+        deductTools,
+        deductItems,
+        dropOverflow);
+  }
+
+  public ItemKit(
+      Map<Slot, ItemStack> slotItems,
+      Map<Slot, Float> slotDropChances,
+      List<ItemStack> freeItems,
+      boolean repairTools,
+      boolean deductTools,
+      boolean deductItems,
+      boolean dropOverflow) {
     this.slotItems = slotItems == null ? ImmutableMap.of() : ImmutableMap.copyOf(slotItems);
+    this.slotDropChances =
+        slotDropChances == null ? ImmutableMap.of() : ImmutableMap.copyOf(slotDropChances);
     this.freeItems = freeItems == null ? ImmutableList.of() : ImmutableList.copyOf(freeItems);
     this.repairTools = repairTools;
     this.deductTools = deductTools;
@@ -170,5 +192,24 @@ public class ItemKit implements KitDefinition {
   @Override
   public void remove(MatchPlayer player) {
     throw new UnsupportedOperationException(this + " is not removable");
+  }
+
+  @Override
+  public void apply(LivingEntity entity) {
+    for (Entry<Slot, ItemStack> entry : slotItems.entrySet()) {
+      Slot slot = entry.getKey();
+      slot.setEquipment(entity, entry.getValue().clone());
+      Float dropChance = slotDropChances.get(slot);
+      if (dropChance != null) slot.setDropChance(entity, dropChance);
+    }
+  }
+
+  @Override
+  public boolean mobCompatible() {
+    if (!freeItems.isEmpty()) return false;
+    for (Slot slot : slotItems.keySet()) {
+      if (!slot.isEquipment()) return false;
+    }
+    return true;
   }
 }

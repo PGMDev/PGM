@@ -4,14 +4,17 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.util.inventory.ArmorType;
 import tc.oc.pgm.util.inventory.Slot;
 
 public class ArmorKit extends AbstractKit {
-  public record ArmorItem(ItemStack stack, boolean locked) {}
+  public record ArmorItem(
+      ItemStack stack, boolean locked, @Nullable Float dropChance) {}
 
   private final Map<Slot.Armor, ArmorItem> armor;
 
@@ -43,5 +46,18 @@ public class ArmorKit extends AbstractKit {
         slot.setItem(player, wearing);
       }
     });
+  }
+
+  @Override
+  public void apply(LivingEntity entity) {
+    armor.forEach((slot, item) -> {
+      slot.setEquipment(entity, item.stack.clone());
+      if (item.dropChance != null) slot.setDropChance(entity, item.dropChance);
+    });
+  }
+
+  @Override
+  public boolean mobCompatible() {
+    return true;
   }
 }

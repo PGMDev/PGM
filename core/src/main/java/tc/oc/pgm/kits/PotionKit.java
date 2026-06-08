@@ -19,13 +19,13 @@ public class PotionKit extends AbstractKit {
   @Override
   public void applyPostEvent(MatchPlayer player, boolean force, List<ItemStack> displacedItems) {
     var pl = player.getBukkit();
-    applyEffects(pl, this.effects, force);
+    applyEffects(pl, force);
 
     // No swirls by default, KitNode can re-enable them if it so desires
     PLAYER_UTILS.setPotionParticles(pl, false);
   }
 
-  public static void applyEffects(LivingEntity entity, Set<PotionEffect> effects, boolean force) {
+  private void applyEffects(LivingEntity entity, boolean force) {
     if (force) {
       for (PotionEffect effect : effects) {
         // Forced potion eff with duration = 0 is used to remove effects, however in modern versions
@@ -37,6 +37,16 @@ public class PotionKit extends AbstractKit {
     } else {
       entity.addPotionEffects(effects);
     }
+  }
+
+  @Override
+  public void apply(LivingEntity entity) {
+    applyEffects(entity, true);
+  }
+
+  @Override
+  public boolean mobCompatible() {
+    return true;
   }
 
   @Override

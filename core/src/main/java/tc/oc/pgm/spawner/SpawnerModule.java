@@ -23,7 +23,6 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.entity.SpawnableEntity;
-import tc.oc.pgm.entity.kits.MobKitParser;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.regions.RegionModule;
@@ -59,18 +58,6 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
     return new SpawnerMatchModule(match, spawners);
   }
 
-  @Override
-  public void postParse(MapFactory factory, Logger logger, Document doc)
-      throws InvalidXMLException {
-    for (SpawnerDefinition def : definitions) {
-      for (Spawnable spawnable : def.objects) {
-        if (spawnable instanceof SpawnableMob mob) {
-          mob.validate();
-        }
-      }
-    }
-  }
-
   public static class Factory implements MapModuleFactory<SpawnerModule> {
     @Override
     public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
@@ -81,14 +68,7 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
     public SpawnerModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       XMLFluentParser parser = factory.getParser();
-      MobKitParser mobKitParser = factory.getMobKits();
       AtomicInteger spawnerIdSerial = new AtomicInteger(1);
-
-      for (Element mobKitsEl : doc.getRootElement().getChildren("mob-kits")) {
-        for (Element mobKitEl : mobKitsEl.getChildren("mob-kit")) {
-          mobKitParser.parse(mobKitEl);
-        }
-      }
 
       List<SpawnerDefinition> spawners = new ArrayList<>();
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "spawners", "spawner")) {
@@ -149,7 +129,7 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
         }
 
         for (Element mobEl : XMLUtils.getChildren(el, "mob")) {
-          objects.add(parseMob(mobEl, id, mobKitParser));
+          objects.add(parseMob(mobEl, id, factory));
         }
 
         SpawnerDefinition spawnerDefinition = new SpawnerDefinition(
@@ -169,15 +149,15 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
       return spawners.isEmpty() ? null : new SpawnerModule(spawners);
     }
 
-    private static SpawnableMob parseMob(Element mobEl, String spawnerId, MobKitParser mobKitParser)
+    private static SpawnableMob parseMob(Element mobEl, String spawnerId, MapFactory factory)
         throws InvalidXMLException {
-      var entity = SpawnableEntity.parse(mobEl, mobKitParser);
+      var entity = SpawnableEntity.parse(mobEl, factory);
       if (EXCLUDED_MOB_TYPES.stream().anyMatch(c -> c.isAssignableFrom(entity.entityType()))) {
         throw new InvalidXMLException(
             "Spawner mob type " + entity.entityType().getSimpleName() + " cannot be spawned",
             mobEl);
       }
-      return new SpawnableMob(entity, spawnerId, mobEl);
+      return new SpawnableMob(entity, spawnerId);
     }
   }
 }

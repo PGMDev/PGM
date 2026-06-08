@@ -4,11 +4,11 @@ import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
-import tc.oc.pgm.entity.kits.MobEquipmentUtil;
+import tc.oc.pgm.util.inventory.EntityEquipmentUtil;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(SPORTPAPER)
-public class SpMobEquipmentUtil implements MobEquipmentUtil {
+public class SpEntityEquipmentUtil implements EntityEquipmentUtil {
   @Override
   public void setOffHand(LivingEntity entity, ItemStack stack) {
     throw new UnsupportedOperationException("Off-hand is not supported on SportPaper 1.8");
