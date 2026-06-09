@@ -48,11 +48,21 @@ map:
 #  "1m5s" = 1 minute and 5 seconds
 #  "0s"   = immediately
 #  -1     = disabled
+# Additionally, some fields support variable durations, such as:
+# cycle:
+#   default: "30s"
+#   rules:
+#     - duration: "15s"
+#       max-players: 15
+#       max-match-length: "5m"
+#     - duration: "60s"
+#       min-match-length: "60m"
 #
 # See the examples above for how to format durations.
 countdown:
-  start: "30s"    # After a match cycles or /start
-  cycle: "30s"    # After a match ends or /cycle
+  start: "30s"    # After a match cycles or /start (supports variable durations)
+  cycle: "30s"    # After a match ends or /cycle (supports variable durations)
+  preload: "5s"   # Before a cycle ends to start loading the next match (supports variable durations)
   huddle: -1      # Before a match starts (only recommended for "ranked" matches)
   restart: "30s"  # After a restart countdown is queued or /qr
 
@@ -101,7 +111,7 @@ votes:
 ui:
   sidebar: true    # Enable the side bar?
   tablist: true    # Enable the tab list?
-  tablist-resize: false # Resize the tab list for 1.7 players? Requires ProtocolLib
+  tablist-resize: false # Resize the tab list for 1.7 players? Requires PacketEvents
   ping: false      # Should tab list show real ping?
   proximity: auto # Should the proximity of objectives be visible?
   fireworks: true  # Spawn fireworks after objectives are completed?
@@ -111,7 +121,7 @@ ui:
 # Changes how stats are shown.
 stats:
   verbose: true   # Enable more detailed stats?
-  show-after: 6s  # How long to wait after the match ends to show stats?
+  show-after: 6s  # How long to wait after the match ends to show stats? (supports variable durations)
   show-best: true # Should show best players stats?
   show-own: true  # Should show each players own stats?
   item-slot: 7    # In what slot should we place the verbose stats item?
@@ -222,6 +232,28 @@ database-max-connections: 5
 
 # Enable the simple vanish manager, disable if you want other plugins to handle this
 vanish: true
+
+# Resolvers pgm should use to convert uuid -> username, mainly for map author names
+# The defined order will be respected by pgm, if one fails or doesn't
+# give a valid answer, the next is checked.
+username-resolvers:
+  # Resolve using bukkit directly first, heavily recommended
+  - type: BUKKIT
+  # Resolve using pgm's SQL table, used as a cache, heavily recommended
+  - type: SQL
+  # See https://playerdb.co, recommended
+  - type: PLAYER_DB
+  # Official minecraft API, heavily rate-limited, but reliable
+  - type: MOJANG
+  # See https://github.com/Electroid/mojang-api, outdated
+  - type: ELECTROID
+  # You may add custom apis of your own, as long as they respond with JSON.
+  # The following is an example of how you'd setup player-db
+#  - type: CUSTOM
+#    name: "playerdb-copy" # Used for debug/logs
+#    uri: "https://playerdb.co/api/player/minecraft/{uuid}" # Template for the uri to hit
+#    single-threaded: false # Optional, use true for rate-limited APIs, ensures non-overlapping requests.
+#    json-path: "data.player.username" # dot-separated JSON object properties, does not support arrays.
 
 # Experimental features that are not yet stable.
 experiments:

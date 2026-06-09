@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.event.EventUtil.handleCall;
 import com.google.gson.JsonObject;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
@@ -20,6 +21,7 @@ import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerSpawnLocationEvent;
 
 public class SportPaperListener implements Listener {
   @EventHandler(ignoreCancelled = true)
@@ -121,5 +123,12 @@ public class SportPaperListener implements Listener {
           }
         },
         event);
+  }
+
+  @EventHandler
+  public void onInitialSpawn(PlayerInitialSpawnEvent event) {
+    var pgmEvent = new PlayerSpawnLocationEvent(event.getSpawnLocation());
+    handleCall(pgmEvent, event);
+    event.setSpawnLocation(pgmEvent.getSpawnLocation());
   }
 }

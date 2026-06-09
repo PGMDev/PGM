@@ -26,7 +26,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jspecify.annotations.Nullable;
-import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
@@ -55,6 +54,7 @@ import tc.oc.pgm.spawns.states.State;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.event.player.PlayerSpawnLocationEvent;
 
 @SuppressWarnings("UnstableApiUsage")
 @ListenerScope(MatchScope.LOADED)
@@ -64,6 +64,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
 
   private final Match match;
   private final SpawnModule module;
+  private final Location worldSpawn;
   private final Map<MatchPlayer, State> states = new HashMap<>();
   private final ListMultimap<MatchPlayer, State> transitions = ArrayListMultimap.create();
 
@@ -79,6 +80,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   public SpawnMatchModule(Match match, SpawnModule module) {
     this.match = match;
     this.module = module;
+    this.worldSpawn = match.getWorld().getSpawnLocation().clone();
   }
 
   public Match getMatch() {
@@ -155,7 +157,8 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   }
 
   public long getJoinPenalty(PlayerPartyChangeEventBase event) {
-    if (event.getRequest().has(JoinRequest.Flag.FORCE)) return 0;
+    // Direct joins (old party is null) are always forced, but shouldn't skip penalty
+    if (event.getRequest().has(JoinRequest.Flag.FORCE) && event.getOldParty() != null) return 0;
     if (event.getNewParty() == null || !event.getNewParty().isParticipating()) return 0;
 
     ParticipationData data = participationData.getIfPresent(event.getPlayer().getId());
@@ -322,7 +325,8 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onInitialSpawn(final PlayerSpawnLocationEvent event) {
     // Ensure the player spawns in the match world
-    event.setSpawnLocation(match.getWorld().getSpawnLocation());
+    // This event is async on modern Paper, so we set a clone of the location
+    event.setSpawnLocation(worldSpawn);
   }
 
   @EventHandler(priority = EventPriority.NORMAL)

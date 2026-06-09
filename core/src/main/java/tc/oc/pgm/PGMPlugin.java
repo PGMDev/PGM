@@ -5,6 +5,7 @@ import fr.minuskube.inv.InventoryManager;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -81,8 +82,11 @@ import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
-import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 import tc.oc.pgm.util.usernames.BukkitUsernameResolver;
+import tc.oc.pgm.util.usernames.ElectroidApiUsernameResolver;
+import tc.oc.pgm.util.usernames.MojangApiUsernameResolver;
+import tc.oc.pgm.util.usernames.PlayerDbApiUsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolver;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
@@ -103,6 +107,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
   private ChatManager chatManager;
   private InventoryManager inventoryManager;
   private AfkTracker afkTracker;
+  private boolean tablistResizerEnabled;
 
   public PGMPlugin() {
     super();
@@ -168,16 +173,13 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       return;
     }
 
-    UsernameResolvers.setResolvers(
-        new BukkitUsernameResolver(),
-        new SqlUsernameResolver((SQLDatastore) datastore),
-        new ApiUsernameResolver());
+    setupUsernameResolvers();
 
     datastore = new CacheDatastore(datastore);
 
     if (!loadInitialMaps()) {
       logger.warning("No maps found, adding default repository as a fallback.");
-      PGMConfig.registerRemoteMapSource(mapSourceFactories, PGMConfig.DEFAULT_REMOTE_REPO);
+      mapSourceFactories.add(PGMConfig.parseGit(PGMConfig.DEFAULT_REMOTE_REPO));
       if (!loadInitialMaps()) {
         logger.severe("No maps were loaded in time, PGM will be disabled");
         getServer().getPluginManager().disablePlugin(this);
@@ -233,10 +235,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     }
 
     if (config.resizeTabList()) {
-      if (this.getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
-        TablistResizer.registerAdapter(this);
+      if (this.getServer().getPluginManager().isPluginEnabled("packetevents")) {
+        TablistResizer.registerListener();
+        tablistResizerEnabled = true;
       } else {
-        logger.warning("ProtocolLib is required when 'ui.resize' is enabled");
+        logger.warning("PacketEvents is required when 'ui.resize' is enabled");
       }
     }
 
@@ -250,8 +253,40 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerCommands();
   }
 
+  private void setupUsernameResolvers() {
+    var custom = config.getCustomUsernameResolvers().iterator();
+    var types = config.getUsernameResolvers();
+    if (types.isEmpty()) {
+      PGM.get()
+          .getLogger()
+          .warning("No username resolvers were configured, falling back to defaults.");
+      var nonCustom = EnumSet.allOf(Config.UsernameResolverType.class);
+      nonCustom.remove(Config.UsernameResolverType.CUSTOM);
+      types = List.copyOf(nonCustom);
+    }
+
+    List<UsernameResolver> resolvers = new ArrayList<>();
+    for (var type : types) {
+      resolvers.add(
+          switch (type) {
+            case BUKKIT -> new BukkitUsernameResolver();
+            case SQL -> new SqlUsernameResolver((SQLDatastore) datastore);
+            case PLAYER_DB -> new PlayerDbApiUsernameResolver();
+            case MOJANG -> new MojangApiUsernameResolver();
+            case ELECTROID -> new ElectroidApiUsernameResolver();
+            case CUSTOM -> custom.next();
+          });
+    }
+    UsernameResolvers.setResolvers(resolvers.toArray(UsernameResolver[]::new));
+  }
+
   @Override
   public void onDisable() {
+    if (tablistResizerEnabled) {
+      TablistResizer.unregisterListener();
+      tablistResizerEnabled = false;
+    }
+    Platform.MANIFEST.onDisable();
     if (matchTabManager != null) matchTabManager.disable();
     if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
     if (executorService != null) executorService.shutdown();

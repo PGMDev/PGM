@@ -18,6 +18,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 
 /** A configuration for server owners to modify {@link PGM}. */
 public interface Config {
@@ -83,6 +85,14 @@ public interface Config {
   Duration getStartTime();
 
   /**
+   * Gets a duration to wait before starting a match.
+   *
+   * @param match The match.
+   * @return A duration.
+   */
+  Duration getStartTime(Match match);
+
+  /**
    * Gets a duration to give teams to "strategize" before the match starts.
    *
    * @return A duration, if non-positive or null then skips this phase.
@@ -95,6 +105,22 @@ public interface Config {
    * @return A duration, if zero then cycles immediately, if negative does not auto-cycle.
    */
   Duration getCycleTime();
+
+  /**
+   * Gets a duration to wait before cycling to another match.
+   *
+   * @param match The match.
+   * @return A duration.
+   */
+  Duration getCycleTime(Match match);
+
+  /**
+   * Gets how much earlier to start preloading the next match.
+   *
+   * @param match The match.
+   * @return A duration.
+   */
+  Duration getPreloadTime(Match match);
 
   /**
    * Gets a duration to wait before restarting the server.
@@ -269,6 +295,12 @@ public interface Config {
 
   /** @return How many ticks should wait until showing stats */
   Duration showStatsAfter();
+
+  /**
+   * @param match The match.
+   * @return How many ticks should wait until showing stats
+   */
+  Duration showStatsAfter(Match match);
 
   /** @return If stats on match end should shown high scores */
   boolean showBestStats();
@@ -481,6 +513,19 @@ public interface Config {
    * @return If vanish is enabled.
    */
   boolean isVanishEnabled();
+
+  List<UsernameResolverType> getUsernameResolvers();
+
+  List<ApiUsernameResolver> getCustomUsernameResolvers();
+
+  enum UsernameResolverType {
+    BUKKIT,
+    SQL,
+    PLAYER_DB,
+    MOJANG,
+    ELECTROID,
+    CUSTOM
+  }
 
   /**
    * Gets experimental configuration settings that are not yet stable.

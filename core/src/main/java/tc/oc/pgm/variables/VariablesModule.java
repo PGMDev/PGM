@@ -29,6 +29,7 @@ import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
+import tc.oc.pgm.variables.types.WorldTimeVariable;
 
 public class VariablesModule implements MapModule<VariablesMatchModule> {
 
@@ -146,21 +147,22 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     public VariablesModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
 
-      boolean featureIds = factory.getProto().isNoOlderThan(MapProtos.FEATURE_SINGLETON_IDS);
       VariableParser parser = new VariableParser(factory);
 
       var features = factory.getFeatures();
-      if (featureIds) {
+      if (factory.getProto().isNoOlderThan(MapProtos.FEATURE_SINGLETON_IDS)) {
         features.addFeature(null, "lives", LivesVariable.INSTANCE);
         features.addFeature(null, "score", ScoreVariable.INSTANCE);
         features.addFeature(null, "timelimit", TimeLimitVariable.INSTANCE);
         features.addFeature(null, "maxbuildheight", MaxBuildVariable.INSTANCE);
-        // TODO: support fallback feature ids being overriden without being a breaking change
-        // features.addFeature(null, "worldtime", WorldTimeVariable.INSTANCE);
         for (var component : PlayerVariable.Component.values()) {
           String key = "player." + component.name().toLowerCase(Locale.ROOT);
           features.addFeature(null, key, PlayerVariable.of(component));
         }
+      }
+
+      if (factory.getProto().isNoOlderThan(MapProtos.FEATURE_SINGLETON_IDS_2)) {
+        features.addFeature(null, "worldtime", WorldTimeVariable.INSTANCE);
       }
 
       for (Element variable : XMLUtils.flattenElements(doc.getRootElement(), "variables", null)) {

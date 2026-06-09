@@ -6,7 +6,6 @@ import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.GameMode;
@@ -30,6 +29,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.bukkit.PotionEffects;
 import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.Materials;
@@ -42,7 +43,7 @@ import tc.oc.pgm.util.material.Materials;
  */
 public class CombatLogTracker implements Listener {
   // Logout within this time since last damage is considered combat log
-  private static final Duration RECENT_DAMAGE_THRESHOLD = Duration.ofSeconds(3);
+  private static final Duration RECENT_DAMAGE_THRESHOLD = Duration.ofSeconds(5);
 
   // Maximum height player can fall without taking damage
   private static final double SAFE_FALL_DISTANCE = 2;
@@ -62,7 +63,7 @@ public class CombatLogTracker implements Listener {
       @Nullable Block blockDamager,
       boolean alreadyDamaged) {}
 
-  private final Map<Player, Damage> recentDamage = new HashMap<>();
+  private final Map<Player, Damage> recentDamage = new OnlinePlayerMapAdapter<>(PGM.get());
 
   public CombatLogTracker(TrackerMatchModule tmm) {}
 
@@ -194,12 +195,9 @@ public class CombatLogTracker implements Listener {
     }
   }
 
-  /**
-   * Get the cause of the player's imminent death, or null if they are not about to die NOTE: not
-   * idempotent, has the side effect of clearing the recentDamage cache
-   */
+  /** Get the cause of the player's imminent death, or null if they are not about to die */
   @Nullable
-  ImminentDeath getImminentDeath(Player player) {
+  private ImminentDeath getImminentDeath(Player player) {
     // If the player is already dead or in creative mode, we don't care
     if (player.isDead()
         || player.hasMetadata("isDead")
@@ -278,9 +276,11 @@ public class CombatLogTracker implements Listener {
     }
 
     // If we didn't predict a falling death, detect combat log due to recent damage
-    Damage damage = this.recentDamage.remove(player);
-    if (damage != null && damage.time.plus(RECENT_DAMAGE_THRESHOLD).isAfter(Instant.now())) {
-      // Player logged out too soon after taking damage
+    Damage damage = this.recentDamage.get(player);
+    if (damage != null
+        && TimeUtils.isShorterThan(
+            Duration.between(damage.time, Instant.now()), RECENT_DAMAGE_THRESHOLD)) {
+      // Player logged out or tried to leave too soon after taking damage
       return new ImminentDeath(damage.event.getCause(), player.getLocation(), null, true);
     }
 

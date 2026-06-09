@@ -109,15 +109,7 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public ItemMaterialData parseItemMaterialData(String text, short dmg, @Nullable Node node)
       throws InvalidXMLException {
-    var md = SpMaterialParser.parseItem(text, node);
-    short mdData = md.getData();
-    if (mdData != dmg && mdData != 0 && dmg != 0)
-      throw new InvalidXMLException(
-          "Mismatching damage, parsed '" + text + ":" + dmg + "' but should be '" + text + ":"
-              + md.getData() + "'",
-          node);
-
-    if (mdData != dmg && dmg != 0) md = new SpMaterialData(md.getItemType(), dmg);
+    var md = SpMaterialParser.parseItem(text, dmg, node);
     validateItem(md.getItemType(), node);
     return md;
   }

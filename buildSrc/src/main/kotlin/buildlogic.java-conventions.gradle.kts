@@ -15,8 +15,10 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/") // Paper builds & paperweight plugin
     maven("https://oss.sonatype.org/content/repositories/snapshots/") // Snapshots
-    maven("https://repo.viaversion.com/") // Viaversion
-    maven("https://repo.pgm.fyi/snapshots") // Sportpaper & other pgm-specific stuff
+    maven("https://repo.viaversion.com/") // ViaVersion
+    maven("https://repo.pgm.fyi/snapshots") // SportPaper & other PGM-specific stuff
+    maven("https://jitpack.io") // MinusKube SmartsInv fix for shift click
+    maven("https://repo.codemc.io/repository/maven-releases/") // PacketEvents
 }
 
 dependencies {
@@ -30,7 +32,7 @@ dependencies {
     api("org.incendo:cloud-minecraft-extras:2.0.0-beta.14")
     api("me.lucko:commodore:2.2")
     api("fr.mrmicky:fastboard:2.1.5")
-    api("fr.minuskube.inv:smart-invs:1.2.7") { isTransitive = false }
+    api("com.github.MinusKube:SmartInvs:9c9dbbe") { isTransitive = false }
     api("org.eclipse.jgit:org.eclipse.jgit:7.5.0.202512021534-r") { isTransitive = false }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
@@ -40,7 +42,7 @@ dependencies {
     compileOnly("org.jetbrains:annotations:26.0.2-1")
 
     // Optional runtime dependencies
-    compileOnly("net.dmulloy2:ProtocolLib:5.4.0")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.12.0")
     compileOnly("com.viaversion:viaversion-api:5.0.0")
 
     // Paper and SportPaper include these (or equivalents)

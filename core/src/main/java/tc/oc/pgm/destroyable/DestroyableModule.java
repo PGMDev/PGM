@@ -97,12 +97,13 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
             .parse(Node.fromRequiredAttr(el, "materials", "material"))
             .build();
 
-        var modeSet = parser.node(n -> parseModeSet(context, n), el, "modes").orNull();
-        var modeChanges = parser.parseBool(el, "mode-changes").orNull();
-        if (modeChanges != null) {
-          if (modeSet != null)
+        var modeSet =
+            parser.node(n -> parseModeSet(context, n), el, "modes").optional(ImmutableSet.of());
+        var modeChanges = parser.parseBool(el, "mode-changes").orFalse();
+        if (modeChanges) {
+          if (!modeSet.isEmpty())
             throw new InvalidXMLException("Cannot combine modes and mode-changes", el);
-          modeSet = modeChanges ? null : ImmutableSet.of();
+          modeSet = null;
         }
 
         boolean showProgress = parser.parseBool(el, "show-progress").orFalse();
@@ -141,7 +142,7 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
     }
 
     public double parsePercent(Node n) throws InvalidXMLException {
-      return XMLUtils.parseNumber(n, n.getValue().replace("%", "").trim(), Double.class);
+      return XMLUtils.parseNumber(n, n.getValue().replace("%", "").trim(), Double.class) / 100.0;
     }
 
     public ImmutableSet<Mode> parseModeSet(MapFactory factory, Node node)

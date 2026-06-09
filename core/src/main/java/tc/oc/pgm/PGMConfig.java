@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,11 +40,14 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
+import tc.oc.pgm.api.VariableDuration;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.map.source.GitMapSourceFactory;
 import tc.oc.pgm.map.source.PathMapSourceFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 
 public final class PGMConfig implements Config {
 
@@ -67,9 +69,10 @@ public final class PGMConfig implements Config {
   private final boolean enforceDevPhase;
 
   // countdown.*
-  private final Duration startTime;
+  private final VariableDuration startTime;
   private final Duration huddleTime;
-  private final Duration cycleTime;
+  private final VariableDuration cycleTime;
+  private final VariableDuration preloadTime;
   private final Duration restartTime;
 
   // restart.*
@@ -105,7 +108,7 @@ public final class PGMConfig implements Config {
   private final boolean showFireworks;
   private final boolean participantsSeeObservers;
   private final boolean verboseStats;
-  private final Duration statsShowAfter;
+  private final VariableDuration statsShowAfter;
   private final boolean statsShowBest;
   private final boolean statsShowOwn;
   private final int verboseItemSlot;
@@ -123,6 +126,10 @@ public final class PGMConfig implements Config {
 
   // groups.*
   private final List<Group> groups;
+
+  // username-resolvers.*
+  private final List<UsernameResolverType> usernameResolvers;
+  private final List<ApiUsernameResolver> customUsernameResolvers;
 
   // experiments.*
   private final Map<String, Object> experiments;
@@ -152,20 +159,14 @@ public final class PGMConfig implements Config {
     final String motd = config.getString("motd");
     this.motd = motd == null || motd.isEmpty() ? null : parseComponentLegacy(motd);
 
-    this.mapSourceFactories = new LinkedList<>();
+    this.mapSourceFactories = new ArrayList<>();
 
-    final TreeSet<String> folders = new TreeSet<>(config.getStringList("map.folders"));
-    final List<Map<?, ?>> repositories = new LinkedList<>(config.getMapList("map.repositories"));
-
-    for (String uri : config.getStringList("map.repositories")) {
-      repositories.add(ImmutableMap.of("uri", uri));
+    for (var repo : config.getList("map.repositories", List.of())) {
+      if (repo instanceof String uri) mapSourceFactories.add(parseGit(Map.of("uri", uri)));
+      else if (repo instanceof Map<?, ?> map) mapSourceFactories.add(parseGit(map));
     }
 
-    for (Map<?, ?> repository : repositories) {
-      registerRemoteMapSource(mapSourceFactories, repository);
-    }
-
-    for (String folder : folders) {
+    for (String folder : new TreeSet<>(config.getStringList("map.folders"))) {
       this.mapSourceFactories.add(new PathMapSourceFactory(Paths.get(folder)));
     }
 
@@ -174,9 +175,13 @@ public final class PGMConfig implements Config {
     this.showUnusedXml = parseBoolean(config.getString("map.show-unused-xml", "true"));
     this.enforceDevPhase = parseBoolean(config.getString("map.enforce-dev-phase", "false"));
 
-    this.startTime = parseDuration(config.getString("countdown.start", "30s"));
+    this.startTime = VariableDuration.parse(config.get("countdown.start"), "30s");
     this.huddleTime = parseDuration(config.getString("countdown.huddle", "0s"));
-    this.cycleTime = parseDuration(config.getString("countdown.cycle", "30s"));
+    this.cycleTime = VariableDuration.parse(config.get("countdown.cycle"), "30s");
+    this.preloadTime = VariableDuration.parse(
+        config.get("countdown.preload"),
+        // Fallback on the now legacy experiments
+        config.getString("experiments.match-preload-seconds", "0"));
     this.restartTime = parseDuration(config.getString("countdown.restart", "30s"));
 
     this.uptimeLimit = parseDuration(config.getString("restart.uptime", "1d"));
@@ -217,7 +222,7 @@ public final class PGMConfig implements Config {
     this.flagBeams = parseBoolean(config.getString("ui.flag-beams", "false"));
 
     this.verboseStats = parseBoolean(config.getString("stats.verbose", "true"));
-    this.statsShowAfter = parseDuration(config.getString("stats.show-after", "6s"));
+    this.statsShowAfter = VariableDuration.parse(config.get("stats.show-after"), "6s");
     this.statsShowBest = parseBoolean(config.getString("stats.show-best", "true"));
     this.statsShowOwn = parseBoolean(config.getString("stats.show-own", "true"));
     this.verboseItemSlot = parseInteger(config.getString("stats.item-slot", "7"));
@@ -233,6 +238,22 @@ public final class PGMConfig implements Config {
         rightText == null || rightText.isEmpty() ? null : parseComponent(rightText);
 
     this.vanish = parseBoolean(config.getString("vanish", "true"));
+
+    this.usernameResolvers = new ArrayList<>();
+    this.customUsernameResolvers = new ArrayList<>();
+    for (var resolver : config.getMapList("username-resolvers")) {
+      var type = parseEnum(String.valueOf(resolver.get("type")), UsernameResolverType.class);
+      if (type == UsernameResolverType.CUSTOM) {
+        customUsernameResolvers.add(new ApiUsernameResolver(
+            getOrDefault(resolver, "name", "custom"),
+            getOrDefault(resolver, "uri", ""),
+            parseBoolean(getOrDefault(resolver, "single-threaded", "true")),
+            getOrDefault(resolver, "json-path", "username")));
+      } else if (usernameResolvers.contains(type)) {
+        throw new IllegalArgumentException("Username resolver already exists for type " + type);
+      }
+      usernameResolvers.add(type);
+    }
 
     final ConfigurationSection section = config.getConfigurationSection("groups");
     this.groups = new ArrayList<>();
@@ -257,17 +278,12 @@ public final class PGMConfig implements Config {
   public static final Map<?, ?> DEFAULT_REMOTE_REPO =
       ImmutableMap.of("uri", "https://github.com/PGMDev/Maps", "path", "default-maps");
 
-  public static void registerRemoteMapSource(
-      List<MapSourceFactory> mapSources, Map<?, ?> repository) {
-    final URI uri = parseUri(String.valueOf(repository.get("uri")));
+  public static GitMapSourceFactory parseGit(Map<?, ?> repository) {
+    final URI uri = parseUri(getOrDefault(repository, "uri", null));
 
-    String branch = String.valueOf(repository.get("branch"));
-    if (branch.isEmpty() || branch.equals("null")) {
-      branch = null;
-    }
-
-    String path = String.valueOf(repository.get("path"));
-    if (path.isEmpty() || path.equals("null")) {
+    String branch = getOrDefault(repository, "branch", null);
+    String path = getOrDefault(repository, "path", null);
+    if (path == null) {
       String normalizedPath = Normalizer.normalize(
               uri.getHost() + uri.getPath(), Normalizer.Form.NFD)
           .replaceAll("[^A-Za-z0-9_]", "-")
@@ -285,7 +301,13 @@ public final class PGMConfig implements Config {
           .stream().map(Object::toString).map(Paths::get).collect(Collectors.toList());
     }
 
-    mapSources.add(new GitMapSourceFactory(base, children, uri, branch));
+    return new GitMapSourceFactory(base, children, uri, branch);
+  }
+
+  private static String getOrDefault(Map<?, ?> map, String key, String defaultValue) {
+    var value = map.get(key);
+    if (value == null) return defaultValue;
+    return value.toString();
   }
 
   // TODO: Can be removed after 1.0 release
@@ -507,7 +529,12 @@ public final class PGMConfig implements Config {
 
   @Override
   public Duration getStartTime() {
-    return startTime;
+    return startTime.getDefault();
+  }
+
+  @Override
+  public Duration getStartTime(Match match) {
+    return startTime.getDuration(match);
   }
 
   @Override
@@ -517,7 +544,17 @@ public final class PGMConfig implements Config {
 
   @Override
   public Duration getCycleTime() {
-    return cycleTime;
+    return cycleTime.getDefault();
+  }
+
+  @Override
+  public Duration getCycleTime(Match match) {
+    return cycleTime.getDuration(match);
+  }
+
+  @Override
+  public Duration getPreloadTime(Match match) {
+    return preloadTime.getDuration(match);
   }
 
   @Override
@@ -656,7 +693,12 @@ public final class PGMConfig implements Config {
 
   @Override
   public Duration showStatsAfter() {
-    return statsShowAfter;
+    return statsShowAfter.getDefault();
+  }
+
+  @Override
+  public Duration showStatsAfter(Match match) {
+    return statsShowAfter.getDuration(match);
   }
 
   @Override
@@ -697,6 +739,16 @@ public final class PGMConfig implements Config {
   @Override
   public boolean isVanishEnabled() {
     return vanish;
+  }
+
+  @Override
+  public List<UsernameResolverType> getUsernameResolvers() {
+    return usernameResolvers;
+  }
+
+  @Override
+  public List<ApiUsernameResolver> getCustomUsernameResolvers() {
+    return customUsernameResolvers;
   }
 
   @Override

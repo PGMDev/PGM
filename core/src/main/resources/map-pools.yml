@@ -23,8 +23,11 @@ pools:
     dynamic: true
     players: 1
     
-    # How long should a map cycle last?
+    # How long should a map cycle last? (supports variable durations)
     cycle-time: "15s"
+
+    # Voted pool only: how long to wait after match end to show votebook (supports variable durations)
+    poll-delay: "5s"
 
     # Map variants to use, in order, if they exist
     variants:
