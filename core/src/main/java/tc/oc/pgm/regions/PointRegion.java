@@ -4,9 +4,10 @@ import java.util.Random;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class PointRegion implements RegionDefinition.HardStatic {
+public class PointRegion
+    implements RegionDefinition.HardStatic, RegionDefinition.MutableSource<PointRegion.Mutable> {
 
-  private final Vector position;
+  protected final Vector position;
 
   public PointRegion(Vector position) {
     this.position = position;
@@ -34,6 +35,20 @@ public class PointRegion implements RegionDefinition.HardStatic {
   @Override
   public boolean canGetRandom() {
     return true;
+  }
+
+  public PointRegion.Mutable asMutableCopy() {
+    return new Mutable(this.position.clone());
+  }
+
+  public static class Mutable extends PointRegion implements RegionDefinition.Mutable {
+    public Mutable(Vector position) {
+      super(position);
+    }
+
+    public Vector getMutablePosition() {
+      return position;
+    }
   }
 
   @Override

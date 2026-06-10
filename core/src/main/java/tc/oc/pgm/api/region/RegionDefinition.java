@@ -29,4 +29,12 @@ public interface RegionDefinition extends FilterDefinition, Region {
       return this;
     }
   }
+
+  /** Marker interface for mutable copies of a {@link RegionDefinition} */
+  interface Mutable extends RegionDefinition {}
+
+  /** Implemented by regions that can produce a mutable copy of themselves */
+  interface MutableSource<T extends RegionDefinition.Mutable> {
+    T asMutableCopy();
+  }
 }

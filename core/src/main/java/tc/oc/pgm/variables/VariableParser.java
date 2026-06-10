@@ -11,8 +11,10 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.regions.Component;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -20,12 +22,17 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.ArrayVariable;
+import tc.oc.pgm.variables.types.BlockVariable;
 import tc.oc.pgm.variables.types.CuboidVariable;
+import tc.oc.pgm.variables.types.CylindricalVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
 import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
+import tc.oc.pgm.variables.types.PointVariable;
+import tc.oc.pgm.variables.types.RegionVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
+import tc.oc.pgm.variables.types.SphereVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
 import tc.oc.pgm.variables.types.WorldTimeVariable;
@@ -122,15 +129,39 @@ public class VariableParser {
     return PlayerVariable.of(component);
   }
 
+  @MethodParser("point")
+  public Variable<Match> parsePoint(Element el) throws InvalidXMLException {
+    return registerComponents(el, new PointVariable(factory.getRegions().parsePoint(el)));
+  }
+
+  @MethodParser("block")
+  public Variable<Match> parseBlock(Element el) throws InvalidXMLException {
+    return registerComponents(el, new BlockVariable(factory.getRegions().parseBlock(el)));
+  }
+
   @MethodParser("cuboid")
   public Variable<Match> parseCuboid(Element el) throws InvalidXMLException {
+    return registerComponents(el, new CuboidVariable(factory.getRegions().parseCuboid(el)));
+  }
+
+  @MethodParser("cylinder")
+  public Variable<Match> parseCylinder(Element el) throws InvalidXMLException {
+    return registerComponents(el, new CylindricalVariable(factory.getRegions().parseCylinder(el)));
+  }
+
+  @MethodParser("sphere")
+  public Variable<Match> parseSphere(Element el) throws InvalidXMLException {
+    return registerComponents(el, new SphereVariable(factory.getRegions().parseSphere(el)));
+  }
+
+  private <R extends RegionDefinition.Mutable, T extends RegionVariable<R, ?>> T registerComponents(
+      Element el, T reg) throws InvalidXMLException {
     String baseId = FeatureDefinitionContext.parseId(el);
-    var variable = new CuboidVariable(factory.getRegions().parseCuboid(el));
-    for (CuboidVariable.Component component : CuboidVariable.Component.values()) {
+    for (Component<R> component : reg.getComponents()) {
       var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
-      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
+      factory.getFeatures().addFeature(el, subId, reg.getComponent(component));
     }
-    return variable;
+    return reg;
   }
 
   @MethodParser("worldtime")

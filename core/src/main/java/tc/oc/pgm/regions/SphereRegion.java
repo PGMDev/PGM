@@ -5,10 +5,11 @@ import static tc.oc.pgm.util.Assert.assertTrue;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.region.RegionDefinition;
 
-public class SphereRegion implements RegionDefinition.HardStatic {
+public class SphereRegion
+    implements RegionDefinition.HardStatic, RegionDefinition.MutableSource<SphereRegion.Mutable> {
   protected final Vector origin;
-  protected final double radius;
-  protected final double radiusSq;
+  protected double radius;
+  protected double radiusSq;
 
   public SphereRegion(Vector origin, double radius) {
     assertTrue(radius >= 0);
@@ -46,5 +47,24 @@ public class SphereRegion implements RegionDefinition.HardStatic {
   @Override
   public String toString() {
     return "Sphere{origin=[" + this.origin + "],radiusSq=" + this.radiusSq + "}";
+  }
+
+  public SphereRegion.Mutable asMutableCopy() {
+    return new Mutable(this.origin.clone(), this.radius);
+  }
+
+  public static class Mutable extends SphereRegion implements RegionDefinition.Mutable {
+    public Mutable(Vector origin, double radius) {
+      super(origin, radius);
+    }
+
+    public Vector getMutableOrigin() {
+      return origin;
+    }
+
+    public void setRadius(double radius) {
+      this.radius = radius;
+      this.radiusSq = radius * radius;
+    }
   }
 }
