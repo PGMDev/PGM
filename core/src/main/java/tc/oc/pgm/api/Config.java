@@ -359,6 +359,7 @@ public interface Config {
     FULL_REJOIN,
     REJOIN_MULTIPLIER,
     REJOIN_MAX,
+    REJOIN_MIN,
     SWITCH
   }
 

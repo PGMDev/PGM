@@ -94,8 +94,9 @@ gameplay:
     full-rejoin: 30s       # Rejoining when your team was full and is still full
     rejoin-multiplier: 10s # Increased penalty for every additional rejoin, up to max
     rejoin-max: 30s        # Max time penalty for repeated rejoins
+    rejoin-min: 0s         # Min time penalty for repeated rejoins
     switch: 30s            # Plainly switching teams
-  
+
 # Changes map voting mechanics.
 votes:
   # Players can gain extra votes based on the permission "pgm.vote.extra.#".
