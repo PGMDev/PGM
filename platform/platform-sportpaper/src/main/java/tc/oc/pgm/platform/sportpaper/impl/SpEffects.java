@@ -1,5 +1,6 @@
 package tc.oc.pgm.platform.sportpaper.impl;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import org.bukkit.Color;
@@ -8,7 +9,9 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.util.bukkit.Effects;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
@@ -107,6 +110,37 @@ public class SpEffects implements Effects {
   @Override
   public void spawnFlame(Player player, Location loc, float x, float y, float z, int amt) {
     player.spigot().playEffect(loc, Effect.FLAME, 0, 0, x, y, z, 0, amt, 256);
+  }
+
+  @Override
+  public void pickupEffect(Entity entity, PickupEffect effect) {
+    Effect particle =
+        switch (effect) {
+          case SPAWN -> Effect.CLOUD;
+          case DESPAWN -> Effect.LARGE_SMOKE;
+          case PICKUP -> Effect.SLIME;
+        };
+    pickupParticles(entity, particle);
+  }
+
+  private void pickupParticles(Entity entity, Effect effect) {
+    World world = entity.getWorld();
+    Vector size = NMS_HACKS.getBoundingBoxSize(entity);
+    Location center = NMS_HACKS.getBoundingBoxCenter(entity).toLocation(world);
+    int count = Math.max(1, (int) Math.ceil(size.getX() * size.getY() * size.getZ())) * 3;
+    world
+        .spigot()
+        .playEffect(
+            center,
+            effect,
+            0,
+            0,
+            (float) Math.max(1d, size.getX() / 2d),
+            (float) Math.max(1d, size.getY() / 2d),
+            (float) Math.max(1d, size.getZ() / 2d),
+            0f,
+            count,
+            256);
   }
 
   private float rgbToParticle(int rgb) {
