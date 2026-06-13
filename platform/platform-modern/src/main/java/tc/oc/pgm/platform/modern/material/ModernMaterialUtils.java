@@ -158,7 +158,7 @@ public class ModernMaterialUtils implements MaterialUtils {
 
     @Override
     public MaterialMatcher.Builder visit(Material material) {
-      return add(material, true);
+      return add(material, material.isLegacy());
     }
 
     @Override
