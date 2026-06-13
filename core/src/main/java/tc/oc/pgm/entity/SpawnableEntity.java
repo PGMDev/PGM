@@ -1,30 +1,42 @@
 package tc.oc.pgm.entity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 import org.bukkit.Location;
+import org.bukkit.entity.ComplexEntityPart;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wither;
 import org.jdom2.Element;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitDefinition;
 import tc.oc.pgm.kits.KitNode;
+import tc.oc.pgm.util.bukkit.EntityTypes;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public record SpawnableEntity(
-    Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties, Kit kit) {
+    Class<? extends Entity> entityType, List<Consumer<Entity>> properties, Kit kit) {
+
+  private static final Set<Class<? extends Entity>> EXCLUDED_TYPES =
+      Set.of(ComplexEntityPart.class, EnderDragon.class, Player.class, Wither.class);
+
+  public SpawnableEntity(Class<? extends Entity> entityType) {
+    this(entityType, List.of(), KitNode.EMPTY);
+  }
 
   public Entity spawn(Location location) {
-    LivingEntity entity = location.getWorld().spawn(location, entityType);
+    Entity entity = location.getWorld().spawn(location, entityType);
     for (var property : properties) {
       property.accept(entity);
     }
-    kit.apply(entity);
+    if (entity instanceof LivingEntity living) kit.apply(living);
     return entity;
   }
 
@@ -34,26 +46,36 @@ public record SpawnableEntity(
     List<Consumer<Entity>> properties =
         MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "kit");
 
-    Kit kit = factory.getParser().kit(el, "kit").optional(KitNode.EMPTY);
+    Kit kit = KitNode.EMPTY;
+    if (LivingEntity.class.isAssignableFrom(type)) {
+      Class<? extends LivingEntity> livingType = type.asSubclass(LivingEntity.class);
+      kit = factory.getParser().kit(el, "kit").optional(KitNode.EMPTY);
 
-    // Kit contents can't be inspected until references resolve, so mob compatibility
-    // is validated through the feature context, which defers until after resolution
-    FeatureValidation<KitDefinition> validation = (def, node) -> def.validateMob(type, node);
-    factory.getFeatures().validate(kit, validation, new Node(el));
+      // Kit contents can't be inspected until references resolve, so mob compatibility
+      // is validated through the feature context, which defers until after resolution
+      FeatureValidation<KitDefinition> validation =
+          (def, node) -> def.validateMob(livingType, node);
+      factory.getFeatures().validate(kit, validation, new Node(el));
+    } else if (el.getAttribute("kit") != null) {
+      throw new InvalidXMLException(
+          "Kits can only be applied to living entities, not " + type.getSimpleName(),
+          el.getAttribute("kit"));
+    }
 
     return new SpawnableEntity(type, properties, kit);
   }
 
-  private static Class<? extends LivingEntity> parseType(Node typeNode) throws InvalidXMLException {
-    Class<? extends Entity> raw = XMLUtils.parseEntityType(typeNode);
-    if (!LivingEntity.class.isAssignableFrom(raw)) {
+  public static Class<? extends Entity> parseType(Node typeNode) throws InvalidXMLException {
+    Class<? extends Entity> type = EntityTypes.getClassByName(typeNode.getValueNormalize());
+    if (type == null) type = XMLUtils.parseEntityType(typeNode);
+    if (isExcluded(type)) {
       throw new InvalidXMLException(
-          "Mob type must be a living entity, got " + raw.getSimpleName(), typeNode);
+          "Entity type " + type.getSimpleName() + " cannot be spawned", typeNode);
     }
-    if (Player.class.isAssignableFrom(raw)) {
-      throw new InvalidXMLException(
-          "Mob type " + raw.getSimpleName() + " cannot be spawned", typeNode);
-    }
-    return raw.asSubclass(LivingEntity.class);
+    return type;
+  }
+
+  private static boolean isExcluded(Class<? extends Entity> type) {
+    return EXCLUDED_TYPES.stream().anyMatch(excluded -> excluded.isAssignableFrom(type));
   }
 }

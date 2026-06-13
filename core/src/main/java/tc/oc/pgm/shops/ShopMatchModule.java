@@ -2,8 +2,10 @@ package tc.oc.pgm.shops;
 
 import static tc.oc.pgm.shops.ShopKeeper.isKeeper;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,21 +16,26 @@ import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
+import tc.oc.pgm.api.time.Tick;
+import tc.oc.pgm.entity.FrozenEntity;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.shops.menu.ShopMenu;
 
 @ListenerScope(MatchScope.LOADED)
-public class ShopMatchModule implements MatchModule, Listener {
+public class ShopMatchModule implements MatchModule, Tickable, Listener {
 
   private final Match match;
   private final Map<String, Shop> shops;
   private final Set<ShopKeeper> shopKeepers;
+  private final Map<ShopKeeper, FrozenEntity> spawned = new LinkedHashMap<>();
 
   public ShopMatchModule(Match match, Map<String, Shop> shops, Set<ShopKeeper> shopKeepers) {
     this.match = match;
@@ -39,8 +46,47 @@ public class ShopMatchModule implements MatchModule, Listener {
   @Override
   public void load() {
     for (ShopKeeper keeper : shopKeepers) {
-      keeper.spawn(match);
+      Location location = keeper.getLocation(match);
+      location.getWorld().getChunkAt(location); // Load chunk
+
+      FrozenEntity frozen = new FrozenEntity();
+      frozen.spawn(location, keeper::spawn);
+      spawned.put(keeper, frozen);
     }
+  }
+
+  @Override
+  public void tick(Match match, Tick tick) {
+    for (Map.Entry<ShopKeeper, FrozenEntity> entry : spawned.entrySet()) {
+      FrozenEntity frozen = entry.getValue();
+      Entity previous = frozen.getEntity();
+      if (!frozen.tick()) {
+        if (previous != null) ShopKeeper.clearKeeper(previous);
+        ShopKeeper keeper = entry.getKey();
+        frozen.spawn(keeper.getLocation(match), keeper::spawn);
+      }
+    }
+  }
+
+  @Override
+  public void unload() {
+    for (FrozenEntity frozen : spawned.values()) {
+      remove(frozen);
+    }
+    spawned.clear();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onChunkUnload(ChunkUnloadEvent event) {
+    for (Entity entity : event.getChunk().getEntities()) {
+      if (isKeeper(entity)) entity.remove();
+    }
+  }
+
+  private void remove(FrozenEntity frozen) {
+    Entity entity = frozen.getEntity();
+    if (entity != null) ShopKeeper.clearKeeper(entity);
+    frozen.remove();
   }
 
   @EventHandler(priority = EventPriority.HIGH)
