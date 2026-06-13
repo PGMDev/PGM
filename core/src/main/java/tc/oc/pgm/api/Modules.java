@@ -5,7 +5,7 @@ import static tc.oc.pgm.util.Assert.assertNotNull;
 import com.google.common.collect.ImmutableMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.ActionMatchModule;
 import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.map.MapModule;
@@ -98,6 +98,8 @@ import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
 import tc.oc.pgm.observers.ObserverToolsMatchModule;
 import tc.oc.pgm.picker.PickerMatchModule;
+import tc.oc.pgm.pickup.PickupMatchModule;
+import tc.oc.pgm.pickup.PickupModule;
 import tc.oc.pgm.portals.PortalMatchModule;
 import tc.oc.pgm.portals.PortalModule;
 import tc.oc.pgm.projectile.ProjectileMatchModule;
@@ -324,6 +326,7 @@ public final class Modules {
     register(SpawnerModule.class, SpawnerMatchModule.class, new SpawnerModule.Factory());
     register(ShopModule.class, ShopMatchModule.class, new ShopModule.Factory());
     register(EnderChestModule.class, EnderChestMatchModule.class, new EnderChestModule.Factory());
+    register(PickupModule.class, PickupMatchModule.class, new PickupModule.Factory());
     register(StructureModule.class, StructureMatchModule.class, new StructureModule.Factory());
     register(LootableModule.class, LootableMatchModule.class, new LootableModule.Factory());
 

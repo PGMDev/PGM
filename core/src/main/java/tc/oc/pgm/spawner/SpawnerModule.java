@@ -5,13 +5,10 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import org.bukkit.Material;
-import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Wither;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.jdom2.Document;
@@ -38,8 +35,6 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
 
   private static final Duration DEFAULT_DELAY = Duration.ofSeconds(10);
   private static final int SPLASH_BIT = 0x4000;
-  private static final Set<Class<? extends LivingEntity>> EXCLUDED_MOB_TYPES =
-      Set.of(Wither.class, EnderDragon.class);
 
   private final List<SpawnerDefinition> definitions;
 
@@ -137,9 +132,9 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
     private static SpawnableMob parseMob(Element mobEl, String spawnerId, MapFactory factory)
         throws InvalidXMLException {
       var entity = SpawnableEntity.parse(mobEl, factory);
-      if (EXCLUDED_MOB_TYPES.stream().anyMatch(c -> c.isAssignableFrom(entity.entityType()))) {
+      if (!LivingEntity.class.isAssignableFrom(entity.entityType())) {
         throw new InvalidXMLException(
-            "Spawner mob type " + entity.entityType().getSimpleName() + " cannot be spawned",
+            "Spawner mob type " + entity.entityType().getSimpleName() + " must be a living entity",
             mobEl);
       }
       return new SpawnableMob(entity, spawnerId);
