@@ -131,7 +131,7 @@ class ModernMaterialParser {
     Set<Material> materials = new HashSet<>(16);
     materials.add(main);
     materials.add(alt);
-    for (byte i = 3; i < 16; i++) {
+    for (byte i = 2; i < 16; i++) {
       md.setData(i);
       materials.add(UNSAFE.fromLegacy(md));
     }
