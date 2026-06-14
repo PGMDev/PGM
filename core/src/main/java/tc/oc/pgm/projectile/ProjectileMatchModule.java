@@ -4,13 +4,11 @@ import static tc.oc.pgm.util.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Explosive;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -46,7 +44,6 @@ import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
-import tc.oc.pgm.util.nms.NMSHacks;
 
 @ListenerScope(MatchScope.RUNNING)
 public class ProjectileMatchModule implements MatchModule, Listener {
@@ -60,7 +57,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final ImmutableSet<ProjectileDefinition> projectileDefinitions;
-  private final HashMap<UUID, ProjectileCooldowns> projectileCooldowns = new HashMap<>();
+  private final Map<UUID, ProjectileCooldowns> projectileCooldowns = new HashMap<>();
 
   private static final String DEFINITION_KEY = "projectileDefinition";
 
@@ -88,34 +85,17 @@ public class ProjectileMatchModule implements MatchModule, Listener {
 
       if (this.isCooldownActive(player, projectileDefinition)) return;
 
-      boolean realProjectile = Projectile.class.isAssignableFrom(projectileDefinition.projectile);
       Vector velocity =
           player.getEyeLocation().getDirection().multiply(projectileDefinition.velocity);
       Entity projectile;
       try {
         assertTrue(launchingDefinition.get() == null, "nested projectile launch");
         launchingDefinition.set(projectileDefinition);
-        if (realProjectile) {
-          projectile = player.launchProjectile(
-              projectileDefinition.projectile.asSubclass(Projectile.class), velocity);
-          if (projectile instanceof Fireball fireball && projectileDefinition.precise) {
-            NMSHacks.NMS_HACKS.setFireballDirection(fireball, velocity);
-          }
-        } else {
-          if (FallingBlock.class.isAssignableFrom(projectileDefinition.projectile)) {
-            projectile =
-                projectileDefinition.blockMaterial.spawnFallingBlock(player.getEyeLocation());
-          } else {
-            projectile =
-                player.getWorld().spawn(player.getEyeLocation(), projectileDefinition.projectile);
-          }
-          projectile.setVelocity(velocity);
+        projectile = projectileDefinition.projectile.spawn(player, velocity);
+        if (projectile != null) {
+          projectile.setMetadata(
+              "projectileDefinition", new FixedMetadataValue(PGM.get(), projectileDefinition));
         }
-        if (projectileDefinition.power != null && projectile instanceof Explosive) {
-          ((Explosive) projectile).setYield(projectileDefinition.power);
-        }
-        projectile.setMetadata(
-            "projectileDefinition", new FixedMetadataValue(PGM.get(), projectileDefinition));
       } finally {
         launchingDefinition.remove();
       }
@@ -123,7 +103,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       // If the entity implements Projectile, it will have already generated a
       // ProjectileLaunchEvent.
       // Otherwise, we fire our custom event.
-      if (!realProjectile) {
+      if (projectile != null && !(projectile instanceof Projectile)) {
         EntityLaunchEvent launchEvent = new EntityLaunchEvent(projectile, event.getPlayer());
         match.callEvent(launchEvent);
         if (launchEvent.isCancelled()) {

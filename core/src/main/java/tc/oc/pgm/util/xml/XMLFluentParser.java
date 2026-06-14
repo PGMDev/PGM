@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.xml;
 
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+
 import com.google.common.collect.Range;
 import java.time.Duration;
 import java.util.function.Function;
@@ -21,6 +23,7 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.function.ThrowingFunction;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -150,6 +153,15 @@ public class XMLFluentParser {
       @Override
       protected Material parse(Node node) throws InvalidXMLException {
         return XMLUtils.parseMaterial(node);
+      }
+    };
+  }
+
+  public Builder.Generic<BlockMaterialData> blockMaterialData(Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected BlockMaterialData parse(Node node) throws InvalidXMLException {
+        return MATERIAL_UTILS.parseBlockMaterialData(node.getValueNormalize(), node);
       }
     };
   }
