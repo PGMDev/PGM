@@ -1,9 +1,7 @@
 package tc.oc.pgm.variables;
 
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filterables;
@@ -42,11 +40,11 @@ public class VariableParser {
   public static final Pattern VARIABLE_ID = Pattern.compile("[A-Za-z_][\\w.]*");
 
   private final MapFactory factory;
-  private final Map<String, Method> methodParsers;
+  private final MethodParsers<Variable<?>> methodParsers;
 
   public VariableParser(MapFactory factory) {
     this.factory = factory;
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+    this.methodParsers = MethodParsers.byNameParser(this, "variable");
   }
 
   public Variable<?> parse(Element el) throws InvalidXMLException {
@@ -56,16 +54,7 @@ public class VariableParser {
           "Variable IDs must start with a letter or underscore and can only include letters, digits or underscores.",
           el);
 
-    Method parser = methodParsers.get(el.getName().toLowerCase());
-    if (parser != null) {
-      try {
-        return (Variable<?>) parser.invoke(this, el);
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else {
-      throw new InvalidXMLException("Unknown variable type: " + el.getName(), el);
-    }
+    return methodParsers.parse(el);
   }
 
   @MethodParser("variable")

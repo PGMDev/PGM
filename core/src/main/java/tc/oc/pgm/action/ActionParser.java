@@ -7,10 +7,8 @@ import static net.kyori.adventure.text.Component.empty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,7 +84,7 @@ public class ActionParser {
   private final boolean legacy;
   private final FeatureDefinitionContext features;
   private final XMLFluentParser parser;
-  private final Map<String, Method> methodParsers;
+  private final MethodParsers<Action<?>> methodParsers;
   private final ReplacementParser replacementParser;
 
   public ActionParser(MapFactory factory) {
@@ -94,8 +92,8 @@ public class ActionParser {
     this.legacy = !factory.getProto().isNoOlderThan(MapProtos.ACTION_REVAMP);
     this.features = factory.getFeatures();
     this.parser = factory.getParser();
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
-    replacementParser = new ReplacementParser(factory);
+    this.methodParsers = MethodParsers.byNameParser(this, "action");
+    this.replacementParser = new ReplacementParser(factory, false);
   }
 
   public <B extends Filterable<?>> Action<? super B> parseProperty(
@@ -134,7 +132,7 @@ public class ActionParser {
   }
 
   public Set<String> actionTypes() {
-    return methodParsers.keySet();
+    return methodParsers.methods().keySet();
   }
 
   private boolean maybeReference(Element el, boolean property) {
@@ -206,23 +204,10 @@ public class ActionParser {
     }
   }
 
-  protected Method getParserFor(Element el) {
-    return methodParsers.get(el.getName().toLowerCase());
-  }
-
   @SuppressWarnings("unchecked")
   private <T, B extends Filterable<?>> Action<T> parseDynamic(Element el, Class<B> scope)
       throws InvalidXMLException {
-    Method parser = getParserFor(el);
-    if (parser != null) {
-      try {
-        return (Action<T>) parser.invoke(this, el, scope);
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else {
-      throw new InvalidXMLException("Unknown action type: " + el.getName(), el);
-    }
+    return (Action<T>) methodParsers.parse(el, scope);
   }
 
   private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)

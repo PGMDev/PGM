@@ -4,11 +4,9 @@ import static tc.oc.pgm.filters.PlatformFilters.PLATFORM_FILTERS;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
@@ -99,7 +97,7 @@ import tc.oc.pgm.variables.Variable;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
-  protected final Map<String, Method> methodParsers;
+  protected final MethodParsers<Filter> methodParsers;
   protected final MapFactory factory;
   protected final XMLFluentParser parser;
   protected final FeatureDefinitionContext features;
@@ -109,7 +107,10 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     this.parser = factory.getParser();
     this.features = factory.getFeatures();
 
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+    this.methodParsers = MethodParsers.<Filter>byNameParser(this, "filter").withFallback(el -> {
+      if (factory.getRegions().isRegion(el)) return factory.getRegions().parse(el);
+      throw new InvalidXMLException("Unknown filter type: " + el.getName(), el);
+    });
   }
 
   @Override
@@ -143,7 +144,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
 
   public boolean isFilter(Element el) {
-    return methodParsers.containsKey(el.getName()) || factory.getRegions().isRegion(el);
+    return methodParsers.methods().containsKey(el.getName())
+        || factory.getRegions().isRegion(el);
   }
 
   public void parseFilterChildren(Element parent) throws InvalidXMLException {
@@ -152,23 +154,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     }
   }
 
-  protected Method getParserFor(Element el) {
-    return methodParsers.get(el.getName().toLowerCase());
-  }
-
   protected Filter parseDynamic(Element el) throws InvalidXMLException {
-    Method parser = getParserFor(el);
-    if (parser != null) {
-      try {
-        return (Filter) parser.invoke(this, el);
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else if (factory.getRegions().isRegion(el)) {
-      return factory.getRegions().parse(el);
-    } else {
-      throw new InvalidXMLException("Unknown filter type: " + el.getName(), el);
-    }
+    return methodParsers.parse(el);
   }
 
   protected List<Filter> parseChildren(Element parent) throws InvalidXMLException {

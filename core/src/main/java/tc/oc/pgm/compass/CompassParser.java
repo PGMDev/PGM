@@ -1,7 +1,5 @@
 package tc.oc.pgm.compass;
 
-import java.lang.reflect.Method;
-import java.util.Map;
 import net.kyori.adventure.text.Component;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filter;
@@ -22,29 +20,16 @@ public class CompassParser {
 
   private final FeatureDefinitionContext features;
   private final FilterParser filters;
-  private final Map<String, Method> methodParsers;
+  private final MethodParsers<CompassTarget<?>> methodParsers;
 
   public CompassParser(MapFactory factory) {
     this.features = factory.getFeatures();
     this.filters = factory.getFilters();
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
-  }
-
-  protected Method getParserFor(Element el) {
-    return methodParsers.get(el.getName().toLowerCase());
+    this.methodParsers = MethodParsers.byNameParser(this, "compass tracker");
   }
 
   public CompassTarget<?> parseCompassTarget(Element el) throws InvalidXMLException {
-    Method parser = getParserFor(el);
-    if (parser != null) {
-      try {
-        return (CompassTarget<?>) parser.invoke(this, el);
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else {
-      throw new InvalidXMLException("Unknown compass tracker type: " + el.getName(), el);
-    }
+    return methodParsers.parse(el);
   }
 
   @MethodParser("player")

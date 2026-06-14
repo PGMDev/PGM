@@ -1,9 +1,7 @@
 package tc.oc.pgm.regions;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.bukkit.util.Vector;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -21,13 +19,13 @@ import tc.oc.pgm.util.xml.XMLUtils;
 
 public abstract class RegionParser implements XMLParser<Region, RegionDefinition> {
 
-  protected final Map<String, Method> methodParsers;
+  protected final MethodParsers<Region> methodParsers;
   protected final MapFactory factory;
   protected final XMLFluentParser parser;
 
   public RegionParser(MapFactory factory) {
     this.factory = factory;
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+    this.methodParsers = MethodParsers.byNameParser(this, "region");
     this.parser = factory.getParser();
   }
 
@@ -97,25 +95,12 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
     return parseRequiredProperty(el, name);
   }
 
-  protected Method getMethodParser(String regionName) {
-    return methodParsers.get(regionName);
-  }
-
   public boolean isRegion(Element el) {
-    return methodParsers.containsKey(el.getName());
+    return methodParsers.methods().containsKey(el.getName());
   }
 
   protected Region parseDynamic(Element el) throws InvalidXMLException {
-    Method parser = this.getMethodParser(el.getName());
-    try {
-      return (Region) parser.invoke(this, el);
-    } catch (Exception e) {
-      if (e.getCause() instanceof InvalidXMLException) {
-        throw (InvalidXMLException) e.getCause();
-      } else {
-        throw new InvalidXMLException("Unknown error parsing region: " + e.getMessage(), el, e);
-      }
-    }
+    return methodParsers.parse(el);
   }
 
   @MethodParser("half")
