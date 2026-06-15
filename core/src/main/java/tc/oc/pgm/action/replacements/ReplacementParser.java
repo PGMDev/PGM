@@ -4,11 +4,9 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Set;
 import net.kyori.adventure.text.Component;
 import org.jdom2.Element;
@@ -29,44 +27,27 @@ import tc.oc.pgm.util.xml.XMLFluentParser;
 
 public class ReplacementParser {
   private static final NumberFormat DEFAULT_FORMAT = NumberFormat.getIntegerInstance();
-  private final Map<String, Method> methodParsers =
-      MethodParsers.getMethodParsersForClass(getClass());
+  private final MethodParsers<Replacement> methodParsers;
   private final FeatureDefinitionContext features;
   private final XMLFluentParser parser;
   private final boolean isTopLevel;
 
   public ReplacementParser(MapFactory factory, boolean topLevel) {
-    features = factory.getFeatures();
-    parser = factory.getParser();
-    isTopLevel = topLevel;
-  }
-
-  public ReplacementParser(MapFactory factory) {
-    this(factory, false);
+    this.methodParsers = MethodParsers.byNameParser(this, "replacement");
+    this.features = factory.getFeatures();
+    this.parser = factory.getParser();
+    this.isTopLevel = topLevel;
   }
 
   public <B extends Filterable<?>> Replacement parse(Element el, @Nullable Class<B> scope)
       throws InvalidXMLException {
-    Method parser = getParserFor(el);
-    if (parser != null) {
-      try {
-        var replacement = (Replacement) parser.invoke(this, el, scope);
-        if (scope != null) replacement.validate(scope, new Node(el));
-        return replacement;
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else {
-      throw new InvalidXMLException("Unknown replacement type: " + el.getName(), el);
-    }
+    var replacement = methodParsers.parse(el, scope);
+    if (scope != null) replacement.validate(scope, new Node(el));
+    return replacement;
   }
 
   public Set<String> replacementTypes() {
-    return methodParsers.keySet();
-  }
-
-  protected Method getParserFor(Element el) {
-    return methodParsers.get(el.getName().toLowerCase());
+    return methodParsers.methods().keySet();
   }
 
   private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
