@@ -35,6 +35,7 @@ import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
@@ -42,6 +43,7 @@ import tc.oc.pgm.events.PlayerParticipationStopEvent;
 import tc.oc.pgm.filters.query.BlockQuery;
 import tc.oc.pgm.filters.query.PlayerBlockQuery;
 import tc.oc.pgm.kits.tag.ItemTags;
+import tc.oc.pgm.projectile.projectiles.BridgeEggProjectile;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 
@@ -58,6 +60,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   private final Match match;
   private final ImmutableSet<ProjectileDefinition> projectileDefinitions;
   private final Map<UUID, ProjectileCooldowns> projectileCooldowns = new HashMap<>();
+  private final HashMap<UUID, ActiveBridgeEgg> activeBridgeEgg = new HashMap<>();
 
   private static final String DEFINITION_KEY = "projectileDefinition";
 
@@ -119,6 +122,23 @@ public class ProjectileMatchModule implements MatchModule, Listener {
       if (projectileDefinition.coolDown != null) {
         startCooldown(player, projectileDefinition);
       }
+
+      if (projectileDefinition.projectile instanceof BridgeEggProjectile bridgeEggProjectile) {
+        ActiveBridgeEgg bridgeEgg = new ActiveBridgeEgg(
+            match,
+            match.getPlayer(player),
+            projectile.getUniqueId(),
+            activeBridgeEgg,
+            projectile,
+            event,
+            bridgeEggProjectile.bridgeRange(),
+            bridgeEggProjectile.bridgeMaterials(),
+            projectile.getLocation(),
+            bridgeEggProjectile.teamColor(),
+            bridgeEggProjectile.silent());
+        activeBridgeEgg.put(projectile.getUniqueId(), bridgeEgg);
+        bridgeEgg.start();
+      }
     }
   }
 
@@ -145,6 +165,15 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     Projectile projectile = event.getEntity();
     ProjectileDefinition projectileDefinition = getProjectileDefinition(projectile);
     if (projectileDefinition == null) return;
+
+    if (projectileDefinition.projectile instanceof BridgeEggProjectile) {
+      ActiveBridgeEgg bridgeEgg = activeBridgeEgg.get(projectile.getUniqueId());
+      if (bridgeEgg != null) {
+        bridgeEgg.stop();
+      }
+      return;
+    }
+
     Filter filter = projectileDefinition.destroyFilter;
     if (filter == null) return;
 
@@ -209,6 +238,10 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onParticipationStop(PlayerParticipationStopEvent event) {
     projectileCooldowns.remove(event.getPlayer().getId());
+
+    activeBridgeEgg.values().stream()
+        .filter(bridgeEgg -> bridgeEgg.isOwnedBy(event.getPlayer()))
+        .forEach(ActiveBridgeEgg::stop);
   }
 
   public void resetItemName(ItemStack item) {
@@ -263,5 +296,12 @@ public class ProjectileMatchModule implements MatchModule, Listener {
   public boolean isCooldownActive(Player player, ProjectileDefinition definition) {
     ProjectileCooldowns playerCooldowns = projectileCooldowns.get(player.getUniqueId());
     return (playerCooldowns != null && playerCooldowns.isActive(definition));
+  }
+
+  @EventHandler
+  public void onMatchFinish(MatchFinishEvent event) {
+    for (ActiveBridgeEgg bridgeEgg : activeBridgeEgg.values()) {
+      bridgeEgg.stop();
+    }
   }
 }
