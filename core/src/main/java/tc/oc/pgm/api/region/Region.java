@@ -181,6 +181,7 @@ public interface Region extends TypedFilter<LocationQuery> {
 
   default Stream<ChunkVector> getChunkPositions() {
     final Bounds bounds = getBounds();
+    if (bounds.isEmpty()) return Stream.empty();
     if (!bounds.isBlockFinite()) {
       throw new UnsupportedOperationException(
           "Cannot enumerate chunks in unbounded region type " + getClass().getSimpleName());
