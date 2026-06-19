@@ -26,6 +26,17 @@ public class Structure implements Feature<StructureDefinition> {
           b -> b.getType() != Material.AIR,
           match.getMap().getProto());
 
+    if (region.getBounds().isEmpty()) {
+      match
+          .getLogger()
+          .warning("No blocks found in structure "
+              + definition.getId()
+              + "; it will be empty"
+              + (definition.includeAir()
+                  ? ""
+                  : " (set air=\"true\" to capture air, or check its region)"));
+    }
+
     snapshot.saveRegion(region);
     if (definition.clearSource()) snapshot.removeBlocks(region, new BlockVector(), false);
   }
