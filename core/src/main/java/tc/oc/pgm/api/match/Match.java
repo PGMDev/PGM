@@ -455,4 +455,19 @@ public interface Match
   default Match getMatch() {
     return this;
   }
+
+  String WORLD_PREFIX = "match-";
+
+  static boolean isMatchWorld(@Nullable String name) {
+    if (name == null || name.length() <= WORLD_PREFIX.length() || !name.startsWith(WORLD_PREFIX))
+      return false;
+    for (int i = WORLD_PREFIX.length(); i < name.length(); i++) {
+      if (!Character.isDigit(name.charAt(i))) return false;
+    }
+    return true;
+  }
+
+  static boolean isMatchWorld(@Nullable World world) {
+    return world != null && isMatchWorld(world.getName());
+  }
 }

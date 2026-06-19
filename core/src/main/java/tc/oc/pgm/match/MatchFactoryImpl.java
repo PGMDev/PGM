@@ -225,7 +225,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
       if (dir == null) {
         dir = new File(
             PGM.get().getServer().getWorldContainer().getAbsoluteFile(),
-            "match-" + counter.getAndIncrement());
+            Match.WORLD_PREFIX + counter.getAndIncrement());
       }
       return dir;
     }
