@@ -113,13 +113,13 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
       var entity = parser
           .<Class<? extends Entity>>node(XMLUtils::parseEntityType, el, "projectile")
           .optional(Arrow.class);
-      var blockMaterial = entity.isAssignableFrom(FallingBlock.class)
+      var blockMaterial = FallingBlock.class.isAssignableFrom(entity)
           ? parser.blockMaterialData(el, "material").required()
           : null;
-      var power = entity.isAssignableFrom(Explosive.class)
+      var power = Explosive.class.isAssignableFrom(entity)
           ? parser.parseFloat(el, "power").orNull()
           : null;
-      var precise = entity.isAssignableFrom(Fireball.class)
+      var precise = Fireball.class.isAssignableFrom(entity)
           ? parser.parseBool(el, "precise").attr().optional(true)
           : false;
 
