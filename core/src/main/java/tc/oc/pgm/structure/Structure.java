@@ -57,17 +57,19 @@ public class Structure implements Feature<StructureDefinition> {
     place(vector, update);
   }
 
-  public boolean matchesWorld(World world, BlockVector origin) {
-    BlockVector offset =
-        origin.clone().subtract(this.getDefinition().getOrigin()).toBlockVector();
+  public BlockVector findMismatch(World world, BlockVector origin) {
+    BlockVector offset = origin.clone().subtract(getDefinition().getOrigin()).toBlockVector();
 
     for (BlockData blockData : snapshot.getMaterials(region)) {
-      BlockMaterialData snapshotMaterial = snapshot.getOriginalMaterial(blockData.getBlockVector());
+      BlockVector pos = blockData.getBlockVector();
+      BlockMaterialData snapshotMaterial = snapshot.getOriginalMaterial(pos);
       BlockMaterialData worldMaterial = MaterialData.block(blockData.getBlock(world, offset));
 
-      if (snapshotMaterial.encoded() != worldMaterial.encoded()) return false;
+      if (snapshotMaterial.encoded() != worldMaterial.encoded()) {
+        return blockData.getBlock(world, offset).getLocation().toVector().toBlockVector();
+      }
     }
 
-    return true;
+    return null;
   }
 }
