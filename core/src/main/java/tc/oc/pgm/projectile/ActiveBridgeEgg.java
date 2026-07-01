@@ -4,7 +4,6 @@ import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -25,6 +24,7 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Sounds;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
 
 public class ActiveBridgeEgg {
@@ -39,7 +39,7 @@ public class ActiveBridgeEgg {
   private Location prevPos;
   private final Location throwOrigin;
   private final int bridgeRange;
-  private final List<Material> bridgeMaterial;
+  private final BlockMaterialData bridgeMaterial;
   private final boolean teamColor;
   private final boolean silent;
   private Future<?> runnableTask = null;
@@ -54,7 +54,7 @@ public class ActiveBridgeEgg {
       Entity proj,
       PlayerInteractEvent launch,
       int bridgeRange,
-      List<Material> bridgeMaterial,
+      BlockMaterialData bridgeMaterial,
       Location bridgePos,
       boolean teamColor,
       boolean silent) {
@@ -136,16 +136,16 @@ public class ActiveBridgeEgg {
 
       for (Location loc : toPlace) {
         Block block = loc.getBlock();
-        Material material = bridgeMaterial.get(match.getRandom().nextInt(bridgeMaterial.size()));
 
         if (block.getType() == Material.AIR) {
           ParticipantState state = player.getParticipantState();
           BlockTransformEvent bte = state != null
-              ? new ParticipantBlockTransformEvent(launch, block, material, state)
-              : new BlockTransformEvent(launch, block, material);
+              ? new ParticipantBlockTransformEvent(
+                  launch, block, bridgeMaterial.getItemType(), state)
+              : new BlockTransformEvent(launch, block, bridgeMaterial.getItemType());
           match.callEvent(bte);
           if (!bte.isCancelled()) {
-            block.setType(material);
+            bridgeMaterial.applyTo(block, true);
             if (!silent) {
               Sounds.play(player.getBukkit(), Sounds.BRIDGE_EGG, loc);
             }

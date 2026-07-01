@@ -132,7 +132,7 @@ public class ProjectileMatchModule implements MatchModule, Listener {
             projectile,
             event,
             bridgeEggProjectile.bridgeRange(),
-            bridgeEggProjectile.bridgeMaterials(),
+            bridgeEggProjectile.bridgeMaterial(),
             projectile.getLocation(),
             bridgeEggProjectile.teamColor(),
             bridgeEggProjectile.silent());

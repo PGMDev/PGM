@@ -3,13 +3,11 @@ package tc.oc.pgm.projectile;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
-import org.bukkit.Material;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Explosive;
@@ -29,8 +27,8 @@ import tc.oc.pgm.projectile.projectiles.EntityProjectile;
 import tc.oc.pgm.projectile.projectiles.PgmProjectile;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
@@ -57,7 +55,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
         throws InvalidXMLException {
       Set<ProjectileDefinition> projectiles = new HashSet<>();
       var parser = factory.getParser();
-      var projParser = new ProjectileParser(parser, doc);
+      var projParser = new ProjectileParser(parser);
 
       for (Element el :
           XMLUtils.flattenElements(doc.getRootElement(), "projectiles", "projectile")) {
@@ -96,13 +94,11 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
   public static class ProjectileParser {
     private final XMLFluentParser parser;
     private final MethodParsers<PgmProjectile> methodParsers;
-    private final Document doc;
 
-    private ProjectileParser(XMLFluentParser parser, Document doc) {
+    private ProjectileParser(XMLFluentParser parser) {
       this.parser = parser;
       this.methodParsers = MethodParsers.<PgmProjectile>byAttrParser(this, "projectile")
           .withFallback(this::parsePlainEntity);
-      this.doc = doc;
     }
 
     public PgmProjectile parseDynamic(Element el) throws InvalidXMLException {
@@ -112,31 +108,12 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
     @MethodParser("bridge-egg")
     public PgmProjectile parseBridgeEgg(Element el) throws InvalidXMLException {
       int bridgeRange = parser.parseInt(el, "bridge-range").required();
-
-      List<Material> bridgeMaterials = new ArrayList<>();
-      String bridgeMaterialId = el.getAttributeValue("bridge-material");
-      Element bridgeMaterialEl = null;
-      for (Element filter : XMLUtils.flattenElements(doc.getRootElement(), "filters")) {
-        if (bridgeMaterialId != null && bridgeMaterialId.equals(filter.getAttributeValue("id"))) {
-          bridgeMaterialEl = filter;
-          break;
-        }
-      }
-      if (bridgeMaterialEl != null) {
-        for (Element child : bridgeMaterialEl.getChildren()) {
-          Material material = XMLUtils.parseMaterial(new Node(child));
-          if (!material.isBlock()) {
-            throw new InvalidXMLException(
-                "'" + material + "' is not a valid block for 'bridge-material'", child);
-          }
-          bridgeMaterials.add(material);
-        }
-      }
-
+      BlockMaterialData bridgeMaterial =
+          parser.blockMaterialData(el, "bridge-material").required();
       boolean teamColor = parser.parseBool(el, "team-color").attr().orFalse();
       boolean silent = parser.parseBool(el, "silent").attr().orFalse();
 
-      return new BridgeEggProjectile(bridgeRange, bridgeMaterials, teamColor, silent);
+      return new BridgeEggProjectile(bridgeRange, bridgeMaterial, teamColor, silent);
     }
 
     public PgmProjectile parsePlainEntity(Element el) throws InvalidXMLException {

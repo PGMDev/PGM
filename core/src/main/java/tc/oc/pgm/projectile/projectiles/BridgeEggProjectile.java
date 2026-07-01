@@ -1,14 +1,13 @@
 package tc.oc.pgm.projectile.projectiles;
 
-import java.util.List;
-import org.bukkit.Material;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.util.material.BlockMaterialData;
 
 public record BridgeEggProjectile(
-    int bridgeRange, List<Material> bridgeMaterials, boolean teamColor, boolean silent)
+    int bridgeRange, BlockMaterialData bridgeMaterial, boolean teamColor, boolean silent)
     implements PgmProjectile {
 
   @Override
