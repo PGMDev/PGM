@@ -1,7 +1,7 @@
-package tc.oc.pgm.mannequin;
+package tc.oc.pgm.platform.modern.modules.mannequin;
 
-import java.util.EnumSet;
 import java.util.UUID;
+
 import org.bukkit.Color;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
@@ -17,7 +17,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
   private final float health;
   private final MannequinPose pose;
   private final boolean immovable;
-  private EnumSet<SkinPart> parts;
+  private final SkinPart.SkinLayers layers;
 
   public MannequinDefinition(
       @Nullable String id,
@@ -30,7 +30,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
       float health,
       MannequinPose pose,
       boolean immovable,
-      EnumSet<SkinPart> parts) {
+      SkinPart.SkinLayers layers) {
     super(id);
     this.name = name;
     this.uuid = uuid;
@@ -41,7 +41,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     this.health = health;
     this.pose = pose;
     this.immovable = immovable;
-    this.parts = EnumSet.copyOf(parts);
+    this.layers = layers;
   }
 
   public String getName() { return name; }
@@ -54,7 +54,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
 
   public boolean isInvulnerable() { return invulnerable; }
 
-  public Color getGlowing() { return  glowing; }
+  public Color getGlowing() { return glowing; }
 
   public float getHealth() { return health; }
 
@@ -62,6 +62,6 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
 
   public boolean isImmovable() { return immovable; }
 
-  public EnumSet<SkinPart> getSkinParts() { return parts; }
+  public SkinPart.SkinLayers getLayers() { return layers; }
 
 }

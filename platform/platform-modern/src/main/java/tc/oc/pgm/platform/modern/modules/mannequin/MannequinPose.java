@@ -1,4 +1,4 @@
-package tc.oc.pgm.mannequin;
+package tc.oc.pgm.platform.modern.modules.mannequin;
 
 public enum MannequinPose {
   STANDING,
