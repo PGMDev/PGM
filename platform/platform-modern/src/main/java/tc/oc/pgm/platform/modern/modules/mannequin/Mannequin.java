@@ -7,9 +7,12 @@ import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.metadata.FixedMetadataValue;
+import tc.oc.pgm.api.PGM;
 
 public class Mannequin {
 
+  public static final String METADATA_KEY = "PGM_mannequin_";
   private final org.bukkit.entity.Mannequin entity;
   private final String id;
 
@@ -45,7 +48,9 @@ public class Mannequin {
           parts.setHatsEnabled(layers.contains(SkinPart.HAT));
           mannequin.setSkinParts(parts);
         });
-    return new Mannequin(entity, id);
+    Mannequin wrapper = new Mannequin(entity, id);
+    entity.setMetadata(METADATA_KEY + id, new FixedMetadataValue(PGM.get(), wrapper));
+    return wrapper;
   }
 
   private static org.bukkit.entity.Pose toBukkitPose(MannequinPose pose) {

@@ -5,6 +5,8 @@ import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 import tc.oc.pgm.api.Modules;
 import tc.oc.pgm.platform.modern.modules.damage.ModernDamageMatchModule;
 import tc.oc.pgm.platform.modern.modules.kits.ModernKitMatchModule;
+import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
+import tc.oc.pgm.platform.modern.modules.mannequin.MannequinModule;
 import tc.oc.pgm.platform.modern.modules.tracker.ModernTrackerMatchModule;
 import tc.oc.pgm.platform.modern.modules.trim.TrimMatchModule;
 import tc.oc.pgm.platform.modern.modules.trim.TrimModule;
@@ -23,6 +25,6 @@ public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
     modules.register(ModernTrackerMatchModule.class, new ModernTrackerMatchModule.Factory());
     modules.register(TrimModule.class, TrimMatchModule.class, new TrimModule.Factory());
     modules.register(WaypointMatchModule.class, WaypointMatchModule::new);
-    modules.register(MannequinModule.class, new MannequinMatchModule::new);
+    modules.register(MannequinModule.class, new MannequinMatchModule());
   }
 }
