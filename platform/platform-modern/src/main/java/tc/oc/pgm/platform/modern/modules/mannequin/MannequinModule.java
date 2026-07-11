@@ -1,6 +1,10 @@
 package tc.oc.pgm.platform.modern.modules.mannequin;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Logger;
 import net.kyori.adventure.text.format.TextColor;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -13,17 +17,8 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Logger;
-
-public class MannequinModule implements MapModule<MannequinMatchModule> {
-  private final Map<String, MannequinDefinition> mannequinDefinitions;
-
-  public MannequinModule(Map<String, MannequinDefinition> mannequinDefinitions) {
-    this.mannequinDefinitions = mannequinDefinitions;
-  }
+public record MannequinModule(Map<String, MannequinDefinition> mannequinDefinitions)
+    implements MapModule<MannequinMatchModule> {
 
   @Override
   public MannequinMatchModule createMatchModule(Match match) {
@@ -37,8 +32,7 @@ public class MannequinModule implements MapModule<MannequinMatchModule> {
       Map<String, MannequinDefinition> mannequins = new HashMap<>();
       var parser = factory.getParser();
 
-      for (Element el :
-          XMLUtils.flattenElements(doc.getRootElement(), "mannequins", "mannequin")) {
+      for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "mannequins", "mannequin")) {
         String id = parser.string(el, "id").required();
         String name = parser.string(el, "name").orNull();
         boolean silent = parser.parseBool(el, "silent").attr().optional(false);
@@ -54,7 +48,9 @@ public class MannequinModule implements MapModule<MannequinMatchModule> {
         }
         UUID uuid = XMLUtils.parseUuid(Node.fromRequiredAttr(profileEl, "uuid"));
         Skin skin = XMLUtils.parseUnsignedSkin(Node.fromRequiredChildOrAttr(profileEl, "skin"));
-        MannequinPose pose = parser.parseEnum(MannequinPose.class, profileEl, "pose").optional(MannequinPose.STANDING);
+        MannequinPose pose = parser
+            .parseEnum(MannequinPose.class, profileEl, "pose")
+            .optional(MannequinPose.STANDING);
         SkinPart.SkinLayers layers = SkinPart.SkinLayers.allOf();
         String removedLayers = parser.string(profileEl, "remove-layers").attr().orNull();
         if (removedLayers != null) {
@@ -62,17 +58,7 @@ public class MannequinModule implements MapModule<MannequinMatchModule> {
         }
 
         MannequinDefinition mannequinDefinition = new MannequinDefinition(
-            id,
-            name,
-            uuid,
-            skin,
-            silent,
-            invulnerable,
-            glowing,
-            health,
-            pose,
-            immovable,
-            layers);
+            id, name, uuid, skin, silent, invulnerable, glowing, health, pose, immovable, layers);
 
         factory.getFeatures().addFeature(el, mannequinDefinition);
         mannequins.put(id, mannequinDefinition);

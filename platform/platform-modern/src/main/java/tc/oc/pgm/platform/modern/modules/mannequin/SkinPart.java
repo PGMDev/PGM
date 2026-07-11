@@ -17,9 +17,13 @@ public enum SkinPart {
   public static class SkinLayers {
     private final EnumSet<SkinPart> layers;
 
-    private SkinLayers(EnumSet<SkinPart> layers) { this.layers = layers; }
+    private SkinLayers(EnumSet<SkinPart> layers) {
+      this.layers = layers;
+    }
 
-    public boolean contains(SkinPart part) { return this.layers.contains(part); }
+    public boolean contains(SkinPart part) {
+      return this.layers.contains(part);
+    }
 
     public static SkinLayers of(SkinPart part) {
       return new SkinLayers(part == null ? EnumSet.noneOf(SkinPart.class) : EnumSet.of(part));
@@ -31,15 +35,18 @@ public enum SkinPart {
       return new SkinLayers(layers);
     }
 
-    public static SkinLayers allOf() { return new SkinLayers(EnumSet.allOf(SkinPart.class)); }
+    public static SkinLayers allOf() {
+      return new SkinLayers(EnumSet.allOf(SkinPart.class));
+    }
 
-    public static SkinLayers noneOf() { return new SkinLayers(EnumSet.noneOf(SkinPart.class)); }
+    public static SkinLayers noneOf() {
+      return new SkinLayers(EnumSet.noneOf(SkinPart.class));
+    }
 
     private static final Map<String, SkinLayers> ALIASES = Map.of(
         "all", SkinLayers.allOf(),
         "arms", SkinLayers.of(SkinPart.LEFT_SLEEVE, SkinPart.RIGHT_SLEEVE),
-        "pants", SkinLayers.of(SkinPart.LEFT_PANTS_LEG, SkinPart.RIGHT_PANTS_LEG)
-    );
+        "pants", SkinLayers.of(SkinPart.LEFT_PANTS_LEG, SkinPart.RIGHT_PANTS_LEG));
 
     public SkinLayers minus(SkinLayers other) {
       EnumSet<SkinPart> result = EnumSet.copyOf(this.layers);

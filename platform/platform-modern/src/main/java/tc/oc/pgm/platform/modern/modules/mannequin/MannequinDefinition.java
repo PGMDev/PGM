@@ -1,9 +1,7 @@
 package tc.oc.pgm.platform.modern.modules.mannequin;
 
 import java.util.UUID;
-
 import net.kyori.adventure.text.format.TextColor;
-import org.bukkit.Color;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.util.skin.Skin;
@@ -45,24 +43,43 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     this.layers = layers;
   }
 
-  public String getName() { return name; }
+  public String getName() {
+    return name;
+  }
 
-  public UUID getUuid() { return uuid; }
+  public UUID getUuid() {
+    return uuid;
+  }
 
-  public Skin getSkin() { return skin; }
+  public Skin getSkin() {
+    return skin;
+  }
 
-  public boolean isSilent() { return silent; }
+  public boolean isSilent() {
+    return silent;
+  }
 
-  public boolean isInvulnerable() { return invulnerable; }
+  public boolean isInvulnerable() {
+    return invulnerable;
+  }
 
-  public TextColor getGlowing() { return glowing; }
+  public TextColor getGlowing() {
+    return glowing;
+  }
 
-  public float getHealth() { return health; }
+  public float getHealth() {
+    return health;
+  }
 
-  public MannequinPose getPose() { return pose; }
+  public MannequinPose getPose() {
+    return pose;
+  }
 
-  public boolean isImmovable() { return immovable; }
+  public boolean isImmovable() {
+    return immovable;
+  }
 
-  public SkinPart.SkinLayers getLayers() { return layers; }
-
+  public SkinPart.SkinLayers getLayers() {
+    return layers;
+  }
 }

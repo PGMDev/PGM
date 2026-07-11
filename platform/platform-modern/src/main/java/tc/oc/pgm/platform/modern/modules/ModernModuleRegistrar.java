@@ -25,6 +25,7 @@ public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
     modules.register(ModernTrackerMatchModule.class, new ModernTrackerMatchModule.Factory());
     modules.register(TrimModule.class, TrimMatchModule.class, new TrimModule.Factory());
     modules.register(WaypointMatchModule.class, WaypointMatchModule::new);
-    modules.register(MannequinModule.class, new MannequinMatchModule());
+    modules.register(
+        MannequinModule.class, MannequinMatchModule.class, new MannequinModule.Factory());
   }
 }

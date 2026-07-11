@@ -22,7 +22,8 @@ public class Mannequin {
   }
 
   public static Mannequin spawn(String id, Location origin, MannequinDefinition definition) {
-    org.bukkit.entity.Mannequin entity = origin.getWorld()
+    org.bukkit.entity.Mannequin entity = origin
+        .getWorld()
         .spawn(origin, org.bukkit.entity.Mannequin.class, mannequin -> {
           mannequin.setCustomName(definition.getName());
 
