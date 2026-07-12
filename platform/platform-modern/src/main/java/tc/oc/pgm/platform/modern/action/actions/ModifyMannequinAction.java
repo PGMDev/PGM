@@ -1,6 +1,7 @@
 package tc.oc.pgm.platform.modern.action.actions;
 
 import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import tc.oc.pgm.action.actions.AbstractAction;
@@ -9,7 +10,9 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
+import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.skin.Skin;
 
 public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractAction<B> {
 
@@ -19,6 +22,9 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable Boolean hideDescription;
   private final @Nullable Boolean hideTitles;
   private final @Nullable Float health;
+  private final @Nullable UUID uuid;
+  private final @Nullable Skin skin;
+  private final @Nullable SkinPart.SkinLayers layers;
   private final @Nullable MannequinPose pose;
   private final @Nullable Formula<B> xformula;
   private final @Nullable Formula<B> yformula;
@@ -34,6 +40,9 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable Boolean hideDescription,
       @Nullable Boolean hideTitles,
       @Nullable Float health,
+      @Nullable UUID uuid,
+      @Nullable Skin skin,
+      @Nullable SkinPart.SkinLayers layers,
       @Nullable MannequinPose pose,
       @Nullable Formula<B> xformula,
       @Nullable Formula<B> yformula,
@@ -47,6 +56,9 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     this.hideDescription = hideDescription;
     this.hideTitles = hideTitles;
     this.health = health;
+    this.uuid = uuid;
+    this.skin = skin;
+    this.layers = layers;
     this.pose = pose;
     this.xformula = xformula;
     this.yformula = yformula;
@@ -66,6 +78,12 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       if (hideDescription != null) mannequin.setHideDescription(hideDescription);
       if (hideTitles != null && hideTitles) mannequin.hideTitles();
       if (health != null) mannequin.setHealth(health);
+
+      if (uuid != null && skin != null) {
+        mannequin.setSkin(uuid, skin);
+        mannequin.setSkinLayers(SkinPart.SkinLayers.allOf());
+      }
+      if (layers != null) mannequin.setSkinLayers(layers);
       if (pose != null) mannequin.setPose(pose);
 
       if (xformula != null && yformula != null && zformula != null) {

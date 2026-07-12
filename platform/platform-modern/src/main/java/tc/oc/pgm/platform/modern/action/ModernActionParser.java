@@ -1,6 +1,7 @@
 package tc.oc.pgm.platform.modern.action;
 
 import java.util.Optional;
+import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.jdom2.Element;
 import tc.oc.pgm.action.ActionParser;
@@ -10,8 +11,10 @@ import tc.oc.pgm.platform.modern.action.actions.ModifyMannequinAction;
 import tc.oc.pgm.platform.modern.action.actions.SpawnMannequinAction;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
+import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -51,11 +54,28 @@ public class ModernActionParser extends ActionParser {
     Boolean hideTitles = getParser().parseBool(el, "hide-titles").attr().orNull();
     Float health = getParser().parseFloat(el, "health").attr().orNull();
 
+    UUID uuid = null;
+    Skin skin = null;
+    SkinPart.SkinLayers layers = null;
     MannequinPose pose = null;
     Element profileEl = el.getChild("profile");
     if (profileEl != null) {
+      Node uuidNode = Node.fromAttr(profileEl, "uuid");
+      Node skinNode = Node.fromChildOrAttr(profileEl, "skin");
+      if (uuidNode != null && skinNode != null) {
+        uuid = XMLUtils.parseUuid(Node.fromRequiredAttr(profileEl, "uuid"));
+        skin = XMLUtils.parseUnsignedSkin(Node.fromRequiredChildOrAttr(profileEl, "skin"));
+      } else if (uuidNode != null || skinNode != null) {
+        throw new InvalidXMLException(
+            "Skin changes require both 'uuid' and 'skin' to be defined", profileEl);
+      }
+
+      String removedLayers =
+          getParser().string(profileEl, "remove-layers").attr().orNull();
+      if (removedLayers != null) {
+        layers = SkinPart.SkinLayers.allOf().minus(SkinPart.SkinLayers.parse(removedLayers));
+      }
       pose = getParser().parseEnum(MannequinPose.class, profileEl, "pose").orNull();
-      //      Add skin customization/rotation separate from teleport action later
     }
 
     Formula<B> xFormula = null, yFormula = null, zFormula = null;
@@ -88,6 +108,9 @@ public class ModernActionParser extends ActionParser {
         hideDescription,
         hideTitles,
         health,
+        uuid,
+        skin,
+        layers,
         pose,
         xFormula,
         yFormula,

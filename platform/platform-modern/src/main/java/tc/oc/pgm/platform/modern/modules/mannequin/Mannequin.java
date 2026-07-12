@@ -3,6 +3,7 @@ package tc.oc.pgm.platform.modern.modules.mannequin;
 import com.destroystokyo.paper.SkinParts;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -10,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.util.skin.Skin;
 
 public class Mannequin {
 
@@ -92,6 +94,28 @@ public class Mannequin {
     entity.setHealth(health);
   }
 
+  public void setSkin(UUID uuid, Skin skin) {
+    var profile = Bukkit.createProfile(uuid, null);
+    profile.setProperty(new ProfileProperty("textures", skin.getData(), skin.getSignature()));
+    entity.setProfile(ResolvableProfile.resolvableProfile(profile));
+  }
+
+  public void setSkinLayers(SkinPart.SkinLayers layers) {
+    SkinParts.Mutable parts = entity.getSkinParts();
+    parts.setCapeEnabled(layers.contains(SkinPart.CAPE));
+    parts.setJacketEnabled(layers.contains(SkinPart.JACKET));
+    parts.setLeftSleeveEnabled(layers.contains(SkinPart.LEFT_SLEEVE));
+    parts.setRightSleeveEnabled(layers.contains(SkinPart.RIGHT_SLEEVE));
+    parts.setLeftPantsEnabled(layers.contains(SkinPart.LEFT_PANTS_LEG));
+    parts.setRightPantsEnabled(layers.contains(SkinPart.RIGHT_PANTS_LEG));
+    parts.setHatsEnabled(layers.contains(SkinPart.HAT));
+    entity.setSkinParts(parts);
+  }
+
+  public void setPose(MannequinPose pose) {
+    entity.setPose(toBukkitPose(pose));
+  }
+
   public void teleport(double x, double y, double z, float yaw, float pitch) {
     entity.teleport(new Location(entity.getWorld(), x, y, z, yaw, pitch));
   }
@@ -106,10 +130,6 @@ public class Mannequin {
 
   public void despawn() {
     entity.remove();
-  }
-
-  public void setPose(MannequinPose pose) {
-    entity.setPose(toBukkitPose(pose));
   }
 
   public void setGlowing(@Nullable TextColor color) {
