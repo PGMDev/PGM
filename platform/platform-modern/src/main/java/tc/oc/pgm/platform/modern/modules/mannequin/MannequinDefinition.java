@@ -5,7 +5,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.inventory.MainHand;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.projectile.ClickAction;
 import tc.oc.pgm.util.skin.Skin;
 
 public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
@@ -22,6 +25,8 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
   private final MainHand mainHand;
   private final boolean gravity;
   private final SkinPart.SkinLayers layers;
+  private final @Nullable Action<? super MatchPlayer> action;
+  private final @Nullable ClickAction cause;
 
   public MannequinDefinition(
       @Nullable String id,
@@ -37,7 +42,9 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
       boolean immovable,
       MainHand mainHand,
       boolean gravity,
-      SkinPart.SkinLayers layers) {
+      SkinPart.SkinLayers layers,
+      @Nullable Action<? super MatchPlayer> action,
+      @Nullable ClickAction cause) {
     super(id);
     this.name = name;
     this.description = description;
@@ -52,6 +59,8 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     this.mainHand = mainHand;
     this.gravity = gravity;
     this.layers = layers;
+    this.action = action;
+    this.cause = cause;
   }
 
   public Component getName() {
@@ -104,5 +113,13 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
 
   public SkinPart.SkinLayers getLayers() {
     return layers;
+  }
+
+  public @Nullable Action<? super MatchPlayer> getAction() {
+    return action;
+  }
+
+  public @Nullable ClickAction getCause() {
+    return cause;
   }
 }

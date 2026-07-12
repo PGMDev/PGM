@@ -10,10 +10,13 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.inventory.MainHand;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.projectile.ClickAction;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -64,6 +67,11 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
           layers = SkinPart.SkinLayers.allOf().minus(SkinPart.SkinLayers.parse(removedLayers));
         }
 
+        Action<? super MatchPlayer> action =
+            parser.action(MatchPlayer.class, el, "click-action").orNull();
+        ClickAction cause =
+            parser.parseEnum(ClickAction.class, el, "on").optional(ClickAction.RIGHT);
+
         MannequinDefinition mannequinDefinition = new MannequinDefinition(
             id,
             name,
@@ -78,7 +86,9 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
             immovable,
             mainHand,
             gravity,
-            layers);
+            layers,
+            action,
+            cause);
 
         factory.getFeatures().addFeature(el, mannequinDefinition);
         mannequins.put(id, mannequinDefinition);

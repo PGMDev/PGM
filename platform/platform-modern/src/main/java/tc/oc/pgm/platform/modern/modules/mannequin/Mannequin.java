@@ -17,14 +17,14 @@ public class Mannequin {
 
   public static final String METADATA_KEY = "PGM_mannequin_";
   private final org.bukkit.entity.Mannequin entity;
-  private final String id;
+  private final MannequinDefinition definition;
 
-  public Mannequin(org.bukkit.entity.Mannequin entity, String id) {
+  public Mannequin(org.bukkit.entity.Mannequin entity, MannequinDefinition definition) {
     this.entity = entity;
-    this.id = id;
+    this.definition = definition;
   }
 
-  public static Mannequin spawn(String id, Location origin, MannequinDefinition definition) {
+  public static Mannequin spawn(Location origin, MannequinDefinition definition) {
     org.bukkit.entity.Mannequin entity = origin
         .getWorld()
         .spawn(origin, org.bukkit.entity.Mannequin.class, mannequin -> {
@@ -55,8 +55,9 @@ public class Mannequin {
           parts.setHatsEnabled(layers.contains(SkinPart.HAT));
           mannequin.setSkinParts(parts);
         });
-    Mannequin wrapper = new Mannequin(entity, id);
-    entity.setMetadata(METADATA_KEY + id, new FixedMetadataValue(PGM.get(), wrapper));
+    Mannequin wrapper = new Mannequin(entity, definition);
+    entity.setMetadata(
+        METADATA_KEY + definition.getId(), new FixedMetadataValue(PGM.get(), wrapper));
     return wrapper;
   }
 
@@ -71,7 +72,15 @@ public class Mannequin {
   }
 
   public String getId() {
-    return this.id;
+    return definition.getId();
+  }
+
+  public MannequinDefinition getDefinition() {
+    return definition;
+  }
+
+  public UUID getEntityId() {
+    return entity.getUniqueId();
   }
 
   public void setName(Component name) {
