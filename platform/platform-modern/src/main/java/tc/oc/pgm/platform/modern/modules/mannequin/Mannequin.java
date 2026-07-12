@@ -3,6 +3,7 @@ package tc.oc.pgm.platform.modern.modules.mannequin;
 import com.destroystokyo.paper.SkinParts;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
+import java.awt.*;
 import javax.annotation.Nullable;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -25,7 +26,8 @@ public class Mannequin {
     org.bukkit.entity.Mannequin entity = origin
         .getWorld()
         .spawn(origin, org.bukkit.entity.Mannequin.class, mannequin -> {
-          mannequin.setCustomName(definition.getName());
+          mannequin.customName(definition.getName());
+          mannequin.setDescription(definition.getDescription());
 
           var profile = Bukkit.createProfile(definition.getUuid(), null);
           profile.setProperty(new ProfileProperty(
@@ -37,6 +39,7 @@ public class Mannequin {
           mannequin.setGlowing(definition.getGlowing() != null);
           mannequin.setPose(toBukkitPose(definition.getPose()));
           mannequin.setImmovable(definition.isImmovable());
+          mannequin.setMainHand(definition.getMainHand());
 
           SkinPart.SkinLayers layers = definition.getLayers();
           SkinParts.Mutable parts = mannequin.getSkinParts();

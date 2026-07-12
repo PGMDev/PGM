@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import org.bukkit.inventory.MainHand;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
@@ -34,12 +36,16 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
 
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "mannequins", "mannequin")) {
         String id = parser.string(el, "id").required();
-        String name = parser.string(el, "name").orNull();
+        Component name = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "name"));
+        Component description =
+            XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "description"));
         boolean silent = parser.parseBool(el, "silent").attr().optional(false);
         boolean invulnerable = parser.parseBool(el, "invulnerable").attr().optional(false);
         TextColor glowing = parser.textColor(el, "glowing").orNull();
         float health = parser.parseFloat(el, "health").attr().optional(20f);
         boolean immovable = parser.parseBool(el, "immovable").attr().optional(false);
+        MainHand mainHand =
+            parser.parseEnum(MainHand.class, el, "main-hand").optional(MainHand.RIGHT);
 
         Element profileEl = el.getChild("profile");
         if (profileEl == null) {
@@ -58,7 +64,19 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
         }
 
         MannequinDefinition mannequinDefinition = new MannequinDefinition(
-            id, name, uuid, skin, silent, invulnerable, glowing, health, pose, immovable, layers);
+            id,
+            name,
+            description,
+            uuid,
+            skin,
+            silent,
+            invulnerable,
+            glowing,
+            health,
+            pose,
+            immovable,
+            mainHand,
+            layers);
 
         factory.getFeatures().addFeature(el, mannequinDefinition);
         mannequins.put(id, mannequinDefinition);
