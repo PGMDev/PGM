@@ -18,8 +18,9 @@ public class MannequinMatchModule implements MatchModule {
     this.mannequinDefinitions = mannequinDefinitions;
   }
 
-  public void spawn(MannequinDefinition definition, double x, double y, double z) {
-    Location origin = new Location(match.getWorld(), x, y, z);
+  public void spawn(
+      MannequinDefinition definition, double x, double y, double z, float yaw, float pitch) {
+    Location origin = new Location(match.getWorld(), x, y, z, yaw, pitch);
     instances.put(definition.getId(), Mannequin.spawn(definition.getId(), origin, definition));
   }
 

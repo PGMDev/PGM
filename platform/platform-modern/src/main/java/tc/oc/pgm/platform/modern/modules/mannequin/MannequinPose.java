@@ -4,6 +4,6 @@ public enum MannequinPose {
   STANDING,
   CROUCHING,
   SWIMMING,
-  GLIDING,
+  CRAWLING,
   SLEEPING
 }

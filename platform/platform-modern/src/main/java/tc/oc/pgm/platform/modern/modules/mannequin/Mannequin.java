@@ -3,10 +3,9 @@ package tc.oc.pgm.platform.modern.modules.mannequin;
 import com.destroystokyo.paper.SkinParts;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
-import java.awt.*;
 import javax.annotation.Nullable;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
@@ -40,6 +39,7 @@ public class Mannequin {
           mannequin.setPose(toBukkitPose(definition.getPose()));
           mannequin.setImmovable(definition.isImmovable());
           mannequin.setMainHand(definition.getMainHand());
+          mannequin.setGravity(definition.hasGravity());
 
           SkinPart.SkinLayers layers = definition.getLayers();
           SkinParts.Mutable parts = mannequin.getSkinParts();
@@ -62,7 +62,7 @@ public class Mannequin {
       case STANDING -> org.bukkit.entity.Pose.STANDING;
       case CROUCHING -> org.bukkit.entity.Pose.SNEAKING;
       case SWIMMING -> org.bukkit.entity.Pose.SWIMMING;
-      case GLIDING -> org.bukkit.entity.Pose.FALL_FLYING;
+      case CRAWLING -> org.bukkit.entity.Pose.FALL_FLYING;
       case SLEEPING -> org.bukkit.entity.Pose.SLEEPING;
     };
   }
@@ -83,7 +83,7 @@ public class Mannequin {
     entity.setPose(toBukkitPose(pose));
   }
 
-  public void setGlowing(@Nullable Color color) {
+  public void setGlowing(@Nullable TextColor color) {
     entity.setGlowing(color != null);
   }
 }

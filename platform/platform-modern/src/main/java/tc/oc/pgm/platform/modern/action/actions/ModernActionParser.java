@@ -24,7 +24,9 @@ public class ModernActionParser extends ActionParser {
     var xformula = getParser().formula(scope, el, "x").required();
     var yformula = getParser().formula(scope, el, "y").required();
     var zformula = getParser().formula(scope, el, "z").required();
+    var yaw = getParser().formula(scope, el, "yaw").optional();
+    var pitch = getParser().formula(scope, el, "pitch").optional();
 
-    return new SpawnMannequinAction<>(scope, mannequin, xformula, yformula, zformula);
+    return new SpawnMannequinAction<>(scope, mannequin, xformula, yformula, zformula, yaw, pitch);
   }
 }

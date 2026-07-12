@@ -20,6 +20,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
   private final MannequinPose pose;
   private final boolean immovable;
   private final MainHand mainHand;
+  private final boolean gravity;
   private final SkinPart.SkinLayers layers;
 
   public MannequinDefinition(
@@ -35,6 +36,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
       MannequinPose pose,
       boolean immovable,
       MainHand mainHand,
+      boolean gravity,
       SkinPart.SkinLayers layers) {
     super(id);
     this.name = name;
@@ -48,6 +50,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     this.pose = pose;
     this.immovable = immovable;
     this.mainHand = mainHand;
+    this.gravity = gravity;
     this.layers = layers;
   }
 
@@ -93,6 +96,10 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
 
   public MainHand getMainHand() {
     return mainHand;
+  }
+
+  public boolean hasGravity() {
+    return gravity;
   }
 
   public SkinPart.SkinLayers getLayers() {
