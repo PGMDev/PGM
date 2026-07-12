@@ -45,10 +45,10 @@ public class ModernActionParser extends ActionParser {
     var mannequin =
         getParser().reference(MannequinDefinition.class, el, "mannequin").required();
     Component name = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "name"));
-    Boolean hideName = getParser().parseBool(el, "hide-name").attr().orNull();
     Component description = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "description"));
     Boolean hideDescription =
         getParser().parseBool(el, "hide-description").attr().orNull();
+    Boolean hideTitles = getParser().parseBool(el, "hide-titles").attr().orNull();
     Float health = getParser().parseFloat(el, "health").attr().orNull();
 
     MannequinPose pose = null;
@@ -84,9 +84,9 @@ public class ModernActionParser extends ActionParser {
         scope,
         mannequin,
         name,
-        hideName,
         description,
         hideDescription,
+        hideTitles,
         health,
         pose,
         xFormula,

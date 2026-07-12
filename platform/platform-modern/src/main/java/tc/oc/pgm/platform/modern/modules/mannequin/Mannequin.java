@@ -76,16 +76,16 @@ public class Mannequin {
     entity.customName(name);
   }
 
-  public void setCustomNameVisible(boolean hideName) {
-    entity.setCustomNameVisible(!hideName);
-  }
-
   public void setDescription(Component description) {
     entity.setDescription(description);
   }
 
   public void setHideDescription(boolean hide) {
     entity.setDescription(null);
+  }
+
+  public void hideTitles() {
+    entity.customName(null);
   }
 
   public void setHealth(float health) {
