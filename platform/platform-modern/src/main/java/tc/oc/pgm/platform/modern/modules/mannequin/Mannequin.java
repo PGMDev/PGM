@@ -4,6 +4,7 @@ import com.destroystokyo.paper.SkinParts;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import javax.annotation.Nullable;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -71,8 +72,36 @@ public class Mannequin {
     return this.id;
   }
 
-  public void teleport(Location location) {
-    entity.teleport(location);
+  public void setName(Component name) {
+    entity.customName(name);
+  }
+
+  public void setCustomNameVisible(boolean hideName) {
+    entity.setCustomNameVisible(!hideName);
+  }
+
+  public void setDescription(Component description) {
+    entity.setDescription(description);
+  }
+
+  public void setHideDescription(boolean hide) {
+    entity.setDescription(null);
+  }
+
+  public void setHealth(float health) {
+    entity.setHealth(health);
+  }
+
+  public void teleport(double x, double y, double z, float yaw, float pitch) {
+    entity.teleport(new Location(entity.getWorld(), x, y, z, yaw, pitch));
+  }
+
+  public float getYaw() {
+    return entity.getLocation().getYaw();
+  }
+
+  public float getPitch() {
+    return entity.getLocation().getPitch();
   }
 
   public void despawn() {

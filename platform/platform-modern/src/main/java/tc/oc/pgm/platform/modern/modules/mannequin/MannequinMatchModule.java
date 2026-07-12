@@ -3,6 +3,7 @@ package tc.oc.pgm.platform.modern.modules.mannequin;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.bukkit.Location;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -26,5 +27,9 @@ public class MannequinMatchModule implements MatchModule {
 
   public void despawn(String id) {
     instances.removeAll(id).forEach(Mannequin::despawn);
+  }
+
+  public void modify(String id, Consumer<Mannequin> modifier) {
+    instances.get(id).forEach(modifier);
   }
 }

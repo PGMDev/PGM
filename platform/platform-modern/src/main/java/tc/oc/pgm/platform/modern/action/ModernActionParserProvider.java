@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.action.actions;
+package tc.oc.pgm.platform.modern.action;
 
 import static tc.oc.pgm.util.platform.Supports.Priority.HIGHEST;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;

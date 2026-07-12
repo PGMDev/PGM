@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.action;
+package tc.oc.pgm.platform.modern.action.actions;
 
 import java.util.Optional;
 import tc.oc.pgm.action.actions.AbstractAction;
@@ -10,7 +10,7 @@ import tc.oc.pgm.util.math.Formula;
 
 public class SpawnMannequinAction<B extends Filterable<?>> extends AbstractAction<B> {
 
-  FeatureReference<MannequinDefinition> mannequinRef;
+  private final FeatureReference<MannequinDefinition> mannequinRef;
   private final Formula<B> xformula;
   private final Formula<B> yformula;
   private final Formula<B> zformula;

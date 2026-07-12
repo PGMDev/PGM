@@ -48,7 +48,6 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
             parser.parseEnum(MainHand.class, el, "main-hand").optional(MainHand.RIGHT);
         boolean gravity = parser.parseBool(el, "gravity").attr().optional(false);
 
-
         Element profileEl = el.getChild("profile");
         if (profileEl == null) {
           throw new InvalidXMLException(
