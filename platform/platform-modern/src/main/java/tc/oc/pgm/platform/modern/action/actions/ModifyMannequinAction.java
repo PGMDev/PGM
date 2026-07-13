@@ -12,6 +12,7 @@ import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
 import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart;
+import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.skin.Skin;
 
@@ -34,6 +35,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable Skin skin;
   private final @Nullable SkinPart.SkinLayers layers;
   private final @Nullable MannequinPose pose;
+  private final @Nullable FeatureReference<WaypointDefinition> waypoint;
+  private final @Nullable Boolean removeWaypoint;
   private final @Nullable Formula<B> xformula;
   private final @Nullable Formula<B> yformula;
   private final @Nullable Formula<B> zformula;
@@ -59,6 +62,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable Skin skin,
       @Nullable SkinPart.SkinLayers layers,
       @Nullable MannequinPose pose,
+      @Nullable FeatureReference<WaypointDefinition> waypoint,
+      @Nullable Boolean removeWaypoint,
       @Nullable Formula<B> xformula,
       @Nullable Formula<B> yformula,
       @Nullable Formula<B> zformula,
@@ -82,6 +87,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     this.skin = skin;
     this.layers = layers;
     this.pose = pose;
+    this.waypoint = waypoint;
+    this.removeWaypoint = removeWaypoint;
     this.xformula = xformula;
     this.yformula = yformula;
     this.zformula = zformula;
@@ -94,7 +101,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     MannequinDefinition definition = mannequinRef.get();
     float yaw = yawFormula.map(f -> (float) f.apply(b)).orElse(0f);
     float pitch = pitchFormula.map(f -> (float) f.apply(b)).orElse(0f);
-    b.getMatch().needModule(MannequinMatchModule.class).modify(definition.getId(), mannequin -> {
+    var mmm = b.getMatch().needModule(MannequinMatchModule.class);
+    mmm.modify(definition.getId(), mannequin -> {
       if (name != null) mannequin.setName(name);
       if (description != null) mannequin.setDescription(description);
       if (hideDescription != null) mannequin.setHideDescription(hideDescription);
@@ -114,6 +122,9 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       }
       if (layers != null) mannequin.setSkinLayers(layers);
       if (pose != null) mannequin.setPose(pose);
+
+      if (waypoint != null) mmm.setWaypoint(mannequin, waypoint.get());
+      if (removeWaypoint != null && removeWaypoint) mmm.setWaypoint(mannequin, null);
 
       if (xformula != null && yformula != null && zformula != null) {
         mannequin.teleport(

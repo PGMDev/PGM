@@ -1,5 +1,6 @@
 package tc.oc.pgm.platform.modern.modules.waypoint;
 
+import java.util.Map;
 import java.util.Optional;
 import net.minecraft.server.waypoints.ServerWaypointManager;
 import net.minecraft.world.waypoints.WaypointTransmitter;
@@ -31,13 +32,15 @@ public class WaypointMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final ServerWaypointManager waypointManager;
+  private final Map<String, WaypointDefinition> waypointDefinitions;
 
-  public WaypointMatchModule(Match match) {
+  public WaypointMatchModule(Match match, Map<String, WaypointDefinition> waypointDefinitions) {
     this.match = match;
+    this.waypointDefinitions = waypointDefinitions;
     this.waypointManager = ((CraftWorld) match.getWorld()).getHandle().getWaypointManager();
   }
 
-  private void track(WaypointTransmitter transmitter) {
+  public void track(WaypointTransmitter transmitter) {
     if (transmitter == null) return;
 
     waypointManager.trackWaypoint(transmitter);
@@ -90,5 +93,9 @@ public class WaypointMatchModule implements MatchModule, Listener {
     } else {
       attr.setBaseValue(0);
     }
+  }
+
+  public void untrack(WaypointTransmitter transmitter) {
+    waypointManager.untrackWaypoint(transmitter);
   }
 }

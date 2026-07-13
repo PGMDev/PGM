@@ -11,6 +11,7 @@ import tc.oc.pgm.platform.modern.modules.tracker.ModernTrackerMatchModule;
 import tc.oc.pgm.platform.modern.modules.trim.TrimMatchModule;
 import tc.oc.pgm.platform.modern.modules.trim.TrimModule;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointMatchModule;
+import tc.oc.pgm.platform.modern.modules.waypoint.WaypointModule;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(PAPER)
@@ -24,7 +25,7 @@ public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
     modules.register(ModernMobsMatchModule.class, new ModernMobsMatchModule.Factory());
     modules.register(ModernTrackerMatchModule.class, new ModernTrackerMatchModule.Factory());
     modules.register(TrimModule.class, TrimMatchModule.class, new TrimModule.Factory());
-    modules.register(WaypointMatchModule.class, WaypointMatchModule::new);
+    modules.register(WaypointModule.class, WaypointMatchModule.class, new WaypointModule.Factory());
     modules.register(
         MannequinModule.class, MannequinMatchModule.class, new MannequinModule.Factory());
   }

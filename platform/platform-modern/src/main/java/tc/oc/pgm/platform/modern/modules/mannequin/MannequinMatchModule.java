@@ -6,9 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import tc.oc.pgm.api.match.Match;
@@ -16,6 +18,9 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
+import tc.oc.pgm.platform.modern.modules.waypoint.WaypointMatchModule;
+import tc.oc.pgm.platform.modern.modules.waypoint.types.DefinedWaypointTransmitter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class MannequinMatchModule implements MatchModule, Listener {
@@ -36,6 +41,11 @@ public class MannequinMatchModule implements MatchModule, Listener {
     Mannequin mannequin = Mannequin.spawn(origin, definition);
     instances.put(definition.getId(), mannequin);
     byEntity.put(mannequin.getEntityId(), mannequin);
+
+    if (definition.getWaypoint() != null) {
+      var transmitter = new DefinedWaypointTransmitter(definition.getWaypoint().get(), mannequin);
+      match.needModule(WaypointMatchModule.class).track(transmitter);
+    }
   }
 
   @EventHandler
@@ -59,5 +69,26 @@ public class MannequinMatchModule implements MatchModule, Listener {
 
   public void modify(String id, Consumer<Mannequin> modifier) {
     instances.get(id).forEach(modifier);
+  }
+
+  public void setWaypoint(Mannequin mannequin, @Nullable WaypointDefinition definition) {
+    var wmm = match.needModule(WaypointMatchModule.class);
+    var current = mannequin.getWaypointTransmitter();
+    if (current != null) wmm.untrack(current);
+    if (definition != null) {
+      var transmitter = new DefinedWaypointTransmitter(definition, mannequin);
+      wmm.track(transmitter);
+      mannequin.setWaypointTransmitter(transmitter);
+    } else {
+      mannequin.setWaypointTransmitter(null);
+    }
+  }
+
+  @EventHandler
+  public void onDeath(EntityDeathEvent event) {
+    Mannequin mannequin = byEntity.remove(event.getEntity().getUniqueId());
+    if (mannequin == null) return;
+    setWaypoint(mannequin, null);
+    instances.remove(mannequin.getId(), mannequin);
   }
 }

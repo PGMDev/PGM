@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.jdom2.Element;
 import tc.oc.pgm.action.ActionParser;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.action.actions.ModifyMannequinAction;
@@ -13,6 +14,7 @@ import tc.oc.pgm.platform.modern.action.actions.SpawnMannequinAction;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
 import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart;
+import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.skin.Skin;
@@ -86,6 +88,13 @@ public class ModernActionParser extends ActionParser {
       pose = getParser().parseEnum(MannequinPose.class, profileEl, "pose").orNull();
     }
 
+    FeatureReference<WaypointDefinition> waypoint =
+        getParser().reference(WaypointDefinition.class, el, "waypoint").orNull();
+    Boolean removeWaypoint = getParser().parseBool(el, "remove-waypoint").attr().orNull();
+    if (waypoint != null && removeWaypoint != null && removeWaypoint) {
+      throw new InvalidXMLException("'waypoint' and 'remove-waypoint' cannot be combined", el);
+    }
+
     Formula<B> xFormula = null, yFormula = null, zFormula = null;
     Optional<Formula<B>> yawFormula = Optional.empty(), pitchFormula = Optional.empty();
     Element teleportEl = el.getChild("teleport");
@@ -127,6 +136,8 @@ public class ModernActionParser extends ActionParser {
         skin,
         layers,
         pose,
+        waypoint,
+        removeWaypoint,
         xFormula,
         yFormula,
         zFormula,

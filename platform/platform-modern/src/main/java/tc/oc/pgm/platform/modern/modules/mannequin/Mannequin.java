@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.platform.modern.modules.waypoint.types.DefinedWaypointTransmitter;
 import tc.oc.pgm.util.skin.Skin;
 
 public class Mannequin {
@@ -18,6 +19,15 @@ public class Mannequin {
   public static final String METADATA_KEY = "PGM_mannequin_";
   private final org.bukkit.entity.Mannequin entity;
   private final MannequinDefinition definition;
+  private @Nullable DefinedWaypointTransmitter waypointTransmitter;
+
+  public @Nullable DefinedWaypointTransmitter getWaypointTransmitter() {
+    return waypointTransmitter;
+  }
+
+  public void setWaypointTransmitter(@Nullable DefinedWaypointTransmitter t) {
+    this.waypointTransmitter = t;
+  }
 
   public Mannequin(org.bukkit.entity.Mannequin entity, MannequinDefinition definition) {
     this.entity = entity;
@@ -168,5 +178,9 @@ public class Mannequin {
 
   public void despawn() {
     entity.remove();
+  }
+
+  public Location getLocation() {
+    return entity.getLocation();
   }
 }

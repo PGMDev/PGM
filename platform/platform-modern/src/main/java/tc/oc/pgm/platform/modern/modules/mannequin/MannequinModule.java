@@ -16,6 +16,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -71,6 +72,9 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
         Action<? super MatchPlayer> action =
             parser.action(MatchPlayer.class, el, "click-action").orNull();
 
+        var waypoint =
+            parser.reference(WaypointDefinition.class, el, "waypoint").orNull();
+
         MannequinDefinition mannequinDefinition = new MannequinDefinition(
             id,
             name,
@@ -88,7 +92,8 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
             physics,
             onFire,
             layers,
-            action);
+            action,
+            waypoint);
 
         factory.getFeatures().addFeature(el, mannequinDefinition);
         mannequins.put(id, mannequinDefinition);
