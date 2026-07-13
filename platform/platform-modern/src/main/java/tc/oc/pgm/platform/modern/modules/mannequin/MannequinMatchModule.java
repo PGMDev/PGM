@@ -20,7 +20,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointMatchModule;
-import tc.oc.pgm.platform.modern.modules.waypoint.types.DefinedWaypointTransmitter;
 
 @ListenerScope(MatchScope.RUNNING)
 public class MannequinMatchModule implements MatchModule, Listener {
@@ -43,9 +42,7 @@ public class MannequinMatchModule implements MatchModule, Listener {
     byEntity.put(mannequin.getEntityId(), mannequin);
 
     if (definition.getWaypoint() != null) {
-      var transmitter = new DefinedWaypointTransmitter(definition.getWaypoint().get(), mannequin);
-      mannequin.setWaypointTransmitter(transmitter);
-      match.needModule(WaypointMatchModule.class).track(transmitter);
+      setWaypoint(mannequin, definition.getWaypoint().get());
     }
   }
 
@@ -73,25 +70,13 @@ public class MannequinMatchModule implements MatchModule, Listener {
   }
 
   public void setWaypoint(Mannequin mannequin, @Nullable WaypointDefinition definition) {
-    var wmm = match.needModule(WaypointMatchModule.class);
-    var current = mannequin.getWaypointTransmitter();
-    if (current != null) wmm.untrack(current);
-    if (definition != null) {
-      var transmitter = new DefinedWaypointTransmitter(definition, mannequin);
-      wmm.track(transmitter);
-      mannequin.setWaypointTransmitter(transmitter);
-    } else {
-      mannequin.setWaypointTransmitter(null);
-    }
+    match
+        .needModule(WaypointMatchModule.class)
+        .applyEntityWaypoint(mannequin.getEntity(), definition);
   }
 
   public void removeWaypoint(Mannequin mannequin) {
-    var wmm = match.needModule(WaypointMatchModule.class);
-    var current = mannequin.getWaypointTransmitter();
-    if (current != null) {
-      wmm.untrack(current);
-    }
-    mannequin.setWaypointTransmitter(null);
+    setWaypoint(mannequin, null);
   }
 
   @EventHandler

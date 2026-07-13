@@ -8,9 +8,11 @@ import org.jdom2.Element;
 import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.action.actions.ModifyMannequinAction;
 import tc.oc.pgm.platform.modern.action.actions.SpawnMannequinAction;
+import tc.oc.pgm.platform.modern.action.actions.WaypointAction;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
 import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart;
@@ -26,6 +28,25 @@ public class ModernActionParser extends ActionParser {
 
   public ModernActionParser(MapFactory factory) {
     super(factory);
+  }
+
+  @MethodParser("waypoint")
+  public WaypointAction parseWaypoint(Element el, Class<?> scope) throws InvalidXMLException {
+    var waypoint = getParser().reference(WaypointDefinition.class, el, "set").orNull();
+    Boolean remove = getParser().parseBool(el, "remove").attr().orNull();
+    if (!MatchPlayer.class.isAssignableFrom(scope)) {
+      throw new InvalidXMLException(
+          "Waypoint only supports player-scope", el); // Fix this wording later
+    }
+    if (waypoint != null && remove != null && remove) {
+      throw new InvalidXMLException(
+          "Cannot define both 'set' and 'remove' attributes", el); // Fix this wording later
+    }
+    if (waypoint == null && (remove == null || !remove)) {
+      throw new InvalidXMLException(
+          "Missing either 'set' or 'remove' attributes", el); // Fix this wording later
+    }
+    return new WaypointAction(waypoint, remove);
   }
 
   @MethodParser("spawn-mannequin")

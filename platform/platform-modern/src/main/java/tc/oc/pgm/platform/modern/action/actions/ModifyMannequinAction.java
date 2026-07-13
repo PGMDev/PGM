@@ -124,8 +124,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       if (pose != null) mannequin.setPose(pose);
 
       if (waypoint != null) mmm.setWaypoint(mannequin, waypoint.get());
-      if (removeWaypoint != null && mannequin.getWaypointTransmitter() != null)
-        mmm.removeWaypoint(mannequin);
+      if (removeWaypoint != null && removeWaypoint) mmm.removeWaypoint(mannequin);
 
       if (xformula != null && yformula != null && zformula != null) {
         mannequin.teleport(
