@@ -44,6 +44,7 @@ public class MannequinMatchModule implements MatchModule, Listener {
 
     if (definition.getWaypoint() != null) {
       var transmitter = new DefinedWaypointTransmitter(definition.getWaypoint().get(), mannequin);
+      mannequin.setWaypointTransmitter(transmitter);
       match.needModule(WaypointMatchModule.class).track(transmitter);
     }
   }
@@ -82,6 +83,15 @@ public class MannequinMatchModule implements MatchModule, Listener {
     } else {
       mannequin.setWaypointTransmitter(null);
     }
+  }
+
+  public void removeWaypoint(Mannequin mannequin) {
+    var wmm = match.needModule(WaypointMatchModule.class);
+    var current = mannequin.getWaypointTransmitter();
+    if (current != null) {
+      wmm.untrack(current);
+    }
+    mannequin.setWaypointTransmitter(null);
   }
 
   @EventHandler
