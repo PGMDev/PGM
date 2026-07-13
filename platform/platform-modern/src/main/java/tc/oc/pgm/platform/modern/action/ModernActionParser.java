@@ -3,6 +3,7 @@ package tc.oc.pgm.platform.modern.action;
 import java.util.Optional;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.jdom2.Element;
 import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.map.factory.MapFactory;
@@ -53,6 +54,13 @@ public class ModernActionParser extends ActionParser {
         getParser().parseBool(el, "hide-description").attr().orNull();
     Boolean hideTitles = getParser().parseBool(el, "hide-titles").attr().orNull();
     Float health = getParser().parseFloat(el, "health").attr().orNull();
+    Boolean silent = getParser().parseBool(el, "silent").attr().orNull();
+    Boolean invulnerable = getParser().parseBool(el, "invulnerable").attr().orNull();
+    TextColor glowing = getParser().textColor(el, "glowing").attr().orNull();
+    Boolean immovable = getParser().parseBool(el, "immovable").attr().orNull();
+    Boolean gravity = getParser().parseBool(el, "gravity").attr().orNull();
+    Boolean physics = getParser().parseBool(el, "physics").attr().orNull();
+    Boolean onFire = getParser().parseBool(el, "on-fire").attr().orNull();
 
     UUID uuid = null;
     Skin skin = null;
@@ -94,7 +102,7 @@ public class ModernActionParser extends ActionParser {
         throw new InvalidXMLException("'x', 'y', and 'z' must all be specified", teleportEl);
       }
       boolean rotation = yawFormula.isPresent() || pitchFormula.isPresent();
-      if ((any && !all) || (rotation && !all)) {
+      if (rotation && !all) {
         throw new InvalidXMLException(
             "'yaw'/'pitch' require 'x', 'y' and 'z' to be defined", teleportEl);
       }
@@ -108,6 +116,13 @@ public class ModernActionParser extends ActionParser {
         hideDescription,
         hideTitles,
         health,
+        silent,
+        invulnerable,
+        glowing,
+        immovable,
+        gravity,
+        physics,
+        onFire,
         uuid,
         skin,
         layers,

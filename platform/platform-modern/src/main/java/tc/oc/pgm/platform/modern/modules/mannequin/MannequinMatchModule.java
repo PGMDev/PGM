@@ -16,7 +16,6 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
-import tc.oc.pgm.projectile.ClickAction;
 
 @ListenerScope(MatchScope.RUNNING)
 public class MannequinMatchModule implements MatchModule, Listener {
@@ -42,19 +41,13 @@ public class MannequinMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onInteract(PlayerInteractAtEntityEvent event) {
     if (event.getHand() != EquipmentSlot.HAND) return;
-
     Mannequin mannequin = byEntity.get(event.getRightClicked().getUniqueId());
     if (mannequin == null) return;
-
-    var definition = mannequin.getDefinition();
-    if (definition.getAction() == null) return;
-    if (definition.getCause() == ClickAction.LEFT) return; // separate punch detection later
-
+    if (mannequin.getDefinition().getAction() == null) return;
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
-
     event.setCancelled(true);
-    definition.getAction().trigger(player);
+    mannequin.getDefinition().getAction().trigger(player);
   }
 
   public void despawn(String id) {

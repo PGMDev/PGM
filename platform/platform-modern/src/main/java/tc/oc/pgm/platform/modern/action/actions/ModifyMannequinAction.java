@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import tc.oc.pgm.action.actions.AbstractAction;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.filters.Filterable;
@@ -22,6 +23,13 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable Boolean hideDescription;
   private final @Nullable Boolean hideTitles;
   private final @Nullable Float health;
+  private final @Nullable Boolean silent;
+  private final @Nullable Boolean invulnerable;
+  private final @Nullable TextColor glowing;
+  private final @Nullable Boolean immovable;
+  private final @Nullable Boolean gravity;
+  private final @Nullable Boolean physics;
+  private final @Nullable Boolean onFire;
   private final @Nullable UUID uuid;
   private final @Nullable Skin skin;
   private final @Nullable SkinPart.SkinLayers layers;
@@ -40,6 +48,13 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable Boolean hideDescription,
       @Nullable Boolean hideTitles,
       @Nullable Float health,
+      @Nullable Boolean silent,
+      @Nullable Boolean invulnerable,
+      @Nullable TextColor glowing,
+      @Nullable Boolean immovable,
+      @Nullable Boolean gravity,
+      @Nullable Boolean physics,
+      @Nullable Boolean onFire,
       @Nullable UUID uuid,
       @Nullable Skin skin,
       @Nullable SkinPart.SkinLayers layers,
@@ -56,6 +71,13 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     this.hideDescription = hideDescription;
     this.hideTitles = hideTitles;
     this.health = health;
+    this.silent = silent;
+    this.invulnerable = invulnerable;
+    this.glowing = glowing;
+    this.immovable = immovable;
+    this.gravity = gravity;
+    this.physics = physics;
+    this.onFire = onFire;
     this.uuid = uuid;
     this.skin = skin;
     this.layers = layers;
@@ -78,6 +100,13 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       if (hideDescription != null) mannequin.setHideDescription(hideDescription);
       if (hideTitles != null && hideTitles) mannequin.hideTitles();
       if (health != null) mannequin.setHealth(health);
+      if (silent != null) mannequin.setSilent(silent);
+      if (invulnerable != null) mannequin.setInvulnerable(invulnerable);
+      if (glowing != null) mannequin.setGlowing(glowing);
+      if (immovable != null) mannequin.setImmovable(immovable);
+      if (gravity != null) mannequin.setGravity(gravity);
+      if (physics != null) mannequin.setPhysics(physics);
+      if (onFire != null) mannequin.setOnFire(onFire);
 
       if (uuid != null && skin != null) {
         mannequin.setSkin(uuid, skin);

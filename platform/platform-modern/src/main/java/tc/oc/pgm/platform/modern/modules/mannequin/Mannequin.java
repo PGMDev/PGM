@@ -43,6 +43,7 @@ public class Mannequin {
           mannequin.setImmovable(definition.isImmovable());
           mannequin.setMainHand(definition.getMainHand());
           mannequin.setGravity(definition.hasGravity());
+          mannequin.setNoPhysics(!definition.hasPhysics());
 
           SkinPart.SkinLayers layers = definition.getLayers();
           SkinParts.Mutable parts = mannequin.getSkinParts();
@@ -99,10 +100,6 @@ public class Mannequin {
     entity.customName(null);
   }
 
-  public void setHealth(float health) {
-    entity.setHealth(health);
-  }
-
   public void setSkin(UUID uuid, Skin skin) {
     var profile = Bukkit.createProfile(uuid, null);
     profile.setProperty(new ProfileProperty("textures", skin.getData(), skin.getSignature()));
@@ -125,6 +122,38 @@ public class Mannequin {
     entity.setPose(toBukkitPose(pose));
   }
 
+  public void setSilent(boolean silent) {
+    entity.setSilent(silent);
+  }
+
+  public void setInvulnerable(boolean invulnerable) {
+    entity.setInvulnerable(invulnerable);
+  }
+
+  public void setGlowing(@Nullable TextColor color) {
+    entity.setGlowing(color != null);
+  }
+
+  public void setHealth(float health) {
+    entity.setHealth(health);
+  }
+
+  public void setImmovable(boolean immovable) {
+    entity.setImmovable(immovable);
+  }
+
+  public void setGravity(boolean gravity) {
+    entity.setGravity(gravity);
+  }
+
+  public void setPhysics(boolean physics) {
+    entity.setNoPhysics(!physics);
+  }
+
+  public void setOnFire(boolean onFire) {
+    entity.setVisualFire(onFire);
+  }
+
   public void teleport(double x, double y, double z, float yaw, float pitch) {
     entity.teleport(new Location(entity.getWorld(), x, y, z, yaw, pitch));
   }
@@ -139,9 +168,5 @@ public class Mannequin {
 
   public void despawn() {
     entity.remove();
-  }
-
-  public void setGlowing(@Nullable TextColor color) {
-    entity.setGlowing(color != null);
   }
 }
