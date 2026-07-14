@@ -2,7 +2,10 @@ package tc.oc.pgm.platform.modern.modules.behavior;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,9 +20,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @ListenerScope(MatchScope.RUNNING)
 public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
@@ -40,6 +40,16 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   }
 
   public void register(Mannequin mannequin, CombatBehavior combat) {
+    org.bukkit.Bukkit.getLogger()
+        .info("[behavior-debug] registered combat for " + mannequin.getId()); // REMOVE LATER
+    var entity = mannequin.getEntity();
+    var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
+    if (attr == null) {
+      entity.registerAttribute(Attribute.ATTACK_DAMAGE);
+      attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
+      attr.setBaseValue(2.0); // default only when we created the attribute
+    }
+    entity.setAI(true);
     hostiles.put(mannequin, new CombatInstance(mannequin, combat));
   }
 
@@ -47,9 +57,11 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     hostiles.remove(mannequin);
   }
 
-  //NEUTRAL
+  // NEUTRAL
   @EventHandler
   public void onDamage(EntityDamageByEntityEvent event) {
+    org.bukkit.Bukkit.getLogger()
+        .info("[behavior-debug] onDamage fired: " + event.getEntity().getType()); // REMOVE LATER
     if (!(event.getDamager() instanceof Player player)) return;
     MatchPlayer attacker = match.getPlayer(player);
     if (attacker == null) return;

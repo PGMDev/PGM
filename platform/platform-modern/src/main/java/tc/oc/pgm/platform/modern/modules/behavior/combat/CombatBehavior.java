@@ -1,31 +1,30 @@
 package tc.oc.pgm.platform.modern.modules.behavior.combat;
 
-import tc.oc.pgm.api.region.Region;
-
-import javax.annotation.Nullable;
 import java.time.Duration;
+import javax.annotation.Nullable;
+import tc.oc.pgm.api.region.Region;
 
 public class CombatBehavior {
   private final HostilityType hostility;
   private final @Nullable Region home;
   private final @Nullable Float radius;
   private final @Nullable Duration duration;
-  private final @Nullable Float range;
-  private final @Nullable Duration interval;
+  private final float range;
+  private final Duration interval;
 
   public CombatBehavior(
-    HostilityType hostility,
-    @Nullable Region home,
-    @Nullable Float radius,
-    @Nullable Duration duration,
-    @Nullable Float range,
-    @Nullable Duration interval) {
-  this.hostility = hostility;
-  this.home = home;
-  this.radius = radius;
-  this.duration = duration;
-  this.range = range;
-  this.interval = interval;
+      HostilityType hostility,
+      @Nullable Region home,
+      @Nullable Float radius,
+      @Nullable Duration duration,
+      float range,
+      Duration interval) {
+    this.hostility = hostility;
+    this.home = home;
+    this.radius = radius;
+    this.duration = duration;
+    this.range = range;
+    this.interval = interval;
   }
 
   public HostilityType getHostility() {
@@ -44,11 +43,11 @@ public class CombatBehavior {
     return duration;
   }
 
-  public @Nullable Float getRange() {
+  public float getRange() {
     return range;
   }
 
-  public @Nullable Duration getInterval() {
+  public Duration getInterval() {
     return interval;
   }
 }

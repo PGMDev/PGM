@@ -1,6 +1,10 @@
 package tc.oc.pgm.platform.modern.modules.behavior;
 
 import com.google.common.collect.ImmutableMap;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.api.map.MapModule;
@@ -9,14 +13,10 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.HostilityType;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
-
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 
 public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions)
     implements MapModule<BehaviorMatchModule> {
@@ -45,7 +45,14 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           Region home = parser.region(combatEl, "home").orNull();
           Float radius = parser.parseFloat(combatEl, "home-radius").orNull();
           Duration duration = parser.duration(combatEl, "aggro-duration").orNull();
-          combat = new CombatBehavior(hostility, home, radius, duration);
+          Float range = parser
+              .parseFloat(combatEl, "attack-range")
+              .optional(CombatInstance.DEFAULT_ATTACK_RANGE);
+          Duration interval = parser
+              .duration(combatEl, "attack-interval")
+              .optional(CombatInstance.DEFAULT_ATTACK_INTERVAL);
+
+          combat = new CombatBehavior(hostility, home, radius, duration, range, interval);
         }
 
         BehaviorDefinition behaviorDefinition = new BehaviorDefinition(id, combat);

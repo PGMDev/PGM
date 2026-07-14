@@ -30,7 +30,6 @@ public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
     modules.register(WaypointModule.class, WaypointMatchModule.class, new WaypointModule.Factory());
     modules.register(
         MannequinModule.class, MannequinMatchModule.class, new MannequinModule.Factory());
-    modules.register(
-        BehaviorModule.class, BehaviorMatchModule.class, new BehaviorModule.Factory());
+    modules.register(BehaviorModule.class, BehaviorMatchModule.class, new BehaviorModule.Factory());
   }
 }

@@ -10,7 +10,6 @@ import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.platform.modern.modules.behavior.BehaviorDefinition;
-import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.skin.Skin;
 
@@ -72,7 +71,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     this.layers = layers;
     this.action = action;
     this.waypoint = waypoint;
-    this.behavior =behavior;
+    this.behavior = behavior;
   }
 
   public Component getName() {

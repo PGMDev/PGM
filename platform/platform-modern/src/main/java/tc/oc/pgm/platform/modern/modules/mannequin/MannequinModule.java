@@ -50,7 +50,7 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
         boolean immovable = parser.parseBool(el, "immovable").attr().optional(false);
         MainHand mainHand =
             parser.parseEnum(MainHand.class, el, "main-hand").optional(MainHand.RIGHT);
-        boolean gravity = parser.parseBool(el, "gravity").attr().optional(false);
+        boolean gravity = parser.parseBool(el, "gravity").attr().optional(true);
         boolean physics = parser.parseBool(el, "physics").attr().optional(true);
         boolean onFire = parser.parseBool(el, "on-fire").attr().optional(false);
 

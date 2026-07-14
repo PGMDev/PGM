@@ -39,8 +39,9 @@ public record WaypointModule(Map<String, WaypointDefinition> waypointDefinitions
         ResourceKey<WaypointStyleAsset> style = WaypointStyleAssets.createId(styleName);
         Color color = XMLUtils.parseHexColor(Node.fromRequiredAttr(el, "color"));
 
-//        ADD TEAMCOLOR SUPPORT. ONLY WORKS FOR PLAYERS, COLOR AND TEAMCOLOR CANNOT BOTH BE DEFINED.
-//        IF TEAM-COLOR="TRUE" AND APPLIED TO MANNEQUIN THE COLOR DEFAULTS TO WHITE
+        //        ADD TEAMCOLOR SUPPORT. ONLY WORKS FOR PLAYERS, COLOR AND TEAMCOLOR CANNOT BOTH BE
+        // DEFINED.
+        //        IF TEAM-COLOR="TRUE" AND APPLIED TO MANNEQUIN THE COLOR DEFAULTS TO WHITE
 
         Float transmitRange = parser.parseFloat(el, "transmit-range").attr().orNull();
 
