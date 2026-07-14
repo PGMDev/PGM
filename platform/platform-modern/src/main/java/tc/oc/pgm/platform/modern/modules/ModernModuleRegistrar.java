@@ -3,6 +3,8 @@ package tc.oc.pgm.platform.modern.modules;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import tc.oc.pgm.api.Modules;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorMatchModule;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorModule;
 import tc.oc.pgm.platform.modern.modules.damage.ModernDamageMatchModule;
 import tc.oc.pgm.platform.modern.modules.kits.ModernKitMatchModule;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
@@ -28,5 +30,7 @@ public class ModernModuleRegistrar implements Modules.ModuleRegistrar {
     modules.register(WaypointModule.class, WaypointMatchModule.class, new WaypointModule.Factory());
     modules.register(
         MannequinModule.class, MannequinMatchModule.class, new MannequinModule.Factory());
+    modules.register(
+        BehaviorModule.class, BehaviorMatchModule.class, new BehaviorModule.Factory());
   }
 }

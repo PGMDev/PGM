@@ -9,6 +9,8 @@ import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorDefinition;
+import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.skin.Skin;
 
@@ -30,6 +32,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
   private final SkinPart.SkinLayers layers;
   private final @Nullable Action<? super MatchPlayer> action;
   private final @Nullable FeatureReference<WaypointDefinition> waypoint;
+  private final @Nullable FeatureReference<BehaviorDefinition> behavior;
 
   public MannequinDefinition(
       @Nullable String id,
@@ -49,7 +52,8 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
       boolean onFire,
       SkinPart.SkinLayers layers,
       @Nullable Action<? super MatchPlayer> action,
-      @Nullable FeatureReference<WaypointDefinition> waypoint) {
+      @Nullable FeatureReference<WaypointDefinition> waypoint,
+      @Nullable FeatureReference<BehaviorDefinition> behavior) {
     super(id);
     this.name = name;
     this.description = description;
@@ -68,6 +72,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     this.layers = layers;
     this.action = action;
     this.waypoint = waypoint;
+    this.behavior =behavior;
   }
 
   public Component getName() {
@@ -136,5 +141,9 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
 
   public @Nullable FeatureReference<WaypointDefinition> getWaypoint() {
     return waypoint;
+  }
+
+  public @Nullable FeatureReference<BehaviorDefinition> getBehavior() {
+    return behavior;
   }
 }

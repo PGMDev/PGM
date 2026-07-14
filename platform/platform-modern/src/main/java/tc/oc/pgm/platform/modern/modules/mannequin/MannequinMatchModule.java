@@ -18,6 +18,8 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorMatchModule;
+import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointMatchModule;
 
@@ -44,6 +46,13 @@ public class MannequinMatchModule implements MatchModule, Listener {
     if (definition.getWaypoint() != null) {
       setWaypoint(mannequin, definition.getWaypoint().get());
     }
+
+    if (definition.getBehavior() != null) {
+      CombatBehavior combat = definition.getBehavior().get().getCombatBehavior();
+      if (combat != null) {
+        match.needModule(BehaviorMatchModule.class).register(mannequin, combat);
+      }
+    }
   }
 
   @EventHandler
@@ -59,8 +68,10 @@ public class MannequinMatchModule implements MatchModule, Listener {
   }
 
   public void despawn(String id) {
+    var bmm = match.needModule(BehaviorMatchModule.class);
     instances.removeAll(id).forEach(mannequin -> {
       byEntity.remove(mannequin.getEntityId());
+      bmm.unregister(mannequin);
       mannequin.despawn();
     });
   }
@@ -84,6 +95,7 @@ public class MannequinMatchModule implements MatchModule, Listener {
     Mannequin mannequin = byEntity.remove(event.getEntity().getUniqueId());
     if (mannequin == null) return;
     setWaypoint(mannequin, null);
+    match.needModule(BehaviorMatchModule.class).unregister(mannequin);
     instances.remove(mannequin.getId(), mannequin);
   }
 }
