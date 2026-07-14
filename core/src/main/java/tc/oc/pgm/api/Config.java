@@ -15,6 +15,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
@@ -468,7 +469,7 @@ public interface Config {
     Component getSuffixOverride();
 
     default Component getComponent(boolean prefix) {
-      if (prefix ? getPrefixOverride() != null : getSuffixOverride() != null) {
+      if ((prefix ? getPrefixOverride() : getSuffixOverride()) != null) {
         return prefix ? getPrefixOverride() : getSuffixOverride();
       }
       TextComponent.Builder hover = text();
@@ -494,7 +495,8 @@ public interface Config {
       }
 
       TextComponent.Builder component = text()
-          .append(text(prefix ? getPrefix() : getSuffix()))
+          .append(LegacyComponentSerializer.legacySection()
+              .deserialize(prefix ? getPrefix() : getSuffix()))
           .hoverEvent(showText(hover.build()));
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
