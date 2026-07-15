@@ -9,7 +9,10 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
   private final @Nullable CombatBehavior combatBehavior;
   private final @Nullable LookBehavior lookBehavior;
 
-  public BehaviorDefinition(@Nullable String id, @Nullable CombatBehavior combatBehavior, @Nullable LookBehavior lookBehavior) {
+  public BehaviorDefinition(
+      @Nullable String id,
+      @Nullable CombatBehavior combatBehavior,
+      @Nullable LookBehavior lookBehavior) {
     super(id);
     this.combatBehavior = combatBehavior;
     this.lookBehavior = lookBehavior;

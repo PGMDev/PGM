@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -19,7 +18,6 @@ import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.HostilityType;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.RotationType;
-import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -66,17 +64,16 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         if (lookEl != null) {
           String target = parser.string(lookEl, "target").attr().orNull();
           boolean trackPlayer = target == null || target.equalsIgnoreCase("player");
-          Vector trackPoint = trackPlayer ? null :
-              XMLUtils.parseVector(Node.fromAttr(lookEl, "target"));
+          Vector trackPoint =
+              trackPlayer ? null : XMLUtils.parseVector(Node.fromAttr(lookEl, "target"));
 
-          RotationType rotation = parser
-            .parseEnum(RotationType.class, lookEl, "rotation")
-            .optional(RotationType.BODY);
+          RotationType rotation =
+              parser.parseEnum(RotationType.class, lookEl, "rotation").optional(RotationType.BODY);
           Float range = parser.parseFloat(lookEl, "visibility-range").attr().optional(6f);
-          Float defaultYaw = parser.parseFloat(lookEl, "default-yaw").attr().orNull();
-          Float defaultPitch = parser.parseFloat(lookEl, "default-pitch").attr().orNull();
+          Float restYaw = parser.parseFloat(lookEl, "rest-yaw").attr().orNull();
+          Float restPitch = parser.parseFloat(lookEl, "rest-pitch").attr().orNull();
 
-          look = new LookBehavior(trackPlayer, trackPoint, rotation, range, defaultYaw, defaultPitch);
+          look = new LookBehavior(trackPlayer, trackPoint, rotation, range, restYaw, restPitch);
         }
 
         BehaviorDefinition behaviorDefinition = new BehaviorDefinition(id, combat, look);

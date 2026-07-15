@@ -1,9 +1,8 @@
 package tc.oc.pgm.platform.modern.modules.behavior.combat;
 
+import io.papermc.paper.entity.LookAnchor;
 import java.time.Duration;
 import javax.annotation.Nullable;
-
-import io.papermc.paper.entity.LookAnchor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.pathfinder.Path;
@@ -13,8 +12,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
-
-import static net.minecraft.world.level.levelgen.feature.EndPodiumFeature.getLocation;
 
 public class CombatInstance {
 
@@ -114,6 +111,10 @@ public class CombatInstance {
         return;
       }
     }
+  }
+
+  public boolean hasTarget() {
+    return target != null;
   }
 
   private void refreshExpiry(Tick now) {

@@ -19,8 +19,6 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.behavior.BehaviorMatchModule;
-import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
-import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointMatchModule;
 
@@ -49,7 +47,9 @@ public class MannequinMatchModule implements MatchModule, Listener {
     }
 
     if (definition.getBehavior() != null) {
-      match.needModule(BehaviorMatchModule.class).register(mannequin, definition.getBehavior().get());
+      match
+          .needModule(BehaviorMatchModule.class)
+          .register(mannequin, definition.getBehavior().get());
     }
   }
 

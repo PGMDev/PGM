@@ -1,14 +1,8 @@
 package tc.oc.pgm.platform.modern.modules.behavior;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.behavior.Behavior;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,6 +17,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.looking.LookInstance;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -30,8 +25,8 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
 
   private final Match match;
   private final Map<String, BehaviorDefinition> behaviorDefinitions;
-  private final SetMultimap<String, Behavior> instances = HashMultimap.create();
   private final Map<Mannequin, CombatInstance> hostiles = new HashMap<>();
+  private final Map<Mannequin, LookInstance> looks = new HashMap<>();
 
   public BehaviorMatchModule(Match match, Map<String, BehaviorDefinition> behaviorDefinitions) {
     this.match = match;
@@ -55,21 +50,8 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
         attr.setBaseValue(2.0); // default only when we created the attribute
       }
       entity.setAI(true);
-
-      net.minecraft.world.entity.monster.zombie.Zombie ghost =
-          new net.minecraft.world.entity.monster.zombie.Zombie(
-              EntityType.ZOMBIE, ((CraftWorld) match.getWorld()).getHandle());
-      ghost.setPos(
-          entity.getLocation().getX(),
-          entity.getLocation().getY(),
-          entity.getLocation().getZ());
-      ghost.setOnGround(true);
-      var loc = entity.getLocation();
-      var path = ghost
-          .getNavigation()
-          .createPath(new BlockPos((int) loc.getX() + 3, (int) loc.getY(), (int) loc.getZ()), 0);
-      }
       hostiles.put(mannequin, new CombatInstance(mannequin, combat));
+    }
 
     LookBehavior look = definition.getLookBehavior();
     if (look != null) {
@@ -100,5 +82,9 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   @Override
   public void tick(Match match, Tick tick) {
     hostiles.values().forEach(ci -> ci.tick(match, tick));
+    looks.forEach(((mannequin, li) -> {
+      CombatInstance ci = hostiles.get(mannequin);
+      if (ci == null || !ci.hasTarget()) li.tick(match);
+    }));
   }
 }
