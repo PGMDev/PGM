@@ -56,22 +56,46 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
               .duration(combatEl, "attack-interval")
               .optional(CombatInstance.DEFAULT_ATTACK_INTERVAL);
 
-          combat = new CombatBehavior(hostility, home, radius, duration, range, interval);
+          Boolean returnHome = parser.parseBool(combatEl, "return-home").optional(false);
+          //          Float strayDis = parser.parseFloat(combatEl, "stray-distance").orNull();
+          Float strayDis = null;
+          boolean strayOutside = false;
+          String stray = parser.string(combatEl, "stray-distance").orNull();
+          if (stray != null) {
+            if (stray.equalsIgnoreCase("outside")) {
+              strayOutside = true;
+            } else
+              strayDis =
+                  XMLUtils.parseNumber(Node.fromAttr(combatEl, "stray-distance"), Float.class);
+          }
+
+          Duration returnAfter = parser.duration(combatEl, "return-after").orNull();
+
+          combat = new CombatBehavior(
+              hostility,
+              home,
+              radius,
+              duration,
+              range,
+              interval,
+              returnHome,
+              strayDis,
+              returnAfter);
         }
 
         Element lookEl = el.getChild("look-at");
         LookBehavior look = null;
         if (lookEl != null) {
-          String target = parser.string(lookEl, "target").attr().orNull();
+          String target = parser.string(lookEl, "target").orNull();
           boolean trackPlayer = target == null || target.equalsIgnoreCase("player");
           Vector trackPoint =
               trackPlayer ? null : XMLUtils.parseVector(Node.fromAttr(lookEl, "target"));
 
           RotationType rotation =
               parser.parseEnum(RotationType.class, lookEl, "rotation").optional(RotationType.BODY);
-          Float range = parser.parseFloat(lookEl, "visibility-range").attr().optional(6f);
-          Float restYaw = parser.parseFloat(lookEl, "rest-yaw").attr().orNull();
-          Float restPitch = parser.parseFloat(lookEl, "rest-pitch").attr().orNull();
+          Float range = parser.parseFloat(lookEl, "visibility-range").optional(6f);
+          Float restYaw = parser.parseFloat(lookEl, "rest-yaw").orNull();
+          Float restPitch = parser.parseFloat(lookEl, "rest-pitch").orNull();
 
           look = new LookBehavior(trackPlayer, trackPoint, rotation, range, restYaw, restPitch);
         }

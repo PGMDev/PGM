@@ -11,6 +11,9 @@ public class CombatBehavior {
   private final @Nullable Duration duration;
   private final float range;
   private final Duration interval;
+  private final @Nullable Boolean returnHome;
+  private final @Nullable Float strayDis;
+  private final @Nullable Duration returnAfter;
 
   public CombatBehavior(
       HostilityType hostility,
@@ -18,13 +21,19 @@ public class CombatBehavior {
       @Nullable Float radius,
       @Nullable Duration duration,
       float range,
-      Duration interval) {
+      @Nullable Duration interval,
+      @Nullable Boolean returnHome,
+      @Nullable Float strayDis,
+      @Nullable Duration returnAfter) {
     this.hostility = hostility;
     this.home = home;
     this.radius = radius;
     this.duration = duration;
     this.range = range;
     this.interval = interval;
+    this.returnHome = returnHome;
+    this.strayDis = strayDis;
+    this.returnAfter = returnAfter;
   }
 
   public HostilityType getHostility() {
@@ -49,5 +58,17 @@ public class CombatBehavior {
 
   public Duration getInterval() {
     return interval;
+  }
+
+  public @Nullable Boolean getReturnHome() {
+    return returnHome;
+  }
+
+  public @Nullable Float getStrayDis() {
+    return strayDis;
+  }
+
+  public Duration getReturnAfter() {
+    return returnAfter;
   }
 }
