@@ -4,8 +4,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,8 +43,6 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   }
 
   public void register(Mannequin mannequin, CombatBehavior combat) {
-    org.bukkit.Bukkit.getLogger()
-        .info("[behavior-debug] registered combat for " + mannequin.getId()); // REMOVE LATER
     var entity = mannequin.getEntity();
     var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
     if (attr == null) {
@@ -50,6 +51,22 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       attr.setBaseValue(2.0); // default only when we created the attribute
     }
     entity.setAI(true);
+
+    net.minecraft.world.entity.monster.zombie.Zombie ghost =
+        new net.minecraft.world.entity.monster.zombie.Zombie(
+            EntityType.ZOMBIE, ((CraftWorld) match.getWorld()).getHandle());
+    ghost.setPos(
+        entity.getLocation().getX(),
+        entity.getLocation().getY(),
+        entity.getLocation().getZ());
+    ghost.setOnGround(true);
+    var loc = entity.getLocation();
+    var path = ghost
+        .getNavigation()
+        .createPath(new BlockPos((int) loc.getX() + 3, (int) loc.getY(), (int) loc.getZ()), 0);
+    org.bukkit.Bukkit.getLogger()
+        .info("[spike] path = " + (path == null ? "null" : path.getNodeCount() + " nodes"));
+
     hostiles.put(mannequin, new CombatInstance(mannequin, combat));
   }
 
@@ -60,8 +77,6 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   // NEUTRAL
   @EventHandler
   public void onDamage(EntityDamageByEntityEvent event) {
-    org.bukkit.Bukkit.getLogger()
-        .info("[behavior-debug] onDamage fired: " + event.getEntity().getType()); // REMOVE LATER
     if (!(event.getDamager() instanceof Player player)) return;
     MatchPlayer attacker = match.getPlayer(player);
     if (attacker == null) return;

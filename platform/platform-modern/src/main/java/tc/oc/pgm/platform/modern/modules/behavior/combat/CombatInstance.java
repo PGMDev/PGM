@@ -2,6 +2,10 @@ package tc.oc.pgm.platform.modern.modules.behavior.combat;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.pathfinder.Path;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -20,12 +24,20 @@ public class CombatInstance {
   private long nextAttackTick = 0;
   private final double rangeSq;
   private final long intervalTicks;
+  private final net.minecraft.world.entity.monster.zombie.Zombie ghost;
+
+  @Nullable
+  Path currentPath;
+
+  long nextRepathTick;
 
   public CombatInstance(Mannequin mannequin, CombatBehavior behavior) {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.rangeSq = behavior.getRange() * behavior.getRange();
     this.intervalTicks = behavior.getInterval().toMillis() / 50;
+    this.ghost = new net.minecraft.world.entity.monster.zombie.Zombie(
+        EntityType.ZOMBIE.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
   }
 
   public boolean matches(org.bukkit.entity.Entity entity) {
@@ -33,9 +45,6 @@ public class CombatInstance {
   }
 
   public void onAttacked(MatchPlayer attacker, Tick now) {
-    org.bukkit.Bukkit.getLogger()
-        .info("[behavior-debug] onAttacked, hostility=" + behavior.getHostility()
-            + " target-before=" + target); // REMOVE LATER
     if (behavior.getHostility() == HostilityType.PASSIVE) return;
     if (target == null || target == attacker) {
       target = attacker;
@@ -45,20 +54,35 @@ public class CombatInstance {
 
   public void tick(Match match, Tick now) {
     validateTarget(now);
-    if (target != null)
-      org.bukkit.Bukkit.getLogger()
-          .info("[behavior-debug] ticking with target=" + target.getNameLegacy() + " inRange="
-              + inAttackRange(target)); // REMOVE LATER
-
     if (target == null && behavior.getHostility() == HostilityType.HOSTILE) {
       acquireTarget(match, now);
     }
 
     if (target != null && now.tick >= nextAttackTick && inAttackRange(target)) {
-      org.bukkit.Bukkit.getLogger().info("[behavior-debug] ATTACKING"); // REMOVE LATER
       mannequin.getEntity().swingMainHand();
       target.getBukkit().damage(2.0, mannequin.getEntity());
       nextAttackTick = now.tick + intervalTicks;
+    }
+
+    if (target != null && !inAttackRange(target)) {
+      Player bukkit = target.getBukkit();
+      if (bukkit != null) {
+        if (now.tick >= nextRepathTick) {
+          var loc = mannequin.getLocation();
+          ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+          ghost.setOnGround(true);
+          currentPath = ghost
+              .getNavigation()
+              .createPath(
+                  new BlockPos(
+                      bukkit.getLocation().getBlockX(),
+                      bukkit.getLocation().getBlockY(),
+                      bukkit.getLocation().getBlockZ()),
+                  0);
+          nextRepathTick = now.tick + 10;
+        }
+        stepAlongPath();
+      }
     }
   }
 
@@ -103,5 +127,18 @@ public class CombatInstance {
     if (bukkit == null) return false;
     return bukkit.getWorld().equals(mannequin.getEntity().getWorld())
         && bukkit.getLocation().distanceSquared(mannequin.getEntity().getLocation()) <= rangeSq;
+  }
+
+  private void stepAlongPath() {
+    if (currentPath == null || currentPath.isDone()) return;
+    var nodePos = currentPath.getNextNodePos();
+    var loc = mannequin.getLocation();
+    var direction = new org.bukkit.util.Vector(
+        nodePos.getX() + 0.5 - loc.getX(), 0, nodePos.getZ() + 0.5 - loc.getZ());
+    if (direction.lengthSquared() < 0.25) {
+      currentPath.advance();
+      return;
+    }
+    mannequin.getEntity().setVelocity(direction.normalize().multiply(0.15));
   }
 }
