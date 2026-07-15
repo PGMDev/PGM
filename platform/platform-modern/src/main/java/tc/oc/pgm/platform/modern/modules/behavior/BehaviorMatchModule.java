@@ -22,6 +22,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
+import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -42,32 +43,38 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     match.addTickable(this, MatchScope.RUNNING);
   }
 
-  public void register(Mannequin mannequin, CombatBehavior combat) {
+  public void register(Mannequin mannequin, BehaviorDefinition definition) {
     var entity = mannequin.getEntity();
-    var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
-    if (attr == null) {
-      entity.registerAttribute(Attribute.ATTACK_DAMAGE);
-      attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
-      attr.setBaseValue(2.0); // default only when we created the attribute
+
+    CombatBehavior combat = definition.getCombatBehavior();
+    if (combat != null) {
+      var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
+      if (attr == null) {
+        entity.registerAttribute(Attribute.ATTACK_DAMAGE);
+        attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
+        attr.setBaseValue(2.0); // default only when we created the attribute
+      }
+      entity.setAI(true);
+
+      net.minecraft.world.entity.monster.zombie.Zombie ghost =
+          new net.minecraft.world.entity.monster.zombie.Zombie(
+              EntityType.ZOMBIE, ((CraftWorld) match.getWorld()).getHandle());
+      ghost.setPos(
+          entity.getLocation().getX(),
+          entity.getLocation().getY(),
+          entity.getLocation().getZ());
+      ghost.setOnGround(true);
+      var loc = entity.getLocation();
+      var path = ghost
+          .getNavigation()
+          .createPath(new BlockPos((int) loc.getX() + 3, (int) loc.getY(), (int) loc.getZ()), 0);
+      }
+      hostiles.put(mannequin, new CombatInstance(mannequin, combat));
+
+    LookBehavior look = definition.getLookBehavior();
+    if (look != null) {
+      looks.put(mannequin, new LookInstance(mannequin, look));
     }
-    entity.setAI(true);
-
-    net.minecraft.world.entity.monster.zombie.Zombie ghost =
-        new net.minecraft.world.entity.monster.zombie.Zombie(
-            EntityType.ZOMBIE, ((CraftWorld) match.getWorld()).getHandle());
-    ghost.setPos(
-        entity.getLocation().getX(),
-        entity.getLocation().getY(),
-        entity.getLocation().getZ());
-    ghost.setOnGround(true);
-    var loc = entity.getLocation();
-    var path = ghost
-        .getNavigation()
-        .createPath(new BlockPos((int) loc.getX() + 3, (int) loc.getY(), (int) loc.getZ()), 0);
-    org.bukkit.Bukkit.getLogger()
-        .info("[spike] path = " + (path == null ? "null" : path.getNodeCount() + " nodes"));
-
-    hostiles.put(mannequin, new CombatInstance(mannequin, combat));
   }
 
   public void unregister(Mannequin mannequin) {
