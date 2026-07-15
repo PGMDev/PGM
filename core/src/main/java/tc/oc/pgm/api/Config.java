@@ -1,5 +1,6 @@
 package tc.oc.pgm.api;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.newline;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
@@ -20,6 +21,7 @@ import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.map.factory.MapSourceFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 
 /** A configuration for server owners to modify {@link PGM}. */
@@ -472,6 +474,9 @@ public interface Config {
       if ((prefix ? getPrefixOverride() : getSuffixOverride()) != null) {
         return prefix ? getPrefixOverride() : getSuffixOverride();
       }
+      String flairText = prefix ? getPrefix() : getSuffix();
+      if (StringUtils.isNullOrEmpty(flairText)) return empty();
+
       TextComponent.Builder hover = text();
       boolean addNewline = false;
       if (getDisplayName() != null && !getDisplayName().isEmpty()) {
@@ -494,10 +499,9 @@ public interface Config {
         hover.append(clickLink);
       }
 
-      TextComponent.Builder component = text()
-          .append(LegacyComponentSerializer.legacySection()
-              .deserialize(prefix ? getPrefix() : getSuffix()))
-          .hoverEvent(showText(hover.build()));
+      TextComponent.Builder component =
+          LegacyComponentSerializer.legacySection().deserialize(flairText).toBuilder()
+              .hoverEvent(showText(hover.build()));
 
       if (getClickLink() != null && !getClickLink().isEmpty()) {
         component.clickEvent(openUrl(getClickLink()));
