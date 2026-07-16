@@ -4,11 +4,14 @@ import com.destroystokyo.paper.event.block.BlockDestroyEvent;
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.data.CraftBlockData;
@@ -16,13 +19,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.FluidLevelChangeEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.jspecify.annotations.NullMarked;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.listeners.BlockPhysicsListener;
 
 @NullMarked
 public class ModernBlockPhysicsListener extends BlockPhysicsListener {
-  private final Set<Chunk> loadingChunks = new HashSet<>();
+  private final Set<LoadingChunk> loadingChunks = new HashSet<>();
 
   @EventHandler(priority = EventPriority.LOWEST)
   public void onFluidLevelChange(FluidLevelChangeEvent event) {
@@ -32,19 +36,26 @@ public class ModernBlockPhysicsListener extends BlockPhysicsListener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void onChunkLoad(ChunkLoadEvent event) {
     if (Match.isMatchWorld(event.getWorld())) {
-      loadingChunks.add(event.getChunk());
+      loadingChunks.add(LoadingChunk.of(event.getChunk()));
     }
   }
 
   @EventHandler
   public void onTickEnd(ServerTickEndEvent event) {
-    loadingChunks.removeIf(chunk -> chunk.getLoadLevel() != Chunk.LoadLevel.BORDER);
+    loadingChunks.removeIf(chunk -> !chunk.isLoading());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onWorldUnload(WorldUnloadEvent event) {
+    UUID worldId = event.getWorld().getUID();
+    loadingChunks.removeIf(chunk -> chunk.worldId().equals(worldId));
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
   public void onBlockDestroy(BlockDestroyEvent event) {
     Block block = event.getBlock();
-    boolean loading = !loadingChunks.isEmpty() && loadingChunks.contains(block.getChunk());
+    boolean loading =
+        !loadingChunks.isEmpty() && loadingChunks.contains(LoadingChunk.of(block.getChunk()));
 
     if (!loading && allowPhysics(block.getWorld())) return;
 
@@ -84,6 +95,19 @@ public class ModernBlockPhysicsListener extends BlockPhysicsListener {
 
     if (updated != state) {
       block.setBlockData(CraftBlockData.createData(updated), false);
+    }
+  }
+
+  private record LoadingChunk(UUID worldId, int x, int z) {
+    private static LoadingChunk of(Chunk chunk) {
+      return new LoadingChunk(chunk.getWorld().getUID(), chunk.getX(), chunk.getZ());
+    }
+
+    private boolean isLoading() {
+      World world = Bukkit.getWorld(worldId);
+      return world != null
+          && world.isChunkLoaded(x, z)
+          && world.getChunkAt(x, z).getLoadLevel() != Chunk.LoadLevel.ENTITY_TICKING;
     }
   }
 }
