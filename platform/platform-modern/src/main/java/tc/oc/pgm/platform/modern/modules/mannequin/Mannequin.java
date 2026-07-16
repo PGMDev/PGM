@@ -135,7 +135,7 @@ public class Mannequin {
   }
 
   public void setHealth(float health) {
-    entity.setHealth(health);
+    entity.setMaxHealth(health);
   }
 
   public void setImmovable(boolean immovable) {

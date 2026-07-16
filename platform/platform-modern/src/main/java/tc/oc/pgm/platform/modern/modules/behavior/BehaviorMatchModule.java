@@ -61,6 +61,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
 
   public void unregister(Mannequin mannequin) {
     hostiles.remove(mannequin);
+    looks.remove(mannequin);
   }
 
   // NEUTRAL

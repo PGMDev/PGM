@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.pathfinder.Path;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -27,15 +28,14 @@ public class CombatInstance {
   private final double rangeSq;
   private final long intervalTicks;
   private final net.minecraft.world.entity.monster.zombie.Zombie ghost;
-  private final @Nullable Vector homeCenter;
   private final double straySq;
   private final long returnAfterTicks;
   private long idleSinceTick = -1;
-
-  @Nullable
-  Path currentPath;
-
+  private @Nullable Path currentPath;
   long nextRepathTick;
+  private long nextWanderTick = 0;
+  private Vector lastWanderProgressPos = null;
+  private long lastWanderProgressTick = 0;
 
   public CombatInstance(Mannequin mannequin, CombatBehavior behavior) {
     this.mannequin = mannequin;
@@ -43,9 +43,7 @@ public class CombatInstance {
     this.rangeSq = behavior.getRange() * behavior.getRange();
     this.intervalTicks = behavior.getInterval().toMillis() / 50;
     this.ghost = new net.minecraft.world.entity.monster.zombie.Zombie(
-        EntityType.ZOMBIE.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
-    this.homeCenter =
-        behavior.getReturnHome() ? behavior.getHome().getBounds().getCenterPoint() : null;
+        EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
     this.straySq =
         behavior.getStrayDis() != null ? behavior.getStrayDis() * behavior.getStrayDis() : -1;
     this.returnAfterTicks =
@@ -72,7 +70,11 @@ public class CombatInstance {
 
     if (target != null && now.tick >= nextAttackTick && inAttackRange(target)) {
       mannequin.getEntity().swingMainHand();
-      target.getBukkit().damage(2.0, mannequin.getEntity());
+      target
+          .getBukkit()
+          .damage(
+              mannequin.getEntity().getAttribute(Attribute.ATTACK_DAMAGE).getValue(),
+              mannequin.getEntity());
       nextAttackTick = now.tick + intervalTicks;
     }
 
@@ -106,7 +108,7 @@ public class CombatInstance {
         double dx = center.getX() - loc.getX();
         double dz = center.getZ() - loc.getZ();
         // Ignore dy to simplify math and to avoid non-full blocks/vertical jittering
-        atHome = Math.sqrt(dx * dx + dz * dz) <= straySq;
+        atHome = dx * dx + dz * dz <= straySq;
       } else {
         atHome = behavior.getHome().contains(mannequin.getEntity());
       }
@@ -133,6 +135,41 @@ public class CombatInstance {
       }
     } else if (target != null) {
       idleSinceTick = -1;
+    }
+
+    if (target == null && behavior.isWander() && atHomeCanWander(match)) {
+      if (currentPath == null || currentPath.isDone()) {
+        if (now.tick >= nextWanderTick) {
+          Vector wanderPoint = pickWanderPoint(match);
+
+          if (wanderPoint != null) {
+            var loc = mannequin.getLocation();
+            ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+            ghost.setOnGround(true);
+            currentPath = ghost
+                .getNavigation()
+                .createPath(
+                    new BlockPos(
+                        wanderPoint.getBlockX(), wanderPoint.getBlockY(), wanderPoint.getBlockZ()),
+                    0);
+            lastWanderProgressPos = loc.toVector();
+            lastWanderProgressTick = now.tick;
+          }
+          nextWanderTick = now.tick + randomIdleTicks(match);
+        }
+      } else {
+        var pos = mannequin.getLocation().toVector();
+
+        if (lastWanderProgressPos == null || pos.distanceSquared(lastWanderProgressPos) > 0.25) {
+          lastWanderProgressPos = pos;
+          lastWanderProgressTick = now.tick;
+        } else if (now.tick - lastWanderProgressTick > 60) {
+          currentPath = null;
+          nextWanderTick = now.tick + randomIdleTicks(match);
+          return;
+        }
+        stepAlongPath();
+      }
     }
   }
 
@@ -195,5 +232,35 @@ public class CombatInstance {
       return;
     }
     mannequin.getEntity().setVelocity(direction.normalize().multiply(0.15));
+  }
+
+  private @Nullable Vector pickWanderPoint(Match match) {
+    var home = behavior.getHome().getStatic(match);
+    var bounds = home.getBounds();
+    var min = bounds.getMin();
+    var max = bounds.getMax();
+    var random = match.getRandom();
+
+    Vector wanderTarget = null;
+    for (int i = 0; i < 4; i++) {
+      double x = min.getX() + random.nextDouble() * (max.getX() - min.getX());
+      double z = min.getZ() + random.nextDouble() * (max.getZ() - min.getZ());
+      Vector candidate = new Vector(x, mannequin.getLocation().getY(), z);
+      if (home.contains(candidate)) {
+        wanderTarget = candidate;
+        break;
+      }
+    }
+
+    return wanderTarget;
+  }
+
+  private long randomIdleTicks(Match match) {
+    return 80 + match.getRandom().nextInt(120);
+  }
+
+  private boolean atHomeCanWander(Match match) {
+    if (behavior.getHome() == null) return true;
+    return behavior.getHome().contains(mannequin.getEntity().getLocation());
   }
 }

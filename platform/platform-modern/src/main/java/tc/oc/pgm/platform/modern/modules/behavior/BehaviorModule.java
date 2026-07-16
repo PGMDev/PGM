@@ -57,7 +57,6 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
               .optional(CombatInstance.DEFAULT_ATTACK_INTERVAL);
 
           Boolean returnHome = parser.parseBool(combatEl, "return-home").optional(false);
-          //          Float strayDis = parser.parseFloat(combatEl, "stray-distance").orNull();
           Float strayDis = null;
           boolean strayOutside = false;
           String stray = parser.string(combatEl, "stray-distance").orNull();
@@ -68,6 +67,8 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
               strayDis =
                   XMLUtils.parseNumber(Node.fromAttr(combatEl, "stray-distance"), Float.class);
           }
+
+          Boolean wander = parser.parseBool(combatEl, "wander").optional(false);
 
           Duration returnAfter = parser.duration(combatEl, "return-after").orNull();
 
@@ -80,7 +81,8 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
               interval,
               returnHome,
               strayDis,
-              returnAfter);
+              returnAfter,
+              wander);
         }
 
         Element lookEl = el.getChild("look-at");
