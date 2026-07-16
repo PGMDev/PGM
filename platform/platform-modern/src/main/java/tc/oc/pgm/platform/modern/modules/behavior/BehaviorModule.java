@@ -58,19 +58,15 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
 
           Boolean returnHome = parser.parseBool(combatEl, "return-home").optional(false);
           Float strayDis = null;
-          boolean strayOutside = false;
           String stray = parser.string(combatEl, "stray-distance").orNull();
-          if (stray != null) {
-            if (stray.equalsIgnoreCase("outside")) {
-              strayOutside = true;
-            } else
-              strayDis =
-                  XMLUtils.parseNumber(Node.fromAttr(combatEl, "stray-distance"), Float.class);
+          if (stray != null && !stray.equalsIgnoreCase("outside")) {
+            strayDis = XMLUtils.parseNumber(Node.fromAttr(combatEl, "stray-distance"), Float.class);
           }
+          Duration returnAfter = parser.duration(combatEl, "return-after").orNull();
 
           Boolean wander = parser.parseBool(combatEl, "wander").optional(false);
-
-          Duration returnAfter = parser.duration(combatEl, "return-after").orNull();
+          Boolean panic = parser.parseBool(combatEl, "panic").optional(false);
+          Duration panicDuration = parser.duration(combatEl, "panic-duration").orNull();
 
           combat = new CombatBehavior(
               hostility,
@@ -82,7 +78,9 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
               returnHome,
               strayDis,
               returnAfter,
-              wander);
+              wander,
+              panic,
+              panicDuration);
         }
 
         Element lookEl = el.getChild("look-at");

@@ -19,6 +19,7 @@ public class CombatInstance {
 
   public static final Float DEFAULT_ATTACK_RANGE = 3.0f;
   public static final Duration DEFAULT_ATTACK_INTERVAL = Duration.ofSeconds(1);
+  public static final Duration DEFAULT_PANIC_DURATION = Duration.ofSeconds(5);
 
   private final Mannequin mannequin;
   private final CombatBehavior behavior;
@@ -36,6 +37,9 @@ public class CombatInstance {
   private long nextWanderTick = 0;
   private Vector lastWanderProgressPos = null;
   private long lastWanderProgressTick = 0;
+  private final long panicDurationTicks;
+  private @Nullable MatchPlayer panicSource;
+  private long panicExpiryTick = 0;
 
   public CombatInstance(Mannequin mannequin, CombatBehavior behavior) {
     this.mannequin = mannequin;
@@ -48,6 +52,10 @@ public class CombatInstance {
         behavior.getStrayDis() != null ? behavior.getStrayDis() * behavior.getStrayDis() : -1;
     this.returnAfterTicks =
         behavior.getReturnAfter() != null ? behavior.getReturnAfter().toMillis() / 50 : 0;
+    this.panicDurationTicks =
+        (behavior.getPanicDuration() != null ? behavior.getPanicDuration() : DEFAULT_PANIC_DURATION)
+                .toMillis()
+            / 50;
   }
 
   public boolean matches(org.bukkit.entity.Entity entity) {
@@ -55,7 +63,14 @@ public class CombatInstance {
   }
 
   public void onAttacked(MatchPlayer attacker, Tick now) {
-    if (behavior.getHostility() == HostilityType.PASSIVE) return;
+    if (behavior.getHostility() == HostilityType.PASSIVE) {
+      if (behavior.isPanic()) {
+        panicSource = attacker;
+        panicExpiryTick = now.tick + panicDurationTicks;
+      }
+      return;
+    }
+
     if (target == null || target == attacker) {
       target = attacker;
       refreshExpiry(now);
@@ -171,6 +186,46 @@ public class CombatInstance {
         stepAlongPath();
       }
     }
+
+    if (behavior.getHostility() == HostilityType.PASSIVE
+        && behavior.isPanic()
+        && target == null
+        && now.tick < panicExpiryTick) {
+      if (panicSource != null) {
+        Vector panicPoint = pickPanicPoint(panicSource, match);
+
+        if (panicPoint != null && now.tick >= nextRepathTick) {
+          var loc = mannequin.getLocation();
+          ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+          ghost.setOnGround(true);
+
+          currentPath = ghost
+              .getNavigation()
+              .createPath(
+                  new BlockPos(
+                      panicPoint.getBlockX(), panicPoint.getBlockY(), panicPoint.getBlockZ()),
+                  0);
+          nextRepathTick = now.tick + 20;
+        }
+
+        if (currentPath != null && !currentPath.isDone()) {
+          var nodePos = currentPath.getNextNodePos();
+          var loc = mannequin.getLocation();
+          var dir = new Vector(
+              nodePos.getX() + 0.5 - loc.getX(),
+              0,
+              nodePos.getZ() + 0.5 - loc.getZ()); // Skip y axis for now
+
+          if (dir.lengthSquared() < 0.25) {
+            currentPath.advance();
+          } else {
+            mannequin
+                .getEntity()
+                .setVelocity(dir.normalize().multiply(0.28)); // 0.28 bps aka sprint speed
+          }
+        }
+      }
+    }
   }
 
   private void validateTarget(Tick now) {
@@ -262,5 +317,23 @@ public class CombatInstance {
   private boolean atHomeCanWander(Match match) {
     if (behavior.getHome() == null) return true;
     return behavior.getHome().contains(mannequin.getEntity().getLocation());
+  }
+
+  private @Nullable Vector pickPanicPoint(MatchPlayer attacker, Match match) {
+    var attackerLoc = attacker.getBukkit().getLocation();
+    var manLoc = mannequin.getLocation();
+    var away = manLoc.toVector().subtract(attackerLoc.toVector());
+
+    if (away.lengthSquared() < 0.01) {
+      away = new Vector(1, 0, 0);
+      away.setY(0).normalize();
+    }
+
+    double dis = 5 + match.getRandom().nextDouble() * 4;
+    double jit = (match.getRandom().nextDouble() - 0.5) * 4;
+    return manLoc
+        .toVector()
+        .add(away.multiply(dis))
+        .add(new Vector(-away.getZ() * jit, 0, away.getX() * jit));
   }
 }

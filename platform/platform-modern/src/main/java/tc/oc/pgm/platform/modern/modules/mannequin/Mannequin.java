@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.skin.Skin;
@@ -39,6 +40,7 @@ public class Mannequin {
           mannequin.setSilent(definition.isSilent());
           mannequin.setInvulnerable(definition.isInvulnerable());
           mannequin.setGlowing(definition.getGlowing() != null);
+          mannequin.setHealth(definition.getHealth());
           mannequin.setPose(toBukkitPose(definition.getPose()));
           mannequin.setImmovable(definition.isImmovable());
           mannequin.setMainHand(definition.getMainHand());
@@ -135,7 +137,10 @@ public class Mannequin {
   }
 
   public void setHealth(float health) {
-    entity.setMaxHealth(health);
+    entity
+        .getAttribute(Attribute.MAX_HEALTH)
+        .setBaseValue(health); // Required to increase health from 20
+    entity.setHealth(health);
   }
 
   public void setImmovable(boolean immovable) {
