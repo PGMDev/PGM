@@ -49,7 +49,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
         attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
         attr.setBaseValue(2.0); // default only when we created the attribute
       }
-      hostiles.put(mannequin, new CombatInstance(mannequin, combat));
+      hostiles.put(mannequin, new CombatInstance(mannequin, combat, definition.isAvoidDanger()));
     }
 
     LookBehavior look = definition.getLookBehavior();

@@ -59,9 +59,9 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
           throw new InvalidXMLException(
               "Mannequin '" + id + "' is missing its required <profile> sub-element.", el);
         }
+
         Node uuidNode = Node.fromRequiredAttr(profileEl, "uuid");
         Node skinNode = Node.fromRequiredChildOrAttr(profileEl, "skin");
-        String skinValue = skinNode != null ? skinNode.getValue().trim() : "";
         boolean playerProfile =
             "#player#".equals(uuidNode.getValue()) || "#player#".equals(skinNode.getValue());
         if (playerProfile

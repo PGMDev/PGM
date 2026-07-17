@@ -6,16 +6,23 @@ import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 
 public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
+  private final boolean avoidDanger;
   private final @Nullable CombatBehavior combatBehavior;
   private final @Nullable LookBehavior lookBehavior;
 
   public BehaviorDefinition(
       @Nullable String id,
+      boolean avoidDanger,
       @Nullable CombatBehavior combatBehavior,
       @Nullable LookBehavior lookBehavior) {
     super(id);
+    this.avoidDanger = avoidDanger;
     this.combatBehavior = combatBehavior;
     this.lookBehavior = lookBehavior;
+  }
+
+  public boolean isAvoidDanger() {
+    return avoidDanger;
   }
 
   public @Nullable CombatBehavior getCombatBehavior() {

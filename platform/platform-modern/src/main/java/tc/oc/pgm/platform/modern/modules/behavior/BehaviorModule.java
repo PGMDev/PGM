@@ -39,6 +39,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
 
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "behaviors", "behavior")) {
         String id = parser.string(el, "id").required();
+        boolean avoidDanger = parser.parseBool(el, "avoid-danger").optional(true);
 
         Element combatEl = el.getChild("combat");
         CombatBehavior combat = null;
@@ -105,7 +106,8 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           look = new LookBehavior(trackPlayer, trackPoint, rotation, range, restYaw, restPitch);
         }
 
-        BehaviorDefinition behaviorDefinition = new BehaviorDefinition(id, combat, look);
+        BehaviorDefinition behaviorDefinition =
+            new BehaviorDefinition(id, avoidDanger, combat, look);
         factory.getFeatures().addFeature(el, behaviorDefinition);
         behaviors.put(id, behaviorDefinition);
       }

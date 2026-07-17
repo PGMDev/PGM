@@ -2,10 +2,12 @@ package tc.oc.pgm.platform.modern.modules.behavior.combat;
 
 import io.papermc.paper.entity.LookAnchor;
 import java.time.Duration;
+import java.util.Map;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.level.pathfinder.PathType;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
@@ -40,14 +42,26 @@ public class CombatInstance {
   private final long panicDurationTicks;
   private @Nullable MatchPlayer panicSource;
   private long panicExpiryTick = 0;
+  private static final Map<PathType, Float> DANGER_PENALTIES = Map.of(
+      PathType.DAMAGE_OTHER, -1.0F,
+      PathType.DANGER_OTHER, -1.0F,
+      PathType.DAMAGE_FIRE, -1.0F,
+      PathType.DANGER_FIRE, -1.0F,
+      PathType.DAMAGE_CAUTIOUS, -1.0F,
+      PathType.LAVA, -1.0F);
 
-  public CombatInstance(Mannequin mannequin, CombatBehavior behavior) {
+  public CombatInstance(Mannequin mannequin, CombatBehavior behavior, boolean avoidDanger) {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.rangeSq = behavior.getRange() * behavior.getRange();
     this.intervalTicks = behavior.getInterval().toMillis() / 50;
     this.ghost = new net.minecraft.world.entity.monster.zombie.Zombie(
         EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
+
+    if (avoidDanger) {
+      DANGER_PENALTIES.forEach(this.ghost::setPathfindingMalus);
+    }
+
     this.straySq =
         behavior.getStrayDis() != null ? behavior.getStrayDis() * behavior.getStrayDis() : -1;
     this.returnAfterTicks =

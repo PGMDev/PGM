@@ -7,10 +7,10 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.util.TriState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.skin.Skin;
@@ -53,7 +53,7 @@ public class Mannequin {
           mannequin.setMainHand(definition.getMainHand());
           mannequin.setGravity(definition.hasGravity());
           mannequin.setNoPhysics(!definition.hasPhysics());
-          mannequin.setVisualFire(definition.isOnFire());
+          mannequin.setVisualFire(definition.isOnFire() ? TriState.TRUE : TriState.FALSE);
 
           SkinPart.SkinLayers layers = definition.getLayers();
           SkinParts.Mutable parts = mannequin.getSkinParts();
@@ -145,10 +145,13 @@ public class Mannequin {
   }
 
   public void setHealth(float health) {
-    AttributeInstance maxHealth = entity.getAttribute(Attribute.MAX_HEALTH);
+    entity.registerAttribute(Attribute.MAX_HEALTH);
+    var maxHealth = entity.getAttribute(Attribute.MAX_HEALTH);
+
     if (maxHealth != null) {
-      maxHealth.setBaseValue(health); // Required to increase health from 20
+      maxHealth.setBaseValue(health);
     }
+
     entity.setHealth(health);
   }
 
@@ -165,7 +168,7 @@ public class Mannequin {
   }
 
   public void setOnFire(boolean onFire) {
-    entity.setVisualFire(onFire);
+    entity.setVisualFire(onFire ? TriState.TRUE : TriState.FALSE);
   }
 
   public void teleport(double x, double y, double z, float yaw, float pitch) {
