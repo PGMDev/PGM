@@ -11,11 +11,11 @@ public class CombatBehavior {
   private final @Nullable Duration duration;
   private final float range;
   private final Duration interval;
-  private final @Nullable Boolean returnHome;
+  private final boolean returnHome;
   private final @Nullable Float strayDis;
   private final @Nullable Duration returnAfter;
-  private final @Nullable Boolean wander;
-  private final @Nullable Boolean panic;
+  private final boolean wander;
+  private final boolean panic;
   private final @Nullable Duration panicDuration;
 
   public CombatBehavior(
@@ -25,11 +25,11 @@ public class CombatBehavior {
       @Nullable Duration duration,
       float range,
       @Nullable Duration interval,
-      @Nullable Boolean returnHome,
+      boolean returnHome,
       @Nullable Float strayDis,
       @Nullable Duration returnAfter,
-      @Nullable Boolean wander,
-      @Nullable Boolean panic,
+      boolean wander,
+      boolean panic,
       @Nullable Duration panicDuration) {
     this.hostility = hostility;
     this.home = home;
@@ -69,7 +69,7 @@ public class CombatBehavior {
     return interval;
   }
 
-  public @Nullable Boolean getReturnHome() {
+  public boolean getReturnHome() {
     return returnHome;
   }
 
@@ -77,19 +77,19 @@ public class CombatBehavior {
     return strayDis;
   }
 
-  public Duration getReturnAfter() {
+  public @Nullable Duration getReturnAfter() {
     return returnAfter;
   }
 
-  public @Nullable Boolean isWander() {
+  public boolean isWander() {
     return wander;
   }
 
-  public @Nullable Boolean isPanic() {
+  public boolean isPanic() {
     return panic;
   }
 
   public @Nullable Duration getPanicDuration() {
-    return duration;
+    return panicDuration;
   }
 }

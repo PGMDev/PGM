@@ -37,6 +37,8 @@ public class LookInstance {
       } else {
         lookHeadOnly(eyes);
       }
+    } else {
+      mannequin.getEntity().setRotation(restYaw, restPitch);
     }
   }
 

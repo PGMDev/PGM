@@ -49,7 +49,6 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
         attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
         attr.setBaseValue(2.0); // default only when we created the attribute
       }
-      entity.setAI(true);
       hostiles.put(mannequin, new CombatInstance(mannequin, combat));
     }
 
@@ -85,7 +84,9 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     hostiles.values().forEach(ci -> ci.tick(match, tick));
     looks.forEach(((mannequin, li) -> {
       CombatInstance ci = hostiles.get(mannequin);
-      if (ci == null || !ci.hasTarget()) li.tick(match);
+      if (ci == null || (!ci.hasTarget() && !ci.isPanicking())) {
+        li.tick(match);
+      }
     }));
   }
 }

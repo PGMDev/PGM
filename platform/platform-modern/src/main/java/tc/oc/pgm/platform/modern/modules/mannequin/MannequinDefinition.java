@@ -16,8 +16,9 @@ import tc.oc.pgm.util.skin.Skin;
 public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
   private final Component name;
   private final Component description;
-  private final UUID uuid;
-  private final Skin skin;
+  private final boolean playerProfile;
+  private final @Nullable UUID uuid;
+  private final @Nullable Skin skin;
   private final boolean silent;
   private final boolean invulnerable;
   private final TextColor glowing;
@@ -37,8 +38,9 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
       @Nullable String id,
       Component name,
       Component description,
-      UUID uuid,
-      Skin skin,
+      boolean playerProfile,
+      @Nullable UUID uuid,
+      @Nullable Skin skin,
       boolean silent,
       boolean invulnerable,
       @Nullable TextColor glowing,
@@ -56,6 +58,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     super(id);
     this.name = name;
     this.description = description;
+    this.playerProfile = playerProfile;
     this.uuid = uuid;
     this.skin = skin;
     this.silent = silent;
@@ -82,11 +85,15 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     return description;
   }
 
-  public UUID getUuid() {
+  public boolean isPlayerProfile() {
+    return playerProfile;
+  }
+
+  public @Nullable UUID getUuid() {
     return uuid;
   }
 
-  public Skin getSkin() {
+  public @Nullable Skin getSkin() {
     return skin;
   }
 

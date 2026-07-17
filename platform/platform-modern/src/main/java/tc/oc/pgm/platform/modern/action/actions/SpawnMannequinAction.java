@@ -1,12 +1,16 @@
 package tc.oc.pgm.platform.modern.action.actions;
 
 import java.util.Optional;
+import java.util.UUID;
 import tc.oc.pgm.action.actions.AbstractAction;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.skin.Skin;
 
 public class SpawnMannequinAction<B extends Filterable<?>> extends AbstractAction<B> {
 
@@ -38,6 +42,16 @@ public class SpawnMannequinAction<B extends Filterable<?>> extends AbstractActio
   public void trigger(B b) {
     float yaw = yawFormula.map(f -> (float) f.apply(b)).orElse(0f);
     float pitch = pitchFormula.map(f -> (float) f.apply(b)).orElse(0f);
+    MannequinDefinition definition = mannequinRef.get();
+    UUID uuidOverride = null;
+    Skin skinOverride = null;
+    if (definition.isPlayerProfile()) {
+      if (!(b instanceof MatchPlayer player)) return;
+      ;
+      uuidOverride = player.getId();
+      skinOverride = PGM.get().getDatastore().getSkin(uuidOverride);
+    }
+
     b.getMatch()
         .needModule(MannequinMatchModule.class)
         .spawn(
@@ -46,6 +60,8 @@ public class SpawnMannequinAction<B extends Filterable<?>> extends AbstractActio
             yformula.apply(b),
             zformula.apply(b),
             yaw,
-            pitch);
+            pitch,
+            uuidOverride,
+            skinOverride);
   }
 }

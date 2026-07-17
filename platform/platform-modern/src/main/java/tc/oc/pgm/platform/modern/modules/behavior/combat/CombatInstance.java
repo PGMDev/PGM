@@ -33,7 +33,7 @@ public class CombatInstance {
   private final long returnAfterTicks;
   private long idleSinceTick = -1;
   private @Nullable Path currentPath;
-  long nextRepathTick;
+  private long nextRepathTick;
   private long nextWanderTick = 0;
   private Vector lastWanderProgressPos = null;
   private long lastWanderProgressTick = 0;
@@ -79,6 +79,12 @@ public class CombatInstance {
 
   public void tick(Match match, Tick now) {
     validateTarget(now);
+    boolean panicking = behavior.isPanic() && target == null && now.tick < panicExpiryTick;
+    if (!panicking && panicSource != null) {
+      panicSource = null;
+      currentPath = null;
+    }
+
     if (target == null && behavior.getHostility() == HostilityType.HOSTILE) {
       acquireTarget(match, now);
     }
@@ -115,20 +121,8 @@ public class CombatInstance {
       }
     }
 
-    if (target == null && behavior.getReturnHome() && behavior.getHome() != null) {
-      boolean atHome;
-      if (straySq >= 0) {
-        var center = behavior.getHome().getStatic(match).getBounds().getCenterPoint();
-        var loc = mannequin.getLocation();
-        double dx = center.getX() - loc.getX();
-        double dz = center.getZ() - loc.getZ();
-        // Ignore dy to simplify math and to avoid non-full blocks/vertical jittering
-        atHome = dx * dx + dz * dz <= straySq;
-      } else {
-        atHome = behavior.getHome().contains(mannequin.getEntity());
-      }
-
-      if (atHome) {
+    if (target == null && behavior.getReturnHome() && behavior.getHome() != null && !panicking) {
+      if (atHome(match)) {
         idleSinceTick = -1;
         currentPath = null;
       } else {
@@ -152,7 +146,7 @@ public class CombatInstance {
       idleSinceTick = -1;
     }
 
-    if (target == null && behavior.isWander() && atHomeCanWander(match)) {
+    if (target == null && behavior.isWander() && atHome(match) && !panicking) {
       if (currentPath == null || currentPath.isDone()) {
         if (now.tick >= nextWanderTick) {
           Vector wanderPoint = pickWanderPoint(match);
@@ -187,43 +181,28 @@ public class CombatInstance {
       }
     }
 
-    if (behavior.getHostility() == HostilityType.PASSIVE
-        && behavior.isPanic()
-        && target == null
-        && now.tick < panicExpiryTick) {
-      if (panicSource != null) {
-        Vector panicPoint = pickPanicPoint(panicSource, match);
+    if (panicking && panicSource != null) {
+      Vector panicPoint = pickPanicPoint(panicSource, match);
 
-        if (panicPoint != null && now.tick >= nextRepathTick) {
-          var loc = mannequin.getLocation();
-          ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
-          ghost.setOnGround(true);
+      if (panicPoint != null && now.tick >= nextRepathTick) {
+        var panicLoc = panicPoint.toLocation(match.getWorld());
+        var loc = mannequin.getLocation();
+        ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+        ghost.setOnGround(true);
 
-          currentPath = ghost
-              .getNavigation()
-              .createPath(
-                  new BlockPos(
-                      panicPoint.getBlockX(), panicPoint.getBlockY(), panicPoint.getBlockZ()),
-                  0);
-          nextRepathTick = now.tick + 20;
-        }
+        currentPath = ghost
+            .getNavigation()
+            .createPath(
+                new BlockPos(
+                    panicPoint.getBlockX(), panicPoint.getBlockY(), panicPoint.getBlockZ()),
+                0);
+        nextRepathTick = now.tick + 20;
 
-        if (currentPath != null && !currentPath.isDone()) {
-          var nodePos = currentPath.getNextNodePos();
-          var loc = mannequin.getLocation();
-          var dir = new Vector(
-              nodePos.getX() + 0.5 - loc.getX(),
-              0,
-              nodePos.getZ() + 0.5 - loc.getZ()); // Skip y axis for now
+        mannequin.getEntity().lookAt(panicLoc, LookAnchor.EYES);
+      }
 
-          if (dir.lengthSquared() < 0.25) {
-            currentPath.advance();
-          } else {
-            mannequin
-                .getEntity()
-                .setVelocity(dir.normalize().multiply(0.28)); // 0.28 bps aka sprint speed
-          }
-        }
+      if (currentPath != null && !currentPath.isDone()) {
+        stepAlongPath(0.28);
       }
     }
   }
@@ -264,6 +243,18 @@ public class CombatInstance {
         : Long.MAX_VALUE;
   }
 
+  private boolean atHome(Match match) {
+    if (behavior.getHome() == null) return true;
+    if (straySq >= 0) {
+      var center = behavior.getHome().getStatic(match).getBounds().getCenterPoint();
+      var loc = mannequin.getLocation();
+      double dx = center.getX() - loc.getX();
+      double dz = center.getZ() - loc.getZ();
+      return dx * dx + dz * dz <= straySq;
+    }
+    return behavior.getHome().contains(mannequin.getEntity());
+  }
+
   private boolean outsideHome(Player bukkit) {
     return behavior.getHome() != null && !behavior.getHome().contains(bukkit.getLocation());
   }
@@ -275,8 +266,11 @@ public class CombatInstance {
         && bukkit.getLocation().distanceSquared(mannequin.getEntity().getLocation()) <= rangeSq;
   }
 
-  private void stepAlongPath() {
+  private void stepAlongPath(double speed) {
     if (currentPath == null || currentPath.isDone()) return;
+
+    if (!mannequin.getEntity().isOnGround()) return;
+
     var nodePos = currentPath.getNextNodePos();
     var loc = mannequin.getLocation();
     var direction = new org.bukkit.util.Vector(
@@ -286,7 +280,17 @@ public class CombatInstance {
       currentPath.advance();
       return;
     }
-    mannequin.getEntity().setVelocity(direction.normalize().multiply(0.15));
+
+    Vector movement = direction.normalize().multiply(speed);
+    if (nodePos.getY() - loc.getY() > 0.5) {
+      movement.setY(0.42);
+    }
+
+    mannequin.getEntity().setVelocity(movement);
+  }
+
+  private void stepAlongPath() {
+    stepAlongPath(0.15);
   }
 
   private @Nullable Vector pickWanderPoint(Match match) {
@@ -314,9 +318,8 @@ public class CombatInstance {
     return 80 + match.getRandom().nextInt(120);
   }
 
-  private boolean atHomeCanWander(Match match) {
-    if (behavior.getHome() == null) return true;
-    return behavior.getHome().contains(mannequin.getEntity().getLocation());
+  public boolean isPanicking() {
+    return panicSource != null;
   }
 
   private @Nullable Vector pickPanicPoint(MatchPlayer attacker, Match match) {
@@ -326,8 +329,8 @@ public class CombatInstance {
 
     if (away.lengthSquared() < 0.01) {
       away = new Vector(1, 0, 0);
-      away.setY(0).normalize();
     }
+    away.setY(0).normalize();
 
     double dis = 5 + match.getRandom().nextDouble() * 4;
     double jit = (match.getRandom().nextDouble() - 0.5) * 4;

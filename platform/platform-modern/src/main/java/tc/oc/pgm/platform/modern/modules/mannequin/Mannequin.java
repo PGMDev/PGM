@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.metadata.FixedMetadataValue;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.skin.Skin;
@@ -25,18 +26,24 @@ public class Mannequin {
     this.definition = definition;
   }
 
-  public static Mannequin spawn(Location origin, MannequinDefinition definition) {
+  public static Mannequin spawn(
+      Location origin,
+      MannequinDefinition definition,
+      @Nullable UUID uuidOverride,
+      @Nullable Skin skinOverride) {
     org.bukkit.entity.Mannequin entity = origin
         .getWorld()
         .spawn(origin, org.bukkit.entity.Mannequin.class, mannequin -> {
           mannequin.customName(definition.getName());
           mannequin.setDescription(definition.getDescription());
 
-          var profile = Bukkit.createProfile(definition.getUuid(), null);
-          profile.setProperty(new ProfileProperty(
-              "textures", definition.getSkin().getData(), definition.getSkin().getSignature()));
+          UUID uuid = uuidOverride != null ? uuidOverride : definition.getUuid();
+          Skin skin = skinOverride != null ? skinOverride : definition.getSkin();
+          var profile = Bukkit.createProfile(uuid, null);
+          profile.setProperty(new ProfileProperty("textures", skin.getData(), skin.getSignature()));
           mannequin.setProfile(ResolvableProfile.resolvableProfile(profile));
 
+          mannequin.setSilent(definition.isSilent());
           mannequin.setSilent(definition.isSilent());
           mannequin.setInvulnerable(definition.isInvulnerable());
           mannequin.setGlowing(definition.getGlowing() != null);
@@ -46,6 +53,7 @@ public class Mannequin {
           mannequin.setMainHand(definition.getMainHand());
           mannequin.setGravity(definition.hasGravity());
           mannequin.setNoPhysics(!definition.hasPhysics());
+          mannequin.setVisualFire(definition.isOnFire());
 
           SkinPart.SkinLayers layers = definition.getLayers();
           SkinParts.Mutable parts = mannequin.getSkinParts();
@@ -137,9 +145,10 @@ public class Mannequin {
   }
 
   public void setHealth(float health) {
-    entity
-        .getAttribute(Attribute.MAX_HEALTH)
-        .setBaseValue(health); // Required to increase health from 20
+    AttributeInstance maxHealth = entity.getAttribute(Attribute.MAX_HEALTH);
+    if (maxHealth != null) {
+      maxHealth.setBaseValue(health); // Required to increase health from 20
+    }
     entity.setHealth(health);
   }
 

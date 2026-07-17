@@ -59,8 +59,19 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
           throw new InvalidXMLException(
               "Mannequin '" + id + "' is missing its required <profile> sub-element.", el);
         }
-        UUID uuid = XMLUtils.parseUuid(Node.fromRequiredAttr(profileEl, "uuid"));
-        Skin skin = XMLUtils.parseUnsignedSkin(Node.fromRequiredChildOrAttr(profileEl, "skin"));
+        Node uuidNode = Node.fromRequiredAttr(profileEl, "uuid");
+        Node skinNode = Node.fromRequiredChildOrAttr(profileEl, "skin");
+        String skinValue = skinNode != null ? skinNode.getValue().trim() : "";
+        boolean playerProfile =
+            "#player#".equals(uuidNode.getValue()) || "#player#".equals(skinNode.getValue());
+        if (playerProfile
+            && !("#player#".equals(uuidNode.getValue())
+                && "#player#".equals(skinNode.getValue()))) {
+          throw new InvalidXMLException(
+              "'uuid' and 'skin' must both be '#player#' or both be regularly defined", profileEl);
+        }
+        UUID uuid = playerProfile ? null : XMLUtils.parseUuid(uuidNode);
+        Skin skin = playerProfile ? null : XMLUtils.parseUnsignedSkin(skinNode);
         MannequinPose pose = parser
             .parseEnum(MannequinPose.class, profileEl, "pose")
             .optional(MannequinPose.STANDING);
@@ -83,6 +94,7 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
             id,
             name,
             description,
+            playerProfile,
             uuid,
             skin,
             silent,

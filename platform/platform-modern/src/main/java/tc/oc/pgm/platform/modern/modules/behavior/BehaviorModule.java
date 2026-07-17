@@ -67,6 +67,11 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           Boolean wander = parser.parseBool(combatEl, "wander").optional(false);
           Boolean panic = parser.parseBool(combatEl, "panic").optional(false);
           Duration panicDuration = parser.duration(combatEl, "panic-duration").orNull();
+          if ((hostility != HostilityType.PASSIVE) && (panic || panicDuration != null)) {
+            throw new InvalidXMLException(
+                "'panic' and 'panic-duration' attributes are not supported for non passive mannequins",
+                combatEl);
+          }
 
           combat = new CombatBehavior(
               hostility,

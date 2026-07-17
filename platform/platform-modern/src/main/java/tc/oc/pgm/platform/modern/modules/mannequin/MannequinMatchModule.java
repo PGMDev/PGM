@@ -21,6 +21,7 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.behavior.BehaviorMatchModule;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointMatchModule;
+import tc.oc.pgm.util.skin.Skin;
 
 @ListenerScope(MatchScope.RUNNING)
 public class MannequinMatchModule implements MatchModule, Listener {
@@ -36,9 +37,16 @@ public class MannequinMatchModule implements MatchModule, Listener {
   }
 
   public void spawn(
-      MannequinDefinition definition, double x, double y, double z, float yaw, float pitch) {
+      MannequinDefinition definition,
+      double x,
+      double y,
+      double z,
+      float yaw,
+      float pitch,
+      @Nullable UUID uuidOverride,
+      @Nullable Skin skinOverride) {
     Location origin = new Location(match.getWorld(), x, y, z, yaw, pitch);
-    Mannequin mannequin = Mannequin.spawn(origin, definition);
+    Mannequin mannequin = Mannequin.spawn(origin, definition, uuidOverride, skinOverride);
     instances.put(definition.getId(), mannequin);
     byEntity.put(mannequin.getEntityId(), mannequin);
 
