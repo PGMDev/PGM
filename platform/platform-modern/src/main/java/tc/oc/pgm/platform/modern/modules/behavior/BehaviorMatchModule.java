@@ -2,11 +2,15 @@ package tc.oc.pgm.platform.modern.modules.behavior;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -63,7 +67,6 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     looks.remove(mannequin);
   }
 
-  // NEUTRAL
   @EventHandler
   public void onDamage(EntityDamageByEntityEvent event) {
     if (!(event.getDamager() instanceof Player player)) return;

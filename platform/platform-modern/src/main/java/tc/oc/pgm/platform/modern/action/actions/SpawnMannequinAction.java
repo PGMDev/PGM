@@ -47,9 +47,14 @@ public class SpawnMannequinAction<B extends Filterable<?>> extends AbstractActio
     Skin skinOverride = null;
     if (definition.isPlayerProfile()) {
       if (!(b instanceof MatchPlayer player)) return;
-      ;
       uuidOverride = player.getId();
+      if (uuidOverride == null) {
+        return;
+      }
       skinOverride = PGM.get().getDatastore().getSkin(uuidOverride);
+      if (skinOverride == null) {
+        return;
+      }
     }
 
     b.getMatch()

@@ -41,6 +41,7 @@ public class CombatInstance {
   private long lastWanderProgressTick = 0;
   private final long panicDurationTicks;
   private @Nullable MatchPlayer panicSource;
+  private long panicStartTick;
   private long panicExpiryTick = 0;
   private static final Map<PathType, Float> DANGER_PENALTIES = Map.of(
       PathType.DAMAGE_OTHER, -1.0F,
@@ -81,6 +82,7 @@ public class CombatInstance {
       if (behavior.isPanic()) {
         panicSource = attacker;
         panicExpiryTick = now.tick + panicDurationTicks;
+        panicStartTick = now.tick + 6;
       }
       return;
     }
@@ -196,6 +198,10 @@ public class CombatInstance {
     }
 
     if (panicking && panicSource != null) {
+      // Delay panicking so mannequin can take vertical kb
+      if (now.tick < panicStartTick) {
+        return;
+      }
       Vector panicPoint = pickPanicPoint(panicSource, match);
 
       if (panicPoint != null && now.tick >= nextRepathTick) {
@@ -210,7 +216,7 @@ public class CombatInstance {
                 new BlockPos(
                     panicPoint.getBlockX(), panicPoint.getBlockY(), panicPoint.getBlockZ()),
                 0);
-        nextRepathTick = now.tick + 20;
+        nextRepathTick = now.tick + 8 + match.getRandom().nextInt(5);
 
         mannequin.getEntity().lookAt(panicLoc, LookAnchor.EYES);
       }
@@ -346,11 +352,17 @@ public class CombatInstance {
     }
     away.setY(0).normalize();
 
-    double dis = 5 + match.getRandom().nextDouble() * 4;
-    double jit = (match.getRandom().nextDouble() - 0.5) * 4;
+    if (match.getRandom().nextDouble() < 0.15) {
+      away.multiply(-0.5);
+    }
+
+    double dis = 3 + match.getRandom().nextDouble() * 2;
+    double jit = (match.getRandom().nextDouble() - 0.5) * dis * 1.5;
+    Vector latOffset = new Vector(-away.getZ() * jit, 0, away.getX() * jit);
+
     return manLoc
         .toVector()
         .add(away.multiply(dis))
-        .add(new Vector(-away.getZ() * jit, 0, away.getX() * jit));
+        .add(latOffset);
   }
 }

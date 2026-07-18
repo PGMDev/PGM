@@ -6,7 +6,9 @@ import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import tc.oc.pgm.action.actions.AbstractAction;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
@@ -120,6 +122,23 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
         mannequin.setSkin(uuid, skin);
         mannequin.setSkinLayers(SkinPart.SkinLayers.allOf());
       }
+      UUID uuidOverride = null;
+      Skin skinOverride = null;
+      if (definition.isPlayerProfile()) {
+        if (!(b instanceof MatchPlayer player)) return;
+        uuidOverride = player.getId();
+        if (uuidOverride == null) {
+          return;
+        }
+        skinOverride = PGM.get().getDatastore().getSkin(uuidOverride);
+        if (skinOverride == null) {
+          return;
+        }
+      }
+
+
+
+
       if (layers != null) mannequin.setSkinLayers(layers);
       if (pose != null) mannequin.setPose(pose);
 

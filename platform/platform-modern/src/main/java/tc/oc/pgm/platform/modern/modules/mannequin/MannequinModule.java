@@ -63,10 +63,10 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
         Node uuidNode = Node.fromRequiredAttr(profileEl, "uuid");
         Node skinNode = Node.fromRequiredChildOrAttr(profileEl, "skin");
         boolean playerProfile =
-            "#player#".equals(uuidNode.getValue()) || "#player#".equals(skinNode.getValue());
+            "#player#".equals(uuidNode.getValueNormalize()) || "#player#".equals(skinNode.getValueNormalize());
         if (playerProfile
-            && !("#player#".equals(uuidNode.getValue())
-                && "#player#".equals(skinNode.getValue()))) {
+            && !("#player#".equals(uuidNode.getValueNormalize())
+                && "#player#".equals(skinNode.getValueNormalize()))) {
           throw new InvalidXMLException(
               "'uuid' and 'skin' must both be '#player#' or both be regularly defined", profileEl);
         }

@@ -36,14 +36,6 @@ public class Mannequin {
         .spawn(origin, org.bukkit.entity.Mannequin.class, mannequin -> {
           mannequin.customName(definition.getName());
           mannequin.setDescription(definition.getDescription());
-
-          UUID uuid = uuidOverride != null ? uuidOverride : definition.getUuid();
-          Skin skin = skinOverride != null ? skinOverride : definition.getSkin();
-          var profile = Bukkit.createProfile(uuid, null);
-          profile.setProperty(new ProfileProperty("textures", skin.getData(), skin.getSignature()));
-          mannequin.setProfile(ResolvableProfile.resolvableProfile(profile));
-
-          mannequin.setSilent(definition.isSilent());
           mannequin.setSilent(definition.isSilent());
           mannequin.setInvulnerable(definition.isInvulnerable());
           mannequin.setGlowing(definition.getGlowing() != null);
@@ -54,19 +46,14 @@ public class Mannequin {
           mannequin.setGravity(definition.hasGravity());
           mannequin.setNoPhysics(!definition.hasPhysics());
           mannequin.setVisualFire(definition.isOnFire() ? TriState.TRUE : TriState.FALSE);
-
-          SkinPart.SkinLayers layers = definition.getLayers();
-          SkinParts.Mutable parts = mannequin.getSkinParts();
-          parts.setCapeEnabled(layers.contains(SkinPart.CAPE));
-          parts.setJacketEnabled(layers.contains(SkinPart.JACKET));
-          parts.setLeftSleeveEnabled(layers.contains(SkinPart.LEFT_SLEEVE));
-          parts.setRightSleeveEnabled(layers.contains(SkinPart.RIGHT_SLEEVE));
-          parts.setLeftPantsEnabled(layers.contains(SkinPart.LEFT_PANTS_LEG));
-          parts.setRightPantsEnabled(layers.contains(SkinPart.RIGHT_PANTS_LEG));
-          parts.setHatsEnabled(layers.contains(SkinPart.HAT));
-          mannequin.setSkinParts(parts);
         });
     Mannequin wrapper = new Mannequin(entity, definition);
+
+    UUID uuid = uuidOverride != null ? uuidOverride : definition.getUuid();
+    Skin skin = skinOverride != null ? skinOverride : definition.getSkin();
+    wrapper.setSkin(uuid, skin);
+    wrapper.setSkinLayers(definition.getLayers());
+
     entity.setMetadata(
         METADATA_KEY + definition.getId(), new FixedMetadataValue(PGM.get(), wrapper));
     return wrapper;
