@@ -33,6 +33,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable Boolean gravity;
   private final @Nullable Boolean physics;
   private final @Nullable Boolean onFire;
+  private final boolean playerProfile;
   private final @Nullable UUID uuid;
   private final @Nullable Skin skin;
   private final @Nullable SkinPart.SkinLayers layers;
@@ -60,6 +61,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable Boolean gravity,
       @Nullable Boolean physics,
       @Nullable Boolean onFire,
+      boolean playerProfile,
       @Nullable UUID uuid,
       @Nullable Skin skin,
       @Nullable SkinPart.SkinLayers layers,
@@ -85,6 +87,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     this.gravity = gravity;
     this.physics = physics;
     this.onFire = onFire;
+    this.playerProfile = playerProfile;
     this.uuid = uuid;
     this.skin = skin;
     this.layers = layers;
@@ -104,6 +107,24 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     float yaw = yawFormula.map(f -> (float) f.apply(b)).orElse(0f);
     float pitch = pitchFormula.map(f -> (float) f.apply(b)).orElse(0f);
     var mmm = b.getMatch().needModule(MannequinMatchModule.class);
+
+    final UUID resolvedUuid;
+    final Skin resolvedSkin;
+    if (playerProfile) {
+      if (!(b instanceof MatchPlayer player)) return;
+      resolvedUuid = player.getId();
+      if (resolvedUuid == null) {
+        return;
+      }
+      resolvedSkin = PGM.get().getDatastore().getSkin(resolvedUuid);
+      if (resolvedSkin == null) {
+        return;
+      }
+    } else {
+      resolvedUuid = this.uuid;
+      resolvedSkin = this.skin;
+    }
+
     mmm.modify(definition.getId(), mannequin -> {
       if (name != null) mannequin.setName(name);
       if (description != null) mannequin.setDescription(description);
@@ -118,27 +139,10 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       if (physics != null) mannequin.setPhysics(physics);
       if (onFire != null) mannequin.setOnFire(onFire);
 
-      if (uuid != null && skin != null) {
-        mannequin.setSkin(uuid, skin);
+      if (resolvedUuid != null && resolvedSkin != null) {
+        mannequin.setSkin(resolvedUuid, resolvedSkin);
         mannequin.setSkinLayers(SkinPart.SkinLayers.allOf());
       }
-      UUID uuidOverride = null;
-      Skin skinOverride = null;
-      if (definition.isPlayerProfile()) {
-        if (!(b instanceof MatchPlayer player)) return;
-        uuidOverride = player.getId();
-        if (uuidOverride == null) {
-          return;
-        }
-        skinOverride = PGM.get().getDatastore().getSkin(uuidOverride);
-        if (skinOverride == null) {
-          return;
-        }
-      }
-
-
-
-
       if (layers != null) mannequin.setSkinLayers(layers);
       if (pose != null) mannequin.setPose(pose);
 

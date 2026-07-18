@@ -54,27 +54,37 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
         boolean physics = parser.parseBool(el, "physics").attr().optional(true);
         boolean onFire = parser.parseBool(el, "on-fire").attr().optional(false);
 
+        boolean playerProfile = false;
+        UUID uuid = null;
+        Skin skin = null;
         Element profileEl = el.getChild("profile");
-        if (profileEl == null) {
-          throw new InvalidXMLException(
-              "Mannequin '" + id + "' is missing its required <profile> sub-element.", el);
-        }
+        if (profileEl != null) {
+          Node uuidNode = Node.fromAttr(profileEl, "uuid");
+          Node skinNode = Node.fromChildOrAttr(profileEl, "skin");
 
-        Node uuidNode = Node.fromRequiredAttr(profileEl, "uuid");
-        Node skinNode = Node.fromRequiredChildOrAttr(profileEl, "skin");
-        boolean playerProfile =
-            "#player#".equals(uuidNode.getValueNormalize()) || "#player#".equals(skinNode.getValueNormalize());
-        if (playerProfile
-            && !("#player#".equals(uuidNode.getValueNormalize())
-                && "#player#".equals(skinNode.getValueNormalize()))) {
-          throw new InvalidXMLException(
-              "'uuid' and 'skin' must both be '#player#' or both be regularly defined", profileEl);
+          if (uuidNode != null && skinNode != null) {
+            playerProfile = "#player#".equals(uuidNode.getValueNormalize())
+                || "#player#".equals(skinNode.getValueNormalize());
+            if (playerProfile
+                && !("#player#".equals(uuidNode.getValueNormalize())
+                    && "#player#".equals(skinNode.getValueNormalize()))) {
+              throw new InvalidXMLException(
+                  "'uuid' and 'skin' must both be '#player#' or both be regularly defined",
+                  profileEl);
+            }
+            if (!playerProfile) {
+              uuid = XMLUtils.parseUuid(uuidNode);
+              skin = XMLUtils.parseUnsignedSkin(skinNode);
+            }
+          } else if (uuidNode != null || skinNode != null) {
+            throw new InvalidXMLException(
+                "Skin changes require both 'uuid' and 'skin' to be defined", profileEl);
+          }
         }
-        UUID uuid = playerProfile ? null : XMLUtils.parseUuid(uuidNode);
-        Skin skin = playerProfile ? null : XMLUtils.parseUnsignedSkin(skinNode);
         MannequinPose pose = parser
             .parseEnum(MannequinPose.class, profileEl, "pose")
             .optional(MannequinPose.STANDING);
+
         SkinPart.SkinLayers layers = SkinPart.SkinLayers.allOf();
         String removedLayers = parser.string(profileEl, "remove-layers").attr().orNull();
         if (removedLayers != null) {

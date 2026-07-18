@@ -85,6 +85,7 @@ public class ModernActionParser extends ActionParser {
     Boolean physics = getParser().parseBool(el, "physics").attr().orNull();
     Boolean onFire = getParser().parseBool(el, "on-fire").attr().orNull();
 
+    boolean playerProfile = false;
     UUID uuid = null;
     Skin skin = null;
     SkinPart.SkinLayers layers = null;
@@ -153,6 +154,7 @@ public class ModernActionParser extends ActionParser {
         gravity,
         physics,
         onFire,
+        playerProfile,
         uuid,
         skin,
         layers,

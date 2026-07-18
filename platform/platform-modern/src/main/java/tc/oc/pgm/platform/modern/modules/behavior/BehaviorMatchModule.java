@@ -2,13 +2,10 @@ package tc.oc.pgm.platform.modern.modules.behavior;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import tc.oc.pgm.api.match.Match;
@@ -20,6 +17,7 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
+import tc.oc.pgm.platform.modern.modules.behavior.combat.PanicInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookInstance;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
@@ -44,8 +42,8 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
 
   public void register(Mannequin mannequin, BehaviorDefinition definition) {
     var entity = mannequin.getEntity();
-
     CombatBehavior combat = definition.getCombatBehavior();
+
     if (combat != null) {
       var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
       if (attr == null) {
@@ -53,6 +51,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
         attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
         attr.setBaseValue(2.0); // default only when we created the attribute
       }
+
       hostiles.put(mannequin, new CombatInstance(mannequin, combat, definition.isAvoidDanger()));
     }
 
@@ -82,12 +81,26 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     }
   }
 
+  @EventHandler
+  public void onEnvironmentalDamage(EntityDamageEvent event) {
+    if (event instanceof EntityDamageByEntityEvent) return;
+    if (!PanicInstance.isPanicCause(event.getCause())) return;
+
+    Tick now = match.getTick();
+    for (CombatInstance ci : hostiles.values()) {
+      if (ci.matches(event.getEntity())) {
+        ci.onEnvironmentalDamage(now);
+        return;
+      }
+    }
+  }
+
   @Override
   public void tick(Match match, Tick tick) {
     hostiles.values().forEach(ci -> ci.tick(match, tick));
     looks.forEach(((mannequin, li) -> {
       CombatInstance ci = hostiles.get(mannequin);
-      if (ci == null || (!ci.hasTarget() && !ci.isPanicking())) {
+      if (ci == null || (!ci.hasTarget() && !ci.isPanicking(tick))) {
         li.tick(match);
       }
     }));

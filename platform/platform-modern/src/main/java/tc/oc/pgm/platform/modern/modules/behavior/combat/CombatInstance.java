@@ -21,7 +21,6 @@ public class CombatInstance {
 
   public static final Float DEFAULT_ATTACK_RANGE = 3.0f;
   public static final Duration DEFAULT_ATTACK_INTERVAL = Duration.ofSeconds(1);
-  public static final Duration DEFAULT_PANIC_DURATION = Duration.ofSeconds(5);
 
   private final Mannequin mannequin;
   private final CombatBehavior behavior;
@@ -39,10 +38,7 @@ public class CombatInstance {
   private long nextWanderTick = 0;
   private Vector lastWanderProgressPos = null;
   private long lastWanderProgressTick = 0;
-  private final long panicDurationTicks;
-  private @Nullable MatchPlayer panicSource;
-  private long panicStartTick;
-  private long panicExpiryTick = 0;
+  private final @Nullable PanicInstance panic;
   private static final Map<PathType, Float> DANGER_PENALTIES = Map.of(
       PathType.DAMAGE_OTHER, -1.0F,
       PathType.DANGER_OTHER, -1.0F,
@@ -67,10 +63,7 @@ public class CombatInstance {
         behavior.getStrayDis() != null ? behavior.getStrayDis() * behavior.getStrayDis() : -1;
     this.returnAfterTicks =
         behavior.getReturnAfter() != null ? behavior.getReturnAfter().toMillis() / 50 : 0;
-    this.panicDurationTicks =
-        (behavior.getPanicDuration() != null ? behavior.getPanicDuration() : DEFAULT_PANIC_DURATION)
-                .toMillis()
-            / 50;
+    this.panic = behavior.isPanic() ? new PanicInstance(mannequin, behavior, ghost) : null;
   }
 
   public boolean matches(org.bukkit.entity.Entity entity) {
@@ -79,10 +72,8 @@ public class CombatInstance {
 
   public void onAttacked(MatchPlayer attacker, Tick now) {
     if (behavior.getHostility() == HostilityType.PASSIVE) {
-      if (behavior.isPanic()) {
-        panicSource = attacker;
-        panicExpiryTick = now.tick + panicDurationTicks;
-        panicStartTick = now.tick + 6;
+      if (panic != null) {
+        panic.startPanic(attacker, now);
       }
       return;
     }
@@ -95,10 +86,8 @@ public class CombatInstance {
 
   public void tick(Match match, Tick now) {
     validateTarget(now);
-    boolean panicking = behavior.isPanic() && target == null && now.tick < panicExpiryTick;
-    if (!panicking && panicSource != null) {
-      panicSource = null;
-      currentPath = null;
+    if (panic != null) {
+      panic.tick(match, now);
     }
 
     if (target == null && behavior.getHostility() == HostilityType.HOSTILE) {
@@ -137,7 +126,10 @@ public class CombatInstance {
       }
     }
 
-    if (target == null && behavior.getReturnHome() && behavior.getHome() != null && !panicking) {
+    if (target == null
+        && behavior.getReturnHome()
+        && behavior.getHome() != null
+        && (panic == null || !panic.isPanicking(now))) {
       if (atHome(match)) {
         idleSinceTick = -1;
         currentPath = null;
@@ -162,7 +154,10 @@ public class CombatInstance {
       idleSinceTick = -1;
     }
 
-    if (target == null && behavior.isWander() && atHome(match) && !panicking) {
+    if (target == null
+        && behavior.isWander()
+        && atHome(match)
+        && (panic == null || !panic.isPanicking(now))) {
       if (currentPath == null || currentPath.isDone()) {
         if (now.tick >= nextWanderTick) {
           Vector wanderPoint = pickWanderPoint(match);
@@ -194,35 +189,6 @@ public class CombatInstance {
           return;
         }
         stepAlongPath();
-      }
-    }
-
-    if (panicking && panicSource != null) {
-      // Delay panicking so mannequin can take vertical kb
-      if (now.tick < panicStartTick) {
-        return;
-      }
-      Vector panicPoint = pickPanicPoint(panicSource, match);
-
-      if (panicPoint != null && now.tick >= nextRepathTick) {
-        var panicLoc = panicPoint.toLocation(match.getWorld());
-        var loc = mannequin.getLocation();
-        ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
-        ghost.setOnGround(true);
-
-        currentPath = ghost
-            .getNavigation()
-            .createPath(
-                new BlockPos(
-                    panicPoint.getBlockX(), panicPoint.getBlockY(), panicPoint.getBlockZ()),
-                0);
-        nextRepathTick = now.tick + 8 + match.getRandom().nextInt(5);
-
-        mannequin.getEntity().lookAt(panicLoc, LookAnchor.EYES);
-      }
-
-      if (currentPath != null && !currentPath.isDone()) {
-        stepAlongPath(0.28);
       }
     }
   }
@@ -338,31 +304,13 @@ public class CombatInstance {
     return 80 + match.getRandom().nextInt(120);
   }
 
-  public boolean isPanicking() {
-    return panicSource != null;
+  public boolean isPanicking(Tick now) {
+    return panic != null && panic.isPanicking(now);
   }
 
-  private @Nullable Vector pickPanicPoint(MatchPlayer attacker, Match match) {
-    var attackerLoc = attacker.getBukkit().getLocation();
-    var manLoc = mannequin.getLocation();
-    var away = manLoc.toVector().subtract(attackerLoc.toVector());
-
-    if (away.lengthSquared() < 0.01) {
-      away = new Vector(1, 0, 0);
+  public void onEnvironmentalDamage(Tick now) {
+    if (behavior.getHostility() == HostilityType.PASSIVE && panic != null) {
+      panic.startPanic(null, now);
     }
-    away.setY(0).normalize();
-
-    if (match.getRandom().nextDouble() < 0.15) {
-      away.multiply(-0.5);
-    }
-
-    double dis = 3 + match.getRandom().nextDouble() * 2;
-    double jit = (match.getRandom().nextDouble() - 0.5) * dis * 1.5;
-    Vector latOffset = new Vector(-away.getZ() * jit, 0, away.getX() * jit);
-
-    return manLoc
-        .toVector()
-        .add(away.multiply(dis))
-        .add(latOffset);
   }
 }
