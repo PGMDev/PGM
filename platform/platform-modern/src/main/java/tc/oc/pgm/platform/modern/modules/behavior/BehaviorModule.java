@@ -2,12 +2,15 @@ package tc.oc.pgm.platform.modern.modules.behavior;
 
 import com.google.common.collect.ImmutableMap;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -18,6 +21,11 @@ import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.HostilityType;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.RotationType;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingGoalBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.RelocationMethod;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.RelocationType;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.StuckBehavior;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -106,8 +114,66 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           look = new LookBehavior(trackPlayer, trackPoint, rotation, range, restYaw, restPitch);
         }
 
+        PathingBehavior path = null;
+        StuckBehavior stuck = null;
+        Element pathEl = el.getChild("pathing");
+        if (pathEl != null) {
+          Vector start = XMLUtils.parseVector(XMLUtils.getRequiredAttribute(pathEl, "start"));
+          boolean loop = parser.parseBool(pathEl, "loop").optional(false);
+
+          List<PathingGoalBehavior> goals = new ArrayList<>();
+          for (Element goalEl : pathEl.getChildren("goal")) {
+            Vector destination =
+                XMLUtils.parseVector(XMLUtils.getRequiredAttribute(goalEl, "destination"));
+
+            Duration idle =
+                parser.duration(goalEl, "idle").orNull();
+            Action<? super Match> completionAction =
+                parser.action(Match.class, goalEl, "completion-action").orNull();
+            Float goalRadius =
+                parser.parseFloat(goalEl, "goal-radius").orNull();
+
+            goals.add(new PathingGoalBehavior(
+                destination,
+                idle,
+                completionAction,
+                goalRadius
+            ));
+          }
+
+          if (goals.isEmpty()) {
+            throw new InvalidXMLException(
+                "Pathing requires at least one 'goal' sub-element to be defined",
+                pathEl);
+          }
+
+          Element stuckEl = pathEl.getChild("if-stuck");
+          if (stuckEl != null) {
+            Duration after = parser.duration(stuckEl, "after").orNull();
+            Action<? super Match> stuckAction =
+                parser.action(Match.class, stuckEl, "stuck-action").orNull();
+
+            RelocationType moveTo = parser.parseEnum(RelocationType.class, stuckEl, "move-to").orNull();
+            RelocationMethod method = parser.parseEnum(RelocationMethod.class, stuckEl, "method").orNull();
+
+            boolean giveUp = parser.parseBool(stuckEl, "give-up").optional(false);
+            boolean despawn = parser.parseBool(stuckEl, "despawn").optional(false);
+
+            stuck = new StuckBehavior(
+                after,
+                stuckAction,
+                moveTo,
+                method,
+                giveUp,
+                despawn
+            );
+          }
+
+          path = new PathingBehavior(start, loop, goals, stuck);
+        }
+
         BehaviorDefinition behaviorDefinition =
-            new BehaviorDefinition(id, avoidDanger, combat, look);
+            new BehaviorDefinition(id, avoidDanger, combat, look, path);
         factory.getFeatures().addFeature(el, behaviorDefinition);
         behaviors.put(id, behaviorDefinition);
       }

@@ -46,7 +46,7 @@ public class PanicInstance {
     this.ghost = ghost;
     this.panicDurationTicks =
         (behavior.getPanicDuration() != null ? behavior.getPanicDuration() : DEFAULT_PANIC_DURATION)
-                .toMillis()
+            .toMillis()
             / 50;
   }
 
