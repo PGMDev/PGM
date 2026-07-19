@@ -35,10 +35,8 @@ public class CombatInstance {
   private long idleSinceTick = -1;
   private @Nullable Path currentPath;
   private long nextRepathTick;
-  private long nextWanderTick = 0;
-  private Vector lastWanderProgressPos = null;
-  private long lastWanderProgressTick = 0;
   private final @Nullable PanicInstance panic;
+  private final @Nullable WanderInstance wander;
   private static final Map<PathType, Float> DANGER_PENALTIES = Map.of(
       PathType.DAMAGE_OTHER, -1.0F,
       PathType.DANGER_OTHER, -1.0F,
@@ -64,6 +62,7 @@ public class CombatInstance {
     this.returnAfterTicks =
         behavior.getReturnAfter() != null ? behavior.getReturnAfter().toMillis() / 50 : 0;
     this.panic = behavior.isPanic() ? new PanicInstance(mannequin, behavior, ghost) : null;
+    this.wander = behavior.isWander() ? new WanderInstance(mannequin, behavior, ghost) : null;
   }
 
   public boolean matches(org.bukkit.entity.Entity entity) {
@@ -75,12 +74,19 @@ public class CombatInstance {
       if (panic != null) {
         panic.startPanic(attacker, now);
       }
+
+      if (wander != null) {
+        wander.clearWanderPath();
+      }
       return;
     }
 
     if (target == null || target == attacker) {
       target = attacker;
       refreshExpiry(now);
+      if (wander != null) {
+        wander.clearWanderPath();
+      }
     }
   }
 
@@ -158,38 +164,7 @@ public class CombatInstance {
         && behavior.isWander()
         && atHome(match)
         && (panic == null || !panic.isPanicking(now))) {
-      if (currentPath == null || currentPath.isDone()) {
-        if (now.tick >= nextWanderTick) {
-          Vector wanderPoint = pickWanderPoint(match);
-
-          if (wanderPoint != null) {
-            var loc = mannequin.getLocation();
-            ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
-            ghost.setOnGround(true);
-            currentPath = ghost
-                .getNavigation()
-                .createPath(
-                    new BlockPos(
-                        wanderPoint.getBlockX(), wanderPoint.getBlockY(), wanderPoint.getBlockZ()),
-                    0);
-            lastWanderProgressPos = loc.toVector();
-            lastWanderProgressTick = now.tick;
-          }
-          nextWanderTick = now.tick + randomIdleTicks(match);
-        }
-      } else {
-        var pos = mannequin.getLocation().toVector();
-
-        if (lastWanderProgressPos == null || pos.distanceSquared(lastWanderProgressPos) > 0.25) {
-          lastWanderProgressPos = pos;
-          lastWanderProgressTick = now.tick;
-        } else if (now.tick - lastWanderProgressTick > 60) {
-          currentPath = null;
-          nextWanderTick = now.tick + randomIdleTicks(match);
-          return;
-        }
-        stepAlongPath();
-      }
+      wander.tick(match, now);
     }
   }
 

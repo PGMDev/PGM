@@ -1,13 +1,12 @@
 package tc.oc.pgm.platform.modern.modules.behavior.pathing;
 
-import org.bukkit.util.Vector;
-
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
+import org.bukkit.util.Vector;
 
 public class PathingBehavior {
-  private final Vector start;
+  private final @Nullable Vector start;
   private final boolean loop;
   private final List<PathingGoalBehavior> goals;
   private final @Nullable StuckBehavior stuck;
@@ -23,7 +22,7 @@ public class PathingBehavior {
     this.stuck = stuck;
   }
 
-  public Vector getStart() {
+  public @Nullable Vector getStart() {
     return start;
   }
 

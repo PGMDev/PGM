@@ -1,10 +1,9 @@
 package tc.oc.pgm.platform.modern.modules.behavior.pathing;
 
+import java.time.Duration;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.match.Match;
-
-import java.time.Duration;
 
 public class StuckBehavior {
   private final Duration after;
@@ -38,7 +37,7 @@ public class StuckBehavior {
   }
 
   public RelocationType getMoveTo() {
-    return getMoveTo();
+    return moveTo;
   }
 
   public RelocationMethod getMethod() {

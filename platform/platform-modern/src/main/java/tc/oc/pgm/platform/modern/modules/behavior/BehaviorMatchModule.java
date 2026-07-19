@@ -2,7 +2,10 @@ package tc.oc.pgm.platform.modern.modules.behavior;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +23,8 @@ import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.PanicInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookInstance;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingInstance;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -29,6 +34,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   private final Map<String, BehaviorDefinition> behaviorDefinitions;
   private final Map<Mannequin, CombatInstance> hostiles = new HashMap<>();
   private final Map<Mannequin, LookInstance> looks = new HashMap<>();
+  private final Map<Mannequin, PathingInstance> paths = new HashMap<>();
 
   public BehaviorMatchModule(Match match, Map<String, BehaviorDefinition> behaviorDefinitions) {
     this.match = match;
@@ -59,11 +65,20 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     if (look != null) {
       looks.put(mannequin, new LookInstance(mannequin, look));
     }
+
+    PathingBehavior path = definition.getPathingBehavior();
+    if (path != null) {
+      Zombie pathGhost = new Zombie(
+          EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
+      pathGhost.setOnGround(true);
+      paths.put(mannequin, new PathingInstance(mannequin, path, pathGhost));
+    }
   }
 
   public void unregister(Mannequin mannequin) {
     hostiles.remove(mannequin);
     looks.remove(mannequin);
+    paths.remove(mannequin);
   }
 
   @EventHandler
@@ -104,5 +119,11 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
         li.tick(match);
       }
     }));
+
+    paths.forEach((mannequin, pi) -> {
+      CombatInstance ci = hostiles.get(mannequin);
+      boolean combatActive = ci != null && (ci.hasTarget() || ci.isPanicking(tick));
+      if (!combatActive) pi.tick(match, tick);
+    });
   }
 }

@@ -47,7 +47,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
 
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "behaviors", "behavior")) {
         String id = parser.string(el, "id").required();
-        boolean avoidDanger = parser.parseBool(el, "avoid-danger").optional(true);
+        boolean avoidDanger = parser.parseBool(el, "avoid-danger").optional(false);
 
         Element combatEl = el.getChild("combat");
         CombatBehavior combat = null;
@@ -118,7 +118,9 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         StuckBehavior stuck = null;
         Element pathEl = el.getChild("pathing");
         if (pathEl != null) {
-          Vector start = XMLUtils.parseVector(XMLUtils.getRequiredAttribute(pathEl, "start"));
+          Node startNode = Node.fromAttr(pathEl, "start");
+          Vector start = startNode != null ? XMLUtils.parseVector(startNode) : null;
+
           boolean loop = parser.parseBool(pathEl, "loop").optional(false);
 
           List<PathingGoalBehavior> goals = new ArrayList<>();
@@ -126,25 +128,17 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
             Vector destination =
                 XMLUtils.parseVector(XMLUtils.getRequiredAttribute(goalEl, "destination"));
 
-            Duration idle =
-                parser.duration(goalEl, "idle").orNull();
+            Duration idle = parser.duration(goalEl, "idle").orNull();
             Action<? super Match> completionAction =
                 parser.action(Match.class, goalEl, "completion-action").orNull();
-            Float goalRadius =
-                parser.parseFloat(goalEl, "goal-radius").orNull();
+            Float goalRadius = parser.parseFloat(goalEl, "goal-radius").orNull();
 
-            goals.add(new PathingGoalBehavior(
-                destination,
-                idle,
-                completionAction,
-                goalRadius
-            ));
+            goals.add(new PathingGoalBehavior(destination, idle, completionAction, goalRadius));
           }
 
           if (goals.isEmpty()) {
             throw new InvalidXMLException(
-                "Pathing requires at least one 'goal' sub-element to be defined",
-                pathEl);
+                "Pathing requires at least one 'goal' sub-element to be defined", pathEl);
           }
 
           Element stuckEl = pathEl.getChild("if-stuck");
@@ -153,20 +147,20 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
             Action<? super Match> stuckAction =
                 parser.action(Match.class, stuckEl, "stuck-action").orNull();
 
-            RelocationType moveTo = parser.parseEnum(RelocationType.class, stuckEl, "move-to").orNull();
-            RelocationMethod method = parser.parseEnum(RelocationMethod.class, stuckEl, "method").orNull();
+            RelocationType moveTo =
+                parser.parseEnum(RelocationType.class, stuckEl, "move-to").orNull();
+            RelocationMethod method =
+                parser.parseEnum(RelocationMethod.class, stuckEl, "method").orNull();
 
             boolean giveUp = parser.parseBool(stuckEl, "give-up").optional(false);
             boolean despawn = parser.parseBool(stuckEl, "despawn").optional(false);
+            if (despawn && (moveTo != null || method != null || giveUp)) {
+              throw new InvalidXMLException(
+                  "'despawn' cannot be combined with 'move-to', 'method', or 'give-up' attributes",
+                  stuckEl);
+            }
 
-            stuck = new StuckBehavior(
-                after,
-                stuckAction,
-                moveTo,
-                method,
-                giveUp,
-                despawn
-            );
+            stuck = new StuckBehavior(after, stuckAction, moveTo, method, giveUp, despawn);
           }
 
           path = new PathingBehavior(start, loop, goals, stuck);

@@ -1,21 +1,20 @@
 package tc.oc.pgm.platform.modern.modules.behavior.pathing;
 
+import java.time.Duration;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.match.Match;
 
-import java.time.Duration;
-
 public class PathingGoalBehavior {
   private final Vector destination;
-  private final Duration idle;
+  private final @Nullable Duration idle;
   private final @Nullable Action<? super Match> completionAction;
   private final @Nullable Float goalRadius;
 
   public PathingGoalBehavior(
       Vector destination,
-      Duration idle,
+      @Nullable Duration idle,
       @Nullable Action<? super Match> completionAction,
       @Nullable Float goalRadius) {
     this.destination = destination;
@@ -28,7 +27,7 @@ public class PathingGoalBehavior {
     return destination;
   }
 
-  public Duration getIdle() {
+  public @Nullable Duration getIdle() {
     return idle;
   }
 
@@ -37,6 +36,6 @@ public class PathingGoalBehavior {
   }
 
   public @Nullable Float getGoalRadius() {
-    return  goalRadius;
+    return goalRadius;
   }
 }
