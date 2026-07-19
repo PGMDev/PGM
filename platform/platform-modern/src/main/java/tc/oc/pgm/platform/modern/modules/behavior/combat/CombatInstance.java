@@ -11,10 +11,10 @@ import net.minecraft.world.level.pathfinder.PathType;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
+import tc.oc.pgm.platform.modern.modules.behavior.PathWalking;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 public class CombatInstance {
@@ -25,8 +25,8 @@ public class CombatInstance {
   private final Mannequin mannequin;
   private final CombatBehavior behavior;
   private @Nullable MatchPlayer target;
-  private long aggroExpiryTick = Long.MAX_VALUE;
-  private long nextAttackTick = 0;
+  private long aggroExpiryTick = -1;
+  private long nextAttackTick;
   private final double rangeSq;
   private final long intervalTicks;
   private final net.minecraft.world.entity.monster.zombie.Zombie ghost;
@@ -127,8 +127,9 @@ public class CombatInstance {
                   0);
           nextRepathTick = now.tick + 10;
         }
+
+        PathWalking.step(mannequin, currentPath, 0.15);
         mannequin.getEntity().lookAt(bukkit.getLocation(), LookAnchor.EYES);
-        stepAlongPath();
       }
     }
 
@@ -150,10 +151,13 @@ public class CombatInstance {
             currentPath = ghost
                 .getNavigation()
                 .createPath(
-                    new BlockPos((int) center.getX(), (int) center.getY(), (int) center.getZ()), 0);
+                    new BlockPos(
+                        (int) Math.floor(center.getX()), (int) Math.floor(center.getY()), (int)
+                            Math.floor(center.getZ())),
+                    0);
             nextRepathTick = now.tick + 10;
           }
-          stepAlongPath();
+          PathWalking.step(mannequin, currentPath, 0.15);
         }
       }
     } else if (target != null) {
@@ -174,10 +178,10 @@ public class CombatInstance {
     if (bukkit == null
         || target.isDead()
         || !target.isParticipating()
-        || now.tick > aggroExpiryTick
+        || aggroExpiryTick != -1 && now.tick > aggroExpiryTick
         || outsideHome(bukkit)) {
       target = null;
-      aggroExpiryTick = Long.MAX_VALUE;
+      aggroExpiryTick = -1;
     }
   }
 
@@ -199,9 +203,8 @@ public class CombatInstance {
   }
 
   private void refreshExpiry(Tick now) {
-    aggroExpiryTick = behavior.getDuration() != null
-        ? now.tick + behavior.getDuration().toMillis() / 50
-        : Long.MAX_VALUE;
+    aggroExpiryTick =
+        behavior.getDuration() != null ? now.tick + behavior.getDuration().toMillis() / 50 : -1;
   }
 
   private boolean atHome(Match match) {
@@ -225,58 +228,6 @@ public class CombatInstance {
     if (bukkit == null) return false;
     return bukkit.getWorld().equals(mannequin.getEntity().getWorld())
         && bukkit.getLocation().distanceSquared(mannequin.getEntity().getLocation()) <= rangeSq;
-  }
-
-  private void stepAlongPath(double speed) {
-    if (currentPath == null || currentPath.isDone()) return;
-
-    if (!mannequin.getEntity().isOnGround()) return;
-
-    var nodePos = currentPath.getNextNodePos();
-    var loc = mannequin.getLocation();
-    var direction = new org.bukkit.util.Vector(
-        nodePos.getX() + 0.5 - loc.getX(), 0, nodePos.getZ() + 0.5 - loc.getZ());
-
-    if (direction.lengthSquared() < 0.25) {
-      currentPath.advance();
-      return;
-    }
-
-    Vector movement = direction.normalize().multiply(speed);
-    if (nodePos.getY() - loc.getY() > 0.5) {
-      movement.setY(0.42);
-    }
-
-    mannequin.getEntity().setVelocity(movement);
-  }
-
-  private void stepAlongPath() {
-    stepAlongPath(0.15);
-  }
-
-  private @Nullable Vector pickWanderPoint(Match match) {
-    var home = behavior.getHome().getStatic(match);
-    var bounds = home.getBounds();
-    var min = bounds.getMin();
-    var max = bounds.getMax();
-    var random = match.getRandom();
-
-    Vector wanderTarget = null;
-    for (int i = 0; i < 4; i++) {
-      double x = min.getX() + random.nextDouble() * (max.getX() - min.getX());
-      double z = min.getZ() + random.nextDouble() * (max.getZ() - min.getZ());
-      Vector candidate = new Vector(x, mannequin.getLocation().getY(), z);
-      if (home.contains(candidate)) {
-        wanderTarget = candidate;
-        break;
-      }
-    }
-
-    return wanderTarget;
-  }
-
-  private long randomIdleTicks(Match match) {
-    return 80 + match.getRandom().nextInt(120);
   }
 
   public boolean isPanicking(Tick now) {

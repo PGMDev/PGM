@@ -7,6 +7,7 @@ import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.time.Tick;
+import tc.oc.pgm.platform.modern.modules.behavior.PathWalking;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 public class WanderInstance {
@@ -62,7 +63,7 @@ public class WanderInstance {
         nextWanderTick = now.tick + randomIdleTicks(match);
         return;
       }
-      stepWanderPath();
+      PathWalking.step(mannequin, wanderPath, 0.15);
     }
   }
 
@@ -89,27 +90,6 @@ public class WanderInstance {
     }
 
     return wanderTarget;
-  }
-
-  private void stepWanderPath() {
-    if (wanderPath == null || wanderPath.isDone()) return;
-    if (!mannequin.getEntity().isOnGround()) return;
-
-    var nodePos = wanderPath.getNextNodePos();
-    var loc = mannequin.getLocation();
-    var direction =
-        new Vector(nodePos.getX() + 0.5 - loc.getX(), 0, nodePos.getZ() + 0.5 - loc.getZ());
-
-    if (direction.lengthSquared() < 0.25) {
-      wanderPath.advance();
-      return;
-    }
-
-    Vector movement = direction.normalize().multiply(0.15);
-    if (nodePos.getY() - loc.getY() > 0.5) {
-      movement.setY(0.42);
-    }
-    mannequin.getEntity().setVelocity(movement);
   }
 
   private long randomIdleTicks(Match match) {

@@ -123,7 +123,11 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     paths.forEach((mannequin, pi) -> {
       CombatInstance ci = hostiles.get(mannequin);
       boolean combatActive = ci != null && (ci.hasTarget() || ci.isPanicking(tick));
-      if (!combatActive) pi.tick(match, tick);
+      if (!combatActive) {
+        pi.tick(match, tick);
+      } else {
+        pi.tick(match, tick);
+      }
     });
   }
 }

@@ -61,6 +61,32 @@ public class MannequinMatchModule implements MatchModule, Listener {
     }
   }
 
+  public void despawn(String id) {
+    var bmm = match.needModule(BehaviorMatchModule.class);
+    instances.removeAll(id).forEach(mannequin -> {
+      byEntity.remove(mannequin.getEntityId());
+      bmm.unregister(mannequin);
+      mannequin.despawn();
+    });
+  }
+
+  public void singleDespawn(Mannequin mannequin) {
+    byEntity.remove(mannequin.getEntityId());
+    instances.remove(mannequin.getId(), mannequin);
+    match.needModule(BehaviorMatchModule.class).unregister(mannequin);
+    setWaypoint(mannequin, null);
+    mannequin.despawn();
+  }
+
+  @EventHandler
+  public void onDeath(EntityDeathEvent event) {
+    Mannequin mannequin = byEntity.remove(event.getEntity().getUniqueId());
+    if (mannequin == null) return;
+    setWaypoint(mannequin, null);
+    match.needModule(BehaviorMatchModule.class).unregister(mannequin);
+    instances.remove(mannequin.getId(), mannequin);
+  }
+
   @EventHandler
   public void onInteract(PlayerInteractAtEntityEvent event) {
     if (event.getHand() != EquipmentSlot.HAND) return;
@@ -71,15 +97,6 @@ public class MannequinMatchModule implements MatchModule, Listener {
     if (player == null) return;
     event.setCancelled(true);
     mannequin.getDefinition().getAction().trigger(player);
-  }
-
-  public void despawn(String id) {
-    var bmm = match.needModule(BehaviorMatchModule.class);
-    instances.removeAll(id).forEach(mannequin -> {
-      byEntity.remove(mannequin.getEntityId());
-      bmm.unregister(mannequin);
-      mannequin.despawn();
-    });
   }
 
   public void modify(String id, Consumer<Mannequin> modifier) {
@@ -94,14 +111,5 @@ public class MannequinMatchModule implements MatchModule, Listener {
 
   public void removeWaypoint(Mannequin mannequin) {
     setWaypoint(mannequin, null);
-  }
-
-  @EventHandler
-  public void onDeath(EntityDeathEvent event) {
-    Mannequin mannequin = byEntity.remove(event.getEntity().getUniqueId());
-    if (mannequin == null) return;
-    setWaypoint(mannequin, null);
-    match.needModule(BehaviorMatchModule.class).unregister(mannequin);
-    instances.remove(mannequin.getId(), mannequin);
   }
 }

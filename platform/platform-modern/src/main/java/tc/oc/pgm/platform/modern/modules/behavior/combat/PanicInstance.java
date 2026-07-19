@@ -12,6 +12,7 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
+import tc.oc.pgm.platform.modern.modules.behavior.PathWalking;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 public class PanicInstance {
@@ -23,9 +24,9 @@ public class PanicInstance {
   private final long panicDurationTicks;
   private @Nullable MatchPlayer panicSource;
   private @Nullable Path panicPath;
-  private long nextRepathTick = 0;
+  private long nextRepathTick;
   private long panicStartTick;
-  private long panicExpiryTick = 0;
+  private long panicExpiryTick;
 
   private static final Set<EntityDamageEvent.DamageCause> PANIC_CAUSES = Set.of(
       EntityDamageEvent.DamageCause.CONTACT,
@@ -92,7 +93,7 @@ public class PanicInstance {
       }
       nextRepathTick = now.tick + 8 + match.getRandom().nextInt(5);
     }
-    stepPanicPath();
+    PathWalking.step(mannequin, panicPath, 0.28);
   }
 
   private @Nullable Vector pickPanicPoint(Match match) {
@@ -118,26 +119,5 @@ public class PanicInstance {
     double jit = (match.getRandom().nextDouble() - 0.5) * dis * 1.5;
     Vector latOffset = new Vector(-away.getZ() * jit, 0, away.getX() * jit);
     return manLoc.toVector().add(away.multiply(dis)).add(latOffset);
-  }
-
-  private void stepPanicPath() {
-    if (panicPath == null || panicPath.isDone()) return;
-    if (!mannequin.getEntity().isOnGround()) return;
-
-    var nodePos = panicPath.getNextNodePos();
-    var loc = mannequin.getLocation();
-    var direction =
-        new Vector(nodePos.getX() + 0.5 - loc.getX(), 0, nodePos.getZ() + 0.5 - loc.getZ());
-
-    if (direction.lengthSquared() < 0.25) {
-      panicPath.advance();
-      return;
-    }
-
-    Vector movement = direction.normalize().multiply(0.28);
-    if (nodePos.getY() - loc.getY() > 0.5) {
-      movement.setY(0.42);
-    }
-    mannequin.getEntity().setVelocity(movement);
   }
 }

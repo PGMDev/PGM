@@ -143,12 +143,32 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
 
           Element stuckEl = pathEl.getChild("if-stuck");
           if (stuckEl != null) {
-            Duration after = parser.duration(stuckEl, "after").orNull();
+            Duration after = parser.duration(stuckEl, "after").optional(Duration.ofSeconds(5));
             Action<? super Match> stuckAction =
                 parser.action(Match.class, stuckEl, "stuck-action").orNull();
 
-            RelocationType moveTo =
-                parser.parseEnum(RelocationType.class, stuckEl, "move-to").orNull();
+            RelocationType moveTo = null;
+            Integer moveToIndex = null;
+            String moveToString = parser.string(stuckEl, "move-to").attr().orNull();
+            if (moveToString != null) {
+              try {
+                moveTo = RelocationType.valueOf(moveToString.toUpperCase());
+              } catch (IllegalArgumentException error) {
+                try {
+                  moveToIndex = Integer.parseInt(moveToString);
+
+                  if (moveToIndex < 0 || moveToIndex > goals.size()) {
+                    throw new InvalidXMLException(
+                        "move-to index must be between 0 and " + goals.size(), stuckEl);
+                  }
+                } catch (NumberFormatException exception) {
+                  throw new InvalidXMLException(
+                      "move-to must be 'start', 'end', 'previous', 'next', or a goal index number",
+                      stuckEl);
+                }
+              }
+            }
+
             RelocationMethod method =
                 parser.parseEnum(RelocationMethod.class, stuckEl, "method").orNull();
 
@@ -160,7 +180,14 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
                   stuckEl);
             }
 
-            stuck = new StuckBehavior(after, stuckAction, moveTo, method, giveUp, despawn);
+            stuck =
+                new StuckBehavior(after, stuckAction, moveTo, moveToIndex, method, giveUp, despawn);
+
+            if (stuck.getMoveTo() == RelocationType.NEXT
+                && stuck.getMethod() != RelocationMethod.TELEPORT) {
+              throw new InvalidXMLException(
+                  "move-to='next' can only be used when using method='teleport'", stuckEl);
+            }
           }
 
           path = new PathingBehavior(start, loop, goals, stuck);

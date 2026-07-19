@@ -8,7 +8,9 @@ import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.time.Tick;
+import tc.oc.pgm.platform.modern.modules.behavior.PathWalking;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
+import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
 
 public class PathingInstance {
 
@@ -25,14 +27,15 @@ public class PathingInstance {
   private final Zombie ghost;
   private final List<PathingGoalBehavior> goals;
   private final Vector startPos;
-  private int currentIndex = 0; // Each goal gets index, start always = 0
+  private int currentIndex; // Each goal gets an index, start always = 0
+  private int lastIndexReached;
   private Phase phase = Phase.WALKING;
   private @Nullable Path currentPath;
-  private long nextRepathTick = 0;
+  private long nextRepathTick;
   private @Nullable Vector lastProgressPos;
-  private long idleUntilTick = 0;
-  private long lastProgressTick = 0;
-  private long stuckSinceTick = -1;
+  private long idleUntilTick;
+  private long lastProgressTick;
+  private boolean wasInterrupted;
 
   public PathingInstance(Mannequin mannequin, PathingBehavior behavior, Zombie ghost) {
     this.mannequin = mannequin;
@@ -44,7 +47,21 @@ public class PathingInstance {
         : mannequin.getLocation().toVector();
   }
 
+  public void pathingInterrupted() {
+    wasInterrupted = true;
+  }
+
   public void tick(Match match, Tick now) {
+    if (wasInterrupted) {
+      wasInterrupted = false;
+
+      if (phase == Phase.WALKING || phase == Phase.IDLING) {
+        currentIndex = lastIndexReached;
+        currentPath = null;
+        lastProgressPos = null; // Time in combat does not count towards time stuck
+        phase = Phase.WALKING;
+      }
+    }
     switch (phase) {
       case WALKING -> tickWalking(match, now);
       case IDLING -> tickIdling(now);
@@ -52,7 +69,7 @@ public class PathingInstance {
     }
   }
 
-  public void tickWalking(Match match, Tick now) {
+  private void tickWalking(Match match, Tick now) {
     Vector target = currentIndex == 0 ? startPos : goals.get(currentIndex - 1).getDestination();
 
     if (disSq(mannequin.getLocation().toVector(), target) <= goalRadiusSq(currentIndex)) {
@@ -67,21 +84,36 @@ public class PathingInstance {
         idleUntilTick = now.tick + idleTicks;
       }
       currentPath = null;
+      lastIndexReached = currentIndex;
       phase = Phase.IDLING;
       return;
     }
 
-    if (now.tick >= nextRepathTick) {
-      var loc = mannequin.getLocation();
-      ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
-      ghost.setOnGround(true);
-      currentPath = ghost
-          .getNavigation()
-          .createPath(
-              new BlockPos((int) target.getX(), (int) target.getY(), (int) target.getZ()), 0);
-      nextRepathTick = now.tick + 10;
+    if (currentPath == null || currentPath.isDone()) {
+      if (now.tick >= nextRepathTick) {
+        var loc = mannequin.getLocation();
+        ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+        ghost.setOnGround(true);
+        currentPath = ghost
+            .getNavigation()
+            .createPath(
+                new BlockPos((int) Math.floor(target.getX()), (int) Math.floor(target.getY()), (int)
+                    Math.floor(target.getZ())),
+                0);
+        nextRepathTick = now.tick + 10;
+      }
     }
-    stepAlongPath();
+
+    PathWalking.step(mannequin, currentPath, 0.15);
+
+    var pos = mannequin.getLocation().toVector();
+    if (lastProgressPos == null || pos.distanceSquared(lastProgressPos) > 0.25) {
+      lastProgressPos = pos;
+      lastProgressTick = now.tick;
+    } else if (behavior.getStuck() != null
+        && now.tick - lastProgressTick >= behavior.getStuck().getAfter().toMillis() / 50) {
+      handleStuck(match, now);
+    }
   }
 
   private double disSq(Vector a, Vector b) {
@@ -90,9 +122,9 @@ public class PathingInstance {
   }
 
   private double goalRadiusSq(int index) {
-    if (index == 0) return 1.5 * 1.5;
-    Float r = goals.get(index - 1).getGoalRadius();
-    return r != null ? r * r : 1.5 * 1.5;
+    if (index == 0) return 0.5 * 0.5;
+    Float radius = goals.get(index - 1).getGoalRadius();
+    return radius != null ? radius * radius : 0.5 * 0.5;
   }
 
   private void tickIdling(Tick now) {
@@ -108,19 +140,48 @@ public class PathingInstance {
     phase = Phase.WALKING;
   }
 
-  private void stepAlongPath() {
-    if (currentPath == null || currentPath.isDone()) return;
-    if (!mannequin.getEntity().isOnGround()) return;
-    var nodePos = currentPath.getNextNodePos();
-    var loc = mannequin.getLocation();
-    var direction = new org.bukkit.util.Vector(
-        nodePos.getX() + 0.5 - loc.getX(), 0, nodePos.getZ() + 0.5 - loc.getZ());
-    if (direction.lengthSquared() < 0.25) {
-      currentPath.advance();
+  private void handleStuck(Match match, Tick now) {
+    StuckBehavior stuck = behavior.getStuck();
+    if (stuck.getStuckAction() != null) {
+      stuck.getStuckAction().trigger(match);
+    }
+    if (stuck.isDespawn()) {
+      match.needModule(MannequinMatchModule.class).singleDespawn(mannequin);
       return;
     }
-    org.bukkit.util.Vector movement = direction.normalize().multiply(0.15);
-    if (nodePos.getY() - loc.getY() > 0.5) movement.setY(0.42);
-    mannequin.getEntity().setVelocity(movement);
+    if (stuck.isGiveUp()) {
+      phase = Phase.GAVE_UP;
+      currentPath = null;
+      return;
+    }
+    int resolved = resolveMoveTo(stuck);
+    Vector dest = resolved == 0 ? startPos : goals.get(resolved - 1).getDestination();
+    currentIndex = resolved;
+    currentPath = null;
+    lastProgressPos = null;
+    if (stuck.getMethod() == RelocationMethod.TELEPORT) {
+      mannequin.teleport(
+          dest.getX(), dest.getY(), dest.getZ(), mannequin.getYaw(), mannequin.getPitch());
+    }
+    phase = Phase.WALKING;
+  }
+
+  private int resolveMoveTo(StuckBehavior stuck) {
+    // Move to a goal using its numeric index
+    if (stuck.getMoveToIndex() != null) {
+      return stuck.getMoveToIndex();
+    }
+
+    if (stuck.getMoveTo() == null) {
+      return Math.max(0, currentIndex - 1);
+    }
+
+    // Move to a goal using an enum
+    return switch (stuck.getMoveTo()) {
+      case START -> 0;
+      case END -> goals.size();
+      case PREVIOUS -> Math.max(0, currentIndex - 1);
+      case NEXT -> currentIndex;
+    };
   }
 }

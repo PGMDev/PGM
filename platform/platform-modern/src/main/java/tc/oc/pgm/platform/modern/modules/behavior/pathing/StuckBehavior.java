@@ -8,21 +8,24 @@ import tc.oc.pgm.api.match.Match;
 public class StuckBehavior {
   private final Duration after;
   private final @Nullable Action<? super Match> stuckAction;
-  private final RelocationType moveTo;
-  private final RelocationMethod method;
+  private final @Nullable RelocationType moveTo;
+  private final @Nullable Integer moveToIndex;
+  private final @Nullable RelocationMethod method;
   private final boolean giveUp;
   private final boolean despawn;
 
   public StuckBehavior(
       Duration after,
       @Nullable Action<? super Match> stuckAction,
-      RelocationType moveTo,
-      RelocationMethod method,
+      @Nullable RelocationType moveTo,
+      @Nullable Integer moveToIndex,
+      @Nullable RelocationMethod method,
       boolean giveUp,
       boolean despawn) {
     this.after = after;
     this.stuckAction = stuckAction;
     this.moveTo = moveTo;
+    this.moveToIndex = moveToIndex;
     this.method = method;
     this.giveUp = giveUp;
     this.despawn = despawn;
@@ -36,11 +39,15 @@ public class StuckBehavior {
     return stuckAction;
   }
 
-  public RelocationType getMoveTo() {
+  public @Nullable RelocationType getMoveTo() {
     return moveTo;
   }
 
-  public RelocationMethod getMethod() {
+  public @Nullable Integer getMoveToIndex() {
+    return moveToIndex;
+  }
+
+  public @Nullable RelocationMethod getMethod() {
     return method;
   }
 
