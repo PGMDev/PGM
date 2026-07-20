@@ -11,6 +11,7 @@ import net.minecraft.world.level.pathfinder.PathType;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
@@ -37,6 +38,10 @@ public class CombatInstance {
   private long nextRepathTick;
   private final @Nullable PanicInstance panic;
   private final @Nullable WanderInstance wander;
+  private final boolean hasPathing;
+  private final double leashSq;
+  private @Nullable Vector aggroAnchor;
+
   private static final Map<PathType, Float> DANGER_PENALTIES = Map.of(
       PathType.DAMAGE_OTHER, -1.0F,
       PathType.DANGER_OTHER, -1.0F,
@@ -45,7 +50,12 @@ public class CombatInstance {
       PathType.DAMAGE_CAUTIOUS, -1.0F,
       PathType.LAVA, -1.0F);
 
-  public CombatInstance(Mannequin mannequin, CombatBehavior behavior, boolean avoidDanger) {
+  public CombatInstance(
+      Mannequin mannequin,
+      CombatBehavior behavior,
+      boolean avoidDanger,
+      boolean hasPathing,
+      @Nullable Float leash) {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.rangeSq = behavior.getRange() * behavior.getRange();
@@ -63,6 +73,8 @@ public class CombatInstance {
         behavior.getReturnAfter() != null ? behavior.getReturnAfter().toMillis() / 50 : 0;
     this.panic = behavior.isPanic() ? new PanicInstance(mannequin, behavior, ghost) : null;
     this.wander = behavior.isWander() ? new WanderInstance(mannequin, behavior, ghost) : null;
+    this.hasPathing = hasPathing;
+    this.leashSq = leash != null ? leash * leash : -1;
   }
 
   public boolean matches(org.bukkit.entity.Entity entity) {
@@ -86,6 +98,10 @@ public class CombatInstance {
       refreshExpiry(now);
       if (wander != null) {
         wander.clearWanderPath();
+      }
+      // Pathing creates a home equiv around aggroAnchor
+      if (hasPathing) {
+        aggroAnchor = mannequin.getLocation().toVector();
       }
     }
   }
@@ -112,7 +128,7 @@ public class CombatInstance {
 
     if (target != null && !inAttackRange(target)) {
       Player bukkit = target.getBukkit();
-      if (bukkit != null) {
+      if (bukkit != null && !(hasPathing && leashSq < 0)) {
         if (now.tick >= nextRepathTick) {
           var loc = mannequin.getLocation();
           ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
@@ -131,6 +147,8 @@ public class CombatInstance {
         PathWalking.step(mannequin, currentPath, 0.15);
         mannequin.getEntity().lookAt(bukkit.getLocation(), LookAnchor.EYES);
       }
+    } else {
+      Player bukkit = target.getBukkit();
     }
 
     if (target == null
@@ -179,7 +197,8 @@ public class CombatInstance {
         || target.isDead()
         || !target.isParticipating()
         || aggroExpiryTick != -1 && now.tick > aggroExpiryTick
-        || outsideHome(bukkit)) {
+        || outsideHome(bukkit)
+        || beyondLeash()) {
       target = null;
       aggroExpiryTick = -1;
     }
@@ -192,6 +211,11 @@ public class CombatInstance {
       if (bukkit == null || player.isDead()) continue;
       if (behavior.getHome().contains(bukkit.getLocation())) {
         target = player;
+
+        if (hasPathing) {
+          aggroAnchor = mannequin.getLocation().toVector();
+        }
+
         refreshExpiry(now);
         return;
       }
@@ -238,5 +262,13 @@ public class CombatInstance {
     if (behavior.getHostility() == HostilityType.PASSIVE && panic != null) {
       panic.startPanic(null, now);
     }
+  }
+
+  private boolean beyondLeash() {
+    if (!hasPathing || leashSq < 0 || aggroAnchor == null) return false;
+    var pos = mannequin.getLocation().toVector();
+    double dx = pos.getX() - aggroAnchor.getX();
+    double dz = pos.getZ() - aggroAnchor.getZ();
+    return dx * dx + dz * dz > leashSq;
   }
 }

@@ -12,6 +12,7 @@ public class PathWalking {
   public static void step(Mannequin mannequin, Path path, double speed) {
     if (path == null || path.isDone()) return;
     if (!mannequin.getEntity().isOnGround()) return;
+    if (mannequin.getEntity().getNoDamageTicks() > 12) return; // Take kb before pathing again
 
     var nodePos = path.getNextNodePos();
     var loc = mannequin.getLocation();
@@ -32,7 +33,7 @@ public class PathWalking {
     mannequin
         .getEntity()
         .lookAt(
-            new Vector(nodePos.getX() + 0.5, nodePos.getY(), nodePos.getZ() + 0.5)
+            new Vector(nodePos.getX() + 0.5, nodePos.getY() + 1.62, nodePos.getZ() + 0.5)
                 .toLocation(mannequin.getEntity().getWorld()),
             LookAnchor.EYES);
 

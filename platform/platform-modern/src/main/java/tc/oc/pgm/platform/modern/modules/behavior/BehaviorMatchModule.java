@@ -49,16 +49,21 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   public void register(Mannequin mannequin, BehaviorDefinition definition) {
     var entity = mannequin.getEntity();
     CombatBehavior combat = definition.getCombatBehavior();
+    PathingBehavior path = definition.getPathingBehavior();
 
     if (combat != null) {
       var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
       if (attr == null) {
         entity.registerAttribute(Attribute.ATTACK_DAMAGE);
         attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
-        attr.setBaseValue(2.0); // default only when we created the attribute
+        attr.setBaseValue(2.0); // Fix later once mob-kits is done
       }
 
-      hostiles.put(mannequin, new CombatInstance(mannequin, combat, definition.isAvoidDanger()));
+      boolean hasPathing = path != null;
+      Float leash = hasPathing ? path.getLeash() : null;
+      hostiles.put(
+          mannequin,
+          new CombatInstance(mannequin, combat, definition.isAvoidDanger(), hasPathing, leash));
     }
 
     LookBehavior look = definition.getLookBehavior();
@@ -66,7 +71,6 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       looks.put(mannequin, new LookInstance(mannequin, look));
     }
 
-    PathingBehavior path = definition.getPathingBehavior();
     if (path != null) {
       Zombie pathGhost = new Zombie(
           EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
@@ -126,7 +130,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       if (!combatActive) {
         pi.tick(match, tick);
       } else {
-        pi.tick(match, tick);
+        pi.pathingInterrupted();
       }
     });
   }

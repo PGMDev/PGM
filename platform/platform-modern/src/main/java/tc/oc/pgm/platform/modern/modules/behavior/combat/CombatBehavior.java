@@ -2,6 +2,7 @@ package tc.oc.pgm.platform.modern.modules.behavior.combat;
 
 import java.time.Duration;
 import javax.annotation.Nullable;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 
 public class CombatBehavior {
@@ -17,6 +18,8 @@ public class CombatBehavior {
   private final boolean wander;
   private final boolean panic;
   private final @Nullable Duration panicDuration;
+  private final @Nullable Float avoidRange;
+  private final @Nullable Filter avoidFilter;
 
   public CombatBehavior(
       HostilityType hostility,
@@ -30,7 +33,9 @@ public class CombatBehavior {
       @Nullable Duration returnAfter,
       boolean wander,
       boolean panic,
-      @Nullable Duration panicDuration) {
+      @Nullable Duration panicDuration,
+      @Nullable Float avoidRange,
+      @Nullable Filter avoidFilter) {
     this.hostility = hostility;
     this.home = home;
     this.radius = radius;
@@ -43,6 +48,8 @@ public class CombatBehavior {
     this.wander = wander;
     this.panic = panic;
     this.panicDuration = panicDuration;
+    this.avoidRange = avoidRange;
+    this.avoidFilter = avoidFilter;
   }
 
   public HostilityType getHostility() {
@@ -91,5 +98,13 @@ public class CombatBehavior {
 
   public @Nullable Duration getPanicDuration() {
     return panicDuration;
+  }
+
+  public @Nullable Float getAvoidRange() {
+    return avoidRange;
+  }
+
+  public @Nullable Filter getAvoidFilter() {
+    return avoidFilter;
   }
 }

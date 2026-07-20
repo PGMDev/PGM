@@ -8,6 +8,7 @@ import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
 
 public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
   private final boolean avoidDanger;
+  private final boolean openDoors;
   private final @Nullable CombatBehavior combatBehavior;
   private final @Nullable LookBehavior lookBehavior;
   private final @Nullable PathingBehavior pathingBehavior;
@@ -15,11 +16,13 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
   public BehaviorDefinition(
       @Nullable String id,
       boolean avoidDanger,
+      boolean openDoors,
       @Nullable CombatBehavior combatBehavior,
       @Nullable LookBehavior lookBehavior,
       @Nullable PathingBehavior pathingBehavior) {
     super(id);
     this.avoidDanger = avoidDanger;
+    this.openDoors = openDoors;
     this.combatBehavior = combatBehavior;
     this.lookBehavior = lookBehavior;
     this.pathingBehavior = pathingBehavior;
@@ -27,6 +30,10 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
 
   public boolean isAvoidDanger() {
     return avoidDanger;
+  }
+
+  public boolean isOpenDoors() {
+    return openDoors;
   }
 
   public @Nullable CombatBehavior getCombatBehavior() {

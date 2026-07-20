@@ -95,8 +95,18 @@ public class ModernActionParser extends ActionParser {
       Node uuidNode = Node.fromAttr(profileEl, "uuid");
       Node skinNode = Node.fromChildOrAttr(profileEl, "skin");
       if (uuidNode != null && skinNode != null) {
-        uuid = XMLUtils.parseUuid(Node.fromRequiredAttr(profileEl, "uuid"));
-        skin = XMLUtils.parseUnsignedSkin(Node.fromRequiredChildOrAttr(profileEl, "skin"));
+        playerProfile = "#player#".equals(uuidNode.getValueNormalize())
+            || "#player#".equals(skinNode.getValueNormalize());
+        if (playerProfile
+            && !("#player#".equals(uuidNode.getValueNormalize())
+                && "#player#".equals(skinNode.getValueNormalize()))) {
+          throw new InvalidXMLException(
+              "'uuid' and 'skin' must both be '#player#' or both be regularly defined", profileEl);
+        }
+        if (!playerProfile) {
+          uuid = XMLUtils.parseUuid(uuidNode);
+          skin = XMLUtils.parseUnsignedSkin(skinNode);
+        }
       } else if (uuidNode != null || skinNode != null) {
         throw new InvalidXMLException(
             "Skin changes require both 'uuid' and 'skin' to be defined", profileEl);

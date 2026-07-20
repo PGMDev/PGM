@@ -11,6 +11,7 @@ import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
@@ -47,7 +48,8 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
 
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "behaviors", "behavior")) {
         String id = parser.string(el, "id").required();
-        boolean avoidDanger = parser.parseBool(el, "avoid-danger").optional(false);
+        boolean avoidDanger = parser.parseBool(el, "avoid-danger").optional(true);
+        boolean openDoors = parser.parseBool(el, "use-doors").optional(true);
 
         Element combatEl = el.getChild("combat");
         CombatBehavior combat = null;
@@ -82,6 +84,14 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
                 combatEl);
           }
 
+          Float avoidRange = parser.parseFloat(combatEl, "avoid-range").orNull();
+          Filter avoidFilter = parser.filter(combatEl, "avoid-filter").orNull();
+          if ((hostility != HostilityType.PASSIVE) && (avoidRange != null || avoidFilter != null)) {
+            throw new InvalidXMLException(
+                "'avoid-range' and 'avoid-filter' attributes are only supported for PASSIVE mannequins",
+                combatEl);
+          }
+
           combat = new CombatBehavior(
               hostility,
               home,
@@ -94,7 +104,9 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
               returnAfter,
               wander,
               panic,
-              panicDuration);
+              panicDuration,
+              avoidRange,
+              avoidFilter);
         }
 
         Element lookEl = el.getChild("look-at");
@@ -115,6 +127,11 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         }
 
         PathingBehavior path = null;
+        if (path != null && combat != null && combat.getHome() != null) {
+          throw new InvalidXMLException(
+              "'home' cannot be combined with <pathing> use 'leash-distance' on <pathing> instead",
+              el);
+        }
         StuckBehavior stuck = null;
         Element pathEl = el.getChild("pathing");
         if (pathEl != null) {
@@ -122,6 +139,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           Vector start = startNode != null ? XMLUtils.parseVector(startNode) : null;
 
           boolean loop = parser.parseBool(pathEl, "loop").optional(false);
+          Float leash = parser.parseFloat(pathEl, "leash-distance").orNull();
 
           List<PathingGoalBehavior> goals = new ArrayList<>();
           for (Element goalEl : pathEl.getChildren("goal")) {
@@ -190,11 +208,11 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
             }
           }
 
-          path = new PathingBehavior(start, loop, goals, stuck);
+          path = new PathingBehavior(start, loop, leash, goals, stuck);
         }
 
         BehaviorDefinition behaviorDefinition =
-            new BehaviorDefinition(id, avoidDanger, combat, look, path);
+            new BehaviorDefinition(id, avoidDanger, openDoors, combat, look, path);
         factory.getFeatures().addFeature(el, behaviorDefinition);
         behaviors.put(id, behaviorDefinition);
       }
