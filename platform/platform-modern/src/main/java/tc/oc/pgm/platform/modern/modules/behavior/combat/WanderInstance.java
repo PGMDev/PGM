@@ -19,6 +19,7 @@ public class WanderInstance {
   private long nextWanderTick;
   private Vector lastWanderProgressPos;
   private long lastWanderProgressTick;
+  private boolean openDoors;
 
   public WanderInstance(Mannequin mannequin, CombatBehavior behavior, Zombie ghost) {
     this.mannequin = mannequin;
@@ -63,7 +64,7 @@ public class WanderInstance {
         nextWanderTick = now.tick + randomIdleTicks(match);
         return;
       }
-      PathWalking.step(mannequin, wanderPath, 0.15);
+      PathWalking.step(mannequin, wanderPath, 0.15, openDoors);
     }
   }
 

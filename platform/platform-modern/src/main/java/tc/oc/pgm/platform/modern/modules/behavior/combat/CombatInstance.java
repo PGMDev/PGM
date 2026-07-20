@@ -26,6 +26,7 @@ public class CombatInstance {
   private final Mannequin mannequin;
   private final CombatBehavior behavior;
   private @Nullable MatchPlayer target;
+  private boolean openDoors;
   private long aggroExpiryTick = -1;
   private long nextAttackTick;
   private final double rangeSq;
@@ -54,6 +55,7 @@ public class CombatInstance {
       Mannequin mannequin,
       CombatBehavior behavior,
       boolean avoidDanger,
+      boolean openDoors,
       boolean hasPathing,
       @Nullable Float leash) {
     this.mannequin = mannequin;
@@ -65,6 +67,10 @@ public class CombatInstance {
 
     if (avoidDanger) {
       DANGER_PENALTIES.forEach(this.ghost::setPathfindingMalus);
+    }
+
+    if (!openDoors) {
+      ghost.setPathfindingMalus(PathType.DOOR_WOOD_CLOSED, 0.0F);
     }
 
     this.straySq =
@@ -99,7 +105,7 @@ public class CombatInstance {
       if (wander != null) {
         wander.clearWanderPath();
       }
-      // Pathing creates a home equiv around aggroAnchor
+      // Pathing creates a home equiv around aggroAnchor with leash as the radius
       if (hasPathing) {
         aggroAnchor = mannequin.getLocation().toVector();
       }
@@ -144,11 +150,9 @@ public class CombatInstance {
           nextRepathTick = now.tick + 10;
         }
 
-        PathWalking.step(mannequin, currentPath, 0.15);
+        PathWalking.step(mannequin, currentPath, 0.15, openDoors);
         mannequin.getEntity().lookAt(bukkit.getLocation(), LookAnchor.EYES);
       }
-    } else {
-      Player bukkit = target.getBukkit();
     }
 
     if (target == null
@@ -175,7 +179,7 @@ public class CombatInstance {
                     0);
             nextRepathTick = now.tick + 10;
           }
-          PathWalking.step(mannequin, currentPath, 0.15);
+          PathWalking.step(mannequin, currentPath, 0.15, openDoors);
         }
       }
     } else if (target != null) {
@@ -205,17 +209,21 @@ public class CombatInstance {
   }
 
   private void acquireTarget(Match match, Tick now) {
-    if (behavior.getHome() == null) return;
+    if (behavior.getHome() == null && !hasPathing) return;
     for (MatchPlayer player : match.getParticipants()) {
       Player bukkit = player.getBukkit();
       if (bukkit == null || player.isDead()) continue;
-      if (behavior.getHome().contains(bukkit.getLocation())) {
-        target = player;
+      boolean inRange = hasPathing
+          ? bukkit.getLocation().distanceSquared(mannequin.getLocation())
+              <= rangeSq * 5 // Give rangeSq a buffer for aggro visibility and to help with aggro
+          // stuttering
+          : behavior.getHome().contains(bukkit.getLocation());
 
+      if (inRange) {
+        target = player;
         if (hasPathing) {
           aggroAnchor = mannequin.getLocation().toVector();
         }
-
         refreshExpiry(now);
         return;
       }

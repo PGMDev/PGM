@@ -36,6 +36,7 @@ public class PathingInstance {
   private long idleUntilTick;
   private long lastProgressTick;
   private boolean wasInterrupted;
+  private boolean openDoors;
 
   public PathingInstance(Mannequin mannequin, PathingBehavior behavior, Zombie ghost) {
     this.mannequin = mannequin;
@@ -104,7 +105,7 @@ public class PathingInstance {
       }
     }
 
-    PathWalking.step(mannequin, currentPath, 0.15);
+    PathWalking.step(mannequin, currentPath, 0.15, openDoors);
 
     var pos = mannequin.getLocation().toVector();
     if (lastProgressPos == null || pos.distanceSquared(lastProgressPos) > 0.25) {

@@ -63,7 +63,13 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       Float leash = hasPathing ? path.getLeash() : null;
       hostiles.put(
           mannequin,
-          new CombatInstance(mannequin, combat, definition.isAvoidDanger(), hasPathing, leash));
+          new CombatInstance(
+              mannequin,
+              combat,
+              definition.isAvoidDanger(),
+              definition.isOpenDoors(),
+              hasPathing,
+              leash));
     }
 
     LookBehavior look = definition.getLookBehavior();

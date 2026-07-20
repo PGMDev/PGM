@@ -27,6 +27,7 @@ public class PanicInstance {
   private long nextRepathTick;
   private long panicStartTick;
   private long panicExpiryTick;
+  private boolean openDoors;
 
   private static final Set<EntityDamageEvent.DamageCause> PANIC_CAUSES = Set.of(
       EntityDamageEvent.DamageCause.CONTACT,
@@ -93,7 +94,7 @@ public class PanicInstance {
       }
       nextRepathTick = now.tick + 8 + match.getRandom().nextInt(5);
     }
-    PathWalking.step(mannequin, panicPath, 0.28);
+    PathWalking.step(mannequin, panicPath, 0.28, openDoors);
   }
 
   private @Nullable Vector pickPanicPoint(Match match) {

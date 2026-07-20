@@ -2,6 +2,7 @@ package tc.oc.pgm.platform.modern.modules.behavior;
 
 import io.papermc.paper.entity.LookAnchor;
 import net.minecraft.world.level.pathfinder.Path;
+import org.bukkit.block.data.type.Door;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
@@ -9,7 +10,7 @@ public class PathWalking {
 
   private PathWalking() {}
 
-  public static void step(Mannequin mannequin, Path path, double speed) {
+  public static void step(Mannequin mannequin, Path path, double speed, boolean openDoors) {
     if (path == null || path.isDone()) return;
     if (!mannequin.getEntity().isOnGround()) return;
     if (mannequin.getEntity().getNoDamageTicks() > 12) return; // Take kb before pathing again
@@ -28,6 +29,16 @@ public class PathWalking {
     Vector movement = direction.normalize().multiply(speed);
     if (nodePos.getY() - loc.getY() > 0.5 && distSq > 1.0) {
       movement.setY(0.42);
+    }
+
+    if (openDoors) {
+      var world = mannequin.getEntity().getWorld();
+      var doorBlock = world.getBlockAt(nodePos.getX(), nodePos.getY(), nodePos.getZ());
+      var blockData = doorBlock.getBlockData();
+      if (blockData instanceof Door door && !door.isOpen()) {
+        door.setOpen(true);
+        doorBlock.setBlockData(door);
+      }
     }
 
     mannequin
