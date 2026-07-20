@@ -66,14 +66,7 @@ public class FeatureFilterParser extends FilterParser {
   @Override
   public void validate(Filter filter, FeatureValidation<FilterDefinition> validation, Node node)
       throws InvalidXMLException {
-    if (filter instanceof XMLFilterReference) {
-      factory.getFeatures().validate((XMLFilterReference) filter, validation);
-    } else if (filter instanceof FilterDefinition) {
-      factory.getFeatures().validate((FilterDefinition) filter, validation, node);
-    } else {
-      throw new IllegalStateException(
-          "Attempted validation on a filter which is neither definition nor reference.");
-    }
+    factory.getFeatures().validate(FilterDefinition.class, filter, validation, node);
   }
 
   @MethodParser("filter")

@@ -15,7 +15,6 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitDefinition;
 import tc.oc.pgm.kits.KitParser;
-import tc.oc.pgm.kits.XMLKitReference;
 import tc.oc.pgm.util.inventory.EntityEquipmentUtil;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -25,12 +24,12 @@ public record SpawnableEntity(
     Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties, List<Kit> kits) {
 
   public Entity spawn(Location location) {
-    Entity entity = location.getWorld().spawn(location, entityType);
+    LivingEntity entity = location.getWorld().spawn(location, entityType);
     for (var property : properties) {
       property.accept(entity);
     }
     for (Kit kit : kits) {
-      kit.apply((LivingEntity) entity);
+      kit.apply(entity);
     }
     return entity;
   }
@@ -41,7 +40,7 @@ public record SpawnableEntity(
 
     List<Consumer<Entity>> properties =
         new ArrayList<>(MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "kit"));
-    parseHorseEquipment(el, type, kitParser, properties);
+    parseEquipment(el, type, kitParser, properties);
 
     List<Kit> kits = new ArrayList<>();
     var kitAttr = el.getAttribute("kit");
@@ -55,44 +54,41 @@ public record SpawnableEntity(
     // Kit contents can't be inspected until references resolve, so mob compatibility
     // is validated through the feature context, which defers until after resolution
     FeatureValidation<KitDefinition> validation = (def, node) -> def.validateMob(type, node);
+    Node node = new Node(el);
     for (Kit kit : kits) {
-      if (kit instanceof XMLKitReference ref) factory.getFeatures().validate(ref, validation);
-      else if (kit instanceof KitDefinition def)
-        factory.getFeatures().validate(def, validation, new Node(el));
+      factory.getFeatures().validate(KitDefinition.class, kit, validation, node);
     }
 
     return new SpawnableEntity(type, properties, kits);
   }
 
-  private static void parseHorseEquipment(
+  private static void parseEquipment(
       Element el,
       Class<? extends LivingEntity> type,
       KitParser kitParser,
       List<Consumer<Entity>> properties)
       throws InvalidXMLException {
     Element saddleEl = el.getChild("saddle");
-    Element armorEl = el.getChild("horse-armor");
-    if (saddleEl != null || armorEl != null) {
+    if (saddleEl != null) {
       if (!Horse.class.isAssignableFrom(type)) {
         throw new InvalidXMLException(
-            "saddle and horse-armor require a horse, got " + type.getSimpleName(), el);
+            "saddle requires a horse, got " + type.getSimpleName(), saddleEl);
       }
-      ItemStack saddle = saddleEl == null ? null : kitParser.parseItem(saddleEl, false);
-      ItemStack armor = armorEl == null ? null : kitParser.parseItem(armorEl, false);
-      properties.add(e -> {
-        Horse horse = (Horse) e;
-        if (saddle != null) horse.getInventory().setSaddle(saddle);
-        if (armor != null) horse.getInventory().setArmor(armor);
-      });
+      ItemStack saddle = kitParser.parseItem(saddleEl, false);
+      properties.add(e -> ((Horse) e).getInventory().setSaddle(saddle));
     }
-    Element decorEl = el.getChild("llama-decor");
-    if (decorEl != null) {
-      if (!EntityEquipmentUtil.EQUIPMENT.isLlama(type)) {
+
+    Element bodyEl = el.getChild("body");
+    if (bodyEl != null) {
+      ItemStack body = kitParser.parseItem(bodyEl, false);
+      if (Horse.class.isAssignableFrom(type)) {
+        properties.add(e -> ((Horse) e).getInventory().setArmor(body));
+      } else if (EntityEquipmentUtil.EQUIPMENT.isLlama(type)) {
+        properties.add(e -> EntityEquipmentUtil.EQUIPMENT.setLlamaDecor((LivingEntity) e, body));
+      } else {
         throw new InvalidXMLException(
-            "llama-decor requires a llama, got " + type.getSimpleName(), el);
+            "body requires a horse or llama, got " + type.getSimpleName(), bodyEl);
       }
-      ItemStack decor = kitParser.parseItem(decorEl, false);
-      properties.add(e -> EntityEquipmentUtil.EQUIPMENT.setLlamaDecor((LivingEntity) e, decor));
     }
   }
 

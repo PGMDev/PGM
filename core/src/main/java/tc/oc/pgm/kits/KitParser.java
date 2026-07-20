@@ -83,6 +83,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public abstract class KitParser {
   private static final Set<String> ITEM_TYPES =
       Set.of("item", "book", "head", "firework", "banner");
+  private static final Range<Float> DROP_CHANCE_RANGE = Range.closed(0f, 1f);
 
   protected final MapFactory factory;
   protected final XMLFluentParser parser;
@@ -240,8 +241,7 @@ public abstract class KitParser {
   }
 
   protected @Nullable Float parseDropChance(Element el) throws InvalidXMLException {
-    var attr = el.getAttribute("drop-chance");
-    return attr == null ? null : XMLUtils.parseNumber(attr, Float.class, Range.closed(0f, 1f));
+    return parser.parseFloat(el, "drop-chance").between(DROP_CHANCE_RANGE).orNull();
   }
 
   public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
@@ -282,8 +282,7 @@ public abstract class KitParser {
           }
           if (dropChance != null) {
             if (!slot.isEquipment()) {
-              throw new InvalidXMLException(
-                  "drop-chance is only supported on equipment slots", itemEl);
+              throw new InvalidXMLException("drop-chance requires an equipment slot", itemEl);
             }
             slotDropChances.put(slot, dropChance);
           }

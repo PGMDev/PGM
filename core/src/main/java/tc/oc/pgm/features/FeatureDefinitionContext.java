@@ -161,8 +161,32 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
   }
 
   public <T extends FeatureDefinition> void validate(
-      FeatureReference<T> reference, FeatureValidation<T> validation) throws InvalidXMLException {
+      FeatureReference<? extends T> reference, FeatureValidation<T> validation)
+      throws InvalidXMLException {
     validations.add(new PendingValidation<>(reference, validation, reference.getNode()));
+  }
+
+  /** Validate a feature that may be either a definition or an unresolved reference */
+  public <T extends FeatureDefinition> void validate(
+      Class<T> type, Object feature, FeatureValidation<T> validation, Node node)
+      throws InvalidXMLException {
+    if (feature instanceof XMLFeatureReference<?> reference) {
+      if (!type.isAssignableFrom(reference.getType())) {
+        throw new IllegalStateException("Attempted validation as "
+            + type.getSimpleName()
+            + " on a reference to "
+            + reference.getType().getSimpleName());
+      }
+      @SuppressWarnings("unchecked")
+      var typed = (XMLFeatureReference<? extends T>) reference;
+      validate(typed, validation);
+    } else if (type.isInstance(feature)) {
+      validate(type.cast(feature), validation, node);
+    } else {
+      throw new IllegalStateException("Attempted validation on a "
+          + feature.getClass().getSimpleName()
+          + " which is neither definition nor reference");
+    }
   }
 
   public Collection<InvalidXMLException> resolveReferences() {
@@ -196,7 +220,7 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
 
   private static class PendingValidation<T extends FeatureDefinition> {
     private final T definition;
-    private final FeatureReference<T> reference;
+    private final FeatureReference<? extends T> reference;
     private final FeatureValidation<T> validation;
     private final Node node;
 
@@ -208,7 +232,7 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
     }
 
     private PendingValidation(
-        FeatureReference<T> reference, FeatureValidation<T> validation, Node node) {
+        FeatureReference<? extends T> reference, FeatureValidation<T> validation, Node node) {
       this.definition = null;
       this.reference = reference;
       this.validation = validation;
