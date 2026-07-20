@@ -76,7 +76,7 @@ import tc.oc.pgm.flag.state.Dropped;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
-import tc.oc.pgm.regions.BlockBoundedValidation;
+import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -670,7 +670,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("blocks")
   public Filter parseBlocksFilter(Element el) throws InvalidXMLException {
     Region region =
-        factory.getRegions().parseRequiredProperty(el, "region", BlockBoundedValidation.INSTANCE);
+        factory.getRegions().parseRequiredProperty(el, "region", RegionValidation.BLOCK_BOUNDED);
     Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), MaterialFilter.NOT_AIR);
 
     return new BlocksFilter(region, child);

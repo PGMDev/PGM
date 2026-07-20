@@ -103,15 +103,22 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
     return methodParsers.parse(el);
   }
 
-  @MethodParser("half")
-  public HalfspaceRegion parseHalfspace(Element el) throws InvalidXMLException {
+  protected Vector parseNormal(Element el) throws InvalidXMLException {
     Vector normal = XMLUtils.parseVector(XMLUtils.getRequiredAttribute(el, "normal"));
     if (normal.lengthSquared() == 0) {
       throw new InvalidXMLException("normal must have a non-zero length", el);
     }
+    return normal;
+  }
 
-    Vector origin = XMLUtils.parseVector(el.getAttribute("origin"), new Vector());
+  protected Vector parseOrigin(Element el) throws InvalidXMLException {
+    return XMLUtils.parseVector(el.getAttribute("origin"), new Vector());
+  }
 
+  @MethodParser("half")
+  public HalfspaceRegion parseHalfspace(Element el) throws InvalidXMLException {
+    Vector normal = parseNormal(el);
+    Vector origin = parseOrigin(el);
     return new HalfspaceRegion(origin, normal);
   }
 
@@ -263,13 +270,8 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
 
   @MethodParser("mirror")
   public MirroredRegion parseMirror(Element el) throws InvalidXMLException {
-    Vector normal = XMLUtils.parseVector(XMLUtils.getRequiredAttribute(el, "normal"));
-    if (normal.lengthSquared() == 0) {
-      throw new InvalidXMLException("normal must have a non-zero length", el);
-    }
-
-    Vector origin = XMLUtils.parseVector(el.getAttribute("origin"), new Vector());
-
+    Vector normal = parseNormal(el);
+    Vector origin = parseOrigin(el);
     return new MirroredRegion(this.parseChildren(el), origin, normal);
   }
 
@@ -279,8 +281,8 @@ public abstract class RegionParser implements XMLParser<Region, RegionDefinition
     Vector min = parser.vector(el, "min").attr().required();
     Vector max = parser.vector(el, "max").attr().required();
     boolean relative = parser.parseBool(el, "relative").attr().orFalse();
-    validate(child, BlockBoundedValidation.INSTANCE, new Node(el));
-    validate(child, StaticValidation.INSTANCE, new Node(el));
+    validate(child, RegionValidation.BLOCK_BOUNDED, new Node(el));
+    validate(child, RegionValidation.STATIC, new Node(el));
     return new ResizedRegion(child, min, max, relative);
   }
 
