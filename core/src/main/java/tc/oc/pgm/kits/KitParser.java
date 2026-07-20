@@ -149,7 +149,7 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
-    kits.add(this.parseArmorKit(el));
+    kits.add(this.parseEquipmentKit(el));
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
     kits.add(this.parseAttributeKit(el));
@@ -229,62 +229,72 @@ public abstract class KitParser {
     return new FlyKit(canFly, flying, flySpeedMultiplier);
   }
 
-  private ArmorKit.ArmorItem parseArmorItem(Element el) throws InvalidXMLException {
-    if (el == null) {
-      return null;
-    }
-    ItemStack stack = parseItem(el, true);
-    boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
-    Float dropChance = parseDropChance(el);
+  public EquipmentKit parseEquipmentKit(Element el) throws InvalidXMLException {
+    Map<Slot, EquipmentKit.EquipmentItem> slots = new HashMap<>();
 
-    return new ArmorKit.ArmorItem(stack, locked, dropChance);
+    for (var entry : Slot.byEquipmentTag().entrySet()) {
+      Element itemEl = el.getChild(entry.getKey());
+      if (itemEl == null) continue;
+      Slot slot = entry.getValue();
+      if (slot == null) {
+        throw new InvalidXMLException(entry.getKey() + " is not a valid slot!", itemEl);
+      }
+      slots.put(slot, parseEquipmentItem(itemEl, slot));
+    }
+
+    return slots.isEmpty() ? null : new EquipmentKit(slots);
+  }
+
+  private EquipmentKit.EquipmentItem parseEquipmentItem(Element el, Slot slot)
+      throws InvalidXMLException {
+    ItemStack stack = parseEquipmentStack(el);
+    Float dropChance = parseDropChance(el);
+    if (dropChance != null && slot instanceof Slot.MobEquipment) {
+      throw new InvalidXMLException("drop-chance is not supported for " + slot, el);
+    }
+    return new EquipmentKit.EquipmentItem(stack, dropChance);
+  }
+
+  private ItemStack parseEquipmentStack(Element el) throws InvalidXMLException {
+    ItemStack stack = parseItem(el, true);
+    Material type = stack.getType();
+    if (type == Material.WRITTEN_BOOK && el.getChild("title") != null) return parseBook(el);
+    if (type == Materials.PLAYER_HEAD
+        && (Node.fromChildOrAttr(el, "skin") != null || Node.fromChildOrAttr(el, "uuid") != null))
+      return parseHead(el);
+    if (type == Materials.FIREWORK
+        && (el.getAttribute("power") != null || el.getChild("explosion") != null))
+      return parseFirework(el);
+    if (stack.getItemMeta() instanceof BannerMeta
+        && (el.getAttribute("base-color") != null || el.getChild("layer") != null))
+      return parseBanner(el);
+    return stack;
   }
 
   protected @Nullable Float parseDropChance(Element el) throws InvalidXMLException {
     return parser.parseFloat(el, "drop-chance").between(DROP_CHANCE_RANGE).orNull();
   }
 
-  public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
-    Map<Slot.Armor, ArmorKit.ArmorItem> armor = new HashMap<>();
-
-    for (Slot.Armor armorSlot : Slot.Armor.armor().toList()) {
-      var armorItem = parseArmorItem(el.getChild(armorSlot.armorTypeName()));
-      if (armorItem != null) armor.put(armorSlot, armorItem);
-    }
-
-    if (!armor.isEmpty()) {
-      return new ArmorKit(armor);
-    } else {
-      return null;
-    }
-  }
-
   public ItemKit parseItemKit(Element el) throws InvalidXMLException {
     Map<Slot, ItemStack> slotItems = Maps.newHashMap();
-    Map<Slot, Float> slotDropChances = Maps.newHashMap();
     List<ItemStack> freeItems = new ArrayList<>();
 
     for (Element itemEl : ((InheritingElement) el).getChildren(ITEM_TYPES)) {
       ItemStack item = this.parseItemStack(itemEl);
 
       if (item != null) {
+        if (itemEl.getAttribute("drop-chance") != null) {
+          throw new InvalidXMLException(
+              "drop-chance is only supported on equipment elements, e.g. <helmet> or <mainhand>",
+              itemEl);
+        }
         Node nodeSlot = Node.fromAttr(itemEl, "slot");
-        Float dropChance = parseDropChance(itemEl);
         if (nodeSlot == null) {
-          if (dropChance != null) {
-            throw new InvalidXMLException("drop-chance requires an equipment slot", itemEl);
-          }
           freeItems.add(item);
         } else {
           Slot slot = parseInventorySlot(nodeSlot);
           if (slotItems.put(slot, item) != null) {
             throw new InvalidXMLException("Kit already has an item in " + slot.getKey(), nodeSlot);
-          }
-          if (dropChance != null) {
-            if (!slot.isEquipment()) {
-              throw new InvalidXMLException("drop-chance requires an equipment slot", itemEl);
-            }
-            slotDropChances.put(slot, dropChance);
           }
         }
       }
@@ -297,8 +307,7 @@ public abstract class KitParser {
     boolean deductItems = XMLUtils.parseBoolean(Node.fromAttr(el, "deduct-items"), true);
     boolean dropOverflow = XMLUtils.parseBoolean(Node.fromAttr(el, "drop-overflow"), false);
 
-    return new ItemKit(
-        slotItems, slotDropChances, freeItems, repairTools, deductTools, deductItems, dropOverflow);
+    return new ItemKit(slotItems, freeItems, repairTools, deductTools, deductItems, dropOverflow);
   }
 
   public @Nullable ItemStack parseItemStack(Element el) throws InvalidXMLException {

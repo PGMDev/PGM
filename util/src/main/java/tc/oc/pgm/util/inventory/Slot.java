@@ -3,9 +3,11 @@ package tc.oc.pgm.util.inventory;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import org.bukkit.Material;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
@@ -49,6 +52,29 @@ public abstract class Slot {
   private static final Map<String, Slot> byKey;
   private static final Table<Class<? extends Slot>, Integer, Slot> byIndex;
   private static final Map<Class<? extends Inventory>, Class<? extends Slot>> byInventoryType;
+
+  /**
+   * Equipment slots by the element name used in kits, e.g. {@code <helmet>}. A null value means the
+   * slot is not supported on this server version.
+   */
+  public static Map<String, Slot> byEquipmentTag() {
+    return EquipmentTags.BY_TAG;
+  }
+
+  /** Lazy holder, so the {@link Slot} class initializer never references its subclasses */
+  private static final class EquipmentTags {
+    static final Map<String, Slot> BY_TAG = build();
+
+    private static Map<String, Slot> build() {
+      var tags = new LinkedHashMap<String, Slot>();
+      Armor.armor().forEach(armor -> tags.put(armor.armorTypeName(), armor));
+      tags.put("mainhand", MainHand.mainHand());
+      tags.put("offhand", OffHand.offHand().orElse(null));
+      tags.put("body", Body.body());
+      tags.put("saddle", Saddle.saddle());
+      return Collections.unmodifiableMap(tags);
+    }
+  }
 
   /**
    * Convert a Mojang slot name (used by /replaceitem) to a {@link Slot} object. The "slot." at the
@@ -214,7 +240,7 @@ public abstract class Slot {
     inv.setItem(getIndex(), airToNull(stack));
   }
 
-  /** Set this equipment slot on a non-player {@link LivingEntity}. Equipment slots only. */
+  /** Set this equipment slot on a non-player {@link LivingEntity}. */
   public void setEquipment(LivingEntity entity, ItemStack stack) {
     throw new UnsupportedOperationException("Slot " + this + " is not a mob equipment slot");
   }
@@ -511,6 +537,61 @@ public abstract class Slot {
         case LEGGINGS -> eq.setLeggingsDropChance(chance);
         case BOOTS -> eq.setBootsDropChance(chance);
       }
+    }
+  }
+
+  /** Mob-only equipment slots, not part of any player inventory */
+  public abstract static class MobEquipment extends Slot {
+    private final String name;
+
+    MobEquipment(String name) {
+      super(MobEquipment.class, null, -1);
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+
+    @Override
+    public boolean isEquipment() {
+      return true;
+    }
+  }
+
+  public static class Body extends MobEquipment {
+    private static final Body body = new Body();
+
+    public static Body body() {
+      return body;
+    }
+
+    Body() {
+      super("body");
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      if (entity instanceof Horse horse) horse.getInventory().setArmor(stack);
+      else EntityEquipmentUtil.EQUIPMENT.setLlamaDecor(entity, stack);
+    }
+  }
+
+  public static class Saddle extends MobEquipment {
+    private static final Saddle saddle = new Saddle();
+
+    public static Saddle saddle() {
+      return saddle;
+    }
+
+    Saddle() {
+      super("saddle");
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      ((Horse) entity).getInventory().setSaddle(stack);
     }
   }
 

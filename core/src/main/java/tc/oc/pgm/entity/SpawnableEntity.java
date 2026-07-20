@@ -5,17 +5,14 @@ import java.util.List;
 import java.util.function.Consumer;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jdom2.Element;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitDefinition;
 import tc.oc.pgm.kits.KitParser;
-import tc.oc.pgm.util.inventory.EntityEquipmentUtil;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -40,7 +37,6 @@ public record SpawnableEntity(
 
     List<Consumer<Entity>> properties =
         new ArrayList<>(MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "kit"));
-    parseEquipment(el, type, kitParser, properties);
 
     List<Kit> kits = new ArrayList<>();
     var kitAttr = el.getAttribute("kit");
@@ -49,6 +45,10 @@ public record SpawnableEntity(
     }
     for (Element kitEl : el.getChildren("kit")) {
       kits.add(kitParser.parse(kitEl));
+    }
+    var equipment = kitParser.parseEquipmentKit(el);
+    if (equipment != null) {
+      kits.add(equipment);
     }
 
     // Kit contents can't be inspected until references resolve, so mob compatibility
@@ -60,36 +60,6 @@ public record SpawnableEntity(
     }
 
     return new SpawnableEntity(type, properties, kits);
-  }
-
-  private static void parseEquipment(
-      Element el,
-      Class<? extends LivingEntity> type,
-      KitParser kitParser,
-      List<Consumer<Entity>> properties)
-      throws InvalidXMLException {
-    Element saddleEl = el.getChild("saddle");
-    if (saddleEl != null) {
-      if (!Horse.class.isAssignableFrom(type)) {
-        throw new InvalidXMLException(
-            "saddle requires a horse, got " + type.getSimpleName(), saddleEl);
-      }
-      ItemStack saddle = kitParser.parseItem(saddleEl, false);
-      properties.add(e -> ((Horse) e).getInventory().setSaddle(saddle));
-    }
-
-    Element bodyEl = el.getChild("body");
-    if (bodyEl != null) {
-      ItemStack body = kitParser.parseItem(bodyEl, false);
-      if (Horse.class.isAssignableFrom(type)) {
-        properties.add(e -> ((Horse) e).getInventory().setArmor(body));
-      } else if (EntityEquipmentUtil.EQUIPMENT.isLlama(type)) {
-        properties.add(e -> EntityEquipmentUtil.EQUIPMENT.setLlamaDecor((LivingEntity) e, body));
-      } else {
-        throw new InvalidXMLException(
-            "body requires a horse or llama, got " + type.getSimpleName(), bodyEl);
-      }
-    }
   }
 
   private static Class<? extends LivingEntity> parseType(Node typeNode) throws InvalidXMLException {
