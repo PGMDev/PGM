@@ -33,9 +33,8 @@ public class TeleportAction extends AbstractAction<MatchPlayer> {
 
   @Override
   public void trigger(MatchPlayer player) {
-    var location = this.region
-        .map(r -> r.getRandom(player.getMatch()).toLocation(player.getWorld()))
-        .orElseGet(player::getLocation);
+    var location =
+        this.region.map(r -> r.getRandomLoc(player.getMatch())).orElseGet(player::getLocation);
 
     xformula.ifPresent(f -> location.setX(f.applyAsDouble(player)));
     yformula.ifPresent(f -> location.setY(f.applyAsDouble(player)));

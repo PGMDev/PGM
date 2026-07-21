@@ -3,24 +3,28 @@ package tc.oc.pgm.spawner;
 import java.util.List;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.api.match.MatchScope;
 
 public class SpawnerMatchModule implements MatchModule {
 
   private final Match match;
-  private final List<SpawnerDefinition> definitions;
+  private final List<Spawner> spawners;
 
-  public SpawnerMatchModule(Match match, List<SpawnerDefinition> definitions) {
+  public SpawnerMatchModule(Match match, List<Spawner> spawners) {
     this.match = match;
-    this.definitions = definitions;
+    this.spawners = spawners;
   }
 
   @Override
   public void load() {
-    for (SpawnerDefinition definition : definitions) {
-      Spawner spawner = new Spawner(definition, match);
-      match.addListener(spawner, MatchScope.RUNNING);
-      match.addTickable(spawner, MatchScope.RUNNING);
+    for (Spawner spawner : spawners) {
+      spawner.registerEvents();
+    }
+  }
+
+  @Override
+  public void unload() {
+    for (Spawner spawner : this.spawners) {
+      spawner.unregisterEvents();
     }
   }
 }

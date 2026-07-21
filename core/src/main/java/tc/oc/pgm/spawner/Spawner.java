@@ -2,27 +2,28 @@ package tc.oc.pgm.spawner;
 
 import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import java.util.Objects;
-import org.bukkit.Location;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.metadata.Metadatable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
-import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
-import tc.oc.pgm.util.TimeUtils;
+import tc.oc.pgm.controlpoint.RegionPlayerTracker;
+import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
-import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
-import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 
 public class Spawner implements Listener, Tickable {
 
@@ -30,115 +31,110 @@ public class Spawner implements Listener, Tickable {
 
   private final Match match;
   private final SpawnerDefinition definition;
-  private final OnlinePlayerMapAdapter<MatchPlayer> players;
+  private final RegionPlayerTracker playerTracker;
 
-  private long lastTick;
-  private long currentDelay;
+  private long canSpawnAt;
   private long spawnedEntities;
 
   public Spawner(SpawnerDefinition definition, Match match) {
     this.definition = definition;
     this.match = match;
-    this.lastTick = match.getTick().tick;
-    this.players = new OnlinePlayerMapAdapter<>(PGM.get());
-    calculateDelay();
+    this.playerTracker = new RegionPlayerTracker(match, definition.playerRegion);
+  }
+
+  public void registerEvents() {
+    match.addListener(this, MatchScope.RUNNING);
+    match.addTickable(this, MatchScope.RUNNING);
+    match.addListener(this.playerTracker, MatchScope.RUNNING);
+  }
+
+  public void unregisterEvents() {
+    HandlerList.unregisterAll(this);
+    HandlerList.unregisterAll(this.playerTracker);
   }
 
   @Override
   public void tick(Match match, Tick tick) {
-    if (!canSpawn()) return;
-    if (match.getTick().tick - lastTick >= currentDelay) {
-      for (Spawnable spawnable : definition.objects) {
-        final Location location =
-            definition.spawnRegion.getRandom(match).toLocation(match.getWorld());
-        spawnable.spawn(location, match);
-        EFFECTS.spawnFlame(match.getWorld(), location);
-        spawnedEntities += spawnable.getSpawnCount();
-      }
-      calculateDelay();
+    var now = match.getTick().tick;
+    if (now < this.canSpawnAt || spawnedEntities >= definition.maxEntities) return;
+    if (!definition.matchFilter.response(match) || !anyPlayerAllows()) return;
+
+    for (Spawnable spawnable : definition.objects) {
+      var location = definition.spawnRegion.getRandomLoc(match);
+      spawnable.spawn(location, match);
+      EFFECTS.spawnFlame(match.getWorld(), location);
+      spawnedEntities += spawnable.getSpawnCount();
     }
+    canSpawnAt = now + calculateDelay();
   }
 
-  private void calculateDelay() {
-    if (definition.minDelay == definition.maxDelay) {
-      currentDelay = TimeUtils.toTicks(definition.delay);
-    } else {
-      long maxDelay = TimeUtils.toTicks(definition.maxDelay);
-      long minDelay = TimeUtils.toTicks(definition.minDelay);
-      currentDelay = (long) (match.getRandom().nextDouble() * (maxDelay - minDelay)
-          + minDelay); // Picks a random tick duration between minDelay and maxDelay
-    }
-    lastTick = match.getTick().tick;
+  private long calculateDelay() {
+    long delay = definition.minDelay;
+    if (definition.maxDelay != delay)
+      delay += (long) ((definition.maxDelay - delay) * match.getRandom().nextDouble());
+    return delay;
   }
 
-  private boolean canSpawn() {
-    if (spawnedEntities >= definition.maxEntities || players.isEmpty()) return false;
-    for (MatchPlayer player : players.values()) {
-      if (definition.playerFilter.query(player).isAllowed()) return true;
+  private boolean anyPlayerAllows() {
+    var filter = definition.playerFilter;
+    if (filter == StaticFilter.ALLOW) return !playerTracker.getPlayers().isEmpty();
+
+    for (MatchPlayer player : playerTracker.getPlayers()) {
+      if (filter.query(player).isAllowed()) return true;
     }
     return false;
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onItemMerge(ItemMergeEvent event) {
-    boolean entityTracked = event.getEntity().hasMetadata(METADATA_KEY);
-    boolean targetTracked = event.getTarget().hasMetadata(METADATA_KEY);
-    if (!entityTracked && !targetTracked) return; // None affected
-    if (entityTracked && targetTracked) {
-      String entitySpawnerId =
-          MetadataUtils.getMetadataValue(event.getEntity(), METADATA_KEY, PGM.get());
-      String targetSpawnerId =
-          MetadataUtils.getMetadataValue(event.getTarget(), METADATA_KEY, PGM.get());
-      if (Objects.equals(entitySpawnerId, targetSpawnerId)) return; // Same spawner, allow merge
+    var entityMeta = MetadataUtils.getMetadataValue(event.getEntity(), METADATA_KEY, PGM.get());
+    var targetMeta = MetadataUtils.getMetadataValue(event.getTarget(), METADATA_KEY, PGM.get());
+    if (entityMeta == null && targetMeta == null) return; // Not spawner related
+    if (!Objects.equals(entityMeta, targetMeta)) {
+      event.setCancelled(true); // Different spawners, prevent merging
     }
-    event.setCancelled(true);
   }
 
-  private void handleEntityRemoveEvent(Metadatable metadatable, int amount) {
-    if (metadatable.hasMetadata(METADATA_KEY)) {
-      if (Objects.equals(
-          MetadataUtils.getMetadataValue(metadatable, METADATA_KEY, PGM.get()),
-          definition.getId())) {
-        spawnedEntities -= amount;
-        spawnedEntities = Math.max(0, spawnedEntities);
+  private void handleEntityRemoveEvent(Entity entity, boolean affectCount) {
+    var metadata = MetadataUtils.getMetadataValue(entity, METADATA_KEY, PGM.get());
+    if (Objects.equals(definition.getId(), metadata)) {
+      entity.removeMetadata(METADATA_KEY, PGM.get());
+      if (affectCount) {
+        int removedEntities = entity instanceof Item item ? item.getItemStack().getAmount() : 1;
+        spawnedEntities = Math.max(0, spawnedEntities - removedEntities);
       }
     }
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onEntityDeath(EntityDeathEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), 1);
+    handleEntityRemoveEvent(event.getEntity(), true);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onItemDespawn(ItemDespawnEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), event.getEntity().getItemStack().getAmount());
+    handleEntityRemoveEvent(event.getEntity(), true);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onItemMergeRecover(ItemMergeEvent event) {
+    // Entity merging does not affect count.
+    // We do need to remove the meta so the remove from world doesn't subtract.
+    handleEntityRemoveEvent(event.getEntity(), false);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onEntityRemove(EntityRemoveFromWorldEvent event) {
+    handleEntityRemoveEvent(event.getEntity(), true);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPotionSplash(PotionSplashEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), 1);
+    handleEntityRemoveEvent(event.getEntity(), true);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerPickup(PlayerPickupItemEvent event) {
-    handleEntityRemoveEvent(event.getItem(), event.getItem().getItemStack().getAmount());
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onPlayerMove(PlayerCoarseMoveEvent event) {
-    final MatchPlayer player = match.getParticipant(event.getPlayer());
-    if (player == null) return;
-    if (definition.playerRegion.contains(event.getPlayer())) {
-      players.putIfAbsent(event.getPlayer(), player);
-    } else {
-      players.remove(event.getPlayer());
-    }
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onMatchEnd(MatchFinishEvent event) {
-    this.players.clear();
-    this.players.disable();
+    handleEntityRemoveEvent(event.getItem(), true);
   }
 }
