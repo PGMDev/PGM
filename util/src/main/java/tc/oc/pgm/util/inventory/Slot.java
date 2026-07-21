@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import org.bukkit.Material;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
@@ -248,6 +247,11 @@ public abstract class Slot {
   /** Set the drop chance for this equipment slot on a non-player {@link LivingEntity}. */
   public void setDropChance(LivingEntity entity, float chance) {
     throw new UnsupportedOperationException("Slot " + this + " is not a mob equipment slot");
+  }
+
+  /** Whether {@link #setDropChance} is supported for this slot on this server version. */
+  public boolean supportsDropChance() {
+    return isEquipment();
   }
 
   protected PlayerInventory asPlayerInventory(Inventory inv) {
@@ -558,6 +562,11 @@ public abstract class Slot {
     public boolean isEquipment() {
       return true;
     }
+
+    @Override
+    public boolean supportsDropChance() {
+      return EntityEquipmentUtil.EQUIPMENT.supportsMobDropChance();
+    }
   }
 
   public static class Body extends MobEquipment {
@@ -573,8 +582,12 @@ public abstract class Slot {
 
     @Override
     public void setEquipment(LivingEntity entity, ItemStack stack) {
-      if (entity instanceof Horse horse) horse.getInventory().setArmor(stack);
-      else EntityEquipmentUtil.EQUIPMENT.setLlamaDecor(entity, stack);
+      EntityEquipmentUtil.EQUIPMENT.setBody(entity, stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      EntityEquipmentUtil.EQUIPMENT.setBodyDropChance(entity, chance);
     }
   }
 
@@ -591,7 +604,12 @@ public abstract class Slot {
 
     @Override
     public void setEquipment(LivingEntity entity, ItemStack stack) {
-      ((Horse) entity).getInventory().setSaddle(stack);
+      EntityEquipmentUtil.EQUIPMENT.setSaddle(entity, stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      EntityEquipmentUtil.EQUIPMENT.setSaddleDropChance(entity, chance);
     }
   }
 

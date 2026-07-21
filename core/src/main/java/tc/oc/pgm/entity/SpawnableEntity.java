@@ -56,7 +56,7 @@ public record SpawnableEntity(
     FeatureValidation<KitDefinition> validation = (def, node) -> def.validateMob(type, node);
     Node node = new Node(el);
     for (Kit kit : kits) {
-      factory.getFeatures().validate(KitDefinition.class, kit, validation, node);
+      factory.getFeatures().validate(kit, validation, node);
     }
 
     return new SpawnableEntity(type, properties, kits);

@@ -249,8 +249,9 @@ public abstract class KitParser {
       throws InvalidXMLException {
     ItemStack stack = parseEquipmentStack(el);
     Float dropChance = parseDropChance(el);
-    if (dropChance != null && slot instanceof Slot.MobEquipment) {
-      throw new InvalidXMLException("drop-chance is not supported for " + slot, el);
+    if (dropChance != null && !slot.supportsDropChance()) {
+      throw new InvalidXMLException(
+          "drop-chance for " + slot + " is not supported on this server version", el);
     }
     return new EquipmentKit.EquipmentItem(stack, dropChance);
   }
@@ -283,11 +284,6 @@ public abstract class KitParser {
       ItemStack item = this.parseItemStack(itemEl);
 
       if (item != null) {
-        if (itemEl.getAttribute("drop-chance") != null) {
-          throw new InvalidXMLException(
-              "drop-chance is only supported on equipment elements, e.g. <helmet> or <mainhand>",
-              itemEl);
-        }
         Node nodeSlot = Node.fromAttr(itemEl, "slot");
         if (nodeSlot == null) {
           freeItems.add(item);

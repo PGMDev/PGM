@@ -40,6 +40,6 @@ public class FeatureRegionParser extends RegionParser {
   @Override
   public void validate(Region region, FeatureValidation<RegionDefinition> validation, Node node)
       throws InvalidXMLException {
-    factory.getFeatures().validate(RegionDefinition.class, region, validation, node);
+    factory.getFeatures().validate(region, validation, node);
   }
 }

@@ -11,7 +11,17 @@ public interface EntityEquipmentUtil {
 
   void setOffHandDropChance(LivingEntity entity, float chance);
 
-  void setLlamaDecor(LivingEntity entity, ItemStack stack);
+  boolean supportsMobDropChance();
 
-  boolean isLlama(Class<? extends LivingEntity> type);
+  boolean canEquipSaddle(Class<? extends LivingEntity> type);
+
+  void setSaddle(LivingEntity entity, ItemStack stack);
+
+  void setSaddleDropChance(LivingEntity entity, float chance);
+
+  boolean canEquipBody(Class<? extends LivingEntity> type);
+
+  void setBody(LivingEntity entity, ItemStack stack);
+
+  void setBodyDropChance(LivingEntity entity, float chance);
 }

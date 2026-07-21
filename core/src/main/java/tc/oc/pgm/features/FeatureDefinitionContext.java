@@ -156,32 +156,20 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
   }
 
   public <T extends FeatureDefinition> void validate(
-      T definition, FeatureValidation<T> validation, Node node) throws InvalidXMLException {
-    validations.add(new PendingValidation<>(definition, validation, node));
-  }
-
-  public <T extends FeatureDefinition> void validate(
       FeatureReference<? extends T> reference, FeatureValidation<T> validation)
       throws InvalidXMLException {
     validations.add(new PendingValidation<>(reference, validation, reference.getNode()));
   }
 
   /** Validate a feature that may be either a definition or an unresolved reference */
+  @SuppressWarnings("unchecked")
   public <T extends FeatureDefinition> void validate(
-      Class<T> type, Object feature, FeatureValidation<T> validation, Node node)
-      throws InvalidXMLException {
+      Object feature, FeatureValidation<T> validation, Node node) throws InvalidXMLException {
     if (feature instanceof XMLFeatureReference<?> reference) {
-      if (!type.isAssignableFrom(reference.getType())) {
-        throw new IllegalStateException("Attempted validation as "
-            + type.getSimpleName()
-            + " on a reference to "
-            + reference.getType().getSimpleName());
-      }
-      @SuppressWarnings("unchecked")
-      var typed = (XMLFeatureReference<? extends T>) reference;
-      validate(typed, validation);
-    } else if (type.isInstance(feature)) {
-      validate(type.cast(feature), validation, node);
+      validations.add(
+          new PendingValidation<>((XMLFeatureReference<? extends T>) reference, validation, node));
+    } else if (feature instanceof FeatureDefinition definition) {
+      validations.add(new PendingValidation<>((T) definition, validation, node));
     } else {
       throw new IllegalStateException("Attempted validation on a "
           + feature.getClass().getSimpleName()

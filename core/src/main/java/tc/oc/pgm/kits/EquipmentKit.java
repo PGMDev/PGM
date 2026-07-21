@@ -3,7 +3,6 @@ package tc.oc.pgm.kits;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -59,15 +58,12 @@ public class EquipmentKit extends AbstractKit {
   @Override
   public void validateMob(Class<? extends LivingEntity> mobType, Node node)
       throws InvalidXMLException {
-    if (slots.containsKey(Slot.Saddle.saddle()) && !Horse.class.isAssignableFrom(mobType)) {
-      throw new InvalidXMLException(
-          "saddle requires a horse, got " + mobType.getSimpleName(), node);
+    var equipment = EntityEquipmentUtil.EQUIPMENT;
+    if (slots.containsKey(Slot.Saddle.saddle()) && !equipment.canEquipSaddle(mobType)) {
+      throw new InvalidXMLException("saddle is not supported for " + mobType.getSimpleName(), node);
     }
-    if (slots.containsKey(Slot.Body.body())
-        && !Horse.class.isAssignableFrom(mobType)
-        && !EntityEquipmentUtil.EQUIPMENT.isLlama(mobType)) {
-      throw new InvalidXMLException(
-          "body requires a horse or llama, got " + mobType.getSimpleName(), node);
+    if (slots.containsKey(Slot.Body.body()) && !equipment.canEquipBody(mobType)) {
+      throw new InvalidXMLException("body is not supported for " + mobType.getSimpleName(), node);
     }
   }
 }

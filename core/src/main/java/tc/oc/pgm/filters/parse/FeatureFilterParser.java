@@ -66,7 +66,7 @@ public class FeatureFilterParser extends FilterParser {
   @Override
   public void validate(Filter filter, FeatureValidation<FilterDefinition> validation, Node node)
       throws InvalidXMLException {
-    factory.getFeatures().validate(FilterDefinition.class, filter, validation, node);
+    factory.getFeatures().validate(filter, validation, node);
   }
 
   @MethodParser("filter")
