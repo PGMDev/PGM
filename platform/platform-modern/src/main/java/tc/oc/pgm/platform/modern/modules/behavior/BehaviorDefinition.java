@@ -3,6 +3,8 @@ package tc.oc.pgm.platform.modern.modules.behavior;
 import javax.annotation.Nullable;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.home.HomeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
 
@@ -10,6 +12,8 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
   private final boolean avoidDanger;
   private final boolean openDoors;
   private final @Nullable CombatBehavior combatBehavior;
+  private final @Nullable HomeBehavior homeBehavior;
+  private final @Nullable EvadeBehavior evadeBehavior;
   private final @Nullable LookBehavior lookBehavior;
   private final @Nullable PathingBehavior pathingBehavior;
 
@@ -18,12 +22,16 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
       boolean avoidDanger,
       boolean openDoors,
       @Nullable CombatBehavior combatBehavior,
+      @Nullable HomeBehavior homeBehavior,
+      @Nullable EvadeBehavior evadeBehavior,
       @Nullable LookBehavior lookBehavior,
       @Nullable PathingBehavior pathingBehavior) {
     super(id);
     this.avoidDanger = avoidDanger;
     this.openDoors = openDoors;
     this.combatBehavior = combatBehavior;
+    this.homeBehavior = homeBehavior;
+    this.evadeBehavior = evadeBehavior;
     this.lookBehavior = lookBehavior;
     this.pathingBehavior = pathingBehavior;
   }
@@ -38,6 +46,14 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
 
   public @Nullable CombatBehavior getCombatBehavior() {
     return combatBehavior;
+  }
+
+  public @Nullable HomeBehavior getHomeBehavior() {
+    return homeBehavior;
+  }
+
+  public @Nullable EvadeBehavior getEvadeBehavior() {
+    return evadeBehavior;
   }
 
   public @Nullable LookBehavior getLookBehavior() {

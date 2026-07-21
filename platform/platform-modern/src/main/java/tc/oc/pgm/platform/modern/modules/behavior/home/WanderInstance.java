@@ -1,4 +1,4 @@
-package tc.oc.pgm.platform.modern.modules.behavior.combat;
+package tc.oc.pgm.platform.modern.modules.behavior.home;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -13,22 +13,17 @@ import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 public class WanderInstance {
 
   private final Mannequin mannequin;
-  private final CombatBehavior behavior;
+  private final HomeBehavior behavior;
   private final net.minecraft.world.entity.monster.zombie.Zombie ghost;
   private @Nullable Path wanderPath;
   private long nextWanderTick;
   private Vector lastWanderProgressPos;
   private long lastWanderProgressTick;
-  private boolean openDoors;
 
-  public WanderInstance(Mannequin mannequin, CombatBehavior behavior, Zombie ghost) {
+  public WanderInstance(Mannequin mannequin, HomeBehavior behavior, Zombie ghost) {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.ghost = ghost;
-  }
-
-  public @Nullable Path getWanderPath() {
-    return wanderPath;
   }
 
   public void clearWanderPath() {
@@ -64,17 +59,13 @@ public class WanderInstance {
         nextWanderTick = now.tick + randomIdleTicks(match);
         return;
       }
-      PathWalking.step(mannequin, wanderPath, 0.15, openDoors);
+      PathWalking.step(mannequin, wanderPath, 0.15, false); // Regular walk speed
     }
   }
 
   private @Nullable Vector pickWanderPoint(Match match) {
-    if (behavior.getHome() == null) {
-      return null;
-    }
-
-    var home = behavior.getHome().getStatic(match);
-    var bounds = home.getBounds();
+    var region = behavior.getRegion().getStatic(match);
+    var bounds = region.getBounds();
     var min = bounds.getMin();
     var max = bounds.getMax();
     var random = match.getRandom();
@@ -84,7 +75,7 @@ public class WanderInstance {
       double x = min.getX() + random.nextDouble() * (max.getX() - min.getX());
       double z = min.getZ() + random.nextDouble() * (max.getZ() - min.getZ());
       Vector candidate = new Vector(x, mannequin.getLocation().getY(), z);
-      if (home.contains(candidate)) {
+      if (region.contains(candidate)) {
         wanderTarget = candidate;
         break;
       }

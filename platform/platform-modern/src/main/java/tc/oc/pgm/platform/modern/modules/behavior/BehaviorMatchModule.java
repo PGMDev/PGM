@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.level.pathfinder.PathType;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
@@ -20,7 +21,10 @@ import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
-import tc.oc.pgm.platform.modern.modules.behavior.combat.PanicInstance;
+import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeInstance;
+import tc.oc.pgm.platform.modern.modules.behavior.home.HomeBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.home.HomeInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
@@ -33,6 +37,8 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   private final Match match;
   private final Map<String, BehaviorDefinition> behaviorDefinitions;
   private final Map<Mannequin, CombatInstance> hostiles = new HashMap<>();
+  private final Map<Mannequin, HomeInstance> homes = new HashMap<>();
+  private final Map<Mannequin, EvadeInstance> evades = new HashMap<>();
   private final Map<Mannequin, LookInstance> looks = new HashMap<>();
   private final Map<Mannequin, PathingInstance> paths = new HashMap<>();
 
@@ -49,7 +55,23 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   public void register(Mannequin mannequin, BehaviorDefinition definition) {
     var entity = mannequin.getEntity();
     CombatBehavior combat = definition.getCombatBehavior();
+    HomeBehavior home = definition.getHomeBehavior();
+    EvadeBehavior evade = definition.getEvadeBehavior();
+    LookBehavior look = definition.getLookBehavior();
     PathingBehavior path = definition.getPathingBehavior();
+
+    Zombie ghost = null;
+    if (combat != null || home != null || evade != null || path != null) {
+      ghost = new Zombie(
+          EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
+      ghost.setOnGround(true);
+      if (definition.isAvoidDanger()) {
+        CombatInstance.DANGER_PENALTIES.forEach(ghost::setPathfindingMalus);
+      }
+      if (definition.isOpenDoors()) {
+        ghost.setPathfindingMalus(PathType.DOOR_WOOD_CLOSED, 0.0F);
+      }
+    }
 
     if (combat != null) {
       var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
@@ -64,29 +86,27 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       hostiles.put(
           mannequin,
           new CombatInstance(
-              mannequin,
-              combat,
-              definition.isAvoidDanger(),
-              definition.isOpenDoors(),
-              hasPathing,
-              leash));
+              mannequin, combat, home, definition.isOpenDoors(), ghost, hasPathing, leash));
     }
 
-    LookBehavior look = definition.getLookBehavior();
+    if (home != null) {
+      homes.put(mannequin, new HomeInstance(mannequin, home, ghost));
+    }
+    if (evade != null) {
+      evades.put(mannequin, new EvadeInstance(mannequin, evade, ghost));
+    }
     if (look != null) {
       looks.put(mannequin, new LookInstance(mannequin, look));
     }
-
     if (path != null) {
-      Zombie pathGhost = new Zombie(
-          EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
-      pathGhost.setOnGround(true);
-      paths.put(mannequin, new PathingInstance(mannequin, path, pathGhost));
+      paths.put(mannequin, new PathingInstance(mannequin, path, ghost, definition.isOpenDoors()));
     }
   }
 
   public void unregister(Mannequin mannequin) {
     hostiles.remove(mannequin);
+    homes.remove(mannequin);
+    evades.remove(mannequin);
     looks.remove(mannequin);
     paths.remove(mannequin);
   }
@@ -98,9 +118,22 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     if (attacker == null) return;
     Tick now = match.getTick();
 
-    for (CombatInstance ci : hostiles.values()) {
-      if (ci.matches(event.getEntity())) {
-        ci.onAttacked(attacker, now);
+    for (Map.Entry<Mannequin, CombatInstance> ci : hostiles.entrySet()) {
+      if (ci.getValue().matches(event.getEntity())) {
+        ci.getValue().onAttacked(attacker, now);
+        HomeInstance hi = homes.get(ci.getKey());
+        if (hi != null) hi.clearPaths();
+        return;
+      }
+    }
+
+    for (Map.Entry<Mannequin, EvadeInstance> ei : evades.entrySet()) {
+      if (ei.getValue().matches(event.getEntity())) {
+        ei.getValue().startPanic(attacker, now);
+        HomeInstance hi = homes.get(ei.getKey());
+        if (hi != null) {
+          hi.clearPaths();
+        }
         return;
       }
     }
@@ -109,31 +142,53 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   @EventHandler
   public void onEnvironmentalDamage(EntityDamageEvent event) {
     if (event instanceof EntityDamageByEntityEvent) return;
-    if (!PanicInstance.isPanicCause(event.getCause())) return;
+    if (!EvadeInstance.isPanicCause(event.getCause())) return;
 
     Tick now = match.getTick();
-    for (CombatInstance ci : hostiles.values()) {
-      if (ci.matches(event.getEntity())) {
-        ci.onEnvironmentalDamage(now);
+    for (Map.Entry<Mannequin, EvadeInstance> ei : evades.entrySet()) {
+      if (ei.getValue().matches(event.getEntity())) {
+        ei.getValue().startPanic(null, now);
         return;
       }
     }
   }
 
+  private boolean inCombat(Mannequin mannequin) {
+    CombatInstance ci = hostiles.get(mannequin);
+    return ci != null && ci.hasTarget();
+  }
+
+  private boolean isEvading(Mannequin mannequin, Tick tick) {
+    EvadeInstance ei = evades.get(mannequin);
+    return ei != null && ei.isEvading(tick);
+  }
+
   @Override
   public void tick(Match match, Tick tick) {
     hostiles.values().forEach(ci -> ci.tick(match, tick));
+
+    homes.forEach((mannequin, hi) -> {
+      if (!inCombat(mannequin) && !isEvading(mannequin, tick)) {
+        hi.tick(match, tick);
+      } else {
+        hi.clearPaths();
+      }
+    });
+
+    evades.values().forEach(ei -> ei.tick(match, tick));
+
     looks.forEach(((mannequin, li) -> {
-      CombatInstance ci = hostiles.get(mannequin);
-      if (ci == null || (!ci.hasTarget() && !ci.isPanicking(tick))) {
+      boolean blocked = inCombat(mannequin) || isEvading(mannequin, tick);
+      PathingInstance pi = paths.get(mannequin);
+      boolean pathing = pi != null && pi.isWalking();
+      if (!blocked && !pathing) {
         li.tick(match);
       }
     }));
 
     paths.forEach((mannequin, pi) -> {
-      CombatInstance ci = hostiles.get(mannequin);
-      boolean combatActive = ci != null && (ci.hasTarget() || ci.isPanicking(tick));
-      if (!combatActive) {
+      boolean blocked = inCombat(mannequin) || isEvading(mannequin, tick);
+      if (!blocked) {
         pi.tick(match, tick);
       } else {
         pi.pathingInterrupted();

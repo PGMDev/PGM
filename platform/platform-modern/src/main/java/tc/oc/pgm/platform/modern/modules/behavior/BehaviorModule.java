@@ -20,6 +20,8 @@ import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.HostilityType;
+import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.home.HomeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.RotationType;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
@@ -49,7 +51,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
       for (Element el : XMLUtils.flattenElements(doc.getRootElement(), "behaviors", "behavior")) {
         String id = parser.string(el, "id").required();
         boolean avoidDanger = parser.parseBool(el, "avoid-danger").optional(true);
-        boolean openDoors = parser.parseBool(el, "use-doors").optional(true);
+        boolean openDoors = parser.parseBool(el, "open-doors").optional(true);
 
         Element combatEl = el.getChild("combat");
         CombatBehavior combat = null;
@@ -57,8 +59,6 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           HostilityType hostility = parser
               .parseEnum(HostilityType.class, combatEl, "hostility")
               .optional(HostilityType.PASSIVE);
-          Region home = parser.region(combatEl, "home").orNull();
-          Float radius = parser.parseFloat(combatEl, "home-radius").orNull();
           Duration duration = parser.duration(combatEl, "aggro-duration").orNull();
           Float range = parser
               .parseFloat(combatEl, "attack-range")
@@ -67,21 +67,41 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
               .duration(combatEl, "attack-interval")
               .optional(CombatInstance.DEFAULT_ATTACK_INTERVAL);
 
-          Boolean returnHome = parser.parseBool(combatEl, "return-home").optional(false);
-          Float strayDis = null;
-          String stray = parser.string(combatEl, "stray-distance").orNull();
-          if (stray != null && !stray.equalsIgnoreCase("outside")) {
-            strayDis = XMLUtils.parseNumber(Node.fromAttr(combatEl, "stray-distance"), Float.class);
-          }
-          Duration returnAfter = parser.duration(combatEl, "return-after").orNull();
+          combat = new CombatBehavior(hostility, duration, range, interval);
+        }
 
-          Boolean wander = parser.parseBool(combatEl, "wander").optional(false);
-          Boolean panic = parser.parseBool(combatEl, "panic").optional(false);
-          Duration panicDuration = parser.duration(combatEl, "panic-duration").orNull();
+        Element homeEl = el.getChild("home");
+        HomeBehavior home = null;
+        if (homeEl != null) {
+          Region region = parser.region(homeEl, "region").required();
+          if (region == null) {
+            throw new InvalidXMLException("'region' attribute is required", homeEl);
+          }
+          Boolean wander = parser.parseBool(homeEl, "wander").optional(false);
+          Float strayDis = null;
+          String stray = parser.string(homeEl, "stray-distance").orNull();
+          if (stray != null && !stray.equalsIgnoreCase("outside")) {
+            strayDis = XMLUtils.parseNumber(Node.fromAttr(homeEl, "stray-distance"), Float.class);
+          }
+          Duration returnAfter = parser.duration(homeEl, "return-after").orNull();
+          if (returnAfter != null && strayDis == null) {
+            throw new InvalidXMLException(
+                "'return-after' requires 'stray-distance' to be defined", homeEl);
+          }
+
+          home = new HomeBehavior(region, wander, strayDis, returnAfter);
+        }
+
+        Element evadeEl = el.getChild("evade");
+        EvadeBehavior evade = null;
+        if (evadeEl != null) {
+          Boolean panic = parser.parseBool(evadeEl, "panic").optional(false);
+          Duration panicDuration = parser.duration(evadeEl, "panic-duration").orNull();
+          HostilityType hostility = combat != null ? combat.getHostility() : HostilityType.PASSIVE;
           if ((hostility != HostilityType.PASSIVE) && (panic || panicDuration != null)) {
             throw new InvalidXMLException(
                 "'panic' and 'panic-duration' attributes are not supported for non passive mannequins",
-                combatEl);
+                evadeEl);
           }
 
           Float avoidRange = parser.parseFloat(combatEl, "avoid-range").orNull();
@@ -89,24 +109,10 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           if ((hostility != HostilityType.PASSIVE) && (avoidRange != null || avoidFilter != null)) {
             throw new InvalidXMLException(
                 "'avoid-range' and 'avoid-filter' attributes are only supported for PASSIVE mannequins",
-                combatEl);
+                evadeEl);
           }
 
-          combat = new CombatBehavior(
-              hostility,
-              home,
-              radius,
-              duration,
-              range,
-              interval,
-              returnHome,
-              strayDis,
-              returnAfter,
-              wander,
-              panic,
-              panicDuration,
-              avoidRange,
-              avoidFilter);
+          evade = new EvadeBehavior(panic, panicDuration, avoidRange, avoidFilter);
         }
 
         Element lookEl = el.getChild("look-at");
@@ -127,14 +133,15 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         }
 
         PathingBehavior path = null;
-        if (path != null && combat != null && combat.getHome() != null) {
-          throw new InvalidXMLException(
-              "'home' cannot be combined with <pathing> use 'leash-distance' on <pathing> instead",
-              el);
-        }
         StuckBehavior stuck = null;
         Element pathEl = el.getChild("pathing");
         if (pathEl != null) {
+          if (home != null) {
+            throw new InvalidXMLException(
+                "'home' cannot be combined with <pathing> use 'leash-distance' attribute on <pathing> instead",
+                el);
+          }
+
           Node startNode = Node.fromAttr(pathEl, "start");
           Vector start = startNode != null ? XMLUtils.parseVector(startNode) : null;
 
@@ -212,7 +219,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         }
 
         BehaviorDefinition behaviorDefinition =
-            new BehaviorDefinition(id, avoidDanger, openDoors, combat, look, path);
+            new BehaviorDefinition(id, avoidDanger, openDoors, combat, home, evade, look, path);
         factory.getFeatures().addFeature(el, behaviorDefinition);
         behaviors.put(id, behaviorDefinition);
       }

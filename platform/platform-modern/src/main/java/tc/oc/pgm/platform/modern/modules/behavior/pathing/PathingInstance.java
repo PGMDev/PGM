@@ -27,7 +27,7 @@ public class PathingInstance {
   private final Zombie ghost;
   private final List<PathingGoalBehavior> goals;
   private final Vector startPos;
-  private int currentIndex; // Each goal gets an index, start always = 0
+  private int currentIndex; // Each goal gets an index assigned, starting position always = 0
   private int lastIndexReached;
   private Phase phase = Phase.WALKING;
   private @Nullable Path currentPath;
@@ -36,12 +36,14 @@ public class PathingInstance {
   private long idleUntilTick;
   private long lastProgressTick;
   private boolean wasInterrupted;
-  private boolean openDoors;
+  private final boolean openDoors;
 
-  public PathingInstance(Mannequin mannequin, PathingBehavior behavior, Zombie ghost) {
+  public PathingInstance(
+      Mannequin mannequin, PathingBehavior behavior, Zombie ghost, boolean openDoors) {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.ghost = ghost;
+    this.openDoors = openDoors;
     this.goals = behavior.getGoals();
     this.startPos = behavior.getStart() != null
         ? behavior.getStart()
@@ -105,7 +107,11 @@ public class PathingInstance {
       }
     }
 
-    PathWalking.step(mannequin, currentPath, 0.15, openDoors);
+    PathWalking.step(
+        mannequin,
+        currentPath,
+        0.15,
+        openDoors); // Regular walk speed + has option to open doors while chasing
 
     var pos = mannequin.getLocation().toVector();
     if (lastProgressPos == null || pos.distanceSquared(lastProgressPos) > 0.25) {
@@ -113,7 +119,7 @@ public class PathingInstance {
       lastProgressTick = now.tick;
     } else if (behavior.getStuck() != null
         && now.tick - lastProgressTick >= behavior.getStuck().getAfter().toMillis() / 50) {
-      handleStuck(match, now);
+      handleStuck(match);
     }
   }
 
@@ -141,7 +147,7 @@ public class PathingInstance {
     phase = Phase.WALKING;
   }
 
-  private void handleStuck(Match match, Tick now) {
+  private void handleStuck(Match match) {
     StuckBehavior stuck = behavior.getStuck();
     if (stuck.getStuckAction() != null) {
       stuck.getStuckAction().trigger(match);
@@ -184,5 +190,9 @@ public class PathingInstance {
       case PREVIOUS -> Math.max(0, currentIndex - 1);
       case NEXT -> currentIndex;
     };
+  }
+
+  public boolean isWalking() {
+    return phase == Phase.WALKING;
   }
 }
