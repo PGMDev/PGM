@@ -38,7 +38,7 @@ public class Mannequin {
           mannequin.setDescription(definition.getDescription());
           mannequin.setSilent(definition.isSilent());
           mannequin.setInvulnerable(definition.isInvulnerable());
-          mannequin.setGlowing(definition.getGlowing() != null);
+          mannequin.setGlowing(definition.isGlowing());
           mannequin.setHealth(definition.getHealth());
           mannequin.setPose(toBukkitPose(definition.getPose()));
           mannequin.setImmovable(definition.isImmovable());
@@ -127,8 +127,8 @@ public class Mannequin {
     entity.setInvulnerable(invulnerable);
   }
 
-  public void setGlowing(@Nullable TextColor color) {
-    entity.setGlowing(color != null);
+  public void setGlowing(boolean glowing) {
+    entity.setGlowing(glowing);
   }
 
   public void setHealth(float health) {

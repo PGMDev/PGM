@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.inventory.MainHand;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -45,7 +44,7 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
             XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "description"));
         boolean silent = parser.parseBool(el, "silent").attr().optional(false);
         boolean invulnerable = parser.parseBool(el, "invulnerable").attr().optional(false);
-        TextColor glowing = parser.textColor(el, "glowing").orNull();
+        boolean glowing = parser.parseBool(el, "glowing").attr().optional(false);
         float health = parser.parseFloat(el, "health").attr().optional(20f);
         boolean immovable = parser.parseBool(el, "immovable").attr().optional(false);
         MainHand mainHand =

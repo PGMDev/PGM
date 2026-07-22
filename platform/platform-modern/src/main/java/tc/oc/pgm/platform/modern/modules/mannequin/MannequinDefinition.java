@@ -2,7 +2,6 @@ package tc.oc.pgm.platform.modern.modules.mannequin;
 
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.inventory.MainHand;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.Action;
@@ -21,7 +20,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
   private final @Nullable Skin skin;
   private final boolean silent;
   private final boolean invulnerable;
-  private final TextColor glowing;
+  private final boolean glowing;
   private final float health;
   private final MannequinPose pose;
   private final boolean immovable;
@@ -43,7 +42,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
       @Nullable Skin skin,
       boolean silent,
       boolean invulnerable,
-      @Nullable TextColor glowing,
+      boolean glowing,
       float health,
       MannequinPose pose,
       boolean immovable,
@@ -105,7 +104,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     return invulnerable;
   }
 
-  public TextColor getGlowing() {
+  public boolean isGlowing() {
     return glowing;
   }
 

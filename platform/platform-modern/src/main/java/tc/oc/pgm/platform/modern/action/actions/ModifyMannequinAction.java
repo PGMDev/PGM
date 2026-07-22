@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
 import tc.oc.pgm.action.actions.AbstractAction;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.FeatureReference;
@@ -28,7 +27,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable Float health;
   private final @Nullable Boolean silent;
   private final @Nullable Boolean invulnerable;
-  private final @Nullable TextColor glowing;
+  private final @Nullable Boolean glowing;
   private final @Nullable Boolean immovable;
   private final @Nullable Boolean gravity;
   private final @Nullable Boolean physics;
@@ -56,7 +55,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable Float health,
       @Nullable Boolean silent,
       @Nullable Boolean invulnerable,
-      @Nullable TextColor glowing,
+      @Nullable Boolean glowing,
       @Nullable Boolean immovable,
       @Nullable Boolean gravity,
       @Nullable Boolean physics,
