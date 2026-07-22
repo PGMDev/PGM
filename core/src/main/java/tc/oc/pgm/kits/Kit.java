@@ -39,7 +39,8 @@ public interface Kit extends Action<MatchPlayer> {
       throws InvalidXMLException {
     if (!mobCompatible()) {
       throw new InvalidXMLException(
-          "kit " + this + " is not compatible with mob " + mobType.getSimpleName(), node);
+          getClass().getSimpleName() + " is not compatible with mob " + mobType.getSimpleName(),
+          node);
     }
   }
 

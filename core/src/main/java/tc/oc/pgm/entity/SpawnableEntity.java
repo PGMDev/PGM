@@ -1,6 +1,5 @@
 package tc.oc.pgm.entity;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import org.bukkit.Location;
@@ -12,54 +11,37 @@ import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitDefinition;
-import tc.oc.pgm.kits.KitParser;
+import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public record SpawnableEntity(
-    Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties, List<Kit> kits) {
+    Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties, Kit kit) {
 
   public Entity spawn(Location location) {
     LivingEntity entity = location.getWorld().spawn(location, entityType);
     for (var property : properties) {
       property.accept(entity);
     }
-    for (Kit kit : kits) {
-      kit.apply(entity);
-    }
+    kit.apply(entity);
     return entity;
   }
 
   public static SpawnableEntity parse(Element el, MapFactory factory) throws InvalidXMLException {
     var type = parseType(Node.fromRequiredAttr(el, "type"));
-    KitParser kitParser = factory.getKits();
 
     List<Consumer<Entity>> properties =
-        new ArrayList<>(MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "kit"));
+        MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "kit");
 
-    List<Kit> kits = new ArrayList<>();
-    var kitAttr = el.getAttribute("kit");
-    if (kitAttr != null) {
-      kits.add(kitParser.parseReference(new Node(kitAttr), kitAttr.getValue()));
-    }
-    for (Element kitEl : el.getChildren("kit")) {
-      kits.add(kitParser.parse(kitEl));
-    }
-    var equipment = kitParser.parseEquipmentKit(el);
-    if (equipment != null) {
-      kits.add(equipment);
-    }
+    Kit kit = factory.getParser().kit(el, "kit").optional(KitNode.EMPTY);
 
     // Kit contents can't be inspected until references resolve, so mob compatibility
     // is validated through the feature context, which defers until after resolution
     FeatureValidation<KitDefinition> validation = (def, node) -> def.validateMob(type, node);
-    Node node = new Node(el);
-    for (Kit kit : kits) {
-      factory.getFeatures().validate(kit, validation, node);
-    }
+    factory.getFeatures().validate(kit, validation, new Node(el));
 
-    return new SpawnableEntity(type, properties, kits);
+    return new SpawnableEntity(type, properties, kit);
   }
 
   private static Class<? extends LivingEntity> parseType(Node typeNode) throws InvalidXMLException {

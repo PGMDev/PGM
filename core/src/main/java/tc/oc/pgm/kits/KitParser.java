@@ -153,6 +153,7 @@ public abstract class KitParser {
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
     kits.add(this.parseAttributeKit(el));
+    kits.add(this.parseMaxHealthKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
     kits.add(this.parseKnockbackReductionKit(el));
@@ -163,7 +164,6 @@ public abstract class KitParser {
     kits.add(this.parseGameModeKit(el));
     kits.add(this.parseShieldKit(el));
     kits.add(this.parseTeamSwitchKit(el));
-    kits.add(this.parseMaxHealthKit(el));
     kits.add(this.parseActionKit(el));
     kits.add(this.parseOverflowWarning(el));
     kits.addAll(this.parseRemoveKits(el));
@@ -247,29 +247,13 @@ public abstract class KitParser {
 
   private EquipmentKit.EquipmentItem parseEquipmentItem(Element el, Slot slot)
       throws InvalidXMLException {
-    ItemStack stack = parseEquipmentStack(el);
+    ItemStack stack = parseItem(el, true);
     Float dropChance = parseDropChance(el);
     if (dropChance != null && !slot.supportsDropChance()) {
       throw new InvalidXMLException(
           "drop-chance for " + slot + " is not supported on this server version", el);
     }
     return new EquipmentKit.EquipmentItem(stack, dropChance);
-  }
-
-  private ItemStack parseEquipmentStack(Element el) throws InvalidXMLException {
-    ItemStack stack = parseItem(el, true);
-    Material type = stack.getType();
-    if (type == Material.WRITTEN_BOOK && el.getChild("title") != null) return parseBook(el);
-    if (type == Materials.PLAYER_HEAD
-        && (Node.fromChildOrAttr(el, "skin") != null || Node.fromChildOrAttr(el, "uuid") != null))
-      return parseHead(el);
-    if (type == Materials.FIREWORK
-        && (el.getAttribute("power") != null || el.getChild("explosion") != null))
-      return parseFirework(el);
-    if (stack.getItemMeta() instanceof BannerMeta
-        && (el.getAttribute("base-color") != null || el.getChild("layer") != null))
-      return parseBanner(el);
-    return stack;
   }
 
   protected @Nullable Float parseDropChance(Element el) throws InvalidXMLException {
@@ -540,7 +524,23 @@ public abstract class KitParser {
         })
         .orSelf();
 
-    return parseItem(el, materialData);
+    ItemStack special = parseSpecialItem(el, materialData.getItemType());
+    return special != null ? special : parseItem(el, materialData);
+  }
+
+  private @Nullable ItemStack parseSpecialItem(Element el, Material type)
+      throws InvalidXMLException {
+    if (type == Material.WRITTEN_BOOK && el.getChild("title") != null) return parseBook(el);
+    if (type == Materials.PLAYER_HEAD
+        && (Node.fromChildOrAttr(el, "skin") != null || Node.fromChildOrAttr(el, "uuid") != null))
+      return parseHead(el);
+    if (type == Materials.FIREWORK
+        && (el.getAttribute("power") != null || el.getChild("explosion") != null))
+      return parseFirework(el);
+    if (Bukkit.getItemFactory().getItemMeta(type) instanceof BannerMeta
+        && (el.getAttribute("base-color") != null || el.getChild("layer") != null))
+      return parseBanner(el);
+    return null;
   }
 
   public ItemStack parseItem(Element el, Material type) throws InvalidXMLException {
