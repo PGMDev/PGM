@@ -10,16 +10,19 @@ import net.kyori.adventure.util.TriState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.util.Vector;
 import tc.oc.pgm.util.skin.Skin;
 
 public class Mannequin {
 
   private final org.bukkit.entity.Mannequin entity;
   private final MannequinDefinition definition;
+  private final Vector spawnPos;
 
   public Mannequin(org.bukkit.entity.Mannequin entity, MannequinDefinition definition) {
     this.entity = entity;
     this.definition = definition;
+    this.spawnPos = entity.getLocation().toVector();
   }
 
   public static Mannequin spawn(
@@ -176,5 +179,9 @@ public class Mannequin {
 
   public org.bukkit.entity.Mannequin getEntity() {
     return entity;
+  }
+
+  public Vector getSpawnPos() {
+    return spawnPos;
   }
 }

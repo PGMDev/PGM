@@ -35,7 +35,6 @@ import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
 
   private final Match match;
-  private final Map<String, BehaviorDefinition> behaviorDefinitions;
   private final Map<Mannequin, CombatInstance> hostiles = new HashMap<>();
   private final Map<Mannequin, HomeInstance> homes = new HashMap<>();
   private final Map<Mannequin, EvadeInstance> evades = new HashMap<>();
@@ -44,7 +43,6 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
 
   public BehaviorMatchModule(Match match, Map<String, BehaviorDefinition> behaviorDefinitions) {
     this.match = match;
-    this.behaviorDefinitions = behaviorDefinitions;
   }
 
   @Override
@@ -123,7 +121,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
         ci.getValue().onAttacked(attacker, now);
         HomeInstance hi = homes.get(ci.getKey());
         if (hi != null) hi.clearPaths();
-        return;
+        break;
       }
     }
 
@@ -134,7 +132,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
         if (hi != null) {
           hi.clearPaths();
         }
-        return;
+        break;
       }
     }
   }
@@ -163,19 +161,29 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     return ei != null && ei.isEvading(tick);
   }
 
+  private boolean canMove(Mannequin mannequin) {
+    return mannequin.getDefinition().hasGravity()
+        && mannequin.getDefinition().hasPhysics()
+        && !mannequin.getDefinition().isImmovable();
+  }
+
   @Override
   public void tick(Match match, Tick tick) {
-    hostiles.values().forEach(ci -> ci.tick(match, tick));
+    hostiles.forEach((mannequin, ci) -> ci.tick(match, tick, canMove(mannequin)));
 
     homes.forEach((mannequin, hi) -> {
-      if (!inCombat(mannequin) && !isEvading(mannequin, tick)) {
+      if (canMove(mannequin) && !inCombat(mannequin) && !isEvading(mannequin, tick)) {
         hi.tick(match, tick);
       } else {
         hi.clearPaths();
       }
     });
 
-    evades.values().forEach(ei -> ei.tick(match, tick));
+    evades.forEach((mannequin, ei) -> {
+      if (canMove(mannequin)) {
+        ei.tick(match, tick);
+      }
+    });
 
     looks.forEach(((mannequin, li) -> {
       boolean blocked = inCombat(mannequin) || isEvading(mannequin, tick);
@@ -188,11 +196,16 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
 
     paths.forEach((mannequin, pi) -> {
       boolean blocked = inCombat(mannequin) || isEvading(mannequin, tick);
-      if (!blocked) {
+      if (canMove(mannequin) && !blocked) {
         pi.tick(match, tick);
       } else {
         pi.pathingInterrupted();
       }
     });
+  }
+
+  public void modifyBehavior(Mannequin mannequin, BehaviorDefinition newDef) {
+    unregister(mannequin);
+    register(mannequin, newDef);
   }
 }

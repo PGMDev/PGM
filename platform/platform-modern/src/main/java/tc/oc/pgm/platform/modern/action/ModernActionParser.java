@@ -10,6 +10,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.action.actions.ModifyMannequinAction;
 import tc.oc.pgm.platform.modern.action.actions.SpawnMannequinAction;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
 import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart;
@@ -102,6 +103,9 @@ public class ModernActionParser extends ActionParser {
       throw new InvalidXMLException("'waypoint' and 'remove-waypoint' cannot be combined", el);
     }
 
+    FeatureReference<BehaviorDefinition> behavior =
+        parser.reference(BehaviorDefinition.class, el, "behavior").orNull();
+
     Formula<B> xFormula = null, yFormula = null, zFormula = null;
     Optional<Formula<B>> yawFormula = Optional.empty(), pitchFormula = Optional.empty();
     Element teleportEl = el.getChild("teleport");
@@ -147,6 +151,7 @@ public class ModernActionParser extends ActionParser {
         pose,
         waypoint,
         removeWaypoint,
+        behavior,
         xFormula,
         yFormula,
         zFormula,

@@ -104,8 +104,8 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
                 evadeEl);
           }
 
-          Float avoidRange = parser.parseFloat(combatEl, "avoid-range").orNull();
-          Filter avoidFilter = parser.filter(combatEl, "avoid-filter").orNull();
+          Float avoidRange = parser.parseFloat(evadeEl, "avoid-range").orNull();
+          Filter avoidFilter = parser.filter(evadeEl, "avoid-filter").orNull();
           if ((hostility != HostilityType.PASSIVE) && (avoidRange != null || avoidFilter != null)) {
             throw new InvalidXMLException(
                 "'avoid-range' and 'avoid-filter' attributes are only supported for PASSIVE mannequins",

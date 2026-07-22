@@ -74,7 +74,9 @@ public class WanderInstance {
     for (int i = 0; i < 4; i++) {
       double x = min.getX() + random.nextDouble() * (max.getX() - min.getX());
       double z = min.getZ() + random.nextDouble() * (max.getZ() - min.getZ());
-      Vector candidate = new Vector(x, mannequin.getLocation().getY(), z);
+      int y = match.getWorld().getHighestBlockYAt((int) Math.floor(x), (int) Math.floor(z));
+
+      Vector candidate = new Vector(x, y, z);
       if (region.contains(candidate)) {
         wanderTarget = candidate;
         break;

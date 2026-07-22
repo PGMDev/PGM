@@ -9,6 +9,8 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorDefinition;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorMatchModule;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
@@ -39,6 +41,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable MannequinPose pose;
   private final @Nullable FeatureReference<WaypointDefinition> waypoint;
   private final @Nullable Boolean removeWaypoint;
+  private final @Nullable FeatureReference<BehaviorDefinition> behavior;
   private final @Nullable Formula<B> xformula;
   private final @Nullable Formula<B> yformula;
   private final @Nullable Formula<B> zformula;
@@ -69,6 +72,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable MannequinPose pose,
       @Nullable FeatureReference<WaypointDefinition> waypoint,
       @Nullable Boolean removeWaypoint,
+      @Nullable FeatureReference<BehaviorDefinition> behavior,
       @Nullable Formula<B> xformula,
       @Nullable Formula<B> yformula,
       @Nullable Formula<B> zformula,
@@ -96,6 +100,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     this.pose = pose;
     this.waypoint = waypoint;
     this.removeWaypoint = removeWaypoint;
+    this.behavior = behavior;
     this.xformula = xformula;
     this.yformula = yformula;
     this.zformula = zformula;
@@ -156,6 +161,12 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
 
       if (waypoint != null) mmm.setWaypoint(mannequin, waypoint.get());
       if (removeWaypoint != null && removeWaypoint) mmm.removeWaypoint(mannequin);
+
+      if (behavior != null) {
+        b.getMatch()
+            .needModule(BehaviorMatchModule.class)
+            .modifyBehavior(mannequin, behavior.get());
+      }
 
       if (xformula != null && yformula != null && zformula != null) {
         mannequin.teleport(

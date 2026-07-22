@@ -84,7 +84,7 @@ public class CombatInstance {
     }
   }
 
-  public void tick(Match match, Tick now) {
+  public void tick(Match match, Tick now, boolean canMove) {
     validateTarget(now);
 
     if (target == null && behavior.getHostility() == HostilityType.HOSTILE) {
@@ -101,7 +101,7 @@ public class CombatInstance {
       nextAttackTick = now.tick + intervalTicks;
     }
 
-    if (target != null && !inAttackRange(target)) {
+    if (canMove && target != null && !inAttackRange(target)) {
       Player bukkit = target.getBukkit();
       if (bukkit != null && !(hasPathing && leashSq < 0)) {
         if (now.tick >= nextRepathTick) {
@@ -116,7 +116,7 @@ public class CombatInstance {
                       bukkit.getLocation().getBlockY(),
                       bukkit.getLocation().getBlockZ()),
                   0);
-          nextRepathTick = now.tick + 10;
+          nextRepathTick = now.tick + 8;
         }
 
         PathWalking.step(
@@ -152,7 +152,7 @@ public class CombatInstance {
       if (bukkit == null || player.isDead()) continue;
       boolean inRange = hasPathing
           ? bukkit.getLocation().distanceSquared(mannequin.getLocation()) <= rangeSq * 5
-          // Give rangeSq a buffer for aggro visibility and to help with aggro stuttering at home bounds
+          // Give rangeSq a buffer for aggro visibility for aggro stuttering at home bounds
           : home.getRegion().contains(bukkit.getLocation());
 
       if (inRange) {

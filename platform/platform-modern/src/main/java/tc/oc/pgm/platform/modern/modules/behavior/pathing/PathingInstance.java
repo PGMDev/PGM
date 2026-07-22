@@ -44,9 +44,7 @@ public class PathingInstance {
     this.ghost = ghost;
     this.openDoors = openDoors;
     this.goals = behavior.getGoals();
-    this.startPos = behavior.getStart() != null
-        ? behavior.getStart()
-        : mannequin.getLocation().toVector();
+    this.startPos = behavior.getStart() != null ? behavior.getStart() : mannequin.getSpawnPos();
   }
 
   public void pathingInterrupted() {
