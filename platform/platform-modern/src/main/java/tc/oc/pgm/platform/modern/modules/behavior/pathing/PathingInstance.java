@@ -190,7 +190,7 @@ public class PathingInstance {
       case START -> 0;
       case END -> goals.size();
       case PREVIOUS -> Math.max(0, currentIndex - 1);
-      case NEXT -> currentIndex;
+      case NEXT -> Math.min(currentIndex + 1, goals.size());
     };
   }
 

@@ -152,7 +152,7 @@ public class CombatInstance {
       if (bukkit == null || player.isDead()) continue;
       boolean inRange = hasPathing
           ? bukkit.getLocation().distanceSquared(mannequin.getLocation()) <= rangeSq * 5
-          // Give rangeSq a buffer for aggro visibility and to help with aggro stuttering
+          // Give rangeSq a buffer for aggro visibility and to help with aggro stuttering at home bounds
           : home.getRegion().contains(bukkit.getLocation());
 
       if (inRange) {

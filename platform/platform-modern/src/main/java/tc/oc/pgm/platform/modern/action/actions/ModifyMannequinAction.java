@@ -44,10 +44,12 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable Formula<B> zformula;
   private final Optional<Formula<B>> yawFormula;
   private final Optional<Formula<B>> pitchFormula;
+  private final @Nullable Boolean despawn;
 
   public ModifyMannequinAction(
       Class<B> scope,
       FeatureReference<MannequinDefinition> mannequinRef,
+      @Nullable Boolean despawn,
       @Nullable Component name,
       @Nullable Component description,
       @Nullable Boolean hideDescription,
@@ -74,6 +76,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       Optional<Formula<B>> pitchFormula) {
     super(scope);
     this.mannequinRef = mannequinRef;
+    this.despawn = despawn;
     this.name = name;
     this.description = description;
     this.hideDescription = hideDescription;
@@ -103,9 +106,15 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   @Override
   public void trigger(B b) {
     MannequinDefinition definition = mannequinRef.get();
+    var mmm = b.getMatch().needModule(MannequinMatchModule.class);
+
+    if (Boolean.TRUE.equals(despawn)) {
+      mmm.despawn(definition.getId());
+      return;
+    }
+
     float yaw = yawFormula.map(f -> (float) f.apply(b)).orElse(0f);
     float pitch = pitchFormula.map(f -> (float) f.apply(b)).orElse(0f);
-    var mmm = b.getMatch().needModule(MannequinMatchModule.class);
 
     final UUID resolvedUuid;
     final Skin resolvedSkin;
@@ -127,7 +136,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     mmm.modify(definition.getId(), mannequin -> {
       if (name != null) mannequin.setName(name);
       if (description != null) mannequin.setDescription(description);
-      if (hideDescription != null) mannequin.setHideDescription(hideDescription);
+      if (hideDescription != null) mannequin.setHideDescription();
       if (hideTitles != null && hideTitles) mannequin.hideTitles();
       if (health != null) mannequin.setHealth(health);
       if (silent != null) mannequin.setSilent(silent);

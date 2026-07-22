@@ -47,6 +47,7 @@ public class ModernActionParser extends ActionParser {
       Element el, Class<B> scope) throws InvalidXMLException {
     scope = parseScope(el, scope);
     var mannequin = parser.reference(MannequinDefinition.class, el, "mannequin").required();
+    Boolean despawn = parser.parseBool(el, "despawn").orFalse();
     Component name = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "name"));
     Component description = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "description"));
     Boolean hideDescription = parser.parseBool(el, "hide-description").attr().orNull();
@@ -126,6 +127,7 @@ public class ModernActionParser extends ActionParser {
     return new ModifyMannequinAction<>(
         scope,
         mannequin,
+        despawn,
         name,
         description,
         hideDescription,

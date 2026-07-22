@@ -10,13 +10,10 @@ import net.kyori.adventure.util.TriState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.metadata.FixedMetadataValue;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.skin.Skin;
 
 public class Mannequin {
 
-  public static final String METADATA_KEY = "PGM_mannequin_";
   private final org.bukkit.entity.Mannequin entity;
   private final MannequinDefinition definition;
 
@@ -50,11 +47,11 @@ public class Mannequin {
 
     UUID uuid = uuidOverride != null ? uuidOverride : definition.getUuid();
     Skin skin = skinOverride != null ? skinOverride : definition.getSkin();
-    wrapper.setSkin(uuid, skin);
+    if (uuid != null && skin != null) {
+      wrapper.setSkin(uuid, skin);
+    }
     wrapper.setSkinLayers(definition.getLayers());
 
-    entity.setMetadata(
-        METADATA_KEY + definition.getId(), new FixedMetadataValue(PGM.get(), wrapper));
     return wrapper;
   }
 
@@ -88,7 +85,7 @@ public class Mannequin {
     entity.setDescription(description);
   }
 
-  public void setHideDescription(boolean hide) {
+  public void setHideDescription() {
     entity.setDescription(null);
   }
 

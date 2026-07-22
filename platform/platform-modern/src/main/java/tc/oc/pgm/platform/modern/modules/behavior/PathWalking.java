@@ -1,8 +1,12 @@
 package tc.oc.pgm.platform.modern.modules.behavior;
 
 import io.papermc.paper.entity.LookAnchor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.pathfinder.Path;
+import org.bukkit.Tag;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
@@ -35,9 +39,16 @@ public class PathWalking {
       var world = mannequin.getEntity().getWorld();
       var doorBlock = world.getBlockAt(nodePos.getX(), nodePos.getY(), nodePos.getZ());
       var blockData = doorBlock.getBlockData();
-      if (blockData instanceof Door door && !door.isOpen()) {
-        door.setOpen(true);
-        doorBlock.setBlockData(door);
+      if (blockData instanceof Door door
+          && !door.isOpen()
+          && Tag.WOODEN_DOORS.isTagged(doorBlock.getType())) {
+
+        var level = ((CraftWorld) world).getHandle();
+        var pos = new BlockPos(nodePos.getX(), nodePos.getY(), nodePos.getZ());
+        var state = level.getBlockState(pos);
+        if (state.getBlock() instanceof DoorBlock nms) {
+          nms.setOpen(null, level, state, pos, true); // Opens + plays appropriate door sound
+        }
       }
     }
 

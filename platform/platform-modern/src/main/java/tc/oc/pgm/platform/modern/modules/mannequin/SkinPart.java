@@ -39,10 +39,6 @@ public enum SkinPart {
       return new SkinLayers(EnumSet.allOf(SkinPart.class));
     }
 
-    public static SkinLayers noneOf() {
-      return new SkinLayers(EnumSet.noneOf(SkinPart.class));
-    }
-
     private static final Map<String, SkinLayers> ALIASES = Map.of(
         "all", SkinLayers.allOf(),
         "arms", SkinLayers.of(SkinPart.LEFT_SLEEVE, SkinPart.RIGHT_SLEEVE),
