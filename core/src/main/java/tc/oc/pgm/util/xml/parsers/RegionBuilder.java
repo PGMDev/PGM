@@ -6,13 +6,16 @@ import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.BlockBoundedValidation;
+import tc.oc.pgm.regions.EmptyRegion;
+import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.regions.StaticValidation;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
-public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionBuilder<T>> {
+public abstract sealed class RegionBuilder<T extends Region> extends Builder<T, RegionBuilder<T>>
+    permits RegionBuilder.OfRegion, RegionBuilder.OfStatic {
   protected final RegionParser regions;
   private boolean children = false;
 
@@ -42,6 +45,16 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
     return this;
   }
 
+  @SuppressWarnings("unchecked")
+  public T orEverywhere() throws InvalidXMLException {
+    return optional((T) EverywhereRegion.INSTANCE);
+  }
+
+  @SuppressWarnings("unchecked")
+  public T orNowhere() throws InvalidXMLException {
+    return optional((T) EmptyRegion.INSTANCE);
+  }
+
   protected Region parseRegion(Node node) throws InvalidXMLException {
     if (children && node.isElement()) {
       return regions.parseChildren(node.getElement());
@@ -55,7 +68,7 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
     return this;
   }
 
-  public static class OfRegion extends RegionBuilder<Region> {
+  public static final class OfRegion extends RegionBuilder<Region> {
     public OfRegion(RegionParser regions, Element el, String... prop) {
       super(regions, el, prop);
     }
@@ -66,7 +79,7 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
     }
   }
 
-  public static class OfStatic extends RegionBuilder<Region.Static> {
+  public static final class OfStatic extends RegionBuilder<Region.Static> {
 
     public OfStatic(RegionParser regions, Element el, String... prop) {
       super(regions, el, prop);
