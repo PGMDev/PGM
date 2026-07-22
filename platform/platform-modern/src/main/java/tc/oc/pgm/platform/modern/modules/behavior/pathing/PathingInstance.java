@@ -2,7 +2,6 @@ package tc.oc.pgm.platform.modern.modules.behavior.pathing;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.util.Vector;
@@ -75,14 +74,12 @@ public class PathingInstance {
   private void tickWalking(Match match, Tick now) {
     Vector target = currentIndex == 0 ? startPos : goals.get(currentIndex - 1).getDestination();
 
-    // Vanilla pathfinding always floors x/z coordinates and walks to the center of the target block.
+    // Vanilla pathfinding always floors x/z coordinates and walks to the center of the target
+    // block.
     // Unfortunately mannequins have to mimic this in order to not get stuck when walking to goals.
     int blockX = (int) Math.floor(target.getX());
     int blockZ = (int) Math.floor(target.getZ());
-    Vector adjusted = new Vector(
-        blockX + 0.5,
-        target.getY(),
-        blockZ + 0.5);
+    Vector adjusted = new Vector(blockX + 0.5, target.getY(), blockZ + 0.5);
 
     if (disSq(mannequin.getLocation().toVector(), adjusted) <= goalRadiusSq(currentIndex)) {
       if (currentIndex > 0) {
@@ -106,9 +103,8 @@ public class PathingInstance {
         var loc = mannequin.getLocation();
         ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
         ghost.setOnGround(true);
-        currentPath = ghost
-            .getNavigation()
-            .createPath(blockX, (int) Math.floor(target.getY()), blockZ, 0);
+        currentPath =
+            ghost.getNavigation().createPath(blockX, (int) Math.floor(target.getY()), blockZ, 0);
         nextRepathTick = now.tick + 10;
       }
     }

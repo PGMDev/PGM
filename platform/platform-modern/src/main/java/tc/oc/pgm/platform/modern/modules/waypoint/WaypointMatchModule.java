@@ -1,6 +1,5 @@
 package tc.oc.pgm.platform.modern.modules.waypoint;
 
-import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.server.waypoints.ServerWaypointManager;
@@ -34,11 +33,9 @@ public class WaypointMatchModule implements MatchModule, Listener {
 
   private final Match match;
   private final ServerWaypointManager waypointManager;
-  private final Map<String, WaypointDefinition> waypointDefinitions;
 
-  public WaypointMatchModule(Match match, Map<String, WaypointDefinition> waypointDefinitions) {
+  public WaypointMatchModule(Match match) {
     this.match = match;
-    this.waypointDefinitions = waypointDefinitions;
     this.waypointManager = ((CraftWorld) match.getWorld()).getHandle().getWaypointManager();
   }
 
@@ -73,12 +70,12 @@ public class WaypointMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerJoin(PlayerJoinMatchEvent event) {
-    removePlayerWaypoint(event.getPlayer());
+    setPlayerWaypoint(event.getPlayer(), null);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onFlagPickup(FlagStateChangeEvent event) {
-    if (event.getOldState() instanceof Carried c) removePlayerWaypoint(c.getCarrier());
+    if (event.getOldState() instanceof Carried c) setPlayerWaypoint(c.getCarrier(), null);
     if (event.getNewState() instanceof Carried c)
       setPlayerWaypoint(c.getCarrier(), event.getFlag().getColor());
   }
@@ -86,47 +83,15 @@ public class WaypointMatchModule implements MatchModule, Listener {
   private void setPlayerWaypoint(MatchPlayer player, Color color) {
     var attr = player.getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE);
     if (attr == null) return;
+    var nmsPlayer = ((CraftPlayer) player.getBukkit()).getHandle();
+    waypointManager.untrackWaypoint(nmsPlayer);
     if (color != null) {
-      var nmsPlayer = ((CraftPlayer) player.getBukkit()).getHandle();
-      // Ensures they're newly registered so the color updates
-      waypointManager.untrackWaypoint(nmsPlayer);
       nmsPlayer.waypointIcon().color = Optional.of(color.asRGB());
       attr.setBaseValue(256);
-    } else {
-      attr.setBaseValue(0);
-    }
-  }
-
-  public void untrack(WaypointTransmitter transmitter) {
-    waypointManager.untrackWaypoint(transmitter);
-  }
-
-  private void applyPlayerWaypointTracking(MatchPlayer player, @Nullable WaypointDefinition def) {
-    var attr = player.getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE);
-    if (attr == null) return;
-    var nmsPlayer = ((CraftPlayer) player.getBukkit()).getHandle();
-
-    waypointManager.untrackWaypoint(nmsPlayer);
-
-    if (def != null) {
-      nmsPlayer.waypointIcon().style = def.getStyle();
-      nmsPlayer.waypointIcon().color = Optional.of(def.getColor().asRGB());
-      float range = def.getTransmitRange() != null ? def.getTransmitRange() : 256f;
-      attr.setBaseValue(range);
       waypointManager.trackWaypoint(nmsPlayer);
     } else {
-      nmsPlayer.waypointIcon().style = WaypointStyleAssets.DEFAULT;
-      nmsPlayer.waypointIcon().color = Optional.empty();
       attr.setBaseValue(0);
     }
-  }
-
-  public void setPlayerWaypoint(MatchPlayer player, WaypointDefinition definition) {
-    this.applyPlayerWaypointTracking(player, definition);
-  }
-
-  public void removePlayerWaypoint(MatchPlayer player) {
-    this.applyPlayerWaypointTracking(player, null);
   }
 
   public void applyEntityWaypoint(
@@ -142,6 +107,7 @@ public class WaypointMatchModule implements MatchModule, Listener {
       nms.waypointIcon().style = def.getStyle();
       nms.waypointIcon().color = Optional.of(def.getColor().asRGB());
       attr.setBaseValue(def.getTransmitRange() != null ? def.getTransmitRange() : 256f);
+      waypointManager.trackWaypoint(nms);
     } else {
       nms.waypointIcon().style = WaypointStyleAssets.DEFAULT;
       nms.waypointIcon().color = Optional.empty();

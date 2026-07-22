@@ -158,8 +158,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
                 parser.action(Match.class, goalEl, "completion-action").orNull();
             Float goalRadius = parser.parseFloat(goalEl, "goal-radius").orNull();
             if (goalRadius != null && goalRadius < 0.5f) {
-              throw new InvalidXMLException(
-                  "'goal-radius' must be at least 0.5", goalEl);
+              throw new InvalidXMLException("'goal-radius' must be at least 0.5", goalEl);
             }
 
             goals.add(new PathingGoalBehavior(destination, idle, completionAction, goalRadius));

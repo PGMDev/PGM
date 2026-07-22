@@ -83,7 +83,7 @@ public class ActionParser {
   private final MapFactory factory;
   private final boolean legacy;
   private final FeatureDefinitionContext features;
-  private final XMLFluentParser parser;
+  protected final XMLFluentParser parser;
   private final MethodParsers<Action<?>> methodParsers;
   private final ReplacementParser replacementParser;
 
