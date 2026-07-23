@@ -80,6 +80,9 @@ public class RenewableModule implements MapModule<RenewableMatchModule> {
         } else {
           if (attrInterval != null) {
             Duration interval = XMLUtils.parseDuration(attrInterval);
+            if (interval.isZero() || interval.isNegative()) {
+              throw new InvalidXMLException("Attribute 'interval' must be positive", elRenewable);
+            }
             renewableDefinition.renewalsPerSecond = 1000f / interval.toMillis();
             renewableDefinition.rateScaled = true;
           } else {
@@ -99,11 +102,8 @@ public class RenewableModule implements MapModule<RenewableMatchModule> {
           // Legacy compatibility
           renewableDefinition.avoidPlayersRange = 0;
         } else {
-          renewableDefinition.avoidPlayersRange =
-              XMLUtils.parseNumber(
-                  elRenewable.getAttribute("avoid-players"),
-                  Double.class,
-                  DEFAULT_AVOID_PLAYERS_RANGE);
+          renewableDefinition.avoidPlayersRange = XMLUtils.parseNumber(
+              elRenewable.getAttribute("avoid-players"), Double.class, DEFAULT_AVOID_PLAYERS_RANGE);
         }
 
         renewableModule.renewableDefinitions.add(renewableDefinition);

@@ -134,6 +134,7 @@ public class CoreMatchModule implements MatchModule, Listener {
     Block block = event.getBlock();
     if (block.getWorld() != this.match.getWorld()) return;
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
+    if (player == null) return;
     var center = BlockVectors.center(block);
 
     for (Core core : this.cores) {
