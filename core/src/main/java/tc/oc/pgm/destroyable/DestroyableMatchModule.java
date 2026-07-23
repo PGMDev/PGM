@@ -111,10 +111,10 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     Block block = event.getBlock();
     MaterialData material = MaterialData.block(block.getState());
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
+    if (player == null) return;
 
     for (Destroyable destroyable : this.destroyables) {
-      if (player != null
-          && player.getParty() == destroyable.getOwner()
+      if (player.getParty() == destroyable.getOwner()
           && !destroyable.isDestroyed()
           && destroyable.getBlockRegion().contains(block)
           && destroyable.hasMaterial(material)) {
