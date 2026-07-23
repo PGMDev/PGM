@@ -4,9 +4,11 @@ import java.util.Optional;
 import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.jdom2.Element;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.platform.modern.action.actions.ModifyMannequinAction;
 import tc.oc.pgm.platform.modern.action.actions.SpawnMannequinAction;
@@ -51,8 +53,8 @@ public class ModernActionParser extends ActionParser {
     Boolean despawn = parser.parseBool(el, "despawn").orFalse();
     Component name = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "name"));
     Component description = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "description"));
-    Boolean hideDescription = parser.parseBool(el, "hide-description").attr().orNull();
-    Boolean hideTitles = parser.parseBool(el, "hide-titles").attr().orNull();
+    boolean hideDescription = parser.parseBool(el, "hide-description").attr().optional(false);
+    boolean hideTitles = parser.parseBool(el, "hide-titles").attr().optional(false);
     Float health = parser.parseFloat(el, "health").attr().orNull();
     Boolean silent = parser.parseBool(el, "silent").attr().orNull();
     Boolean invulnerable = parser.parseBool(el, "invulnerable").attr().orNull();
@@ -61,6 +63,14 @@ public class ModernActionParser extends ActionParser {
     Boolean gravity = parser.parseBool(el, "gravity").attr().orNull();
     Boolean physics = parser.parseBool(el, "physics").attr().orNull();
     Boolean onFire = parser.parseBool(el, "on-fire").attr().orNull();
+
+    boolean removeAction = parser.parseBool(el, "remove-click-action").attr().optional(false);
+    Action<? super MatchPlayer> action =
+        parser.action(MatchPlayer.class, el, "click-action").orNull();
+    if (action != null && removeAction) {
+      throw new InvalidXMLException(
+          "'click-action' and 'remove-click-action' cannot be combined", el);
+    }
 
     boolean playerProfile = false;
     UUID uuid = null;
@@ -96,15 +106,19 @@ public class ModernActionParser extends ActionParser {
       pose = parser.parseEnum(MannequinPose.class, profileEl, "pose").orNull();
     }
 
+    boolean removeWaypoint = parser.parseBool(el, "remove-waypoint").attr().optional(false);
     FeatureReference<WaypointDefinition> waypoint =
         parser.reference(WaypointDefinition.class, el, "waypoint").orNull();
-    Boolean removeWaypoint = parser.parseBool(el, "remove-waypoint").attr().orNull();
-    if (waypoint != null && removeWaypoint != null && removeWaypoint) {
+    if (waypoint != null && removeWaypoint) {
       throw new InvalidXMLException("'waypoint' and 'remove-waypoint' cannot be combined", el);
     }
 
+    boolean removeBehavior = parser.parseBool(el, "remove-behavior").attr().optional(false);
     FeatureReference<BehaviorDefinition> behavior =
         parser.reference(BehaviorDefinition.class, el, "behavior").orNull();
+    if (behavior != null && removeBehavior) {
+      throw new InvalidXMLException("'behavior' and 'remove-behavior' cannot be combined", el);
+    }
 
     Formula<B> xFormula = null, yFormula = null, zFormula = null;
     Optional<Formula<B>> yawFormula = Optional.empty(), pitchFormula = Optional.empty();
@@ -144,13 +158,16 @@ public class ModernActionParser extends ActionParser {
         gravity,
         physics,
         onFire,
+        removeAction,
+        action,
         playerProfile,
         uuid,
         skin,
         layers,
         pose,
-        waypoint,
         removeWaypoint,
+        waypoint,
+        removeBehavior,
         behavior,
         xFormula,
         yFormula,

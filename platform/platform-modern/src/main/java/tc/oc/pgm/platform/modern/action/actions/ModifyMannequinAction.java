@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.actions.AbstractAction;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.feature.FeatureReference;
@@ -24,8 +25,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final FeatureReference<MannequinDefinition> mannequinRef;
   private final @Nullable Component name;
   private final @Nullable Component description;
-  private final @Nullable Boolean hideDescription;
-  private final @Nullable Boolean hideTitles;
+  private final boolean hideDescription;
+  private final boolean hideTitles;
   private final @Nullable Float health;
   private final @Nullable Boolean silent;
   private final @Nullable Boolean invulnerable;
@@ -34,14 +35,17 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final @Nullable Boolean gravity;
   private final @Nullable Boolean physics;
   private final @Nullable Boolean onFire;
+  private final @Nullable Action<? super MatchPlayer> action;
+  private final boolean removeAction;
   private final boolean playerProfile;
   private final @Nullable UUID uuid;
   private final @Nullable Skin skin;
   private final @Nullable SkinPart.SkinLayers layers;
   private final @Nullable MannequinPose pose;
   private final @Nullable FeatureReference<WaypointDefinition> waypoint;
-  private final @Nullable Boolean removeWaypoint;
+  private final boolean removeWaypoint;
   private final @Nullable FeatureReference<BehaviorDefinition> behavior;
+  private final boolean removeBehavior;
   private final @Nullable Formula<B> xformula;
   private final @Nullable Formula<B> yformula;
   private final @Nullable Formula<B> zformula;
@@ -55,8 +59,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable Boolean despawn,
       @Nullable Component name,
       @Nullable Component description,
-      @Nullable Boolean hideDescription,
-      @Nullable Boolean hideTitles,
+      boolean hideDescription,
+      boolean hideTitles,
       @Nullable Float health,
       @Nullable Boolean silent,
       @Nullable Boolean invulnerable,
@@ -65,13 +69,16 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       @Nullable Boolean gravity,
       @Nullable Boolean physics,
       @Nullable Boolean onFire,
+      boolean removeAction,
+      @Nullable Action<? super MatchPlayer> action,
       boolean playerProfile,
       @Nullable UUID uuid,
       @Nullable Skin skin,
       @Nullable SkinPart.SkinLayers layers,
       @Nullable MannequinPose pose,
+      boolean removeWaypoint,
       @Nullable FeatureReference<WaypointDefinition> waypoint,
-      @Nullable Boolean removeWaypoint,
+      boolean removeBehavior,
       @Nullable FeatureReference<BehaviorDefinition> behavior,
       @Nullable Formula<B> xformula,
       @Nullable Formula<B> yformula,
@@ -93,13 +100,16 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     this.gravity = gravity;
     this.physics = physics;
     this.onFire = onFire;
+    this.removeAction = removeAction;
+    this.action = action;
     this.playerProfile = playerProfile;
     this.uuid = uuid;
     this.skin = skin;
     this.layers = layers;
     this.pose = pose;
-    this.waypoint = waypoint;
     this.removeWaypoint = removeWaypoint;
+    this.waypoint = waypoint;
+    this.removeBehavior = removeBehavior;
     this.behavior = behavior;
     this.xformula = xformula;
     this.yformula = yformula;
@@ -141,8 +151,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
     mmm.modify(definition.getId(), mannequin -> {
       if (name != null) mannequin.setName(name);
       if (description != null) mannequin.setDescription(description);
-      if (hideDescription != null) mannequin.setHideDescription();
-      if (hideTitles != null && hideTitles) mannequin.hideTitles();
+      if (hideDescription) mannequin.setHideDescription();
+      if (hideTitles) mannequin.hideTitles();
       if (health != null) mannequin.setHealth(health);
       if (silent != null) mannequin.setSilent(silent);
       if (invulnerable != null) mannequin.setInvulnerable(invulnerable);
@@ -151,6 +161,8 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       if (gravity != null) mannequin.setGravity(gravity);
       if (physics != null) mannequin.setPhysics(physics);
       if (onFire != null) mannequin.setOnFire(onFire);
+      if (removeAction) mannequin.setAction(null);
+      if (action != null) mannequin.setAction(action);
 
       if (resolvedUuid != null && resolvedSkin != null) {
         mannequin.setSkin(resolvedUuid, resolvedSkin);
@@ -159,9 +171,12 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       if (layers != null) mannequin.setSkinLayers(layers);
       if (pose != null) mannequin.setPose(pose);
 
+      if (removeWaypoint) mmm.removeWaypoint(mannequin);
       if (waypoint != null) mmm.setWaypoint(mannequin, waypoint.get());
-      if (removeWaypoint != null && removeWaypoint) mmm.removeWaypoint(mannequin);
 
+      if (removeBehavior) {
+        b.getMatch().needModule(BehaviorMatchModule.class).unregister(mannequin);
+      }
       if (behavior != null) {
         b.getMatch()
             .needModule(BehaviorMatchModule.class)

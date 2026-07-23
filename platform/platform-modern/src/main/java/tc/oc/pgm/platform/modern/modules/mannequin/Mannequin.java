@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.util.Vector;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.skin.Skin;
 
 public class Mannequin {
@@ -18,11 +20,13 @@ public class Mannequin {
   private final org.bukkit.entity.Mannequin entity;
   private final MannequinDefinition definition;
   private final Vector spawnPos;
+  private @Nullable Action<? super MatchPlayer> action;
 
   public Mannequin(org.bukkit.entity.Mannequin entity, MannequinDefinition definition) {
     this.entity = entity;
     this.definition = definition;
     this.spawnPos = entity.getLocation().toVector();
+    this.action = definition.getAction();
   }
 
   public static Mannequin spawn(
@@ -78,6 +82,10 @@ public class Mannequin {
 
   public UUID getEntityId() {
     return entity.getUniqueId();
+  }
+
+  public @Nullable Action<? super MatchPlayer> getAction() {
+    return action;
   }
 
   public void setName(Component name) {
@@ -155,6 +163,10 @@ public class Mannequin {
 
   public void setOnFire(boolean onFire) {
     entity.setVisualFire(onFire ? TriState.TRUE : TriState.FALSE);
+  }
+
+  public void setAction(@Nullable Action<? super MatchPlayer> action) {
+    this.action = action;
   }
 
   public void teleport(double x, double y, double z, float yaw, float pitch) {

@@ -21,6 +21,10 @@ public class EvadeBehavior {
     this.avoidFilter = avoidFilter;
   }
 
+  public boolean isPanic() {
+    return panic;
+  }
+
   public @Nullable Duration getPanicDuration() {
     return panicDuration;
   }

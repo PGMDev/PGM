@@ -92,11 +92,12 @@ public class MannequinMatchModule implements MatchModule, Listener {
     if (event.getHand() != EquipmentSlot.HAND) return;
     Mannequin mannequin = byEntity.get(event.getRightClicked().getUniqueId());
     if (mannequin == null) return;
-    if (mannequin.getDefinition().getAction() == null) return;
+    var action = mannequin.getAction();
+    if (action == null) return;
     MatchPlayer player = match.getPlayer(event.getPlayer());
     if (player == null) return;
     event.setCancelled(true);
-    mannequin.getDefinition().getAction().trigger(player);
+    action.trigger(player);
   }
 
   public void modify(String id, Consumer<Mannequin> modifier) {

@@ -70,6 +70,7 @@ public class EvadeInstance {
   }
 
   public void startPanic(@Nullable MatchPlayer attacker, Tick now) {
+    if (!behavior.isPanic()) return;
     this.fleeSource = attacker;
     this.panicExpiryTick = now.tick + panicDurationTicks;
     this.panicStartTick = now.tick + 6; // Delay panicking start so mannequin can take kb
