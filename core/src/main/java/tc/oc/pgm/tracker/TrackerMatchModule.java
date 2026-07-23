@@ -47,6 +47,7 @@ public class TrackerMatchModule implements MatchModule {
   private final FireTracker fireTracker;
   private final FallingBlockTracker fallingBlockTracker;
   private final CactiTracker cactiTracker;
+  private final CombatLogTracker combatLogTracker;
 
   private final Set<DamageResolver> damageResolvers = new LinkedHashSet<>();
   private final Match match;
@@ -59,6 +60,7 @@ public class TrackerMatchModule implements MatchModule {
     fireTracker = new FireTracker(this, match);
     fallingBlockTracker = new FallingBlockTracker(this, match);
     cactiTracker = new CactiTracker(this, match);
+    combatLogTracker = new CombatLogTracker(this);
 
     // Damage resolvers - order is important!
     damageResolvers.add(fallTracker);
@@ -82,14 +84,19 @@ public class TrackerMatchModule implements MatchModule {
     match.addListener(blockTracker, MatchScope.RUNNING);
     match.addListener(fallingBlockTracker, MatchScope.RUNNING);
     match.addListener(cactiTracker, MatchScope.RUNNING);
+    match.addListener(combatLogTracker, MatchScope.RUNNING);
     match.addListener(new EndCrystalTracker(this, match), MatchScope.RUNNING);
     match.addListener(new DispenserTracker(this, match), MatchScope.RUNNING);
     match.addListener(new TNTTracker(this, match), MatchScope.RUNNING);
     match.addListener(new SpleefTracker(this), MatchScope.RUNNING);
     match.addListener(new OwnedMobTracker(this, match), MatchScope.RUNNING);
     match.addListener(new ProjectileTracker(this, match), MatchScope.RUNNING);
-    match.addListener(new CombatLogTracker(this), MatchScope.RUNNING);
     match.addListener(new DeathTracker(this), MatchScope.RUNNING);
+  }
+
+  @Override
+  public void unload() {
+    combatLogTracker.unload();
   }
 
   public EntityTracker getEntityTracker() {
