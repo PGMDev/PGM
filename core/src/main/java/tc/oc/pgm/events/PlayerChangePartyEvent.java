@@ -2,8 +2,8 @@ package tc.oc.pgm.events;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.bukkit.event.HandlerList;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.join.JoinRequest;
