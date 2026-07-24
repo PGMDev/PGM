@@ -23,11 +23,11 @@ jobs:
       with:
         java-version: 21
         distribution: temurin
-    # Configures gradle with caching
+    # Configures gradle with caching. Intentionally pinned to v5.0.2 instead of v6
+    # to benefit from better caching without having to agree to a commercial license,
+    # along with having to trust a 2 MB obfuscated JS blob.
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v6
-      with:
-        cache-provider: basic
+      uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c # v5.0.2
     # Run "gradlew publish" for origin/dev and "gradlew build" for PRs or elsewhere
     - name: Execute Gradle ${{ (github.repository == 'PGMDev/PGM' && github.ref == 'refs/heads/dev') && 'Publish' || 'Build' }}
       run: ./gradlew ${{ (github.repository == 'PGMDev/PGM' && github.ref == 'refs/heads/dev') && 'publish' || 'build' }}
