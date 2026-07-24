@@ -7,7 +7,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -63,9 +62,14 @@ public class CombatLogTracker implements Listener {
       @Nullable Block blockDamager,
       boolean alreadyDamaged) {}
 
-  private final Map<Player, Damage> recentDamage = new OnlinePlayerMapAdapter<>(PGM.get());
+  private final OnlinePlayerMapAdapter<Damage> recentDamage =
+      new OnlinePlayerMapAdapter<>(PGM.get());
 
   public CombatLogTracker(TrackerMatchModule tmm) {}
+
+  public void unload() {
+    recentDamage.disable();
+  }
 
   private static boolean hasFireResistance(LivingEntity entity) {
     for (PotionEffect effect : entity.getActivePotionEffects()) {

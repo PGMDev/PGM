@@ -67,8 +67,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   private final Match match;
 
-  private final Map<Player, InventoryTrackerEntry> monitoredInventories;
-  private final Map<Player, Instant> updateQueue;
+  private final OnlinePlayerMapAdapter<InventoryTrackerEntry> monitoredInventories;
+  private final OnlinePlayerMapAdapter<Instant> updateQueue;
 
   public ViewInventoryMatchModule(Match match) {
     this.match = match;
@@ -249,8 +249,8 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
   @Override
   public void unload() {
-    monitoredInventories.clear();
-    updateQueue.clear();
+    monitoredInventories.disable();
+    updateQueue.disable();
   }
 
   public boolean canPreviewInventory(Player viewer, Player holder) {

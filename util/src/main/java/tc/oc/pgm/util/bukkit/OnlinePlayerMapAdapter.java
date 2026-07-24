@@ -7,7 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.plugin.Plugin;
 
 /** Uses {@link ListeningMapAdapter} to guarantee that the map only contains online players. */
@@ -29,6 +31,19 @@ public class OnlinePlayerMapAdapter<V> extends ListeningMapAdapter<Player, V> im
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerQuit(PlayerQuitEvent event) {
     this.remove(event.getPlayer());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+    V value = this.remove(event.getPlayer());
+    if (value != null) {
+      this.put(event.getPlayer(), value);
+    }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onWorldUnload(WorldUnloadEvent event) {
+    this.keySet().removeIf(player -> player.getWorld().equals(event.getWorld()));
   }
 
   @Override
