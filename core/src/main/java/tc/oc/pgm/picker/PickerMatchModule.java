@@ -16,12 +16,15 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -37,6 +40,7 @@ import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
 import tc.oc.pgm.api.player.event.PlayerVanishEvent;
 import tc.oc.pgm.api.setting.SettingKey;
@@ -50,9 +54,11 @@ import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResult;
 import tc.oc.pgm.join.JoinResultOption;
+import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.spawns.events.DeathKitApplyEvent;
 import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
+import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.util.LegacyFormatUtils;
@@ -187,12 +193,19 @@ public class PickerMatchModule implements MatchModule, Listener {
     return true;
   }
 
+  /** Is the player alive and using an in-game picker item? They may only pick a class. */
+  private boolean isPickingInGame(@Nullable MatchPlayer player) {
+    return player != null && hasClasses && player.isParticipating() && player.isAlive();
+  }
+
   /**
    * Does the player have any use for the picker dialog? If the player can join, but there is
    * nothing to pick (i.e. FFA without classes) then this returns false, while {@link #canUse}
    * returns true.
    */
   private boolean canOpenWindow(MatchPlayer player) {
+    if (isPickingInGame(player)) return true;
+
     return canUse(player) && (hasClasses || canChooseMultipleTeams(player));
   }
 
@@ -206,7 +219,9 @@ public class PickerMatchModule implements MatchModule, Listener {
     assertTrue(hasTeams || hasClasses); // Window should not open if there is nothing to pick
 
     String key;
-    if (hasTeams && hasClasses) {
+    if (isPickingInGame(player)) {
+      key = "picker.windowTitle.class";
+    } else if (hasTeams && hasClasses) {
       key = "picker.windowTitle.teamClass";
     } else if (hasTeams) {
       key = "picker.windowTitle.team";
@@ -311,19 +326,18 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOWEST)
   public void checkInventoryClick(final InventoryClickEvent event) {
-    if (event.getCurrentItem() == null
-        || event.getCurrentItem().getItemMeta() == null
-        || !event.getCurrentItem().getItemMeta().hasDisplayName()) return;
-    if (event.getWhoClicked() instanceof Player bukkitPlayer) {
-      MatchPlayer player = match.getPlayer(bukkitPlayer);
-      if (player == null || !this.picking.contains(player)) return;
+    if (!(event.getWhoClicked() instanceof Player bukkitPlayer)) return;
 
-      this.handleInventoryClick(
-          player,
-          ChatColor.stripColor(event.getCurrentItem().getItemMeta().getDisplayName()),
-          event.getCurrentItem());
-      event.setCancelled(true);
-    }
+    MatchPlayer player = match.getPlayer(bukkitPlayer);
+    if (player == null || !this.picking.contains(player)) return;
+
+    event.setCancelled(true);
+
+    final ItemStack item = event.getCurrentItem();
+    if (item == null || item.getItemMeta() == null || !item.getItemMeta().hasDisplayName()) return;
+
+    this.handleInventoryClick(
+        player, ChatColor.stripColor(item.getItemMeta().getDisplayName()), item);
   }
 
   @EventHandler
@@ -373,9 +387,37 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
   }
 
+  @EventHandler(priority = EventPriority.HIGH)
+  public void rightClickPickerItem(final PlayerInteractEvent event) {
+    if (event.useItemInHand() == Event.Result.DENY) return;
+
+    final Action action = event.getAction();
+    if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
+
+    final ItemStack item = event.getItem();
+    if (InventoryUtils.isNothing(item) || !ItemTags.PICKER.has(item)) return;
+
+    final MatchPlayer player = match.getPlayer(event.getPlayer());
+    if (!isPickingInGame(player) || !settingEnabled(player, true)) return;
+
+    event.setCancelled(true);
+
+    showWindow(player);
+  }
+
   @EventHandler
   public void giveKitToObservers(final ObserverKitApplyEvent event) {
     refreshKit(event.getPlayer());
+  }
+
+  @EventHandler
+  public void participantSpawn(final ParticipantKitApplyEvent event) {
+    refreshWindow(event.getPlayer());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void participantDeath(final MatchPlayerDeathEvent event) {
+    scheduleRefresh(event.getVictim());
   }
 
   @EventHandler
@@ -512,17 +554,21 @@ public class PickerMatchModule implements MatchModule, Listener {
   private ItemStack[] createWindowContents(final MatchPlayer player) {
     final List<ItemStack> slots = new ArrayList<>();
 
-    final Set<Team> teams = getChoosableTeams(player);
-    if (!teams.isEmpty()) {
-      // Auto-join button at start of row
-      if (teams.size() > 1 && canAutoJoin(player)) {
-        slots.add(createAutoJoinButton(player));
-      }
+    final boolean inGame = isPickingInGame(player);
 
-      // Team buttons
-      if (teams.size() > 1 || !hasJoined(player)) {
-        for (Team team : teams) {
-          slots.add(createTeamJoinButton(player, team));
+    if (!inGame) {
+      final Set<Team> teams = getChoosableTeams(player);
+      if (!teams.isEmpty()) {
+        // Auto-join button at start of row
+        if (teams.size() > 1 && canAutoJoin(player)) {
+          slots.add(createAutoJoinButton(player));
+        }
+
+        // Team buttons
+        if (teams.size() > 1 || !hasJoined(player)) {
+          for (Team team : teams) {
+            slots.add(createTeamJoinButton(player, team));
+          }
         }
       }
     }
@@ -540,7 +586,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     // Pad last row to width
     while (slots.size() % WIDTH != 0) slots.add(null);
 
-    if (hasJoined(player)) {
+    if (!inGame && hasJoined(player)) {
       // Put leave button in first empty slot of the last column
       for (int slot = WIDTH - 1; ; slot += WIDTH) {
         while (slots.size() <= slot) {
@@ -561,9 +607,14 @@ public class PickerMatchModule implements MatchModule, Listener {
     ItemStack item = cls.getIcon().toItemStack(1);
     ItemMeta meta = item.getItemMeta();
 
+    final ClassMatchModule cmm = match.getModule(ClassMatchModule.class);
+    final PlayerClass playing = cmm.getPlayingClass(viewer.getId());
+    final PlayerClass selected = cmm.getSelectedClass(viewer.getId());
+
     meta.setDisplayName(
         (cls.canUse(viewer.getBukkit()) ? ChatColor.GREEN : ChatColor.RED) + cls.getName());
-    if (match.getModule(ClassMatchModule.class).getSelectedClass(viewer.getId()).equals(cls)) {
+
+    if (playing.equals(cls)) {
       meta.addEnchant(Enchantments.INFINITY, 1, true);
     }
 
@@ -573,6 +624,11 @@ public class PickerMatchModule implements MatchModule, Listener {
           ChatColor.GOLD + cls.getLongDescription(), LORE_WIDTH_PIXELS, lore);
     } else if (cls.getDescription() != null) {
       lore.add(ChatColor.GOLD + cls.getDescription());
+    }
+
+    if (selected.equals(cls) && !selected.equals(playing)) {
+      lore.add(
+          ChatColor.AQUA + TextTranslations.translate("match.class.queue", viewer.getBukkit()));
     }
 
     if (!cls.canUse(viewer.getBukkit())) {
@@ -670,6 +726,9 @@ public class PickerMatchModule implements MatchModule, Listener {
             cmm.setPlayerClass(player.getId(), cls);
 
             player.sendMessage(translatable("match.class.ok", NamedTextColor.GREEN, cls));
+            if (player.isParticipating()) {
+              player.sendMessage(translatable("match.class.queue", NamedTextColor.GREEN));
+            }
             scheduleRefresh(player);
           } else {
             player.sendMessage(translatable("match.class.sticky", NamedTextColor.RED));
@@ -684,6 +743,8 @@ public class PickerMatchModule implements MatchModule, Listener {
         return;
       }
     }
+
+    if (isPickingInGame(player)) return;
 
     if (hasTeams && Button.TEAM_JOIN.matches(item)) {
       Team team = player.getMatch().needModule(TeamMatchModule.class).getTeam(name);
