@@ -80,7 +80,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       }
 
       boolean hasPathing = path != null;
-      Float leash = hasPathing ? path.getLeash() : null;
+      Float leash = hasPathing ? path.leash() : null;
       hostiles.put(
           mannequin,
           new CombatInstance(

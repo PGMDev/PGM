@@ -1,6 +1,6 @@
 package tc.oc.pgm.platform.modern.modules.behavior.home;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
@@ -64,7 +64,7 @@ public class WanderInstance {
   }
 
   private @Nullable Vector pickWanderPoint(Match match) {
-    var region = behavior.getRegion().getStatic(match);
+    var region = behavior.region().getStatic(match);
     var bounds = region.getBounds();
     var min = bounds.getMin();
     var max = bounds.getMax();

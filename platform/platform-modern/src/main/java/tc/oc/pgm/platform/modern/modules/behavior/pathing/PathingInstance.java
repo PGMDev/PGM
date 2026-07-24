@@ -1,7 +1,7 @@
 package tc.oc.pgm.platform.modern.modules.behavior.pathing;
 
 import java.util.List;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.util.Vector;
@@ -43,8 +43,8 @@ public class PathingInstance {
     this.behavior = behavior;
     this.ghost = ghost;
     this.openDoors = openDoors;
-    this.goals = behavior.getGoals();
-    this.startPos = behavior.getStart() != null ? behavior.getStart() : mannequin.getSpawnPos();
+    this.goals = behavior.goals();
+    this.startPos = behavior.start() != null ? behavior.start() : mannequin.getSpawnPos();
   }
 
   public void pathingInterrupted() {
@@ -70,7 +70,7 @@ public class PathingInstance {
   }
 
   private void tickWalking(Match match, Tick now) {
-    Vector target = currentIndex == 0 ? startPos : goals.get(currentIndex - 1).getDestination();
+    Vector target = currentIndex == 0 ? startPos : goals.get(currentIndex - 1).destination();
 
     // Vanilla pathfinding always floors x/z coordinates and walks to the center of the target
     // block.
@@ -83,11 +83,11 @@ public class PathingInstance {
       if (currentIndex > 0) {
         PathingGoalBehavior goal = goals.get(currentIndex - 1);
 
-        if (goal.getCompletionAction() != null) {
-          goal.getCompletionAction().trigger(match);
+        if (goal.completionAction() != null) {
+          goal.completionAction().trigger(match);
         }
 
-        long idleTicks = goal.getIdle() != null ? goal.getIdle().toMillis() / 50 : 0;
+        long idleTicks = goal.idle() != null ? goal.idle().toMillis() / 50 : 0;
         idleUntilTick = now.tick + idleTicks;
       }
       currentPath = null;
@@ -117,8 +117,8 @@ public class PathingInstance {
     if (lastProgressPos == null || pos.distanceSquared(lastProgressPos) > 0.25) {
       lastProgressPos = pos;
       lastProgressTick = now.tick;
-    } else if (behavior.getStuck() != null
-        && now.tick - lastProgressTick >= behavior.getStuck().getAfter().toMillis() / 50) {
+    } else if (behavior.stuck() != null
+        && now.tick - lastProgressTick >= behavior.stuck().after().toMillis() / 50) {
       handleStuck(match);
     }
   }
@@ -130,15 +130,15 @@ public class PathingInstance {
 
   private double goalRadiusSq(int index) {
     if (index == 0) return 0.5 * 0.5;
-    Float radius = goals.get(index - 1).getGoalRadius();
+    Float radius = goals.get(index - 1).goalRadius();
     return radius != null ? radius * radius : 0.5 * 0.5;
   }
 
   private void tickIdling(Tick now) {
     if (now.tick < idleUntilTick) return;
     currentIndex++;
-    if (currentIndex > behavior.getGoals().size()) {
-      if (behavior.isLoop()) currentIndex = 0;
+    if (currentIndex > behavior.goals().size()) {
+      if (behavior.loop()) currentIndex = 0;
       else {
         phase = Phase.DONE;
         return;
@@ -148,25 +148,25 @@ public class PathingInstance {
   }
 
   private void handleStuck(Match match) {
-    StuckBehavior stuck = behavior.getStuck();
-    if (stuck.getStuckAction() != null) {
-      stuck.getStuckAction().trigger(match);
+    StuckBehavior stuck = behavior.stuck();
+    if (stuck.stuckAction() != null) {
+      stuck.stuckAction().trigger(match);
     }
-    if (stuck.isDespawn()) {
+    if (stuck.despawn()) {
       match.needModule(MannequinMatchModule.class).singleDespawn(mannequin);
       return;
     }
-    if (stuck.isGiveUp()) {
+    if (stuck.giveUp()) {
       phase = Phase.GAVE_UP;
       currentPath = null;
       return;
     }
     int resolved = resolveMoveTo(stuck);
-    Vector dest = resolved == 0 ? startPos : goals.get(resolved - 1).getDestination();
+    Vector dest = resolved == 0 ? startPos : goals.get(resolved - 1).destination();
     currentIndex = resolved;
     currentPath = null;
     lastProgressPos = null;
-    if (stuck.getMethod() == RelocationMethod.TELEPORT) {
+    if (stuck.method() == RelocationMethod.TELEPORT) {
       mannequin.teleport(
           dest.getX(), dest.getY(), dest.getZ(), mannequin.getYaw(), mannequin.getPitch());
     }
@@ -175,16 +175,16 @@ public class PathingInstance {
 
   private int resolveMoveTo(StuckBehavior stuck) {
     // Move to a goal using its numeric index
-    if (stuck.getMoveToIndex() != null) {
-      return stuck.getMoveToIndex();
+    if (stuck.moveToIndex() != null) {
+      return stuck.moveToIndex();
     }
 
-    if (stuck.getMoveTo() == null) {
+    if (stuck.moveTo() == null) {
       return Math.max(0, currentIndex - 1);
     }
 
     // Move to a goal using an enum
-    return switch (stuck.getMoveTo()) {
+    return switch (stuck.moveTo()) {
       case START -> 0;
       case END -> goals.size();
       case PREVIOUS -> Math.max(0, currentIndex - 1);

@@ -1,6 +1,6 @@
 package tc.oc.pgm.platform.modern.modules.behavior;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;

@@ -3,7 +3,7 @@ package tc.oc.pgm.platform.modern.modules.behavior.combat;
 import io.papermc.paper.entity.LookAnchor;
 import java.time.Duration;
 import java.util.Map;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
@@ -59,8 +59,8 @@ public class CombatInstance {
     this.behavior = behavior;
     this.home = home;
     this.openDoors = openDoors;
-    this.rangeSq = behavior.getRange() * behavior.getRange();
-    this.intervalTicks = behavior.getInterval().toMillis() / 50;
+    this.rangeSq = behavior.range() * behavior.range();
+    this.intervalTicks = behavior.interval().toMillis() / 50;
     this.ghost = ghost;
     this.hasPathing = hasPathing;
     this.leashSq = leash != null ? leash * leash : -1;
@@ -72,7 +72,7 @@ public class CombatInstance {
 
   public void onAttacked(MatchPlayer attacker, Tick now) {
     // Handle neutral/hostile. Passive is handled in EvadeInstance
-    if (behavior.getHostility() == HostilityType.PASSIVE) return;
+    if (behavior.hostility() == HostilityType.PASSIVE) return;
 
     if (target == null || target == attacker) {
       target = attacker;
@@ -87,7 +87,7 @@ public class CombatInstance {
   public void tick(Match match, Tick now, boolean canMove) {
     validateTarget(now);
 
-    if (target == null && behavior.getHostility() == HostilityType.HOSTILE) {
+    if (target == null && behavior.hostility() == HostilityType.HOSTILE) {
       acquireTarget(match, now);
     }
 
@@ -153,7 +153,7 @@ public class CombatInstance {
       boolean inRange = hasPathing
           ? bukkit.getLocation().distanceSquared(mannequin.getLocation()) <= rangeSq * 5
           // Give rangeSq a buffer for aggro visibility for aggro stuttering at home bounds
-          : home.getRegion().contains(bukkit.getLocation());
+          : home.region().contains(bukkit.getLocation());
 
       if (inRange) {
         target = player;
@@ -172,7 +172,7 @@ public class CombatInstance {
 
   private void refreshExpiry(Tick now) {
     aggroExpiryTick =
-        behavior.getDuration() != null ? now.tick + behavior.getDuration().toMillis() / 50 : -1;
+        behavior.duration() != null ? now.tick + behavior.duration().toMillis() / 50 : -1;
   }
 
   private boolean inAttackRange(MatchPlayer target) {
@@ -194,6 +194,6 @@ public class CombatInstance {
     if (home == null) {
       return false;
     }
-    return !home.getRegion().contains(bukkit.getLocation());
+    return !home.region().contains(bukkit.getLocation());
   }
 }

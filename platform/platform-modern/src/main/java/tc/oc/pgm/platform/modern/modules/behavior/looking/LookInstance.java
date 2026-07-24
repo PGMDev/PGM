@@ -1,7 +1,7 @@
 package tc.oc.pgm.platform.modern.modules.behavior.looking;
 
 import io.papermc.paper.entity.LookAnchor;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -19,9 +19,9 @@ public class LookInstance {
   public LookInstance(Mannequin mannequin, LookBehavior behavior) {
     this.mannequin = mannequin;
     this.behavior = behavior;
-    this.restYaw = behavior.getRestYaw() != null ? behavior.getRestYaw() : mannequin.getYaw();
+    this.restYaw = behavior.restYaw() != null ? behavior.restYaw() : mannequin.getYaw();
     this.restPitch =
-        behavior.getRestPitch() != null ? behavior.getRestPitch() : mannequin.getPitch();
+        behavior.restPitch() != null ? behavior.restPitch() : mannequin.getPitch();
   }
 
   public boolean matches(Entity entity) {
@@ -30,14 +30,14 @@ public class LookInstance {
 
   public void tick(Match match) {
     Location eyes = null;
-    if (behavior.getTrackPlayer()) {
+    if (behavior.trackPlayer()) {
       eyes = nearestPlayerInRange(match);
-    } else if (behavior.getTrackPoint() != null) {
-      eyes = behavior.getTrackPoint().toLocation(mannequin.getEntity().getWorld());
+    } else if (behavior.trackPoint() != null) {
+      eyes = behavior.trackPoint().toLocation(mannequin.getEntity().getWorld());
     }
 
     if (eyes != null) {
-      if (behavior.getRotation() == RotationType.BODY) {
+      if (behavior.rotation() == RotationType.BODY) {
         mannequin.getEntity().lookAt(eyes, LookAnchor.EYES);
       } else {
         lookHeadOnly(eyes);
@@ -48,7 +48,7 @@ public class LookInstance {
   }
 
   private @Nullable Location nearestPlayerInRange(Match match) {
-    double rangeSq = behavior.getRange() * behavior.getRange();
+    double rangeSq = behavior.range() * behavior.range();
     Location self = mannequin.getLocation();
     MatchPlayer nearest = null;
     double best = rangeSq;

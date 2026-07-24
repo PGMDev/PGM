@@ -97,7 +97,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         if (evadeEl != null) {
           Boolean panic = parser.parseBool(evadeEl, "panic").optional(false);
           Duration panicDuration = parser.duration(evadeEl, "panic-duration").orNull();
-          HostilityType hostility = combat != null ? combat.getHostility() : HostilityType.PASSIVE;
+          HostilityType hostility = combat != null ? combat.hostility() : HostilityType.PASSIVE;
           if ((hostility != HostilityType.PASSIVE) && (panic || panicDuration != null)) {
             throw new InvalidXMLException(
                 "'panic' and 'panic-duration' attributes are not supported for non passive mannequins",
@@ -211,8 +211,8 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
             stuck =
                 new StuckBehavior(after, stuckAction, moveTo, moveToIndex, method, giveUp, despawn);
 
-            if (stuck.getMoveTo() == RelocationType.NEXT
-                && stuck.getMethod() != RelocationMethod.TELEPORT) {
+            if (stuck.moveTo() == RelocationType.NEXT
+                && stuck.method() != RelocationMethod.TELEPORT) {
               throw new InvalidXMLException(
                   "move-to='next' can only be used when using method='teleport'", stuckEl);
             }

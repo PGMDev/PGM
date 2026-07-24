@@ -1,6 +1,6 @@
 package tc.oc.pgm.platform.modern.modules.behavior.home;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
@@ -26,25 +26,25 @@ public class HomeInstance {
     this.behavior = behavior;
     this.ghost = ghost;
     this.straySq =
-        behavior.getStrayDis() != null ? behavior.getStrayDis() * behavior.getStrayDis() : -1;
+        behavior.strayDis() != null ? behavior.strayDis() * behavior.strayDis() : -1;
     this.returnAfterTicks =
-        behavior.getReturnAfter() != null ? behavior.getReturnAfter().toMillis() / 50 : 0;
-    this.wander = behavior.isWander() ? new WanderInstance(mannequin, behavior, ghost) : null;
+        behavior.returnAfter() != null ? behavior.returnAfter().toMillis() / 50 : 0;
+    this.wander = behavior.wander() ? new WanderInstance(mannequin, behavior, ghost) : null;
   }
 
   private boolean atHome(Match match) {
     if (straySq >= 0) {
-      var center = behavior.getRegion().getStatic(match).getBounds().getCenterPoint();
+      var center = behavior.region().getStatic(match).getBounds().getCenterPoint();
       var loc = mannequin.getLocation();
       double dx = center.getX() - loc.getX();
       double dz = center.getZ() - loc.getZ();
       return dx * dx + dz * dz <= straySq;
     }
-    return behavior.getRegion().contains(mannequin.getEntity());
+    return behavior.region().contains(mannequin.getEntity());
   }
 
   public boolean returnsHome() {
-    return behavior.getStrayDis() != null;
+    return behavior.strayDis() != null;
   }
 
   public void clearPaths() {
@@ -70,7 +70,7 @@ public class HomeInstance {
 
     if (currentPath == null || currentPath.isDone()) {
       if (now.tick >= nextRepathTick) {
-        var center = behavior.getRegion().getStatic(match).getBounds().getCenterPoint();
+        var center = behavior.region().getStatic(match).getBounds().getCenterPoint();
         var loc = mannequin.getLocation();
         ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
         ghost.setOnGround(true);

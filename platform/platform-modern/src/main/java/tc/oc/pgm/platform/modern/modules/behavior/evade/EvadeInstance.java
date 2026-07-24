@@ -3,7 +3,7 @@ package tc.oc.pgm.platform.modern.modules.behavior.evade;
 import io.papermc.paper.entity.LookAnchor;
 import java.time.Duration;
 import java.util.Set;
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
@@ -53,12 +53,12 @@ public class EvadeInstance {
     this.behavior = behavior;
     this.ghost = ghost;
     this.panicDurationTicks =
-        (behavior.getPanicDuration() != null ? behavior.getPanicDuration() : DEFAULT_PANIC_DURATION)
+        (behavior.panicDuration() != null ? behavior.panicDuration() : DEFAULT_PANIC_DURATION)
                 .toMillis()
             / 50;
     this.avoidRangeSq =
-        behavior.getAvoidRange() != null ? behavior.getAvoidRange() * behavior.getAvoidRange() : -1;
-    this.avoidFilter = behavior.getAvoidFilter();
+        behavior.avoidRange() != null ? behavior.avoidRange() * behavior.avoidRange() : -1;
+    this.avoidFilter = behavior.avoidFilter();
   }
 
   public boolean matches(Entity entity) {
@@ -70,7 +70,7 @@ public class EvadeInstance {
   }
 
   public void startPanic(@Nullable MatchPlayer attacker, Tick now) {
-    if (!behavior.isPanic()) return;
+    if (!behavior.panic()) return;
     this.fleeSource = attacker;
     this.panicExpiryTick = now.tick + panicDurationTicks;
     this.panicStartTick = now.tick + 6; // Delay panicking start so mannequin can take kb
