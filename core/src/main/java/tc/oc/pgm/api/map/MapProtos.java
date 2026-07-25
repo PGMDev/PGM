@@ -52,4 +52,7 @@ public interface MapProtos {
 
   // Make more singletons have built-in default ids
   Version FEATURE_SINGLETON_IDS_2 = new Version(1, 5, 1);
+
+  // Shop categories are features; shopkeepers accept mob properties
+  Version SHOP_CATEGORY_FEATURES = new Version(1, 5, 2);
 }
