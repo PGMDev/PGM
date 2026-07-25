@@ -16,6 +16,7 @@ import org.bukkit.event.entity.ItemMergeEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.Tickable;
@@ -32,6 +33,8 @@ public class Spawner implements Listener, Tickable {
   private final Match match;
   private final SpawnerDefinition definition;
   private final RegionPlayerTracker playerTracker;
+  private final Filter matchFilter;
+  private final Filter playerFilter;
 
   private long canSpawnAt;
   private long spawnedEntities;
@@ -40,6 +43,9 @@ public class Spawner implements Listener, Tickable {
     this.definition = definition;
     this.match = match;
     this.playerTracker = new RegionPlayerTracker(match, definition.playerRegion);
+    boolean isMatchFilter = definition.filter.respondsTo(Match.class);
+    this.matchFilter = isMatchFilter ? definition.filter : StaticFilter.ALLOW;
+    this.playerFilter = isMatchFilter ? StaticFilter.ALLOW : definition.filter;
   }
 
   public void registerEvents() {
@@ -57,7 +63,7 @@ public class Spawner implements Listener, Tickable {
   public void tick(Match match, Tick tick) {
     var now = match.getTick().tick;
     if (now < this.canSpawnAt || spawnedEntities >= definition.maxEntities) return;
-    if (!definition.matchFilter.response(match) || !anyPlayerAllows()) return;
+    if (!matchFilter.response(match) || !anyPlayerAllows()) return;
 
     for (Spawnable spawnable : definition.objects) {
       var location = definition.spawnRegion.getRandomLoc(match);
@@ -76,11 +82,10 @@ public class Spawner implements Listener, Tickable {
   }
 
   private boolean anyPlayerAllows() {
-    var filter = definition.playerFilter;
-    if (filter == StaticFilter.ALLOW) return !playerTracker.getPlayers().isEmpty();
+    if (playerFilter == StaticFilter.ALLOW) return !playerTracker.getPlayers().isEmpty();
 
     for (MatchPlayer player : playerTracker.getPlayers()) {
-      if (filter.query(player).isAllowed()) return true;
+      if (playerFilter.query(player).isAllowed()) return true;
     }
     return false;
   }

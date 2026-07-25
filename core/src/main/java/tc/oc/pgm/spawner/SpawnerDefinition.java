@@ -17,16 +17,14 @@ public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
   public final int maxEntities;
   public final long minDelay, maxDelay;
   public final List<Spawnable> objects;
-  public final Filter matchFilter;
-  public final Filter playerFilter;
+  public final Filter filter;
 
   public SpawnerDefinition(
       String id,
       List<Spawnable> objects,
       Region spawnRegion,
       Region playerRegion,
-      Filter matchFilter,
-      Filter playerFilter,
+      Filter filter,
       Duration minDelay,
       Duration maxDelay,
       int maxEntities) {
@@ -37,8 +35,7 @@ public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
     this.minDelay = TimeUtils.toTicks(minDelay);
     this.maxDelay = TimeUtils.toTicks(maxDelay);
     this.objects = objects;
-    this.matchFilter = matchFilter;
-    this.playerFilter = playerFilter;
+    this.filter = filter;
   }
 
   @Override
