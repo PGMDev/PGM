@@ -24,7 +24,6 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.entity.SpawnableEntity;
 import tc.oc.pgm.filters.FilterModule;
-import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.spawner.objects.SpawnableItem;
 import tc.oc.pgm.spawner.objects.SpawnableMob;
@@ -99,12 +98,6 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
         int maxEntities = parser.parseInt(el, "max-entities").optional(Integer.MAX_VALUE);
         Filter filter = parser.filter(el, "filter").orAllow();
 
-        // Supporting both independently would require a proto bump; however we
-        // can use respondsTo as an optimization to handle it as a match-only filter.
-        boolean isMatchFilter = filter.respondsTo(Match.class);
-        Filter playerFilter = isMatchFilter ? StaticFilter.ALLOW : filter;
-        Filter matchFilter = isMatchFilter ? filter : StaticFilter.ALLOW;
-
         List<Spawnable> objects = new ArrayList<>();
         for (Element itemEl : XMLUtils.getChildren(el, "item")) {
           ItemStack stack = parser.item(itemEl).required();
@@ -133,15 +126,7 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
         }
 
         SpawnerDefinition spawnerDefinition = new SpawnerDefinition(
-            id,
-            objects,
-            spawnRegion,
-            playerRegion,
-            matchFilter,
-            playerFilter,
-            minDelay,
-            maxDelay,
-            maxEntities);
+            id, objects, spawnRegion, playerRegion, filter, minDelay, maxDelay, maxEntities);
         factory.getFeatures().addFeature(el, spawnerDefinition);
         spawners.add(spawnerDefinition);
       }
