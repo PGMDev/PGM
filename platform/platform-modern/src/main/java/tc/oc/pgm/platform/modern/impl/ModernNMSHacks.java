@@ -64,7 +64,6 @@ import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
@@ -330,7 +329,6 @@ public class ModernNMSHacks implements NMSHacks {
     console.initWorld(serverLevel, primaryLevelData, primaryLevelData.worldGenOptions());
     serverLevel.setSpawnSettings(true);
     console.prepareLevel(serverLevel);
-    server.getPluginManager().callEvent(new WorldLoadEvent(serverLevel.getWorld()));
     return serverLevel.getWorld();
   }
 

@@ -1,3 +1,5 @@
+import de.skuzzle.restrictimports.gradle.RestrictImports
+
 plugins {
     `java-library`
     id("com.diffplug.spotless")
@@ -75,13 +77,20 @@ spotless {
     }
 }
 
-restrictImports {
-    group {
+tasks {
+    // Bypass inability to have two groups with same base packages inside the import restriction plugin
+    val restrictJavaxAnnotations = register<RestrictImports>("restrictJavaxAnnotations") {
+        group = "verification"
         reason = "Use org.jspecify.annotations to add annotations, or org.jetbrains.annotations if needed"
         bannedImports = listOf("javax.annotation.**")
     }
-    group {
+    val restrictAsserts = register<RestrictImports>("restrictAsserts") {
+        group = "verification"
         reason = "Use tc.oc.pgm.util.Assert to add assertions"
         bannedImports = listOf("com.google.common.base.Preconditions.**", "java.util.Objects.requireNonNull")
+    }
+    // Enforce the import restrictions
+    check {
+        dependsOn(restrictJavaxAnnotations, restrictAsserts)
     }
 }

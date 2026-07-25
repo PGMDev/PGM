@@ -658,6 +658,10 @@ public abstract class KitParser {
       ItemTags.LOCKED.set(itemStack, true);
     }
 
+    if (XMLUtils.parseBoolean(el.getAttribute("class-menu"), false)) {
+      ItemTags.PICKER.set(itemStack, true);
+    }
+
     if (itemStack.getAmount() == ItemKit.INFINITE_STACK_SIZE) {
       ItemTags.INFINITE.set(itemStack, true);
     }
