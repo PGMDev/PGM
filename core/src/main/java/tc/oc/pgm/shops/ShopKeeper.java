@@ -3,6 +3,8 @@ package tc.oc.pgm.shops;
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
+import java.util.List;
+import java.util.function.Consumer;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -10,6 +12,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.points.PointProvider;
 import tc.oc.pgm.util.bukkit.MetadataUtils;
@@ -21,18 +24,24 @@ public class ShopKeeper {
   private final String name;
   private final PointProvider location;
   private final Class<? extends Entity> type;
-  private final Shop shop;
+  private final List<Consumer<Entity>> properties;
+  private final FeatureReference<Shop> shop;
 
   public ShopKeeper(
-      @Nullable String name, PointProvider location, Class<? extends Entity> type, Shop shop) {
+      @Nullable String name,
+      PointProvider location,
+      Class<? extends Entity> type,
+      List<Consumer<Entity>> properties,
+      FeatureReference<Shop> shop) {
     this.name = name;
     this.location = location;
     this.type = type;
+    this.properties = properties;
     this.shop = shop;
   }
 
   public Shop getShop() {
-    return shop;
+    return shop.get();
   }
 
   public Class<? extends Entity> getType() {
@@ -52,10 +61,13 @@ public class ShopKeeper {
     Entity keeper = loc.getWorld().spawn(loc, type);
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
-    keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));
     if (keeper instanceof LivingEntity livingEntity) {
       livingEntity.setRemoveWhenFarAway(false);
     }
+    for (Consumer<Entity> property : properties) {
+      property.accept(keeper);
+    }
+    keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), getShop().getId()));
     NMS_HACKS.freezeEntity(keeper);
   }
 

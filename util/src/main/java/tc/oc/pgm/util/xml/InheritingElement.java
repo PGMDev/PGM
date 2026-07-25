@@ -44,8 +44,9 @@ public class InheritingElement extends LocatedElement {
       setAttribute(attribute.clone());
     }
 
-    if (getParent() instanceof Element) {
-      for (Attribute attribute : ((Element) el.getParent()).getAttributes()) {
+    // Root attributes (proto, etc.) are map metadata, not inheritable defaults
+    if (getParent() instanceof Element parent && !parent.isRootElement()) {
+      for (Attribute attribute : parent.getAttributes()) {
         if (getAttribute(attribute.getName()) == null) {
           setAttribute(attribute.clone());
         }
@@ -111,15 +112,13 @@ public class InheritingElement extends LocatedElement {
 
   public Iterable<Element> getChildren(Set<String> names) {
     boolean visitingAllowed = visitingAllowed();
-    return Iterables.filter(
-        super.getChildren(),
-        el -> {
-          if (names.contains(el.getName())) {
-            if (visitingAllowed) ((InheritingElement) el).setVisited();
-            return true;
-          }
-          return false;
-        });
+    return Iterables.filter(super.getChildren(), el -> {
+      if (names.contains(el.getName())) {
+        if (visitingAllowed) ((InheritingElement) el).setVisited();
+        return true;
+      }
+      return false;
+    });
   }
 
   @Override

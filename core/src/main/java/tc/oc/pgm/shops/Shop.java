@@ -5,7 +5,9 @@ import static net.kyori.adventure.text.Component.translatable;
 import com.google.common.collect.ImmutableList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.kits.ItemKit;
@@ -15,12 +17,14 @@ import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.util.bukkit.Sounds;
 
+@FeatureInfo(name = "shop")
 public class Shop extends SelfIdentifyingFeatureDefinition {
 
   private final String name;
-  private final ImmutableList<Category> categories;
+  private final ImmutableList<Supplier<Category>> categories;
+  private ImmutableList<Category> resolvedCategories;
 
-  public Shop(String id, String name, List<Category> categories) {
+  public Shop(String id, String name, List<Supplier<Category>> categories) {
     super(id);
     this.name = name != null ? name : id;
     this.categories = ImmutableList.copyOf(categories);
@@ -31,11 +35,15 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
   }
 
   public List<Category> getCategories() {
-    return categories;
+    if (resolvedCategories == null) {
+      resolvedCategories =
+          ImmutableList.copyOf(categories.stream().map(Supplier::get).toList());
+    }
+    return resolvedCategories;
   }
 
   public List<Category> getVisibleCategories(MatchPlayer player) {
-    return categories.stream()
+    return getCategories().stream()
         .filter(c -> c.getFilter().query(player).isAllowed())
         .toList();
   }
