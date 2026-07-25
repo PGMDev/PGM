@@ -83,6 +83,7 @@ import tc.oc.pgm.util.xml.XMLUtils;
 public abstract class KitParser {
   private static final Set<String> ITEM_TYPES =
       Set.of("item", "book", "head", "firework", "banner");
+  private static final Range<Float> DROP_CHANCE_RANGE = Range.closed(0f, 1f);
 
   protected final MapFactory factory;
   protected final XMLFluentParser parser;
@@ -148,10 +149,11 @@ public abstract class KitParser {
       kits.add(this.parse(child));
     }
 
-    kits.add(this.parseArmorKit(el));
+    kits.add(this.parseEquipmentKit(el));
     kits.add(this.parseItemKit(el));
     kits.add(this.parsePotionKit(el));
     kits.add(this.parseAttributeKit(el));
+    kits.add(this.parseMaxHealthKit(el));
     kits.add(this.parseHealthKit(el));
     kits.add(this.parseHungerKit(el));
     kits.add(this.parseKnockbackReductionKit(el));
@@ -162,7 +164,6 @@ public abstract class KitParser {
     kits.add(this.parseGameModeKit(el));
     kits.add(this.parseShieldKit(el));
     kits.add(this.parseTeamSwitchKit(el));
-    kits.add(this.parseMaxHealthKit(el));
     kits.add(this.parseActionKit(el));
     kits.add(this.parseOverflowWarning(el));
     kits.addAll(this.parseRemoveKits(el));
@@ -228,29 +229,35 @@ public abstract class KitParser {
     return new FlyKit(canFly, flying, flySpeedMultiplier);
   }
 
-  private ArmorKit.ArmorItem parseArmorItem(Element el) throws InvalidXMLException {
-    if (el == null) {
-      return null;
-    }
-    ItemStack stack = parseItem(el, true);
-    boolean locked = XMLUtils.parseBoolean(el.getAttribute("locked"), false);
+  public EquipmentKit parseEquipmentKit(Element el) throws InvalidXMLException {
+    Map<Slot, EquipmentKit.EquipmentItem> slots = new HashMap<>();
 
-    return new ArmorKit.ArmorItem(stack, locked);
+    for (var entry : Slot.byEquipmentTag().entrySet()) {
+      Element itemEl = el.getChild(entry.getKey());
+      if (itemEl == null) continue;
+      Slot slot = entry.getValue();
+      if (slot == null) {
+        throw new InvalidXMLException(entry.getKey() + " is not a valid slot!", itemEl);
+      }
+      slots.put(slot, parseEquipmentItem(itemEl, slot));
+    }
+
+    return slots.isEmpty() ? null : new EquipmentKit(slots);
   }
 
-  public ArmorKit parseArmorKit(Element el) throws InvalidXMLException {
-    Map<Slot.Armor, ArmorKit.ArmorItem> armor = new HashMap<>();
-
-    for (Slot.Armor armorSlot : Slot.Armor.armor().toList()) {
-      var armorItem = parseArmorItem(el.getChild(armorSlot.armorTypeName()));
-      if (armorItem != null) armor.put(armorSlot, armorItem);
+  private EquipmentKit.EquipmentItem parseEquipmentItem(Element el, Slot slot)
+      throws InvalidXMLException {
+    ItemStack stack = parseItem(el, true);
+    Float dropChance = parseDropChance(el);
+    if (dropChance != null && !slot.supportsDropChance()) {
+      throw new InvalidXMLException(
+          "drop-chance for " + slot + " is not supported on this server version", el);
     }
+    return new EquipmentKit.EquipmentItem(stack, dropChance);
+  }
 
-    if (!armor.isEmpty()) {
-      return new ArmorKit(armor);
-    } else {
-      return null;
-    }
+  protected @Nullable Float parseDropChance(Element el) throws InvalidXMLException {
+    return parser.parseFloat(el, "drop-chance").between(DROP_CHANCE_RANGE).orNull();
   }
 
   public ItemKit parseItemKit(Element el) throws InvalidXMLException {
@@ -517,7 +524,23 @@ public abstract class KitParser {
         })
         .orSelf();
 
-    return parseItem(el, materialData);
+    ItemStack special = parseSpecialItem(el, materialData.getItemType());
+    return special != null ? special : parseItem(el, materialData);
+  }
+
+  private @Nullable ItemStack parseSpecialItem(Element el, Material type)
+      throws InvalidXMLException {
+    if (type == Material.WRITTEN_BOOK && el.getChild("title") != null) return parseBook(el);
+    if (type == Materials.PLAYER_HEAD
+        && (Node.fromChildOrAttr(el, "skin") != null || Node.fromChildOrAttr(el, "uuid") != null))
+      return parseHead(el);
+    if (type == Materials.FIREWORK
+        && (el.getAttribute("power") != null || el.getChild("explosion") != null))
+      return parseFirework(el);
+    if (Bukkit.getItemFactory().getItemMeta(type) instanceof BannerMeta
+        && (el.getAttribute("base-color") != null || el.getChild("layer") != null))
+      return parseBanner(el);
+    return null;
   }
 
   public ItemStack parseItem(Element el, Material type) throws InvalidXMLException {

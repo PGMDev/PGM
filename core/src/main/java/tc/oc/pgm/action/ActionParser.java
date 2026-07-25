@@ -51,7 +51,6 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
@@ -190,18 +189,10 @@ public class ActionParser {
     return new SetVariableAction<>(scope, var, formula);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   private void validate(
       Action<?> action, FeatureValidation<ActionDefinition<?>> validation, Node node)
       throws InvalidXMLException {
-    if (action instanceof XMLFeatureReference ref) {
-      features.validate(ref, validation);
-    } else if (action instanceof ActionDefinition ad) {
-      features.validate(ad, validation, node);
-    } else {
-      throw new IllegalStateException(
-          "Attempted validation on an action which is neither definition nor reference.");
-    }
+    features.validate(action, validation, node);
   }
 
   @SuppressWarnings("unchecked")

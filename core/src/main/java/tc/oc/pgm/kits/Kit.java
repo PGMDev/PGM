@@ -1,9 +1,12 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 
 public interface Kit extends Action<MatchPlayer> {
 
@@ -19,6 +22,27 @@ public interface Kit extends Action<MatchPlayer> {
    * simultaneously. In this way, the number of stacks that go to their proper slots is maximized.
    */
   void apply(MatchPlayer player, boolean force, List<ItemStack> displacedItems);
+
+  /** Apply this kit to a non-player {@link LivingEntity} (e.g. a spawned mob). */
+  default void apply(LivingEntity entity) {}
+
+  /** Whether this kit can be meaningfully applied to a non-player {@link LivingEntity}. */
+  default boolean mobCompatible() {
+    return false;
+  }
+
+  /**
+   * Throw if this kit cannot be applied to the given mob type. Called after feature references are
+   * resolved, so implementations may safely inspect their content.
+   */
+  default void validateMob(Class<? extends LivingEntity> mobType, Node node)
+      throws InvalidXMLException {
+    if (!mobCompatible()) {
+      throw new InvalidXMLException(
+          getClass().getSimpleName() + " is not compatible with mob " + mobType.getSimpleName(),
+          node);
+    }
+  }
 
   /**
    * Do whatever is necessary with leftover items that couldn't make it into the players' inventory,

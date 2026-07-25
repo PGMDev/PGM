@@ -122,7 +122,7 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
         }
 
         for (Element mobEl : XMLUtils.getChildren(el, "mob")) {
-          objects.add(parseMob(mobEl, id));
+          objects.add(parseMob(mobEl, id, factory));
         }
 
         SpawnerDefinition spawnerDefinition = new SpawnerDefinition(
@@ -134,9 +134,9 @@ public class SpawnerModule implements MapModule<SpawnerMatchModule> {
       return spawners.isEmpty() ? null : new SpawnerModule(spawners);
     }
 
-    private static SpawnableMob parseMob(Element mobEl, String spawnerId)
+    private static SpawnableMob parseMob(Element mobEl, String spawnerId, MapFactory factory)
         throws InvalidXMLException {
-      var entity = SpawnableEntity.parse(mobEl);
+      var entity = SpawnableEntity.parse(mobEl, factory);
       if (EXCLUDED_MOB_TYPES.stream().anyMatch(c -> c.isAssignableFrom(entity.entityType()))) {
         throw new InvalidXMLException(
             "Spawner mob type " + entity.entityType().getSimpleName() + " cannot be spawned",

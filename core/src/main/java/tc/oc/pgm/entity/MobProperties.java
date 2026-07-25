@@ -1,6 +1,7 @@
 package tc.oc.pgm.entity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,6 @@ import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.material.Colorable;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.entity.MobProperty.Parser;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -83,7 +83,6 @@ public abstract class MobProperties {
 
     register(Horse.class, "color", enumOf(Horse.Color.class), Horse::setColor);
     register(Horse.class, "style", enumOf(Horse.Style.class), Horse::setStyle);
-    register(Horse.class, "carrying-chest", BOOL, Horse::setCarryingChest);
     register(Horse.class, "max-domestication", INT, Horse::setMaxDomestication);
     register(Horse.class, "domestication", INT, Horse::setDomestication);
     register(Horse.class, "jump-strength", DOUBLE, Horse::setJumpStrength);
@@ -118,19 +117,11 @@ public abstract class MobProperties {
     properties.add(new MobProperty<>(ownerType, xmlName, parser, setter));
   }
 
-  public final @Nullable MobProperty<?, ?> find(Class<? extends Entity> type, String xmlName) {
-    for (var property : properties) {
-      if (property.ownerType().isAssignableFrom(type) && property.xmlName().equals(xmlName)) {
-        return property;
-      }
-    }
-    return null;
-  }
-
   public final List<Consumer<Entity>> parseAttributes(
       Class<? extends Entity> type, Element el, String... excluded) throws InvalidXMLException {
-    var skip = Set.of(excluded);
     Set<String> matched = new HashSet<>();
+    matched.add("type");
+    Collections.addAll(matched, excluded);
     List<Consumer<Entity>> applied = new ArrayList<>();
     // Walk the registry in order, to maintain dependency order, ie maxHealth before health
     for (var property : properties) {
@@ -142,7 +133,7 @@ public abstract class MobProperties {
       matched.add(name);
     }
     for (var attr : el.getAttributes()) {
-      if (!skip.contains(attr.getName()) && !matched.contains(attr.getName())) {
+      if (!matched.contains(attr.getName())) {
         throw new InvalidXMLException(
             "Attribute '" + attr.getName() + "' is not a valid property for "
                 + type.getSimpleName(),

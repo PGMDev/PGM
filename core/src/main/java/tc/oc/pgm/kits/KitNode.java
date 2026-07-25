@@ -5,11 +5,14 @@ import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 
 public class KitNode extends AbstractKit {
   private final List<Kit> kits;
@@ -68,6 +71,25 @@ public class KitNode extends AbstractKit {
     for (Kit kit : kits) {
       kit.remove(player);
     }
+  }
+
+  @Override
+  public void apply(LivingEntity entity) {
+    for (Kit kit : kits) kit.apply(entity);
+  }
+
+  @Override
+  public boolean mobCompatible() {
+    for (Kit kit : kits) {
+      if (!kit.mobCompatible()) return false;
+    }
+    return true;
+  }
+
+  @Override
+  public void validateMob(Class<? extends LivingEntity> mobType, Node node)
+      throws InvalidXMLException {
+    for (Kit kit : kits) kit.validateMob(mobType, node);
   }
 
   public static final KitNode EMPTY =
