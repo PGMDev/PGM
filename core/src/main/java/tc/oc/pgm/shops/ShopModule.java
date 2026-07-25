@@ -36,6 +36,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.entity.MobProperties;
+import tc.oc.pgm.entity.SpawnableEntity;
 import tc.oc.pgm.kits.ItemKit;
 import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.kits.OverflowWarningKit;
@@ -132,7 +133,8 @@ public class ShopModule implements MapModule<ShopMatchModule> {
             : List.of();
         PointProvider location = pointParser.parseSingle(shopkeeper, new PointProviderAttributes());
 
-        keepers.add(new ShopKeeper(name, location, mob, properties, shop));
+        keepers.add(new ShopKeeper(
+            name, location, new SpawnableEntity(mob, properties, KitNode.EMPTY), shop));
       }
 
       return shops.isEmpty() ? null : new ShopModule(shops, keepers);
