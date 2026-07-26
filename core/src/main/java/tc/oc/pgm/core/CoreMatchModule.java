@@ -25,6 +25,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
+import tc.oc.pgm.goals.GoalFormatter;
 import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
@@ -83,6 +84,18 @@ public class CoreMatchModule implements MatchModule, Listener {
         }
       }
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void announceLeak(final CoreLeakEvent event) {
+    final Core core = event.getCore();
+    if (!core.hasShowOption(ShowOption.SHOW_MESSAGES)) return;
+
+    this.match.sendMessage(translatable(
+        "core.complete.owned",
+        GoalFormatter.formatContributions(core.getContributions()),
+        core.getComponentName(),
+        core.getOwner().getName()));
   }
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
