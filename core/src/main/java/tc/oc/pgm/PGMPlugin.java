@@ -23,9 +23,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 import org.bukkit.generator.ChunkGenerator;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.java.JavaPluginLoader;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
@@ -111,12 +109,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
   public PGMPlugin() {
     super();
-  }
-
-  // Used by RuntimePluginLoader in PGMServer
-  public PGMPlugin(
-      JavaPluginLoader loader, PluginDescriptionFile description, File dataFolder, File file) {
-    super(loader, description, dataFolder, file);
   }
 
   @Override

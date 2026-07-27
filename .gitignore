@@ -37,6 +37,9 @@ xcuserdata
 # VSCode files
 .vscode
 
+# Default test server directory
+run/
+
 # Minecraft generated files
 banned-ips.json
 banned-players.json
