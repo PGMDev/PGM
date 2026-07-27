@@ -60,7 +60,7 @@ public class Structure implements Feature<StructureDefinition> {
   }
 
   public void placeAbsolute(BlockVector vector, boolean update) {
-    vector.subtract(getRegion().getBounds().getBlockMin());
+    vector.subtract(getDefinition().getOrigin());
     place(vector, update);
   }
 }
