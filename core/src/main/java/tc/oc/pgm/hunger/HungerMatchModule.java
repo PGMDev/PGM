@@ -13,12 +13,19 @@ import tc.oc.pgm.events.ListenerScope;
 @ListenerScope(MatchScope.RUNNING)
 public class HungerMatchModule implements MatchModule, Listener {
 
-  public HungerMatchModule(Match match) {}
+  private final boolean preventDepletion;
+  private final boolean preventReplenishment;
+
+  public HungerMatchModule(Match match, boolean depletion, boolean replenishment) {
+    this.preventDepletion = !depletion;
+    this.preventReplenishment = !replenishment;
+  }
 
   @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
   public void handleHungerChange(final FoodLevelChangeEvent event) {
-    if (event.getEntity() instanceof Player) {
-      int oldFoodLevel = ((Player) event.getEntity()).getFoodLevel();
+    if (!(event.getEntity() instanceof Player p)) return;
+    int oldFoodLevel = p.getFoodLevel();
+    if (event.getFoodLevel() < oldFoodLevel ? preventDepletion : preventReplenishment) {
       event.setFoodLevel(oldFoodLevel);
     }
   }
