@@ -1,10 +1,10 @@
 package tc.oc.pgm.platform.modern.modules.behavior.looking;
 
 import io.papermc.paper.entity.LookAnchor;
-import org.jspecify.annotations.Nullable;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
@@ -20,8 +20,7 @@ public class LookInstance {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.restYaw = behavior.restYaw() != null ? behavior.restYaw() : mannequin.getYaw();
-    this.restPitch =
-        behavior.restPitch() != null ? behavior.restPitch() : mannequin.getPitch();
+    this.restPitch = behavior.restPitch() != null ? behavior.restPitch() : mannequin.getPitch();
   }
 
   public boolean matches(Entity entity) {

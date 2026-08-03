@@ -8,5 +8,4 @@ public record EvadeBehavior(
     boolean panic,
     @Nullable Duration panicDuration,
     @Nullable Float avoidRange,
-    @Nullable Filter avoidFilter) {
-}
+    @Nullable Filter avoidFilter) {}

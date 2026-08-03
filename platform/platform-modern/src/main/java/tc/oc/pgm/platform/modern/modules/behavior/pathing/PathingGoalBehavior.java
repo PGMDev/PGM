@@ -10,5 +10,4 @@ public record PathingGoalBehavior(
     Vector destination,
     @Nullable Duration idle,
     @Nullable Action<? super Match> completionAction,
-    @Nullable Float goalRadius) {
-}
+    @Nullable Float goalRadius) {}

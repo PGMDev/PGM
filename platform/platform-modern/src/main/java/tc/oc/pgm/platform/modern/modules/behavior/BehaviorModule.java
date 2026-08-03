@@ -21,6 +21,7 @@ import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.HostilityType;
 import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.home.HomeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.RotationType;
@@ -29,6 +30,9 @@ import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingGoalBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.RelocationMethod;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.RelocationType;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.StuckBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.tempt.TemptBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.tempt.TemptInstance;
+import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -96,7 +100,9 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         EvadeBehavior evade = null;
         if (evadeEl != null) {
           Boolean panic = parser.parseBool(evadeEl, "panic").optional(false);
-          Duration panicDuration = parser.duration(evadeEl, "panic-duration").orNull();
+          Duration panicDuration = parser
+              .duration(evadeEl, "panic-duration")
+              .optional(EvadeInstance.DEFAULT_PANIC_DURATION);
           HostilityType hostility = combat != null ? combat.hostility() : HostilityType.PASSIVE;
           if ((hostility != HostilityType.PASSIVE) && (panic || panicDuration != null)) {
             throw new InvalidXMLException(
@@ -113,6 +119,28 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           }
 
           evade = new EvadeBehavior(panic, panicDuration, avoidRange, avoidFilter);
+        }
+
+        TemptBehavior tempt = null;
+        Element temptEl = el.getChild("tempt");
+        if (temptEl != null) {
+          var kits = factory.getKits();
+          boolean follow = parser.parseBool(temptEl, "follow").optional(false);
+          boolean hasHolding = temptEl.getChild("holding") != null;
+          if (!follow && !hasHolding) {
+            throw new InvalidXMLException(
+                "Either a 'follow' attribute or 'holding' child must be defined", temptEl);
+          }
+          if (follow && hasHolding) {
+            throw new InvalidXMLException("'follow' and 'holding' cannot both be defined", temptEl);
+          }
+
+          ItemMatcher holding = hasHolding ? kits.parseItemMatcher(temptEl, "holding") : null;
+          Float range =
+              parser.parseFloat(temptEl, "range").optional(TemptInstance.DEFAULT_TEMPT_RANGE);
+          boolean leaveHome = parser.parseBool(temptEl, "leave-home").optional(false);
+
+          tempt = new TemptBehavior(holding, follow, range, leaveHome);
         }
 
         Element lookEl = el.getChild("look-at");
@@ -221,8 +249,8 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           path = new PathingBehavior(start, loop, leash, goals, stuck);
         }
 
-        BehaviorDefinition behaviorDefinition =
-            new BehaviorDefinition(id, avoidDanger, openDoors, combat, home, evade, look, path);
+        BehaviorDefinition behaviorDefinition = new BehaviorDefinition(
+            id, avoidDanger, openDoors, combat, home, evade, tempt, look, path);
         factory.getFeatures().addFeature(el, behaviorDefinition);
         behaviors.put(id, behaviorDefinition);
       }

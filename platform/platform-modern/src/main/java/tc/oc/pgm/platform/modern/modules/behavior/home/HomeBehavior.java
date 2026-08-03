@@ -8,5 +8,4 @@ public record HomeBehavior(
     Region region,
     boolean wander,
     @Nullable Float strayDis,
-    @Nullable Duration returnAfter) {
-}
+    @Nullable Duration returnAfter) {}

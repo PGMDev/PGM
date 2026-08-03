@@ -1,7 +1,7 @@
 package tc.oc.pgm.platform.modern.modules.behavior.looking;
 
-import org.jspecify.annotations.Nullable;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.Nullable;
 
 public record LookBehavior(
     boolean trackPlayer,
@@ -9,5 +9,4 @@ public record LookBehavior(
     RotationType rotation,
     float range,
     @Nullable Float restYaw,
-    @Nullable Float restPitch) {
-}
+    @Nullable Float restPitch) {}

@@ -11,5 +11,5 @@ public record StuckBehavior(
     @Nullable RelocationType moveTo,
     @Nullable Integer moveToIndex,
     @Nullable RelocationMethod method,
-    boolean giveUp, boolean despawn) {
-}
+    boolean giveUp,
+    boolean despawn) {}

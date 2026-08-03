@@ -2,8 +2,8 @@ package tc.oc.pgm.platform.modern.modules.behavior.pathing;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.jspecify.annotations.Nullable;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.Nullable;
 
 public record PathingBehavior(
     @Nullable Vector start,

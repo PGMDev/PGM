@@ -39,7 +39,7 @@ public class WaypointMatchModule implements MatchModule, Listener {
     this.waypointManager = ((CraftWorld) match.getWorld()).getHandle().getWaypointManager();
   }
 
-  public void track(WaypointTransmitter transmitter) {
+  private void track(WaypointTransmitter transmitter) {
     if (transmitter == null) return;
 
     waypointManager.trackWaypoint(transmitter);
@@ -87,6 +87,7 @@ public class WaypointMatchModule implements MatchModule, Listener {
     waypointManager.untrackWaypoint(nmsPlayer);
     if (color != null) {
       nmsPlayer.waypointIcon().color = Optional.of(color.asRGB());
+      // Ensures they're newly registered so the color updates
       attr.setBaseValue(256);
       waypointManager.trackWaypoint(nmsPlayer);
     } else {

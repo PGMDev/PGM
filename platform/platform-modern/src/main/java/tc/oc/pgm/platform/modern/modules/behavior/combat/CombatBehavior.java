@@ -4,10 +4,7 @@ import java.time.Duration;
 import org.jspecify.annotations.Nullable;
 
 public record CombatBehavior(
-    HostilityType hostility,
-    @Nullable Duration duration,
-    float range,
-    Duration interval) {
+    HostilityType hostility, @Nullable Duration duration, float range, Duration interval) {
 
   public CombatBehavior(
       HostilityType hostility,

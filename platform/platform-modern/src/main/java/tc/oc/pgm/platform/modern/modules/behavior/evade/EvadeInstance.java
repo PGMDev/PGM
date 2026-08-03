@@ -3,13 +3,13 @@ package tc.oc.pgm.platform.modern.modules.behavior.evade;
 import io.papermc.paper.entity.LookAnchor;
 import java.time.Duration;
 import java.util.Set;
-import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -19,7 +19,7 @@ import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 public class EvadeInstance {
 
-  private static final Duration DEFAULT_PANIC_DURATION = Duration.ofSeconds(5);
+  public static final Duration DEFAULT_PANIC_DURATION = Duration.ofSeconds(5);
   private static final Set<EntityDamageEvent.DamageCause> PANIC_CAUSES = Set.of(
       EntityDamageEvent.DamageCause.CONTACT,
       EntityDamageEvent.DamageCause.FALL,
@@ -132,21 +132,19 @@ public class EvadeInstance {
     if (avoidRangeSq < 0) {
       return null;
     }
-    var man = mannequin.getLocation();
+    var loc = mannequin.getLocation();
     MatchPlayer nearest = null;
-    double elligible = avoidRangeSq;
+    double eligible = avoidRangeSq;
     for (MatchPlayer player : match.getParticipants()) {
       var bukkit = player.getBukkit();
       if (bukkit == null || player.isDead()) continue;
       if (avoidFilter != null && !avoidFilter.query(player).isAllowed()) {
         continue;
       }
-      //      if (behavior.getAvoidFilter() != null
-      //          && !behavior.getAvoidFilter().query(player).isAllowed()) continue;
 
-      double dis = bukkit.getLocation().distanceSquared(man);
-      if (dis <= elligible) {
-        elligible = dis;
+      double dis = bukkit.getLocation().distanceSquared(loc);
+      if (dis <= eligible) {
+        eligible = dis;
         nearest = player;
       }
     }

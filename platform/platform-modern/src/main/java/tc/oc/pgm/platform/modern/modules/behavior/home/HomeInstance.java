@@ -1,9 +1,9 @@
 package tc.oc.pgm.platform.modern.modules.behavior.home;
 
-import org.jspecify.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.platform.modern.modules.behavior.PathWalking;
@@ -16,6 +16,7 @@ public class HomeInstance {
   private final Zombie ghost;
   private final double straySq;
   private final long returnAfterTicks;
+  private boolean returning;
   private final @Nullable WanderInstance wander;
   private long idleSinceTick = -1;
   private @Nullable Path currentPath;
@@ -25,8 +26,7 @@ public class HomeInstance {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.ghost = ghost;
-    this.straySq =
-        behavior.strayDis() != null ? behavior.strayDis() * behavior.strayDis() : -1;
+    this.straySq = behavior.strayDis() != null ? behavior.strayDis() * behavior.strayDis() : -1;
     this.returnAfterTicks =
         behavior.returnAfter() != null ? behavior.returnAfter().toMillis() / 50 : 0;
     this.wander = behavior.wander() ? new WanderInstance(mannequin, behavior, ghost) : null;
@@ -58,6 +58,7 @@ public class HomeInstance {
     if (atHome(match)) {
       idleSinceTick = -1;
       currentPath = null;
+      returning = false;
       if (wander != null) {
         wander.tick(match, now);
       }
@@ -66,7 +67,8 @@ public class HomeInstance {
 
     if ((!returnsHome())) return;
     if (idleSinceTick == -1) idleSinceTick = now.tick;
-    if (now.tick - idleSinceTick >= returnAfterTicks) return;
+    if (now.tick - idleSinceTick < returnAfterTicks) return;
+    returning = true;
 
     if (currentPath == null || currentPath.isDone()) {
       if (now.tick >= nextRepathTick) {
@@ -85,5 +87,10 @@ public class HomeInstance {
     }
 
     PathWalking.step(mannequin, currentPath, 0.15, false); // Regular walk speed
+  }
+
+  public boolean isReturning() {
+    // Returning home has priority over temptation
+    return returnsHome();
   }
 }

@@ -29,6 +29,8 @@ import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingInstance;
+import tc.oc.pgm.platform.modern.modules.behavior.tempt.TemptBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.tempt.TemptInstance;
 import tc.oc.pgm.platform.modern.modules.mannequin.Mannequin;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -38,6 +40,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   private final Map<Mannequin, CombatInstance> hostiles = new HashMap<>();
   private final Map<Mannequin, HomeInstance> homes = new HashMap<>();
   private final Map<Mannequin, EvadeInstance> evades = new HashMap<>();
+  private final Map<Mannequin, TemptInstance> tempts = new HashMap<>();
   private final Map<Mannequin, LookInstance> looks = new HashMap<>();
   private final Map<Mannequin, PathingInstance> paths = new HashMap<>();
 
@@ -55,11 +58,12 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     CombatBehavior combat = definition.getCombatBehavior();
     HomeBehavior home = definition.getHomeBehavior();
     EvadeBehavior evade = definition.getEvadeBehavior();
+    TemptBehavior tempt = definition.getTemptBehavior();
     LookBehavior look = definition.getLookBehavior();
     PathingBehavior path = definition.getPathingBehavior();
 
     Zombie ghost = null;
-    if (combat != null || home != null || evade != null || path != null) {
+    if (combat != null || home != null || evade != null || tempt != null || path != null) {
       ghost = new Zombie(
           EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
       ghost.setOnGround(true);
@@ -93,6 +97,11 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     if (evade != null) {
       evades.put(mannequin, new EvadeInstance(mannequin, evade, ghost));
     }
+
+    if (tempt != null) {
+      tempts.put(mannequin, new TemptInstance(mannequin, tempt, home, ghost));
+    }
+
     if (look != null) {
       looks.put(mannequin, new LookInstance(mannequin, look));
     }
@@ -105,6 +114,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     hostiles.remove(mannequin);
     homes.remove(mannequin);
     evades.remove(mannequin);
+    tempts.remove(mannequin);
     looks.remove(mannequin);
     paths.remove(mannequin);
   }
@@ -161,6 +171,11 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     return ei != null && ei.isEvading(tick);
   }
 
+  private boolean isTempted(Mannequin mannequin) {
+    TemptInstance ti = tempts.get(mannequin);
+    return ti != null && ti.isTempted();
+  }
+
   private boolean canMove(Mannequin mannequin) {
     return mannequin.getDefinition().hasGravity()
         && mannequin.getDefinition().hasPhysics()
@@ -172,7 +187,10 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     hostiles.forEach((mannequin, ci) -> ci.tick(match, tick, canMove(mannequin)));
 
     homes.forEach((mannequin, hi) -> {
-      if (canMove(mannequin) && !inCombat(mannequin) && !isEvading(mannequin, tick)) {
+      if (canMove(mannequin)
+          && !inCombat(mannequin)
+          && !isEvading(mannequin, tick)
+          && !isTempted(mannequin)) {
         hi.tick(match, tick);
       } else {
         hi.clearPaths();
@@ -185,8 +203,22 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       }
     });
 
+    tempts.forEach(((mannequin, ti) -> {
+      HomeInstance hi = homes.get(mannequin);
+      boolean returning = hi != null && hi.isReturning() && !ti.leaveHome();
+      PathingInstance pi = paths.get(mannequin);
+      boolean pathing = pi != null && pi.isWalking();
+      if (canMove(mannequin)
+          && !returning
+          && !inCombat(mannequin)
+          && !isEvading(mannequin, tick)
+          && !pathing) {
+        ti.tick(match, tick);
+      }
+    }));
+
     looks.forEach(((mannequin, li) -> {
-      boolean blocked = inCombat(mannequin) || isEvading(mannequin, tick);
+      boolean blocked = inCombat(mannequin) || isEvading(mannequin, tick) || isTempted(mannequin);
       PathingInstance pi = paths.get(mannequin);
       boolean pathing = pi != null && pi.isWalking();
       if (!blocked && !pathing) {

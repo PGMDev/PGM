@@ -7,6 +7,7 @@ import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.home.HomeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
+import tc.oc.pgm.platform.modern.modules.behavior.tempt.TemptBehavior;
 
 public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
   private final boolean avoidDanger;
@@ -14,6 +15,7 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
   private final @Nullable CombatBehavior combatBehavior;
   private final @Nullable HomeBehavior homeBehavior;
   private final @Nullable EvadeBehavior evadeBehavior;
+  private final @Nullable TemptBehavior temptBehavior;
   private final @Nullable LookBehavior lookBehavior;
   private final @Nullable PathingBehavior pathingBehavior;
 
@@ -24,6 +26,7 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
       @Nullable CombatBehavior combatBehavior,
       @Nullable HomeBehavior homeBehavior,
       @Nullable EvadeBehavior evadeBehavior,
+      @Nullable TemptBehavior temptBehavior,
       @Nullable LookBehavior lookBehavior,
       @Nullable PathingBehavior pathingBehavior) {
     super(id);
@@ -32,6 +35,7 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
     this.combatBehavior = combatBehavior;
     this.homeBehavior = homeBehavior;
     this.evadeBehavior = evadeBehavior;
+    this.temptBehavior = temptBehavior;
     this.lookBehavior = lookBehavior;
     this.pathingBehavior = pathingBehavior;
   }
@@ -54,6 +58,10 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
 
   public @Nullable EvadeBehavior getEvadeBehavior() {
     return evadeBehavior;
+  }
+
+  public @Nullable TemptBehavior getTemptBehavior() {
+    return temptBehavior;
   }
 
   public @Nullable LookBehavior getLookBehavior() {
