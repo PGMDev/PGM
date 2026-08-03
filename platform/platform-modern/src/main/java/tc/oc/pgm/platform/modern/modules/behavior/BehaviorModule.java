@@ -21,7 +21,6 @@ import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.CombatInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.combat.HostilityType;
 import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;
-import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeInstance;
 import tc.oc.pgm.platform.modern.modules.behavior.home.HomeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.RotationType;
@@ -56,6 +55,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         String id = parser.string(el, "id").required();
         boolean avoidDanger = parser.parseBool(el, "avoid-danger").optional(true);
         boolean openDoors = parser.parseBool(el, "open-doors").optional(true);
+        boolean enterVehicles = parser.parseBool(el, "enter-vehicles").optional(false);
 
         Element combatEl = el.getChild("combat");
         CombatBehavior combat = null;
@@ -100,9 +100,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         EvadeBehavior evade = null;
         if (evadeEl != null) {
           Boolean panic = parser.parseBool(evadeEl, "panic").optional(false);
-          Duration panicDuration = parser
-              .duration(evadeEl, "panic-duration")
-              .optional(EvadeInstance.DEFAULT_PANIC_DURATION);
+          Duration panicDuration = parser.duration(evadeEl, "panic-duration").orNull();
           HostilityType hostility = combat != null ? combat.hostility() : HostilityType.PASSIVE;
           if ((hostility != HostilityType.PASSIVE) && (panic || panicDuration != null)) {
             throw new InvalidXMLException(
@@ -250,7 +248,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         }
 
         BehaviorDefinition behaviorDefinition = new BehaviorDefinition(
-            id, avoidDanger, openDoors, combat, home, evade, tempt, look, path);
+            id, avoidDanger, openDoors, enterVehicles, combat, home, evade, tempt, look, path);
         factory.getFeatures().addFeature(el, behaviorDefinition);
         behaviors.put(id, behaviorDefinition);
       }

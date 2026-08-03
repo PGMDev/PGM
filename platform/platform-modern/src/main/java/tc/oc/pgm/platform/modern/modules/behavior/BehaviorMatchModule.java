@@ -177,9 +177,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   }
 
   private boolean canMove(Mannequin mannequin) {
-    return mannequin.getDefinition().hasGravity()
-        && mannequin.getDefinition().hasPhysics()
-        && !mannequin.getDefinition().isImmovable();
+    return mannequin.hasGravity() && mannequin.hasPhysics() && !mannequin.isImmovable();
   }
 
   @Override

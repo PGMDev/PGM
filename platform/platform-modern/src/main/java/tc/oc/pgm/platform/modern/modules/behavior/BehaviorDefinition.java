@@ -12,6 +12,7 @@ import tc.oc.pgm.platform.modern.modules.behavior.tempt.TemptBehavior;
 public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
   private final boolean avoidDanger;
   private final boolean openDoors;
+  private final boolean enterVehicles;
   private final @Nullable CombatBehavior combatBehavior;
   private final @Nullable HomeBehavior homeBehavior;
   private final @Nullable EvadeBehavior evadeBehavior;
@@ -23,6 +24,7 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
       @Nullable String id,
       boolean avoidDanger,
       boolean openDoors,
+      boolean enterVehicles,
       @Nullable CombatBehavior combatBehavior,
       @Nullable HomeBehavior homeBehavior,
       @Nullable EvadeBehavior evadeBehavior,
@@ -32,6 +34,7 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
     super(id);
     this.avoidDanger = avoidDanger;
     this.openDoors = openDoors;
+    this.enterVehicles = enterVehicles;
     this.combatBehavior = combatBehavior;
     this.homeBehavior = homeBehavior;
     this.evadeBehavior = evadeBehavior;
@@ -46,6 +49,10 @@ public class BehaviorDefinition extends SelfIdentifyingFeatureDefinition {
 
   public boolean isOpenDoors() {
     return openDoors;
+  }
+
+  public boolean isEnterVehicles() {
+    return enterVehicles;
   }
 
   public @Nullable CombatBehavior getCombatBehavior() {

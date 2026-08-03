@@ -4,13 +4,13 @@ import com.destroystokyo.paper.SkinParts;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.util.Vector;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.skin.Skin;
@@ -153,12 +153,24 @@ public class Mannequin {
     entity.setImmovable(immovable);
   }
 
+  public boolean isImmovable() {
+    return entity.isImmovable();
+  }
+
   public void setGravity(boolean gravity) {
     entity.setGravity(gravity);
   }
 
+  public boolean hasGravity() {
+    return entity.hasGravity();
+  }
+
   public void setPhysics(boolean physics) {
     entity.setNoPhysics(!physics);
+  }
+
+  public boolean hasPhysics() {
+    return !entity.hasNoPhysics();
   }
 
   public void setOnFire(boolean onFire) {

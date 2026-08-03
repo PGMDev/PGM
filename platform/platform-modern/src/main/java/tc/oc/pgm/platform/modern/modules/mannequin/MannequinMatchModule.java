@@ -6,13 +6,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -112,5 +113,18 @@ public class MannequinMatchModule implements MatchModule, Listener {
 
   public void removeWaypoint(Mannequin mannequin) {
     setWaypoint(mannequin, null);
+  }
+
+  @EventHandler
+  public void onVehicleEnter(VehicleEnterEvent event) {
+    Mannequin mannequin = byEntity.get(event.getEntered().getUniqueId());
+    if (mannequin == null) return;
+
+    // Ignore preventing vehicle entry when no behavior is present.
+    var behavior = mannequin.getDefinition().getBehavior();
+    if (behavior == null) return;
+    if (!behavior.get().isEnterVehicles()) {
+      event.setCancelled(true);
+    }
   }
 }
