@@ -16,6 +16,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.Filterables;
@@ -643,9 +644,24 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
 
   @MethodParser("built")
   public Filter parseBuiltFilter(Element el) throws InvalidXMLException {
-    var structure = parser.reference(StructureDefinition.class, el, "structure").required();
-    var origin = parser.vector(el, "origin").required().toBlockVector();
+    var structure = parser
+        .reference(StructureDefinition.class, el, "structure")
+        .validate((FeatureValidation<StructureDefinition>) (def, node) -> {
+          int count = 0;
+          var it = def.getRegion().getStatic().getBlockVectorIterator();
+          while (it.hasNext()) {
+            it.next();
+            count++;
+          }
+          if (count > 1024)
+            throw new InvalidXMLException(
+                String.format(
+                    "Structure '%s' exceeds limit of 1024 blocks (has %d)", def.getId(), count),
+                node);
+        })
+        .required();
 
+    var origin = parser.vector(el, "origin").required().toBlockVector();
     return new BuiltFilter(structure, origin);
   }
 

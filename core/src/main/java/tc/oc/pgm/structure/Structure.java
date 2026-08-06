@@ -57,19 +57,26 @@ public class Structure implements Feature<StructureDefinition> {
     place(vector, update);
   }
 
-  public BlockVector findMismatch(World world, BlockVector origin) {
-    BlockVector offset = origin.clone().subtract(getDefinition().getOrigin()).toBlockVector();
-
-    for (BlockData blockData : snapshot.getMaterials(region)) {
-      BlockVector pos = blockData.getBlockVector();
-      BlockMaterialData snapshotMaterial = snapshot.getOriginalMaterial(pos);
-      BlockMaterialData worldMaterial = MaterialData.block(blockData.getBlock(world, offset));
-
-      if (snapshotMaterial.encoded() != worldMaterial.encoded()) {
-        return blockData.getBlock(world, offset).getLocation().toVector().toBlockVector();
-      }
+  public boolean findMismatch(World world, BlockVector offset, BlockVector out) {
+    BlockMaterialData snapshotMaterial = snapshot.getOriginalMaterial(
+        out.getBlockX() - offset.getBlockX(),
+        out.getBlockY() - offset.getBlockY(),
+        out.getBlockZ() - offset.getBlockZ());
+    if (snapshotMaterial.encoded()
+        != MaterialData.block(world.getBlockAt(out.getBlockX(), out.getBlockY(), out.getBlockZ()))
+            .encoded()) {
+      return true;
     }
 
-    return null;
+    for (BlockData blockData : snapshot.getMaterials(region)) {
+      if (!blockData.sameMaterialAs(world, offset)) {
+        BlockVector sv = blockData.getBlockVector();
+        out.setX(sv.getBlockX() + offset.getBlockX());
+        out.setY(sv.getBlockY() + offset.getBlockY());
+        out.setZ(sv.getBlockZ() + offset.getBlockZ());
+        return true;
+      }
+    }
+    return false;
   }
 }
