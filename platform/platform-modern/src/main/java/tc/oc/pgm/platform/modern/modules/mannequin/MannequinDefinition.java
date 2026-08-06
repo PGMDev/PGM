@@ -9,6 +9,7 @@ import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.platform.modern.modules.behavior.BehaviorDefinition;
+import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart.SkinLayers;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.skin.Skin;
 
@@ -28,7 +29,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
   private final boolean gravity;
   private final boolean physics;
   private final boolean onFire;
-  private final SkinPart.SkinLayers layers;
+  private final SkinLayers layers;
   private final @Nullable Action<? super MatchPlayer> action;
   private final @Nullable FeatureReference<WaypointDefinition> waypoint;
   private final @Nullable FeatureReference<BehaviorDefinition> behavior;
@@ -50,7 +51,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
       boolean gravity,
       boolean physics,
       boolean onFire,
-      SkinPart.SkinLayers layers,
+      SkinLayers layers,
       @Nullable Action<? super MatchPlayer> action,
       @Nullable FeatureReference<WaypointDefinition> waypoint,
       @Nullable FeatureReference<BehaviorDefinition> behavior) {
@@ -136,7 +137,7 @@ public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
     return onFire;
   }
 
-  public SkinPart.SkinLayers getLayers() {
+  public SkinLayers getLayers() {
     return layers;
   }
 

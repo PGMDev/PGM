@@ -13,6 +13,7 @@ import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart.SkinLayers;
 import tc.oc.pgm.util.skin.Skin;
 
 public class Mannequin {
@@ -110,7 +111,7 @@ public class Mannequin {
     entity.setProfile(ResolvableProfile.resolvableProfile(profile));
   }
 
-  public void setSkinLayers(SkinPart.SkinLayers layers) {
+  public void setSkinLayers(SkinLayers layers) {
     SkinParts.Mutable parts = entity.getSkinParts();
     parts.setCapeEnabled(layers.contains(SkinPart.CAPE));
     parts.setJacketEnabled(layers.contains(SkinPart.JACKET));

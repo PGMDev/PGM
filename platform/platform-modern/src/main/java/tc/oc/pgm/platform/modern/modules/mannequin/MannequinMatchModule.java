@@ -96,7 +96,7 @@ public class MannequinMatchModule implements MatchModule, Listener {
     var action = mannequin.getAction();
     if (action == null) return;
     MatchPlayer player = match.getPlayer(event.getPlayer());
-    if (player == null) return;
+    if (player == null || player.isDead()) return;
     event.setCancelled(true);
     action.trigger(player);
   }

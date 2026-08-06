@@ -2,8 +2,8 @@ package tc.oc.pgm.platform.modern.action.actions;
 
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.kyori.adventure.text.Component;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.actions.AbstractAction;
 import tc.oc.pgm.api.PGM;
@@ -15,7 +15,7 @@ import tc.oc.pgm.platform.modern.modules.behavior.BehaviorMatchModule;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinDefinition;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinMatchModule;
 import tc.oc.pgm.platform.modern.modules.mannequin.MannequinPose;
-import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart;
+import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart.SkinLayers;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.skin.Skin;
@@ -40,7 +40,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
   private final boolean playerProfile;
   private final @Nullable UUID uuid;
   private final @Nullable Skin skin;
-  private final @Nullable SkinPart.SkinLayers layers;
+  private final @Nullable SkinLayers layers;
   private final @Nullable MannequinPose pose;
   private final @Nullable FeatureReference<WaypointDefinition> waypoint;
   private final boolean removeWaypoint;
@@ -74,7 +74,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
       boolean playerProfile,
       @Nullable UUID uuid,
       @Nullable Skin skin,
-      @Nullable SkinPart.SkinLayers layers,
+      @Nullable SkinLayers layers,
       @Nullable MannequinPose pose,
       boolean removeWaypoint,
       @Nullable FeatureReference<WaypointDefinition> waypoint,
@@ -166,7 +166,7 @@ public class ModifyMannequinAction<B extends Filterable<?>> extends AbstractActi
 
       if (resolvedUuid != null && resolvedSkin != null) {
         mannequin.setSkin(resolvedUuid, resolvedSkin);
-        mannequin.setSkinLayers(SkinPart.SkinLayers.allOf());
+        mannequin.setSkinLayers(SkinLayers.allOf());
       }
       if (layers != null) mannequin.setSkinLayers(layers);
       if (pose != null) mannequin.setPose(pose);

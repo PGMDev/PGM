@@ -44,7 +44,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
   private final Map<Mannequin, LookInstance> looks = new HashMap<>();
   private final Map<Mannequin, PathingInstance> paths = new HashMap<>();
 
-  public BehaviorMatchModule(Match match, Map<String, BehaviorDefinition> behaviorDefinitions) {
+  public BehaviorMatchModule(Match match) {
     this.match = match;
   }
 
@@ -63,6 +63,7 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
     PathingBehavior path = definition.getPathingBehavior();
 
     Zombie ghost = null;
+    // look-at not included since it doesn't use a ghost
     if (combat != null || home != null || evade != null || tempt != null || path != null) {
       ghost = new Zombie(
           EntityType.ZOMBIE, ((CraftWorld) mannequin.getEntity().getWorld()).getHandle());
@@ -88,7 +89,14 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       hostiles.put(
           mannequin,
           new CombatInstance(
-              mannequin, combat, home, definition.isOpenDoors(), ghost, hasPathing, leash));
+              mannequin,
+              combat,
+              home,
+              definition.isOpenDoors(),
+              ghost,
+              hasPathing,
+              leash,
+              combat.attackFilter()));
     }
 
     if (home != null) {
@@ -106,7 +114,8 @@ public class BehaviorMatchModule implements MatchModule, Listener, Tickable {
       looks.put(mannequin, new LookInstance(mannequin, look));
     }
     if (path != null) {
-      paths.put(mannequin, new PathingInstance(mannequin, path, ghost, definition.isOpenDoors()));
+      paths.put(
+          mannequin, new PathingInstance(mannequin, path, ghost, definition.isOpenDoors(), match));
     }
   }
 

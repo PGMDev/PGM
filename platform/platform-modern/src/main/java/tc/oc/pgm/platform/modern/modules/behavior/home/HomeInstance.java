@@ -35,9 +35,9 @@ public class HomeInstance {
   private boolean atHome(Match match) {
     if (straySq >= 0) {
       var center = behavior.region().getStatic(match).getBounds().getCenterPoint();
-      var loc = mannequin.getLocation();
-      double dx = center.getX() - loc.getX();
-      double dz = center.getZ() - loc.getZ();
+      var manLoc = mannequin.getLocation();
+      double dx = center.getX() - manLoc.getX();
+      double dz = center.getZ() - manLoc.getZ();
       return dx * dx + dz * dz <= straySq;
     }
     return behavior.region().contains(mannequin.getEntity());
@@ -73,8 +73,8 @@ public class HomeInstance {
     if (currentPath == null || currentPath.isDone()) {
       if (now.tick >= nextRepathTick) {
         var center = behavior.region().getStatic(match).getBounds().getCenterPoint();
-        var loc = mannequin.getLocation();
-        ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+        var manLoc = mannequin.getLocation();
+        ghost.setPos(manLoc.getX(), manLoc.getY(), manLoc.getZ());
         ghost.setOnGround(true);
         currentPath = ghost
             .getNavigation()
@@ -91,6 +91,6 @@ public class HomeInstance {
 
   public boolean isReturning() {
     // Returning home has priority over temptation
-    return returnsHome();
+    return returning;
   }
 }

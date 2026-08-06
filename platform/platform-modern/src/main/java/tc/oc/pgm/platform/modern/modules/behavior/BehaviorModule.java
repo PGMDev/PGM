@@ -24,6 +24,7 @@ import tc.oc.pgm.platform.modern.modules.behavior.evade.EvadeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.home.HomeBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.LookBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.looking.RotationType;
+import tc.oc.pgm.platform.modern.modules.behavior.pathing.LoopBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.PathingGoalBehavior;
 import tc.oc.pgm.platform.modern.modules.behavior.pathing.RelocationMethod;
@@ -41,7 +42,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
 
   @Override
   public BehaviorMatchModule createMatchModule(Match match) {
-    return new BehaviorMatchModule(match, behaviorDefinitions);
+    return new BehaviorMatchModule(match);
   }
 
   public static class Factory implements MapModuleFactory<BehaviorModule> {
@@ -70,8 +71,13 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           Duration interval = parser
               .duration(combatEl, "attack-interval")
               .optional(CombatInstance.DEFAULT_ATTACK_INTERVAL);
+          Filter attackFilter = parser.filter(combatEl, "attack-filter").orNull();
+          if (attackFilter != null && hostility == HostilityType.PASSIVE) {
+            throw new InvalidXMLException(
+                "'attack-filter' is not supported for passive mannequins", combatEl);
+          }
 
-          combat = new CombatBehavior(hostility, duration, range, interval);
+          combat = new CombatBehavior(hostility, duration, range, interval, attackFilter);
         }
 
         Element homeEl = el.getChild("home");
@@ -159,6 +165,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
         }
 
         PathingBehavior path = null;
+        LoopBehavior loop = null;
         StuckBehavior stuck = null;
         Element pathEl = el.getChild("pathing");
         if (pathEl != null) {
@@ -170,8 +177,6 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
 
           Node startNode = Node.fromAttr(pathEl, "start");
           Vector start = startNode != null ? XMLUtils.parseVector(startNode) : null;
-
-          boolean loop = parser.parseBool(pathEl, "loop").optional(false);
           Float leash = parser.parseFloat(pathEl, "leash-distance").orNull();
 
           List<PathingGoalBehavior> goals = new ArrayList<>();
@@ -193,6 +198,25 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
           if (goals.isEmpty()) {
             throw new InvalidXMLException(
                 "Pathing requires at least one 'goal' sub-element to be defined", pathEl);
+          }
+
+          Element loopEl = pathEl.getChild("loop");
+          if (loopEl != null) {
+            boolean isRandomGoal = parser.parseBool(loopEl, "random").optional(false);
+            boolean isReverse = parser.parseBool(loopEl, "reverse").optional(false);
+            if (isRandomGoal && isReverse) {
+              throw new InvalidXMLException("'random' and 'reverse' cannot be combined", loopEl);
+            }
+
+            Integer times = parser.parseInt(loopEl, "times").orNull();
+            if (times != null && times <= 0) {
+              throw new InvalidXMLException("'times' must be greater than 0", loopEl);
+            }
+
+            Action<? super Match> completionAction =
+                parser.action(Match.class, loopEl, "completion-action").orNull();
+
+            loop = new LoopBehavior(isRandomGoal, isReverse, times, completionAction);
           }
 
           Element stuckEl = pathEl.getChild("if-stuck");
@@ -244,7 +268,7 @@ public record BehaviorModule(Map<String, BehaviorDefinition> behaviorDefinitions
             }
           }
 
-          path = new PathingBehavior(start, loop, leash, goals, stuck);
+          path = new PathingBehavior(start, leash, goals, loop, stuck);
         }
 
         BehaviorDefinition behaviorDefinition = new BehaviorDefinition(

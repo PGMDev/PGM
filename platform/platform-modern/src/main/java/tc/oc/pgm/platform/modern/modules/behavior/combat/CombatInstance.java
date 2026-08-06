@@ -12,6 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.time.Tick;
@@ -46,6 +47,7 @@ public class CombatInstance {
   private final boolean hasPathing;
   private final double leashSq;
   private @Nullable Vector aggroAnchor;
+  private final @Nullable Filter attackFilter;
 
   public CombatInstance(
       Mannequin mannequin,
@@ -54,7 +56,8 @@ public class CombatInstance {
       boolean openDoors,
       Zombie ghost,
       boolean hasPathing,
-      @Nullable Float leash) {
+      @Nullable Float leash,
+      @Nullable Filter attackFilter) {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.home = home;
@@ -64,6 +67,7 @@ public class CombatInstance {
     this.ghost = ghost;
     this.hasPathing = hasPathing;
     this.leashSq = leash != null ? leash * leash : -1;
+    this.attackFilter = attackFilter;
   }
 
   public boolean matches(Entity entity) {
@@ -73,6 +77,9 @@ public class CombatInstance {
   public void onAttacked(MatchPlayer attacker, Tick now) {
     // Handle neutral/hostile. Passive is handled in EvadeInstance
     if (behavior.hostility() == HostilityType.PASSIVE) return;
+
+    // Don't aggro onto/attack players matching attack-filter
+    if (attackFilter != null && !attackFilter.query(attacker).isAllowed()) return;
 
     if (target == null || target == attacker) {
       target = attacker;
@@ -92,21 +99,23 @@ public class CombatInstance {
     }
 
     if (target != null && now.tick >= nextAttackTick && inAttackRange(target)) {
-      mannequin.getEntity().swingMainHand();
-      target
-          .getBukkit()
-          .damage(
-              mannequin.getEntity().getAttribute(Attribute.ATTACK_DAMAGE).getValue(),
-              mannequin.getEntity());
-      nextAttackTick = now.tick + intervalTicks;
+      if (attackFilter == null || attackFilter.query(target).isAllowed()) {
+        mannequin.getEntity().swingMainHand();
+        target
+            .getBukkit()
+            .damage(
+                mannequin.getEntity().getAttribute(Attribute.ATTACK_DAMAGE).getValue(),
+                mannequin.getEntity());
+        nextAttackTick = now.tick + intervalTicks;
+      }
     }
 
     if (canMove && target != null && !inAttackRange(target)) {
       Player bukkit = target.getBukkit();
       if (bukkit != null && !(hasPathing && leashSq < 0)) {
         if (now.tick >= nextRepathTick) {
-          var loc = mannequin.getLocation();
-          ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+          var manLoc = mannequin.getLocation();
+          ghost.setPos(manLoc.getX(), manLoc.getY(), manLoc.getZ());
           ghost.setOnGround(true);
           currentPath = ghost
               .getNavigation()
@@ -137,7 +146,8 @@ public class CombatInstance {
         || !target.isParticipating()
         || aggroExpiryTick != -1 && now.tick > aggroExpiryTick
         || outsideHome(bukkit)
-        || beyondLeash()) {
+        || beyondLeash()
+        || (attackFilter != null && !attackFilter.query(target).isAllowed())) {
       target = null;
       aggroExpiryTick = -1;
     }
@@ -150,6 +160,8 @@ public class CombatInstance {
     for (MatchPlayer player : match.getParticipants()) {
       Player bukkit = player.getBukkit();
       if (bukkit == null || player.isDead()) continue;
+      if (attackFilter != null && !attackFilter.query(player).isAllowed()) continue;
+
       boolean inRange = hasPathing
           ? bukkit.getLocation().distanceSquared(mannequin.getLocation()) <= rangeSq * 5
           // Give rangeSq a buffer for aggro visibility for aggro stuttering at home bounds

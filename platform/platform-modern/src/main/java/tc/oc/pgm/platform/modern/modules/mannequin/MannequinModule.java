@@ -16,6 +16,7 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.platform.modern.modules.behavior.BehaviorDefinition;
+import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart.SkinLayers;
 import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
 import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -84,10 +85,10 @@ public record MannequinModule(Map<String, MannequinDefinition> mannequinDefiniti
             .parseEnum(MannequinPose.class, profileEl, "pose")
             .optional(MannequinPose.STANDING);
 
-        SkinPart.SkinLayers layers = SkinPart.SkinLayers.allOf();
+        SkinLayers layers = SkinLayers.allOf();
         String removedLayers = parser.string(profileEl, "remove-layers").attr().orNull();
         if (removedLayers != null) {
-          layers = SkinPart.SkinLayers.allOf().minus(SkinPart.SkinLayers.parse(removedLayers));
+          layers = SkinLayers.allOf().minus(SkinLayers.parse(removedLayers));
         }
 
         Action<? super MatchPlayer> action =

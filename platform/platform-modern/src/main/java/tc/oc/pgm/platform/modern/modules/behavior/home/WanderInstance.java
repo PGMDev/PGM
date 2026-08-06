@@ -35,14 +35,14 @@ public class WanderInstance {
       if (now.tick >= nextWanderTick) {
         Vector point = pickWanderPoint(match);
         if (point != null) {
-          var loc = mannequin.getLocation();
-          ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+          var manLoc = mannequin.getLocation();
+          ghost.setPos(manLoc.getX(), manLoc.getY(), manLoc.getZ());
           ghost.setOnGround(true);
 
           wanderPath = ghost
               .getNavigation()
               .createPath(new BlockPos(point.getBlockX(), point.getBlockY(), point.getBlockZ()), 0);
-          lastWanderProgressPos = loc.toVector();
+          lastWanderProgressPos = manLoc.toVector();
           lastWanderProgressTick = now.tick;
         }
         nextWanderTick = now.tick + randomIdleTicks(match);

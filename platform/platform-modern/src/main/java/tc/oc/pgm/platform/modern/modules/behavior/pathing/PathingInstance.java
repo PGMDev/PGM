@@ -1,5 +1,7 @@
 package tc.oc.pgm.platform.modern.modules.behavior.pathing;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.level.pathfinder.Path;
@@ -16,7 +18,6 @@ public class PathingInstance {
   private enum Phase {
     WALKING,
     IDLING,
-    STUCK,
     GAVE_UP,
     DONE
   }
@@ -36,15 +37,23 @@ public class PathingInstance {
   private long lastProgressTick;
   private boolean wasInterrupted;
   private final boolean openDoors;
+  private final boolean randomGoal;
+  private int loopsCompleted;
+  private boolean forward = true;
+  private boolean firstVisit = true;
 
   public PathingInstance(
-      Mannequin mannequin, PathingBehavior behavior, Zombie ghost, boolean openDoors) {
+      Mannequin mannequin, PathingBehavior behavior, Zombie ghost, boolean openDoors, Match match) {
     this.mannequin = mannequin;
     this.behavior = behavior;
     this.ghost = ghost;
     this.openDoors = openDoors;
-    this.goals = behavior.goals();
+    this.goals = new ArrayList<>(behavior.goals());
     this.startPos = behavior.start() != null ? behavior.start() : mannequin.getSpawnPos();
+    this.randomGoal = behavior.loop() != null && behavior.loop().randomGoal();
+    if (randomGoal) {
+      Collections.shuffle(this.goals, match.getRandom());
+    }
   }
 
   public void pathingInterrupted() {
@@ -64,7 +73,7 @@ public class PathingInstance {
     }
     switch (phase) {
       case WALKING -> tickWalking(match, now);
-      case IDLING -> tickIdling(now);
+      case IDLING -> tickIdling(match, now);
       case DONE, GAVE_UP -> {}
     }
   }
@@ -72,8 +81,7 @@ public class PathingInstance {
   private void tickWalking(Match match, Tick now) {
     Vector target = currentIndex == 0 ? startPos : goals.get(currentIndex - 1).destination();
 
-    // Vanilla pathfinding always floors x/z coordinates and walks to the center of the target
-    // block.
+    // Vanilla pathfinding always floors x/z coords and walks to the center of the target block.
     // Unfortunately mannequins have to mimic this in order to not get stuck when walking to goals.
     int blockX = (int) Math.floor(target.getX());
     int blockZ = (int) Math.floor(target.getZ());
@@ -89,7 +97,11 @@ public class PathingInstance {
 
         long idleTicks = goal.idle() != null ? goal.idle().toMillis() / 50 : 0;
         idleUntilTick = now.tick + idleTicks;
+      } else {
+        // Suppress a start node's completion-action when a mannequin is first spawned
+        firstVisit = false;
       }
+
       currentPath = null;
       lastIndexReached = currentIndex;
       phase = Phase.IDLING;
@@ -98,8 +110,8 @@ public class PathingInstance {
 
     if (currentPath == null || currentPath.isDone()) {
       if (now.tick >= nextRepathTick) {
-        var loc = mannequin.getLocation();
-        ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+        var manLoc = mannequin.getLocation();
+        ghost.setPos(manLoc.getX(), manLoc.getY(), manLoc.getZ());
         ghost.setOnGround(true);
         currentPath =
             ghost.getNavigation().createPath(blockX, (int) Math.floor(target.getY()), blockZ, 0);
@@ -134,21 +146,54 @@ public class PathingInstance {
     return radius != null ? radius * radius : 0.5 * 0.5;
   }
 
-  private void tickIdling(Tick now) {
+  private void tickIdling(Match match, Tick now) {
     if (now.tick < idleUntilTick) return;
-    currentIndex++;
-    if (currentIndex > behavior.goals().size()) {
-      if (behavior.loop()) currentIndex = 0;
-      else {
+    if (forward) {
+      currentIndex++;
+    } else {
+      currentIndex--;
+    }
+
+    LoopBehavior loop = behavior.loop();
+    if (currentIndex > goals.size()) {
+      if (loop == null) {
         phase = Phase.DONE;
         return;
       }
+
+      if (loop.reverse()) {
+        forward = false;
+        currentIndex = goals.size() - 1;
+      } else {
+        if (loopCompletion(match, loop)) return;
+        if (randomGoal) {
+          Collections.shuffle(this.goals, match.getRandom());
+
+          // TODO: come back and fix returning to start goal everytime a full shuffle is walked
+
+        } else {
+          currentIndex = 0;
+        }
+      }
+    } else if (currentIndex < 0) {
+      if (loop == null) {
+        phase = Phase.DONE;
+        return;
+      }
+      if (loopCompletion(match, loop)) return;
+
+      forward = true;
+      currentIndex = 0;
     }
+
     phase = Phase.WALKING;
   }
 
   private void handleStuck(Match match) {
     StuckBehavior stuck = behavior.stuck();
+    if (stuck == null) {
+      return;
+    }
     if (stuck.stuckAction() != null) {
       stuck.stuckAction().trigger(match);
     }
@@ -194,5 +239,20 @@ public class PathingInstance {
 
   public boolean isWalking() {
     return phase == Phase.WALKING;
+  }
+
+  private boolean loopCompletion(Match match, LoopBehavior loop) {
+    loopsCompleted++;
+
+    // Completion action fired when looping back and returning to start node
+    if (loop.completionAction() != null) {
+      loop.completionAction().trigger(match);
+    }
+
+    if (loop.times() != null && loopsCompleted >= loop.times()) {
+      phase = Phase.DONE;
+      return true;
+    }
+    return false;
   }
 }

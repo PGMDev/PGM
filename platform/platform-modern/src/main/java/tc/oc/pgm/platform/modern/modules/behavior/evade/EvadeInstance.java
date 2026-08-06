@@ -44,7 +44,7 @@ public class EvadeInstance {
   private long panicStartTick;
   private long panicExpiryTick = -1;
   private long nextRepathTick;
-  private boolean avoiding;
+  private boolean isAvoiding;
   private final double avoidRangeSq;
   private final Filter avoidFilter;
 
@@ -83,7 +83,7 @@ public class EvadeInstance {
   }
 
   public boolean isEvading(Tick now) {
-    return isPanicking(now) || avoiding;
+    return isPanicking(now) || isAvoiding;
   }
 
   public void tick(Match match, Tick now) {
@@ -93,18 +93,18 @@ public class EvadeInstance {
       return;
     }
     // Post panic cleanup
-    if (panicExpiryTick != -1 && now.tick < panicExpiryTick) {
+    if (panicExpiryTick != -1 && now.tick >= panicExpiryTick) {
       panicExpiryTick = -1;
     }
     // Fleeing due to avoid attribute
     if (avoidRangeSq < 0) {
-      avoiding = false;
+      isAvoiding = false;
       return;
     }
 
     fleeSource = nearestAvoidTarget(match);
-    avoiding = fleeSource != null;
-    if (avoiding) {
+    isAvoiding = fleeSource != null;
+    if (isAvoiding) {
       flee(match, now, 0.22, 12);
     } else {
       fleePath = null;
@@ -114,8 +114,8 @@ public class EvadeInstance {
   private void flee(Match match, Tick now, double speed, int repathBase) {
     if (fleePath == null || fleePath.isDone() || now.tick >= nextRepathTick) {
       Vector fleePoint = pickFleePoint(match);
-      var loc = mannequin.getLocation();
-      ghost.setPos(loc.getX(), loc.getY(), loc.getZ());
+      var manLoc = mannequin.getLocation();
+      ghost.setPos(manLoc.getX(), manLoc.getY(), manLoc.getZ());
       ghost.setOnGround(true);
       fleePath = ghost
           .getNavigation()
@@ -132,7 +132,7 @@ public class EvadeInstance {
     if (avoidRangeSq < 0) {
       return null;
     }
-    var loc = mannequin.getLocation();
+    var manLoc = mannequin.getLocation();
     MatchPlayer nearest = null;
     double eligible = avoidRangeSq;
     for (MatchPlayer player : match.getParticipants()) {
@@ -142,7 +142,7 @@ public class EvadeInstance {
         continue;
       }
 
-      double dis = bukkit.getLocation().distanceSquared(loc);
+      double dis = bukkit.getLocation().distanceSquared(manLoc);
       if (dis <= eligible) {
         eligible = dis;
         nearest = player;
