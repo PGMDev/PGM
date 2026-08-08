@@ -6,7 +6,7 @@ import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -14,11 +14,13 @@ import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Range;
 import java.lang.ref.SoftReference;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +57,7 @@ import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
+import tc.oc.pgm.util.world.WorldFormat;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -123,15 +126,26 @@ public class MapInfoImpl implements MapInfo {
 
   @NonNull
   private Map<String, VariantInfo> createVariantMap(Element root) throws InvalidXMLException {
+    // Most variants share a world folder, so only inspect each one once
+    Map<Path, WorldData> worlds = new HashMap<>();
+
     LinkedHashMap<String, VariantInfo> variants = new LinkedHashMap<>();
     for (Element el : root.getChildren("variant")) {
-      VariantData vd = new VariantData(root, el);
+      VariantData vd = new VariantData(root, el, worlds);
       if (variants.put(vd.variantId, vd) != null)
         throw new InvalidXMLException("Duplicate variant ids are not allowed", el);
     }
     if (!variants.containsKey(DEFAULT_VARIANT))
-      variants.putFirst(DEFAULT_VARIANT, new VariantData(root, null));
+      variants.putFirst(DEFAULT_VARIANT, new VariantData(root, null, worlds));
     return ImmutableMap.copyOf(variants);
+  }
+
+  /** The state of a world folder, as read while parsing the map */
+  private record WorldData(WorldFormat format, int dataVersion) {
+    static WorldData read(Path worldDir) {
+      var format = WorldFormat.detect(worldDir);
+      return new WorldData(format, WORLD_STORAGE.getWorldDataVersion(worldDir, format));
+    }
   }
 
   @Override
@@ -383,14 +397,19 @@ public class MapInfoImpl implements MapInfo {
 
   private class VariantData implements VariantInfo {
     private static final Version VERSION_1_13 = new Version(1, 13, 0);
+    private static final Version VERSION_26_1 = new Version(26, 1, 0);
+
     private final String variantId;
     private final String mapName;
     private final String mapId;
     private final boolean customId;
     private final String world;
+    private final WorldFormat worldFormat;
+    private final int worldDataVersion;
     private final Range<Version> serverVersions;
 
-    public VariantData(Element root, @Nullable Element el) throws InvalidXMLException {
+    public VariantData(Element root, @Nullable Element el, Map<Path, WorldData> worlds)
+        throws InvalidXMLException {
       String name = assertNotNull(Node.fromRequiredChildOrAttr(root, "name").getValueNormalize());
       String slug = assertNotNull(root).getChildTextNormalize("slug");
       Node minVer = Node.fromAttr(root, "min-server-version");
@@ -422,10 +441,17 @@ public class MapInfoImpl implements MapInfo {
       this.customId = slug != null;
       this.mapId = assertNotNull(slug != null ? slug : StringUtils.slugify(mapName));
 
+      var sourceDir = source.getAbsoluteDir();
+      var worldDir = world != null ? sourceDir.resolve(world) : sourceDir;
+      var worldData = worlds.computeIfAbsent(worldDir, WorldData::read);
+      this.worldFormat = worldData.format();
+      this.worldDataVersion = worldData.dataVersion();
+
+      Version minVersion = XMLUtils.parseSemanticVersion(minVer);
+      Version maxVersion = XMLUtils.parseSemanticVersion(maxVer);
+
       this.serverVersions = XMLUtils.parseClosedRange(
-          fallback(minVer, maxVer),
-          parseOrInferMinimumVersion(source, minVer),
-          XMLUtils.parseSemanticVersion(maxVer));
+          fallback(minVer, maxVer), inferMinimumVersion(worldData, minVersion), maxVersion);
     }
 
     static <T> T fallback(T obj, T fallback) {
@@ -462,18 +488,31 @@ public class MapInfoImpl implements MapInfo {
       return serverVersions;
     }
 
-    @Nullable
-    private Version parseOrInferMinimumVersion(MapSource source, @Nullable Node minVer)
-        throws InvalidXMLException {
-      if (minVer != null) return XMLUtils.parseSemanticVersion(minVer);
-      /* Infer the map version from the DataVersion field in level.dat. If 1.13+, set that as
-      the min version to avoid legacy servers crashing when loading the chunks. */
-      var sourceDir = source.getAbsoluteDir();
-      var levelDat = (world != null ? sourceDir.resolve(world) : sourceDir).resolve("level.dat");
+    @Override
+    public WorldFormat getWorldFormat() {
+      return worldFormat;
+    }
 
-      var mapDataVersion = MISC_UTILS.getWorldDataVersion(levelDat);
-      if (mapDataVersion >= DataVersions.V1_13) return VERSION_1_13;
-      return null;
+    @Override
+    public int getWorldDataVersion() {
+      return worldDataVersion;
+    }
+
+    @Nullable
+    private Version inferMinimumVersion(WorldData worldData, @Nullable Version declared) {
+      final Version required;
+      if (worldData.format() == WorldFormat.DIMENSION) {
+        // Assume dimension format maps are at least 26.1
+        required = VERSION_26_1;
+      } else if (worldData.dataVersion() >= DataVersions.V1_13) {
+        // Avoid legacy servers crashing when loading chunks of post-flattening maps
+        required = VERSION_1_13;
+      } else {
+        return declared;
+      }
+
+      // A declared version may raise the floor the world requires, but never lower it
+      return declared == null || declared.isOlderThan(required) ? required : declared;
     }
   }
 }
