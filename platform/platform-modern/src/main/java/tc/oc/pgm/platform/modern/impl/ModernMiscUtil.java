@@ -3,25 +3,15 @@ package tc.oc.pgm.platform.modern.impl;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -43,7 +33,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
-import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
@@ -91,19 +80,6 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
-  public int getWorldDataVersion(Path levelDat) {
-    // Constant from LevelStorageSource, sounds way too high (104mb) but better than unbounded
-    long MAX_HEAP = 104857600L;
-    try {
-      var root = NbtIo.readCompressed(levelDat, NbtAccounter.create(MAX_HEAP));
-      return NbtUtils.getDataVersion(root.getCompoundOrEmpty("Data"), DataVersions.LEGACY);
-    } catch (Throwable ignored) {
-      // In case we cannot read the level.dat file, return a constant
-      return DataVersions.LEGACY;
-    }
-  }
-
-  @Override
   public Key getSoundKey(String name) {
     // From Paper, most reliable option
     try {
@@ -148,16 +124,5 @@ public class ModernMiscUtil implements MiscUtils {
   public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
     if (ev instanceof PlayerPickupArrowEvent arrowEvent) return arrowEvent.getArrow();
     return ev.getItem();
-  }
-
-  @Override
-  public List<File> getWorldDirectories() {
-    var console = ((CraftServer) Bukkit.getServer()).getServer();
-    // Probe a non-existent dimension to get the dimension root folder
-    var dimensionKey =
-        CraftNamespacedKey.toResourceKey(Registries.DIMENSION, new NamespacedKey("pgm", "world"));
-    return List.of(
-        console.storageSource.getDimensionPath(dimensionKey).getParent().toFile(),
-        Bukkit.getServer().getWorldContainer());
   }
 }
