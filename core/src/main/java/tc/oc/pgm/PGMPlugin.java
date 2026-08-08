@@ -1,6 +1,6 @@
 package tc.oc.pgm;
 
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
 
 import com.google.common.collect.Lists;
 import fr.minuskube.inv.InventoryManager;
@@ -211,7 +211,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
         config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
 
     // Sometimes match folders need to be cleaned up if the server previously crashed
-    for (File root : MISC_UTILS.getWorldDirectories()) {
+    for (File root : WORLD_STORAGE.getWorldDirectories()) {
       final File[] worldDirs = root.listFiles();
       if (worldDirs == null) continue;
       for (File dir : worldDirs) {

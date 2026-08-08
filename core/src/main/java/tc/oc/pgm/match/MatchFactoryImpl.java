@@ -1,9 +1,8 @@
 package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
-import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.Packets.TAB_PACKETS;
+import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
@@ -38,15 +37,15 @@ import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
 import tc.oc.pgm.api.match.factory.MatchFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.spawns.SpawnMatchModule;
+import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextParser;
 import tc.oc.pgm.util.text.TextTranslations;
+import tc.oc.pgm.util.world.WorldCreationInfo;
 
 public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   private static final AtomicLong counter = new AtomicLong();
   private static final Difficulty[] difficulties = Difficulty.values();
-  private static final World.Environment[] environments = World.Environment.values();
-
   private static final String DUMMY_TEAM = "dummy";
 
   private final Stack<Stage> stages;
@@ -215,33 +214,30 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
   /** Stage #2: downloads a {@link MapContext} to a local directory. */
   private static class DownloadMapStage implements Stage, Revertable {
     private final MapContext map;
-    private File dir;
+    private final String worldName;
+    private final File dir;
 
     private DownloadMapStage(MapContext map) {
       this.map = assertNotNull(map);
-    }
-
-    private File getDirectory() {
-      if (dir == null) {
-        dir = new File(
-            PGM.get().getServer().getWorldContainer().getAbsoluteFile(),
-            Match.WORLD_PREFIX + counter.getAndIncrement());
-      }
-      return dir;
+      this.worldName = Match.WORLD_PREFIX + counter.getAndIncrement();
+      this.dir = WORLD_STORAGE.getWorldDirectory(worldName, map.getInfo().getWorldFormat());
     }
 
     private InitWorldStage advanceSync() throws MapMissingException {
       // Always ensure the directory is empty first
-      MISC_UTILS.deleteWorldDirectories(getDirectory().getName());
+      WORLD_STORAGE.deleteWorldDirectories(worldName);
 
-      final File dir = getDirectory();
       if (dir.mkdirs()) {
         map.getInfo().getSource().downloadTo(map.getInfo().getWorldFolder(), dir);
       } else {
         throw new MapMissingException(dir.getPath(), "Unable to mkdirs world directory");
       }
 
-      return new InitWorldStage(map, dir.getName());
+      for (String discarded : WORLD_STORAGE.getDiscardedFiles(map.getInfo().getWorldFormat())) {
+        FileUtils.delete(new File(dir, discarded));
+      }
+
+      return new InitWorldStage(map, worldName);
     }
 
     @Override
@@ -252,7 +248,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     @Override
     public void revert() {
       counter.getAndDecrement();
-      MISC_UTILS.deleteWorldDirectories(getDirectory().getName());
+      WORLD_STORAGE.deleteWorldDirectories(worldName);
     }
   }
 
@@ -265,8 +261,13 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
 
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getInfo().getWorld();
-      final World world = NMS_HACKS.createWorld(
-          worldName, info.getEnvironment(), info.hasTerrain(), info.getSeed());
+      final World world = WORLD_STORAGE.createWorld(new WorldCreationInfo(
+          worldName,
+          info.getEnvironment(),
+          info.hasTerrain(),
+          info.getSeed(),
+          map.getInfo().getWorldFormat(),
+          map.getInfo().getWorldDataVersion()));
 
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 
