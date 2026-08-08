@@ -2,11 +2,12 @@ package tc.oc.pgm.match;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -95,6 +96,7 @@ import tc.oc.pgm.result.CompetitorVictoryCondition;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.collection.RankedSet;
@@ -945,7 +947,9 @@ public class MatchImpl implements Match {
           Level.SEVERE, "Unable to unload world " + worldName + " (this can cause memory leaks!)");
     }
 
-    MISC_UTILS.deleteWorldDirectories(worldName);
+    for (File root : WORLD_STORAGE.getWorldDirectories()) {
+      FileUtils.delete(new File(root, worldName));
+    }
   }
 
   @Override
