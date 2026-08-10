@@ -42,6 +42,7 @@ import tc.oc.pgm.destroyable.DestroyableModule;
 import tc.oc.pgm.doublejump.DoubleJumpMatchModule;
 import tc.oc.pgm.enderchest.EnderChestMatchModule;
 import tc.oc.pgm.enderchest.EnderChestModule;
+import tc.oc.pgm.entity.TaggedMobMatchModule;
 import tc.oc.pgm.fallingblocks.FallingBlocksMatchModule;
 import tc.oc.pgm.fallingblocks.FallingBlocksModule;
 import tc.oc.pgm.ffa.FreeForAllMatchModule;
@@ -333,5 +334,6 @@ public final class Modules {
     // MatchModules only used if required as a dependency by other modules
     registerDependencyOnly(SnapshotMatchModule.class, new SnapshotMatchModule.Factory());
     registerDependencyOnly(HologramMatchModule.class, HologramMatchModule::new);
+    registerDependencyOnly(TaggedMobMatchModule.class, TaggedMobMatchModule::new);
   }
 }

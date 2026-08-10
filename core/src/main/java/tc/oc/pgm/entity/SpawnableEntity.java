@@ -12,7 +12,7 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public record SpawnableEntity(
-    Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties) {
+    Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties, String id) {
 
   public Entity spawn(Location location) {
     Entity entity = location.getWorld().spawn(location, entityType);
@@ -24,8 +24,9 @@ public record SpawnableEntity(
 
   public static SpawnableEntity parse(Element el) throws InvalidXMLException {
     var type = parseType(Node.fromRequiredAttr(el, "type"));
+    String id = el.getAttributeValue("id");
     return new SpawnableEntity(
-        type, MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "type"));
+        type, MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "type", "id"), id);
   }
 
   private static Class<? extends LivingEntity> parseType(Node typeNode) throws InvalidXMLException {

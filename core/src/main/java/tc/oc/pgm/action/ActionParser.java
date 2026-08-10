@@ -35,6 +35,7 @@ import tc.oc.pgm.action.actions.ScheduleAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
 import tc.oc.pgm.action.actions.SoundAction;
+import tc.oc.pgm.action.actions.SummonAction;
 import tc.oc.pgm.action.actions.TakePaymentAction;
 import tc.oc.pgm.action.actions.TeamAliasAction;
 import tc.oc.pgm.action.actions.TeleportAction;
@@ -50,6 +51,8 @@ import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.entity.SpawnableEntity;
+import tc.oc.pgm.entity.TaggedMob;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
@@ -549,5 +552,33 @@ public class ActionParser {
     return MatchPlayer.class.isAssignableFrom(scope)
         ? new ScheduleAction.Player(after, (Action<? super MatchPlayer>) action)
         : new ScheduleAction<>(scope, after, action);
+  }
+
+  @MethodParser("summon")
+  public <T extends Filterable<?>> SummonAction<T> parseSummon(Element el, Class<T> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+
+    var entity = parser.reference(TaggedMob.class, el, "entity").optional().orElse(null);
+    Element mobEl = el.getChild("mob");
+
+    if (entity != null && mobEl != null) {
+      throw new InvalidXMLException("Cannot specify both 'entity-id' and 'mob' elements", el);
+    }
+
+    if (entity == null && mobEl == null) {
+      throw new InvalidXMLException("Either 'entity' or a 'mob' element is required", el);
+    }
+
+    SpawnableEntity mob = mobEl != null ? SpawnableEntity.parse(mobEl) : null;
+
+    var xFormula = parser.formula(scope, el, "x").required();
+    var yFormula = parser.formula(scope, el, "y").required();
+    var zFormula = parser.formula(scope, el, "z").required();
+    var pitchFormula = parser.formula(scope, el, "pitch").optional();
+    var yawFormula = parser.formula(scope, el, "yaw").optional();
+
+    return new SummonAction<>(
+        scope, entity, mob, xFormula, yFormula, zFormula, pitchFormula, yawFormula);
   }
 }
