@@ -563,7 +563,7 @@ public class ActionParser {
     Element mobEl = el.getChild("mob");
 
     if (entity != null && mobEl != null) {
-      throw new InvalidXMLException("Cannot specify both 'entity-id' and 'mob' elements", el);
+      throw new InvalidXMLException("Cannot specify both 'entity' and 'mob' elements", el);
     }
 
     if (entity == null && mobEl == null) {
