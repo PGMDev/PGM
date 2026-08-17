@@ -121,7 +121,7 @@ public class Spawner implements Listener, Tickable {
     handleEntityRemoveEvent(event.getEntity(), true);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onItemMergeRecover(ItemMergeEvent event) {
     // Entity merging does not affect count.
     // We do need to remove the meta so the remove from world doesn't subtract.
