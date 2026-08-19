@@ -5,8 +5,12 @@ import com.mojang.serialization.Dynamic;
 import io.papermc.paper.world.PaperWorldLoader;
 import io.papermc.paper.world.migration.WorldFolderMigration;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.OptionalLong;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -20,6 +24,10 @@ import net.minecraft.util.worldupdate.UpgradeProgress;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapIndex;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
@@ -35,7 +43,7 @@ import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.generator.WorldInfo;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.DataVersions;
@@ -43,7 +51,15 @@ import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.world.WorldCreationInfo;
 import tc.oc.pgm.util.world.WorldFormat;
 
+@NullMarked
 public abstract class ModernWorldLoader {
+
+  /** Map data file names, in either the legacy or the file fixer's layout */
+  private static final Pattern MAP_FILE = Pattern.compile("(?:map_)?(\\d+)\\.dat");
+
+  /** Map id counter file name, as renamed from {@code idcounts.dat} by the file fixer */
+  private static final String MAP_INDEX_FILE =
+      savedDataFile(Path.of(""), MapIndex.TYPE).getFileName().toString();
 
   /** @return the loaded world, or null if it could not be created */
   public static @Nullable World createWorld(WorldCreationInfo info) {
@@ -69,7 +85,7 @@ public abstract class ModernWorldLoader {
    * this is {@link org.bukkit.craftbukkit.CraftServer#createWorld} adapted for PGM's needs.
    */
   private static @Nullable World createWorld(
-      @NonNull WorldCreator creator, WorldFormat format, int dataVersion) {
+      WorldCreator creator, WorldFormat format, int dataVersion) {
     var server = (CraftServer) Bukkit.getServer();
     var console = server.getServer(); // NMS server
 
@@ -96,14 +112,13 @@ public abstract class ModernWorldLoader {
       biomeProvider = server.getBiomeProvider(name);
     }
 
-    ResourceKey<LevelStem> actualDimension =
-        switch (creator.environment()) {
-          case NORMAL -> LevelStem.OVERWORLD;
-          case NETHER -> LevelStem.NETHER;
-          case THE_END -> LevelStem.END;
-          default ->
-            throw new IllegalArgumentException("Illegal dimension (" + creator.environment() + ")");
-        };
+    ResourceKey<LevelStem> actualDimension = switch (creator.environment()) {
+      case NORMAL -> LevelStem.OVERWORLD;
+      case NETHER -> LevelStem.NETHER;
+      case THE_END -> LevelStem.END;
+      default ->
+        throw new IllegalArgumentException("Illegal dimension (" + creator.environment() + ")");
+    };
 
     RegistryAccess registryAccess = console.registryAccess();
     // PGM: set our own dimension key with our own namespace
@@ -236,9 +251,17 @@ public abstract class ModernWorldLoader {
     var console = server.getServer();
     var legacyWorldGenSettings = readLegacyWorldGenSettings(console, name);
 
+    Path sourceRoot = console.storageSource.parent().getLevelPath(name);
+    Path dimensionPath = console.storageSource.getDimensionPath(dimensionKey);
+    ResourceKey<LevelStem> storageStem = storageStem(sourceRoot, stem);
+
     try {
+      // Move maps out of the world folder before the migration discards it, as Paper only
+      // migrates a fixed whitelist of saved data, which maps are not part of
+      migrateMapData(sourceRoot, storageStem, dimensionPath);
+
       WorldFolderMigration.migrateApiWorld(
-          console.storageSource, console.registryAccess(), name, stem, dimensionKey);
+          console.storageSource, console.registryAccess(), name, storageStem, dimensionKey);
     } catch (IOException ex) {
       throw new RuntimeException("Failed to migrate legacy world " + name, ex);
     }
@@ -269,5 +292,60 @@ public abstract class ModernWorldLoader {
           .log(Level.WARNING, "Failed to read legacy world gen settings for " + name, ex);
       return null;
     }
+  }
+
+  private static void migrateMapData(
+      Path sourceRoot, ResourceKey<LevelStem> stem, Path dimensionPath) throws IOException {
+    for (Path source : List.of(
+        savedDataFile(sourceRoot, MapIndex.TYPE).getParent(),
+        savedDataFile(storageFolder(sourceRoot, stem), MapIndex.TYPE).getParent(),
+        sourceRoot.resolve("DIM-1", "data"),
+        sourceRoot.resolve("DIM1", "data"))) {
+      if (!Files.isDirectory(source)) continue;
+
+      try (var files = Files.list(source)) {
+        for (Path file : files.toList()) {
+          var fileName = file.getFileName().toString();
+          var matcher = MAP_FILE.matcher(fileName);
+          if (matcher.matches()) {
+            var id = new MapId(Integer.parseInt(matcher.group(1)));
+            moveMapFile(file, savedDataFile(dimensionPath, MapItemSavedData.type(id)));
+          } else if (fileName.equals(MAP_INDEX_FILE)) {
+            moveMapFile(file, savedDataFile(dimensionPath, MapIndex.TYPE));
+          }
+        }
+      }
+    }
+  }
+
+  private static void moveMapFile(Path file, Path targetFile) throws IOException {
+    if (Files.exists(targetFile)) {
+      PGM.get()
+          .getLogger()
+          .warning("Skipping map data " + file + ", as " + targetFile + " already exists");
+      return;
+    }
+
+    Files.createDirectories(targetFile.getParent());
+    try {
+      Files.move(file, targetFile);
+    } catch (IOException ex) {
+      PGM.get().getLogger().log(Level.FINE, "Could not move " + file + ", copying instead", ex);
+      Files.copy(file, targetFile);
+    }
+  }
+
+  private static Path savedDataFile(Path root, SavedDataType<?> type) {
+    return type.id().withSuffix(".dat").resolveAgainst(root.resolve(LevelResource.DATA.id()));
+  }
+
+  private static ResourceKey<LevelStem> storageStem(Path sourceRoot, ResourceKey<LevelStem> stem) {
+    return Files.isDirectory(storageFolder(sourceRoot, stem).resolve("region"))
+        ? stem
+        : LevelStem.OVERWORLD;
+  }
+
+  private static Path storageFolder(Path sourceRoot, ResourceKey<LevelStem> stem) {
+    return stem.identifier().resolveAgainst(sourceRoot.resolve("dimensions"));
   }
 }
