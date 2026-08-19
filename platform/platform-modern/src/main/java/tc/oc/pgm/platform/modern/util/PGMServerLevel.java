@@ -11,7 +11,6 @@ import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -20,10 +19,11 @@ import net.minecraft.world.level.storage.SavedDataStorage;
 import org.bukkit.World;
 import org.bukkit.generator.BiomeProvider;
 import org.bukkit.generator.ChunkGenerator;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 
+@NullMarked
 public class PGMServerLevel extends ServerLevel {
   public PGMServerLevel(
       MinecraftServer server,
@@ -61,19 +61,22 @@ public class PGMServerLevel extends ServerLevel {
         loadedWorldData);
   }
 
-  // Redirect all map operations to world-level storage
-  @Nullable
+  /**
+   * All map-related methods redirect to level-specific {@link getDataStorage} rather than
+   * {@code this.getServer().getDataStorage()}
+   */
   @Override
-  public MapItemSavedData getMapData(@NonNull MapId mapId) {
+  public @Nullable MapItemSavedData getMapData(final MapId id) {
     // Paper start - Call missing map initialize event and set id
     final SavedDataStorage storage = getDataStorage();
 
-    final Optional<SavedData> cacheEntry = storage.cache.get(MapItemSavedData.type(mapId));
+    final Optional<net.minecraft.world.level.saveddata.SavedData> cacheEntry =
+        storage.cache.get(MapItemSavedData.type(id));
     if (cacheEntry == null) { // Cache did not contain, try to load and may init
       final MapItemSavedData mapData =
-          storage.get(MapItemSavedData.type(mapId)); // get populates the cache
+          storage.get(MapItemSavedData.type(id)); // get populates the cache
       if (mapData != null) { // map was read, init it and return
-        mapData.id = mapId;
+        mapData.id = id;
         new org.bukkit.event.server.MapInitializeEvent(mapData.mapView).callEvent();
         return mapData;
       }
@@ -82,7 +85,7 @@ public class PGMServerLevel extends ServerLevel {
     }
     // Cache entry exists, update it with the id ref and return.
     if (cacheEntry.orElse(null) instanceof final MapItemSavedData mapItemSavedData) {
-      mapItemSavedData.id = mapId;
+      mapItemSavedData.id = id;
       return mapItemSavedData;
     }
 
@@ -91,18 +94,18 @@ public class PGMServerLevel extends ServerLevel {
   }
 
   @Override
-  public void setMapData(@NonNull MapId mapId, MapItemSavedData data) {
+  public void setMapData(final MapId id, final MapItemSavedData data) {
     // CraftBukkit start
-    data.id = mapId;
+    data.id = id;
     org.bukkit.event.server.MapInitializeEvent event =
         new org.bukkit.event.server.MapInitializeEvent(data.mapView);
     event.callEvent();
     // CraftBukkit end
-    getDataStorage().set(MapItemSavedData.type(mapId), data);
+    getDataStorage().set(MapItemSavedData.type(id), data);
   }
 
   @Override
-  public @NonNull MapId getFreeMapId() {
+  public MapId getFreeMapId() {
     return getDataStorage().computeIfAbsent(MapIndex.TYPE).getNextMapId();
   }
 
