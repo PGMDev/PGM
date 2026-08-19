@@ -1,6 +1,7 @@
 package tc.oc.pgm.spawner;
 
 import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import java.util.Objects;
@@ -11,9 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.entity.ItemMergeEvent;
-import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
@@ -29,6 +28,7 @@ import tc.oc.pgm.util.bukkit.MetadataUtils;
 public class Spawner implements Listener, Tickable {
 
   public static final String METADATA_KEY = "spawner";
+  private static final int MAX_MERGE_SIZE = 64;
 
   private final Match match;
   private final SpawnerDefinition definition;
@@ -100,10 +100,10 @@ public class Spawner implements Listener, Tickable {
     }
   }
 
-  private void handleEntityRemoveEvent(Entity entity, boolean affectCount) {
+  private void handleEntityRemoveEvent(Entity entity, boolean affectCount, boolean stopTracking) {
     var metadata = MetadataUtils.getMetadataValue(entity, METADATA_KEY, PGM.get());
     if (Objects.equals(definition.getId(), metadata)) {
-      entity.removeMetadata(METADATA_KEY, PGM.get());
+      if (stopTracking) entity.removeMetadata(METADATA_KEY, PGM.get());
       if (affectCount) {
         int removedEntities = entity instanceof Item item ? item.getItemStack().getAmount() : 1;
         spawnedEntities = Math.max(0, spawnedEntities - removedEntities);
@@ -113,33 +113,31 @@ public class Spawner implements Listener, Tickable {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onEntityDeath(EntityDeathEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), true);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onItemDespawn(ItemDespawnEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), true);
+    handleEntityRemoveEvent(event.getEntity(), true, true);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onItemMergeRecover(ItemMergeEvent event) {
     // Entity merging does not affect count.
     // We do need to remove the meta so the remove from world doesn't subtract.
-    handleEntityRemoveEvent(event.getEntity(), false);
+    // Partial merges still do need to be tracked, however
+    var from = event.getEntity().getItemStack();
+    var to = event.getTarget().getItemStack();
+    int space = Math.min(to.getMaxStackSize(), MAX_MERGE_SIZE) - to.getAmount();
+    if (space < from.getAmount()) return;
+    handleEntityRemoveEvent(event.getEntity(), false, true);
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onEntityRemove(EntityRemoveFromWorldEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), true);
-  }
-
-  @EventHandler(priority = EventPriority.MONITOR)
-  public void onPotionSplash(PotionSplashEvent event) {
-    handleEntityRemoveEvent(event.getEntity(), true);
+    // When an item is removed by chunk unloads, it's not actually gone and
+    // is still relevant to the spawner.
+    if (!MISC_UTILS.isEntityDestroyed(event)) return;
+    handleEntityRemoveEvent(event.getEntity(), true, true);
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerPickup(PlayerPickupItemEvent event) {
-    handleEntityRemoveEvent(event.getItem(), true);
+    handleEntityRemoveEvent(event.getItem(), true, event.getRemaining() == 0);
   }
 }
