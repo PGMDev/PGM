@@ -12,7 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
@@ -260,9 +260,9 @@ public class MatchTabView extends TabView implements Listener {
   private int getColumnsForTeam(Team team, int[] sizes) {
     return switch (sizes.length) {
       case 0, 1 -> getWidth();
-        // Two team split closer to 3-1 than to 2-2, then do that split
+      // Two team split closer to 3-1 than to 2-2, then do that split
       case 2 -> sizes[1] * 0.6f > sizes[0] ? getSize(team) == sizes[0] ? 1 : 3 : 2;
-        // If one out of 3 teams is bigger, give that 2 columns
+      // If one out of 3 teams is bigger, give that 2 columns
       case 3 -> sizes[2] > sizes[1] && getSize(team) == sizes[2] ? 2 : 1;
       default -> 1;
     };
@@ -315,14 +315,19 @@ public class MatchTabView extends TabView implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerVanish(PlayerVanishEvent event) {
-    updatePlayerParty(
-        event.getPlayer(), event.getPlayer().getParty(), event.getPlayer().getParty());
+    refreshEntry(event.getPlayer());
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerNameChange(NameDecorationChangeEvent event) {
-    MatchPlayer mp = match.getPlayer(event.getUUID());
-    if (mp != null) updatePlayerParty(mp, mp.getParty(), mp.getParty());
+    refreshEntry(match.getPlayer(event.getUUID()));
+  }
+
+  private void refreshEntry(@Nullable MatchPlayer player) {
+    if (player == null) return;
+
+    updatePlayerParty(player, player.getParty(), player.getParty());
+    dirtyTracker.prioritize();
   }
 
   private void updatePlayerParty(

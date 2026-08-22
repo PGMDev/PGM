@@ -16,9 +16,10 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.event.NameDecorationChangeEvent;
+import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.map.Contributor;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.event.MatchAfterLoadEvent;
@@ -36,6 +37,7 @@ import tc.oc.pgm.spawns.events.ParticipantSpawnEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.events.TeamResizeEvent;
+import tc.oc.pgm.util.Players;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.concurrent.RateLimiter;
@@ -128,6 +130,8 @@ public class MatchTabManager extends TabManager implements Listener {
     }
 
     PlayerTabEntry.setPlayerComponent(pl -> player(pl, NameStyle.TAB));
+    PlayerTabEntry.setPlayerSkin((pl, viewer) ->
+        Players.shouldRevealDisguise(viewer, pl) ? null : Integration.getDisguiseSkin(pl));
   }
 
   protected static TabEntry[] headerFactory(Match match) {
@@ -317,12 +321,12 @@ public class MatchTabManager extends TabManager implements Listener {
   public void onPlayerTeamChange(PlayerPartyChangeEvent event) {
     invalidate(event.getPlayer());
 
-    if (event.getOldParty() instanceof Team) {
-      this.getTeamEntry((Team) event.getOldParty()).invalidate();
+    if (event.getOldParty() instanceof Team team) {
+      this.getTeamEntry(team).invalidate();
     }
 
-    if (event.getNewParty() instanceof Team) {
-      this.getTeamEntry((Team) event.getNewParty()).invalidate();
+    if (event.getNewParty() instanceof Team team) {
+      this.getTeamEntry(team).invalidate();
     }
 
     if (event.getOldParty() instanceof Tribute || event.getNewParty() instanceof Tribute) {
@@ -332,8 +336,8 @@ public class MatchTabManager extends TabManager implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onTeamRename(PartyRenameEvent event) {
-    if (event.getParty() instanceof Team) {
-      this.getTeamEntry((Team) event.getParty()).invalidate();
+    if (event.getParty() instanceof Team team) {
+      this.getTeamEntry(team).invalidate();
     }
   }
 
@@ -366,7 +370,7 @@ public class MatchTabManager extends TabManager implements Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlayerNameChange(NameDecorationChangeEvent event) {
     TabEntry entry = getPlayerEntryOrNull(Bukkit.getPlayer(event.getUUID()));
-    if (entry instanceof DynamicTabEntry) ((DynamicTabEntry) entry).invalidate();
+    if (entry instanceof DynamicTabEntry dynamicTabEntry) dynamicTabEntry.refresh();
   }
 
   private Integer getRenderBatchSize() {
