@@ -8,8 +8,8 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.named.NameDecorationProvider;
 
 /**
@@ -26,7 +26,19 @@ public interface NameDecorationRegistry extends Listener, NameDecorationProvider
    * @param partyColor The color of the party this player is currently in
    * @return The name, decorated
    */
-  String getDecoratedName(Player player, ChatColor partyColor);
+  default String getDecoratedName(Player player, ChatColor partyColor) {
+    return getDecoratedName(player, player.getName(), partyColor);
+  }
+
+  /**
+   * Get the fully decorated name for this player, under a name that may not be their own
+   *
+   * @param player The player to decorate
+   * @param name The name to decorate, which may be a nickname
+   * @param partyColor The color of the party this player is currently in
+   * @return The name, decorated
+   */
+  String getDecoratedName(Player player, String name, ChatColor partyColor);
 
   /**
    * Get the fully decorated name as a Component
@@ -49,7 +61,7 @@ public interface NameDecorationRegistry extends Listener, NameDecorationProvider
    */
   void setProvider(@Nullable NameDecorationProvider provider);
 
-  @NotNull
+  @NonNull
   NameDecorationProvider getProvider();
 
   default String getPrefix(UUID uuid) {
