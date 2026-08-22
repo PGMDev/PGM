@@ -30,7 +30,6 @@ import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.platform.modern.material.ModernBlockData;
 import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.platform.modern.util.Skins;
@@ -64,14 +63,6 @@ public class ModernPlayerUtils implements PlayerUtils {
   public Skin getPlayerSkin(Player player) {
     CraftPlayer craftPlayer = (CraftPlayer) player;
     return Skins.fromProfile(craftPlayer.getProfile());
-  }
-
-  @Override
-  public Skin getPlayerSkinForViewer(Player player, Player viewer) {
-    Skin skin = Integration.getPlayerSkin(player, viewer);
-    if (skin != null && !skin.isEmpty()) return skin;
-
-    return getPlayerSkin(player);
   }
 
   @Override

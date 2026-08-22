@@ -20,18 +20,19 @@ public class Players {
   }
 
   public static boolean shouldReveal(CommandSender viewer, Player other) {
+    return viewer == other || (isVisible(viewer, other) && shouldRevealDisguise(viewer, other));
+  }
+
+  public static boolean shouldRevealDisguise(CommandSender viewer, Player other) {
     return viewer == other
-        || (isVisible(viewer, other)
-            && (Integration.getNick(other) == null
-                || isFriend(viewer, other)
-                || viewer.hasPermission(Permissions.STAFF)));
+        || Integration.getNick(other) == null
+        || isFriend(viewer, other)
+        || viewer.hasPermission(Permissions.STAFF)
+        || Integration.canRevealDisguise(other, viewer);
   }
 
   public static String getVisibleName(CommandSender viewer, Player other) {
-    String nick = Integration.getNick(other);
-    if (nick == null || isFriend(viewer, other) || viewer.hasPermission(Permissions.STAFF))
-      return other.getName();
-    return nick;
+    return shouldRevealDisguise(viewer, other) ? other.getName() : Integration.getNick(other);
   }
 
   public static List<String> getPlayerNames(CommandSender sender, String query) {

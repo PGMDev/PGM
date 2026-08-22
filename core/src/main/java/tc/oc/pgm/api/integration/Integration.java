@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.channels.Channel;
@@ -67,8 +68,12 @@ public final class Integration {
   }
 
   @Nullable
-  public static Skin getPlayerSkin(Player player, Player viewer) {
-    return NICKS.get().getPlayerSkin(player, viewer);
+  public static Skin getDisguiseSkin(Player player) {
+    return NICKS.get().getDisguiseSkin(player);
+  }
+
+  public static boolean canRevealDisguise(Player player, CommandSender viewer) {
+    return NICKS.get().canRevealDisguise(player, viewer);
   }
 
   public static boolean isMuted(Player player) {
