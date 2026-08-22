@@ -175,9 +175,9 @@ public class VotingPool extends MapPool {
       double scoreAfterVoteMax,
       double scoreMinToVote,
       Formula<Match> scoreAfterPlay,
+      boolean useCurrentMap,
       int minCooldown,
-      int minutesPerDay,
-      boolean useCurrentMap) {
+      int minutesPerDay) {
     private VoteConstants(ConfigurationSection section, int mapAmount) {
       this(
           section.getInt("vote-options", MapVotePicker.MAX_VOTE_OPTIONS), // Show 5 maps
@@ -190,9 +190,9 @@ public class VotingPool extends MapPool {
           section.getDouble("score.min-for-vote", 0.01), // To even be voted, need at least 1%
           Formula.of(section.getString("score.after-playing"), Context.variables(), c -> 0)
               .map(m -> new Context(m.getDuration())),
+          section.getBoolean("score.use-current-map", true),
           section.getInt("cooldown.min-length", 30),
-          section.getInt("cooldown.minutes-per-day", 30),
-          section.getBoolean("score.use-current-map", true));
+          section.getInt("cooldown.minutes-per-day", 30));
     }
 
     public double afterVoteScore(double score) {
