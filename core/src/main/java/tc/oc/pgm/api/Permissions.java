@@ -25,6 +25,7 @@ public interface Permissions {
   String JOIN_CHOOSE = JOIN + ".choose"; // Can choose which team to join
   String JOIN_FULL = ROOT + ".full"; // Can join a team or server if it is full
   String JOIN_FORCE = JOIN + ".force"; // Can force other players onto teams
+  String JOIN_BYPASS = JOIN + ".bypass-time"; // Can bypass time penalties when joining a team
   String VOTE = ROOT + ".vote"; // Can user vote in map pools
   String EXTRA_VOTE = VOTE + ".extra"; // User vote in map pools count as double
   String LEAVE = ROOT + ".leave"; // Can join observers willingly
