@@ -22,7 +22,6 @@ import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
-import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.MaterialData;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -39,9 +38,10 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     return destroyables;
   }
 
-  private boolean anyDestroyableAffected(long pos) {
+  private boolean anyDestroyableAffected(BlockTransformEvent event) {
     for (Destroyable destroyable : this.destroyables) {
-      if (!destroyable.isDestroyed() && destroyable.getBlockRegion().contains(pos)) {
+      if (!destroyable.isDestroyed()
+          && destroyable.getBlockRegion().contains(event.getNewState())) {
         return true;
       }
     }
@@ -54,11 +54,9 @@ public class DestroyableMatchModule implements MatchModule, Listener {
    */
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void testBlockChange(BlockTransformEvent event) {
-    if (this.match.getWorld() != event.getWorld()) return;
-
-    // Both states are the same block, so one encoded position serves every region check below
-    long pos = BlockVectors.encodePos(event.getOldState());
-    if (!this.anyDestroyableAffected(pos)) return;
+    if (this.match.getWorld() != event.getWorld() || !this.anyDestroyableAffected(event)) {
+      return;
+    }
 
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
 
@@ -80,7 +78,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
     for (Destroyable destroyable : this.destroyables) {
       String reasonKey =
-          destroyable.testBlockChange(event.getOldState(), event.getNewState(), player, pos);
+          destroyable.testBlockChange(event.getOldState(), event.getNewState(), player);
       if (reasonKey != null) {
         event.setCancelled(translatable(reasonKey, destroyable.getComponentName()));
         return;
@@ -94,13 +92,15 @@ public class DestroyableMatchModule implements MatchModule, Listener {
    */
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleBlockChange(BlockTransformEvent event) {
-    if (this.match.getWorld() != event.getWorld()) return;
-
-    long pos = BlockVectors.encodePos(event.getOldState());
-    ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
+    if (this.match.getWorld() != event.getWorld() || !this.anyDestroyableAffected(event)) {
+      return;
+    }
 
     for (Destroyable destroyable : this.destroyables) {
-      destroyable.handleBlockChange(event.getOldState(), event.getNewState(), player, pos);
+      destroyable.handleBlockChange(
+          event.getOldState(),
+          event.getNewState(),
+          ParticipantBlockTransformEvent.getPlayerState(event));
     }
   }
 
@@ -113,11 +113,10 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null) return;
 
-    long pos = BlockVectors.encodePos(block);
     for (Destroyable destroyable : this.destroyables) {
       if (player.getParty() == destroyable.getOwner()
           && !destroyable.isDestroyed()
-          && destroyable.getBlockRegion().contains(pos)
+          && destroyable.getBlockRegion().contains(block)
           && destroyable.hasMaterial(material)) {
 
         event.setCancelled(true);
