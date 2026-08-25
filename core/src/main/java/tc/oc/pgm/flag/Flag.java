@@ -81,7 +81,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
   private final ItemStack bannerItem;
   private final ItemStack legacyBannerItem;
   private final AngleProvider bannerYawProvider;
-  private final @Nullable Team owner;
   private Set<Team> capturers;
   private Set<Team> controllers;
   private Set<Team> completers;
@@ -92,14 +91,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
       throws ModuleLoadException {
     super(definition, match);
     this.nets = nets;
-
-    TeamMatchModule tmm = match.getModule(TeamMatchModule.class);
-
-    if (definition.getOwner() != null && tmm != null) {
-      this.owner = tmm.getTeam(definition.getOwner());
-    } else {
-      this.owner = null;
-    }
 
     Banner banner = null;
     for (PointProvider point : definition.getDefaultPost().getFallback().getReturnPoints()) {
@@ -201,11 +192,6 @@ public class Flag extends TouchableGoal<FlagDefinition> implements Listener {
     return this.state instanceof Spawned
         ? Optional.of(((Spawned) state).getLocation())
         : Optional.empty();
-  }
-
-  /** Owner is defined in XML, and does not change during a match */
-  public @Nullable Team getOwner() {
-    return owner;
   }
 
   /** Controller is the owner of the {@link Post} the flag is at, which obviously can change */
