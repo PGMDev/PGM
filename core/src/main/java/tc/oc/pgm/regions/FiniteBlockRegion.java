@@ -12,7 +12,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.api.region.RegionDefinition;
@@ -25,7 +25,7 @@ import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.material.MaterialMatcher;
 
 /**
- * Region represented by a set of single blocks. This will check if a point is inside the block at
+ * Region represented by a list of single blocks. This will check if a point is inside the block at
  * all.
  */
 public class FiniteBlockRegion implements RegionDefinition.HardStatic {
@@ -54,11 +54,7 @@ public class FiniteBlockRegion implements RegionDefinition.HardStatic {
 
   @Override
   public boolean contains(Vector point) {
-    return this.bounds.contains(point) && this.positions.contains(point.toBlockVector());
-  }
-
-  public boolean contains(long encodedPos) {
-    return this.positions.contains(encodedPos);
+    return bounds.contains(point) && positions.contains(point.toBlockVector());
   }
 
   @Override
@@ -88,16 +84,16 @@ public class FiniteBlockRegion implements RegionDefinition.HardStatic {
 
   @Override
   public Iterator<BlockVector> getBlockVectorIterator() {
-    return this.positions.iterator();
+    return positions.iterator();
   }
 
   @Override
   public Iterable<BlockVector> getBlockVectors() {
-    return this.positions;
+    return positions;
   }
 
   public int getBlockVolume() {
-    return this.positions.size();
+    return positions.size();
   }
 
   @Override

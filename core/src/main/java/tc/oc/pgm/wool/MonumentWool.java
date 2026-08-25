@@ -14,8 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.inventory.ItemStack;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
@@ -57,8 +56,9 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
         + this.definition + '}';
   }
 
+  // Remove @Nullable
   @Override
-  public @NonNull Team getOwner() {
+  public Team getOwner() {
     Team owner = super.getOwner();
     if (owner == null) {
       throw new IllegalStateException("wool " + getId() + " has no owner");

@@ -1,16 +1,17 @@
 package tc.oc.pgm.destroyable;
 
+import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +36,6 @@ import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.MatchPlayerState;
 import tc.oc.pgm.api.player.ParticipantState;
-import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.blockdrops.BlockDropsRuleSet;
@@ -43,12 +43,13 @@ import tc.oc.pgm.events.FeatureChangeEvent;
 import tc.oc.pgm.fireworks.FireworkMatchModule;
 import tc.oc.pgm.goals.IncrementalGoal;
 import tc.oc.pgm.goals.ModeChangeGoal;
-import tc.oc.pgm.goals.OwnedTouchableGoal;
+import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ModeUtils;
 import tc.oc.pgm.regions.FiniteBlockRegion;
+import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.bukkit.Sounds;
@@ -56,11 +57,10 @@ import tc.oc.pgm.util.collection.DefaultMapAdapter;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.MaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.named.NameStyle;
 
-public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
+public class Destroyable extends TouchableGoal<DestroyableFactory>
     implements IncrementalGoal<DestroyableFactory>, ModeChangeGoal<DestroyableFactory> {
-
-  private static final Duration SPARK_COOLDOWN = Duration.ofMillis(75);
 
   // Block replacement rules in this ruleset will be used to calculate destroyable health
   protected BlockDropsRuleSet blockDropsRuleSet;
@@ -73,6 +73,7 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
   // The percentage of blocks that must be broken for the entire Destroyable to be destroyed.
   protected double destructionRequired;
 
+  protected final Duration SPARK_COOLDOWN = Duration.ofMillis(75);
   protected Instant lastSparkTime;
 
   /**
@@ -94,20 +95,19 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
    *
    * <p>This map will have en entry for every destroyable world for every block. If there are no
    * custom block replacement rules affecting this destroyable, this will be null;
-   *
-   * <p>Keyed by {@link BlockVectors#encodePos encoded position} so that lookups on the block-change
-   * hot path don't have to allocate a {@link BlockVector}.
    */
-  protected Long2ObjectMap<Map<BlockMaterialData, Integer>> blockMaterialHealth;
+  protected Map<BlockVector, Map<BlockMaterialData, Integer>> blockMaterialHealth;
 
   protected final List<DestroyableHealthChange> events = Lists.newArrayList();
   protected ImmutableList<DestroyableContribution> contributions;
+
+  protected Iterable<Location> proximityLocations;
 
   public Destroyable(DestroyableFactory definition, Match match) {
     super(definition, match);
 
     this.materialPattern = definition.getMaterials();
-    this.materials = this.materialPattern.getPossibleBlocks();
+    this.materials = materialPattern.getPossibleBlocks();
     this.destructionRequired = definition.getDestructionRequired();
 
     this.blockRegion = FiniteBlockRegion.fromWorld(
@@ -128,9 +128,47 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
     this.isShared = match.getCompetitors().stream().filter(this::canComplete).count() != 1;
   }
 
+  // Remove @Nullable
   @Override
-  protected Region getProximityRegion() {
-    return this.blockRegion;
+  public @NonNull Team getOwner() {
+    Team owner = super.getOwner();
+    if (owner == null) {
+      throw new IllegalStateException("destroyable " + getId() + " has no owner");
+    }
+    return owner;
+  }
+
+  @Override
+  public boolean getDeferTouches() {
+    return true;
+  }
+
+  @Override
+  public Component getTouchMessage(@Nullable ParticipantState toucher, boolean self) {
+    if (toucher == null) {
+      return translatable(
+          "destroyable.touch.owned", empty(), getComponentName(), getOwner().getName());
+    } else if (self) {
+      return translatable(
+          "destroyable.touch.owned.you", empty(), getComponentName(), getOwner().getName());
+    } else {
+      return translatable(
+          "destroyable.touch.owned.player",
+          toucher.getName(NameStyle.COLOR),
+          getComponentName(),
+          getOwner().getName());
+    }
+  }
+
+  @Override
+  public Iterable<Location> getProximityLocations(ParticipantState player) {
+    if (proximityLocations == null) {
+      proximityLocations = Collections.singleton(getBlockRegion()
+          .getBounds()
+          .getCenterPoint()
+          .toLocation(getOwner().getMatch().getWorld()));
+    }
+    return proximityLocations;
   }
 
   @Override
@@ -144,7 +182,7 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
     // We only need blockMaterialHealth if there are destroyable blocks that are
     // replaced by other destroyable blocks when broken.
     if (this.isAffectedByBlockReplacementRules()) {
-      this.blockMaterialHealth = new Long2ObjectOpenHashMap<>();
+      this.blockMaterialHealth = new HashMap<>();
       this.buildMaterialHealthMap();
     } else {
       this.blockMaterialHealth = null;
@@ -183,7 +221,7 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
     this.health = 0;
     Set<BlockMaterialData> visited = new HashSet<>();
     try {
-      for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
+      for (Block block : blockRegion.getBlocks(match.getWorld())) {
         Map<BlockMaterialData, Integer> materialHealthMap = new HashMap<>();
         int blockMaxHealth = 0;
 
@@ -196,10 +234,10 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
           }
         }
 
-        long pos = BlockVectors.encodePos(block);
-        this.blockMaterialHealth.put(pos, materialHealthMap);
+        this.blockMaterialHealth.put(
+            block.getLocation().toVector().toBlockVector(), materialHealthMap);
         this.maxHealth += blockMaxHealth;
-        this.health += this.getBlockHealth(block.getState(), pos);
+        this.health += this.getBlockHealth(block.getState());
       }
     } catch (Indestructible ex) {
       this.health = this.maxHealth = Integer.MAX_VALUE;
@@ -246,11 +284,16 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
   }
 
   /** Return the number of breaks required to change the given block to a non-objective world */
-  private int getBlockHealth(BlockState blockState, long pos) {
+  public int getBlockHealth(BlockState blockState) {
+    if (!this.getBlockRegion().contains(blockState)) {
+      return 0;
+    }
+
     if (this.blockMaterialHealth == null) {
       return this.hasMaterial(MaterialData.block(blockState)) ? 1 : 0;
     } else {
-      Map<BlockMaterialData, Integer> materialHealthMap = this.blockMaterialHealth.get(pos);
+      Map<BlockMaterialData, Integer> materialHealthMap =
+          this.blockMaterialHealth.get(blockState.getLocation().toVector().toBlockVector());
       if (materialHealthMap == null) {
         return 0;
       }
@@ -259,12 +302,8 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
     }
   }
 
-  /**
-   * Both states are the same block, so they share a single position and a single region check, done
-   * by the caller.
-   */
-  protected int getBlockHealthChange(BlockState oldState, BlockState newState, long pos) {
-    return this.getBlockHealth(newState, pos) - this.getBlockHealth(oldState, pos);
+  public int getBlockHealthChange(BlockState oldState, BlockState newState) {
+    return this.getBlockHealth(newState) - this.getBlockHealth(oldState);
   }
 
   /**
@@ -274,15 +313,14 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
    * @param oldState State of the block before the change
    * @param newState State of the block after the change
    * @param player Player responsible for the change
-   * @param pos The {@link BlockVectors#encodePos encoded position} shared by both states
    * @return An object containing information about the change, including the health delta, or null
    *     if this Destroyable was not affected by the block change
    */
   public DestroyableHealthChange handleBlockChange(
-      BlockState oldState, BlockState newState, @Nullable ParticipantState player, long pos) {
-    if (this.isDestroyed() || !this.getBlockRegion().contains(pos)) return null;
+      BlockState oldState, BlockState newState, @Nullable ParticipantState player) {
+    if (this.isDestroyed() || !this.getBlockRegion().contains(oldState)) return null;
 
-    int deltaHealth = this.getBlockHealthChange(oldState, newState, pos);
+    int deltaHealth = this.getBlockHealthChange(oldState, newState);
     if (deltaHealth == 0) return null;
 
     this.addHealth(deltaHealth);
@@ -351,15 +389,14 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
    * @param oldState State of the block before the change
    * @param newState State of the block after the change
    * @param player Player responsible for the change
-   * @param pos The {@link BlockVectors#encodePos encoded position} shared by both states
    * @return A player-readable message explaining why the block change is not allowed, or null if it
    *     is allowed
    */
   public String testBlockChange(
-      BlockState oldState, BlockState newState, @Nullable ParticipantState player, long pos) {
-    if (this.isDestroyed() || !this.getBlockRegion().contains(pos)) return null;
+      BlockState oldState, BlockState newState, @Nullable ParticipantState player) {
+    if (this.isDestroyed() || !this.getBlockRegion().contains(oldState)) return null;
 
-    int deltaHealth = this.getBlockHealthChange(oldState, newState, pos);
+    int deltaHealth = this.getBlockHealthChange(oldState, newState);
     if (deltaHealth == 0) return null;
 
     if (deltaHealth < 0) {
@@ -384,7 +421,7 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
   }
 
   public boolean hasMaterial(MaterialData data) {
-    return this.materialPattern.matches(data);
+    return materialPattern.matches(data);
   }
 
   public void addHealth(int delta) {
@@ -474,7 +511,7 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
 
   @Override
   public TextColor renderSidebarLabelColor(@Nullable Competitor competitor, Party viewer) {
-    if (this.isShared && this.owner != null) return this.owner.getTextColor();
+    if (isShared && owner != null) return owner.getTextColor();
     return super.renderSidebarLabelColor(competitor, viewer);
   }
 
@@ -489,7 +526,7 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
 
   @Override
   public boolean isShared() {
-    return this.isShared;
+    return isShared;
   }
 
   @Override
@@ -556,7 +593,7 @@ public class Destroyable extends OwnedTouchableGoal<DestroyableFactory>
 
     for (Block block : this.getBlockRegion().getBlocks(match.getWorld())) {
       BlockState oldState = block.getState();
-      int oldHealth = this.getBlockHealth(oldState, BlockVectors.encodePos(block));
+      int oldHealth = this.getBlockHealth(oldState);
 
       if (oldHealth > 0) {
         newMaterial.applyTo(block, true);
