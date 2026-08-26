@@ -23,7 +23,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -76,6 +78,7 @@ import tc.oc.pgm.stats.menu.items.VerboseStatsMenuItem;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
+import tc.oc.pgm.util.collection.RankedSet;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
@@ -100,6 +103,9 @@ public class StatsMatchModule implements MatchModule, Listener {
   private final int verboseItemSlot = PGM.get().getConfiguration().getVerboseItemSlot();
 
   private List<MenuItem> teams;
+
+  private static final int TOP_HOVER_LIMIT = 10;
+  private static final int MAX_PLAYERS = 15;
 
   public StatsMatchModule(Match match, List<StatType.OfFormula> formulaStats) {
     this.match = match;
@@ -365,7 +371,7 @@ public class StatsMatchModule implements MatchModule, Listener {
         var number = agg.type.makeNumber(value);
         return !best ? number : text("   ").append(translatable("match.stats.you.short", number));
       }));
-    return agg.type.component(who);
+    return agg.type.component(who).hoverEvent(buildTopHover(agg));
   }
 
   private Component credit(Set<UUID> players) {
@@ -491,5 +497,61 @@ public class StatsMatchModule implements MatchModule, Listener {
       case StatType.OfFormula formulaStats ->
         player != null ? formulaStats.formula().apply(player) : null;
     };
+  }
+
+  private Component buildTopHover(AggStat<?> agg) {
+    RankedSet<Map.Entry<UUID, Double>> ranked =
+        new RankedSet<>(Comparator.<Map.Entry<UUID, Double>, Double>comparing(Map.Entry::getValue)
+            .reversed());
+
+    for (Map.Entry<UUID, PlayerStats> e : allPlayerStats.entrySet()) {
+      Number val = getStatValue(agg.type, match.getPlayer(e.getKey()), e.getValue());
+      if (val != null && val.doubleValue() > 0)
+        ranked.add(Map.entry(e.getKey(), val.doubleValue()));
+    }
+
+    if (ranked.size() <= 1) return null;
+
+    List<Component> lines = new ArrayList<>();
+    int playersShown = 0;
+    int rank = 1;
+
+    for (Set<Map.Entry<UUID, Double>> rankSet : ranked.ranksView()) {
+      if (lines.size() >= TOP_HOVER_LIMIT || playersShown >= MAX_PLAYERS) break;
+
+      List<Map.Entry<UUID, Double>> entries = new ArrayList<>(rankSet);
+      int rankSize = entries.size();
+
+      if (rankSize <= 3) {
+        List<Component> names =
+            entries.stream().map(e -> getPlayerComponent(e.getKey())).toList();
+        lines.add(rankLine(
+            rank, agg, list(names, NamedTextColor.GRAY), entries.getFirst().getValue()));
+        playersShown += rankSize;
+      } else {
+        for (Map.Entry<UUID, Double> entry : entries) {
+          if (lines.size() >= TOP_HOVER_LIMIT || playersShown >= MAX_PLAYERS) break;
+          lines.add(rankLine(rank, agg, getPlayerComponent(entry.getKey()), entry.getValue()));
+          playersShown++;
+        }
+      }
+
+      rank += rankSize;
+    }
+
+    return Component.join(
+        JoinConfiguration.newlines(),
+        Stream.concat(
+                Stream.of(translatable("match.stats.top", agg.type.component(empty()))),
+                lines.stream())
+            .toList());
+  }
+
+  private Component rankLine(int rank, AggStat<?> agg, Component who, double value) {
+    return text(rank + ". ")
+        .color(NamedTextColor.WHITE)
+        .append(who)
+        .append(text(" - ").color(NamedTextColor.GRAY))
+        .append(agg.type.makeNumber(value));
   }
 }
