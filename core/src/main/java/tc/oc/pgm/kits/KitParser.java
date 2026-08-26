@@ -1,5 +1,6 @@
 package tc.oc.pgm.kits;
 
+import static tc.oc.pgm.consumable.ConsumeCause.*;
 import static tc.oc.pgm.util.inventory.InventoryUtils.INVENTORY_UTILS;
 import static tc.oc.pgm.util.material.ColorUtils.COLOR_UTILS;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
@@ -52,7 +53,9 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.consumable.ConsumableDefinition;
+import tc.oc.pgm.consumable.ConsumeCause;
 import tc.oc.pgm.doublejump.DoubleJumpKit;
+import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.itemmeta.ItemModifyModule;
 import tc.oc.pgm.kits.tag.Grenade;
@@ -63,6 +66,7 @@ import tc.oc.pgm.shield.ShieldKit;
 import tc.oc.pgm.shield.ShieldParameters;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.StreamUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.ComponentApplicator;
@@ -680,12 +684,21 @@ public abstract class KitParser {
 
     Node consumableNode = Node.fromAttr(el, "consumable");
     if (consumableNode != null) {
+      var features = factory.getFeatures();
+      var references = StreamUtils.of(Splitter.on(';').split(consumableNode.getValue()))
+          .map(id -> features.createReference(consumableNode, id, ConsumableDefinition.class))
+          .toList();
+
+      features.validate(references.getFirst(), (first, node) -> {
+        Set<ConsumeCause> causes = EnumSet.noneOf(ConsumeCause.class);
+        for (var ref : references) {
+          var c = ref.get().getCause();
+          if (c == CLICK ? !(causes.add(RIGHT_CLICK) | causes.add(LEFT_CLICK)) : !causes.add(c))
+            throw new InvalidXMLException("Overlapping consumable causes", node);
+        }
+      });
       ItemTags.CONSUMABLE.set(
-          itemStack,
-          factory
-              .getFeatures()
-              .createReference(consumableNode, ConsumableDefinition.class)
-              .getId());
+          itemStack, references.stream().map(XMLFeatureReference::getId).toList());
     }
   }
 
@@ -710,9 +723,7 @@ public abstract class KitParser {
         int level = 1;
         List<String> parts = Lists.newArrayList(Splitter.on(":").limit(2).split(enchantmentText));
         Enchantment enchant = XMLUtils.parseEnchantment(attr, parts.get(0));
-        if (parts.size() > 1) {
-          level = XMLUtils.parseNumber(attr, parts.get(1), Integer.class);
-        }
+        if (parts.size() > 1) {}
         enchantments.put(enchant, level);
       }
     }
