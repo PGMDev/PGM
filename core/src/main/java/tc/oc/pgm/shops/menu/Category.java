@@ -4,28 +4,26 @@ import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.bukkit.inventory.ItemStack;
+import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 
-public class Category {
+@FeatureInfo(name = "category")
+public class Category extends SelfIdentifyingFeatureDefinition {
 
   // Max amount of icons a category can hold
   public static final int MAX_ICONS = 28;
 
-  private final String id;
   private final ItemStack categoryIcon;
   private final ImmutableList<Icon> icons;
   private final Filter filter;
 
   public Category(String id, ItemStack categoryIcon, Filter filter, List<Icon> icons) {
-    this.id = id;
+    super(id);
     this.categoryIcon = categoryIcon;
     this.filter = filter;
     this.icons = ImmutableList.copyOf(icons);
-  }
-
-  public String getId() {
-    return id;
   }
 
   public ItemStack getCategoryIcon() {
@@ -37,10 +35,9 @@ public class Category {
   }
 
   public ImmutableList<Icon> getVisibleIcons(MatchPlayer player) {
-    return ImmutableList.copyOf(
-        icons.stream()
-            .filter(icon -> icon.getFilter().query(player).isAllowed())
-            .collect(Collectors.toList()));
+    return ImmutableList.copyOf(icons.stream()
+        .filter(icon -> icon.getFilter().query(player).isAllowed())
+        .collect(Collectors.toList()));
   }
 
   public Filter getFilter() {

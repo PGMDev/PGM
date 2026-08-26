@@ -17,14 +17,14 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public record SpawnableEntity(
-    Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties, Kit kit) {
+    Class<? extends Entity> entityType, List<Consumer<Entity>> properties, Kit kit) {
 
   public Entity spawn(Location location) {
-    LivingEntity entity = location.getWorld().spawn(location, entityType);
+    Entity entity = location.getWorld().spawn(location, entityType);
     for (var property : properties) {
       property.accept(entity);
     }
-    kit.apply(entity);
+    if (entity instanceof LivingEntity living) kit.apply(living);
     return entity;
   }
 

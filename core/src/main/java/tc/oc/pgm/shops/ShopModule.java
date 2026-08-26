@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,18 +23,20 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
+import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.entity.MobProperties;
+import tc.oc.pgm.entity.SpawnableEntity;
 import tc.oc.pgm.kits.ItemKit;
 import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.kits.OverflowWarningKit;
@@ -82,20 +86,28 @@ public class ShopModule implements MapModule<ShopMatchModule> {
       PointParser pointParser = new PointParser(factory);
       Map<String, Shop> shops = Maps.newHashMap();
       Set<ShopKeeper> keepers = Sets.newHashSet();
+      boolean shopFeatures = factory.getProto().isNoOlderThan(MapProtos.SHOP_CATEGORY_FEATURES);
 
       // Parse Shops
       for (Element shop : XMLUtils.flattenElements(doc.getRootElement(), "shops")) {
-        String shopId = XMLUtils.getRequiredAttribute(shop, "id").getValue();
-        String shopName = XMLUtils.getNullableAttribute(shop, "name");
-        List<Category> categories = Lists.newArrayList();
+        if ("category".equals(shop.getName())) {
+          parseCategory(shop, factory, true);
+          continue;
+        }
+
+        String shopId = parser.string(shop, "id").attr().required();
+        String shopName = parser.string(shop, "name").attr().orNull();
+        List<Supplier<Category>> categories = Lists.newArrayList();
 
         for (Element category : XMLUtils.getChildren(shop, "category")) {
-          Attribute categoryId = XMLUtils.getRequiredAttribute(category, "id");
-          ItemStack categoryIcon = applyItemFlags(parser.item(category).required());
-          List<Icon> icons = parseIcons(category, parser);
-          Filter filter = parser.filter(category, "filter").orAllow();
-
-          categories.add(new Category(categoryId.getValue(), categoryIcon, filter, icons));
+          if (isCategoryReference(category)) {
+            var reference =
+                parser.reference(Category.class, category, "id").attr().required();
+            categories.add(reference::get);
+          } else {
+            Category parsed = parseCategory(category, factory, shopFeatures);
+            categories.add(() -> parsed);
+          }
         }
 
         if (categories.isEmpty()) {
@@ -109,33 +121,52 @@ public class ShopModule implements MapModule<ShopMatchModule> {
 
       // Parse Shopkeepers
       for (Element shopkeeper : XMLUtils.flattenElements(doc.getRootElement(), "shopkeepers")) {
-        Attribute shopAttr = XMLUtils.getRequiredAttribute(shopkeeper, "shop");
-
-        String shopId = shopAttr.getValue();
-        String name = XMLUtils.getNullableAttribute(shopkeeper, "name");
-        Class<? extends Entity> mob =
-            XMLUtils.parseEntityTypeAttribute(shopkeeper, "mob", Villager.class);
+        var shop = parser.reference(Shop.class, shopkeeper, "shop").required();
+        String name = parser.string(shopkeeper, "name").attr().orNull();
+        Class<? extends Entity> mob = parser
+            .node(XMLUtils::parseEntityType, shopkeeper, "mob")
+            .attr()
+            .optional(Villager.class);
+        List<Consumer<Entity>> properties = shopFeatures
+            ? MobProperties.MOB_PROPERTIES.parseAttributes(
+                mob, shopkeeper, "shop", "name", "mob", "yaw", "pitch", "angle", "safe", "outdoors")
+            : List.of();
         PointProvider location = pointParser.parseSingle(shopkeeper, new PointProviderAttributes());
 
-        Shop shop = shops.get(shopId);
-
-        if (shop == null) {
-          throw new InvalidXMLException(
-              "No shop with id '" + shopId + "' could be found", shopkeeper);
-        }
-
-        keepers.add(new ShopKeeper(name, location, mob, shop));
+        keepers.add(new ShopKeeper(
+            name, location, new SpawnableEntity(mob, properties, KitNode.EMPTY), shop));
       }
 
       return shops.isEmpty() ? null : new ShopModule(shops, keepers);
     }
   }
 
-  private static List<Icon> parseIcons(Element category, XMLFluentParser parser)
+  private static boolean isCategoryReference(Element el) {
+    return el.getChildren().isEmpty()
+        && el.getAttributes().size() == 1
+        && el.getAttribute("id") != null;
+  }
+
+  private static Category parseCategory(Element el, MapFactory factory, boolean register)
+      throws InvalidXMLException {
+    var parser = factory.getParser();
+    String id = parser.string(el, "id").attr().required();
+    ItemStack icon = applyItemFlags(parser.item(el).required());
+    Filter filter = parser.filter(el, "filter").orAllow();
+    PaymentDefaults defaults = PaymentDefaults.parse(el, parser);
+    List<Icon> icons = parseIcons(el, parser, defaults);
+
+    Category category = new Category(id, icon, filter, icons);
+    if (register) factory.getFeatures().addFeature(el, category);
+    return category;
+  }
+
+  private static List<Icon> parseIcons(
+      Element category, XMLFluentParser parser, PaymentDefaults defaults)
       throws InvalidXMLException {
     List<Icon> icons = Lists.newArrayList();
     for (Element icon : XMLUtils.getChildren(category, "item")) {
-      icons.add(parseIcon(icon, parser));
+      icons.add(parseIcon(icon, parser, defaults));
     }
 
     if (icons.size() > Category.MAX_ICONS) {
@@ -150,10 +181,11 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     return icons;
   }
 
-  private static Icon parseIcon(Element icon, XMLFluentParser parser) throws InvalidXMLException {
+  private static Icon parseIcon(Element icon, XMLFluentParser parser, PaymentDefaults defaults)
+      throws InvalidXMLException {
     boolean stackable = false;
 
-    List<Payment> payments = parsePayments(icon, parser);
+    List<Payment> payments = parsePayments(icon, parser, defaults);
 
     ItemStack item = parser.item(icon).required();
     Filter filter = parser.filter(icon, "filter").orAllow();
@@ -173,12 +205,17 @@ public class ShopModule implements MapModule<ShopMatchModule> {
 
   public static List<Payment> parsePayments(Element parent, XMLFluentParser parser)
       throws InvalidXMLException {
+    return parsePayments(parent, parser, null);
+  }
+
+  private static List<Payment> parsePayments(
+      Element parent, XMLFluentParser parser, PaymentDefaults defaults) throws InvalidXMLException {
     List<Payment> payments = Lists.newArrayList();
     for (Element payment : XMLUtils.getChildren(parent, "payment")) {
-      payments.add(parsePayment(payment, parser));
+      payments.add(parsePayment(payment, parser, defaults));
     }
     if (payments.isEmpty()) {
-      payments.add(parsePayment(parent, parser));
+      payments.add(parsePayment(parent, parser, defaults));
     }
     if (payments.size()
         != payments.stream().map(Payment::getCurrency).distinct().count()) {
@@ -190,9 +227,18 @@ public class ShopModule implements MapModule<ShopMatchModule> {
 
   public static Payment parsePayment(Element el, XMLFluentParser parser)
       throws InvalidXMLException {
+    return parsePayment(el, parser, null);
+  }
+
+  private static Payment parsePayment(Element el, XMLFluentParser parser, PaymentDefaults defaults)
+      throws InvalidXMLException {
     Integer price = parser.parseInt(el, "price").optional(0);
     Material currency = price <= 0 ? null : parser.material(el, "currency").orNull();
-    ChatColor color = parser.parseEnum(ChatColor.class, el, "color").optional(ChatColor.GOLD);
+    if (currency == null && price > 0 && defaults != null) currency = defaults.currency();
+
+    ChatColor defaultColor =
+        defaults != null && defaults.color() != null ? defaults.color() : ChatColor.GOLD;
+    ChatColor color = parser.parseEnum(ChatColor.class, el, "color").optional(defaultColor);
 
     ItemStack item = parser.item(el, "item").child().orNull();
     if (currency == null && item == null && price > 0) {
@@ -200,6 +246,14 @@ public class ShopModule implements MapModule<ShopMatchModule> {
     }
 
     return new Payment(currency, price, color, item);
+  }
+
+  private record PaymentDefaults(Material currency, ChatColor color) {
+    static PaymentDefaults parse(Element el, XMLFluentParser parser) throws InvalidXMLException {
+      return new PaymentDefaults(
+          parser.material(el, "currency").attr().orNull(),
+          parser.parseEnum(ChatColor.class, el, "payment-color").attr().orNull());
+    }
   }
 
   private static ItemStack applyItemFlags(ItemStack stack) {
