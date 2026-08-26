@@ -82,9 +82,13 @@ public class ActionParser {
   private final MapFactory factory;
   private final boolean legacy;
   private final FeatureDefinitionContext features;
-  private final XMLFluentParser parser;
+  protected final XMLFluentParser parser;
   private final MethodParsers<Action<?>> methodParsers;
   private final ReplacementParser replacementParser;
+
+  protected XMLFluentParser getParser() {
+    return parser;
+  }
 
   public ActionParser(MapFactory factory) {
     this.factory = factory;
@@ -201,7 +205,7 @@ public class ActionParser {
     return (Action<T>) methodParsers.parse(el, scope);
   }
 
-  private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
+  protected <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
       throws InvalidXMLException {
     return parseScope(el, scope, "scope");
   }
