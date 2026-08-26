@@ -446,4 +446,9 @@ public class ModernNMSHacks implements NMSHacks {
   public int allocateEntityId() {
     return Bukkit.getUnsafe().nextEntityId();
   }
+
+  @Override
+  public int getMinHeight(World world) {
+    return world.getMinHeight();
+  }
 }
