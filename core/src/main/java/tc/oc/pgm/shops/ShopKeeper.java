@@ -6,7 +6,6 @@ import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
@@ -43,7 +42,7 @@ public class ShopKeeper {
     return name == null || name.isEmpty() ? ChatColor.GRAY + getShop().getId() : colorize(name);
   }
 
-  public void spawn(Match match) {
+  public Entity spawn(Match match) {
     if (match == null) throw new IllegalArgumentException("Match can not be null!");
 
     Location loc = location.getPoint(match, null);
@@ -53,10 +52,9 @@ public class ShopKeeper {
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
     keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));
-    if (keeper instanceof LivingEntity livingEntity) {
-      livingEntity.setRemoveWhenFarAway(false);
-    }
     NMS_HACKS.freezeEntity(keeper);
+
+    return keeper;
   }
 
   public static boolean isKeeper(Entity entity) {

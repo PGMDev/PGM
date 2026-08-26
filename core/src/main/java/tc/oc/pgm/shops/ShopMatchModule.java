@@ -1,9 +1,12 @@
 package tc.oc.pgm.shops;
 
 import static tc.oc.pgm.shops.ShopKeeper.isKeeper;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,17 +21,20 @@ import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.Tickable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
+import tc.oc.pgm.api.time.Tick;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.shops.menu.ShopMenu;
 
 @ListenerScope(MatchScope.LOADED)
-public class ShopMatchModule implements MatchModule, Listener {
+public class ShopMatchModule implements MatchModule, Tickable, Listener {
 
   private final Match match;
   private final Map<String, Shop> shops;
   private final Set<ShopKeeper> shopKeepers;
+  private final Map<Entity, Location> spawned = new LinkedHashMap<>();
 
   public ShopMatchModule(Match match, Map<String, Shop> shops, Set<ShopKeeper> shopKeepers) {
     this.match = match;
@@ -39,8 +45,25 @@ public class ShopMatchModule implements MatchModule, Listener {
   @Override
   public void load() {
     for (ShopKeeper keeper : shopKeepers) {
-      keeper.spawn(match);
+      Entity entity = keeper.spawn(match);
+      spawned.put(entity, entity.getLocation());
     }
+  }
+
+  @Override
+  public void tick(Match match, Tick tick) {
+    for (Map.Entry<Entity, Location> entry : spawned.entrySet()) {
+      Entity entity = entry.getKey();
+      if (entity.isValid()) NMS_HACKS.tickFrozenEntity(entity, entry.getValue());
+    }
+  }
+
+  @Override
+  public void unload() {
+    for (Entity entity : spawned.keySet()) {
+      entity.remove();
+    }
+    spawned.clear();
   }
 
   @EventHandler(priority = EventPriority.HIGH)

@@ -45,8 +45,10 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.validation.ContentValidationException;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
 import org.bukkit.World;
@@ -58,9 +60,11 @@ import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.craftbukkit.generator.CraftWorldInfo;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
@@ -72,6 +76,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.NonNull;
 import tc.oc.pgm.api.PGM;
@@ -103,10 +108,40 @@ public class ModernNMSHacks implements NMSHacks {
 
   @Override
   public void freezeEntity(Entity entity) {
-    if (((CraftEntity) entity).getHandle() instanceof Mob mob) {
-      mob.setNoAi(true);
-      mob.setNoGravity(true);
+    entity.setGravity(false);
+    entity.setPersistent(true);
+    if (entity instanceof LivingEntity living) living.setRemoveWhenFarAway(false);
+
+    var handle = ((CraftEntity) entity).getHandle();
+    if (handle instanceof Mob mob) mob.setNoAi(true);
+  }
+
+  @Override
+  public void tickFrozenEntity(Entity entity, Location location) {
+    var handle = ((CraftEntity) entity).getHandle();
+    handle.setDeltaMovement(Vec3.ZERO);
+    handle.hurtMarked = false;
+    handle.fallDistance = 0;
+    handle.snapTo(
+        location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+  }
+
+  @Override
+  public void setupPickup(Entity entity) {
+    if (entity instanceof EnderCrystal crystal) {
+      crystal.setShowingBottom(false);
     }
+  }
+
+  @Override
+  public Vector getBoundingBoxCenter(Entity entity) {
+    return entity.getBoundingBox().getCenter();
+  }
+
+  @Override
+  public Vector getBoundingBoxSize(Entity entity) {
+    BoundingBox box = entity.getBoundingBox();
+    return new Vector(box.getWidthX(), box.getHeight(), box.getWidthZ());
   }
 
   @Override
