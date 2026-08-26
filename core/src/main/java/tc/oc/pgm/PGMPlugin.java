@@ -48,7 +48,6 @@ import tc.oc.pgm.db.SQLDatastore;
 import tc.oc.pgm.db.SqlUsernameResolver;
 import tc.oc.pgm.integrations.SimpleVanishIntegration;
 import tc.oc.pgm.listeners.AntiGriefListener;
-import tc.oc.pgm.listeners.FormattingListener;
 import tc.oc.pgm.listeners.InitialMatchLoader;
 import tc.oc.pgm.listeners.JoinLeaveAnnouncer;
 import tc.oc.pgm.listeners.MatchAnnouncer;
@@ -418,7 +417,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(nameDecorationRegistry);
     registerEvents(new PGMListener(this, matchManager));
-    registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));
     registerEvents(new RestartListener(this, matchManager));
     registerEvents(new WorldProblemListener(this));

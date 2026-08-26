@@ -34,9 +34,11 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.goals.Contribution;
+import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
 import tc.oc.pgm.goals.events.GoalStatusChangeEvent;
 import tc.oc.pgm.teams.Team;
+import tc.oc.pgm.util.named.NameStyle;
 
 @ListenerScope(MatchScope.RUNNING)
 public class WoolMatchModule implements MatchModule, Listener {
@@ -199,6 +201,17 @@ public class WoolMatchModule implements MatchModule, Listener {
             ImmutableList.of(new Contribution(player, 1))));
       }
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void announceWoolPlace(final PlayerWoolPlaceEvent event) {
+    if (!event.getWool().hasShowOption(ShowOption.SHOW_MESSAGES)) return;
+
+    this.match.sendMessage(translatable(
+        "wool.complete.owned",
+        event.getPlayer().getName(NameStyle.COLOR),
+        event.getWool().getComponentName(),
+        event.getPlayer().getParty().getName()));
   }
 
   @EventHandler

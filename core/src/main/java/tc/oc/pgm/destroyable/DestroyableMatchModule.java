@@ -20,6 +20,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
+import tc.oc.pgm.goals.GoalFormatter;
 import tc.oc.pgm.goals.ShowOption;
 import tc.oc.pgm.modes.ObjectiveModeChangeEvent;
 import tc.oc.pgm.util.material.MaterialData;
@@ -123,6 +124,18 @@ public class DestroyableMatchModule implements MatchModule, Listener {
         player.sendWarning(translatable("objective.damageOwn", destroyable.getComponentName()));
       }
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void announceDestroy(final DestroyableDestroyedEvent event) {
+    Destroyable destroyable = event.getDestroyable();
+    if (!destroyable.hasShowOption(ShowOption.SHOW_MESSAGES)) return;
+
+    this.match.sendMessage(translatable(
+        "destroyable.complete.owned",
+        GoalFormatter.formatContributionsWithShares(destroyable.getContributions()),
+        destroyable.getComponentName(),
+        destroyable.getOwner().getName()));
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
