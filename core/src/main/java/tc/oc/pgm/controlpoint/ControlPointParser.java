@@ -18,9 +18,9 @@ import tc.oc.pgm.filters.operator.AnyFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.payload.PayloadDefinition;
-import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.util.block.BlockVectors;
@@ -51,10 +51,10 @@ public abstract class ControlPointParser {
         : regionParser.parseProperty(Node.fromRequiredChildOrAttr(el, "capture-region", "capture"));
     Region progressDisplayRegion = regionParser.parseProperty(
         Node.fromChildOrAttr(el, "progress-display-region", "progress"),
-        BlockBoundedValidation.INSTANCE);
+        RegionValidation.BLOCK_BOUNDED);
     Region ownerDisplayRegion = regionParser.parseProperty(
         Node.fromChildOrAttr(el, "owner-display-region", "captured"),
-        BlockBoundedValidation.INSTANCE);
+        RegionValidation.BLOCK_BOUNDED);
 
     Filter captureFilter = filterParser.parseFilterProperty(el, "capture-filter");
     Filter playerFilter = filterParser.parseFilterProperty(el, "player-filter");
