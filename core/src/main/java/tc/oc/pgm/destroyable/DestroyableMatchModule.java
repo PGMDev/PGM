@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.Component.translatable;
 import java.util.Collection;
 import org.bukkit.block.Block;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,6 +30,8 @@ import tc.oc.pgm.util.material.MaterialData;
 public class DestroyableMatchModule implements MatchModule, Listener {
   protected final Match match;
   protected final Collection<Destroyable> destroyables;
+  // Set whenever an event affects a destroyable, reset after
+  private boolean breakAffectsDestroyable = false;
 
   public DestroyableMatchModule(Match match, Collection<Destroyable> destroyables) {
     this.match = match;
@@ -39,15 +42,6 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     return destroyables;
   }
 
-  private boolean anyDestroyableAffected(long pos) {
-    for (Destroyable destroyable : this.destroyables) {
-      if (!destroyable.isDestroyed() && destroyable.getBlockRegion().contains(pos)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   /**
    * This handler only checks to see if the event should be cancelled. It does not change the state
    * of any Destroyables.
@@ -56,29 +50,19 @@ public class DestroyableMatchModule implements MatchModule, Listener {
   public void testBlockChange(BlockTransformEvent event) {
     if (this.match.getWorld() != event.getWorld()) return;
 
-    // Both states are the same block, so one encoded position serves every region check below
-    long pos = BlockVectors.encodePos(event.getOldState());
-    if (!this.anyDestroyableAffected(pos)) return;
-
+    long pos = BlockVectors.encodePos(event.getBlock());
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
 
-    if (event.getCause() instanceof EntityExplodeEvent
-        && ((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
-      // If the platform doesn't provide enough data to tell
-      // who owns the TNT minecart that blew up the destroyable,
-      // cancel the event to prevent possible team griefing
-      if (player == null) {
+    boolean anyDestroyableAffected = false;
+    for (Destroyable destroyable : this.destroyables) {
+      if (destroyable.isDestroyed() || !destroyable.getBlockRegion().contains(pos)) continue;
+
+      if (!anyDestroyableAffected && shouldCancel(event.getCause(), player)) {
         event.setCancelled(true);
         return;
       }
-    } else if (event.getCause() instanceof BlockPistonExtendEvent
-        || event.getCause() instanceof BlockPistonRetractEvent) {
+      anyDestroyableAffected = true;
 
-      event.setCancelled(true);
-      return;
-    }
-
-    for (Destroyable destroyable : this.destroyables) {
       String reasonKey =
           destroyable.testBlockChange(event.getOldState(), event.getNewState(), player, pos);
       if (reasonKey != null) {
@@ -86,6 +70,18 @@ public class DestroyableMatchModule implements MatchModule, Listener {
         return;
       }
     }
+
+    if (anyDestroyableAffected) breakAffectsDestroyable = true;
+  }
+
+  private boolean shouldCancel(Event cause, ParticipantState player) {
+    // If the platform doesn't provide enough data to tell who owns the
+    // TNT minecart, cancel the event to prevent possible team griefing
+    return cause instanceof BlockPistonExtendEvent
+        || cause instanceof BlockPistonRetractEvent
+        || (cause instanceof EntityExplodeEvent explosion
+            && explosion.getEntity() instanceof ExplosiveMinecart
+            && player == null);
   }
 
   /**
@@ -94,7 +90,9 @@ public class DestroyableMatchModule implements MatchModule, Listener {
    */
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleBlockChange(BlockTransformEvent event) {
-    if (this.match.getWorld() != event.getWorld()) return;
+    if (this.match.getWorld() != event.getWorld() || !breakAffectsDestroyable) return;
+
+    breakAffectsDestroyable = false; // Consider handled
 
     long pos = BlockVectors.encodePos(event.getOldState());
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
@@ -122,6 +120,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
         event.setCancelled(true);
         player.sendWarning(translatable("objective.damageOwn", destroyable.getComponentName()));
+        break;
       }
     }
   }
