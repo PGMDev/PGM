@@ -501,11 +501,12 @@ public class BlockTransformListener implements Listener {
     Map<Block, BlockState> newStates = new HashMap<>();
 
     // Add the arm of the piston, which will extend into the adjacent block.
-    BlockState state = event.getBlock().getRelative(event.getDirection()).getState();
+    Block head = event.getBlock().getRelative(event.getDirection());
+    BlockState state = head.getState();
     MATERIAL_UTILS
         .fromLegacyBlock(Materials.PISTON_HEAD, getPistonDirectionByte(event.getDirection()))
         .applyTo(state);
-    newStates.put(event.getBlock(), state);
+    newStates.put(head, state);
 
     this.onPistonMove(event, event.getBlocks(), newStates);
   }

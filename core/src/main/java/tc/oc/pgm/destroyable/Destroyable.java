@@ -95,13 +95,16 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
    * gold block at (1,2,3), it will need to be broken three times to change into a block that is not
    * a destroyable material.
    *
-   * <p>This map will have en entry for every destroyable material for every block. If there are no
+   * <p>This map will have an entry for every destroyable material for every block. If there are no
    * custom block replacement rules affecting this destroyable, this will be null;
    *
    * <p>Keyed by {@link BlockVectors#encodePos encoded position} so that lookups on the block-change
    * hot path don't have to allocate a {@link BlockVector}.
+   *
+   * <p>The values are immutable and interned: every block with an identical material-to-health
+   * mapping shares one map instance, so they must never be modified in place.
    */
-  protected Long2ObjectMap<Map<BlockMaterialData, Integer>> blockMaterialHealth;
+  private Long2ObjectMap<Map<BlockMaterialData, Integer>> blockMaterialHealth;
 
   protected final List<DestroyableHealthChange> events = Lists.newArrayList();
   protected ImmutableList<DestroyableContribution> contributions;
@@ -187,7 +190,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     // We only need blockMaterialHealth if there are destroyable blocks that are
     // replaced by other destroyable blocks when broken.
     if (this.isAffectedByBlockReplacementRules()) {
-      this.blockMaterialHealth = new Long2ObjectOpenHashMap<>();
+      this.blockMaterialHealth = new Long2ObjectOpenHashMap<>(this.blockRegion.getBlockVolume());
       this.buildMaterialHealthMap();
     } else {
       this.blockMaterialHealth = null;
@@ -289,8 +292,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return health;
   }
 
-  /** Return the number of breaks required to change the given block to a non-objective world */
-  protected int getBlockHealth(BlockState blockState, long pos) {
+  /** Return the number of breaks required to change the given block to a non-objective material */
+  private int getBlockHealth(BlockState blockState, long pos) {
     if (this.blockMaterialHealth == null) {
       return this.hasMaterial(MaterialData.block(blockState)) ? 1 : 0;
     } else {
@@ -299,7 +302,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     }
   }
 
-  protected int getBlockHealthChange(BlockState oldState, BlockState newState, long pos) {
+  private int getBlockHealthChange(BlockState oldState, BlockState newState, long pos) {
     return this.getBlockHealth(newState, pos) - this.getBlockHealth(oldState, pos);
   }
 
@@ -312,9 +315,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
    * @param player Player responsible for the change
    * @param pos The {@link BlockVectors#encodePos encoded position} shared by both states
    */
-  public void handleBlockChange(
+  void handleBlockChange(
       BlockState oldState, BlockState newState, @Nullable ParticipantState player, long pos) {
-    if (this.isDestroyed() || !this.getBlockRegion().contains(pos)) return;
+    if (this.isDestroyed() || !this.getBlockRegion().containsPos(pos)) return;
 
     int deltaHealth = this.getBlockHealthChange(oldState, newState, pos);
     if (deltaHealth == 0) return;
@@ -386,8 +389,11 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
    * @return A player-readable message explaining why the block change is not allowed, or null if it
    *     is allowed
    */
-  public String testBlockChange(
+  @Nullable
+  String testBlockChange(
       BlockState oldState, BlockState newState, @Nullable ParticipantState player, long pos) {
+    if (this.isDestroyed() || !this.getBlockRegion().containsPos(pos)) return null;
+
     int deltaHealth = this.getBlockHealthChange(oldState, newState, pos);
     if (deltaHealth == 0) return null;
 
@@ -471,7 +477,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   @Override
   public double getCompletion() {
-    return Math.min(1, (double) this.getBreaks() / this.getBreaksRequired());
+    int breaksRequired = this.getBreaksRequired();
+    if (breaksRequired <= 0) return 1;
+    return Math.min(1, (double) this.getBreaks() / breaksRequired);
   }
 
   @Override

@@ -24,7 +24,7 @@ public interface BlockVectors {
   Set<Material> SUPPORTIVE_BLOCKS = ImmutableSet.of(
       parse(Material::valueOf, "ENCHANTMENT_TABLE", "ENCHANTING_TABLE"),
       parse(Material::valueOf, "DAYLIGHT_DETECTOR_INVERTED", "DAYLIGHT_DETECTOR"),
-      // TODO: PLATFORM DEPENDANT, new versions should use a longer list of blocks
+      // TODO: PLATFORM DEPENDENT, new versions should use a longer list of blocks
       parse(Material::valueOf, "LEAVES", "LEGACY_LEAVES"),
       parse(Material::valueOf, "LEAVES_2", "LEGACY_LEAVES_2"),
       parse(Material::valueOf, "PISTON_BASE", "PISTON"),
@@ -84,40 +84,46 @@ public interface BlockVectors {
   }
 
   /** BlockVector encoding API - pack a BlockVector into a single long */
-  int SHIFT = 21;
+  int X_BITS = 26, Y_BITS = 12, Z_BITS = 26;
 
-  long MASK = ~(-1 << SHIFT);
-  long SIGN_MASK = 1 << (SHIFT - 1);
+  int Z_SHIFT = 0, Y_SHIFT = Z_BITS, X_SHIFT = Z_BITS + Y_BITS;
+
+  long X_MASK = (1L << X_BITS) - 1;
+  long Y_MASK = (1L << Y_BITS) - 1;
+  long Z_MASK = (1L << Z_BITS) - 1;
 
   /** Decode a single component from the packed coordinates */
-  private static long unpack(long packed, int shift) {
-    packed >>= shift;
-
-    // Sign extension
-    if ((packed & SIGN_MASK) == 0) {
-      packed &= MASK;
-    } else {
-      packed |= ~MASK;
-    }
-
-    return packed;
+  private static long unpack(long packed, int shift, int bits) {
+    return (packed << (64 - shift - bits)) >> (64 - bits);
   }
 
   static BlockVector decodePos(long encoded) {
-    return new BlockVector(
-        unpack(encoded, 0), unpack(encoded, SHIFT), unpack(encoded, SHIFT + SHIFT));
+    return new BlockVector(unpackX(encoded), unpackY(encoded), unpackZ(encoded));
   }
 
   static void decodeInto(long encoded, Location loc) {
-    loc.setX(unpack(encoded, 0));
-    loc.setY(unpack(encoded, SHIFT));
-    loc.setZ(unpack(encoded, SHIFT + SHIFT));
+    loc.setX(unpackX(encoded));
+    loc.setY(unpackY(encoded));
+    loc.setZ(unpackZ(encoded));
   }
 
-  long ENCODED_NULL_POS = Long.MIN_VALUE;
+  /** Decode the X component of an {@link #encodePos encoded position} */
+  static int unpackX(long encoded) {
+    return (int) unpack(encoded, X_SHIFT, X_BITS);
+  }
+
+  /** Decode the Y component of an {@link #encodePos encoded position} */
+  static int unpackY(long encoded) {
+    return (int) unpack(encoded, Y_SHIFT, Y_BITS);
+  }
+
+  /** Decode the Z component of an {@link #encodePos encoded position} */
+  static int unpackZ(long encoded) {
+    return (int) unpack(encoded, Z_SHIFT, Z_BITS);
+  }
 
   static long encodePos(long x, long y, long z) {
-    return (x & MASK) | ((y & MASK) << SHIFT) | ((z & MASK) << (SHIFT + SHIFT));
+    return ((x & X_MASK) << X_SHIFT) | ((y & Y_MASK) << Y_SHIFT) | ((z & Z_MASK) << Z_SHIFT);
   }
 
   static long encodePos(BlockVector vector) {
@@ -148,9 +154,9 @@ public interface BlockVectors {
    */
   static long neighborPos(long encoded, BlockFace face) {
     return encodePos(
-        unpack(encoded, 0) + face.getModX(),
-        unpack(encoded, SHIFT) + face.getModY(),
-        unpack(encoded, SHIFT + SHIFT) + face.getModZ());
+        unpackX(encoded) + face.getModX(),
+        unpackY(encoded) + face.getModY(),
+        unpackZ(encoded) + face.getModZ());
   }
 
   /**
@@ -158,11 +164,10 @@ public interface BlockVectors {
    * is more efficient than creating an intermediate {@link BlockVector}, and more convenient.
    */
   static Block blockAt(World world, long encoded) {
-    return world.getBlockAt((int) unpack(encoded, 0), (int) unpack(encoded, SHIFT), (int)
-        unpack(encoded, SHIFT + SHIFT));
+    return world.getBlockAt(unpackX(encoded), unpackY(encoded), unpackZ(encoded));
   }
 
-  // TODO: PLATFORM DEPENDANT, could optimize all the "endsWith" by using diff paths
+  // TODO: PLATFORM DEPENDENT, could optimize all the "endsWith" by using diff paths
   /** Block world that a player can stand on */
   static boolean isSupportive(Material type) {
     if (type.isOccluding()) {

@@ -57,7 +57,11 @@ public class FiniteBlockRegion implements RegionDefinition.HardStatic {
     return bounds.contains(point) && positions.contains(point.toBlockVector());
   }
 
-  public boolean contains(long encodedPos) {
+  /**
+   * Test if the region contains the block at the given {@link BlockVectors#encodePos encoded
+   * position}. Callers must pass an encoding of real world coordinates.
+   */
+  public boolean containsPos(long encodedPos) {
     return positions.contains(encodedPos);
   }
 
