@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -62,8 +63,9 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void leakCheck(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    if (Materials.isLava(event.getNewState().getType())) {
-      var blockVector = BlockVectors.center(event.getNewState());
+    BlockState newState = event.getNewState();
+    if (Materials.isLava(newState.getType()) && !this.allCoresLeaked()) {
+      var blockVector = BlockVectors.center(newState);
       // Vector ensuring it's inside leak region if it's above
       var minVector = blockVector.clone();
       minVector.setY(0.5);
@@ -77,7 +79,7 @@ public class CoreMatchModule implements MatchModule, Listener {
         if (core.getLeakRegion().contains(blockVector)) {
           // core has leaked
           core.markLeaked();
-          this.match.callEvent(new CoreLeakEvent(this.match, core, event.getNewState()));
+          this.match.callEvent(new CoreLeakEvent(this.match, core, newState));
           this.match.callEvent(new GoalCompleteEvent(
               this.match, core, core.getOwner(), false, core.getContributions()));
         }
@@ -85,16 +87,22 @@ public class CoreMatchModule implements MatchModule, Listener {
     }
   }
 
+  private boolean allCoresLeaked() {
+    for (Core core : this.cores) {
+      if (!core.hasLeaked()) return false;
+    }
+    return true;
+  }
+
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void breakCheck(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
-    ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
 
-    var blockVector = BlockVectors.center(event.getNewState());
-
+    long pos = event.getPos();
     for (Core core : this.cores) {
-      if (!core.hasLeaked() && core.getCasingRegion().contains(blockVector)) {
+      if (!core.hasLeaked() && core.getCasingRegion().containsPos(pos)) {
         if (event.getNewState().getType() == Material.AIR) {
+          ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
           if (player != null) {
             Competitor team = player.getParty();
 
@@ -109,11 +117,11 @@ public class CoreMatchModule implements MatchModule, Listener {
                 this.match.callEvent(new GoalStatusChangeEvent(this.match, core));
               }
             }
-          } else if (event.getCause() instanceof EntityExplodeEvent) {
+          } else if (event.getCause() instanceof EntityExplodeEvent explosion) {
             // If the platform doesn't provide enough data to tell
             // who owns the TNT minecart that blew up the core, cancel the
             // event to prevent possible team griefing
-            if (((EntityExplodeEvent) event.getCause()).getEntity() instanceof ExplosiveMinecart) {
+            if (explosion.getEntity() instanceof ExplosiveMinecart) {
               event.setCancelled(true);
             }
           } else if (event.getCause() instanceof BlockPistonRetractEvent) {
@@ -135,11 +143,11 @@ public class CoreMatchModule implements MatchModule, Listener {
     if (block.getWorld() != this.match.getWorld()) return;
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null) return;
-    var center = BlockVectors.center(block);
 
+    long pos = BlockVectors.encodePos(block);
     for (Core core : this.cores) {
       if (!core.hasLeaked()
-          && core.getCasingRegion().contains(center)
+          && core.getCasingRegion().containsPos(pos)
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
         player.sendWarning(translatable("objective.damageOwn", core.getComponentName()));
@@ -151,9 +159,9 @@ public class CoreMatchModule implements MatchModule, Listener {
   public void lavaProtection(final BlockTransformEvent event) {
     if (event.getWorld() != this.match.getWorld()) return;
 
-    var blockVector = BlockVectors.center(event.getNewState());
+    long pos = event.getPos();
     for (Core core : this.cores) {
-      if (core.getLavaRegion().contains(blockVector)) {
+      if (core.getLavaRegion().containsPos(pos)) {
         event.setCancelled(true);
       }
     }
