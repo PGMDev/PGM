@@ -88,10 +88,10 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
   }
 
   @Override
-  public String getDecoratedName(Player player, ChatColor partyColor) {
+  public String getDecoratedName(Player player, String name, ChatColor partyColor) {
     return getPrefix(player.getUniqueId())
         + (partyColor == null ? ChatColor.RESET : partyColor)
-        + player.getName()
+        + name
         + getSuffix(player.getUniqueId())
         + ChatColor.WHITE;
   }
