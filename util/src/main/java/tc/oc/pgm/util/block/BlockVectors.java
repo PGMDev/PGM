@@ -83,7 +83,12 @@ public interface BlockVectors {
     return out;
   }
 
-  /** BlockVector encoding API - pack a BlockVector into a single long */
+  /**
+   * BlockVector encoding API - pack a BlockVector into a single long. Unlike Minecraft itself, we
+   * pack in order of {@code [x | y | z]}, whereas {@code net.minecraft.core.BlockPos} packs
+   * {@code [x | z | y]}. Field lengths are the same, however; this avoids aliasing, though such
+   * aliasing is unlikely to occur in PGM's use cases.
+   */
   int X_BITS = 26, Y_BITS = 12, Z_BITS = 26;
 
   int Z_SHIFT = 0, Y_SHIFT = Z_BITS, X_SHIFT = Z_BITS + Y_BITS;
