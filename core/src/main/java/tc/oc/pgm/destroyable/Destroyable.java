@@ -79,14 +79,29 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   protected Instant lastSparkTime;
 
   /**
-   * The maximum possible health that this Destroyable can have, which is the sum of the max health
-   * of each block. The max health of a block is the maximum number of breaks between any
-   * destroyable world and any non-destroyable world. Note that blocks are not necessarily at max
-   * health when the match starts. This value can change as the result of mode changes.
+   * The health of this Destroyable at match load, i.e. the number of breaks needed to clear every
+   * block in the region. {@link #health} is how many of those breaks are still outstanding, so a
+   * Destroyable always starts a match at full health and 0% completion, even when its blocks are
+   * not all the strongest destroyable material. A repair of a stronger block cannot make the
+   * {@link #health} of the Destroyable exceed this amount.
+   *
+   * <p>The single-material case re-derives this from the region on a mode change so the denominator
+   * matches the new material set, which can shift completion; {@link DestroyableMatchModule}
+   * accounts for that. The multi-material case cannot re-derive it, see
+   * {@link #buildMaterialHealthMap()}.
+   *
+   * <p>Zero only when the region contains no matching blocks at all.
    */
   protected int maxHealth;
 
-  // The current health of the Destroyable
+  /**
+   * Whether {@link #maxHealth} has been established. Only read by
+   * {@link #buildMaterialHealthMap()}, which cannot safely re-derive it. The single-material case
+   * in {@link #recalculateHealth()} re-derives it from the region every time, which is idempotent.
+   */
+  private boolean maxHealthCalculated;
+
+  /** The current health of the Destroyable */
   protected int health;
 
   /**
@@ -202,6 +217,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
         }
       }
     }
+    this.maxHealthCalculated = true;
   }
 
   protected boolean isAffectedByBlockReplacementRules() {
@@ -224,8 +240,17 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   /** Used internally to break out of the below recursive algorithm when a cycle is detected */
   protected static final class Indestructible extends Exception {}
 
+  /**
+   * Build {@link #blockMaterialHealth} and derive the current health from it.
+   *
+   * <p>Unlike the single-material case, there is no way to derive {@link #maxHealth} here without
+   * reading the region as it currently stands, because a block only contributes the health of the
+   * material it is actually holding. Deriving it a second time, from a region that has since been
+   * broken into, would set it equal to the reduced health and so silently reset
+   * {@link #getBreaks()} to zero. It is therefore fixed on the first pass and left alone after
+   * that.
+   */
   protected void buildMaterialHealthMap() {
-    this.maxHealth = 0;
     this.health = 0;
     Set<BlockMaterialData> visited = new HashSet<>();
     var materialHealthMapCache =
@@ -244,10 +269,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
         long pos = BlockVectors.encodePos(block);
         this.blockMaterialHealth.put(pos, materialHealthMap);
-        var blockHealth = this.getBlockHealth(block.getState(), pos);
-        this.maxHealth += blockHealth;
-        this.health += blockHealth;
+        this.health += this.getBlockHealth(block.getState(), pos);
       }
+      if (!this.maxHealthCalculated) this.maxHealth = this.health;
     } catch (Indestructible ex) {
       this.health = this.maxHealth = Integer.MAX_VALUE;
       PGM.get()
@@ -434,11 +458,12 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   public float getHealthPercent() {
-    return (float) this.health / this.maxHealth;
+    if (this.maxHealth <= 0) return 0f;
+    return Math.min(1f, (float) this.health / this.maxHealth);
   }
 
   public int getBreaks() {
-    return this.maxHealth - this.health;
+    return Math.max(0, this.maxHealth - this.health);
   }
 
   public double getDestructionRequired() {
@@ -450,7 +475,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   private int getBreaksRequired(double destructionRequired) {
-    return (int) Math.round(this.maxHealth * destructionRequired);
+    if (this.maxHealth <= 0) return 0;
+    return Math.max(1, (int) Math.round(this.maxHealth * destructionRequired));
   }
 
   public int getBreaksRequired() {

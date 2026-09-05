@@ -5,6 +5,7 @@ import static tc.oc.pgm.api.map.MapProtos.MODES_IMPLEMENTATION_VERSION;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -64,19 +65,24 @@ public class CoreMatchModule implements MatchModule, Listener {
     if (event.getWorld() != this.match.getWorld()) return;
 
     BlockState newState = event.getNewState();
-    if (Materials.isLava(newState.getType()) && !this.allCoresLeaked()) {
-      var blockVector = BlockVectors.center(newState);
-      // Vector ensuring it's inside leak region if it's above
-      var minVector = blockVector.clone();
-      minVector.setY(0.5);
+    if (Materials.isLava(newState.getType())) {
+      Location blockCenter = null, minCenter = null;
       for (Core core : this.cores) {
-        if (core.hasLeaked() || !core.getLeakRegion().contains(minVector)) continue;
+        if (core.hasLeaked()) continue;
 
-        if (core.updateLeak(blockVector.getBlockY())) {
+        if (blockCenter == null) {
+          blockCenter = BlockVectors.center(newState);
+          minCenter = blockCenter.clone();
+          minCenter.setY(0.5);
+        }
+
+        if (!core.getLeakRegion().contains(minCenter)) continue;
+
+        if (core.updateLeak(blockCenter.getBlockY())) {
           this.match.callEvent(new GoalStatusChangeEvent(this.match, core));
         }
 
-        if (core.getLeakRegion().contains(blockVector)) {
+        if (core.getLeakRegion().contains(blockCenter)) {
           // core has leaked
           core.markLeaked();
           this.match.callEvent(new CoreLeakEvent(this.match, core, newState));
@@ -85,13 +91,6 @@ public class CoreMatchModule implements MatchModule, Listener {
         }
       }
     }
-  }
-
-  private boolean allCoresLeaked() {
-    for (Core core : this.cores) {
-      if (!core.hasLeaked()) return false;
-    }
-    return true;
   }
 
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -151,6 +150,7 @@ public class CoreMatchModule implements MatchModule, Listener {
           && player.getParty() == core.getOwner()) {
         event.setCancelled(true);
         player.sendWarning(translatable("objective.damageOwn", core.getComponentName()));
+        break;
       }
     }
   }
@@ -163,6 +163,7 @@ public class CoreMatchModule implements MatchModule, Listener {
     for (Core core : this.cores) {
       if (core.getLavaRegion().containsPos(pos)) {
         event.setCancelled(true);
+        break;
       }
     }
   }

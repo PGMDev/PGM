@@ -34,7 +34,7 @@ import tc.oc.pgm.util.material.MaterialData;
 public class DestroyableMatchModule implements MatchModule, Listener {
   protected final Match match;
   protected final Collection<Destroyable> destroyables;
-  protected Event lastAffectingCause;
+  protected @Nullable Event lastAffectingCause;
 
   public DestroyableMatchModule(Match match, Collection<Destroyable> destroyables) {
     this.match = match;
@@ -43,6 +43,11 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
   public Collection<Destroyable> getDestroyables() {
     return destroyables;
+  }
+
+  @Override
+  public void disable() {
+    this.lastAffectingCause = null;
   }
 
   /**
@@ -60,7 +65,7 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     for (Destroyable destroyable : this.destroyables) {
       if (destroyable.isDestroyed() || !destroyable.getBlockRegion().containsPos(pos)) continue;
 
-      if (!anyDestroyableAffected && shouldCancel(event.getCause(), player)) {
+      if (shouldCancel(event.getCause(), player)) {
         event.setCancelled(true);
         return;
       }
@@ -110,12 +115,13 @@ public class DestroyableMatchModule implements MatchModule, Listener {
   public void processBlockDamage(BlockDamageEvent event) {
     if (this.match.getWorld() != event.getBlock().getWorld()) return;
 
-    Block block = event.getBlock();
-    MaterialData material = MaterialData.block(block.getState());
     MatchPlayer player = this.match.getPlayer(event.getPlayer());
     if (player == null) return;
 
+    Block block = event.getBlock();
     long pos = BlockVectors.encodePos(block);
+    MaterialData material = MaterialData.block(block.getState());
+
     for (Destroyable destroyable : this.destroyables) {
       if (player.getParty() == destroyable.getOwner()
           && !destroyable.isDestroyed()
