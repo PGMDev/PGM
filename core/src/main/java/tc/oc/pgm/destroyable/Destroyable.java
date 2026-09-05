@@ -211,7 +211,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
       for (BlockMaterialData material : this.materials) {
-        BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
+        BlockDrops drops = this.blockDropsRuleSet.getDrops(block, material);
         if (drops != null && drops.replacement != null && this.hasMaterial(drops.replacement)) {
           return true;
         }
@@ -281,7 +281,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     int health = 1;
     if (this.blockDropsRuleSet != null) {
-      BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
+      BlockDrops drops = this.blockDropsRuleSet.getDrops(block, material);
       if (drops != null && drops.replacement != null) {
         health +=
             this.buildBlockMaterialHealthMap(block, drops.replacement, materialHealthMap, visited);
@@ -380,7 +380,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   /**
-   * Test if the given block change is allowed by this Destroyable
+   * Test if the given block change is allowed by this Destroyable. Caller must ensure block is part
+   * of the destroyable.
    *
    * @param oldState State of the block before the change
    * @param newState State of the block after the change
@@ -392,8 +393,6 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   @Nullable
   String testBlockChange(
       BlockState oldState, BlockState newState, @Nullable ParticipantState player, long pos) {
-    if (this.isDestroyed() || !this.getBlockRegion().containsPos(pos)) return null;
-
     int deltaHealth = this.getBlockHealthChange(oldState, newState, pos);
     if (deltaHealth == 0) return null;
 

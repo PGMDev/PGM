@@ -34,6 +34,7 @@ import tc.oc.pgm.util.material.MaterialData;
 public class DestroyableMatchModule implements MatchModule, Listener {
   protected final Match match;
   protected final Collection<Destroyable> destroyables;
+  protected Event lastAffectingCause;
 
   public DestroyableMatchModule(Match match, Collection<Destroyable> destroyables) {
     this.match = match;
@@ -42,15 +43,6 @@ public class DestroyableMatchModule implements MatchModule, Listener {
 
   public Collection<Destroyable> getDestroyables() {
     return destroyables;
-  }
-
-  private boolean anyDestroyableAffected(long pos) {
-    for (Destroyable destroyable : this.destroyables) {
-      if (!destroyable.isDestroyed() && destroyable.getBlockRegion().containsPos(pos)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
@@ -62,24 +54,27 @@ public class DestroyableMatchModule implements MatchModule, Listener {
     if (this.match.getWorld() != event.getWorld()) return;
 
     long pos = event.getPos();
-    if (!this.anyDestroyableAffected(pos)) return;
-
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
-    if (shouldCancel(event.getCause(), player)) {
-      event.setCancelled(true);
-      return;
-    }
 
-    BlockState oldState = event.getOldState();
-    BlockState newState = event.getNewState();
-
+    boolean anyDestroyableAffected = false;
     for (Destroyable destroyable : this.destroyables) {
-      String reasonKey = destroyable.testBlockChange(oldState, newState, player, pos);
+      if (destroyable.isDestroyed() || !destroyable.getBlockRegion().containsPos(pos)) continue;
+
+      if (!anyDestroyableAffected && shouldCancel(event.getCause(), player)) {
+        event.setCancelled(true);
+        return;
+      }
+      anyDestroyableAffected = true;
+
+      String reasonKey =
+          destroyable.testBlockChange(event.getOldState(), event.getNewState(), player, pos);
       if (reasonKey != null) {
         event.setCancelled(translatable(reasonKey, destroyable.getComponentName()));
         return;
       }
     }
+
+    if (anyDestroyableAffected) lastAffectingCause = event.getCause();
   }
 
   private boolean shouldCancel(@Nullable Event cause, @Nullable ParticipantState player) {
@@ -99,10 +94,9 @@ public class DestroyableMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void handleBlockChange(BlockTransformEvent event) {
     if (this.match.getWorld() != event.getWorld()) return;
+    if (event.getCause() != this.lastAffectingCause) return;
 
     long pos = event.getPos();
-    if (!this.anyDestroyableAffected(pos)) return;
-
     BlockState oldState = event.getOldState();
     BlockState newState = event.getNewState();
     ParticipantState player = ParticipantBlockTransformEvent.getPlayerState(event);
