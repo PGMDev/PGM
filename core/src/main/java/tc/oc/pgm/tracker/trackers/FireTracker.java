@@ -1,10 +1,10 @@
 package tc.oc.pgm.tracker.trackers;
 
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.material.Materials.ANY_FIRE;
 
 import java.util.Map;
 import java.util.WeakHashMap;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -12,7 +12,7 @@ import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -47,7 +47,7 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
       case FIRE_TICK:
         FireInfo info = resolveBurning(victim);
         if (info != null) return info;
-        // fall through
+      // fall through
 
       case FIRE:
       case LAVA:
@@ -62,15 +62,17 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockTransform(BlockTransformEvent event) {
+    boolean wasFire = ANY_FIRE.matches(event.getOldState());
+    boolean isFire = ANY_FIRE.matches(event.getNewState());
     boolean wasLava = Materials.isLava(event.getOldState());
     boolean isLava = Materials.isLava(event.getNewState());
 
-    if (event.changedFrom(Material.FIRE) || (wasLava && !isLava)) {
+    if ((wasFire && !isFire) || (wasLava && !isLava)) {
       blocks().clearBlock(event.getBlock());
     }
-    if (event instanceof ParticipantBlockTransformEvent
-        && (event.changedTo(Material.FIRE) || (!wasLava && isLava))) {
-      ParticipantState placer = ((ParticipantBlockTransformEvent) event).getPlayerState();
+    if (event instanceof ParticipantBlockTransformEvent bte
+        && ((!wasFire && isFire) || (!wasLava && isLava))) {
+      ParticipantState placer = bte.getPlayerState();
       blocks()
           .trackBlockState(
               event.getNewState(), new FireInfo(new BlockInfo(event.getNewState(), placer)));

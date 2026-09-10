@@ -1,11 +1,15 @@
 package tc.oc.pgm.tracker.trackers;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
@@ -19,12 +23,39 @@ import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 
 /** Updates the state of owned TNT blocks and entities */
 public class TNTTracker extends AbstractTracker<TNTInfo> {
+
+  private final Map<Block, ParticipantState> pendingPlacers = new HashMap<>();
+  private long pendingTick = Long.MIN_VALUE;
+
   public TNTTracker(TrackerMatchModule tmm, Match match) {
     super(TNTInfo.class, tmm, match);
   }
 
-  @SuppressWarnings("deprecation")
+  private Map<Block, ParticipantState> pending() {
+    long tick = match.getTick().tick;
+    if (tick != pendingTick) {
+      pendingTick = tick;
+      pendingPlacers.clear();
+    }
+    return pendingPlacers;
+  }
+
+  /**
+   * Retain the placer of a TNT block that a transform is about to remove. HIGHEST, because
+   * {@link BlockTracker} clears the block at MONITOR, before a prime caused by that removal
+   * arrives.
+   */
   @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+  public void onTntRemoved(BlockTransformEvent event) {
+    if (!event.changedFrom(Material.TNT)) return;
+
+    Block block = event.getOldState().getBlock();
+    ParticipantState placer = blocks().getOwner(block);
+    if (placer != null) pending().put(block, placer);
+  }
+
+  @SuppressWarnings("deprecation")
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPlace(ParticipantBlockTransformEvent event) {
     if (event.getNewState().getType() == Material.TNT) {
       blocks()
@@ -34,9 +65,12 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
     }
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+  @EventHandler(priority = EventPriority.HIGHEST)
   public void onPrime(ExplosionPrimeEvent event) {
     if (event.getEntity() instanceof TNTPrimed tnt) {
+      ParticipantState pendingPlacer = pending().remove(tnt.getLocation().getBlock());
+      if (event.isCancelled()) return;
+
       // Some TNT was activated, try to figure out why
       TNTInfo info = null;
 
@@ -56,6 +90,7 @@ public class TNTTracker extends AbstractTracker<TNTInfo> {
 
       if (info == null) {
         ParticipantState placer = blocks().getOwner(tnt.getLocation().getBlock());
+        if (placer == null) placer = pendingPlacer;
         if (placer != null) {
           // If no primer was resolved for the event, give the TNT entity to the block placer, if
           // any

@@ -54,12 +54,21 @@ public abstract class GeneralizedEvent extends PreemptiveEvent {
     this.propagate = propagate;
   }
 
+  /**
+   * Gets whether cancelling this event also cancels the cause.
+   *
+   * @return if the event propagates cancellations
+   */
+  public boolean isPropagate() {
+    return this.propagate;
+  }
+
   @Override
   public void setCancelled(final boolean cancel) {
     super.setCancelled(cancel);
 
-    if (this.propagate && this.cause instanceof Cancellable) {
-      ((Cancellable) this.cause).setCancelled(cancel);
+    if (this.propagate && this.cause instanceof Cancellable cancellable) {
+      cancellable.setCancelled(cancel);
     }
   }
 

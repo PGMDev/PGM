@@ -7,10 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.server.v1_8_R3.Block;
 import net.minecraft.server.v1_8_R3.IBlockData;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.Hanging;
@@ -19,7 +20,9 @@ import org.bukkit.entity.LeashHitch;
 import org.bukkit.entity.Painting;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Directional;
 import org.bukkit.material.Door;
+import org.bukkit.material.PistonExtensionMaterial;
 import org.bukkit.util.BlockVector;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.platform.sportpaper.material.ModernMaterialNames.MaterialMapping;
@@ -29,6 +32,7 @@ import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.material.ItemMaterialData;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.material.MaterialUtils;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -150,7 +154,7 @@ public class SpMaterialUtils implements MaterialUtils {
   @Override
   public Set<BlockMaterialData> getPossibleBlocks(Material material) {
     // Get all possible blockstates off of nms
-    Block block = CraftMagicNumbers.getBlock(material);
+    var block = CraftMagicNumbers.getBlock(material);
     List<IBlockData> states = block.P().a();
     Set<BlockMaterialData> materials = new HashSet<>(states.size());
     for (IBlockData state : states) {
@@ -160,13 +164,45 @@ public class SpMaterialUtils implements MaterialUtils {
   }
 
   @Override
-  public MaterialMatcher.Builder matcherBuilder() {
-    return new MaterialMatcherBuilderImpl();
+  public BlockMaterialData pistonHead(BlockFace facing, boolean sticky) {
+    PistonExtensionMaterial head = new PistonExtensionMaterial(Materials.PISTON_HEAD);
+    head.setFacingDirection(facing);
+    head.setSticky(sticky);
+    return new SpMaterialData(head);
   }
 
   @Override
-  public boolean isUpperHalfOfDoor(org.bukkit.block.Block block) {
-    return block.getState().getData() instanceof Door door && door.isTopHalf();
+  public boolean isBrokenByPiston(Block block) {
+    // getPushReaction
+    return CraftMagicNumbers.getBlock(block.getType()).k() == 1;
+  }
+
+  @Override
+  public @Nullable BlockFace getFacingOrNull(Block block) {
+    return block.getState().getData() instanceof Directional directional
+        ? directional.getFacing()
+        : null;
+  }
+
+  @Override
+  public @Nullable BlockFace getDoorOtherHalf(BlockState state) {
+    if (!(state.getData() instanceof Door door)) return null;
+    return door.isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
+  }
+
+  @Override
+  public @Nullable Material getBucketContents(Material bucket) {
+    return switch (bucket) {
+      case BUCKET -> Material.AIR;
+      case WATER_BUCKET -> Material.WATER;
+      case LAVA_BUCKET -> Material.LAVA;
+      default -> null;
+    };
+  }
+
+  @Override
+  public MaterialMatcher.Builder matcherBuilder() {
+    return new MaterialMatcherBuilderImpl();
   }
 
   private static class MaterialMatcherBuilderImpl extends MaterialMatcher.BuilderImpl
