@@ -104,6 +104,8 @@ public class Renewable implements Listener, Tickable {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onBlockChange(BlockTransformEvent event) {
+    if (event.getWorld() != match.getWorld()) return;
+
     BlockState oldState = event.getOldState(), newState = event.getNewState();
 
     updateRenewablePool(newState);

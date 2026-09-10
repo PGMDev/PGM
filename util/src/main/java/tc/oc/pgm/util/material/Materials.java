@@ -37,9 +37,13 @@ public interface Materials {
   Material IRON_DOOR = parse("IRON_DOOR_BLOCK", "IRON_DOOR");
   Material RAW_FISH = parse("RAW_FISH", "COD");
   Material WORKBENCH = parse("WORKBENCH", "CRAFTING_TABLE");
-  Material SOIL = parse("SOIL", "FARMLAND");
   Material MOVING_PISTON = parse("PISTON_MOVING_PIECE", "MOVING_PISTON");
   Material PISTON_HEAD = parse("PISTON_EXTENSION", "PISTON_HEAD");
+
+  MaterialMatcher ANY_FIRE = MaterialMatcher.builder()
+      .add(Material.FIRE)
+      .addNullable(Material.getMaterial("SOUL_FIRE"))
+      .build();
 
   MaterialMatcher WEAPONS = MaterialMatcher.builder()
       .addAll(m -> m.name().endsWith("_SWORD")
@@ -54,15 +58,19 @@ public interface Materials {
       .addNullable(Material.getMaterial("MACE"))
       .build();
 
-  MaterialMatcher DOOR_ITEMS = MaterialMatcher.builder()
-      .addAll(m -> m.name().contains("_DOOR") && !m.isBlock())
+  MaterialMatcher DOORS = MaterialMatcher.builder()
+      .addAll(m -> {
+        String name = m.name().replace("_", "");
+        return name.contains("DOOR") && !name.contains("TRAPDOOR");
+      })
       .build();
 
   // A set of item types which, when used to interact with the match environment by non-playing
   // users, can potentially cause client-server de-sync
   MaterialMatcher FORBIDDEN_OBSERVER_TYPES = MaterialMatcher.builder()
-      .add(DOOR_ITEMS)
-      .addAll(Materials.LILY_PAD, Material.BUCKET, Material.LAVA_BUCKET, Material.WATER_BUCKET)
+      .add(DOORS)
+      .add(Materials.LILY_PAD)
+      .addAll(m -> m.name().endsWith("BUCKET") && !m.name().contains("MILK"))
       .build();
 
   MaterialMatcher SOLID_EXCLUSIONS = MaterialMatcher.builder()
@@ -208,17 +216,6 @@ public interface Materials {
     return isClimbable(location.getBlock().getType());
   }
 
-  static boolean isBucket(ItemStack bucket) {
-    return isBucket(bucket.getType());
-  }
-
-  static boolean isBucket(Material bucket) {
-    return bucket == Material.BUCKET
-        || bucket == Material.LAVA_BUCKET
-        || bucket == Material.WATER_BUCKET
-        || bucket == Material.MILK_BUCKET;
-  }
-
   static int amount(@Nullable ItemStack stack) {
     return stack == null || stack.getType() == Material.AIR ? 0 : stack.getAmount();
   }
@@ -226,18 +223,5 @@ public interface Materials {
   @Contract(value = "null -> true", pure = true)
   static boolean isNothing(@Nullable ItemStack stack) {
     return amount(stack) == 0;
-  }
-
-  static Material materialInBucket(ItemStack bucket) {
-    return materialInBucket(bucket.getType());
-  }
-
-  static Material materialInBucket(Material bucket) {
-    return switch (bucket) {
-      case BUCKET, MILK_BUCKET -> Material.AIR;
-      case LAVA_BUCKET -> Material.LAVA;
-      case WATER_BUCKET -> Material.WATER;
-      default -> throw new IllegalArgumentException(bucket + " is not a bucket");
-    };
   }
 }
