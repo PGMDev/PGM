@@ -72,6 +72,7 @@ import tc.oc.pgm.util.FileUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.AfkTracker;
+import tc.oc.pgm.util.listener.BlockFallListener;
 import tc.oc.pgm.util.listener.ItemTransferListener;
 import tc.oc.pgm.util.listener.PlayerBlockListener;
 import tc.oc.pgm.util.listener.PlayerMoveListener;
@@ -409,6 +410,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new PlayerMoveListener());
     registerEvents(new ItemTransferListener());
     registerEvents(new TNTMinecartPlacementListener());
+    registerEvents(new BlockFallListener());
     registerEvents(matchManager);
     inventoryManager.init();
     registerEvents(afkTracker);

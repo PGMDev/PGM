@@ -1,7 +1,8 @@
 package tc.oc.pgm.damage;
 
+import static tc.oc.pgm.util.material.Materials.ANY_FIRE;
+
 import com.google.common.collect.SetMultimap;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -9,7 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -37,7 +38,7 @@ public class DisableDamageMatchModule implements MatchModule, Listener {
       return DamageCause.CONTACT;
     } else if (Materials.isLava(block.getType())) {
       return DamageCause.LAVA;
-    } else if (Material.FIRE == block.getType()) {
+    } else if (ANY_FIRE.matches(block.getType())) {
       return DamageCause.FIRE;
     }
     return DamageCause.CONTACT;

@@ -249,16 +249,13 @@ public class FallingBlocksMatchModule implements MatchModule, Listener, Tickable
     }
   }
 
-  @SuppressWarnings("deprecation")
   private void fall(long pos, @Nullable ParticipantState breaker) {
     // Block must be removed BEFORE spawning the FallingBlock, or it will not appear on the client
     // https://bugs.mojang.com/browse/MC-72248
     Block block = blockAt(match.getWorld(), pos);
     BlockState oldState = block.getState();
     block.setType(Material.AIR, false);
-    FallingBlock fallingBlock = block
-        .getWorld()
-        .spawnFallingBlock(block.getLocation(), oldState.getType(), oldState.getRawData());
+    FallingBlock fallingBlock = MaterialData.block(oldState).spawnFallingBlock(block.getLocation());
 
     BlockFallEvent event = new BlockFallEvent(block, fallingBlock);
     match.callEvent(

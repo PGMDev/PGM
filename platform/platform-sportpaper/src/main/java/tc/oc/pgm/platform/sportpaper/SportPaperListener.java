@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerInitialSpawnEvent;
 import org.bukkit.plugin.Plugin;
 import tc.oc.pgm.util.event.ExtraPingDataRequestEvent;
 import tc.oc.pgm.util.event.block.BlockDispenseEntityEvent;
-import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.EntityExtinguishEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
@@ -24,12 +23,6 @@ import tc.oc.pgm.util.event.player.PlayerSpawnEntityEvent;
 import tc.oc.pgm.util.event.player.PlayerSpawnLocationEvent;
 
 public class SportPaperListener implements Listener {
-  @EventHandler(ignoreCancelled = true)
-  public void onBlockFall(org.bukkit.event.block.BlockFallEvent sportEvent) {
-    BlockFallEvent pgmEvent = new BlockFallEvent(sportEvent.getBlock(), sportEvent.getEntity());
-    handleCall(pgmEvent, sportEvent);
-  }
-
   @EventHandler(ignoreCancelled = true)
   public void onPlayerOnGround(org.bukkit.event.player.PlayerOnGroundEvent sportEvent) {
     PlayerOnGroundEvent pgmEvent =

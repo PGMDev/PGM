@@ -6,11 +6,15 @@ import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -18,11 +22,14 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -32,6 +39,7 @@ import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Team;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -107,9 +115,14 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
-  public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
-    return ev.getExplosionResult() == ExplosionResult.DESTROY
-        || ev.getExplosionResult() == ExplosionResult.DESTROY_WITH_DECAY;
+  public boolean isDestructiveExplosion(Event ev) {
+    ExplosionResult result = switch (ev) {
+      case BlockExplodeEvent explodeEvent -> explodeEvent.getExplosionResult();
+      case EntityExplodeEvent explodeEvent -> explodeEvent.getExplosionResult();
+      default -> null;
+    };
+
+    return result == ExplosionResult.DESTROY || result == ExplosionResult.DESTROY_WITH_DECAY;
   }
 
   @Override
@@ -124,5 +137,32 @@ public class ModernMiscUtil implements MiscUtils {
   public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
     if (ev instanceof PlayerPickupArrowEvent arrowEvent) return arrowEvent.getArrow();
     return ev.getItem();
+  }
+
+  @Override
+  public boolean isDuplicateRetract(BlockPistonRetractEvent event) {
+    return false;
+  }
+
+  @Override
+  public boolean doesWaterEvaporate(Block block) {
+    // The same positional lookup BucketItem makes before placing water
+    return ((CraftWorld) block.getWorld())
+        .getHandle()
+        .environmentAttributes()
+        .getValue(
+            EnvironmentAttributes.WATER_EVAPORATES,
+            new BlockPos(block.getX(), block.getY(), block.getZ()));
+  }
+
+  @Override
+  public @Nullable FallingBlock getFallingBlock(EntityChangeBlockEvent event) {
+    if (!(event.getEntity() instanceof FallingBlock fallingBlock)) return null;
+
+    Material material = fallingBlock.getBlockData().getMaterial();
+    return material == event.getBlock().getType()
+            && material != event.getBlockData().getMaterial()
+        ? fallingBlock
+        : null;
   }
 }
