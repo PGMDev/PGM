@@ -15,6 +15,9 @@ import tc.oc.pgm.api.map.MapTag;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
+import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.core.CoreMatchModule;
+import tc.oc.pgm.destroyable.DestroyableMatchModule;
 import tc.oc.pgm.filters.matcher.CauseFilter;
 import tc.oc.pgm.filters.operator.DenyFilter;
 import tc.oc.pgm.regions.EverywhereRegion;
@@ -38,6 +41,11 @@ public class TNTModule implements MapModule<TNTMatchModule> {
   @Override
   public Collection<MapTag> getTags() {
     return properties.instantIgnite() ? TAGS : List.of();
+  }
+
+  @Override
+  public Collection<Class<? extends MatchModule>> getWeakDependencies() {
+    return List.of(DestroyableMatchModule.class, CoreMatchModule.class);
   }
 
   @Override

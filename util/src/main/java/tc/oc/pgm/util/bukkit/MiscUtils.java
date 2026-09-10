@@ -8,19 +8,21 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Team;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
 
@@ -55,9 +57,16 @@ public interface MiscUtils {
 
   boolean isPowerEnchanted(Projectile proj);
 
-  boolean isDestructiveExplosion(EntityExplodeEvent ev);
+  boolean isDestructiveExplosion(Event ev);
 
   boolean isEntityDestroyed(EntityRemoveFromWorldEvent ev);
 
   Entity getFakePickupEntity(PlayerPickupItemEvent ev);
+
+  boolean isDuplicateRetract(BlockPistonRetractEvent event);
+
+  boolean doesWaterEvaporate(Block block);
+
+  @Nullable
+  FallingBlock getFallingBlock(EntityChangeBlockEvent event);
 }

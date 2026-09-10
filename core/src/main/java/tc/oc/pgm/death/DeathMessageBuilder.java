@@ -3,6 +3,7 @@ package tc.oc.pgm.death;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.material.Materials.ANY_FIRE;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
@@ -371,7 +372,7 @@ public class DeathMessageBuilder {
     require("fire");
     player();
     if (!(fire.getIgniter() instanceof BlockInfo igniter
-        && igniter.getMaterial().getItemType() == Material.FIRE)) {
+        && ANY_FIRE.matches(igniter.getMaterial().getItemType()))) {
       // "burned by fire" is redundant
       physical(fire.getIgniter());
     }

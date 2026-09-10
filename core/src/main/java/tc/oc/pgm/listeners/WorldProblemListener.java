@@ -70,9 +70,9 @@ public class WorldProblemListener implements Listener {
       if (!event.getWorld().hasMetadata("is-post-flattening")) {
         // Replace formerly invisible half-iron-door blocks with barriers
         for (Block ironDoor : NMS_HACKS.getBlocks(event.getChunk(), Materials.IRON_DOOR)) {
-          BlockFace half =
-              MATERIAL_UTILS.isUpperHalfOfDoor(ironDoor) ? BlockFace.UP : BlockFace.DOWN;
-          if (ironDoor.getRelative(half.getOppositeFace()).getType() != Materials.IRON_DOOR) {
+          BlockFace otherHalf = MATERIAL_UTILS.getDoorOtherHalf(ironDoor.getState());
+          if (otherHalf != null
+              && ironDoor.getRelative(otherHalf).getType() != Materials.IRON_DOOR) {
             ironDoor.setType(Material.BARRIER, false);
           }
         }

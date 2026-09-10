@@ -1,6 +1,7 @@
 package tc.oc.pgm.tracker.trackers;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,7 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPistonEvent;
 import org.bukkit.event.block.BlockPistonExtendEvent;
 import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.ParticipantState;
@@ -110,6 +111,11 @@ public class BlockTracker implements Listener {
     }
   }
 
+  public void unload() {
+    blocks.clear();
+    materials.clear();
+  }
+
   private void handleMove(Collection<Block> blocks, BlockFace direction) {
     Map<Block, TrackerInfo> keepInfo = new HashMap<>();
     Map<Block, Material> keepMaterials = new HashMap<>();
@@ -154,6 +160,8 @@ public class BlockTracker implements Listener {
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onPistonRetract(BlockPistonRetractEvent event) {
+    if (MISC_UTILS.isDuplicateRetract(event)) return;
+
     handleMove(event.getBlocks(), event.getDirection());
   }
 }
