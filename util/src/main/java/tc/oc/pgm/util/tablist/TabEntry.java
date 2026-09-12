@@ -4,11 +4,14 @@ import java.util.UUID;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.skin.Skin;
 
 /** Content for a slot in a {@link TabView} */
 public interface TabEntry {
+
+  /** Returned by {@link #getFakeEntityId(TabView)} when no fake entity has been spawned */
+  int NULL_ENTITY = -1;
 
   /** Called by {@link TabView}s when this entry is added to the view */
   void addToView(TabView view);
@@ -39,19 +42,25 @@ public interface TabEntry {
   Player getFakePlayer(TabView view);
 
   /**
-   * Entity ID of the fake player mentioned above. If used, this must not collide with any real
-   * entites.
+   * Entity ID of the fake player mentioned above, or {@link #NULL_ENTITY} if none has been spawned
+   * in this view. This is read-only: it always reports the ID that was last spawned, so that a
+   * destroy packet cannot target an entity the client never received.
    */
   int getFakeEntityId(TabView view);
+
+  /**
+   * Reserve the entity ID to spawn the fake player with, and return it. Entity IDs are scoped to a
+   * world, so this may differ from a previous call if the viewer has changed world. If used, this
+   * must not collide with any real entities.
+   */
+  default int allocateFakeEntityId(TabView view) {
+    return getFakeEntityId(view);
+  }
 
   /** Name for the entry (not visible) */
   String getName(TabView view);
 
-  /**
-   * Content to show in the entry
-   *
-   * @return
-   */
+  /** Content to show in the entry */
   Component getContent(TabView view);
 
   /**
@@ -63,11 +72,7 @@ public interface TabEntry {
   /** Ping value for the entry */
   int getPing();
 
-  /**
-   * Skin for the entry's icon
-   *
-   * @return
-   */
+  /** Skin for the entry's icon */
   @Nullable
   Skin getSkin(TabView view);
 }
