@@ -196,7 +196,7 @@ public abstract class ModernWorldLoader {
         false, // PGM: force isDebug false
         biomeZoomSeed,
         ImmutableList.of(), // PGM: no spawners
-        true, // PGM: force tickTime true
+        true,
         actualDimension,
         creator.environment(),
         chunkGenerator,
