@@ -5,17 +5,14 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.util.block.BlockVectorSet;
 
-public class Union implements RegionDefinition.Static {
-  private final Region[] regions;
+public class Union extends CompositeRegion {
   private Supplier<Iterator<BlockVector>> iteratorFactory;
 
   public Union(Region... regions) {
-    this.regions = regions;
+    super(regions);
   }
 
   public static Region of(Region... regions) {
@@ -26,8 +23,9 @@ public class Union implements RegionDefinition.Static {
     };
   }
 
-  public Region[] getRegions() {
-    return regions;
+  @Override
+  protected Union rebuild(Region[] regions) {
+    return new Union(regions);
   }
 
   @Override
@@ -42,41 +40,12 @@ public class Union implements RegionDefinition.Static {
 
   @Override
   public boolean isBlockBounded() {
-    for (Region region : this.regions) {
-      if (!region.isBlockBounded()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  @Override
-  public boolean isStatic() {
-    for (Region region : this.regions) {
-      if (!region.isStatic()) {
-        return false;
-      }
-    }
-    return true;
+    return all(Region::isBlockBounded);
   }
 
   @Override
   public boolean isEmpty() {
-    for (Region region : this.regions) {
-      if (!region.isEmpty()) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  @Override
-  public Region.Static getStaticImpl(Match match) {
-    Region[] regions = new Region[this.regions.length];
-    for (int i = 0; i < this.regions.length; i++) {
-      regions[i] = this.regions[i].getStatic(match);
-    }
-    return new Union(regions);
+    return all(Region::isEmpty);
   }
 
   @Override
@@ -139,16 +108,5 @@ public class Union implements RegionDefinition.Static {
   private Iterator<BlockVector> childScan() {
     return Iterators.concat(Iterators.transform(
         Iterators.forArray(regions), r -> r.getStatic().getBlockVectorIterator()));
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("Union{regions=[");
-    for (Region region : this.regions) {
-      sb.append(region.toString()).append(",");
-    }
-    sb.append("]}");
-    return sb.toString();
   }
 }

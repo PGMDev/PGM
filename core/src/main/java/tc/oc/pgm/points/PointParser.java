@@ -10,8 +10,8 @@ import org.jdom2.Element;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.PointRegion;
-import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -34,7 +34,7 @@ public class PointParser {
   }
 
   private Region validate(Region region, Node node) throws InvalidXMLException {
-    regionParser.validate(region, RandomPointsValidation.INSTANCE, node);
+    regionParser.validate(region, RegionValidation.RANDOM_POINTS, node);
     return region;
   }
 
