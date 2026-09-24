@@ -188,7 +188,7 @@ public class DamageMatchModule implements MatchModule, Listener {
 
   /** Search the rider stack for a participant */
   @Nullable
-  MatchPlayer getVictim(Entity entity) {
+  public MatchPlayer getVictim(Entity entity) {
     if (entity == null) return null;
 
     MatchPlayer victim = match.getParticipant(entity);

@@ -1,11 +1,14 @@
 package tc.oc.pgm.platform.modern.modules.damage;
 
+import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.ENTITY_ATTACK;
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.MAGIC;
 
+import io.papermc.paper.event.entity.WardenAngerChangeEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.bukkit.entity.AreaEffectCloud;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.AreaEffectCloudApplyEvent;
@@ -17,6 +20,7 @@ import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
 import tc.oc.pgm.damage.DamageMatchModule;
@@ -66,5 +70,27 @@ public class ModernDamageMatchModule implements MatchModule, Listener {
     PotionType base = cloud.getBasePotionType();
     if (base != null) effects.addAll(base.getPotionEffects());
     return PotionClassification.isHarmful(effects);
+  }
+
+  // Prevent wardens from targetting allies
+  @EventHandler(ignoreCancelled = true)
+  public void onWardenAngerChange(WardenAngerChangeEvent event) {
+    ParticipantState victimState;
+    if (event.getTarget() instanceof Player) {
+      // Don't target allies
+      MatchPlayer victim = dmm.getVictim(event.getTarget());
+      if (victim == null) return;
+      victimState = victim.getParticipantState();
+    } else {
+      // Don't target other mobs owned by allies
+      victimState = dmm.tracker().getOwner(event.getTarget());
+    }
+    if (victimState == null) return;
+
+    DamageInfo damageInfo =
+        dmm.tracker().resolveDamage(ENTITY_ATTACK, event.getTarget(), event.getEntity());
+    if (dmm.queryHostile(victimState, damageInfo).isDenied()) {
+      event.setCancelled(true);
+    }
   }
 }

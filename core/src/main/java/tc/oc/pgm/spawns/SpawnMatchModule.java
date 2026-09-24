@@ -27,6 +27,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.api.match.Match;
@@ -160,6 +161,7 @@ public class SpawnMatchModule implements MatchModule, Listener, Tickable {
     // Direct joins (old party is null) are always forced, but shouldn't skip penalty
     if (event.getRequest().has(JoinRequest.Flag.FORCE) && event.getOldParty() != null) return 0;
     if (event.getNewParty() == null || !event.getNewParty().isParticipating()) return 0;
+    if (event.getPlayer().getBukkit().hasPermission(Permissions.JOIN_BYPASS)) return 0;
 
     ParticipationData data = participationData.getIfPresent(event.getPlayer().getId());
     return data == null ? 0 : data.getJoinTick(event.getNewParty() instanceof Team t ? t : null);

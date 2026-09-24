@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.bukkit;
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
@@ -58,6 +59,8 @@ public interface MiscUtils {
   boolean isPowerEnchanted(Projectile proj);
 
   boolean isDestructiveExplosion(EntityExplodeEvent ev);
+
+  boolean isEntityDestroyed(EntityRemoveFromWorldEvent ev);
 
   Entity getFakePickupEntity(PlayerPickupItemEvent ev);
 }

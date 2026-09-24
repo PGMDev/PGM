@@ -12,8 +12,8 @@ import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.parse.FilterParser;
-import tc.oc.pgm.regions.RandomPointsValidation;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -47,18 +47,15 @@ public class EnderChestModule implements MapModule<EnderChestMatchModule> {
       List<Dropoff> dropoffs = Lists.newArrayList();
 
       for (Element enderchestEl : doc.getRootElement().getChildren("enderchest")) {
-        fallback =
-            XMLUtils.parseEnum(
-                Node.fromAttr(enderchestEl, "fallback"),
-                DropoffFallback.class,
-                DropoffFallback.AUTO);
+        fallback = XMLUtils.parseEnum(
+            Node.fromAttr(enderchestEl, "fallback"), DropoffFallback.class, DropoffFallback.AUTO);
         enabled = true;
       }
 
       for (Element dropoffEl :
           XMLUtils.flattenElements(doc.getRootElement(), "enderchest", "dropoff")) {
         Region region =
-            regions.parseRequiredProperty(dropoffEl, "region", RandomPointsValidation.INSTANCE);
+            regions.parseRequiredProperty(dropoffEl, "region", RegionValidation.RANDOM_POINTS);
         Filter filter = filters.parseRequiredProperty(dropoffEl, "filter");
         dropoffs.add(new Dropoff(region, filter));
       }
