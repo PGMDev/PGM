@@ -2,6 +2,7 @@ package tc.oc.pgm.platform.modern.modules;
 
 import io.papermc.paper.event.entity.EntityInsideBlockEvent;
 import io.papermc.paper.event.entity.EntityKnockbackEvent;
+import io.papermc.paper.event.entity.WardenAngerChangeEvent;
 import java.util.Collection;
 import java.util.List;
 import org.bukkit.Material;
@@ -71,5 +72,12 @@ public class ModernEventFilterMatchModule implements MatchModule, Listener {
   public void onInsideBlock(EntityInsideBlockEvent event) {
     if (event.getBlock().getType() != Material.TRIPWIRE) return;
     efmm.cancelUnlessInteracting(event, event.getEntity());
+  }
+
+  // Prevent observers from being targetted by wardens if they manage to get out of
+  // creative/spectator mode
+  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+  public void onWardenAngerChange(WardenAngerChangeEvent event) {
+    efmm.cancelUnlessInteracting(event, event.getTarget());
   }
 }

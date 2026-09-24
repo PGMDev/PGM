@@ -4,6 +4,7 @@ import static net.kyori.adventure.key.Key.key;
 import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -117,6 +118,12 @@ public class SpMiscUtil implements MiscUtils {
   public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
     // All explosions in 1.8 are destructive
     return true;
+  }
+
+  @Override
+  public boolean isEntityDestroyed(EntityRemoveFromWorldEvent ev) {
+    // When an entity is removed by chunk unloading, it's not destroyed
+    return ev.getEntity().isDead();
   }
 
   @Override

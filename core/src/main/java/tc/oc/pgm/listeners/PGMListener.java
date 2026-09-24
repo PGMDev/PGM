@@ -1,15 +1,8 @@
 package tc.oc.pgm.listeners;
 
-import static net.kyori.adventure.text.Component.space;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
-import static tc.oc.pgm.util.player.PlayerComponent.player;
-import static tc.oc.pgm.util.text.TemporalComponent.duration;
 
 import java.util.Random;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderPearl;
@@ -38,22 +31,14 @@ import tc.oc.pgm.api.Permissions;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchManager;
-import tc.oc.pgm.api.match.event.MatchFinishEvent;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
-import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.channels.ChatManager;
-import tc.oc.pgm.events.MapPoolAdjustEvent;
-import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerLeavePartyEvent;
-import tc.oc.pgm.gamerules.GameRulesMatchModule;
 import tc.oc.pgm.modules.WorldTimeModule;
-import tc.oc.pgm.util.bukkit.GameRules;
 import tc.oc.pgm.util.bukkit.WorldBorders;
 import tc.oc.pgm.util.event.PlayerCoarseMoveEvent;
 import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.Materials;
-import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class PGMListener implements Listener {
@@ -159,50 +144,6 @@ public class PGMListener implements Listener {
   }
 
   @EventHandler
-  public void initGamerules(final MatchLoadEvent event) {
-    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(event.getMatch().getWorld(), 0);
-  }
-
-  @EventHandler
-  public void unlockFireTick(final MatchStartEvent event) {
-    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(
-        event.getMatch().getWorld(),
-        event
-            .getMatch()
-            .needModule(GameRulesMatchModule.class)
-            .getGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER));
-  }
-
-  @EventHandler
-  public void postGamerules(final MatchFinishEvent event) {
-    GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER.set(event.getMatch().getWorld(), 0);
-  }
-
-  //
-  // Time Lock
-  // lock time before, during (if time lock enabled), and after the match
-  //
-  @EventHandler
-  public void lockTime(final MatchLoadEvent event) {
-    GameRules.ADVANCE_TIME.set(event.getMatch().getWorld(), false);
-  }
-
-  @EventHandler
-  public void unlockTime(final MatchStartEvent event) {
-    GameRules.ADVANCE_TIME.set(
-        event.getMatch().getWorld(),
-        event
-            .getMatch()
-            .needModule(GameRulesMatchModule.class)
-            .getGameRule(GameRules.ADVANCE_TIME));
-  }
-
-  @EventHandler
-  public void lockTime(final MatchFinishEvent event) {
-    GameRules.ADVANCE_TIME.set(event.getMatch().getWorld(), false);
-  }
-
-  @EventHandler
   public void setTime(final MatchLoadEvent event) {
     Long time = event.getMatch().getModule(WorldTimeModule.class).getTime();
     if (time != null) {
@@ -251,65 +192,6 @@ public class PGMListener implements Listener {
     var world = quitter.getBukkit().getWorld();
     var location = quitter.getBukkit().getLocation();
     Slot.Player.forEach(quitter.getInventory(), (s, is) -> world.dropItemNaturally(location, is));
-  }
-
-  @EventHandler
-  public void announceDynamicMapPoolChange(MapPoolAdjustEvent event) {
-    // Send feedback to staff, alerting them that the map pool has changed by force
-    if (event.isForced()) {
-      Component poolName = text(event.getNewPool().getName(), NamedTextColor.LIGHT_PURPLE);
-      Component staffName = player(event.getSender());
-      Component matchLimit = text()
-          .append(text(event.getMatchLimit(), NamedTextColor.GREEN))
-          .append(space())
-          .append(translatable(
-              "match.name" + (event.getMatchLimit() != 1 ? ".plural" : ""), NamedTextColor.GRAY))
-          .build();
-
-      // No limit
-      Component forced = translatable("pool.change.force", poolName, staffName);
-      if (event.getTimeLimit() != null) {
-        Component time = duration(event.getTimeLimit()).color(NamedTextColor.GREEN);
-
-        // If time & match limit are present, display both
-        if (event.getMatchLimit() != 0) {
-          Component timeAndLimit = translatable("misc.or", NamedTextColor.GRAY, time, matchLimit);
-          forced = translatable("pool.change.forceTimed", poolName, timeAndLimit, staffName);
-        } else {
-          // Just time limit
-          forced = translatable("pool.change.forceTimed", poolName, time, staffName);
-        }
-      } else if (event.getMatchLimit() != 0) {
-        // Just match limit
-        forced = translatable("pool.change.forceTimed", poolName, matchLimit, staffName);
-      }
-
-      ChatManager.broadcastAdminMessage(forced.color(NamedTextColor.GRAY));
-    }
-
-    // Broadcast map pool changes due to size
-    if (event.getNewPool().isDynamic()) {
-      Component broadcast = text()
-          .append(text("[", NamedTextColor.WHITE))
-          .append(translatable("pool.name", NamedTextColor.GOLD))
-          .append(text("] ", NamedTextColor.WHITE))
-          .append(translatable(
-              "pool.change",
-              NamedTextColor.GREEN,
-              text(event.getNewPool().getName(), NamedTextColor.AQUA)))
-          .build();
-
-      event.getMatch().sendMessage(broadcast);
-    }
-  }
-
-  @EventHandler // We only need to store skins for the post match stats
-  public void storeSkinOnMatchJoin(PlayerJoinMatchEvent event) {
-    final MatchPlayer player = event.getPlayer();
-    Skin playerSkin = PLAYER_UTILS.getPlayerSkin(player.getBukkit());
-    if (playerSkin != null) {
-      PGM.get().getDatastore().setSkin(player.getId(), playerSkin);
-    }
   }
 
   /** Prevent teleporting outside the border */
