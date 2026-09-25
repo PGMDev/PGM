@@ -6,6 +6,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
@@ -21,6 +23,7 @@ public class Portal implements FeatureDefinition {
   protected final Filter observerFilter;
   protected final boolean sound;
   protected final boolean smooth;
+  protected final @Nullable Action<? super MatchPlayer> action;
 
   public Portal(
       Filter trigger,
@@ -28,7 +31,8 @@ public class Portal implements FeatureDefinition {
       Filter participantFilter,
       Filter observerFilter,
       boolean sound,
-      boolean smooth) {
+      boolean smooth,
+      @Nullable Action<? super MatchPlayer> action) {
 
     this.trigger = trigger;
     this.transform = transform;
@@ -36,6 +40,7 @@ public class Portal implements FeatureDefinition {
     this.observerFilter = observerFilter;
     this.sound = sound;
     this.smooth = smooth;
+    this.action = action;
   }
 
   public void load(FilterMatchModule fmm) {
@@ -100,5 +105,7 @@ public class Portal implements FeatureDefinition {
         }
       }
     }
+
+    if (action != null && player.isParticipating()) action.trigger(player);
   }
 }

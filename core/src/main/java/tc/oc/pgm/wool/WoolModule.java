@@ -10,6 +10,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -18,19 +19,18 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.regions.RegionModule;
-import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamMatchModule;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
 import tc.oc.pgm.util.xml.InvalidXMLException;
-import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class WoolModule implements MapModule<WoolMatchModule> {
@@ -78,25 +78,27 @@ public class WoolModule implements MapModule<WoolMatchModule> {
     }
 
     @Override
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
+      return ImmutableList.of(ActionModule.class);
+    }
+
+    @Override
     public WoolModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Multimap<TeamFactory, MonumentWoolFactory> woolFactories = ArrayListMultimap.create();
-      RegionParser parser = factory.getRegions();
+      var parser = factory.getParser();
 
       for (Element woolEl : XMLUtils.flattenElements(doc.getRootElement(), "wools", "wool")) {
-        String id = woolEl.getAttributeValue("id");
-        boolean craftable = Boolean.parseBoolean(woolEl.getAttributeValue("craftable", "true"));
+        String id = parser.string(woolEl, "id").orNull();
+        boolean craftable = parser.parseBool(woolEl, "craftable").orTrue();
         TeamFactory team =
-            Teams.getTeam(new Node(XMLUtils.getRequiredAttribute(woolEl, "team")), factory);
-        DyeColor color = XMLUtils.parseDyeColor(XMLUtils.getRequiredAttribute(woolEl, "color"));
-        Region placement;
-        if (factory.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
-          placement = parser.parseChildren(woolEl);
-        } else {
-          placement = parser.parseRequiredRegionProperty(woolEl, "monument");
-        }
+            parser.node(n -> Teams.getTeam(n, factory), woolEl, "team").required();
+        DyeColor color = parser.node(XMLUtils::parseDyeColor, woolEl, "color").required();
+        Region placement = parser.region(woolEl, "monument").legacy(factory).required();
         ShowOptions options = ShowOptions.parse(factory.getFilters(), woolEl);
-        Boolean required = XMLUtils.parseBoolean(woolEl.getAttribute("required"), null);
+        Boolean required = parser.parseBool(woolEl, "required").orNull();
+        var placeAction =
+            parser.action(MatchPlayer.class, woolEl, "place-action").orNull();
 
         ProximityMetric woolProximityMetric = ProximityMetric.parse(
             woolEl, "wool", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
@@ -110,7 +112,7 @@ public class WoolModule implements MapModule<WoolMatchModule> {
           location = new Vector(
               Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
         } else {
-          location = XMLUtils.parseVector(XMLUtils.getRequiredAttribute(woolEl, "location"));
+          location = parser.vector(woolEl, "location").required();
         }
 
         MonumentWoolFactory wool = new MonumentWoolFactory(
@@ -123,7 +125,8 @@ public class WoolModule implements MapModule<WoolMatchModule> {
             color,
             location,
             placement,
-            craftable);
+            craftable,
+            placeAction);
         factory.getFeatures().addFeature(woolEl, wool);
         woolFactories.put(team, wool);
       }

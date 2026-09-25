@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.NotNull;
+import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
@@ -21,6 +22,7 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.blitz.BlitzModule;
 import tc.oc.pgm.filters.FilterModule;
@@ -80,7 +82,7 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
 
     @Override
     public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
-      return ImmutableList.of(BlitzModule.class);
+      return ImmutableList.of(BlitzModule.class, ActionModule.class);
     }
 
     @Override
@@ -143,8 +145,10 @@ public class ScoreModule implements MapModule<ScoreMatchModule> {
             redeemables = parseRedeemables(scoreBoxEl.getChild("redeemables"), parser);
           }
           boolean silent = parser.parseBool(scoreBoxEl, "silent").attr().orFalse();
+          var action = parser.action(MatchPlayer.class, scoreBoxEl, "action").orNull();
 
-          scoreBoxes.add(new ScoreBoxDefinition(region, points, filter, redeemables, silent));
+          scoreBoxes.add(
+              new ScoreBoxDefinition(region, points, filter, redeemables, silent, action));
         }
       }
       // by default, if limit is set and initial >= to it, do not enforce it

@@ -12,7 +12,9 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.feature.FeatureInfo;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.goals.ProximityMetric;
@@ -32,6 +34,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
   protected final Region placement;
   protected final boolean craftable;
   protected final Component componentName;
+  protected final @Nullable Action<? super MatchPlayer> placeAction;
 
   public static String makeColorName(DyeColor color) {
     String[] name = StringUtils.split(color.toString(), '_');
@@ -59,7 +62,8 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
       DyeColor color,
       Vector location,
       Region placement,
-      boolean craftable) {
+      boolean craftable,
+      @Nullable Action<? super MatchPlayer> placeAction) {
 
     super(
         id,
@@ -74,6 +78,7 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
     this.placement = placement;
     this.craftable = craftable;
     this.componentName = makeComponentName(color);
+    this.placeAction = placeAction;
   }
 
   @Override
@@ -121,6 +126,10 @@ public class MonumentWoolFactory extends ProximityGoalDefinition {
 
   public boolean isCraftable() {
     return this.craftable;
+  }
+
+  public @Nullable Action<? super MatchPlayer> getPlaceAction() {
+    return this.placeAction;
   }
 
   public boolean isObjectiveWool(ItemStack stack) {
