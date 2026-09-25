@@ -3,6 +3,8 @@ package tc.oc.pgm.shops;
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -33,8 +35,12 @@ public class ShopKeeper {
       FeatureReference<Shop> shop) {
     this.name = name;
     this.location = location;
-    this.entity = entity;
     this.shop = shop;
+    // Keeper defaults run first so the map's mob properties can override them
+    List<Consumer<Entity>> properties = new ArrayList<>();
+    properties.add(this::applyDefaults);
+    properties.addAll(entity.properties());
+    this.entity = new SpawnableEntity(entity.entityType(), properties, entity.kit());
   }
 
   public Shop getShop() {
@@ -55,17 +61,17 @@ public class ShopKeeper {
     Location loc = location.getPoint(match, null);
     loc.getWorld().getChunkAt(loc); // Load chunk
 
-    Entity keeper = loc.getWorld().spawn(loc, entity.entityType());
+    Entity keeper = entity.spawn(loc);
+    keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), getShop().getId()));
+    NMS_HACKS.freezeEntity(keeper);
+  }
+
+  private void applyDefaults(Entity keeper) {
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
     if (keeper instanceof LivingEntity livingEntity) {
       livingEntity.setRemoveWhenFarAway(false);
     }
-    for (Consumer<Entity> property : entity.properties()) {
-      property.accept(keeper);
-    }
-    keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), getShop().getId()));
-    NMS_HACKS.freezeEntity(keeper);
   }
 
   public static boolean isKeeper(Entity entity) {

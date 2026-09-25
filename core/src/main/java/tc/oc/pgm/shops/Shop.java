@@ -3,6 +3,7 @@ package tc.oc.pgm.shops;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
@@ -22,7 +23,7 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
 
   private final String name;
   private final ImmutableList<Supplier<Category>> categories;
-  private ImmutableList<Category> resolvedCategories;
+  private ImmutableList<Category> resolved;
 
   public Shop(String id, String name, List<Supplier<Category>> categories) {
     super(id);
@@ -35,11 +36,10 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
   }
 
   public List<Category> getCategories() {
-    if (resolvedCategories == null) {
-      resolvedCategories =
-          ImmutableList.copyOf(categories.stream().map(Supplier::get).toList());
+    if (resolved == null) {
+      resolved = ImmutableList.copyOf(Lists.transform(categories, Supplier::get));
     }
-    return resolvedCategories;
+    return resolved;
   }
 
   public List<Category> getVisibleCategories(MatchPlayer player) {
