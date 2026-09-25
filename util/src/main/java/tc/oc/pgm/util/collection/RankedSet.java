@@ -104,6 +104,11 @@ public class RankedSet<E> extends ForwardingSet<E> {
     return list.iterator();
   }
 
+  public List<Set<E>> ranksView() {
+    freshenRanking();
+    return Collections.unmodifiableList(ranks);
+  }
+
   /** Iterate in arbitrary order */
   public Iterator<E> unorderedIterator() {
     return super.iterator();
