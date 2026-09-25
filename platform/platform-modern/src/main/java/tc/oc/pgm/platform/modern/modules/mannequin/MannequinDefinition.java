@@ -1,0 +1,155 @@
+package tc.oc.pgm.platform.modern.modules.mannequin;
+
+import java.util.UUID;
+import net.kyori.adventure.text.Component;
+import org.bukkit.inventory.MainHand;
+import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
+import tc.oc.pgm.api.feature.FeatureReference;
+import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.platform.modern.modules.behavior.BehaviorDefinition;
+import tc.oc.pgm.platform.modern.modules.mannequin.SkinPart.SkinLayers;
+import tc.oc.pgm.platform.modern.modules.waypoint.WaypointDefinition;
+import tc.oc.pgm.util.skin.Skin;
+
+public class MannequinDefinition extends SelfIdentifyingFeatureDefinition {
+  private final Component name;
+  private final Component description;
+  private final boolean playerProfile;
+  private final @Nullable UUID uuid;
+  private final @Nullable Skin skin;
+  private final boolean silent;
+  private final boolean invulnerable;
+  private final boolean glowing;
+  private final float health;
+  private final MannequinPose pose;
+  private final boolean immovable;
+  private final MainHand mainHand;
+  private final boolean gravity;
+  private final boolean physics;
+  private final boolean onFire;
+  private final SkinLayers layers;
+  private final @Nullable Action<? super MatchPlayer> action;
+  private final @Nullable FeatureReference<WaypointDefinition> waypoint;
+  private final @Nullable FeatureReference<BehaviorDefinition> behavior;
+
+  public MannequinDefinition(
+      @Nullable String id,
+      Component name,
+      Component description,
+      boolean playerProfile,
+      @Nullable UUID uuid,
+      @Nullable Skin skin,
+      boolean silent,
+      boolean invulnerable,
+      boolean glowing,
+      float health,
+      MannequinPose pose,
+      boolean immovable,
+      MainHand mainHand,
+      boolean gravity,
+      boolean physics,
+      boolean onFire,
+      SkinLayers layers,
+      @Nullable Action<? super MatchPlayer> action,
+      @Nullable FeatureReference<WaypointDefinition> waypoint,
+      @Nullable FeatureReference<BehaviorDefinition> behavior) {
+    super(id);
+    this.name = name;
+    this.description = description;
+    this.playerProfile = playerProfile;
+    this.uuid = uuid;
+    this.skin = skin;
+    this.silent = silent;
+    this.invulnerable = invulnerable;
+    this.glowing = glowing;
+    this.health = health;
+    this.pose = pose;
+    this.immovable = immovable;
+    this.mainHand = mainHand;
+    this.gravity = gravity;
+    this.physics = physics;
+    this.onFire = onFire;
+    this.layers = layers;
+    this.action = action;
+    this.waypoint = waypoint;
+    this.behavior = behavior;
+  }
+
+  public Component getName() {
+    return name;
+  }
+
+  public Component getDescription() {
+    return description;
+  }
+
+  public boolean isPlayerProfile() {
+    return playerProfile;
+  }
+
+  public @Nullable UUID getUuid() {
+    return uuid;
+  }
+
+  public @Nullable Skin getSkin() {
+    return skin;
+  }
+
+  public boolean isSilent() {
+    return silent;
+  }
+
+  public boolean isInvulnerable() {
+    return invulnerable;
+  }
+
+  public boolean isGlowing() {
+    return glowing;
+  }
+
+  public float getHealth() {
+    return health;
+  }
+
+  public MannequinPose getPose() {
+    return pose;
+  }
+
+  public boolean isImmovable() {
+    return immovable;
+  }
+
+  public MainHand getMainHand() {
+    return mainHand;
+  }
+
+  public boolean hasGravity() {
+    return gravity;
+  }
+
+  public boolean hasPhysics() {
+    return physics;
+  }
+
+  public boolean isOnFire() {
+    return onFire;
+  }
+
+  public SkinLayers getLayers() {
+    return layers;
+  }
+
+  public @Nullable Action<? super MatchPlayer> getAction() {
+    return action;
+  }
+
+  public @Nullable FeatureReference<WaypointDefinition> getWaypoint() {
+    return waypoint;
+  }
+
+  public @Nullable FeatureReference<BehaviorDefinition> getBehavior() {
+    return behavior;
+  }
+}

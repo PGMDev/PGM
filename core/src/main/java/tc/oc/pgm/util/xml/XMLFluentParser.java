@@ -13,6 +13,7 @@ import org.bukkit.util.Vector;
 import org.jdom2.Element;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParser;
+import tc.oc.pgm.action.actions.ActionParserProvider;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
@@ -25,6 +26,7 @@ import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.function.ThrowingFunction;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.text.TextParser;
@@ -58,7 +60,7 @@ public class XMLFluentParser {
   // ie: fluent parser -> action parser -> fluent parser
   public void init() {
     this.features = factory.getFeatures();
-    this.actions = new ActionParser(factory);
+    this.actions = Platform.get(ActionParserProvider.class).create(factory);
     this.filters = factory.getFilters();
     this.regions = factory.getRegions();
     this.kits = factory.getKits();
