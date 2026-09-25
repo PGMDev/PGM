@@ -15,29 +15,37 @@ import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.blockdrops.BlockDrops;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.GeneralizedEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.material.BlockMaterialData;
 
 /** Called when a {@link Block} transforms from one {@link BlockState} to another. */
+@NullMarked
 public class BlockTransformEvent extends GeneralizedEvent {
+
+  private static final HandlerList HANDLER_LIST = new HandlerList();
 
   private final Block block;
   private final BlockState oldState;
   private final BlockState newState;
+  private final long pos;
 
   // FIXME: Orthogonal concern from block drops module, remove later
-  private BlockDrops drops;
+  private @Nullable BlockDrops drops;
 
   public BlockTransformEvent(Event cause, Block block, BlockState oldState, BlockState newState) {
     super(assertNotNull(cause));
     this.block = assertNotNull(block);
     this.oldState = assertNotNull(oldState);
     this.newState = assertNotNull(newState);
-    assertTrue(block.getWorld().equals(oldState.getWorld()));
-    assertTrue(block.getWorld().equals(newState.getWorld()));
+    this.pos = BlockVectors.encodePos(block);
+    assertTrue(isSameBlock(block, oldState), "old state must be at the transformed block");
+    assertTrue(isSameBlock(block, newState), "new state must be at the transformed block");
   }
 
   public BlockTransformEvent(Event cause, BlockState oldState, BlockState newState) {
@@ -61,6 +69,17 @@ public class BlockTransformEvent extends GeneralizedEvent {
   }
 
   /**
+   * All of {@link #block}, {@link #oldState} and {@link #newState} must describe the same position,
+   * so that listeners can derive a single position for the whole event.
+   */
+  private static boolean isSameBlock(Block block, BlockState state) {
+    return block.getWorld().equals(state.getWorld())
+        && block.getX() == state.getX()
+        && block.getY() == state.getY()
+        && block.getZ() == state.getZ();
+  }
+
+  /**
    * Get the {@link World} that the {@link BlockTransformEvent} occurred in.
    *
    * @return The {@link World} of the event.
@@ -76,6 +95,16 @@ public class BlockTransformEvent extends GeneralizedEvent {
    */
   public final Block getBlock() {
     return block;
+  }
+
+  /**
+   * Get the {@link BlockVectors#encodePos encoded position} of the transformed {@link Block}, which
+   * is shared by {@link #getOldState()} and {@link #getNewState()}.
+   *
+   * @return The encoded position of the transformed {@link Block}.
+   */
+  public final long getPos() {
+    return pos;
   }
 
   /**
@@ -162,8 +191,8 @@ public class BlockTransformEvent extends GeneralizedEvent {
       }
     }
 
-    if (event instanceof ExplosionPrimeByEntityEvent
-        && ((ExplosionPrimeByEntityEvent) event).getPrimer() instanceof Player) {
+    if (event instanceof ExplosionPrimeByEntityEvent primeByEntityEvent
+        && primeByEntityEvent.getPrimer() instanceof Player) {
       return true;
     }
 
@@ -171,7 +200,7 @@ public class BlockTransformEvent extends GeneralizedEvent {
   }
 
   @Deprecated
-  public final BlockDrops getDrops() {
+  public final @Nullable BlockDrops getDrops() {
     return drops;
   }
 
@@ -180,14 +209,12 @@ public class BlockTransformEvent extends GeneralizedEvent {
     this.drops = drops;
   }
 
-  private static final HandlerList handlers = new HandlerList();
-
   @Override
   public HandlerList getHandlers() {
-    return handlers;
+    return HANDLER_LIST;
   }
 
   public static HandlerList getHandlerList() {
-    return handlers;
+    return HANDLER_LIST;
   }
 }

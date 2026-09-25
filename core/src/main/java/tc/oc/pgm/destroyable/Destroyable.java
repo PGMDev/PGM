@@ -9,6 +9,8 @@ import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -77,26 +79,47 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   protected Instant lastSparkTime;
 
   /**
-   * The maximum possible health that this Destroyable can have, which is the sum of the max health
-   * of each block. The max health of a block is the maximum number of breaks between any
-   * destroyable world and any non-destroyable world. Note that blocks are not necessarily at max
-   * health when the match starts. This value can change as the result of mode changes.
+   * The health of this Destroyable at match load, i.e. the number of breaks needed to clear every
+   * block in the region. {@link #health} is how many of those breaks are still outstanding, so a
+   * Destroyable always starts a match at full health and 0% completion, even when its blocks are
+   * not all the strongest destroyable material. A repair of a stronger block cannot make the
+   * {@link #health} of the Destroyable exceed this amount.
+   *
+   * <p>The single-material case re-derives this from the region on a mode change so the denominator
+   * matches the new material set, which can shift completion; {@link DestroyableMatchModule}
+   * accounts for that. The multi-material case cannot re-derive it, see
+   * {@link #buildMaterialHealthMap()}.
+   *
+   * <p>Zero only when the region contains no matching blocks at all.
    */
   protected int maxHealth;
 
-  // The current health of the Destroyable
+  /**
+   * Whether {@link #maxHealth} has been established. Only read by
+   * {@link #buildMaterialHealthMap()}, which cannot safely re-derive it. The single-material case
+   * in {@link #recalculateHealth()} re-derives it from the region every time, which is idempotent.
+   */
+  private boolean maxHealthCalculated;
+
+  /** The current health of the Destroyable */
   protected int health;
 
   /**
-   * Map of block -> world -> health i.e. the health level that each world represents for each block
-   * in the destroyable. For example, (1,2,3) -> Gold Block -> 3 means that when there is a gold
-   * block at (1,2,3), it will need to be broken three times to change into a block that is not a
-   * destroyable world.
+   * Map of block -> material -> health i.e. the health level that each material represents for each
+   * block in the destroyable. For example, (1,2,3) -> Gold Block -> 3 means that when there is a
+   * gold block at (1,2,3), it will need to be broken three times to change into a block that is not
+   * a destroyable material.
    *
-   * <p>This map will have en entry for every destroyable world for every block. If there are no
+   * <p>This map will have an entry for every destroyable material for every block. If there are no
    * custom block replacement rules affecting this destroyable, this will be null;
+   *
+   * <p>Keyed by {@link BlockVectors#encodePos encoded position} so that lookups on the block-change
+   * hot path don't have to allocate a {@link BlockVector}.
+   *
+   * <p>The values are immutable and interned: every block with an identical material-to-health
+   * mapping shares one map instance, so they must never be modified in place.
    */
-  protected Map<BlockVector, Map<BlockMaterialData, Integer>> blockMaterialHealth;
+  private Long2ObjectMap<Map<BlockMaterialData, Integer>> blockMaterialHealth;
 
   protected final List<DestroyableHealthChange> events = Lists.newArrayList();
   protected ImmutableList<DestroyableContribution> contributions;
@@ -182,7 +205,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     // We only need blockMaterialHealth if there are destroyable blocks that are
     // replaced by other destroyable blocks when broken.
     if (this.isAffectedByBlockReplacementRules()) {
-      this.blockMaterialHealth = new HashMap<>();
+      this.blockMaterialHealth = new Long2ObjectOpenHashMap<>(this.blockRegion.getBlockVolume());
       this.buildMaterialHealthMap();
     } else {
       this.blockMaterialHealth = null;
@@ -194,6 +217,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
         }
       }
     }
+    this.maxHealthCalculated = true;
   }
 
   protected boolean isAffectedByBlockReplacementRules() {
@@ -203,7 +227,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     for (Block block : this.blockRegion.getBlocks(match.getWorld())) {
       for (BlockMaterialData material : this.materials) {
-        BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
+        BlockDrops drops = this.blockDropsRuleSet.getDrops(block, material);
         if (drops != null && drops.replacement != null && this.hasMaterial(drops.replacement)) {
           return true;
         }
@@ -216,29 +240,38 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   /** Used internally to break out of the below recursive algorithm when a cycle is detected */
   protected static final class Indestructible extends Exception {}
 
+  /**
+   * Build {@link #blockMaterialHealth} and derive the current health from it.
+   *
+   * <p>Unlike the single-material case, there is no way to derive {@link #maxHealth} here without
+   * reading the region as it currently stands, because a block only contributes the health of the
+   * material it is actually holding. Deriving it a second time, from a region that has since been
+   * broken into, would set it equal to the reduced health and so silently reset
+   * {@link #getBreaks()} to zero. It is therefore fixed on the first pass and left alone after
+   * that.
+   */
   protected void buildMaterialHealthMap() {
-    this.maxHealth = 0;
     this.health = 0;
     Set<BlockMaterialData> visited = new HashSet<>();
+    var materialHealthMapCache =
+        new HashMap<Map<BlockMaterialData, Integer>, Map<BlockMaterialData, Integer>>();
     try {
       for (Block block : blockRegion.getBlocks(match.getWorld())) {
         Map<BlockMaterialData, Integer> materialHealthMap = new HashMap<>();
-        int blockMaxHealth = 0;
-
         for (BlockMaterialData material : this.materials) {
           visited.clear();
-          int blockHealth =
-              this.buildBlockMaterialHealthMap(block, material, materialHealthMap, visited);
-          if (blockHealth > blockMaxHealth) {
-            blockMaxHealth = blockHealth;
-          }
+          this.buildBlockMaterialHealthMap(block, material, materialHealthMap, visited);
         }
+        materialHealthMap = Map.copyOf(materialHealthMap);
 
-        this.blockMaterialHealth.put(
-            block.getLocation().toVector().toBlockVector(), materialHealthMap);
-        this.maxHealth += blockMaxHealth;
-        this.health += this.getBlockHealth(block.getState());
+        var cached = materialHealthMapCache.putIfAbsent(materialHealthMap, materialHealthMap);
+        if (cached != null) materialHealthMap = cached;
+
+        long pos = BlockVectors.encodePos(block);
+        this.blockMaterialHealth.put(pos, materialHealthMap);
+        this.health += this.getBlockHealth(block.getState(), pos);
       }
+      if (!this.maxHealthCalculated) this.maxHealth = this.health;
     } catch (Indestructible ex) {
       this.health = this.maxHealth = Integer.MAX_VALUE;
       PGM.get()
@@ -272,7 +305,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     int health = 1;
     if (this.blockDropsRuleSet != null) {
-      BlockDrops drops = this.blockDropsRuleSet.getDrops(block.getState(), material);
+      BlockDrops drops = this.blockDropsRuleSet.getDrops(block, material);
       if (drops != null && drops.replacement != null) {
         health +=
             this.buildBlockMaterialHealthMap(block, drops.replacement, materialHealthMap, visited);
@@ -283,27 +316,18 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
     return health;
   }
 
-  /** Return the number of breaks required to change the given block to a non-objective world */
-  public int getBlockHealth(BlockState blockState) {
-    if (!this.getBlockRegion().contains(blockState)) {
-      return 0;
-    }
-
+  /** Return the number of breaks required to change the given block to a non-objective material */
+  private int getBlockHealth(BlockState blockState, long pos) {
     if (this.blockMaterialHealth == null) {
       return this.hasMaterial(MaterialData.block(blockState)) ? 1 : 0;
     } else {
-      Map<BlockMaterialData, Integer> materialHealthMap =
-          this.blockMaterialHealth.get(blockState.getLocation().toVector().toBlockVector());
-      if (materialHealthMap == null) {
-        return 0;
-      }
-      Integer health = materialHealthMap.get(MaterialData.block(blockState));
-      return health == null ? 0 : health;
+      var health = this.blockMaterialHealth.get(pos);
+      return health == null ? 0 : health.getOrDefault(MaterialData.block(blockState), 0);
     }
   }
 
-  public int getBlockHealthChange(BlockState oldState, BlockState newState) {
-    return this.getBlockHealth(newState) - this.getBlockHealth(oldState);
+  private int getBlockHealthChange(BlockState oldState, BlockState newState, long pos) {
+    return this.getBlockHealth(newState, pos) - this.getBlockHealth(oldState, pos);
   }
 
   /**
@@ -313,20 +337,18 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
    * @param oldState State of the block before the change
    * @param newState State of the block after the change
    * @param player Player responsible for the change
-   * @return An object containing information about the change, including the health delta, or null
-   *     if this Destroyable was not affected by the block change
+   * @param pos The {@link BlockVectors#encodePos encoded position} shared by both states
    */
-  public DestroyableHealthChange handleBlockChange(
-      BlockState oldState, BlockState newState, @Nullable ParticipantState player) {
-    if (this.isDestroyed() || !this.getBlockRegion().contains(oldState)) return null;
+  void handleBlockChange(
+      BlockState oldState, BlockState newState, @Nullable ParticipantState player, long pos) {
+    if (this.isDestroyed() || !this.getBlockRegion().containsPos(pos)) return;
 
-    int deltaHealth = this.getBlockHealthChange(oldState, newState);
-    if (deltaHealth == 0) return null;
+    int deltaHealth = this.getBlockHealthChange(oldState, newState, pos);
+    if (deltaHealth == 0) return;
 
     this.addHealth(deltaHealth);
 
-    DestroyableHealthChange changeInfo =
-        new DestroyableHealthChange(oldState, newState, player, deltaHealth);
+    var changeInfo = new DestroyableHealthChange(oldState, newState, player, deltaHealth);
     this.events.add(changeInfo);
 
     if (deltaHealth < 0) {
@@ -379,24 +401,23 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
       this.match.callEvent(new GoalCompleteEvent(
           this.getMatch(), this, this.getOwner(), false, this.getContributions()));
     }
-
-    return changeInfo;
   }
 
   /**
-   * Test if the given block change is allowed by this Destroyable
+   * Test if the given block change is allowed by this Destroyable. Caller must ensure block is part
+   * of the destroyable.
    *
    * @param oldState State of the block before the change
    * @param newState State of the block after the change
    * @param player Player responsible for the change
+   * @param pos The {@link BlockVectors#encodePos encoded position} shared by both states
    * @return A player-readable message explaining why the block change is not allowed, or null if it
    *     is allowed
    */
-  public String testBlockChange(
-      BlockState oldState, BlockState newState, @Nullable ParticipantState player) {
-    if (this.isDestroyed() || !this.getBlockRegion().contains(oldState)) return null;
-
-    int deltaHealth = this.getBlockHealthChange(oldState, newState);
+  @Nullable
+  String testBlockChange(
+      BlockState oldState, BlockState newState, @Nullable ParticipantState player, long pos) {
+    int deltaHealth = this.getBlockHealthChange(oldState, newState, pos);
     if (deltaHealth == 0) return null;
 
     if (deltaHealth < 0) {
@@ -425,7 +446,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   public void addHealth(int delta) {
-    this.health = Math.max(0, Math.min(this.maxHealth, this.health + delta));
+    this.health = Math.clamp(this.health + delta, 0, this.maxHealth);
   }
 
   public int getMaxHealth() {
@@ -437,11 +458,12 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   public float getHealthPercent() {
-    return (float) this.health / this.maxHealth;
+    if (this.maxHealth <= 0) return 0f;
+    return Math.min(1f, (float) this.health / this.maxHealth);
   }
 
   public int getBreaks() {
-    return this.maxHealth - this.health;
+    return Math.max(0, this.maxHealth - this.health);
   }
 
   public double getDestructionRequired() {
@@ -453,7 +475,8 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
   }
 
   private int getBreaksRequired(double destructionRequired) {
-    return (int) Math.round(this.maxHealth * destructionRequired);
+    if (this.maxHealth <= 0) return 0;
+    return Math.max(1, (int) Math.round(this.maxHealth * destructionRequired));
   }
 
   public int getBreaksRequired() {
@@ -479,7 +502,9 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
   @Override
   public double getCompletion() {
-    return Math.min(1, (double) this.getBreaks() / this.getBreaksRequired());
+    int breaksRequired = this.getBreaksRequired();
+    if (breaksRequired <= 0) return 1;
+    return Math.min(1, (double) this.getBreaks() / breaksRequired);
   }
 
   @Override
@@ -593,7 +618,7 @@ public class Destroyable extends TouchableGoal<DestroyableFactory>
 
     for (Block block : this.getBlockRegion().getBlocks(match.getWorld())) {
       BlockState oldState = block.getState();
-      int oldHealth = this.getBlockHealth(oldState);
+      int oldHealth = this.getBlockHealth(oldState, BlockVectors.encodePos(block));
 
       if (oldHealth > 0) {
         newMaterial.applyTo(block, true);
