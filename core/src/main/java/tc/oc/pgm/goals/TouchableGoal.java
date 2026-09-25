@@ -18,6 +18,7 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.party.event.CompetitorRemoveEvent;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.goals.events.GoalCompleteEvent;
@@ -87,6 +88,12 @@ public abstract class TouchableGoal<T extends ProximityGoalDefinition> extends P
 
   public boolean hasTouched(ParticipantState player) {
     return touchingPlayers.contains(player);
+  }
+
+  // Compared by id and party, as participant state equality includes dead/vanished/nick
+  public boolean hasTouched(MatchPlayer player) {
+    return touchingPlayers.stream()
+        .anyMatch(p -> p.getId().equals(player.getId()) && p.getParty() == player.getParty());
   }
 
   public ImmutableSet<ParticipantState> getTouchingPlayers() {

@@ -47,6 +47,7 @@ import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
 import tc.oc.pgm.filters.matcher.party.ScoreFilter;
+import tc.oc.pgm.filters.matcher.party.TouchedFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
@@ -76,6 +77,7 @@ import tc.oc.pgm.flag.state.Dropped;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
+import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
@@ -431,6 +433,13 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("completed")
   public Filter parseCompleted(Element el) throws InvalidXMLException {
     return new TeamFilterAdapter(Optional.empty(), goalFilter(el));
+  }
+
+  @MethodParser("touched")
+  public Filter parseTouched(Element el) throws InvalidXMLException {
+    return parseExplicitTeam(
+        el,
+        new TouchedFilter(features.createReference(new Node(el), ProximityGoalDefinition.class)));
   }
 
   @MethodParser("captured")
