@@ -12,14 +12,15 @@ import net.minecraft.server.v1_8_R3.ChunkSection;
 import net.minecraft.server.v1_8_R3.EntityArrow;
 import net.minecraft.server.v1_8_R3.EntityFireball;
 import net.minecraft.server.v1_8_R3.EntityFireworks;
+import net.minecraft.server.v1_8_R3.EntityInsentient;
 import net.minecraft.server.v1_8_R3.IBlockData;
 import net.minecraft.server.v1_8_R3.IDataManager;
-import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import net.minecraft.server.v1_8_R3.ServerNBTManager;
 import net.minecraft.server.v1_8_R3.WorldData;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -32,9 +33,11 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftFirework;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftItem;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_8_R3.util.CraftMagicNumbers;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -69,12 +72,40 @@ public class SpNMSHacks implements NMSHacks {
 
   @Override
   public void freezeEntity(Entity entity) {
-    net.minecraft.server.v1_8_R3.Entity nmsEntity = ((CraftEntity) entity).getHandle();
-    NBTTagCompound tag = new NBTTagCompound();
-    nmsEntity.c(tag); // save to tag
-    tag.setBoolean("NoAI", true);
-    tag.setBoolean("NoGravity", true);
-    nmsEntity.f(tag); // load from tag
+    if (entity instanceof LivingEntity living) living.setRemoveWhenFarAway(false);
+    if (entity instanceof ArmorStand stand) stand.setGravity(false);
+
+    // setNoAi
+    var handle = ((CraftEntity) entity).getHandle();
+    if (handle instanceof EntityInsentient insentient) insentient.k(true);
+  }
+
+  @Override
+  public void tickFrozenEntity(Entity entity, Location location) {
+    var handle = ((CraftEntity) entity).getHandle();
+    handle.motX = handle.motY = handle.motZ = 0;
+    handle.velocityChanged = false;
+    handle.fallDistance = 0;
+    handle.setPositionRotation(
+        location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+  }
+
+  @Override
+  public void setupPickup(Entity entity) {
+    // Unlike modern, 1.8 has no API to hide an ender crystal's bedrock base
+  }
+
+  @Override
+  public Vector getBoundingBoxCenter(Entity entity) {
+    var nmsEntity = ((CraftEntity) entity).getHandle();
+    var box = nmsEntity.getBoundingBox();
+    return new Vector((box.a + box.d) / 2d, (box.b + box.e) / 2d, (box.c + box.f) / 2d);
+  }
+
+  @Override
+  public Vector getBoundingBoxSize(Entity entity) {
+    var box = ((CraftEntity) entity).getHandle().getBoundingBox();
+    return new Vector(box.d - box.a, box.e - box.b, box.f - box.c);
   }
 
   @Override
