@@ -4,9 +4,12 @@ import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
+import java.util.Map;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.skin.Skin;
@@ -45,13 +48,18 @@ public class PlayerTabEntry extends DynamicTabEntry {
     return uuid;
   }
 
+  /** An entity ID and the world it was allocated from */
+  private record ViewEntity(int entityId, UUID worldId) {}
+
   protected final Player player;
-  private final int spareEntityId;
+
+  // As entity IDs are allocated per-world on 26.2+, they are also only guaranteed unique
+  // in the world they were allocated in. We have to re-allocate on world change.
+  private final Map<TabView, ViewEntity> viewEntities = new WeakHashMap<>();
 
   public PlayerTabEntry(Player player) {
     super(randomUUIDVersion2SameDefaultSkin(player.getUniqueId()));
     this.player = player;
-    this.spareEntityId = NMS_HACKS.allocateEntityId();
   }
 
   @Override
@@ -61,7 +69,20 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   @Override
   public int getFakeEntityId(TabView view) {
-    return this.spareEntityId;
+    ViewEntity entity = this.viewEntities.get(view);
+    return entity == null ? NULL_ENTITY : entity.entityId();
+  }
+
+  @Override
+  public int allocateFakeEntityId(TabView view) {
+    World world = view.getViewer().getWorld();
+    ViewEntity entity = this.viewEntities.get(view);
+
+    if (entity == null || !entity.worldId().equals(world.getUID())) {
+      entity = new ViewEntity(NMS_HACKS.allocateEntityId(world), world.getUID());
+      this.viewEntities.put(view, entity);
+    }
+    return entity.entityId();
   }
 
   @Override
