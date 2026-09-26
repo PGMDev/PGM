@@ -1,6 +1,5 @@
 package tc.oc.pgm.rotation.vote;
 
-import static tc.oc.pgm.rotation.vote.MapPoll.VOTE_BOOK_METADATA;
 import static tc.oc.pgm.rotation.vote.MapPoll.VOTE_BOOK_TAG;
 
 import org.bukkit.Material;
@@ -30,9 +29,9 @@ final class VotingBookListener implements Listener {
     if (player != null
         && poll.isRunning()
         && isRightClick(event.getAction())
-        && event.getMaterial() == Material.ENCHANTED_BOOK) {
-      String validator = VOTE_BOOK_TAG.get(event.getItem());
-      if (validator != null && validator.equals(VOTE_BOOK_METADATA)) poll.sendBook(player, true);
+        && event.getMaterial() == Material.ENCHANTED_BOOK
+        && Boolean.TRUE.equals(VOTE_BOOK_TAG.get(event.getItem()))) {
+      poll.sendBook(player, true);
     }
   }
 

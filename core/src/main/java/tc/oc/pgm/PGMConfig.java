@@ -200,7 +200,7 @@ public final class PGMConfig implements Config {
     }
 
     this.allowExtraVotes = parseBoolean(config.getString("votes.allow-extra-votes", "true"));
-    this.maxExtraVotes = parseInteger(config.getString("votes.max-extra-votes", "5"));
+    this.maxExtraVotes = Math.abs(parseInteger(config.getString("votes.max-extra-votes", "5")));
 
     this.minPlayers = parseInteger(config.getString("join.min-players", "1"));
     this.endEmptyMatches = config.getBoolean("join.end-empty-matches", minPlayers > 0);
