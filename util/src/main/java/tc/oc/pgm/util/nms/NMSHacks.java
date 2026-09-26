@@ -57,4 +57,6 @@ public interface NMSHacks {
   int getMaxWorldSize(World world);
 
   int allocateEntityId();
+
+  int getMinHeight(World world);
 }
