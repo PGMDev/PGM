@@ -10,6 +10,7 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
+import net.objecthunter.exp4j.function.Functions;
 import net.objecthunter.exp4j.shuntingyard.ShuntingYard;
 import net.objecthunter.exp4j.tokenizer.FunctionToken;
 import net.objecthunter.exp4j.tokenizer.VariableToken;
@@ -49,6 +50,10 @@ public interface Formula<T> extends ToDoubleFunction<T> {
         .build();
 
     return new ExpFormula<>(exp, context);
+  }
+
+  static boolean isReservedName(String name) {
+    return AddedFunctions.BY_NAME.containsKey(name) || Functions.getBuiltinFunction(name) != null;
   }
 
   static Set<String> getUsedVariables(String expr, ContextFactory<?> context)

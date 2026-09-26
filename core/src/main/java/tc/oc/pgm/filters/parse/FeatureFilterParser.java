@@ -22,7 +22,6 @@ import tc.oc.pgm.filters.operator.DenyFilter;
 import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.operator.OneFilter;
 import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.parser.ParsingNode;
 import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
@@ -116,8 +115,8 @@ public class FeatureFilterParser extends FilterParser {
       } else {
         var variables = factory.needModule(VariablesModule.class);
         var expr = match.group(3);
-        var scope = variables.deriveScope(expr);
-        return VariableFilter.of(Formula.of(expr, variables.getContext(scope)), scope, range);
+        var scope = variables.deriveScope(node, expr);
+        return VariableFilter.of(variables.parseFormula(scope, node, expr), scope, range);
       }
     }
     return null;

@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
 import org.jdom2.Document;
@@ -23,8 +24,10 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.LivesVariable;
+import tc.oc.pgm.variables.types.LocalVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
@@ -49,12 +52,42 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends Filterable<?>> Formula.ContextFactory<T> getContext(Class<T> scope) {
-    return (Formula.ContextFactory<T>) variablesByScope.get(scope);
+  private <T extends Filterable<?>> Context<T> getContext(Class<T> scope) {
+    return (Context<T>) variablesByScope.get(scope);
   }
 
-  public Class<? extends Filterable<?>> deriveScope(String expression) {
-    var vars = Formula.getUsedVariables(expression, getContext(Filterables.SCOPES.getLast()));
+  public <T extends Filterable<?>> Formula<T> parseFormula(
+      Class<T> scope, Node node, String expression) throws InvalidXMLException {
+    var locals = context.getLocals().visible(node);
+    Formula.ExpFormula<T> formula;
+    try {
+      formula = Formula.of(expression, getContext(scope).withLocals(locals));
+    } catch (IllegalArgumentException e) {
+      checkHiddenLocals(node, expression);
+      throw e;
+    }
+
+    if (!locals.isEmpty()) {
+      for (String used : formula.expression().getVariableNames()) {
+        var local = locals.get(used);
+        if (local != null) context.getLocals().markUsed(node, local);
+      }
+    }
+    return formula;
+  }
+
+  public Class<? extends Filterable<?>> deriveScope(Node node, String expression)
+      throws InvalidXMLException {
+    var locals = context.getLocals().visible(node);
+    Set<String> vars;
+    try {
+      vars = Formula.getUsedVariables(
+          expression, getContext(Filterables.SCOPES.getLast()).withLocals(locals));
+    } catch (IllegalArgumentException e) {
+      checkHiddenLocals(node, expression);
+      throw e;
+    }
+    vars.removeAll(locals.keySet());
 
     for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
       if (variablesByScope.get(scope).vars.keySet().containsAll(vars)) return scope;
@@ -64,6 +97,13 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
     throw new IllegalStateException(
         "Expression '" + expression + "' uses variables not found in any scope: " + vars);
+  }
+
+  private void checkHiddenLocals(Node node, String expression) throws InvalidXMLException {
+    context.getLocals().checkHidden(node, name -> Pattern.compile(
+            "(?<![\\w.])" + Pattern.quote(name) + "(?![\\w.])")
+        .matcher(expression)
+        .find());
   }
 
   private record Context<T extends Filterable<?>>(
@@ -85,6 +125,19 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         }
       }
       return new Context<>(variableNames.build(), arrayNames.build(), variableMap.build());
+    }
+
+    public Context<T> withLocals(Map<String, LocalVariable> locals) {
+      if (locals.isEmpty()) return this;
+      var allVars = ImmutableMap.<String, Variable<?>>builder()
+          .putAll(vars)
+          .putAll(locals)
+          .build();
+      var allNames = ImmutableSet.<String>builder()
+          .addAll(variables)
+          .addAll(locals.keySet())
+          .build();
+      return new Context<>(allNames, arrays, allVars);
     }
 
     @Override

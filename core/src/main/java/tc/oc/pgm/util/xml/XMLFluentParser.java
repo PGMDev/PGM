@@ -263,8 +263,8 @@ public class XMLFluentParser {
     if (variables == null) this.variables = factory.needModule(VariablesModule.class);
     return new Builder.Generic<>(el, prop) {
       @Override
-      protected Formula<T> parse(Node node) {
-        return Formula.of(node.getValue(), variables.getContext(clazz));
+      protected Formula<T> parse(Node node) throws InvalidXMLException {
+        return variables.parseFormula(clazz, node, node.getValue());
       }
     };
   }

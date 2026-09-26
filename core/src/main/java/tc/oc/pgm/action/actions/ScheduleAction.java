@@ -6,6 +6,7 @@ import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.variables.LocalFrame;
 
 public class ScheduleAction<B extends Filterable<?>> extends AbstractAction<B> {
   protected final Duration after;
@@ -25,7 +26,7 @@ public class ScheduleAction<B extends Filterable<?>> extends AbstractAction<B> {
   protected void schedule(B t, Runnable r) {
     t.getMatch()
         .getExecutor(MatchScope.RUNNING)
-        .schedule(r, after.toMillis(), TimeUnit.MILLISECONDS);
+        .schedule(LocalFrame.bind(r), after.toMillis(), TimeUnit.MILLISECONDS);
   }
 
   /** Specialization for running with a player, requires that the player did not change teams. */

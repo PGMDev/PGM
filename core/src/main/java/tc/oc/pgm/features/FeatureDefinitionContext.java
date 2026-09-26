@@ -16,6 +16,8 @@ import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.util.collection.ContextStore;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.variables.LocalScopes;
+import tc.oc.pgm.variables.Variable;
 
 public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
 
@@ -25,8 +27,14 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
 
   private final List<PendingValidation<?>> validations = new ArrayList<>();
 
+  private final LocalScopes locals = new LocalScopes();
+
   public static String parseId(Element node) {
     return node == null ? null : node.getAttributeValue("id");
+  }
+
+  public LocalScopes getLocals() {
+    return locals;
   }
 
   /** Return the XML element associated with the given feature */
@@ -56,6 +64,7 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
       throws InvalidXMLException {
     definitions.add(definition);
     if (id != null) {
+      if (node != null) locals.checkEscape(node, id);
       FeatureDefinition old = this.store.put(id, definition);
       if (old != null && old != definition) {
         this.store.put(id, old);
@@ -147,11 +156,22 @@ public class FeatureDefinitionContext extends ContextStore<FeatureDefinition> {
    */
   public <T extends FeatureDefinition> T resolve(Node node, String id, Class<T> cls)
       throws InvalidXMLException {
+    boolean isVariable = node != null && Variable.class.isAssignableFrom(cls);
+    if (isVariable) {
+      var local = locals.lookup(node, id);
+      if (cls.isInstance(local)) {
+        locals.markUsed(node, local);
+        return cls.cast(local);
+      }
+    }
+
     T val = get(id, cls);
-    if (val == null)
+    if (val == null) {
+      if (isVariable) locals.checkHidden(node, id::equals);
       throw new InvalidXMLException(
           "Unknown " + SelfIdentifyingFeatureDefinition.makeTypeName(cls) + " ID '" + id + "'",
           node);
+    }
     return val;
   }
 

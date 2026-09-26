@@ -24,7 +24,9 @@ import tc.oc.pgm.action.actions.DropFlagAction;
 import tc.oc.pgm.action.actions.EnchantItemAction;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
+import tc.oc.pgm.action.actions.FrameAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
+import tc.oc.pgm.action.actions.LetAction;
 import tc.oc.pgm.action.actions.MessageAction;
 import tc.oc.pgm.action.actions.OpenShop;
 import tc.oc.pgm.action.actions.PasteStructureAction;
@@ -115,7 +117,16 @@ public class ActionParser {
       return parseReference(node, id, bound);
     }
 
-    Action<? super B> result = property ? parseAction(el, bound) : parseDynamic(el, bound);
+    var locals = features.getLocals();
+    var layout = id != null || !locals.isInFunction(el) ? locals.enterFunction(el) : null;
+    Action<? super B> result;
+    try {
+      result = property ? parseAction(el, bound) : parseDynamic(el, bound);
+    } finally {
+      if (layout != null) locals.exitFunction();
+    }
+    if (layout != null && layout.size() > 0) result = new FrameAction<>(result, layout);
+
     if (bound != null) validate(result, ActionScopeValidation.of(bound), node);
     if (result instanceof ActionDefinition) {
       if (XMLUtils.parseBoolean(Node.fromAttr(el, "expose"), false)) {
@@ -170,10 +181,10 @@ public class ActionParser {
     if (scope == null)
       throw new InvalidXMLException("Inline action requires an implicit scope", node);
 
-    var context = factory.needModule(VariablesModule.class).getContext(scope);
+    var variables = factory.needModule(VariablesModule.class);
 
     Variable<?> var = features.resolve(node, match.group(1), Variable.class);
-    Formula<B> formula = Formula.of(match.group(3), context);
+    Formula<B> formula = variables.parseFormula(scope, node, match.group(3));
 
     if (var.isReadonly())
       throw new InvalidXMLException("Variable was readonly when write access is required", node);
@@ -184,7 +195,8 @@ public class ActionParser {
         throw new InvalidXMLException(
             "Inline action doesn't define the index to insert into", node);
 
-      return new SetVariableAction.Indexed<>(scope, varIdx, Formula.of(idxText, context), formula);
+      return new SetVariableAction.Indexed<>(
+          scope, varIdx, variables.parseFormula(scope, node, idxText), formula);
     }
     return new SetVariableAction<>(scope, var, formula);
   }
@@ -362,6 +374,23 @@ public class ActionParser {
     }
 
     return new SetVariableAction<>(scope, var, formula);
+  }
+
+  @MethodParser("let")
+  public <T extends Filterable<?>> LetAction<T> parseLet(Element el, Class<T> scope)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+    Formula<T> formula = parser.formula(scope, el, "value").required();
+    String name = parser.string(el, "name").required();
+    VariableParser.validateName(name, "Local variable names", el);
+    if (Formula.isReservedName(name))
+      throw new InvalidXMLException(
+          "Local variable '" + name + "' conflicts with a built-in function", el);
+    if (features.get(name, Variable.class) != null)
+      throw new InvalidXMLException(
+          "Local variable '" + name + "' conflicts with an existing variable", el);
+
+    return new LetAction<>(scope, features.getLocals().declare(el, name), formula);
   }
 
   @MethodParser("kill-entities")
