@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -81,8 +80,8 @@ public class DestroyableModule implements MapModule<DestroyableMatchModule> {
       List<DestroyableFactory> destroyables = Lists.newArrayList();
       var parser = context.getParser();
 
-      for (Element el : XMLUtils.flattenElements(
-          doc.getRootElement(), Set.of("destroyables"), Set.of("destroyable"))) {
+      for (Element el :
+          XMLUtils.flattenElements(doc.getRootElement(), "destroyables", "destroyable")) {
         var owner = parser.node(n -> Teams.getTeam(n, context), el, "owner").required();
         String name = parser.string(el, "name").required();
 
