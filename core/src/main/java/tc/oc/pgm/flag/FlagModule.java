@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Logger;
 import org.jdom2.Document;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapTag;
@@ -60,7 +61,8 @@ public class FlagModule implements MapModule<FlagMatchModule> {
   public static class Factory implements MapModuleFactory<FlagModule> {
     @Override
     public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
-      return ImmutableList.of(TeamModule.class, RegionModule.class, FilterModule.class);
+      return ImmutableList.of(
+          TeamModule.class, RegionModule.class, FilterModule.class, ActionModule.class);
     }
 
     @Override

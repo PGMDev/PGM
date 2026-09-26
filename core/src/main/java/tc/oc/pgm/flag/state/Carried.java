@@ -288,6 +288,8 @@ public class Carried extends Spawned implements Missing {
 
     FlagCaptureEvent event = new FlagCaptureEvent(this.flag, this.carrier, net);
     this.flag.getMatch().callEvent(event);
+
+    if (net.getCaptureAction() != null) net.getCaptureAction().trigger(this.carrier);
   }
 
   private MatchPlayer carrier() {

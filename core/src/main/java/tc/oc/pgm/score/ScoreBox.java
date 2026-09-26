@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Competitor;
@@ -58,6 +59,10 @@ public class ScoreBox {
 
   public boolean isSilent() {
     return this.definition.silent();
+  }
+
+  public @Nullable Action<? super MatchPlayer> getAction() {
+    return this.definition.action();
   }
 
   public @Nullable Instant getLastScoreTime(MatchPlayer player) {

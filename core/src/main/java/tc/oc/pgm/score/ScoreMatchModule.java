@@ -265,6 +265,7 @@ public class ScoreMatchModule implements MatchModule, Listener {
 
     this.incrementScore(player.getId(), player.getCompetitor(), points, ScoreCause.SCOREBOX);
     box.setLastScoreTime(player, Instant.now());
+    if (box.getAction() != null) box.getAction().trigger(player);
 
     int wholePoints = (int) points;
     if (wholePoints < 1 || box.isSilent()) return;
