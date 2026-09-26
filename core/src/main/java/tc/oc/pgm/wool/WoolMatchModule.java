@@ -199,9 +199,6 @@ public class WoolMatchModule implements MatchModule, Listener {
             wool.getOwner(),
             true,
             ImmutableList.of(new Contribution(player, 1))));
-
-        var placeAction = wool.getDefinition().getPlaceAction();
-        if (placeAction != null) player.getPlayer().ifPresent(placeAction::trigger);
       }
     }
   }

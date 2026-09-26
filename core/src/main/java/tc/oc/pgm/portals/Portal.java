@@ -106,6 +106,6 @@ public class Portal implements FeatureDefinition {
       }
     }
 
-    if (action != null && player.isParticipating()) action.trigger(player);
+    if (action != null && player.canInteract()) action.trigger(player);
   }
 }

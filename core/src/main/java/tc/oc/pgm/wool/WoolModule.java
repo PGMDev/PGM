@@ -10,7 +10,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.util.Vector;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.map.Gamemode;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.MapProtos;
@@ -19,7 +18,6 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
-import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.goals.GoalMatchModule;
 import tc.oc.pgm.goals.ProximityMetric;
@@ -78,11 +76,6 @@ public class WoolModule implements MapModule<WoolMatchModule> {
     }
 
     @Override
-    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
-      return ImmutableList.of(ActionModule.class);
-    }
-
-    @Override
     public WoolModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       Multimap<TeamFactory, MonumentWoolFactory> woolFactories = ArrayListMultimap.create();
@@ -97,8 +90,6 @@ public class WoolModule implements MapModule<WoolMatchModule> {
         Region placement = parser.region(woolEl, "monument").legacy(factory).required();
         ShowOptions options = ShowOptions.parse(factory.getFilters(), woolEl);
         Boolean required = parser.parseBool(woolEl, "required").orNull();
-        var placeAction =
-            parser.action(MatchPlayer.class, woolEl, "place-action").orNull();
 
         ProximityMetric woolProximityMetric = ProximityMetric.parse(
             woolEl, "wool", new ProximityMetric(ProximityMetric.Type.CLOSEST_KILL, false));
@@ -125,8 +116,7 @@ public class WoolModule implements MapModule<WoolMatchModule> {
             color,
             location,
             placement,
-            craftable,
-            placeAction);
+            craftable);
         factory.getFeatures().addFeature(woolEl, wool);
         woolFactories.put(team, wool);
       }
