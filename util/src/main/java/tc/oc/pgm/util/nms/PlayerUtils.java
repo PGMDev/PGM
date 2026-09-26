@@ -5,7 +5,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.block.BlockVectorSet;
 import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.block.RayBlockIntersection;
@@ -25,8 +25,6 @@ public interface PlayerUtils {
       PlayerTeleportEvent.TeleportCause cause);
 
   Skin getPlayerSkin(Player player);
-
-  Skin getPlayerSkinForViewer(Player player, Player viewer);
 
   String getPlayerName(UUID uuid);
 

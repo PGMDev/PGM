@@ -3,6 +3,7 @@ package tc.oc.pgm.match;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 import static tc.oc.pgm.util.Assert.assertTrue;
 import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -946,9 +947,8 @@ public class MatchImpl implements Match {
           Level.SEVERE, "Unable to unload world " + worldName + " (this can cause memory leaks!)");
     }
 
-    final File oldMatchFolder = new File(PGM.get().getServer().getWorldContainer(), worldName);
-    if (oldMatchFolder.exists()) {
-      FileUtils.delete(oldMatchFolder);
+    for (File root : WORLD_STORAGE.getWorldDirectories()) {
+      FileUtils.delete(new File(root, worldName));
     }
   }
 

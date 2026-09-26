@@ -50,9 +50,9 @@ usercache.json
 whitelist.json
 logs/
 plugins/
-world/
-world_nether/
-world_the_end/
+/world/
+/world_nether/
+/world_the_end/
 wepif.yml
 crash-reports/
 eula.txt

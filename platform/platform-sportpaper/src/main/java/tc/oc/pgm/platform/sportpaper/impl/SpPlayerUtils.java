@@ -33,7 +33,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
 import tc.oc.pgm.platform.sportpaper.packets.PacketSender;
 import tc.oc.pgm.platform.sportpaper.utils.Skins;
@@ -62,14 +62,6 @@ public class SpPlayerUtils implements PlayerUtils, PacketSender {
   public Skin getPlayerSkin(Player player) {
     CraftPlayer craftPlayer = (CraftPlayer) player;
     return Skins.fromProfile(craftPlayer.getProfile());
-  }
-
-  @Override
-  public Skin getPlayerSkinForViewer(Player player, Player viewer) {
-    return player.hasFakeSkin(viewer)
-        ? new Skin(
-            player.getFakeSkin(viewer).getData(), player.getFakeSkin(viewer).getSignature())
-        : getPlayerSkin(player);
   }
 
   @Override
