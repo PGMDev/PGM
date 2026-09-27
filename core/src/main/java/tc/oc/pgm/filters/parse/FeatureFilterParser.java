@@ -45,14 +45,7 @@ public class FeatureFilterParser extends FilterParser {
 
   @Override
   public Filter parse(Element el) throws InvalidXMLException {
-    return parse(el, null);
-  }
-
-  @Override
-  public Filter parse(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
-    // Filters with an id can be referenced from anywhere, so they can't see locals
-    if (FeatureDefinitionContext.parseId(el) != null) locals = null;
-    Filter filter = this.parseDynamic(el, locals);
+    Filter filter = this.parseDynamic(el);
     if (!(filter instanceof FeatureReference)) {
       factory.getFeatures().addFeature(el, filter);
     }
@@ -88,13 +81,13 @@ public class FeatureFilterParser extends FilterParser {
   }
 
   @MethodParser("allow")
-  public Filter parseAllow(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
-    return new AllowFilter(parseChild(el, locals));
+  public Filter parseAllow(Element el) throws InvalidXMLException {
+    return new AllowFilter(parseChild(el));
   }
 
   @MethodParser("deny")
-  public Filter parseDeny(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
-    return new DenyFilter(parseChild(el, locals));
+  public Filter parseDeny(Element el) throws InvalidXMLException {
+    return new DenyFilter(parseChild(el));
   }
 
   private static final Pattern INLINE_VARIABLE =

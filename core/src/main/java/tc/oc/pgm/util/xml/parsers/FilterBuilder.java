@@ -50,7 +50,7 @@ public class FilterBuilder extends Builder<Filter, FilterBuilder> {
 
   @Override
   protected Filter parse(Node node) throws InvalidXMLException {
-    if (prop.length == 0) return filters.parse(el, locals);
+    if (prop.length == 0) return filters.parse(el);
     return filters.parseProperty(node, locals);
   }
 

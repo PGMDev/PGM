@@ -1,11 +1,9 @@
 package tc.oc.pgm.filters.operator;
 
 import org.jdom2.Element;
-import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
-import tc.oc.pgm.util.math.LocalFrame;
 
 /**
  * Wrapper around a child filter, exists only as a parsing optimization. Single-child "any", "all"
@@ -24,12 +22,7 @@ public class FilterWrapper extends SingleFilterFunction {
 
   @Override
   public QueryResponse query(Query query) {
-    return query(query, null);
-  }
-
-  @Override
-  public QueryResponse query(Query query, @Nullable LocalFrame locals) {
-    return filter.query(query, locals);
+    return filter.query(query);
   }
 
   public static Filter of(Element el, Filter filter) {

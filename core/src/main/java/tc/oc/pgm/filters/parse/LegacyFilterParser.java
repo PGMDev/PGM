@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Element;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
@@ -20,7 +19,6 @@ import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.material.MaterialMatcher;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
-import tc.oc.pgm.variables.LocalScope;
 
 /** For proto < 1.4 */
 public class LegacyFilterParser extends FilterParser {
@@ -114,7 +112,7 @@ public class LegacyFilterParser extends FilterParser {
     if (isReference(el)) {
       return parseReference(Node.fromAttr(el, "name"));
     } else {
-      return this.parseAll(el, null);
+      return this.parseAll(el);
     }
   }
 
@@ -126,8 +124,8 @@ public class LegacyFilterParser extends FilterParser {
 
   // Legacy not allows for multiple children and is an implicit and
   @MethodParser("not")
-  public Filter parseNot(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
-    return new InverseFilter(AnyFilter.of(parseChildren(el, locals)));
+  public Filter parseNot(Element el) throws InvalidXMLException {
+    return new InverseFilter(AnyFilter.of(parseChildren(el)));
   }
 
   // Removed in proto 1.4 to avoid conflict with <block> region
