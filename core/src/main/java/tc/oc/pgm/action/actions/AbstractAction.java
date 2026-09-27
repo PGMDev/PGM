@@ -1,5 +1,6 @@
 package tc.oc.pgm.action.actions;
 
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.action.ActionDefinition;
 
 public abstract class AbstractAction<S> implements ActionDefinition<S> {
@@ -16,5 +17,5 @@ public abstract class AbstractAction<S> implements ActionDefinition<S> {
   }
 
   @Override
-  public void untrigger(S s) {}
+  public void untrigger(S s, ActionContext context) {}
 }

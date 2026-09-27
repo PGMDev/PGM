@@ -2,6 +2,7 @@ package tc.oc.pgm.action.actions;
 
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.tag.TeamColorApplicator;
 import tc.oc.pgm.util.inventory.ItemMatcher;
@@ -30,7 +31,7 @@ public class ReplaceItemAction extends AbstractAction<MatchPlayer> {
   }
 
   @Override
-  public void trigger(MatchPlayer player) {
+  public void trigger(MatchPlayer player, ActionContext context) {
     PlayerInventory inv = player.getInventory();
     slots.forEach(inv, (slot, stack) -> {
       if (matcher.matches(stack)) slot.setItem(inv, replaceItem(stack, player));

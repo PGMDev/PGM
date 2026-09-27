@@ -24,6 +24,7 @@ import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
+import tc.oc.pgm.variables.LocalScope;
 
 public class ReplacementParser {
   private static final NumberFormat DEFAULT_FORMAT = NumberFormat.getIntegerInstance();
@@ -41,7 +42,13 @@ public class ReplacementParser {
 
   public <B extends Filterable<?>> Replacement parse(Element el, @Nullable Class<B> scope)
       throws InvalidXMLException {
-    var replacement = methodParsers.parse(el, scope);
+    return parse(el, scope, null);
+  }
+
+  public <B extends Filterable<?>> Replacement parse(
+      Element el, @Nullable Class<B> scope, @Nullable LocalScope locals)
+      throws InvalidXMLException {
+    var replacement = methodParsers.parse(el, scope, locals);
     if (scope != null) replacement.validate(scope, new Node(el));
     return replacement;
   }
@@ -64,16 +71,17 @@ public class ReplacementParser {
   }
 
   @MethodParser("decimal")
-  public <T extends Filterable<?>> Replacement parseDecimal(Element el, Class<T> scope)
-      throws InvalidXMLException {
+  public <T extends Filterable<?>> Replacement parseDecimal(
+      Element el, Class<T> scope, @Nullable LocalScope locals) throws InvalidXMLException {
     scope = parseScope(el, scope);
-    var formula = parser.formula(scope, el, "value").required();
+    var formula = parser.formula(scope, locals, el, "value").required();
     var format = parser
         .<NumberFormat>primitive(DecimalFormat::new, el, "format")
         .attr()
         .optional(DEFAULT_FORMAT);
 
-    return ScopedReplacement.of(scope, ctx -> text(format.format(formula.applyAsDouble(ctx))));
+    return ScopedReplacement.of(
+        scope, (ctx, frame) -> text(format.format(formula.apply(ctx, frame))));
   }
 
   @MethodParser("player")
@@ -87,19 +95,19 @@ public class ReplacementParser {
   }
 
   @MethodParser("switch")
-  public <T extends Filterable<?>> Replacement parseSwitch(Element el, Class<T> scope)
-      throws InvalidXMLException {
+  public <T extends Filterable<?>> Replacement parseSwitch(
+      Element el, Class<T> scope, @Nullable LocalScope locals) throws InvalidXMLException {
     scope = parseScope(el, scope);
     record SwitchBranch(Component result, Range<Double> valueRange, Filter filter) {}
 
-    var formula = parser.formula(scope, el, "value").orNull();
+    var formula = parser.formula(scope, locals, el, "value").orNull();
     var fallback = parser.component(el, "fallback").child().optional(empty());
     var children = el.getChildren("case");
     var branches = new ArrayList<SwitchBranch>(children.size());
 
     for (var innerEl : children) {
       var valueRange = formula != null ? parser.doubleRange(innerEl, "match").orNull() : null;
-      var filter = parser.filter(innerEl, "filter").optional(() -> {
+      var filter = parser.filter(locals, innerEl, "filter").optional(() -> {
         if (formula == null)
           throw new InvalidXMLException(
               "The filter is required if value is not specified in the switch element", innerEl);
@@ -112,11 +120,11 @@ public class ReplacementParser {
       branches.add(new SwitchBranch(result, valueRange != null ? valueRange : Range.all(), filter));
     }
 
-    return ScopedReplacement.of(scope, ctx -> {
-      var formulaResult = formula != null ? formula.applyAsDouble(ctx) : null;
+    return ScopedReplacement.of(scope, (ctx, frame) -> {
+      var formulaResult = formula != null ? formula.apply(ctx, frame) : null;
       for (var branch : branches) {
         if ((formula == null || branch.valueRange.contains(formulaResult))
-            && branch.filter.query(ctx).isAllowed()) return branch.result;
+            && branch.filter.query(ctx, frame).isAllowed()) return branch.result;
       }
 
       return fallback;

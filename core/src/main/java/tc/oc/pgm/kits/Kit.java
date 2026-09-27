@@ -4,6 +4,7 @@ import java.util.List;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -67,12 +68,12 @@ public interface Kit extends Action<MatchPlayer> {
   }
 
   @Override
-  default void trigger(MatchPlayer player) {
+  default void trigger(MatchPlayer player, ActionContext context) {
     player.applyKit(this, false);
   }
 
   @Override
-  default void untrigger(MatchPlayer player) {
+  default void untrigger(MatchPlayer player, ActionContext context) {
     if (isRemovable()) remove(player);
   }
 }

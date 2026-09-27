@@ -14,6 +14,7 @@ import net.objecthunter.exp4j.function.Functions;
 import net.objecthunter.exp4j.shuntingyard.ShuntingYard;
 import net.objecthunter.exp4j.tokenizer.FunctionToken;
 import net.objecthunter.exp4j.tokenizer.VariableToken;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Formula<T> extends ToDoubleFunction<T> {
@@ -80,10 +81,19 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     return applyAsDouble(value);
   }
 
+  default double apply(T value, @Nullable LocalFrame locals) {
+    return applyAsDouble(value);
+  }
+
   record ExpFormula<T>(Expression expression, ContextFactory<T> context) implements Formula<T> {
     @Override
     public double applyAsDouble(T value) {
-      return expression.setExpressionContext(context.withContext(value)).evaluate();
+      return apply(value, null);
+    }
+
+    @Override
+    public double apply(T value, @Nullable LocalFrame locals) {
+      return expression.setExpressionContext(context.withContext(value, locals)).evaluate();
     }
   }
 
@@ -105,6 +115,10 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     Set<String> getArrays();
 
     ExpressionContext withContext(T t);
+
+    default ExpressionContext withContext(T t, @Nullable LocalFrame locals) {
+      return withContext(t);
+    }
 
     static <T extends ExpressionContext> ContextFactory<T> ofStatic(Set<String> variables) {
       return new ContextFactory<>() {

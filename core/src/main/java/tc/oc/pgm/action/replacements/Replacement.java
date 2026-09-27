@@ -1,8 +1,10 @@
 package tc.oc.pgm.action.replacements;
 
 import net.kyori.adventure.text.ComponentLike;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.util.math.LocalFrame;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
@@ -25,4 +27,8 @@ public interface Replacement extends FeatureDefinition {
    * @return The replacement component
    */
   ComponentLike get(Filterable<?> filterable);
+
+  default ComponentLike get(Filterable<?> filterable, @Nullable LocalFrame locals) {
+    return get(filterable);
+  }
 }

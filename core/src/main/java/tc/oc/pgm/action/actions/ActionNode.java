@@ -2,8 +2,8 @@ package tc.oc.pgm.action.actions;
 
 import com.google.common.collect.ImmutableList;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.filter.Filter;
-import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.filters.Filterable;
 
 public class ActionNode<B extends Filterable<?>> extends AbstractAction<B> {
@@ -30,23 +30,19 @@ public class ActionNode<B extends Filterable<?>> extends AbstractAction<B> {
   }
 
   @Override
-  public void trigger(B t) {
-    trigger(t, t);
-  }
-
-  @Override
-  public void trigger(B t, Query event) {
-    if (filter.query(event).isAllowed()) {
+  public void trigger(B t, ActionContext context) {
+    if (filter.query(context.queryOr(t), context.locals()).isAllowed()) {
       for (Action<? super B> action : actions) {
-        action.trigger(t, event);
+        action.trigger(t, context);
       }
     }
   }
 
-  public void untrigger(B t) {
-    if (untrigerFilter.query(t).isAllowed()) {
+  @Override
+  public void untrigger(B t, ActionContext context) {
+    if (untrigerFilter.query(t, context.locals()).isAllowed()) {
       for (Action<? super B> action : actions) {
-        action.untrigger(t);
+        action.untrigger(t, context);
       }
     }
   }

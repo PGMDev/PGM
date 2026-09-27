@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters.matcher.match;
 
 import com.google.common.collect.Range;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.Filterables;
@@ -13,6 +14,7 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.WeakTypedFilter;
 import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.math.LocalFrame;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.variables.Variable;
@@ -152,10 +154,15 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
 
     @Override
     public QueryResponse query(Query q) {
+      return query(q, null);
+    }
+
+    @Override
+    public QueryResponse query(Query q, @Nullable LocalFrame locals) {
       T target;
       if (!(q instanceof MatchQuery mq) || (target = mq.filterable(scope)) == null)
         return QueryResponse.ABSTAIN;
-      return QueryResponse.fromBoolean(values.contains(formula.apply(target)));
+      return QueryResponse.fromBoolean(values.contains(formula.apply(target, locals)));
     }
 
     @Override
@@ -182,6 +189,17 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     @Override
     public boolean matches(PartyQuery query) {
       return values.contains(formula.apply(query.getParty()));
+    }
+
+    @Override
+    public QueryResponse query(Query query) {
+      return query(query, null);
+    }
+
+    @Override
+    public QueryResponse query(Query query, @Nullable LocalFrame locals) {
+      if (!(query instanceof PartyQuery pq)) return QueryResponse.ABSTAIN;
+      return QueryResponse.fromBoolean(values.contains(formula.apply(pq.getParty(), locals)));
     }
 
     @Override

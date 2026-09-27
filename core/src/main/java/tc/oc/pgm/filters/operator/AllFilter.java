@@ -1,8 +1,10 @@
 package tc.oc.pgm.filters.operator;
 
 import java.util.Collection;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.util.math.LocalFrame;
 
 public class AllFilter extends MultiFilterFunction {
 
@@ -12,10 +14,15 @@ public class AllFilter extends MultiFilterFunction {
 
   @Override
   public QueryResponse query(Query query) {
+    return query(query, null);
+  }
+
+  @Override
+  public QueryResponse query(Query query, @Nullable LocalFrame locals) {
     // returns true if all the filters match
     QueryResponse response = QueryResponse.ABSTAIN;
     for (Filter filter : this.filters) {
-      QueryResponse filterResponse = filter.query(query);
+      QueryResponse filterResponse = filter.query(query, locals);
       if (filterResponse == QueryResponse.DENY) {
         return filterResponse;
       } else if (filterResponse == QueryResponse.ALLOW) {

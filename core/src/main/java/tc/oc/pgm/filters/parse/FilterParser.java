@@ -18,6 +18,7 @@ import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.PlayerRelation;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.classes.ClassModule;
@@ -93,6 +94,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.Variable;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
@@ -132,6 +134,10 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
    */
   public abstract Filter parse(Element el) throws InvalidXMLException;
 
+  public Filter parse(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
+    return parse(el);
+  }
+
   @Override
   public Filter parsePropertyElement(Element property) throws InvalidXMLException {
     return parseChild(property);
@@ -142,6 +148,22 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
    * {@link Node} for error reporting purposes.
    */
   public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
+
+  public Filter parseReference(Node node, String id, @Nullable LocalScope locals)
+      throws InvalidXMLException {
+    return parseReference(node, id);
+  }
+
+  public Filter parseProperty(Node node, @Nullable LocalScope locals) throws InvalidXMLException {
+    return node.isAttribute()
+        ? parseReference(node, node.getValue(), locals)
+        : parseChild(node.getElement(), locals);
+  }
+
+  public Filter parseChild(Element parent, @Nullable LocalScope locals) throws InvalidXMLException {
+    if (locals == null || parent.getChildren().size() != 1) return parseChild(parent);
+    return parse(parent.getChildren().getFirst(), locals);
+  }
 
   public boolean isFilter(Element el) {
     return methodParsers.methods().containsKey(el.getName())
@@ -158,10 +180,20 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     return methodParsers.parse(el);
   }
 
+  protected Filter parseDynamic(Element el, @Nullable LocalScope locals)
+      throws InvalidXMLException {
+    return methodParsers.parse(el, locals);
+  }
+
   protected List<Filter> parseChildren(Element parent) throws InvalidXMLException {
+    return parseChildren(parent, null);
+  }
+
+  protected List<Filter> parseChildren(Element parent, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     List<Filter> filters = Lists.newArrayList();
     for (Element el : parent.getChildren()) {
-      filters.add(this.parse(el));
+      filters.add(this.parse(el, locals));
     }
     return filters;
   }
@@ -208,23 +240,23 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   @MethodParser("any")
-  public Filter parseAny(Element el) throws InvalidXMLException {
-    return FilterWrapper.of(el, AnyFilter.of(parseChildren(el)));
+  public Filter parseAny(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
+    return FilterWrapper.of(el, AnyFilter.of(parseChildren(el, locals)));
   }
 
   @MethodParser("all")
-  public Filter parseAll(Element el) throws InvalidXMLException {
-    return FilterWrapper.of(el, AllFilter.of(parseChildren(el)));
+  public Filter parseAll(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
+    return FilterWrapper.of(el, AllFilter.of(parseChildren(el, locals)));
   }
 
   @MethodParser("one")
-  public Filter parseOne(Element el) throws InvalidXMLException {
-    return FilterWrapper.of(el, OneFilter.of(parseChildren(el)));
+  public Filter parseOne(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
+    return FilterWrapper.of(el, OneFilter.of(parseChildren(el, locals)));
   }
 
   @MethodParser("not")
-  public Filter parseNot(Element el) throws InvalidXMLException {
-    return new InverseFilter(parseChild(el));
+  public Filter parseNot(Element el, @Nullable LocalScope locals) throws InvalidXMLException {
+    return new InverseFilter(parseChild(el, locals));
   }
 
   @MethodParser("team")
@@ -644,18 +676,29 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   @MethodParser("variable")
-  public Filter parseVariableFilter(Element el) throws InvalidXMLException {
+  public Filter parseVariableFilter(Element el, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     Range<Double> range = XMLUtils.parseNumericRange(new Node(el), Double.class);
+    // Team adapters query each competitor without locals
+    if (el.getAttribute("team") != null || el.getAttribute("any") != null) locals = null;
 
     Filter filter;
     if (el.getAttribute("var") != null) {
-      Variable<?> varDef = parser.variable(el, "var").required();
-      Integer index = varDef.isIndexed() ? parser.parseInt(el, "index").required() : null;
+      String name = el.getAttributeValue("var");
+      if (locals != null && locals.lookup(name) != null) {
+        if (el.getAttribute("index") != null)
+          throw new InvalidXMLException(LocalScope.INDEX_ERROR, el);
+        var formula = parser.formula(Match.class, locals, el, "var").attr().required();
+        filter = VariableFilter.of(formula, Match.class, range);
+      } else {
+        Variable<?> varDef = parser.variable(el, "var").required();
+        Integer index = varDef.isIndexed() ? parser.parseInt(el, "index").required() : null;
 
-      filter = VariableFilter.of(varDef, index, range, new Node(el));
+        filter = VariableFilter.of(varDef, index, range, new Node(el));
+      }
     } else if (el.getAttribute("value") != null) {
       var scope = Filterables.parse(Node.fromRequiredAttr(el, "scope"));
-      var formula = parser.formula(scope, el, "value").attr().required();
+      var formula = parser.formula(scope, locals, el, "value").attr().required();
 
       filter = VariableFilter.of(formula, scope, range);
     } else {

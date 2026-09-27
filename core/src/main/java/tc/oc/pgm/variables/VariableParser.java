@@ -48,16 +48,16 @@ public class VariableParser {
   }
 
   public Variable<?> parse(Element el) throws InvalidXMLException {
-    validateName(Node.fromRequiredAttr(el, "id").getValue(), "Variable IDs", el);
+    validateName(Node.fromRequiredAttr(el, "id").getValue(), "Variable IDs", new Node(el));
     return methodParsers.parse(el);
   }
 
-  public static void validateName(String name, String kind, Element el) throws InvalidXMLException {
+  public static void validateName(String name, String kind, Node node) throws InvalidXMLException {
     if (!VARIABLE_ID.matcher(name).matches() || name.contains("."))
       throw new InvalidXMLException(
           kind
               + " must start with a letter or underscore and can only include letters, digits or underscores.",
-          el);
+          node);
   }
 
   @MethodParser("variable")
