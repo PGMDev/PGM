@@ -24,6 +24,7 @@ import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.math.LocalFrame;
+import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.LivesVariable;
@@ -98,7 +99,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         }
       }
       return new Context<>(
-          variableNames.build(), arrayNames.build(), variableMap.build(), ImmutableMap.of());
+          variableNames.build(), arrayNames.build(), variableMap.build(), Map.of());
     }
 
     public Context<T> withLocals(@Nullable LocalScope scope) {
@@ -141,7 +142,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         public Double getVariable(String id) {
           return variableCache.computeIfAbsent(id, key -> {
             var local = locals.get(key);
-            return local != null ? local.get(frame) : vars.get(key).getValue(scope);
+            return local != null ? frame.get(local) : vars.get(key).getValue(scope);
           });
         }
 

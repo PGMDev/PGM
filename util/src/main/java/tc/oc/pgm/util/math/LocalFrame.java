@@ -11,17 +11,17 @@ public final class LocalFrame {
     this.values = new double[size];
   }
 
-  public double get(int slot) {
-    return values[slot];
+  public double get(LocalRef ref) {
+    return frame(ref).values[ref.slot()];
   }
 
-  public void set(int slot, double value) {
-    values[slot] = value;
+  public void set(LocalRef ref, double value) {
+    frame(ref).values[ref.slot()] = value;
   }
 
-  public @Nullable LocalFrame ancestor(int depth) {
+  private LocalFrame frame(LocalRef ref) {
     var frame = this;
-    for (int i = 0; i < depth && frame != null; i++) frame = frame.parent;
+    for (int i = 0; i < ref.depth(); i++) frame = frame.parent;
     return frame;
   }
 }

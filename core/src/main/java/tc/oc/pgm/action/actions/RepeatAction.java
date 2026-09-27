@@ -5,7 +5,7 @@ import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.math.Formula;
-import tc.oc.pgm.variables.LocalRef;
+import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.variables.LocalScope;
 
 public class RepeatAction<B extends Filterable<?>> extends AbstractAction<B> {
@@ -36,7 +36,7 @@ public class RepeatAction<B extends Filterable<?>> extends AbstractAction<B> {
         action.trigger(b, context);
       } else {
         var frame = locals.createFrame(context.locals());
-        if (index != null) index.set(frame, i);
+        if (index != null) frame.set(index, i);
         action.trigger(b, context.withLocals(frame));
       }
     }

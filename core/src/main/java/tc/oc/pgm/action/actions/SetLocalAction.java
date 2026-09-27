@@ -3,7 +3,7 @@ package tc.oc.pgm.action.actions;
 import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.math.Formula;
-import tc.oc.pgm.variables.LocalRef;
+import tc.oc.pgm.util.math.LocalRef;
 
 public class SetLocalAction<T extends Filterable<?>> extends AbstractAction<T> {
 
@@ -18,11 +18,6 @@ public class SetLocalAction<T extends Filterable<?>> extends AbstractAction<T> {
 
   @Override
   public void trigger(T t, ActionContext context) {
-    local.set(context.locals(), formula.apply(t, context.locals()));
-  }
-
-  @Override
-  public void untrigger(T t, ActionContext context) {
-    trigger(t, context);
+    context.locals().set(local, formula.apply(t, context.locals()));
   }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.math.LocalFrame;
+import tc.oc.pgm.util.math.LocalRef;
 
 public final class LocalScope {
   public static final String INDEX_ERROR = "Local variables cannot contain an index.";
@@ -22,7 +23,7 @@ public final class LocalScope {
     int depth = 0;
     for (var scope = this; scope != null; scope = scope.parent, depth++) {
       int slot = scope.names.indexOf(name);
-      if (slot >= 0) return new LocalRef(name, depth, slot);
+      if (slot >= 0) return new LocalRef(depth, slot);
     }
     return null;
   }
@@ -32,7 +33,7 @@ public final class LocalScope {
     int depth = 0;
     for (var scope = this; scope != null; scope = scope.parent, depth++) {
       for (int slot = 0; slot < scope.names.size(); slot++) {
-        result.putIfAbsent(scope.names.get(slot), new LocalRef(scope.names.get(slot), depth, slot));
+        result.putIfAbsent(scope.names.get(slot), new LocalRef(depth, slot));
       }
     }
     return result;
