@@ -99,19 +99,9 @@ public class ActionParser {
   }
 
   public <B extends Filterable<?>> Action<? super B> parseProperty(
-      Element el, @Nullable Class<B> bound) throws InvalidXMLException {
-    return parseProperty(el, bound, null);
-  }
-
-  public <B extends Filterable<?>> Action<? super B> parseProperty(
       Element el, @Nullable Class<B> bound, @Nullable LocalScope locals)
       throws InvalidXMLException {
     return parse(el, bound, true, locals);
-  }
-
-  public <B extends Filterable<?>> Action<? super B> parse(Element el, @Nullable Class<B> bound)
-      throws InvalidXMLException {
-    return parse(el, bound, null);
   }
 
   public <B extends Filterable<?>> Action<? super B> parse(
@@ -155,11 +145,6 @@ public class ActionParser {
 
   private boolean maybeReference(Element el, boolean property) {
     return (property || "action".equals(el.getName())) && el.getChildren().isEmpty();
-  }
-
-  public <B extends Filterable<?>> Action<? super B> parseReference(Node node, Class<B> bound)
-      throws InvalidXMLException {
-    return parseReference(node, bound, null);
   }
 
   public <B extends Filterable<?>> Action<? super B> parseReference(

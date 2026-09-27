@@ -123,11 +123,6 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     }
 
     @Override
-    public ExpressionContext withContext(T scope) {
-      return withContext(scope, null);
-    }
-
-    @Override
     public ExpressionContext withContext(T scope, @Nullable LocalFrame frame) {
       return new ExpressionContext() {
         private final Map<String, Double> variableCache = new HashMap<>();

@@ -30,11 +30,6 @@ public abstract class ScopedReplacement<S extends Filterable<?>> implements Repl
   protected abstract ComponentLike getImpl(S ctx, @Nullable LocalFrame locals);
 
   @Override
-  public ComponentLike get(Filterable<?> filterable) {
-    return get(filterable, null);
-  }
-
-  @Override
   public ComponentLike get(Filterable<?> filterable, @Nullable LocalFrame locals) {
     S ctx = filterable.getFilterableAncestor(scope);
     if (ctx == null)

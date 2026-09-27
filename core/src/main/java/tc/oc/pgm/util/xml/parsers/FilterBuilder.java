@@ -15,10 +15,6 @@ public class FilterBuilder extends Builder<Filter, FilterBuilder> {
   private final FilterParser filters;
   private final @Nullable LocalScope locals;
 
-  public FilterBuilder(FilterParser filters, Element el, String... prop) {
-    this(filters, null, el, prop);
-  }
-
   public FilterBuilder(
       FilterParser filters, @Nullable LocalScope locals, Element el, String... prop) {
     super(el, prop);

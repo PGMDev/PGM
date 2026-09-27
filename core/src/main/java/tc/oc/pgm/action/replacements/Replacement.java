@@ -26,9 +26,5 @@ public interface Replacement extends FeatureDefinition {
    * @param filterable The filterable to use when creating the replacement component
    * @return The replacement component
    */
-  ComponentLike get(Filterable<?> filterable);
-
-  default ComponentLike get(Filterable<?> filterable, @Nullable LocalFrame locals) {
-    return get(filterable);
-  }
+  ComponentLike get(Filterable<?> filterable, @Nullable LocalFrame locals);
 }

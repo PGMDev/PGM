@@ -191,7 +191,7 @@ public class XMLFluentParser {
   }
 
   public FilterBuilder filter(Element el, String... prop) {
-    return new FilterBuilder(filters, el, prop);
+    return filter(null, el, prop);
   }
 
   public FilterBuilder filter(@Nullable LocalScope locals, Element el, String... prop) {

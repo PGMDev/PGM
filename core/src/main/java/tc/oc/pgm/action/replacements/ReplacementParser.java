@@ -40,11 +40,6 @@ public class ReplacementParser {
     this.isTopLevel = topLevel;
   }
 
-  public <B extends Filterable<?>> Replacement parse(Element el, @Nullable Class<B> scope)
-      throws InvalidXMLException {
-    return parse(el, scope, null);
-  }
-
   public <B extends Filterable<?>> Replacement parse(
       Element el, @Nullable Class<B> scope, @Nullable LocalScope locals)
       throws InvalidXMLException {
@@ -90,7 +85,7 @@ public class ReplacementParser {
     var variable = parser.variable(el, "var").scope(MatchPlayer.class).singleExclusive();
     var fallback = parser.component(el, "fallback").optional(empty());
     var nameStyle = parser.parseEnum(NameStyle.class, el, "style").optional(NameStyle.VERBOSE);
-    return filterable ->
+    return (filterable, locals) ->
         variable.getHolder(filterable).map(mp -> mp.getName(nameStyle)).orElse(fallback);
   }
 

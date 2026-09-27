@@ -114,16 +114,12 @@ public interface Formula<T> extends ToDoubleFunction<T> {
 
     Set<String> getArrays();
 
-    ExpressionContext withContext(T t);
-
-    default ExpressionContext withContext(T t, @Nullable LocalFrame locals) {
-      return withContext(t);
-    }
+    ExpressionContext withContext(T t, @Nullable LocalFrame locals);
 
     static <T extends ExpressionContext> ContextFactory<T> ofStatic(Set<String> variables) {
       return new ContextFactory<>() {
         @Override
-        public ExpressionContext withContext(T t) {
+        public ExpressionContext withContext(T t, @Nullable LocalFrame locals) {
           return t;
         }
 
