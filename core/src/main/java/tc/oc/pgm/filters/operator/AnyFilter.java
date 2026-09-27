@@ -21,11 +21,11 @@ public class AnyFilter extends MultiFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query, @Nullable LocalFrame locals) {
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
     // returns true if any of the filters match
     QueryResponse response = QueryResponse.ABSTAIN;
     for (Filter filter : this.filters) {
-      QueryResponse filterResponse = filter.query(query, locals);
+      QueryResponse filterResponse = filter.query(query, frame);
       if (filterResponse == QueryResponse.ALLOW) {
         return filterResponse;
       } else if (filterResponse == QueryResponse.DENY) {

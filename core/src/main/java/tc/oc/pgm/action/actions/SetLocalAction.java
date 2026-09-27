@@ -18,6 +18,6 @@ public class SetLocalAction<T extends Filterable<?>> extends AbstractAction<T> {
 
   @Override
   public void trigger(T t, ActionContext context) {
-    context.locals().set(local, formula.apply(t, context.locals()));
+    context.frame().set(local, formula.apply(t, context.frame()));
   }
 }

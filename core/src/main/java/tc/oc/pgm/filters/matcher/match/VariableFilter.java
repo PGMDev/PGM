@@ -159,11 +159,11 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     }
 
     @Override
-    public QueryResponse query(Query q, @Nullable LocalFrame locals) {
+    public QueryResponse query(Query q, @Nullable LocalFrame frame) {
       T target;
       if (!(q instanceof MatchQuery mq) || (target = mq.filterable(scope)) == null)
         return QueryResponse.ABSTAIN;
-      return QueryResponse.fromBoolean(values.contains(formula.apply(target, locals)));
+      return QueryResponse.fromBoolean(values.contains(formula.apply(target, frame)));
     }
 
     @Override
@@ -189,8 +189,8 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     }
 
     @Override
-    public QueryResponse query(Query query, @Nullable LocalFrame locals) {
-      return QueryResponse.fromBoolean(values.contains(locals.get(local)));
+    public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+      return QueryResponse.fromBoolean(values.contains(frame.get(local)));
     }
 
     @Override
@@ -223,9 +223,9 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     }
 
     @Override
-    public QueryResponse query(Query query, @Nullable LocalFrame locals) {
+    public QueryResponse query(Query query, @Nullable LocalFrame frame) {
       if (!(query instanceof PartyQuery pq)) return QueryResponse.ABSTAIN;
-      return QueryResponse.fromBoolean(values.contains(formula.apply(pq.getParty(), locals)));
+      return QueryResponse.fromBoolean(values.contains(formula.apply(pq.getParty(), frame)));
     }
 
     @Override

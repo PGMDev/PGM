@@ -4,19 +4,19 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.util.math.LocalFrame;
 
-public record ActionContext(@Nullable Query query, @Nullable LocalFrame locals) {
+public record ActionContext(@Nullable Query query, @Nullable LocalFrame frame) {
   public static final ActionContext EMPTY = new ActionContext(null, null);
 
   public static ActionContext query(Query query) {
     return new ActionContext(query, null);
   }
 
-  public ActionContext withLocals(@Nullable LocalFrame locals) {
-    return new ActionContext(query, locals);
+  public ActionContext withFrame(@Nullable LocalFrame frame) {
+    return new ActionContext(query, frame);
   }
 
   public ActionContext withoutQuery() {
-    return new ActionContext(null, locals);
+    return new ActionContext(null, frame);
   }
 
   public Query queryOr(Query fallback) {

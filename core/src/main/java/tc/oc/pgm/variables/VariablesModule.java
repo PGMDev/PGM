@@ -65,7 +65,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
       String expression, @Nullable LocalScope locals) {
     var formulaContext = getContext(Filterables.SCOPES.getLast()).withLocals(locals);
     var vars = Formula.getUsedVariables(expression, formulaContext);
-    vars.removeAll(formulaContext.locals().keySet());
+    vars.removeAll(formulaContext.refs().keySet());
 
     for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
       if (variablesByScope.get(scope).vars.keySet().containsAll(vars)) return scope;
@@ -81,7 +81,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
       ImmutableSet<String> variables,
       ImmutableSet<String> arrays,
       Map<String, Variable<?>> vars,
-      Map<String, LocalRef> locals)
+      Map<String, LocalRef> refs)
       implements Formula.ContextFactory<T> {
 
     public static <T extends Filterable<?>> Context<T> of(
@@ -102,14 +102,12 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
           variableNames.build(), arrayNames.build(), variableMap.build(), Map.of());
     }
 
-    public Context<T> withLocals(@Nullable LocalScope scope) {
-      if (scope == null) return this;
-      var locals = scope.visible();
-      var allNames = ImmutableSet.<String>builder()
-          .addAll(variables)
-          .addAll(locals.keySet())
-          .build();
-      return new Context<>(allNames, arrays, vars, locals);
+    public Context<T> withLocals(@Nullable LocalScope locals) {
+      if (locals == null) return this;
+      var refs = locals.visible();
+      var allNames =
+          ImmutableSet.<String>builder().addAll(variables).addAll(refs.keySet()).build();
+      return new Context<>(allNames, arrays, vars, refs);
     }
 
     @Override
@@ -136,7 +134,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
         @Override
         public Double getVariable(String id) {
           return variableCache.computeIfAbsent(id, key -> {
-            var local = locals.get(key);
+            var local = refs.get(key);
             return local != null ? frame.get(local) : vars.get(key).getValue(scope);
           });
         }

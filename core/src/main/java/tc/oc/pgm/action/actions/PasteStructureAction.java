@@ -32,9 +32,9 @@ public class PasteStructureAction<T extends Filterable<?>> extends AbstractActio
 
   @Override
   public void trigger(T t, ActionContext context) {
-    var locals = context.locals();
+    var frame = context.frame();
     var loc = new BlockVector(
-        xformula.apply(t, locals), yformula.apply(t, locals), zformula.apply(t, locals));
+        xformula.apply(t, frame), yformula.apply(t, frame), zformula.apply(t, frame));
     structureReference.get().getStructure(t.getMatch()).placeAbsolute(loc, update);
   }
 }

@@ -18,11 +18,11 @@ public class AllFilter extends MultiFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query, @Nullable LocalFrame locals) {
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
     // returns true if all the filters match
     QueryResponse response = QueryResponse.ABSTAIN;
     for (Filter filter : this.filters) {
-      QueryResponse filterResponse = filter.query(query, locals);
+      QueryResponse filterResponse = filter.query(query, frame);
       if (filterResponse == QueryResponse.DENY) {
         return filterResponse;
       } else if (filterResponse == QueryResponse.ALLOW) {

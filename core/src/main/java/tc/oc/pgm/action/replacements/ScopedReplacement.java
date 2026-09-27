@@ -27,10 +27,10 @@ public abstract class ScopedReplacement<S extends Filterable<?>> implements Repl
     }
   }
 
-  protected abstract ComponentLike getImpl(S ctx, @Nullable LocalFrame locals);
+  protected abstract ComponentLike getImpl(S ctx, @Nullable LocalFrame frame);
 
   @Override
-  public ComponentLike get(Filterable<?> filterable, @Nullable LocalFrame locals) {
+  public ComponentLike get(Filterable<?> filterable, @Nullable LocalFrame frame) {
     S ctx = filterable.getFilterableAncestor(scope);
     if (ctx == null)
       throw new IllegalStateException("Wrong replacement scope for '"
@@ -40,15 +40,15 @@ public abstract class ScopedReplacement<S extends Filterable<?>> implements Repl
           + " which cannot be found in "
           + filterable.getClass().getSimpleName());
 
-    return getImpl(ctx, locals);
+    return getImpl(ctx, frame);
   }
 
   public static <S extends Filterable<?>> ScopedReplacement<S> of(
       Class<S> scope, BiFunction<S, @Nullable LocalFrame, ComponentLike> get) {
     return new ScopedReplacement<>(scope) {
       @Override
-      protected ComponentLike getImpl(S ctx, @Nullable LocalFrame locals) {
-        return get.apply(ctx, locals);
+      protected ComponentLike getImpl(S ctx, @Nullable LocalFrame frame) {
+        return get.apply(ctx, frame);
       }
     };
   }

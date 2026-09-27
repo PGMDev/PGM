@@ -36,8 +36,8 @@ public class FillAction extends AbstractAction<Match> {
   @Override
   public void trigger(Match match, ActionContext context) {
     for (Block block : region.getBlocks(match.getWorld())) {
-      if (filter != null
-          && filter.query(new BlockQuery(block), context.locals()).isDenied()) continue;
+      if (filter != null && filter.query(new BlockQuery(block), context.frame()).isDenied())
+        continue;
 
       if (!events) {
         materialData.applyTo(block, update);

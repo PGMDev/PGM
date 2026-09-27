@@ -30,14 +30,14 @@ public class RepeatAction<B extends Filterable<?>> extends AbstractAction<B> {
 
   @Override
   public void trigger(B b, ActionContext context) {
-    int times = (int) formula.apply(b, context.locals());
+    int times = (int) formula.apply(b, context.frame());
     for (int i = 0; i < times; i++) {
       if (locals == null) {
         action.trigger(b, context);
       } else {
-        var frame = locals.createFrame(context.locals());
+        var frame = locals.createFrame(context.frame());
         if (index != null) frame.set(index, i);
-        action.trigger(b, context.withLocals(frame));
+        action.trigger(b, context.withFrame(frame));
       }
     }
   }

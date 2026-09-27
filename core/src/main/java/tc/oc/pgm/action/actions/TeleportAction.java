@@ -34,16 +34,16 @@ public class TeleportAction extends AbstractAction<MatchPlayer> {
 
   @Override
   public void trigger(MatchPlayer player, ActionContext context) {
-    var locals = context.locals();
+    var frame = context.frame();
     var location =
         this.region.map(r -> r.getRandomLoc(player.getMatch())).orElseGet(player::getLocation);
 
-    xformula.ifPresent(f -> location.setX(f.apply(player, locals)));
-    yformula.ifPresent(f -> location.setY(f.apply(player, locals)));
-    zformula.ifPresent(f -> location.setZ(f.apply(player, locals)));
+    xformula.ifPresent(f -> location.setX(f.apply(player, frame)));
+    yformula.ifPresent(f -> location.setY(f.apply(player, frame)));
+    zformula.ifPresent(f -> location.setZ(f.apply(player, frame)));
 
-    pitchFormula.ifPresent(f -> location.setPitch((float) f.apply(player, locals)));
-    yawFormula.ifPresent(f -> location.setYaw((float) f.apply(player, locals)));
+    pitchFormula.ifPresent(f -> location.setPitch((float) f.apply(player, frame)));
+    yawFormula.ifPresent(f -> location.setYaw((float) f.apply(player, frame)));
 
     player.getBukkit().teleport(location, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
   }

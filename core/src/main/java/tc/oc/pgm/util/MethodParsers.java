@@ -18,10 +18,6 @@ public record MethodParsers<T>(
     ThrowingFunction<Element, T, InvalidXMLException> fallback) {
   private static final Map<Class<?>, Map<String, Method>> METHOD_CACHE = new ConcurrentHashMap<>();
 
-  public T parse(Element el) throws InvalidXMLException {
-    return parse(el, new Object[0]);
-  }
-
   public T parse(Element el, Object... additionalParams) throws InvalidXMLException {
     var key = keyExtractor.apply(el);
     Method parser = key == null ? null : methods.get(key.toLowerCase(Locale.ROOT));

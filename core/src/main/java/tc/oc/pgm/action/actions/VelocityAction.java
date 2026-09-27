@@ -21,9 +21,9 @@ public class VelocityAction extends AbstractAction<MatchPlayer> {
 
   @Override
   public void trigger(MatchPlayer matchPlayer, ActionContext context) {
-    double x = xformula.apply(matchPlayer, context.locals());
-    double y = yformula.apply(matchPlayer, context.locals());
-    double z = zformula.apply(matchPlayer, context.locals());
+    double x = xformula.apply(matchPlayer, context.frame());
+    double y = yformula.apply(matchPlayer, context.frame());
+    double z = zformula.apply(matchPlayer, context.frame());
     matchPlayer.getBukkit().setVelocity(VectorUtils.clampVelocityVector(new Vector(x, y, z)));
   }
 }

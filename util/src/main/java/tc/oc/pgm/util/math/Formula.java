@@ -81,7 +81,7 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     return applyAsDouble(value);
   }
 
-  default double apply(T value, @Nullable LocalFrame locals) {
+  default double apply(T value, @Nullable LocalFrame frame) {
     return applyAsDouble(value);
   }
 
@@ -92,8 +92,8 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     }
 
     @Override
-    public double apply(T value, @Nullable LocalFrame locals) {
-      return expression.setExpressionContext(context.withContext(value, locals)).evaluate();
+    public double apply(T value, @Nullable LocalFrame frame) {
+      return expression.setExpressionContext(context.withContext(value, frame)).evaluate();
     }
   }
 
@@ -114,12 +114,12 @@ public interface Formula<T> extends ToDoubleFunction<T> {
 
     Set<String> getArrays();
 
-    ExpressionContext withContext(T t, @Nullable LocalFrame locals);
+    ExpressionContext withContext(T t, @Nullable LocalFrame frame);
 
     static <T extends ExpressionContext> ContextFactory<T> ofStatic(Set<String> variables) {
       return new ContextFactory<>() {
         @Override
-        public ExpressionContext withContext(T t, @Nullable LocalFrame locals) {
+        public ExpressionContext withContext(T t, @Nullable LocalFrame frame) {
           return t;
         }
 

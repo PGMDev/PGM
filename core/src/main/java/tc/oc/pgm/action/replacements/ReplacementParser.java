@@ -85,8 +85,8 @@ public class ReplacementParser {
     var variable = parser.variable(el, "var").scope(MatchPlayer.class).singleExclusive();
     var fallback = parser.component(el, "fallback").optional(empty());
     var nameStyle = parser.parseEnum(NameStyle.class, el, "style").optional(NameStyle.VERBOSE);
-    return (filterable, locals) ->
-        variable.getHolder(filterable).map(mp -> mp.getName(nameStyle)).orElse(fallback);
+    return (ctx, frame) ->
+        variable.getHolder(ctx).map(mp -> mp.getName(nameStyle)).orElse(fallback);
   }
 
   @MethodParser("switch")

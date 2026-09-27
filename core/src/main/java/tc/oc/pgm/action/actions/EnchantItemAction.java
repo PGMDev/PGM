@@ -30,7 +30,7 @@ public class EnchantItemAction extends AbstractAction<MatchPlayer> {
   public void trigger(MatchPlayer player, ActionContext context) {
     PlayerInventory inv = Objects.requireNonNull(player.getInventory());
 
-    int level = Math.max(0, (int) this.level.apply(player, context.locals()));
+    int level = Math.max(0, (int) this.level.apply(player, context.frame()));
 
     slots.forEach(inv, (slot, stack) -> {
       if (matcher.matches(stack)) slot.setItem(inv, enchant(stack, level));

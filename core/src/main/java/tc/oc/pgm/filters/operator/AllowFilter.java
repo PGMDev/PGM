@@ -26,8 +26,8 @@ public class AllowFilter extends SingleFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query, @Nullable LocalFrame locals) {
-    return switch (filter.query(query, locals)) {
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+    return switch (filter.query(query, frame)) {
       case ALLOW -> QueryResponse.ALLOW;
       default -> QueryResponse.ABSTAIN;
     };

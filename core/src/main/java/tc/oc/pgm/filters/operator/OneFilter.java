@@ -17,12 +17,12 @@ public class OneFilter extends MultiFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query, @Nullable LocalFrame locals) {
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
     // returns true if exactly one of the filters match
     boolean hasAllow = false;
     QueryResponse response = QueryResponse.ABSTAIN;
     for (Filter filter : this.filters) {
-      QueryResponse filterResponse = filter.query(query, locals);
+      QueryResponse filterResponse = filter.query(query, frame);
       if (filterResponse == QueryResponse.ALLOW) {
         if (hasAllow) {
           return QueryResponse.DENY;

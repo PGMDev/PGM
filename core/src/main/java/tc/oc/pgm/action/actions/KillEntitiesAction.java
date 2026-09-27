@@ -22,7 +22,7 @@ public class KillEntitiesAction extends AbstractAction<Match> {
   public void trigger(Match match, ActionContext context) {
     match.getWorld().getEntities().forEach((Entity entity) -> {
       if (!(entity instanceof Player)
-          && filter.query(new EntityQuery(null, entity), context.locals()).isAllowed()) {
+          && filter.query(new EntityQuery(null, entity), context.frame()).isAllowed()) {
         if (entity instanceof Item) {
           match.callEvent(new ItemDespawnEvent((Item) entity, entity.getLocation()));
         }

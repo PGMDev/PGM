@@ -18,7 +18,7 @@ public class SetVariableAction<T extends Filterable<?>> extends AbstractAction<T
 
   @Override
   public void trigger(T t, ActionContext context) {
-    variable.setValue(t, formula.apply(t, context.locals()));
+    variable.setValue(t, formula.apply(t, context.frame()));
   }
 
   public static class Indexed<T extends Filterable<?>> extends SetVariableAction<T> {
@@ -35,7 +35,7 @@ public class SetVariableAction<T extends Filterable<?>> extends AbstractAction<T
     @SuppressWarnings("unchecked")
     public void trigger(T t, ActionContext context) {
       ((Variable.Indexed<T>) variable)
-          .setValue(t, (int) idx.apply(t, context.locals()), formula.apply(t, context.locals()));
+          .setValue(t, (int) idx.apply(t, context.frame()), formula.apply(t, context.frame()));
     }
   }
 }

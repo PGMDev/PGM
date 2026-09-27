@@ -18,8 +18,8 @@ public class InverseFilter extends SingleFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query, @Nullable LocalFrame locals) {
-    return switch (this.filter.query(query, locals)) {
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+    return switch (this.filter.query(query, frame)) {
       case ALLOW -> QueryResponse.DENY;
       case DENY -> QueryResponse.ALLOW;
       default -> QueryResponse.ABSTAIN;

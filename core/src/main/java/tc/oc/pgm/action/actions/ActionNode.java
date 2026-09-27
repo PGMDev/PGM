@@ -36,8 +36,8 @@ public class ActionNode<B extends Filterable<?>> extends AbstractAction<B> {
 
   @Override
   public void trigger(B t, ActionContext context) {
-    context = withFrame(context);
-    if (filter.query(context.queryOr(t), context.locals()).isAllowed()) {
+    context = enterFrame(context);
+    if (filter.query(context.queryOr(t), context.frame()).isAllowed()) {
       for (Action<? super B> action : actions) {
         action.trigger(t, context);
       }
@@ -46,15 +46,15 @@ public class ActionNode<B extends Filterable<?>> extends AbstractAction<B> {
 
   @Override
   public void untrigger(B t, ActionContext context) {
-    context = withFrame(context);
-    if (untrigerFilter.query(t, context.locals()).isAllowed()) {
+    context = enterFrame(context);
+    if (untrigerFilter.query(t, context.frame()).isAllowed()) {
       for (Action<? super B> action : actions) {
         action.untrigger(t, context);
       }
     }
   }
 
-  private ActionContext withFrame(ActionContext context) {
-    return locals == null ? context : context.withLocals(locals.createFrame(context.locals()));
+  private ActionContext enterFrame(ActionContext context) {
+    return locals == null ? context : context.withFrame(locals.createFrame(context.frame()));
   }
 }

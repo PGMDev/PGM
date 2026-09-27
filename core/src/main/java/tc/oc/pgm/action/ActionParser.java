@@ -262,15 +262,11 @@ public class ActionParser {
       throws InvalidXMLException {
     scope = parseScope(el, scope);
     var declared = parseLocals(el, locals, null);
-    return parseNode(el, scope, obs, declared != null ? declared : locals, declared);
+    return parseNode(el, scope, obs, declared != null ? declared : locals, declared != null);
   }
 
   private <B extends Filterable<?>> ActionNode<B> parseNode(
-      Element el,
-      Class<B> scope,
-      boolean obs,
-      @Nullable LocalScope locals,
-      @Nullable LocalScope frame)
+      Element el, Class<B> scope, boolean obs, @Nullable LocalScope locals, boolean newFrame)
       throws InvalidXMLException {
     if (el.getChildren().isEmpty())
       throw new InvalidXMLException("No action children were defined", el);
@@ -286,7 +282,11 @@ public class ActionParser {
         .result(!legacy && filter == StaticFilter.ALLOW);
 
     return new ActionNode<>(
-        children.build(), wrapFilter(filter, obs), wrapFilter(untriggerFilter, obs), scope, frame);
+        children.build(),
+        wrapFilter(filter, obs),
+        wrapFilter(untriggerFilter, obs),
+        scope,
+        newFrame ? locals : null);
   }
 
   private @Nullable LocalScope parseLocals(
@@ -332,7 +332,7 @@ public class ActionParser {
 
     Node index = Node.fromAttr(el, "index");
     var declared = parseLocals(el, locals, index);
-    var child = parseNode(el, scope, true, declared != null ? declared : locals, null);
+    var child = parseNode(el, scope, true, declared != null ? declared : locals, false);
     Formula<B> formula = parser.formula(scope, locals, el, "times").required();
 
     return new RepeatAction<>(

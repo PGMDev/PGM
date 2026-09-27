@@ -45,20 +45,20 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
 
   @Override
   public void trigger(T scope, ActionContext context) {
-    var locals = context.locals();
-    if (text != null) scope.sendMessage(replace(text, scope, locals));
-    if (title != null) scope.showTitle(replace(title, scope, locals));
-    if (actionbar != null) scope.sendActionBar(replace(actionbar, scope, locals));
+    var frame = context.frame();
+    if (text != null) scope.sendMessage(replace(text, scope, frame));
+    if (title != null) scope.showTitle(replace(title, scope, frame));
+    if (actionbar != null) scope.sendActionBar(replace(actionbar, scope, frame));
   }
 
-  private Component replace(Component component, T scope, @Nullable LocalFrame locals) {
+  private Component replace(Component component, T scope, @Nullable LocalFrame frame) {
     if (component == null || replacements == null) {
       return component;
     }
 
     BiFunction<MatchResult, TextComponent.Builder, ComponentLike> replacer = (match, original) -> {
       Replacement r = replacements.get(match.group(1));
-      return r != null ? r.get(scope, locals) : original;
+      return r != null ? r.get(scope, frame) : original;
     };
 
     component = component.replaceText(b -> b.match(PATTERN).replacement(replacer));
@@ -86,11 +86,11 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
     return component.children(children);
   }
 
-  private Title replace(Title title, T scope, @Nullable LocalFrame locals) {
+  private Title replace(Title title, T scope, @Nullable LocalFrame frame) {
     if (replacements == null) return title;
     return Title.title(
-        replace(title.title(), scope, locals),
-        replace(title.subtitle(), scope, locals),
+        replace(title.title(), scope, frame),
+        replace(title.subtitle(), scope, frame),
         title.times());
   }
 }

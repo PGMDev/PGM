@@ -29,7 +29,7 @@ public interface Filter extends FeatureDefinition {
   /** ALLOW or DENY the given {@link Query}, or ABSTAIN from responding. */
   QueryResponse query(Query query);
 
-  default QueryResponse query(Query query, @Nullable LocalFrame locals) {
+  default QueryResponse query(Query query, @Nullable LocalFrame frame) {
     return query(query);
   }
 
