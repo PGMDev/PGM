@@ -16,6 +16,7 @@ import tc.oc.pgm.regions.Component;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
+import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -58,6 +59,8 @@ public class VariableParser {
           kind
               + " must start with a letter or underscore and can only include letters, digits or underscores.",
           node);
+    if (Formula.isReservedName(name))
+      throw new InvalidXMLException("'" + name + "' conflicts with a built-in function", node);
   }
 
   @MethodParser("variable")

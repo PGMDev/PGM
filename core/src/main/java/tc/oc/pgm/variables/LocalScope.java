@@ -1,6 +1,6 @@
 package tc.oc.pgm.variables;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,39 +8,42 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.math.LocalFrame;
 import tc.oc.pgm.util.math.LocalRef;
 
+/**
+ * Parse-time view of the local variables declared by an action and its enclosing actions. Resolves
+ * names to {@link LocalRef}s, with inner declarations shadowing outer ones and globals.
+ */
 public final class LocalScope {
   public static final String INDEX_ERROR = "Local variables cannot contain an index.";
 
   private final @Nullable LocalScope parent;
-  private final ImmutableList<String> names;
+  private final int size;
+  private final ImmutableMap<String, LocalRef> refs;
 
   public LocalScope(@Nullable LocalScope parent, List<String> names) {
     this.parent = parent;
-    this.names = ImmutableList.copyOf(names);
+    this.size = names.size();
+
+    Map<String, LocalRef> refs = new HashMap<>();
+    for (int slot = 0; slot < names.size(); slot++) {
+      refs.put(names.get(slot), new LocalRef(0, slot));
+    }
+    if (parent != null) {
+      parent.refs.forEach(
+          (name, ref) -> refs.putIfAbsent(name, new LocalRef(ref.depth() + 1, ref.slot())));
+    }
+    this.refs = ImmutableMap.copyOf(refs);
   }
 
   public @Nullable LocalRef lookup(String name) {
-    int depth = 0;
-    for (var scope = this; scope != null; scope = scope.parent, depth++) {
-      int slot = scope.names.indexOf(name);
-      if (slot >= 0) return new LocalRef(depth, slot);
-    }
-    return null;
+    return refs.get(name);
   }
 
-  public Map<String, LocalRef> visible() {
-    Map<String, LocalRef> result = new HashMap<>();
-    int depth = 0;
-    for (var scope = this; scope != null; scope = scope.parent, depth++) {
-      for (int slot = 0; slot < scope.names.size(); slot++) {
-        result.putIfAbsent(scope.names.get(slot), new LocalRef(depth, slot));
-      }
-    }
-    return result;
+  public ImmutableMap<String, LocalRef> visible() {
+    return refs;
   }
 
   // Root scopes never link to the caller's frame, so a callee can't reach into it
   public LocalFrame createFrame(@Nullable LocalFrame parent) {
-    return new LocalFrame(names.size(), this.parent == null ? null : parent);
+    return new LocalFrame(size, this.parent == null ? null : parent);
   }
 }

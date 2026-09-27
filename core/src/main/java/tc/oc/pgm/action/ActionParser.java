@@ -295,27 +295,22 @@ public class ActionParser {
     if (node == null && index == null) return null;
 
     List<String> names = new ArrayList<>();
-    if (index != null) declareLocal(index.getValue().trim(), index, parent, names);
+    if (index != null) names.add(validateLocal(index.getValue(), index, names));
     if (node != null) {
       for (String name : node.getValue().split(",")) {
-        declareLocal(name.trim(), node, parent, names);
+        names.add(validateLocal(name, node, names));
       }
     }
     return new LocalScope(parent, names);
   }
 
-  private void declareLocal(String name, Node node, @Nullable LocalScope parent, List<String> names)
+  private String validateLocal(String name, Node node, List<String> names)
       throws InvalidXMLException {
+    name = name.trim();
     VariableParser.validateName(name, "Local variable names", node);
-    if (Formula.isReservedName(name))
-      throw new InvalidXMLException(
-          "Local variable '" + name + "' conflicts with a built-in function", node);
-    if (features.get(name, Variable.class) != null)
-      throw new InvalidXMLException(
-          "Local variable '" + name + "' conflicts with an existing variable", node);
-    if (names.contains(name) || (parent != null && parent.lookup(name) != null))
+    if (names.contains(name))
       throw new InvalidXMLException("Local variable '" + name + "' is already defined", node);
-    names.add(name);
+    return name;
   }
 
   // Parsers

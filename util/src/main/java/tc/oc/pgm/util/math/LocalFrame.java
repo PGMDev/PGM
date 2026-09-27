@@ -2,6 +2,10 @@ package tc.oc.pgm.util.math;
 
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Runtime values of one local scope for a single action execution. Frames link to their enclosing
+ * frame, so a {@link LocalRef} reaches outer locals by walking up {@code depth} parents.
+ */
 public final class LocalFrame {
   private final @Nullable LocalFrame parent;
   private final double[] values;

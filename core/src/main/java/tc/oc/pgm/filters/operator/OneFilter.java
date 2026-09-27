@@ -12,11 +12,6 @@ public class OneFilter extends MultiFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query) {
-    return query(query, null);
-  }
-
-  @Override
   public QueryResponse query(Query query, @Nullable LocalFrame frame) {
     // returns true if exactly one of the filters match
     boolean hasAllow = false;

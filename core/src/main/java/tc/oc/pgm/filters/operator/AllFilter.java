@@ -13,11 +13,6 @@ public class AllFilter extends MultiFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query) {
-    return query(query, null);
-  }
-
-  @Override
   public QueryResponse query(Query query, @Nullable LocalFrame frame) {
     // returns true if all the filters match
     QueryResponse response = QueryResponse.ABSTAIN;

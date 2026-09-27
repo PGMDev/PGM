@@ -2,6 +2,7 @@ package tc.oc.pgm.variables;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -107,7 +108,8 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
       var refs = locals.visible();
       var allNames =
           ImmutableSet.<String>builder().addAll(variables).addAll(refs.keySet()).build();
-      return new Context<>(allNames, arrays, vars, refs);
+      var visibleArrays = Sets.difference(arrays, refs.keySet()).immutableCopy();
+      return new Context<>(allNames, visibleArrays, vars, refs);
     }
 
     @Override

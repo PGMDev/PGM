@@ -185,11 +185,12 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
 
     @Override
     public QueryResponse query(Query query) {
-      return query(query, null);
+      throw new IllegalStateException("Local variable filter queried outside of an action");
     }
 
     @Override
     public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+      if (frame == null) return query(query);
       return QueryResponse.fromBoolean(values.contains(frame.get(local)));
     }
 
