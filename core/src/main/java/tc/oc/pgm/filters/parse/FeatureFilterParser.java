@@ -114,16 +114,19 @@ public class FeatureFilterParser extends FilterParser {
       Range<Double> range = XMLUtils.parseNumericRange(node, match.group(4), Double.class);
 
       var varName = match.group(1);
-      if (varName != null && (locals == null || locals.lookup(varName) == null)) {
+      var local = varName != null && locals != null ? locals.lookup(varName) : null;
+      if (local != null) {
+        if (match.group(2) != null) throw new InvalidXMLException(LocalScope.INDEX_ERROR, node);
+        return new VariableFilter.Local(local, range);
+      } else if (varName != null) {
         Variable<?> variable = features.resolve(node, match.group(1), Variable.class);
         Integer index = match.group(2) == null
             ? null
             : XMLUtils.parseNumber(node, match.group(2), Integer.class);
         return VariableFilter.of(variable, index, range, node);
       } else {
-        if (match.group(2) != null) throw new InvalidXMLException(LocalScope.INDEX_ERROR, node);
         var variables = factory.needModule(VariablesModule.class);
-        var expr = varName != null ? varName : match.group(3);
+        var expr = match.group(3);
         var scope = variables.deriveScope(expr, locals);
         return VariableFilter.of(variables.parseFormula(scope, expr, locals), scope, range);
       }

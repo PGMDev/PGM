@@ -15,6 +15,7 @@ import tc.oc.pgm.filters.matcher.WeakTypedFilter;
 import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.math.LocalFrame;
+import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.variables.Variable;
@@ -170,6 +171,31 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
       //noinspection unchecked
       return Filterable.class.isAssignableFrom(queryType)
           && Filterables.isAssignable((Class<Filterable<?>>) queryType, scope);
+    }
+  }
+
+  public static class Local implements FilterDefinition {
+    private final LocalRef local;
+    private final Range<Double> values;
+
+    public Local(LocalRef local, Range<Double> values) {
+      this.local = local;
+      this.values = values;
+    }
+
+    @Override
+    public QueryResponse query(Query query) {
+      return query(query, null);
+    }
+
+    @Override
+    public QueryResponse query(Query query, @Nullable LocalFrame locals) {
+      return QueryResponse.fromBoolean(values.contains(locals.get(local)));
+    }
+
+    @Override
+    public boolean respondsTo(Class<? extends Query> queryType) {
+      return true;
     }
   }
 
