@@ -1,7 +1,9 @@
 package tc.oc.pgm.filters.operator;
 
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.util.math.LocalFrame;
 
 /**
  * Allow if the child filter allows, otherwise abstain (in other words, transform deny to abstain).
@@ -20,7 +22,12 @@ public class AllowFilter extends SingleFilterFunction {
 
   @Override
   public QueryResponse query(Query query) {
-    return switch (filter.query(query)) {
+    return query(query, null);
+  }
+
+  @Override
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+    return switch (filter.query(query, frame)) {
       case ALLOW -> QueryResponse.ALLOW;
       default -> QueryResponse.ABSTAIN;
     };

@@ -1,5 +1,6 @@
 package tc.oc.pgm.action.actions;
 
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.variables.Variable;
@@ -16,8 +17,8 @@ public class SetVariableAction<T extends Filterable<?>> extends AbstractAction<T
   }
 
   @Override
-  public void trigger(T t) {
-    variable.setValue(t, formula.applyAsDouble(t));
+  public void trigger(T t, ActionContext context) {
+    variable.setValue(t, formula.apply(t, context.frame()));
   }
 
   public static class Indexed<T extends Filterable<?>> extends SetVariableAction<T> {
@@ -32,9 +33,9 @@ public class SetVariableAction<T extends Filterable<?>> extends AbstractAction<T
 
     @Override
     @SuppressWarnings("unchecked")
-    public void trigger(T t) {
+    public void trigger(T t, ActionContext context) {
       ((Variable.Indexed<T>) variable)
-          .setValue(t, (int) idx.applyAsDouble(t), formula.applyAsDouble(t));
+          .setValue(t, (int) idx.apply(t, context.frame()), formula.apply(t, context.frame()));
     }
   }
 }

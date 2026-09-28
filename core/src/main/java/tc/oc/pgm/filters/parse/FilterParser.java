@@ -93,6 +93,7 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.Variable;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
@@ -142,6 +143,17 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
    * {@link Node} for error reporting purposes.
    */
   public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
+
+  public Filter parseReference(Node node, String id, @Nullable LocalScope locals)
+      throws InvalidXMLException {
+    return parseReference(node, id);
+  }
+
+  public Filter parseProperty(Node node, @Nullable LocalScope locals) throws InvalidXMLException {
+    return node.isAttribute()
+        ? parseReference(node, node.getValue(), locals)
+        : parseChild(node.getElement());
+  }
 
   public boolean isFilter(Element el) {
     return methodParsers.methods().containsKey(el.getName())

@@ -1,7 +1,6 @@
 package tc.oc.pgm.action;
 
 import org.jetbrains.annotations.Nullable;
-import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.util.xml.Node;
@@ -20,17 +19,12 @@ public class XMLActionReference<S> extends XMLFeatureReference<ActionDefinition>
   }
 
   @Override
-  public void trigger(S s) {
-    ((Action<? super S>) get()).trigger(s);
+  public void trigger(S s, ActionContext context) {
+    ((Action<? super S>) get()).trigger(s, context);
   }
 
   @Override
-  public void trigger(S s, Query q) {
-    ((Action<? super S>) get()).trigger(s, q);
-  }
-
-  @Override
-  public void untrigger(S s) {
-    ((Action<? super S>) get()).untrigger(s);
+  public void untrigger(S s, ActionContext context) {
+    ((Action<? super S>) get()).untrigger(s, context);
   }
 }

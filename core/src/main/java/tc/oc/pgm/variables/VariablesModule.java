@@ -2,6 +2,7 @@ package tc.oc.pgm.variables;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -11,6 +12,7 @@ import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.filter.Filterables;
 import tc.oc.pgm.api.map.MapModule;
@@ -22,6 +24,8 @@ import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.math.LocalFrame;
+import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.LivesVariable;
@@ -49,12 +53,20 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
   }
 
   @SuppressWarnings("unchecked")
-  public <T extends Filterable<?>> Formula.ContextFactory<T> getContext(Class<T> scope) {
-    return (Formula.ContextFactory<T>) variablesByScope.get(scope);
+  private <T extends Filterable<?>> Context<T> getContext(Class<T> scope) {
+    return (Context<T>) variablesByScope.get(scope);
   }
 
-  public Class<? extends Filterable<?>> deriveScope(String expression) {
-    var vars = Formula.getUsedVariables(expression, getContext(Filterables.SCOPES.getLast()));
+  public <T extends Filterable<?>> Formula<T> parseFormula(
+      Class<T> scope, String expression, @Nullable LocalScope locals) {
+    return Formula.of(expression, getContext(scope).withLocals(locals));
+  }
+
+  public Class<? extends Filterable<?>> deriveScope(
+      String expression, @Nullable LocalScope locals) {
+    var formulaContext = getContext(Filterables.SCOPES.getLast()).withLocals(locals);
+    var vars = Formula.getUsedVariables(expression, formulaContext);
+    vars.removeAll(formulaContext.refs().keySet());
 
     for (Class<? extends Filterable<?>> scope : Filterables.SCOPES) {
       if (variablesByScope.get(scope).vars.keySet().containsAll(vars)) return scope;
@@ -67,7 +79,10 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
   }
 
   private record Context<T extends Filterable<?>>(
-      ImmutableSet<String> variables, ImmutableSet<String> arrays, Map<String, Variable<?>> vars)
+      ImmutableSet<String> variables,
+      ImmutableSet<String> arrays,
+      Map<String, Variable<?>> vars,
+      Map<String, LocalRef> refs)
       implements Formula.ContextFactory<T> {
 
     public static <T extends Filterable<?>> Context<T> of(
@@ -84,7 +99,17 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
           variableMap.put(definition.getKey(), variable);
         }
       }
-      return new Context<>(variableNames.build(), arrayNames.build(), variableMap.build());
+      return new Context<>(
+          variableNames.build(), arrayNames.build(), variableMap.build(), Map.of());
+    }
+
+    public Context<T> withLocals(@Nullable LocalScope locals) {
+      if (locals == null) return this;
+      var refs = locals.visible();
+      var allNames =
+          ImmutableSet.<String>builder().addAll(variables).addAll(refs.keySet()).build();
+      var visibleArrays = Sets.difference(arrays, refs.keySet()).immutableCopy();
+      return new Context<>(allNames, visibleArrays, vars, refs);
     }
 
     @Override
@@ -98,7 +123,7 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
     }
 
     @Override
-    public ExpressionContext withContext(T scope) {
+    public ExpressionContext withContext(T scope, @Nullable LocalFrame frame) {
       return new ExpressionContext() {
         private final Map<String, Double> variableCache = new HashMap<>();
         private final Map<String, Function> arrayCache = new HashMap<>();
@@ -110,7 +135,10 @@ public class VariablesModule implements MapModule<VariablesMatchModule> {
 
         @Override
         public Double getVariable(String id) {
-          return variableCache.computeIfAbsent(id, key -> vars.get(key).getValue(scope));
+          return variableCache.computeIfAbsent(id, key -> {
+            var local = refs.get(key);
+            return local != null ? frame.get(local) : vars.get(key).getValue(scope);
+          });
         }
 
         @Override

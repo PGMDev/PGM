@@ -2,6 +2,7 @@ package tc.oc.pgm.action.actions;
 
 import java.util.Optional;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.util.math.Formula;
@@ -32,16 +33,17 @@ public class TeleportAction extends AbstractAction<MatchPlayer> {
   }
 
   @Override
-  public void trigger(MatchPlayer player) {
+  public void trigger(MatchPlayer player, ActionContext context) {
+    var frame = context.frame();
     var location =
         this.region.map(r -> r.getRandomLoc(player.getMatch())).orElseGet(player::getLocation);
 
-    xformula.ifPresent(f -> location.setX(f.applyAsDouble(player)));
-    yformula.ifPresent(f -> location.setY(f.applyAsDouble(player)));
-    zformula.ifPresent(f -> location.setZ(f.applyAsDouble(player)));
+    xformula.ifPresent(f -> location.setX(f.apply(player, frame)));
+    yformula.ifPresent(f -> location.setY(f.apply(player, frame)));
+    zformula.ifPresent(f -> location.setZ(f.apply(player, frame)));
 
-    pitchFormula.ifPresent(f -> location.setPitch((float) f.applyAsDouble(player)));
-    yawFormula.ifPresent(f -> location.setYaw((float) f.applyAsDouble(player)));
+    pitchFormula.ifPresent(f -> location.setPitch((float) f.apply(player, frame)));
+    yawFormula.ifPresent(f -> location.setYaw((float) f.apply(player, frame)));
 
     player.getBukkit().teleport(location, PlayerTeleportEvent.TeleportCause.ENDER_PEARL);
   }

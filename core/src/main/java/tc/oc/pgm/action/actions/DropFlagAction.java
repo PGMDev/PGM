@@ -1,5 +1,6 @@
 package tc.oc.pgm.action.actions;
 
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.flag.Flag;
@@ -14,7 +15,7 @@ public class DropFlagAction extends AbstractAction<Match> {
   }
 
   @Override
-  public void trigger(Match match) {
+  public void trigger(Match match, ActionContext context) {
     final Flag flag = this.flag.get().getGoal(match);
     if (flag == null) return;
     flag.dropFlag();

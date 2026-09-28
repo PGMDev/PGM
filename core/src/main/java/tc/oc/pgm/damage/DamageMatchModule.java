@@ -25,6 +25,7 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -176,12 +177,14 @@ public class DamageMatchModule implements MatchModule, Listener {
       if (attackerAction != null && (attacker = damageInfo.getAttacker()) != null) {
         attacker
             .getPlayer()
-            .ifPresent(p -> attackerAction.trigger(p, getAttackerQuery(event, victim, damageInfo)));
+            .ifPresent(p -> attackerAction.trigger(
+                p, ActionContext.query(getAttackerQuery(event, victim, damageInfo))));
       }
       if (victimAction != null) {
         victim
             .getPlayer()
-            .ifPresent(p -> victimAction.trigger(p, getQuery(event, victim, damageInfo)));
+            .ifPresent(p ->
+                victimAction.trigger(p, ActionContext.query(getQuery(event, victim, damageInfo))));
       }
     }
   }

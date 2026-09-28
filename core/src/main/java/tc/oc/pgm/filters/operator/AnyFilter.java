@@ -2,10 +2,12 @@ package tc.oc.pgm.filters.operator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.util.material.MaterialMatcher;
+import tc.oc.pgm.util.math.LocalFrame;
 
 public class AnyFilter extends MultiFilterFunction {
 
@@ -14,11 +16,11 @@ public class AnyFilter extends MultiFilterFunction {
   }
 
   @Override
-  public QueryResponse query(Query query) {
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
     // returns true if any of the filters match
     QueryResponse response = QueryResponse.ABSTAIN;
     for (Filter filter : this.filters) {
-      QueryResponse filterResponse = filter.query(query);
+      QueryResponse filterResponse = filter.query(query, frame);
       if (filterResponse == QueryResponse.ALLOW) {
         return filterResponse;
       } else if (filterResponse == QueryResponse.DENY) {
