@@ -25,11 +25,11 @@ public final class LocalScope {
 
     Map<String, LocalRef> refs = new HashMap<>();
     for (int slot = 0; slot < names.size(); slot++) {
-      refs.put(names.get(slot), new LocalRef(0, slot));
+      refs.put(names.get(slot), LocalRef.of(0, slot));
     }
     if (parent != null) {
       parent.refs.forEach(
-          (name, ref) -> refs.putIfAbsent(name, new LocalRef(ref.depth() + 1, ref.slot())));
+          (name, ref) -> refs.putIfAbsent(name, LocalRef.of(ref.depth() + 1, ref.slot())));
     }
     this.refs = ImmutableMap.copyOf(refs);
   }
@@ -44,6 +44,8 @@ public final class LocalScope {
 
   // Root scopes never link to the caller's frame, so a callee can't reach into it
   public LocalFrame createFrame(@Nullable LocalFrame parent) {
+    if (this.parent != null && parent == null)
+      throw new IllegalStateException("Nested local scope entered without its enclosing frame");
     return new LocalFrame(size, this.parent == null ? null : parent);
   }
 }
