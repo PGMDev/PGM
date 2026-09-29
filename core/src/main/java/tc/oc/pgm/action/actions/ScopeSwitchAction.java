@@ -49,6 +49,7 @@ public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
       Iterable<I> inner = multi.apply(o);
       for (I i : inner) {
         child.trigger(i, childContext);
+        if (childContext.halted()) return;
       }
     }
   }

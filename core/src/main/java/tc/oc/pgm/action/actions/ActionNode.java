@@ -40,6 +40,7 @@ public class ActionNode<B extends Filterable<?>> extends AbstractAction<B> {
     if (filter.query(context.queryOr(t), context.frame()).isAllowed()) {
       for (Action<? super B> action : actions) {
         action.trigger(t, context);
+        if (context.halted()) return;
       }
     }
   }
