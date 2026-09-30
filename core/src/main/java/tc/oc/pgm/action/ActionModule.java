@@ -70,7 +70,7 @@ public class ActionModule implements MapModule<ActionMatchModule> {
 
       for (Element action :
           XMLUtils.flattenElements(doc.getRootElement(), Set.of("actions"), parser.actionTypes())) {
-        parser.parse(action, null, null, null);
+        parser.parse(action, null, null);
       }
 
       ImmutableList.Builder<Trigger<?>> triggers = ImmutableList.builder();

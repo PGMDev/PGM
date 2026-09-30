@@ -39,7 +39,7 @@ public class RepeatAction<B extends Filterable<?>> extends AbstractAction<B> {
         if (index != null) frame.set(index, i);
         action.trigger(b, context.withFrame(frame));
       }
-      if (!context.continueLoop()) return;
+      if (context.haltLoop()) return;
     }
   }
 }

@@ -21,7 +21,7 @@ public final class ControlScope {
   }
 
   public ControlScope loop() {
-    return loop ? this : new ControlScope(root(this), true);
+    return loop ? this : new ControlScope(this, true);
   }
 
   public boolean inLoop() {

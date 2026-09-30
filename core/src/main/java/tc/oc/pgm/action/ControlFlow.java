@@ -23,10 +23,10 @@ public final class ControlFlow {
     return signal != null;
   }
 
-  public boolean continueLoop() {
-    if (signal == Signal.RETURN) return false;
-    boolean keepGoing = signal != Signal.BREAK;
+  public boolean haltLoop() {
+    if (signal == Signal.RETURN) return true;
+    boolean halt = signal == Signal.BREAK;
     signal = null;
-    return keepGoing;
+    return halt;
   }
 }

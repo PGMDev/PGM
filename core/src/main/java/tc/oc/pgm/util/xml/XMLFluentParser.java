@@ -13,8 +13,8 @@ import org.bukkit.util.Vector;
 import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionParseContext;
 import tc.oc.pgm.action.ActionParser;
-import tc.oc.pgm.action.ControlScope;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
@@ -251,21 +251,17 @@ public class XMLFluentParser {
 
   public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(
       Class<T> clazz, Element el, String... prop) {
-    return action(clazz, null, null, el, prop);
+    return action(clazz, null, el, prop);
   }
 
   public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(
-      Class<T> clazz,
-      @Nullable LocalScope locals,
-      @Nullable ControlScope control,
-      Element el,
-      String... prop) {
+      Class<T> clazz, @Nullable ActionParseContext context, Element el, String... prop) {
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Action<? super T> parse(Node node) throws InvalidXMLException {
         return node.isAttribute()
-            ? actions.parseReference(node, clazz, locals)
-            : actions.parseProperty(node.getElement(), clazz, locals, control);
+            ? actions.parseReference(node, clazz, context == null ? null : context.locals())
+            : actions.parseProperty(node.getElement(), clazz, context);
       }
     };
   }

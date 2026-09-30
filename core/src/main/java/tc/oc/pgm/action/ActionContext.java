@@ -30,8 +30,8 @@ public record ActionContext(
     return flow != null && flow.halted();
   }
 
-  public boolean continueLoop() {
-    return flow == null || flow.continueLoop();
+  public boolean haltLoop() {
+    return flow != null && flow.haltLoop();
   }
 
   public Query queryOr(Query fallback) {
