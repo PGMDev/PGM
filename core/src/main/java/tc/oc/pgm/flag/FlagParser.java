@@ -16,6 +16,7 @@ import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.parse.FilterParser;
@@ -32,10 +33,12 @@ import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.xml.InheritingElement;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class FlagParser {
   private final MapFactory factory;
+  private final XMLFluentParser parser;
   private final FilterParser filterParser;
   private final PointParser pointParser;
 
@@ -46,6 +49,7 @@ public class FlagParser {
 
   public FlagParser(MapFactory factory) {
     this.factory = factory;
+    this.parser = factory.getParser();
     this.filterParser = factory.getFilters();
     this.pointParser = new PointParser(factory);
   }
@@ -177,20 +181,19 @@ public class FlagParser {
   public void parseNet(Element el, @Nullable FlagDefinition parentFlag) throws InvalidXMLException {
     checkDeprecatedFilter(el);
 
-    String id = el.getAttributeValue("id");
-    Region region = factory.getRegions().parseRequiredRegionProperty(el, "region");
+    String id = parser.string(el, "id").orNull();
+    Region region = parser.region(el, "region").required();
     FeatureReference<TeamFactory> owner =
-        factory.getFeatures().createReference(Node.fromAttr(el, "owner"), TeamFactory.class, null);
-    double pointsPerCapture = XMLUtils.parseNumber(el.getAttribute("points"), Double.class, 0D);
-    boolean sticky = XMLUtils.parseBoolean(el.getAttribute("sticky"), true);
-    Filter captureFilter =
-        filterParser.parseFilterProperty(el, "capture-filter", StaticFilter.ALLOW);
-    Filter respawnFilter =
-        filterParser.parseFilterProperty(el, "respawn-filter", StaticFilter.ALLOW);
-    boolean respawnTogether = XMLUtils.parseBoolean(el.getAttribute("respawn-together"), false);
-    Component respawnMessage = XMLUtils.parseFormattedText(el, "respawn-message");
-    Component denyMessage = XMLUtils.parseFormattedText(el, "deny-message");
-    Vector proximityLocation = XMLUtils.parseVector(el.getAttribute("location"), (Vector) null);
+        parser.reference(TeamFactory.class, el, "owner").attr().orNull();
+    double pointsPerCapture = parser.parseDouble(el, "points").optional(0D);
+    boolean sticky = parser.parseBool(el, "sticky").orTrue();
+    Filter captureFilter = parser.filter(el, "capture-filter").orAllow();
+    Filter respawnFilter = parser.filter(el, "respawn-filter").orAllow();
+    boolean respawnTogether = parser.parseBool(el, "respawn-together").orFalse();
+    Component respawnMessage = parser.component(el, "respawn-message").orNull();
+    Component denyMessage = parser.component(el, "deny-message").orNull();
+    Vector proximityLocation = parser.vector(el, "location").orNull();
+    var captureAction = parser.action(MatchPlayer.class, el, "capture-action").orNull();
 
     PostDefinition returnPost = null;
     Node postAttr = Node.fromAttr(el, "post");
@@ -238,7 +241,8 @@ public class FlagParser {
         capturableFlags,
         returnableFlags,
         respawnTogether,
-        proximityLocation);
+        proximityLocation,
+        captureAction);
     nets.add(net);
     factory.getFeatures().addFeature(el, net);
   }

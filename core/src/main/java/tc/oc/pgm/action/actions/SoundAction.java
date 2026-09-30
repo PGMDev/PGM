@@ -1,6 +1,7 @@
 package tc.oc.pgm.action.actions;
 
 import net.kyori.adventure.sound.Sound;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.util.Audience;
 
 public class SoundAction extends AbstractAction<Audience> {
@@ -12,7 +13,7 @@ public class SoundAction extends AbstractAction<Audience> {
   }
 
   @Override
-  public void trigger(Audience audience) {
+  public void trigger(Audience audience, ActionContext context) {
     audience.playSound(sound);
   }
 }

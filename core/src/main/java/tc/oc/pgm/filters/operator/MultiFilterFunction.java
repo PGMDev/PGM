@@ -9,10 +9,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bukkit.event.Event;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.filters.matcher.StaticFilter;
+import tc.oc.pgm.util.math.LocalFrame;
 
 public abstract class MultiFilterFunction implements FilterDefinition {
   protected final List<Filter> filters;
@@ -20,6 +22,14 @@ public abstract class MultiFilterFunction implements FilterDefinition {
   public MultiFilterFunction(Iterable<? extends Filter> filters) {
     this.filters = ImmutableList.copyOf(filters);
   }
+
+  @Override
+  public QueryResponse query(Query query) {
+    return query(query, null);
+  }
+
+  @Override
+  public abstract QueryResponse query(Query query, @Nullable LocalFrame frame);
 
   @Override
   public boolean respondsTo(Class<? extends Query> queryType) {

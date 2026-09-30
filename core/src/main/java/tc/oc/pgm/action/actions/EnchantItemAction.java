@@ -4,6 +4,7 @@ import java.util.Objects;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.SlotGroup;
@@ -26,10 +27,10 @@ public class EnchantItemAction extends AbstractAction<MatchPlayer> {
   }
 
   @Override
-  public void trigger(MatchPlayer player) {
+  public void trigger(MatchPlayer player, ActionContext context) {
     PlayerInventory inv = Objects.requireNonNull(player.getInventory());
 
-    int level = Math.max(0, (int) this.level.applyAsDouble(player));
+    int level = Math.max(0, (int) this.level.apply(player, context.frame()));
 
     slots.forEach(inv, (slot, stack) -> {
       if (matcher.matches(stack)) slot.setItem(inv, enchant(stack, level));

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
 import java.util.function.Function;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -40,25 +41,27 @@ public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
   }
 
   @Override
-  public void trigger(O o) {
+  public void trigger(O o, ActionContext context) {
+    var childContext = context.withoutQuery();
     if (single != null) {
-      child.trigger(single.apply(o));
+      child.trigger(single.apply(o), childContext);
     } else if (multi != null) {
       Iterable<I> inner = multi.apply(o);
       for (I i : inner) {
-        child.trigger(i);
+        child.trigger(i, childContext);
       }
     }
   }
 
   @Override
-  public void untrigger(O o) {
+  public void untrigger(O o, ActionContext context) {
+    var childContext = context.withoutQuery();
     if (single != null) {
-      child.untrigger(single.apply(o));
+      child.untrigger(single.apply(o), childContext);
     } else if (multi != null) {
       Iterable<I> inner = multi.apply(o);
       for (I i : inner) {
-        child.untrigger(i);
+        child.untrigger(i, childContext);
       }
     }
   }

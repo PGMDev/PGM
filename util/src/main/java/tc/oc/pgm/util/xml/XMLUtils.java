@@ -737,11 +737,15 @@ public final class XMLUtils {
     return parseBlockVector(node, null);
   }
 
-  public static DyeColor parseDyeColor(Attribute attr) throws InvalidXMLException {
-    DyeColor result = DyeColors.getByName(attr.getValue());
+  public static DyeColor parseDyeColor(Node node) throws InvalidXMLException {
+    DyeColor result = DyeColors.getByName(node.getValue());
     if (result == null)
-      throw new InvalidXMLException("Invalid dye color '" + attr.getValue() + "'", attr);
+      throw new InvalidXMLException("Invalid dye color '" + node.getValue() + "'", node);
     return result;
+  }
+
+  public static DyeColor parseDyeColor(Attribute attr) throws InvalidXMLException {
+    return parseDyeColor(new Node(attr));
   }
 
   public static DyeColor parseDyeColor(Attribute attr, DyeColor def) throws InvalidXMLException {

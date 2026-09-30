@@ -13,22 +13,22 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
-import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.ActionModule;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.map.MapModule;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.FilterModule;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.operator.InverseFilter;
-import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.regions.RFAContext;
 import tc.oc.pgm.regions.RFAScope;
 import tc.oc.pgm.regions.RegionFilterApplication;
@@ -36,6 +36,8 @@ import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.TranslatedRegion;
 import tc.oc.pgm.regions.Union;
 import tc.oc.pgm.util.xml.InvalidXMLException;
+import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public class PortalModule implements MapModule<PortalMatchModule> {
@@ -65,6 +67,11 @@ public class PortalModule implements MapModule<PortalMatchModule> {
     }
 
     @Override
+    public Collection<Class<? extends MapModule<?>>> getWeakDependencies() {
+      return ImmutableList.of(ActionModule.class);
+    }
+
+    @Override
     public PortalModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
       var parser = factory.getParser();
@@ -74,11 +81,11 @@ public class PortalModule implements MapModule<PortalMatchModule> {
       for (Element portalEl : XMLUtils.flattenElements(doc.getRootElement(), "portals", "portal")) {
 
         PortalTransform transform = PortalTransform.piecewise(
-            parseDoubleProvider(portalEl, "x", RelativeDoubleProvider.ZERO),
-            parseDoubleProvider(portalEl, "y", RelativeDoubleProvider.ZERO),
-            parseDoubleProvider(portalEl, "z", RelativeDoubleProvider.ZERO),
-            parseDoubleProvider(portalEl, "yaw", RelativeDoubleProvider.ZERO),
-            parseDoubleProvider(portalEl, "pitch", RelativeDoubleProvider.ZERO));
+            parseDoubleProvider(parser, portalEl, "x"),
+            parseDoubleProvider(parser, portalEl, "y"),
+            parseDoubleProvider(parser, portalEl, "z"),
+            parseDoubleProvider(parser, portalEl, "yaw"),
+            parseDoubleProvider(parser, portalEl, "pitch"));
 
         Region.Static entrance =
             parser.staticRegion(portalEl, "region").legacy(factory).orNull();
@@ -99,11 +106,11 @@ public class PortalModule implements MapModule<PortalMatchModule> {
 
         // Dynamic filters
         Filter forward =
-            factory.getFilters().parseProperty(portalEl, "forward", DynamicFilterValidation.PLAYER);
+            parser.filter(portalEl, "forward").dynamic(MatchPlayer.class).orNull();
         Filter reverse =
-            factory.getFilters().parseProperty(portalEl, "reverse", DynamicFilterValidation.PLAYER);
+            parser.filter(portalEl, "reverse").dynamic(MatchPlayer.class).orNull();
         Filter transit =
-            factory.getFilters().parseProperty(portalEl, "transit", DynamicFilterValidation.PLAYER);
+            parser.filter(portalEl, "transit").dynamic(MatchPlayer.class).orNull();
 
         // Check for conflicting dynamic filters
         if (transit != null && (forward != null || reverse != null)) {
@@ -140,23 +147,22 @@ public class PortalModule implements MapModule<PortalMatchModule> {
         // otherwise it must be enabled explicitly.
         final boolean bidirectional = reverse != null
             || transit != null
-            || XMLUtils.parseBoolean(portalEl.getAttribute("bidirectional"), false);
+            || parser.parseBool(portalEl, "bidirectional").orFalse();
         if (bidirectional && !transform.invertible()) {
           throw new InvalidXMLException(
               "Bidirectional portal must have an invertible transform", portalEl);
         }
 
         // Passive filters
-        Filter participantFilter =
-            factory.getFilters().parseFilterProperty(portalEl, "filter", StaticFilter.ALLOW);
+        Filter participantFilter = parser.filter(portalEl, "filter").orAllow();
+        Filter observerFilter = parser.filter(portalEl, "observers").orAllow();
 
-        Filter observerFilter =
-            factory.getFilters().parseFilterProperty(portalEl, "observers", StaticFilter.ALLOW);
+        boolean sound = parser.parseBool(portalEl, "sound").orTrue();
+        boolean smooth = parser.parseBool(portalEl, "smooth").orFalse();
 
-        boolean sound = XMLUtils.parseBoolean(portalEl.getAttribute("sound"), true);
-        boolean smooth = XMLUtils.parseBoolean(portalEl.getAttribute("smooth"), false);
+        boolean protect = parser.parseBool(portalEl, "protect").orFalse();
 
-        boolean protect = XMLUtils.parseBoolean(portalEl.getAttribute("protect"), false);
+        var action = parser.action(MatchPlayer.class, portalEl, "action").orNull();
 
         // Protect the entrance/exit
         if (protect) {
@@ -166,8 +172,8 @@ public class PortalModule implements MapModule<PortalMatchModule> {
           }
         }
 
-        Portal portal =
-            new Portal(forwardFinal, transform, participantFilter, observerFilter, sound, smooth);
+        Portal portal = new Portal(
+            forwardFinal, transform, participantFilter, observerFilter, sound, smooth, action);
         portals.add(portal);
         factory.getFeatures().addFeature(portalEl, portal);
 
@@ -178,7 +184,8 @@ public class PortalModule implements MapModule<PortalMatchModule> {
               participantFilter,
               observerFilter,
               sound,
-              smooth);
+              smooth,
+              action);
           portals.add(inversePortal);
           factory.getFeatures().addFeature(portalEl, inversePortal);
         }
@@ -203,22 +210,23 @@ public class PortalModule implements MapModule<PortalMatchModule> {
     }
 
     private static DoubleProvider parseDoubleProvider(
-        Element el, String attributeName, DoubleProvider def) throws InvalidXMLException {
-      Attribute attr = el.getAttribute(attributeName);
-      if (attr == null) {
-        return def;
-      }
-      String text = attr.getValue();
+        XMLFluentParser parser, Element el, String attributeName) throws InvalidXMLException {
+      return parser
+          .node(Factory::parseDoubleProvider, el, attributeName)
+          .attr()
+          .optional(RelativeDoubleProvider.ZERO);
+    }
+
+    private static DoubleProvider parseDoubleProvider(Node node) throws InvalidXMLException {
+      String text = node.getValue();
       try {
         if (text.startsWith("@")) {
-          double value = Double.parseDouble(text.substring(1));
-          return new StaticDoubleProvider(value);
+          return new StaticDoubleProvider(Double.parseDouble(text.substring(1)));
         } else {
-          double value = Double.parseDouble(text);
-          return new RelativeDoubleProvider(value);
+          return new RelativeDoubleProvider(Double.parseDouble(text));
         }
       } catch (NumberFormatException e) {
-        throw new InvalidXMLException("Invalid portal coordinate", attr, e);
+        throw new InvalidXMLException("Invalid portal coordinate", node, e);
       }
     }
   }

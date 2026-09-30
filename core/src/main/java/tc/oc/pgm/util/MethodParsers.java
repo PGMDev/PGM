@@ -18,26 +18,15 @@ public record MethodParsers<T>(
     ThrowingFunction<Element, T, InvalidXMLException> fallback) {
   private static final Map<Class<?>, Map<String, Method>> METHOD_CACHE = new ConcurrentHashMap<>();
 
-  public T parse(Element el) throws InvalidXMLException {
-    var key = keyExtractor.apply(el);
-    Method parser = key == null ? null : methods.get(key.toLowerCase(Locale.ROOT));
-    if (parser == null) return fallback.apply(el);
-    try {
-      //noinspection unchecked
-      return (T) parser.invoke(actualParser, el);
-    } catch (Exception e) {
-      throw InvalidXMLException.coerce(e, new Node(el));
-    }
-  }
-
   public T parse(Element el, Object... additionalParams) throws InvalidXMLException {
     var key = keyExtractor.apply(el);
     Method parser = key == null ? null : methods.get(key.toLowerCase(Locale.ROOT));
     if (parser == null) return fallback.apply(el);
     try {
-      Object[] params = new Object[additionalParams.length + 1];
+      Object[] params = new Object[parser.getParameterCount()];
       params[0] = el;
-      System.arraycopy(additionalParams, 0, params, 1, additionalParams.length);
+      System.arraycopy(
+          additionalParams, 0, params, 1, Math.min(additionalParams.length, params.length - 1));
       //noinspection unchecked
       return (T) parser.invoke(actualParser, params);
     } catch (Exception e) {

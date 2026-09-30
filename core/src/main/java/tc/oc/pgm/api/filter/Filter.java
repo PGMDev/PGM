@@ -3,11 +3,13 @@ package tc.oc.pgm.api.filter;
 import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import org.bukkit.event.Event;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.filters.parse.FilterParser;
+import tc.oc.pgm.util.math.LocalFrame;
 
 /**
  * Something that can answer "yes", "no" or "i don't care" to the imagined question: "Can X
@@ -26,6 +28,10 @@ public interface Filter extends FeatureDefinition {
 
   /** ALLOW or DENY the given {@link Query}, or ABSTAIN from responding. */
   QueryResponse query(Query query);
+
+  default QueryResponse query(Query query, @Nullable LocalFrame frame) {
+    return query(query);
+  }
 
   /**
    * Return true if this filter ALLOWs the given {@link Query}, false if this filter DENYes it, or

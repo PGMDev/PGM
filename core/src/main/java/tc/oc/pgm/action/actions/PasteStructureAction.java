@@ -1,6 +1,7 @@
 package tc.oc.pgm.action.actions;
 
 import org.bukkit.util.BlockVector;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.structure.StructureDefinition;
@@ -30,8 +31,10 @@ public class PasteStructureAction<T extends Filterable<?>> extends AbstractActio
   }
 
   @Override
-  public void trigger(T t) {
-    var loc = new BlockVector(xformula.apply(t), yformula.apply(t), zformula.apply(t));
+  public void trigger(T t, ActionContext context) {
+    var frame = context.frame();
+    var loc = new BlockVector(
+        xformula.apply(t, frame), yformula.apply(t, frame), zformula.apply(t, frame));
     structureReference.get().getStructure(t.getMatch()).placeAbsolute(loc, update);
   }
 }

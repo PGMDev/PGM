@@ -22,12 +22,12 @@ import tc.oc.pgm.filters.operator.DenyFilter;
 import tc.oc.pgm.filters.operator.InverseFilter;
 import tc.oc.pgm.filters.operator.OneFilter;
 import tc.oc.pgm.util.MethodParser;
-import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.parser.ParsingNode;
 import tc.oc.pgm.util.parser.SyntaxException;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariableParser;
 import tc.oc.pgm.variables.VariablesModule;
@@ -54,10 +54,16 @@ public class FeatureFilterParser extends FilterParser {
 
   @Override
   public Filter parseReference(Node node, String id) throws InvalidXMLException {
+    return parseReference(node, id, null);
+  }
+
+  @Override
+  public Filter parseReference(Node node, String id, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     Filter resolved = features.get(id, Filter.class);
     if (resolved != null) return resolved;
 
-    Filter inline = parseInlineFilter(node, id);
+    Filter inline = parseInlineFilter(node, id, locals);
     if (inline != null) return inline;
 
     return features.addReference(new XMLFilterReference(factory.getFeatures(), node, id));
@@ -91,11 +97,12 @@ public class FeatureFilterParser extends FilterParser {
           .replace("%RANGE%", XMLUtils.RANGE_DOTTED.pattern())
           .replace("%NUM%", "-?\\d*\\.?\\d+"));
 
-  private @Nullable Filter parseInlineFilter(Node node, String text) throws InvalidXMLException {
+  private @Nullable Filter parseInlineFilter(Node node, String text, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     // Formula-style inline filter
     if (text.contains("(")) {
       try {
-        return buildFilter(node, ParsingNode.parse(text));
+        return buildFilter(node, ParsingNode.parse(text), locals);
       } catch (SyntaxException e) {
         throw new InvalidXMLException(e.getMessage(), node, e);
       }
@@ -107,7 +114,11 @@ public class FeatureFilterParser extends FilterParser {
       Range<Double> range = XMLUtils.parseNumericRange(node, match.group(4), Double.class);
 
       var varName = match.group(1);
-      if (varName != null) {
+      var local = varName != null && locals != null ? locals.lookup(varName) : null;
+      if (local != null) {
+        if (match.group(2) != null) throw new InvalidXMLException(LocalScope.INDEX_ERROR, node);
+        return new VariableFilter.Local(local, range);
+      } else if (varName != null) {
         Variable<?> variable = features.resolve(node, match.group(1), Variable.class);
         Integer index = match.group(2) == null
             ? null
@@ -116,37 +127,40 @@ public class FeatureFilterParser extends FilterParser {
       } else {
         var variables = factory.needModule(VariablesModule.class);
         var expr = match.group(3);
-        var scope = variables.deriveScope(expr);
-        return VariableFilter.of(Formula.of(expr, variables.getContext(scope)), scope, range);
+        var scope = variables.deriveScope(expr, locals);
+        return VariableFilter.of(variables.parseFormula(scope, expr, locals), scope, range);
       }
     }
     return null;
   }
 
-  private Filter buildFilter(Node node, ParsingNode parsed) throws InvalidXMLException {
-    if (parsed.getChildren() == null) return parseReference(node, parsed.getBase());
+  private Filter buildFilter(Node node, ParsingNode parsed, @Nullable LocalScope locals)
+      throws InvalidXMLException {
+    if (parsed.getChildren() == null) return parseReference(node, parsed.getBase(), locals);
     return switch (parsed.getBase()) {
-      case "all" -> AllFilter.of(buildChildren(node, parsed));
-      case "any" -> AnyFilter.of(buildChildren(node, parsed));
-      case "one" -> OneFilter.of(buildChildren(node, parsed));
-      case "not" -> new InverseFilter(buildChild(node, parsed));
-      case "deny" -> new DenyFilter(buildChild(node, parsed));
-      case "allow" -> new AllowFilter(buildChild(node, parsed));
+      case "all" -> AllFilter.of(buildChildren(node, parsed, locals));
+      case "any" -> AnyFilter.of(buildChildren(node, parsed, locals));
+      case "one" -> OneFilter.of(buildChildren(node, parsed, locals));
+      case "not" -> new InverseFilter(buildChild(node, parsed, locals));
+      case "deny" -> new DenyFilter(buildChild(node, parsed, locals));
+      case "allow" -> new AllowFilter(buildChild(node, parsed, locals));
       default ->
         throw new SyntaxException("Unknown inline filter type " + parsed.getBase(), parsed);
     };
   }
 
-  private List<Filter> buildChildren(Node node, ParsingNode parent) throws InvalidXMLException {
+  private List<Filter> buildChildren(Node node, ParsingNode parent, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     List<Filter> params = new ArrayList<>(parent.getChildrenCount());
-    for (ParsingNode child : parent.getChildren()) params.add(buildFilter(node, child));
+    for (ParsingNode child : parent.getChildren()) params.add(buildFilter(node, child, locals));
     return params;
   }
 
-  private Filter buildChild(Node node, ParsingNode parent) throws InvalidXMLException {
+  private Filter buildChild(Node node, ParsingNode parent, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     if (parent.getChildrenCount() != 1)
       throw new SyntaxException(
           "Expected exactly one child but got " + parent.getChildrenCount(), parent);
-    return buildFilter(node, parent.getChildren().getFirst());
+    return buildFilter(node, parent.getChildren().getFirst(), locals);
   }
 }

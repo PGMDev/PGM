@@ -1,5 +1,6 @@
 package tc.oc.pgm.action.actions;
 
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.shops.Shop;
@@ -14,7 +15,7 @@ public class OpenShop extends AbstractAction<MatchPlayer> {
   }
 
   @Override
-  public void trigger(MatchPlayer player) {
+  public void trigger(MatchPlayer player, ActionContext context) {
     new ShopMenu(this.shop.get(), player);
   }
 }

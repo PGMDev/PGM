@@ -11,6 +11,7 @@ import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParser;
 import tc.oc.pgm.api.feature.FeatureDefinition;
@@ -38,6 +39,7 @@ import tc.oc.pgm.util.xml.parsers.ReferenceBuilder;
 import tc.oc.pgm.util.xml.parsers.RegionBuilder;
 import tc.oc.pgm.util.xml.parsers.StringBuilder;
 import tc.oc.pgm.util.xml.parsers.VariableBuilder;
+import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class XMLFluentParser {
@@ -189,7 +191,11 @@ public class XMLFluentParser {
   }
 
   public FilterBuilder filter(Element el, String... prop) {
-    return new FilterBuilder(filters, el, prop);
+    return filter(null, el, prop);
+  }
+
+  public FilterBuilder filter(@Nullable LocalScope locals, Element el, String... prop) {
+    return new FilterBuilder(filters, locals, el, prop);
   }
 
   public RegionBuilder<Region> region(Element el, String... prop) {
@@ -244,12 +250,17 @@ public class XMLFluentParser {
 
   public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(
       Class<T> clazz, Element el, String... prop) {
+    return action(clazz, null, el, prop);
+  }
+
+  public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(
+      Class<T> clazz, @Nullable LocalScope locals, Element el, String... prop) {
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Action<? super T> parse(Node node) throws InvalidXMLException {
         return node.isAttribute()
-            ? actions.parseReference(node, clazz)
-            : actions.parseProperty(node.getElement(), clazz);
+            ? actions.parseReference(node, clazz, locals)
+            : actions.parseProperty(node.getElement(), clazz, locals);
       }
     };
   }
@@ -260,11 +271,16 @@ public class XMLFluentParser {
 
   public <T extends Filterable<?>> Builder<Formula<T>, ?> formula(
       Class<T> clazz, Element el, String... prop) {
+    return formula(clazz, null, el, prop);
+  }
+
+  public <T extends Filterable<?>> Builder<Formula<T>, ?> formula(
+      Class<T> clazz, @Nullable LocalScope locals, Element el, String... prop) {
     if (variables == null) this.variables = factory.needModule(VariablesModule.class);
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Formula<T> parse(Node node) {
-        return Formula.of(node.getValue(), variables.getContext(clazz));
+        return variables.parseFormula(clazz, node.getValue(), locals);
       }
     };
   }

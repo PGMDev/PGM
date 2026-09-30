@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -60,7 +61,7 @@ public class KitNode extends AbstractKit {
   }
 
   @Override
-  public void untrigger(MatchPlayer player) {
+  public void untrigger(MatchPlayer player, ActionContext context) {
     for (Kit kit : kits) {
       if (kit.isRemovable()) kit.remove(player);
     }
