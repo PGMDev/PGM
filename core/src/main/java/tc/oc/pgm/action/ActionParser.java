@@ -348,7 +348,8 @@ public class ActionParser {
     outer = parseScope(el, outer, "outer");
     Class<I> inner = parseScope(el, null, "inner");
 
-    Action<? super I> child = parseAction(el, inner, includeObs(el, inner), context);
+    var childContext = ScopeSwitchAction.isMulti(outer, inner) ? context.loop() : context;
+    Action<? super I> child = parseAction(el, inner, includeObs(el, inner), childContext);
 
     Action<? super O> result = ScopeSwitchAction.of(child, outer, inner);
     if (result == null) {
@@ -382,7 +383,9 @@ public class ActionParser {
     var control = context.control();
     if (signal != ControlFlow.Signal.RETURN && !control.inLoop())
       throw new InvalidXMLException(
-          "'" + el.getName() + "' must be inside a repeat within the same action", el);
+          "'" + el.getName()
+              + "' must be inside a repeat or a switch-scope to a lower scope within the same action",
+          el);
     control.markUsed();
     return new ControlAction(
         signal, parser.filter(context.locals(), el, "filter").orAllow());

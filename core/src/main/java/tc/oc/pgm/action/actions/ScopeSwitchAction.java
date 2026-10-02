@@ -40,6 +40,10 @@ public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
     return new ScopeSwitchAction<>(outer, single, multi, child);
   }
 
+  public static boolean isMulti(Class<?> outer, Class<?> inner) {
+    return TriggerModifiers.getMultiConversion(outer, inner) != null;
+  }
+
   @Override
   public void trigger(O o, ActionContext context) {
     var childContext = context.withoutQuery();
@@ -49,7 +53,7 @@ public class ScopeSwitchAction<O, I> extends AbstractAction<O> {
       Iterable<I> inner = multi.apply(o);
       for (I i : inner) {
         child.trigger(i, childContext);
-        if (childContext.halted()) return;
+        if (childContext.haltLoop()) return;
       }
     }
   }

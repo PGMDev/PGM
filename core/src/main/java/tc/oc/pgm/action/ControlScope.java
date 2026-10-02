@@ -4,7 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Parse-time view of the control statements in a root action. Tracks whether statements are inside
- * a repeat, and whether the root uses any so it only needs a {@link ControlFlow} when they are.
+ * a loop, and whether the root uses any so it only needs a {@link ControlFlow} when they are.
  */
 public final class ControlScope {
   private final @Nullable ControlScope root;
