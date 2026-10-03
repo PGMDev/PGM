@@ -48,7 +48,6 @@ import tc.oc.pgm.action.actions.VelocityAction;
 import tc.oc.pgm.action.actions.WeatherAction;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.action.replacements.ReplacementParser;
-import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.Filterables;
@@ -470,15 +469,10 @@ public class ActionParser {
   }
 
   @MethodParser("call")
-  @SuppressWarnings("unchecked")
   public <T extends Filterable<?>> CallAction<T> parseCall(
       Element el, Class<T> scope, ActionParseContext context) throws InvalidXMLException {
     var locals = context.locals();
     scope = parseScope(el, scope);
-    // Scope is checked in validateCall once the function resolves
-    var function = (FeatureReference<FunctionDefinition<T>>) (FeatureReference<?>)
-        parser.reference(FunctionDefinition.class, el, "function").required();
-
     ImmutableMap.Builder<String, Formula<T>> argsBuilder = ImmutableMap.builder();
     for (Attribute attr : el.getAttributes()) {
       if (CALL_ATTRIBUTES.contains(attr.getName())) continue;
@@ -490,11 +484,11 @@ public class ActionParser {
     var result =
         el.getAttribute("result") != null ? parseTarget(el, "result", scope, locals) : null;
 
-    Class<T> callScope = scope;
-    features.validate(
-        function,
-        (FunctionDefinition<T> fn, Node node) ->
-            validateCall(fn, node, callScope, args.keySet(), result != null));
+    var function = parser
+        .function(el, scope, "function")
+        .validate((FunctionDefinition<T> fn, Node node) ->
+            validateCall(fn, node, args.keySet(), result != null))
+        .required();
 
     return new CallAction<>(
         scope, function, args, result, parser.filter(locals, el, "filter").orAllow());
@@ -517,13 +511,8 @@ public class ActionParser {
   }
 
   private void validateCall(
-      FunctionDefinition<?> fn, Node node, Class<?> scope, Set<String> args, boolean hasResult)
+      FunctionDefinition<?> fn, Node node, Set<String> args, boolean hasResult)
       throws InvalidXMLException {
-    if (fn.getScope() != scope)
-      throw new InvalidXMLException(
-          "Function '" + fn.getId() + "' has scope " + fn.getScope().getSimpleName()
-              + " but is called from scope " + scope.getSimpleName(),
-          node);
     for (String param : fn.getParams().keySet()) {
       if (!args.contains(param))
         throw new InvalidXMLException(

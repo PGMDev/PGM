@@ -15,6 +15,7 @@ import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
 import tc.oc.pgm.action.ActionParseContext;
 import tc.oc.pgm.action.ActionParser;
+import tc.oc.pgm.action.FunctionDefinition;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
@@ -243,6 +244,20 @@ public class XMLFluentParser {
   public <T extends FeatureDefinition> ReferenceBuilder<T> reference(
       Class<T> clazz, Element el, String... prop) {
     return new ReferenceBuilder<>(features, clazz, el, prop);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <S extends Filterable<?>> ReferenceBuilder<FunctionDefinition<S>> function(
+      Element el, Class<S> scope, String... prop) {
+    var builder = (ReferenceBuilder<FunctionDefinition<S>>)
+        (ReferenceBuilder<?>) reference(FunctionDefinition.class, el, prop);
+    return builder.validate((FunctionDefinition<S> fn, Node node) -> {
+      if (fn.getScope() != scope)
+        throw new InvalidXMLException(
+            "Function '" + fn.getId() + "' has scope " + fn.getScope().getSimpleName()
+                + " but is called from scope " + scope.getSimpleName(),
+            node);
+    });
   }
 
   public VariableBuilder<?> variable(Element el, String... prop) {
