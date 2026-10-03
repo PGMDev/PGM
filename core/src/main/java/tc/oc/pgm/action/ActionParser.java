@@ -18,9 +18,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
+import tc.oc.pgm.action.actions.CallAction;
 import tc.oc.pgm.action.actions.ControlAction;
 import tc.oc.pgm.action.actions.ControlWrapperAction;
 import tc.oc.pgm.action.actions.DropFlagAction;
@@ -34,6 +36,7 @@ import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
+import tc.oc.pgm.action.actions.ReturnAction;
 import tc.oc.pgm.action.actions.ScheduleAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetLocalAction;
@@ -73,6 +76,7 @@ import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
@@ -259,6 +263,46 @@ public class ActionParser {
         parser.action(cls, el, "action", "trigger").required());
   }
 
+  private static final Set<String> CALL_ATTRIBUTES =
+      Set.of("id", "scope", "function", "result", "index", "filter", "expose");
+
+  // Parser for <function> elements
+  public <B extends Filterable<?>> void parseFunction(Element el) throws InvalidXMLException {
+    String id = XMLUtils.parseRequiredId(el);
+    Class<B> scope = parseScope(el, null);
+
+    Node paramsNode = Node.fromAttr(el, "params");
+    var params = parseLocalNames(List.of(), paramsNode);
+
+    var children = el.getChildren();
+    var last = children.isEmpty() ? null : children.getLast();
+    boolean returnsValue =
+        last != null && "return".equals(last.getName()) && last.getAttribute("value") != null;
+    if (returnsValue && last.getAttribute("filter") != null)
+      throw new InvalidXMLException(
+          "Function '" + id + "' must end with an unfiltered return", last);
+
+    var locals = new LocalScope(null, parseLocalNames(params, Node.fromAttr(el, "locals")));
+    var context = ActionParseContext.function(locals, returnsValue);
+    var body = new ActionNode<>(
+        parseChildren(el, scope, context),
+        parser.filter(locals, el, "filter").orAllow(),
+        StaticFilter.ALLOW,
+        scope,
+        null);
+
+    ImmutableMap.Builder<String, LocalRef> paramRefs = ImmutableMap.builder();
+    for (String name : params) {
+      if (CALL_ATTRIBUTES.contains(name))
+        throw new InvalidXMLException(
+            "'" + name + "' is reserved and cannot be a function parameter", paramsNode);
+      paramRefs.put(name, locals.lookup(name));
+    }
+
+    features.addFeature(
+        el, new FunctionDefinition(id, scope, paramRefs.build(), locals, body, returnsValue));
+  }
+
   // Generic action with N children parser
   private <B extends Filterable<?>> Action<? super B> parseAction(
       Element el, Class<B> scope, boolean obs, ActionParseContext context)
@@ -271,13 +315,7 @@ public class ActionParser {
   private <B extends Filterable<?>> ActionNode<B> parseNode(
       Element el, Class<B> scope, boolean obs, ActionParseContext context, boolean newFrame)
       throws InvalidXMLException {
-    if (el.getChildren().isEmpty())
-      throw new InvalidXMLException("No action children were defined", el);
-
-    ImmutableList.Builder<Action<? super B>> children = ImmutableList.builder();
-    for (Element child : el.getChildren()) {
-      children.add(parse(child, scope, context));
-    }
+    var children = parseChildren(el, scope, context);
 
     var locals = context.locals();
     Filter filter = parser.filter(locals, el, "filter").orAllow();
@@ -286,11 +324,23 @@ public class ActionParser {
         .result(!legacy && filter == StaticFilter.ALLOW);
 
     return new ActionNode<>(
-        children.build(),
+        children,
         wrapFilter(filter, obs),
         wrapFilter(untriggerFilter, obs),
         scope,
         newFrame ? locals : null);
+  }
+
+  private <B extends Filterable<?>> ImmutableList<Action<? super B>> parseChildren(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
+    if (el.getChildren().isEmpty())
+      throw new InvalidXMLException("No action children were defined", el);
+
+    ImmutableList.Builder<Action<? super B>> children = ImmutableList.builder();
+    for (Element child : el.getChildren()) {
+      children.add(parse(child, scope, context));
+    }
+    return children.build();
   }
 
   private @Nullable LocalScope parseLocals(
@@ -300,12 +350,17 @@ public class ActionParser {
 
     List<String> names = new ArrayList<>();
     if (index != null) names.add(validateLocal(index.getValue(), index, names));
-    if (node != null) {
-      for (String name : node.getValue().split(",")) {
-        names.add(validateLocal(name, node, names));
-      }
+    return new LocalScope(parent, parseLocalNames(names, node));
+  }
+
+  private List<String> parseLocalNames(List<String> names, @Nullable Node node)
+      throws InvalidXMLException {
+    if (node == null) return names;
+    List<String> result = new ArrayList<>(names);
+    for (String name : node.getValue().split(",")) {
+      result.add(validateLocal(name, node, result));
     }
-    return new LocalScope(parent, names);
+    return result;
   }
 
   private String validateLocal(String name, Node node, List<String> names)
@@ -372,16 +427,31 @@ public class ActionParser {
   }
 
   @MethodParser("return")
-  public ControlAction parseReturn(Element el, Class<?> scope, ActionParseContext context)
-      throws InvalidXMLException {
-    return parseControl(el, context, ControlFlow.Signal.RETURN);
+  public <B extends Filterable<?>> ReturnAction<B> parseReturn(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
+    var returnsValue = context.returnsValue();
+    boolean hasValue = returnsValue != null && el.getAttribute("value") != null;
+    if (returnsValue != null && returnsValue != hasValue)
+      throw new InvalidXMLException(
+          hasValue
+              ? "Functions that return a value must end with an unfiltered return value"
+              : "All returns in a function must either have a value or not",
+          el);
+    context.control().markUsed();
+
+    scope = parseScope(el, scope);
+    var locals = context.locals();
+    return new ReturnAction<>(
+        scope,
+        parser.filter(locals, el, "filter").orAllow(),
+        hasValue ? parser.formula(scope, locals, el, "value").required() : null);
   }
 
   private ControlAction parseControl(
       Element el, ActionParseContext context, ControlFlow.Signal signal)
       throws InvalidXMLException {
     var control = context.control();
-    if (signal != ControlFlow.Signal.RETURN && !control.inLoop())
+    if (!control.inLoop())
       throw new InvalidXMLException(
           "'" + el.getName()
               + "' must be inside a repeat or a switch-scope to a lower scope within the same action",
@@ -389,6 +459,75 @@ public class ActionParser {
     control.markUsed();
     return new ControlAction(
         signal, parser.filter(context.locals(), el, "filter").orAllow());
+  }
+
+  @MethodParser("call")
+  public <T extends Filterable<?>> CallAction<T> parseCall(
+      Element el, Class<T> scope, ActionParseContext context) throws InvalidXMLException {
+    var locals = context.locals();
+    scope = parseScope(el, scope);
+    var function = parser.reference(FunctionDefinition.class, el, "function").required();
+
+    ImmutableMap.Builder<String, Formula<T>> argsBuilder = ImmutableMap.builder();
+    for (Attribute attr : el.getAttributes()) {
+      if (CALL_ATTRIBUTES.contains(attr.getName())) continue;
+      argsBuilder.put(
+          attr.getName(), parser.formula(scope, locals, el, attr.getName()).required());
+    }
+    var args = argsBuilder.build();
+
+    var result = parseResult(el, scope, locals);
+
+    Class<T> callScope = scope;
+    features.validate(
+        function,
+        (FunctionDefinition fn, Node node) ->
+            validateCall(fn, node, callScope, args.keySet(), result != null));
+
+    return new CallAction<>(
+        scope, function, args, result, parser.filter(locals, el, "filter").orAllow());
+  }
+
+  private <T extends Filterable<?>> CallAction.@Nullable Target<T> parseResult(
+      Element el, Class<T> scope, @Nullable LocalScope locals) throws InvalidXMLException {
+    var name = parser.string(el, "result").orNull();
+    if (name == null) return null;
+
+    var local = locals != null ? locals.lookup(name) : null;
+    if (local != null) {
+      if (el.getAttribute("index") != null)
+        throw new InvalidXMLException(LocalScope.INDEX_ERROR, el);
+      return (t, frame, value) -> frame.set(local, value);
+    }
+
+    Variable<?> var = parser.variable(el, "result").bound(scope).writtable().required();
+    if (var.isIndexed() && var instanceof Variable.Indexed<?> indexedVar) {
+      Formula<T> idx = parser.formula(scope, locals, el, "index").required();
+      return (t, frame, value) -> indexedVar.setValue(t, (int) idx.apply(t, frame), value);
+    }
+    return (t, frame, value) -> var.setValue(t, value);
+  }
+
+  private void validateCall(
+      FunctionDefinition fn, Node node, Class<?> scope, Set<String> args, boolean hasResult)
+      throws InvalidXMLException {
+    if (!fn.getScope().isAssignableFrom(scope))
+      throw new InvalidXMLException(
+          "Function '" + fn.getId() + "' has scope " + fn.getScope().getSimpleName()
+              + " but is called from scope " + scope.getSimpleName(),
+          node);
+    for (String param : fn.getParams().keySet()) {
+      if (!args.contains(param))
+        throw new InvalidXMLException(
+            "Missing argument '" + param + "' for function '" + fn.getId() + "'", node);
+    }
+    for (String arg : args) {
+      if (!fn.getParams().containsKey(arg))
+        throw new InvalidXMLException(
+            "Unknown argument '" + arg + "' for function '" + fn.getId() + "'", node);
+    }
+    if (hasResult && !fn.returnsValue())
+      throw new InvalidXMLException("Function '" + fn.getId() + "' does not return a value", node);
   }
 
   @MethodParser("kit")
