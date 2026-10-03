@@ -5,12 +5,9 @@ import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.minecraft.server.v1_8_R3.EntityPotion;
-import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -32,14 +29,12 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
-import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = SPORTPAPER, priority = HIGH)
 public class SpMiscUtil implements MiscUtils {
-  private static final byte NBT_TAG_ANY_NUMERIC = 99;
 
   @Override
   public boolean yield(Event event) {
@@ -87,19 +82,6 @@ public class SpMiscUtil implements MiscUtils {
   @Override
   public double getArrowDamage(Arrow arrow) {
     return arrow.spigot().getDamage();
-  }
-
-  @Override
-  public int getWorldDataVersion(Path levelDat) {
-    try {
-      var dataTag = NBTCompressedStreamTools.a(Files.newInputStream(levelDat)).getCompound("Data");
-      return dataTag.hasKeyOfType("DataVersion", NBT_TAG_ANY_NUMERIC)
-          ? dataTag.getInt("DataVersion")
-          : DataVersions.LEGACY;
-    } catch (Throwable ignored) {
-      // In case we cannot read the level.dat file, return a constant
-      return DataVersions.LEGACY;
-    }
   }
 
   @Override
