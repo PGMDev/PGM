@@ -22,7 +22,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDamageEvent;
-import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -37,7 +36,6 @@ import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
-import tc.oc.pgm.util.event.player.PlayerOnGroundEvent;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.event.player.PlayerSpawnLocationEvent;
 
@@ -54,12 +52,6 @@ public class ModernListener implements Listener {
       BlockFallEvent pgmEvent = new BlockFallEvent(event.getLocation().getBlock(), fb);
       handleCall(pgmEvent, event);
     }
-  }
-
-  @EventHandler(ignoreCancelled = true)
-  public void onPlayerOnGround(EntityPoseChangeEvent event) {
-    if (event.getEntity() instanceof Player p)
-      handleCall(new PlayerOnGroundEvent(p, p.isOnGround()), event);
   }
 
   @EventHandler(ignoreCancelled = true)
