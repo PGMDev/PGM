@@ -6,12 +6,10 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.player.MatchPlayer;
@@ -30,53 +28,41 @@ public class ConsumableMatchModule implements MatchModule, Listener {
     this.consumables = consumables;
   }
 
-  private @Nullable ConsumableDefinition getConsumableDefinition(ItemStack item) {
-    if (item == null) return null;
-    return consumables.get(ItemTags.CONSUMABLE.get(item));
-  }
-
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   private void onItemConsume(PlayerItemConsumeEvent event) {
-    ConsumableDefinition consumable = getConsumableDefinition(event.getItem());
-    if (consumable == null || consumable.getCause() != ConsumeCause.EAT) return;
-
-    runConsumable(event, consumable);
+    runConsumable(event, event.getItem(), ConsumeCause.EAT);
   }
 
   @EventHandler(priority = EventPriority.HIGH)
   private void onClick(PlayerInteractEvent event) {
-    // It's been cancelled
+    // It's been canceled
     if (event.useItemInHand() == Event.Result.DENY) return;
 
-    ConsumableDefinition consumable = getConsumableDefinition(event.getItem());
-    if (consumable == null) return;
-
-    var action = event.getAction();
-    if (!switch (consumable.getCause()) {
-      case LEFT_CLICK -> action == Action.LEFT_CLICK_BLOCK || action == Action.LEFT_CLICK_AIR;
-      case RIGHT_CLICK -> action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR;
-      case CLICK -> action == Action.LEFT_CLICK_BLOCK
-          || action == Action.LEFT_CLICK_AIR
-          || action == Action.RIGHT_CLICK_BLOCK
-          || action == Action.RIGHT_CLICK_AIR;
-      default -> false;
-    }) return;
-
-    runConsumable(event, consumable);
+    runConsumable(
+        event,
+        event.getItem(),
+        switch (event.getAction()) {
+          case LEFT_CLICK_BLOCK, LEFT_CLICK_AIR -> ConsumeCause.LEFT_CLICK;
+          case RIGHT_CLICK_BLOCK, RIGHT_CLICK_AIR -> ConsumeCause.RIGHT_CLICK;
+          default -> null;
+        });
   }
 
-  public <T extends PlayerEvent & Cancellable> void runConsumable(
-      T event, ConsumableDefinition consumable) {
-    MatchPlayer matchPlayer = match.getPlayer(event.getPlayer());
-    if (!MatchPlayers.canInteract(matchPlayer)) return;
+  private <T extends PlayerEvent & Cancellable> void runConsumable(
+      T event, ItemStack item, ConsumeCause cause) {
+    if (item == null || cause == null) return;
+    MatchPlayer pl = match.getPlayer(event.getPlayer());
+    if (!MatchPlayers.canInteract(pl)) return;
+    var ids = ItemTags.CONSUMABLE.get(item);
+    if (ids == null) return;
 
-    if (consumable.getOverride()) {
-      event.setCancelled(true);
+    for (String id : ids) {
+      var consumable = consumables.get(id);
+      if (consumable == null || !consumable.getCause().triggersOn(cause)) continue;
+      if (consumable.getOverride()) event.setCancelled(true);
+      if (consumable.getConsume()) InventoryUtils.consumeItem(event, pl.getBukkit());
+      consumable.getAction().trigger(pl);
+      return;
     }
-    if (consumable.getConsume()) {
-      InventoryUtils.consumeItem(event);
-    }
-
-    consumable.getAction().trigger(matchPlayer);
   }
 }
