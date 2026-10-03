@@ -1,7 +1,9 @@
 package tc.oc.pgm.platform.modern.modules.waypoint;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.server.waypoints.ServerWaypointManager;
+import net.minecraft.world.waypoints.WaypointStyleAssets;
 import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.bukkit.Color;
 import org.bukkit.attribute.Attribute;
@@ -81,13 +83,35 @@ public class WaypointMatchModule implements MatchModule, Listener {
   private void setPlayerWaypoint(MatchPlayer player, Color color) {
     var attr = player.getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE);
     if (attr == null) return;
+    var nmsPlayer = ((CraftPlayer) player.getBukkit()).getHandle();
+    waypointManager.untrackWaypoint(nmsPlayer);
     if (color != null) {
-      var nmsPlayer = ((CraftPlayer) player.getBukkit()).getHandle();
-      // Ensures they're newly registered so the color updates
-      waypointManager.untrackWaypoint(nmsPlayer);
       nmsPlayer.waypointIcon().color = Optional.of(color.asRGB());
+      // Ensures they're newly registered so the color updates
       attr.setBaseValue(256);
+      waypointManager.trackWaypoint(nmsPlayer);
     } else {
+      attr.setBaseValue(0);
+    }
+  }
+
+  public void applyEntityWaypoint(
+      org.bukkit.entity.Entity entity, @Nullable WaypointDefinition def) {
+    var attr = ((org.bukkit.attribute.Attributable) entity)
+        .getAttribute(Attribute.WAYPOINT_TRANSMIT_RANGE);
+    if (attr == null) return;
+    var nms = ((org.bukkit.craftbukkit.entity.CraftLivingEntity) entity).getHandle();
+
+    waypointManager.untrackWaypoint(nms);
+
+    if (def != null) {
+      nms.waypointIcon().style = def.getStyle();
+      nms.waypointIcon().color = Optional.of(def.getColor().asRGB());
+      attr.setBaseValue(def.getTransmitRange() != null ? def.getTransmitRange() : 256f);
+      waypointManager.trackWaypoint(nms);
+    } else {
+      nms.waypointIcon().style = WaypointStyleAssets.DEFAULT;
+      nms.waypointIcon().color = Optional.empty();
       attr.setBaseValue(0);
     }
   }
