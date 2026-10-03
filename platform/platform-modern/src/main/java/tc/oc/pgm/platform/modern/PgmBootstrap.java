@@ -1,10 +1,10 @@
 package tc.oc.pgm.platform.modern;
 
-import ca.spottedleaf.dataconverter.converters.DataConverter;
+import ca.spottedleaf.converter.DataConverter;
+import ca.spottedleaf.converter.types.ListType;
+import ca.spottedleaf.converter.types.MapType;
+import ca.spottedleaf.converter.types.ObjectType;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
-import ca.spottedleaf.dataconverter.types.ListType;
-import ca.spottedleaf.dataconverter.types.MapType;
-import ca.spottedleaf.dataconverter.types.ObjectType;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
 import io.papermc.paper.plugin.bootstrap.PluginProviderContext;
@@ -20,10 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarFile;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,12 +29,6 @@ import tc.oc.pgm.util.DataVersions;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PgmBootstrap implements PluginBootstrap {
-
-  private static final String NAMESPACE = "pgm";
-  private static final String PATH = "legacy_overworld";
-
-  public static final ResourceKey<DimensionType> LEGACY_OVERWORLD = ResourceKey.create(
-      Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(NAMESPACE, PATH));
 
   @Override
   public void bootstrap(@NonNull BootstrapContext context) {
