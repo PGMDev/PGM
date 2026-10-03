@@ -73,6 +73,11 @@ public class ActionModule implements MapModule<ActionMatchModule> {
         parser.parse(action, null, null);
       }
 
+      for (Element function :
+          XMLUtils.flattenElements(doc.getRootElement(), "actions", "function")) {
+        parser.parseFunction(function);
+      }
+
       ImmutableList.Builder<Trigger<?>> triggers = ImmutableList.builder();
       for (Element rule : XMLUtils.flattenElements(doc.getRootElement(), "actions", "trigger")) {
         triggers.add(parser.parseTrigger(rule));

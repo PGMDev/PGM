@@ -9,6 +9,10 @@ public record ActionParseContext(@Nullable LocalScope locals, ControlScope contr
     return new ActionParseContext(null, ControlScope.root());
   }
 
+  public static ActionParseContext function(LocalScope locals) {
+    return new ActionParseContext(locals, ControlScope.function());
+  }
+
   public ActionParseContext withLocals(@Nullable LocalScope locals) {
     return locals == null ? this : new ActionParseContext(locals, control);
   }
