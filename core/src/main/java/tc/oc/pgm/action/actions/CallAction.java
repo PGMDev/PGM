@@ -1,6 +1,8 @@
 package tc.oc.pgm.action.actions;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.action.ControlFlow;
@@ -18,6 +20,7 @@ public class CallAction<T extends Filterable<?>> extends AbstractAction<T> {
   private final ImmutableMap<String, Formula<T>> args;
   private final @Nullable VariableTarget<T> result;
   private final Filter filter;
+  private @Nullable ImmutableList<Formula<T>> orderedArgs;
 
   public CallAction(
       Class<T> scope,
@@ -37,9 +40,12 @@ public class CallAction<T extends Filterable<?>> extends AbstractAction<T> {
     if (!filter.query(context.queryOr(t), context.frame()).isAllowed()) return;
 
     var fn = function.get();
+    if (orderedArgs == null)
+      orderedArgs = ImmutableList.copyOf(Lists.transform(fn.getParams(), args::get));
+
     var frame = fn.createFrame();
-    for (var param : fn.getParams().entrySet()) {
-      frame.set(param.getValue(), args.get(param.getKey()).apply(t, context.frame()));
+    for (int i = 0; i < orderedArgs.size(); i++) {
+      frame.setDirect(i, orderedArgs.get(i).apply(t, context.frame()));
     }
 
     var flow = fn.usesControl() ? new ControlFlow(fn.getDefaultValue()) : null;

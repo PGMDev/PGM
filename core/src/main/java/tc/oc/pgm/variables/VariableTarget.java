@@ -17,8 +17,10 @@ public interface VariableTarget<T> {
 
   static <T extends Filterable<?>> VariableTarget<T> variable(
       Variable<?> var, @Nullable Formula<T> idx) {
-    if (idx != null && var instanceof Variable.Indexed<?> indexed)
-      return (t, frame, value) -> indexed.setValue(t, (int) idx.apply(t, frame), value);
-    return (t, frame, value) -> var.setValue(t, value);
+    if ((idx != null) != var.isIndexed())
+      throw new IllegalArgumentException("Index must be provided if and only if var is indexed");
+    if (idx == null) return (t, frame, value) -> var.setValue(t, value);
+    var indexed = (Variable.Indexed<?>) var;
+    return (t, frame, value) -> indexed.setValue(t, (int) idx.apply(t, frame), value);
   }
 }

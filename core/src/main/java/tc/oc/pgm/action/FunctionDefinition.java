@@ -1,17 +1,16 @@
 package tc.oc.pgm.action;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableList;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.util.math.LocalFrame;
-import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.variables.LocalScope;
 
 /** A reusable action body with parameters, private locals and an optional return value. */
 @FeatureInfo(name = "function")
 public class FunctionDefinition<S> extends SelfIdentifyingFeatureDefinition {
   private final Class<S> scope;
-  private final ImmutableMap<String, LocalRef> params;
+  private final ImmutableList<String> params;
   private final LocalScope locals;
   private final Action<S> body;
   private final boolean usesControl;
@@ -21,7 +20,7 @@ public class FunctionDefinition<S> extends SelfIdentifyingFeatureDefinition {
   public FunctionDefinition(
       String id,
       Class<S> scope,
-      ImmutableMap<String, LocalRef> params,
+      ImmutableList<String> params,
       LocalScope locals,
       Action<S> body,
       boolean usesControl,
@@ -41,7 +40,8 @@ public class FunctionDefinition<S> extends SelfIdentifyingFeatureDefinition {
     return scope;
   }
 
-  public ImmutableMap<String, LocalRef> getParams() {
+  // Params occupy the first slots of the frame, in this order
+  public ImmutableList<String> getParams() {
     return params;
   }
 

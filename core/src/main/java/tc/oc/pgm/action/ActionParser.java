@@ -75,11 +75,11 @@ import tc.oc.pgm.util.MethodParsers;
 import tc.oc.pgm.util.inventory.ItemMatcher;
 import tc.oc.pgm.util.inventory.SlotGroup;
 import tc.oc.pgm.util.math.Formula;
-import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.parsers.Builder;
 import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariableParser;
@@ -294,17 +294,12 @@ public class ActionParser {
           "'default' is only allowed on functions that return a value", defaultNode);
     double defaultValue = parser.parseDouble(el, "default").optional(0d);
 
-    ImmutableMap.Builder<String, LocalRef> paramRefs = ImmutableMap.builder();
-    for (String name : params) {
-      paramRefs.put(name, locals.lookup(name));
-    }
-
     features.addFeature(
         el,
         new FunctionDefinition<>(
             id,
             scope,
-            paramRefs.build(),
+            ImmutableList.copyOf(params),
             locals,
             body,
             context.control().isUsed(),
@@ -481,8 +476,7 @@ public class ActionParser {
     }
     var args = argsBuilder.build();
 
-    var result =
-        el.getAttribute("result") != null ? parseTarget(el, "result", scope, locals) : null;
+    var result = parseTarget(el, "result", scope, locals).orNull();
 
     var function = parser
         .function(el, scope, "function")
@@ -494,32 +488,36 @@ public class ActionParser {
         scope, function, args, result, parser.filter(locals, el, "filter").orAllow());
   }
 
-  private <T extends Filterable<?>> VariableTarget<T> parseTarget(
-      Element el, String attr, Class<T> scope, @Nullable LocalScope locals)
-      throws InvalidXMLException {
-    var local = locals != null ? locals.lookup(parser.string(el, attr).required()) : null;
-    if (local != null) {
-      if (el.getAttribute("index") != null)
-        throw new InvalidXMLException(LocalScope.INDEX_ERROR, el);
-      return VariableTarget.local(local);
-    }
+  private <T extends Filterable<?>> Builder.Generic<VariableTarget<T>> parseTarget(
+      Element el, String attr, Class<T> scope, @Nullable LocalScope locals) {
+    return parser.node(
+        node -> {
+          var local = locals != null ? locals.lookup(node.getValue()) : null;
+          if (local != null) {
+            if (el.getAttribute("index") != null)
+              throw new InvalidXMLException(LocalScope.INDEX_ERROR, el);
+            return VariableTarget.local(local);
+          }
 
-    Variable<?> var = parser.variable(el, attr).bound(scope).writtable().required();
-    Formula<T> idx =
-        var.isIndexed() ? parser.formula(scope, locals, el, "index").required() : null;
-    return VariableTarget.variable(var, idx);
+          Variable<?> var = parser.variable(el, attr).bound(scope).writtable().required();
+          Formula<T> idx =
+              var.isIndexed() ? parser.formula(scope, locals, el, "index").required() : null;
+          return VariableTarget.variable(var, idx);
+        },
+        el,
+        attr);
   }
 
   private void validateCall(
       FunctionDefinition<?> fn, Node node, Set<String> args, boolean hasResult)
       throws InvalidXMLException {
-    for (String param : fn.getParams().keySet()) {
+    for (String param : fn.getParams()) {
       if (!args.contains(param))
         throw new InvalidXMLException(
             "Missing argument '" + param + "' for function '" + fn.getId() + "'", node);
     }
     for (String arg : args) {
-      if (!fn.getParams().containsKey(arg))
+      if (!fn.getParams().contains(arg))
         throw new InvalidXMLException(
             "Unknown argument '" + arg + "' for function '" + fn.getId() + "'", node);
     }
@@ -589,7 +587,7 @@ public class ActionParser {
       Element el, Class<T> scope, ActionParseContext context) throws InvalidXMLException {
     var locals = context.locals();
     scope = parseScope(el, scope);
-    var target = parseTarget(el, "var", scope, locals);
+    var target = parseTarget(el, "var", scope, locals).required();
     return new SetVariableAction<>(
         scope, target, parser.formula(scope, locals, el, "value").required());
   }
