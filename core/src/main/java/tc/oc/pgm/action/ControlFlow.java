@@ -17,6 +17,12 @@ public final class ControlFlow {
   private @Nullable Signal signal;
   private double value;
 
+  public ControlFlow() {}
+
+  public ControlFlow(double value) {
+    this.value = value;
+  }
+
   public void signal(Signal signal) {
     this.signal = signal;
   }

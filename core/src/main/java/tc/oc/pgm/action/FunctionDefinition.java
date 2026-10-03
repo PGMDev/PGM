@@ -3,36 +3,41 @@ package tc.oc.pgm.action;
 import com.google.common.collect.ImmutableMap;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
-import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.util.math.LocalFrame;
 import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.variables.LocalScope;
 
 /** A reusable action body with parameters, private locals and an optional return value. */
 @FeatureInfo(name = "function")
-public class FunctionDefinition extends SelfIdentifyingFeatureDefinition {
-  private final Class<?> scope;
+public class FunctionDefinition<S> extends SelfIdentifyingFeatureDefinition {
+  private final Class<S> scope;
   private final ImmutableMap<String, LocalRef> params;
   private final LocalScope locals;
-  private final Action<?> body;
+  private final Action<S> body;
+  private final boolean usesControl;
   private final boolean returnsValue;
+  private final double defaultValue;
 
   public FunctionDefinition(
       String id,
-      Class<?> scope,
+      Class<S> scope,
       ImmutableMap<String, LocalRef> params,
       LocalScope locals,
-      Action<?> body,
-      boolean returnsValue) {
+      Action<S> body,
+      boolean usesControl,
+      boolean returnsValue,
+      double defaultValue) {
     super(id);
     this.scope = scope;
     this.params = params;
     this.locals = locals;
     this.body = body;
+    this.usesControl = usesControl;
     this.returnsValue = returnsValue;
+    this.defaultValue = defaultValue;
   }
 
-  public Class<?> getScope() {
+  public Class<S> getScope() {
     return scope;
   }
 
@@ -40,18 +45,23 @@ public class FunctionDefinition extends SelfIdentifyingFeatureDefinition {
     return params;
   }
 
+  public Action<S> getBody() {
+    return body;
+  }
+
+  public boolean usesControl() {
+    return usesControl;
+  }
+
   public boolean returnsValue() {
     return returnsValue;
   }
 
-  public LocalFrame createFrame() {
-    return locals.createFrame(null);
+  public double getDefaultValue() {
+    return defaultValue;
   }
 
-  @SuppressWarnings("unchecked")
-  public ControlFlow call(Filterable<?> t, ActionContext context, LocalFrame frame) {
-    var flow = new ControlFlow();
-    ((Action<Filterable<?>>) body).trigger(t, new ActionContext(context.query(), frame, flow));
-    return flow;
+  public LocalFrame createFrame() {
+    return locals.createFrame(null);
   }
 }
