@@ -4,11 +4,13 @@ import static tc.oc.pgm.shops.ShopKeeper.isKeeper;
 
 import java.util.Map;
 import java.util.Set;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
@@ -48,6 +50,12 @@ public class ShopMatchModule implements MatchModule, Listener {
     if (isKeeper(event.getEntity())) {
       event.setCancelled(true);
     }
+  }
+
+  // Armor stands never fire PlayerInteractEntityEvent
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void onClickArmorStandKeeper(PlayerInteractAtEntityEvent event) {
+    if (event.getRightClicked() instanceof ArmorStand) onClickShopKeeper(event);
   }
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
