@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -27,6 +28,7 @@ import tc.oc.pgm.kits.KitNode;
 import tc.oc.pgm.regions.Bounds;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.util.block.BlockStates;
+import tc.oc.pgm.util.block.BlockVectors;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.material.BlockMaterialData;
@@ -70,17 +72,19 @@ public class BlockDropsRuleSet {
     return new BlockDropsRuleSet(subset.build());
   }
 
-  public BlockDrops getDrops(BlockState block, BlockMaterialData material) {
-    return this.getDrops(null, block, material, null);
+  public BlockDrops getDrops(Block block, BlockMaterialData material) {
+    return this.getDrops(
+        null, block, BlockStates.cloneWithMaterial(block, material), material, null);
   }
 
-  public BlockDrops getDrops(@Nullable Event event, BlockState block, ParticipantState player) {
-    return this.getDrops(event, block, MaterialData.block(block), player);
+  public BlockDrops getDrops(@Nullable Event event, BlockState state, ParticipantState player) {
+    return this.getDrops(event, state.getBlock(), state, MaterialData.block(state), player);
   }
 
-  public BlockDrops getDrops(
+  private BlockDrops getDrops(
       @Nullable Event event,
-      BlockState block,
+      Block block,
+      BlockState state,
       BlockMaterialData material,
       @Nullable ParticipantState playerState) {
     Map<ItemStack, Double> items = new LinkedHashMap<>();
@@ -91,7 +95,7 @@ public class BlockDropsRuleSet {
     double fallSpeed = 1;
     int experience = 0;
     boolean custom = false;
-    block = BlockStates.cloneWithMaterial(block.getBlock(), material);
+    var pos = BlockVectors.center(block);
 
     boolean rightToolUsed = true;
     if (event instanceof BlockTransformEvent transformEvent) {
@@ -106,10 +110,10 @@ public class BlockDropsRuleSet {
     for (BlockDropsRule rule : this.rules) {
       if (event instanceof PlayerPunchBlockEvent && !rule.punch) continue;
       if (event instanceof PlayerTrampleBlockEvent && !rule.trample) continue;
-      if (rule.region != null && !rule.region.contains(block)) continue;
+      if (rule.region != null && !rule.region.contains(pos)) continue;
 
       if (rule.filter != null) {
-        Query query = Queries.block(event, playerState, block);
+        Query query = Queries.block(event, playerState, state);
         if (!rule.filter.query(query).isAllowed()) continue;
       }
 
