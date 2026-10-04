@@ -23,6 +23,10 @@ public final class LocalFrame {
     frame(ref).values[ref.slot()] = value;
   }
 
+  public void setDirect(int slot, double value) {
+    values[slot] = value;
+  }
+
   private LocalFrame frame(LocalRef ref) {
     var frame = this;
     for (int i = 0; i < ref.depth(); i++) frame = frame.parent;
