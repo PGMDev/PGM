@@ -12,6 +12,7 @@ import tc.oc.pgm.util.platform.Platform;
 public interface Sounds {
   Sound ADMIN_CHAT = sound("ORB_PICKUP", "ENTITY_EXPERIENCE_ORB_PICKUP", 1f, 0.7f);
   Sound ALERT = sound("NOTE_PLING", "BLOCK_NOTE_BLOCK_PLING", 1f, 2f);
+  Sound BRIDGE_EGG = sound("CHICKEN_EGG_POP", "ENTITY_CHICKEN_EGG", 0.6f, 1f);
   Sound CONTROL_POINT_GOOD = sound("PORTAL_TRAVEL", "BLOCK_PORTAL_TRAVEL", 0.35f, 2f);
   Sound CONTROL_POINT_BAD = sound("BLAZE_DEATH", "ENTITY_BLAZE_DEATH", 0.4f, 0.8f);
   Sound DEATH_OWN =
