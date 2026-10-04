@@ -1,5 +1,6 @@
 package tc.oc.pgm.util.inventory.tag;
 
+import java.util.List;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.platform.Platform;
@@ -54,6 +55,16 @@ public interface ItemTag<T> {
   }
 
   /**
+   * Creates a string list item tag.
+   *
+   * @param key A key.
+   * @return An item tag.
+   */
+  static ItemTag<List<String>> newStringList(String key) {
+    return FACTORY.newStringList(key);
+  }
+
+  /**
    * Creates a boolean item tag.
    *
    * @param key A key.
@@ -65,6 +76,8 @@ public interface ItemTag<T> {
 
   interface Factory {
     ItemTag<String> newString(String key);
+
+    ItemTag<List<String>> newStringList(String key);
 
     ItemTag<Boolean> newBoolean(String key);
   }
