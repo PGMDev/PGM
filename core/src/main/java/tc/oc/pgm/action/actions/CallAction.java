@@ -1,8 +1,7 @@
 package tc.oc.pgm.action.actions;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.util.List;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.action.ControlFlow;
@@ -20,7 +19,7 @@ public class CallAction<T extends Filterable<?>> extends AbstractAction<T> {
   private final ImmutableMap<String, Formula<T>> args;
   private final @Nullable VariableTarget<T> result;
   private final Filter filter;
-  private @Nullable ImmutableList<Formula<T>> orderedArgs;
+  private @Nullable List<Formula<T>> orderedArgs;
 
   public CallAction(
       Class<T> scope,
@@ -41,7 +40,7 @@ public class CallAction<T extends Filterable<?>> extends AbstractAction<T> {
 
     var fn = function.get();
     if (orderedArgs == null)
-      orderedArgs = ImmutableList.copyOf(Lists.transform(fn.getParams(), args::get));
+      orderedArgs = fn.getParams().stream().map(args::get).toList();
 
     var frame = fn.createFrame();
     for (int i = 0; i < orderedArgs.size(); i++) {

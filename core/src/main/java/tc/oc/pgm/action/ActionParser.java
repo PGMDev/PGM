@@ -288,11 +288,14 @@ public class ActionParser {
         null);
 
     boolean returnsValue = context.control().returnsValue();
-    Node defaultNode = Node.fromAttr(el, "default");
-    if (defaultNode != null && !returnsValue)
-      throw new InvalidXMLException(
-          "'default' is only allowed on functions that return a value", defaultNode);
-    double defaultValue = parser.parseDouble(el, "default").optional(0d);
+    double defaultValue = parser
+        .parseDouble(el, "default")
+        .validate((v, n) -> {
+          if (!returnsValue)
+            throw new InvalidXMLException(
+                "'default' is only allowed on functions that return a value", n);
+        })
+        .optional(0d);
 
     features.addFeature(
         el,
@@ -438,14 +441,15 @@ public class ActionParser {
 
     scope = parseScope(el, scope);
     var locals = context.locals();
-    Formula<B> value = null;
-    if (el.getAttribute("value") != null) {
-      if (!control.inFunction())
-        throw new InvalidXMLException(
-            "Returns can only have a value inside a function, outside of any schedule", el);
-      control.markReturnsValue();
-      value = parser.formula(scope, locals, el, "value").required();
-    }
+    Formula<B> value = parser
+        .formula(scope, locals, el, "value")
+        .validate((v, n) -> {
+          if (!control.inFunction())
+            throw new InvalidXMLException(
+                "Returns can only have a value inside a function, outside of any schedule", n);
+          control.markReturnsValue();
+        })
+        .orNull();
     return new ReturnAction<>(scope, parser.filter(locals, el, "filter").orAllow(), value);
   }
 
