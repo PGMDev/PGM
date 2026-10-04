@@ -3,6 +3,7 @@ package tc.oc.pgm.util.nms;
 import java.util.List;
 import java.util.UUID;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -27,6 +28,14 @@ public interface NMSHacks {
   boolean isCraftItemArrowEntity(PlayerPickupItemEvent item);
 
   void freezeEntity(Entity entity);
+
+  void setupPickup(Entity entity);
+
+  void tickFrozenEntity(Entity entity, Location location);
+
+  Vector getBoundingBoxCenter(Entity entity);
+
+  Vector getBoundingBoxSize(Entity entity);
 
   void setFireballDirection(Fireball entity, Vector direction);
 
