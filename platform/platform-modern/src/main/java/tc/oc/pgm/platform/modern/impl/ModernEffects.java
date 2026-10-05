@@ -16,7 +16,7 @@ import tc.oc.pgm.util.bukkit.Effects;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "26.2")
 public class ModernEffects implements Effects {
   @Override
   public void coloredDust(Player player, Location location, Color color) {
@@ -77,7 +77,8 @@ public class ModernEffects implements Effects {
   public void blockBreak(Location location, BlockMaterialData material) {
     location
         .getWorld()
-        .playEffect(location, Effect.STEP_SOUND, ((ModernBlockMaterialData) material).getBlock());
+        .playEffect(
+            location, Effect.DESTROY_BLOCK, ((ModernBlockMaterialData) material).getBlock());
   }
 
   @Override

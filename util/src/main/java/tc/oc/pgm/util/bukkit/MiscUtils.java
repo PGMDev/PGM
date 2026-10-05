@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.bukkit;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -49,8 +48,6 @@ public interface MiscUtils {
   ThrownPotion spawnPotion(Location loc, ItemStack item);
 
   double getArrowDamage(Arrow arrow);
-
-  int getWorldDataVersion(Path levelDat);
 
   Key getSoundKey(String name);
 
