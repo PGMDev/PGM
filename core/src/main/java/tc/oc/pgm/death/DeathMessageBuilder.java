@@ -249,8 +249,26 @@ public class DeathMessageBuilder {
       return block(blockInfo);
     } else if (info instanceof ItemInfo itemInfo) {
       return item(itemInfo);
+    } else if (info instanceof ProjectileInfo projectileInfo) {
+      return launched(projectileInfo);
     }
 
+    return false;
+  }
+
+  boolean launched(ProjectileInfo projectileInfo) {
+    if (projectileInfo.hasCustomName()) {
+      if (option("entity")) {
+        weapon = projectileInfo.getName();
+        return true;
+      }
+    } else if (projectileInfo.getProjectile() instanceof EntityInfo entityInfo) {
+      // Other projectiles are only named by messages written for them, such as a flaming arrow
+      if (option("entity", makeEntityIdentifier(entityInfo))) {
+        weapon = entityInfo.getName();
+        return true;
+      }
+    }
     return false;
   }
 
@@ -358,6 +376,7 @@ public class DeathMessageBuilder {
     }
 
     attack(projectile.getShooter(), info);
+    if (info != null && projectile.hasCustomName()) weapon = projectile.getName();
     ranged(projectile, distanceReference);
   }
 
@@ -450,6 +469,7 @@ public class DeathMessageBuilder {
     var entityType = entityInfo.getEntityType();
     if (entityType == EntityType.CREEPER) return "Creeper";
     else if (entityType == EntityTypes.PRIMED_TNT) return "PrimedTnt";
+    else if (entityType == EntityType.ARROW) return "Arrow";
     return entityInfo.getIdentifier();
   }
 
