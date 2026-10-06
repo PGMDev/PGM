@@ -38,7 +38,6 @@ import tc.oc.pgm.tracker.info.MobInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.pgm.util.bukkit.EntityTypes;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.text.MinecraftComponent;
@@ -201,8 +200,7 @@ public class DeathMessageBuilder {
   }
 
   boolean item(ItemInfo itemInfo) {
-    // TODO: Bukkit 1.13+ should be able to handle more than just weapons
-    if (Materials.isWeapon(itemInfo.getItem().getType()) && option("item")) {
+    if (itemInfo.getItem().getType() != Material.AIR && option("item")) {
       weapon = itemInfo.getName();
       return true;
     }
@@ -436,9 +434,10 @@ public class DeathMessageBuilder {
       case PotionInfo potionInfo -> magic(potionInfo, null);
       case FallingBlockInfo fallingBlockInfo -> squash(fallingBlockInfo);
       case BlockInfo blockInfo -> {
-        switch (blockInfo.getMaterial().getItemType()) {
-          case ANVIL -> squash(blockInfo);
-          default -> suffocate(blockInfo);
+        if (blockInfo.getMaterial().getItemType() == Material.ANVIL) {
+          squash(blockInfo);
+        } else {
+          suffocate(blockInfo);
         }
       }
       case FallInfo fallInfo -> fall(fallInfo);

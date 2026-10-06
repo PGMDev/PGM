@@ -1,12 +1,22 @@
 package tc.oc.pgm.util.text;
 
+import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.Component.virtual;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.VirtualComponentRenderer;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.EntityTypes;
+import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.platform.Platform;
 
 /** A singleton for accessing {@link Component} translations for Minecraft clients. */
@@ -41,6 +51,38 @@ public final class MinecraftComponent {
   }
 
   /**
+   * Gets a translated item name, including its variant, such as the color of a dye.
+   *
+   * @param item An item.
+   * @return An item name.
+   */
+  public static Component item(ItemStack item) {
+    final Component name = TRANSLATOR.getName(item);
+    final String english = TRANSLATOR.getEnglishName(item);
+    return english == null ? name : virtual(CommandSender.class, new LegacyFallback(name, english));
+  }
+
+  /**
+   * Shows 1.7 clients a plain English name, since their language files don't have the keys of items
+   * added or renamed in 1.8, such as banners or stone variants.
+   */
+  private record LegacyFallback(Component name, String english)
+      implements VirtualComponentRenderer<CommandSender> {
+    @Override
+    public ComponentLike apply(@NonNull CommandSender viewer) {
+      return viewer instanceof Player player
+              && ViaUtils.getProtocolVersion(player) <= ViaUtils.VERSION_1_7
+          ? text(english)
+          : name;
+    }
+
+    @Override
+    public @NonNull String fallbackString() {
+      return english;
+    }
+  }
+
+  /**
    * Gets a translated potion name.
    *
    * @param potion A potion type.
@@ -56,5 +98,10 @@ public final class MinecraftComponent {
     String getTranslationKey(EntityType entityType);
 
     String getTranslationKey(PotionEffectType potionEffectType);
+
+    Component getName(ItemStack item);
+
+    @Nullable
+    String getEnglishName(ItemStack item);
   }
 }
