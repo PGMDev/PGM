@@ -49,6 +49,8 @@ public interface MiscUtils {
 
   double getArrowDamage(Arrow arrow);
 
+  int getArrowKnockback(Arrow arrow);
+
   Key getSoundKey(String name);
 
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
