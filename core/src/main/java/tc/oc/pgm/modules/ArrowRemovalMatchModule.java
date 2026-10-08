@@ -1,7 +1,9 @@
 package tc.oc.pgm.modules;
 
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+
 import java.util.concurrent.TimeUnit;
-import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Projectile;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -26,8 +28,10 @@ public class ArrowRemovalMatchModule implements MatchModule {
   }
 
   private void removeOldArrows() {
-    for (Arrow arrow : match.getWorld().getEntitiesByClass(Arrow.class)) {
-      if (arrow.getTicksLived() >= maxTicks) arrow.remove();
+    for (Projectile projectile : match.getWorld().getEntitiesByClass(Projectile.class)) {
+      if (MISC_UTILS.isArrow(projectile.getClass()) && projectile.getTicksLived() >= maxTicks) {
+        projectile.remove();
+      }
     }
   }
 }
