@@ -2,6 +2,7 @@ package tc.oc.pgm.tracker.trackers;
 
 import static net.kyori.adventure.text.Component.translatable;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -214,16 +215,18 @@ public class CombatLogTracker implements Listener {
       Block landingBlock = null;
       int waterDepth = 0;
       Location location = player.getLocation();
+      int minY = NMS_HACKS.getMinWorldHeight(location.getWorld());
+      int maxY = NMS_HACKS.getMaxWorldHeight(location.getWorld());
 
-      if (location.getY() > 256) {
-        // If player is above Y 256, assume they fell at least to there
-        fallDistance += location.getY() - 256;
-        location.setY(256);
+      if (location.getY() > maxY) {
+        // If player is above the build limit, assume they fell at least to there
+        fallDistance += location.getY() - maxY;
+        location.setY(maxY);
       }
 
       // Search the blocks directly beneath the player until we find what they would have landed on
       Block block;
-      for (; location.getY() >= 0; location.add(0, -1, 0)) {
+      for (; location.getY() >= minY; location.add(0, -1, 0)) {
         block = location.getBlock();
         if (block != null) {
           landingBlock = block;
@@ -257,7 +260,7 @@ public class CombatLogTracker implements Listener {
       boolean fireResistance = hasFireResistance(player);
 
       // Now decide if the landing would have killed them
-      if (location.getBlockY() < 0) {
+      if (location.getBlockY() < minY) {
         // The player would have fallen into the void
         return new ImminentDeath(EntityDamageEvent.DamageCause.VOID, location, null, false);
       } else if (landingBlock != null) {

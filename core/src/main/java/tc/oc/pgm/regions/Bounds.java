@@ -6,7 +6,12 @@ import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import tc.oc.pgm.util.block.CuboidBlockIterator;
 
-public class Bounds implements Cloneable {
+@SuppressWarnings("ClassCanBeRecord")
+public class Bounds {
+  // Default min/max y in modern Minecraft
+  private static final int MIN_Y = -64;
+  private static final int MAX_Y = 320;
+
   protected final Vector min;
   protected final Vector max;
 
@@ -35,11 +40,6 @@ public class Bounds implements Cloneable {
 
   public Bounds(Bounds other) {
     this(other.min, other.max);
-  }
-
-  @Override
-  public Bounds clone() {
-    return new Bounds(this);
   }
 
   public static Bounds unbounded() {
@@ -185,21 +185,21 @@ public class Bounds implements Cloneable {
   public BlockVector getBlockMin() {
     return new BlockVector(
         roundDown(min.getX()) + 0.5d,
-        Math.clamp(roundDown(min.getY()), 0, 255) + 0.5d,
+        Math.clamp(roundDown(min.getY()), MIN_Y, MAX_Y) + 0.5d,
         roundDown(min.getZ()) + 0.5d);
   }
 
   public BlockVector getBlockMaxInside() {
     return new BlockVector(
         Math.round(max.getX()) - 0.5d,
-        Math.clamp(Math.round(max.getY()), 1, 255) - 0.5,
+        Math.clamp(Math.round(max.getY()), MIN_Y + 1, MAX_Y) - 0.5,
         Math.round(max.getZ()) - 0.5d);
   }
 
   public BlockVector getBlockMaxOutside() {
     return new BlockVector(
         Math.round(max.getX()) + 0.5d,
-        Math.clamp(Math.round(max.getY()), 0, 255) + 0.5d,
+        Math.clamp(Math.round(max.getY()), MIN_Y, MAX_Y) + 0.5d,
         Math.round(max.getZ()) + 0.5d);
   }
 
