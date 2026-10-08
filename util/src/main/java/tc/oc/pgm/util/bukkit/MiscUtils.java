@@ -51,6 +51,8 @@ public interface MiscUtils {
 
   int getArrowKnockback(Arrow arrow);
 
+  boolean isArrow(Class<? extends Entity> entityClass);
+
   Key getSoundKey(String name);
 
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
