@@ -90,6 +90,11 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
+  public boolean isArrow(Class<? extends Entity> entityClass) {
+    return Arrow.class.isAssignableFrom(entityClass);
+  }
+
+  @Override
   @SuppressWarnings("PatternValidation")
   public Key getSoundKey(String name) {
     return key(CraftSound.getSound(Sound.valueOf(name)));
