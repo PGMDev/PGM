@@ -106,6 +106,11 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
+  public boolean isKnownSound(Key key) {
+    return Registry.SOUND_EVENT.get(key) != null;
+  }
+
+  @Override
   public void initScoreboardTeam(Team team, NamedTextColor color) {
     team.color(color);
     team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
