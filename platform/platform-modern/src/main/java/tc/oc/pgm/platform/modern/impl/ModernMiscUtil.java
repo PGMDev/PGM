@@ -21,6 +21,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.Trident;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -84,6 +85,13 @@ public class ModernMiscUtil implements MiscUtils {
     // Knockback is a function of the firing weapon, the arrow itself always reports 0
     ItemStack weapon = arrow.getWeapon();
     return weapon == null ? 0 : weapon.getEnchantmentLevel(Enchantment.PUNCH);
+  }
+
+  @Override
+  public boolean isArrow(Class<? extends Entity> entityClass) {
+    // Spectral arrows aren't Arrows on modern, while tridents are thrown rather than fired
+    return AbstractArrow.class.isAssignableFrom(entityClass)
+        && !Trident.class.isAssignableFrom(entityClass);
   }
 
   @Override
