@@ -101,6 +101,12 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
+  public boolean isKnownSound(Key key) {
+    // There is no authoritative list of sound keys in legacy
+    return true;
+  }
+
+  @Override
   public boolean isPowerEnchanted(Projectile proj) {
     // Arrows with damage > 2 are from power bows.
     return proj instanceof Arrow arrow && arrow.spigot().getDamage() > 2.0D;
