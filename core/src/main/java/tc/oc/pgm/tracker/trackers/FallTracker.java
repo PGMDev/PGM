@@ -1,5 +1,7 @@
 package tc.oc.pgm.tracker.trackers;
 
+import static tc.oc.pgm.damage.PlatformDamage.PLATFORM_DAMAGE;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -161,6 +163,7 @@ public class FallTracker implements Listener, DamageResolver {
         break;
 
       default:
+        if (PLATFORM_DAMAGE.causesKnockback(event.getCause())) break;
         return;
     }
 
