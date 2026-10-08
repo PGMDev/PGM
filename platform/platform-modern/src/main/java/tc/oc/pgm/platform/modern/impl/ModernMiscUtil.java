@@ -80,6 +80,13 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
+  public int getArrowKnockback(Arrow arrow) {
+    // Knockback is a function of the firing weapon, the arrow itself always reports 0
+    ItemStack weapon = arrow.getWeapon();
+    return weapon == null ? 0 : weapon.getEnchantmentLevel(Enchantment.PUNCH);
+  }
+
+  @Override
   public Key getSoundKey(String name) {
     // From Paper, most reliable option
     try {

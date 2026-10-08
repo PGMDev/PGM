@@ -85,6 +85,11 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
+  public int getArrowKnockback(Arrow arrow) {
+    return arrow.getKnockbackStrength();
+  }
+
+  @Override
   @SuppressWarnings("PatternValidation")
   public Key getSoundKey(String name) {
     return key(CraftSound.getSound(Sound.valueOf(name)));

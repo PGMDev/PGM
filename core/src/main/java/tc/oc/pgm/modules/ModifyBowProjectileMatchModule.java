@@ -78,16 +78,15 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
       newProjectile.setFallDistance(oldEntity.getFallDistance());
       newProjectile.setFireTicks(oldEntity.getFireTicks());
 
-      if (newProjectile instanceof Projectile) {
-        ((Projectile) newProjectile).setShooter(oldEntity.getShooter());
-        ((Projectile) newProjectile).setBounce(oldEntity.doesBounce());
+      if (newProjectile instanceof Projectile projectile) {
+        projectile.setShooter(oldEntity.getShooter());
       }
 
       // Save some special properties of Arrows
       if (oldEntity instanceof Arrow arrow) {
         newProjectile.setMetadata("critical", new FixedMetadataValue(plugin, arrow.isCritical()));
         newProjectile.setMetadata(
-            "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
+            "knockback", new FixedMetadataValue(plugin, MISC_UTILS.getArrowKnockback(arrow)));
         newProjectile.setMetadata(
             "damage", new FixedMetadataValue(plugin, MISC_UTILS.getArrowDamage(arrow)));
       }
