@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.Nameable;
+import org.bukkit.Registry;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.CraftChunk;
@@ -32,6 +33,7 @@ import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
@@ -152,6 +154,14 @@ public class ModernNMSHacks implements NMSHacks {
   @Override
   public void cleanupPlayer(Player player) {
     player.setKiller(null);
+    player.setFreezeTicks(0);
+    player.setBeeStingersInBody(0);
+    player.setGliding(false);
+    player.clearActiveItem();
+
+    for (ItemType type : Registry.ITEM) {
+      if (player.getCooldown(type.key()) > 0) player.setCooldown(type.key(), 0);
+    }
   }
 
   @Override
