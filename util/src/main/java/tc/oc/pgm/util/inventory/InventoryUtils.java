@@ -173,6 +173,10 @@ public final class InventoryUtils {
     return stack;
   }
 
+  public static boolean isOffHand(Event event) {
+    return INVENTORY_UTILS.getUsedHand(event) != EquipmentSlot.HAND;
+  }
+
   public static void consumeItem(PlayerEvent event) {
     consumeItem(event, event.getPlayer());
   }

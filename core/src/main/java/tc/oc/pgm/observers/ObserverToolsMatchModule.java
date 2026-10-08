@@ -54,7 +54,7 @@ public class ObserverToolsMatchModule implements MatchModule, Listener {
   @EventHandler
   public void onToolClick(PlayerInteractEvent event) {
     if (isRightClick(event.getAction())) {
-      ItemStack item = event.getPlayer().getItemInHand();
+      ItemStack item = event.getItem();
       MatchPlayer player = match.getPlayer(event.getPlayer());
       if (player != null && item != null && item.isSimilar(createItem(player.getBukkit()))) {
         openMenu(player);
