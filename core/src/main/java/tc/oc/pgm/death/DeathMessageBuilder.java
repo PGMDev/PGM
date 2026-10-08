@@ -3,6 +3,7 @@ package tc.oc.pgm.death;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.damage.PlatformDamage.PLATFORM_DAMAGE;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
@@ -26,6 +27,7 @@ import tc.oc.pgm.api.tracker.info.RangedInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.tracker.info.BlockInfo;
+import tc.oc.pgm.tracker.info.ContactInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.FallingBlockInfo;
@@ -297,14 +299,30 @@ public class DeathMessageBuilder {
   void generic(GenericDamageInfo info) throws NoMessage {
     require(
         switch (info.getDamageType()) {
-          case CONTACT -> "cactus";
           case DROWNING -> "drown";
           case LIGHTNING -> "lightning";
           case STARVATION -> "starve";
           case SUFFOCATION -> "suffocate";
           case CUSTOM -> "generic";
-          default -> "unknown";
+          default -> {
+            String key = PLATFORM_DAMAGE.getDeathKey(info.getDamageType());
+            yield key != null ? key : "unknown";
+          }
         });
+  }
+
+  void contact(ContactInfo contact) throws NoMessage {
+    require(
+        switch (contact.getType()) {
+          case CACTUS -> "cactus";
+          case HOT_FLOOR -> "hotFloor";
+          case CAMPFIRE -> "fire";
+          case SWEET_BERRY_BUSH -> "sweetBerryBush";
+          case STALAGMITE -> "stalagmite";
+          case OTHER -> "unknown";
+        });
+    // Name whoever placed the block, which unknown deaths have no message for
+    if (contact.getType() != ContactInfo.Type.OTHER) attack(null, contact.getBlock());
   }
 
   void melee(MeleeInfo melee) throws NoMessage {
@@ -352,11 +370,6 @@ public class DeathMessageBuilder {
 
   void suffocate(PhysicalInfo fallenBlock) throws NoMessage {
     require("suffocate");
-    attack(null, fallenBlock);
-  }
-
-  void cactus(PhysicalInfo fallenBlock) throws NoMessage {
-    require("cactus");
     attack(null, fallenBlock);
   }
 
@@ -419,12 +432,12 @@ public class DeathMessageBuilder {
       case ProjectileInfo projectileInfo -> projectile(projectileInfo, location);
       case ExplosionInfo explosionInfo -> explosion(explosionInfo, location);
       case FireInfo fireInfo -> fire(fireInfo);
+      case ContactInfo contactInfo -> contact(contactInfo);
       case PotionInfo potionInfo -> magic(potionInfo, null);
       case FallingBlockInfo fallingBlockInfo -> squash(fallingBlockInfo);
       case BlockInfo blockInfo -> {
         switch (blockInfo.getMaterial().getItemType()) {
           case ANVIL -> squash(blockInfo);
-          case CACTUS -> cactus(blockInfo);
           default -> suffocate(blockInfo);
         }
       }
