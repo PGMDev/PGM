@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +48,7 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
       case FIRE_TICK:
         FireInfo info = resolveBurning(victim);
         if (info != null) return info;
-        // fall through
+      // fall through
 
       case FIRE:
       case LAVA:
@@ -74,6 +75,13 @@ public class FireTracker extends AbstractTracker<FireInfo> implements DamageReso
       blocks()
           .trackBlockState(
               event.getNewState(), new FireInfo(new BlockInfo(event.getNewState(), placer)));
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+  public void onEntityCombust(EntityCombustEvent event) {
+    if (event.getEntity().getFireTicks() <= 0) {
+      this.burningEntities.remove(event.getEntity());
     }
   }
 
