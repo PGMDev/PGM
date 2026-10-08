@@ -1,5 +1,7 @@
 package tc.oc.pgm.modules;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,8 +22,10 @@ public class InternalMatchModule implements MatchModule, Listener {
     if (event.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN) {
       double fromY = event.getFrom().getY();
       double toY = event.getTo().getY();
+      double minY = NMS_HACKS.getMinWorldHeight(event.getTo().getWorld());
+      double maxY = NMS_HACKS.getMaxWorldHeight(event.getTo().getWorld()) - 1;
 
-      if ((fromY >= 0.0D && fromY < 255.0D) && (toY < 0.0D || toY >= 255.0D)) {
+      if ((fromY >= minY && fromY < maxY) && (toY < minY || toY >= maxY)) {
         event.setCancelled(true);
       }
     }

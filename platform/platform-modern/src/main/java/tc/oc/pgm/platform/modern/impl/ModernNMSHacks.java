@@ -189,6 +189,16 @@ public class ModernNMSHacks implements NMSHacks {
   }
 
   @Override
+  public int getMinWorldHeight(World world) {
+    return world.getMinHeight();
+  }
+
+  @Override
+  public int getMaxWorldHeight(World world) {
+    return world.getMaxHeight();
+  }
+
+  @Override
   public int allocateEntityId(World world) {
     return Bukkit.getUnsafe().nextEntityId(world);
   }
