@@ -195,9 +195,9 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void checkInfiniteBlocks(BlockPlaceEvent event) {
-    final ItemStack item = event.getPlayer().getItemInHand();
+    final ItemStack item = event.getItemInHand();
     if (ItemTags.INFINITE.has(item)) {
-      // infinite block contains -1 items, giving -1 items sets the amount back to -1
+      // Top the stack back up, so placing never depletes it
       item.setAmount(ItemKit.INFINITE_STACK_SIZE);
     }
   }
