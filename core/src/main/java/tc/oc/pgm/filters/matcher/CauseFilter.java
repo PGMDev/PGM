@@ -19,6 +19,7 @@ import tc.oc.pgm.api.tracker.info.MeleeInfo;
 import tc.oc.pgm.api.tracker.info.PhysicalInfo;
 import tc.oc.pgm.api.tracker.info.PotionInfo;
 import tc.oc.pgm.tracker.TrackerMatchModule;
+import tc.oc.pgm.tracker.info.ContactInfo;
 import tc.oc.pgm.tracker.info.ItemInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.event.GeneralizedEvent;
@@ -129,7 +130,10 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
         event instanceof BlockBurnEvent
             || damageCause == EntityDamageEvent.DamageCause.FIRE
             || damageCause == EntityDamageEvent.DamageCause.FIRE_TICK
-            || damageCause == EntityDamageEvent.DamageCause.LAVA;
+            || damageCause == EntityDamageEvent.DamageCause.LAVA
+            || (damageInfo instanceof ContactInfo contact
+                && (contact.getType() == ContactInfo.Type.HOT_FLOOR
+                    || contact.getType() == ContactInfo.Type.CAMPFIRE));
       case FALL -> // Strictly damage from hitting the ground
         damageCause == EntityDamageEvent.DamageCause.FALL;
       case GRAVITY -> // Any damage caused by a fall
@@ -141,7 +145,8 @@ public class CauseFilter extends TypedFilter.Impl<MatchQuery> {
       case DROWNING -> damageCause == EntityDamageEvent.DamageCause.DROWNING;
       case STARVATION -> damageCause == EntityDamageEvent.DamageCause.STARVATION;
       case LIGHTNING -> damageCause == EntityDamageEvent.DamageCause.LIGHTNING;
-      case CACTUS -> damageCause == EntityDamageEvent.DamageCause.CONTACT;
+      case CACTUS ->
+        damageInfo instanceof ContactInfo contact && contact.getType() == ContactInfo.Type.CACTUS;
       case THORNS -> damageCause == EntityDamageEvent.DamageCause.THORNS;
     };
   }
