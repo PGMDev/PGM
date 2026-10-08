@@ -75,8 +75,9 @@ public class ProjectileMatchModule implements MatchModule, Listener {
     ParticipantState playerState = match.getParticipantState(player);
     if (playerState == null) return;
 
-    ProjectileDefinition projectileDefinition =
-        this.getProjectileDefinition(player.getItemInHand());
+    ItemStack item = event.getItem();
+    if (InventoryUtils.isNothing(item)) return;
+    ProjectileDefinition projectileDefinition = this.getProjectileDefinition(item);
 
     if (projectileDefinition != null
         && isValidProjectileAction(event.getAction(), projectileDefinition.clickAction)) {

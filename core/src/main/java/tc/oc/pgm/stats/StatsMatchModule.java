@@ -119,8 +119,10 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onMatchStart(final MatchStartEvent event) {
-    event.getMatch().getParticipants().forEach(player -> getPlayerStat(player)
-        .startParticipation());
+    event
+        .getMatch()
+        .getParticipants()
+        .forEach(player -> getPlayerStat(player).startParticipation());
   }
 
   @EventHandler(priority = EventPriority.LOWEST)
@@ -339,7 +341,7 @@ public class StatsMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void onToolClick(PlayerInteractEvent event) {
-    if (event.getPlayer().getItemInHand().getType() != Material.PAPER) return;
+    if (event.getItem() == null || event.getItem().getType() != Material.PAPER) return;
     if (!match.isFinished() || !verboseStats) return;
     Action action = event.getAction();
     if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
