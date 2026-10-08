@@ -24,8 +24,8 @@ import tc.oc.pgm.tracker.resolvers.ExplosionDamageResolver;
 import tc.oc.pgm.tracker.resolvers.GenericDamageResolver;
 import tc.oc.pgm.tracker.resolvers.PotionDamageResolver;
 import tc.oc.pgm.tracker.trackers.BlockTracker;
-import tc.oc.pgm.tracker.trackers.CactiTracker;
 import tc.oc.pgm.tracker.trackers.CombatLogTracker;
+import tc.oc.pgm.tracker.trackers.ContactTracker;
 import tc.oc.pgm.tracker.trackers.DeathTracker;
 import tc.oc.pgm.tracker.trackers.DispenserTracker;
 import tc.oc.pgm.tracker.trackers.EndCrystalTracker;
@@ -46,7 +46,7 @@ public class TrackerMatchModule implements MatchModule {
   private final FallTracker fallTracker;
   private final FireTracker fireTracker;
   private final FallingBlockTracker fallingBlockTracker;
-  private final CactiTracker cactiTracker;
+  private final ContactTracker contactTracker;
   private final CombatLogTracker combatLogTracker;
 
   private final Set<DamageResolver> damageResolvers = new LinkedHashSet<>();
@@ -59,14 +59,14 @@ public class TrackerMatchModule implements MatchModule {
     fallTracker = new FallTracker(this, match);
     fireTracker = new FireTracker(this, match);
     fallingBlockTracker = new FallingBlockTracker(this, match);
-    cactiTracker = new CactiTracker(this, match);
+    contactTracker = new ContactTracker(this, match);
     combatLogTracker = new CombatLogTracker(this);
 
     // Damage resolvers - order is important!
     damageResolvers.add(fallTracker);
     damageResolvers.add(fireTracker);
     damageResolvers.add(fallingBlockTracker);
-    damageResolvers.add(cactiTracker);
+    damageResolvers.add(contactTracker);
     damageResolvers.add(new PotionDamageResolver());
     damageResolvers.add(new ExplosionDamageResolver());
     damageResolvers.add(new GenericDamageResolver());
@@ -83,7 +83,7 @@ public class TrackerMatchModule implements MatchModule {
     match.addListener(entityTracker, MatchScope.RUNNING);
     match.addListener(blockTracker, MatchScope.RUNNING);
     match.addListener(fallingBlockTracker, MatchScope.RUNNING);
-    match.addListener(cactiTracker, MatchScope.RUNNING);
+    match.addListener(contactTracker, MatchScope.RUNNING);
     match.addListener(combatLogTracker, MatchScope.RUNNING);
     match.addListener(new EndCrystalTracker(this, match), MatchScope.RUNNING);
     match.addListener(new DispenserTracker(this, match), MatchScope.RUNNING);
