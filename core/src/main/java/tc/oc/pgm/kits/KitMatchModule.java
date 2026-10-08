@@ -98,7 +98,7 @@ public class KitMatchModule implements MatchModule, Listener {
     switch (event.getAction()) {
       case HOTBAR_SWAP:
       case HOTBAR_MOVE_AND_READD:
-        Slot slot = Slot.Hotbar.forIndex(event.getHotbarButton());
+        Slot slot = Slot.Player.forIndex(event.getHotbarButton());
         if (slot == null) return;
         ItemStack item = event.getWhoClicked().getInventory().getItem(slot.getIndex());
         if (isLocked(item)) break;
