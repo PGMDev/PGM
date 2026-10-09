@@ -5,10 +5,10 @@ import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.ENTITY_ATTAC
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.FIRE;
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.MAGIC;
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import java.util.List;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -79,7 +79,7 @@ public class DamageMatchModule implements MatchModule, Listener {
     // Disable self-damage with arrows
     if (damageInfo instanceof ProjectileInfo projectileInfo) {
       if (projectileInfo.getProjectile() instanceof EntityInfo
-          && ((EntityInfo) projectileInfo.getProjectile()).getEntityType() == EntityType.ARROW) {
+          && MISC_UTILS.isArrow(((EntityInfo) projectileInfo.getProjectile()).getEntityClass())) {
         return false;
       }
     }

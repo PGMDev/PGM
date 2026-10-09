@@ -3,6 +3,7 @@ package tc.oc.pgm.action;
 import static net.kyori.adventure.key.Key.key;
 import static net.kyori.adventure.sound.Sound.sound;
 import static net.kyori.adventure.text.Component.empty;
+import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -581,7 +583,15 @@ public class ActionParser {
     float pitch =
         XMLUtils.parseNumber(Node.fromAttr(el, "pitch"), Float.class, soundType.getPitch());
 
-    Sound sound = sound(key(resource, ':'), Sound.Source.MASTER, volume, pitch);
+    Key soundKey = key(resource, ':');
+    if (resourceNode != null && !MISC_UTILS.isKnownSound(soundKey)) {
+      factory.warn(
+          "Unknown sound " + soundKey.asString()
+              + ", it will be silent unless provided by a resource pack",
+          resourceNode);
+    }
+
+    Sound sound = sound(soundKey, Sound.Source.MASTER, volume, pitch);
 
     return new SoundAction(sound);
   }

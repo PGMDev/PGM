@@ -4,9 +4,10 @@ import static org.reflections.scanners.Scanners.TypesAnnotated;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.reflections.Reflections;
 import org.reflections.util.ConfigurationBuilder;
 import tc.oc.pgm.util.Version;
@@ -21,20 +22,30 @@ import tc.oc.pgm.util.text.TextParser;
 public abstract class Platform {
   private static final Reflections REFLECTIONS = new Reflections(
       new ConfigurationBuilder().forPackage("tc.oc.pgm.platform").setScanners(TypesAnnotated));
+  private static final Pattern VERSION_MATCHER = Pattern.compile("\\d+(?:\\.\\d+){1,2}");
 
   public static final Version MINECRAFT_VERSION;
   public static final Variant VARIANT;
 
+  private static Version parseServerVersion(final @NonNull String versionName) {
+    var matcher = VERSION_MATCHER.matcher(versionName);
+
+    if (!matcher.find())
+      throw new IllegalArgumentException("Could not parse server version from: " + versionName);
+
+    return TextParser.parseVersion(matcher.group());
+  }
+
   static {
     var sv = Bukkit.getServer();
-    MINECRAFT_VERSION = TextParser.parseVersion(sv.getBukkitVersion().split("-")[0]);
+    MINECRAFT_VERSION = parseServerVersion(sv.getBukkitVersion());
     VARIANT = Arrays.stream(Variant.values())
         .filter(v -> v.matcher.test(sv))
         .findFirst()
         .orElse(null);
   }
 
-  public static final @NotNull Manifest MANIFEST = get(Manifest.class);
+  public static final @NonNull Manifest MANIFEST = get(Manifest.class);
 
   /**
    * Do a minimum sanity-check of the platform's viability and early-load some codepaths
@@ -49,7 +60,7 @@ public abstract class Platform {
     assertTrue(ColorUtils.COLOR_UTILS.isColorAffected(item.getItemType()));
   }
 
-  public static <T> @NotNull T get(Class<T> clazz) {
+  public static <T> @NonNull T get(Class<T> clazz) {
     return (T) Platform.getBestSupported(clazz);
   }
 

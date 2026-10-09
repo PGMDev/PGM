@@ -53,7 +53,7 @@ public class CuboidRegion
   }
 
   public CuboidRegion.Mutable asMutableCopy() {
-    return new Mutable(this.bounds.clone());
+    return new Mutable(new Bounds(this.bounds));
   }
 
   public static class Mutable extends CuboidRegion implements RegionDefinition.Mutable {
