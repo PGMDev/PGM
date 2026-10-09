@@ -14,6 +14,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.action.replacements.Replacement;
@@ -70,20 +71,29 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
     return component;
   }
 
-  private Component replaceClickEvents(
+  private static @NonNull Component replaceClickEvents(
       Component component, Function<MatchResult, String> replacer) {
     var click = component.clickEvent();
-    if (click != null && click.payload() instanceof ClickEvent.Payload.Text payload) {
-      var matcher = PATTERN.matcher(payload.value());
-      var result = new StringBuilder();
-      while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
-      matcher.appendTail(result);
-      var resultPayload = ClickEvent.Payload.string(result.toString());
-      component = component.clickEvent(ClickEvent.clickEvent(click.action(), resultPayload));
+    if (click != null
+        && click.action() instanceof ClickEvent.Action.TextCarrier action
+        && click.payload() instanceof ClickEvent.Payload.Text payload) {
+      component = component.clickEvent(replaceEvent(action, payload, replacer));
     }
     var children = new ArrayList<>(component.children());
     children.replaceAll(child -> replaceClickEvents(child, replacer));
     return component.children(children);
+  }
+
+  private static @NonNull ClickEvent<ClickEvent.Payload.Text> replaceEvent(
+      ClickEvent.Action<ClickEvent.Payload.Text> action,
+      ClickEvent.Payload.Text payload,
+      Function<MatchResult, String> replacer) {
+    var matcher = PATTERN.matcher(payload.value());
+    var result = new StringBuilder();
+    while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
+    matcher.appendTail(result);
+    var resultPayload = ClickEvent.Payload.string(result.toString());
+    return ClickEvent.clickEvent(action, resultPayload);
   }
 
   private Title replace(Title title, T scope, @Nullable LocalFrame frame) {

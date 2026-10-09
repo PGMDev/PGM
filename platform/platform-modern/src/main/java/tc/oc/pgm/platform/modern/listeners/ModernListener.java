@@ -14,7 +14,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -24,14 +23,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.entity.EntityPoseChangeEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.jspecify.annotations.NullMarked;
 import tc.oc.pgm.api.PGM;
-import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectRemoveEvent;
@@ -47,15 +44,6 @@ import tc.oc.pgm.util.event.player.PlayerSpawnLocationEvent;
  */
 @NullMarked
 public class ModernListener implements Listener {
-
-  @EventHandler(ignoreCancelled = true)
-  public void onBlockFall(EntitySpawnEvent event) {
-    if (event.getEntity() instanceof FallingBlock fb) {
-      BlockFallEvent pgmEvent = new BlockFallEvent(event.getLocation().getBlock(), fb);
-      handleCall(pgmEvent, event);
-    }
-  }
-
   @EventHandler(ignoreCancelled = true)
   public void onPlayerOnGround(EntityPoseChangeEvent event) {
     if (event.getEntity() instanceof Player p)
