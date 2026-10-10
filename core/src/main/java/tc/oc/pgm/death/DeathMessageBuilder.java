@@ -3,6 +3,7 @@ package tc.oc.pgm.death;
 import static net.kyori.adventure.text.Component.space;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.damage.PlatformDamage.PLATFORM_DAMAGE;
 
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
@@ -26,6 +27,7 @@ import tc.oc.pgm.api.tracker.info.RangedInfo;
 import tc.oc.pgm.api.tracker.info.TrackerInfo;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.tracker.info.BlockInfo;
+import tc.oc.pgm.tracker.info.ContactInfo;
 import tc.oc.pgm.tracker.info.EntityInfo;
 import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.FallingBlockInfo;
@@ -36,7 +38,6 @@ import tc.oc.pgm.tracker.info.MobInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.tracker.info.SpleefInfo;
 import tc.oc.pgm.util.bukkit.EntityTypes;
-import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.text.MinecraftComponent;
@@ -199,8 +200,7 @@ public class DeathMessageBuilder {
   }
 
   boolean item(ItemInfo itemInfo) {
-    // TODO: Bukkit 1.13+ should be able to handle more than just weapons
-    if (Materials.isWeapon(itemInfo.getItem().getType()) && option("item")) {
+    if (itemInfo.getItem().getType() != Material.AIR && option("item")) {
       weapon = itemInfo.getName();
       return true;
     }
@@ -249,8 +249,26 @@ public class DeathMessageBuilder {
       return block(blockInfo);
     } else if (info instanceof ItemInfo itemInfo) {
       return item(itemInfo);
+    } else if (info instanceof ProjectileInfo projectileInfo) {
+      return launched(projectileInfo);
     }
 
+    return false;
+  }
+
+  boolean launched(ProjectileInfo projectileInfo) {
+    if (projectileInfo.hasCustomName()) {
+      if (option("entity")) {
+        weapon = projectileInfo.getName();
+        return true;
+      }
+    } else if (projectileInfo.getProjectile() instanceof EntityInfo entityInfo) {
+      // Other projectiles are only named by messages written for them, such as a flaming arrow
+      if (option("entity", makeEntityIdentifier(entityInfo))) {
+        weapon = entityInfo.getName();
+        return true;
+      }
+    }
     return false;
   }
 
@@ -297,14 +315,30 @@ public class DeathMessageBuilder {
   void generic(GenericDamageInfo info) throws NoMessage {
     require(
         switch (info.getDamageType()) {
-          case CONTACT -> "cactus";
           case DROWNING -> "drown";
           case LIGHTNING -> "lightning";
           case STARVATION -> "starve";
           case SUFFOCATION -> "suffocate";
           case CUSTOM -> "generic";
-          default -> "unknown";
+          default -> {
+            String key = PLATFORM_DAMAGE.getDeathKey(info.getDamageType());
+            yield key != null ? key : "unknown";
+          }
         });
+  }
+
+  void contact(ContactInfo contact) throws NoMessage {
+    require(
+        switch (contact.getType()) {
+          case CACTUS -> "cactus";
+          case HOT_FLOOR -> "hotFloor";
+          case CAMPFIRE -> "fire";
+          case SWEET_BERRY_BUSH -> "sweetBerryBush";
+          case STALAGMITE -> "stalagmite";
+          case OTHER -> "unknown";
+        });
+    // Name whoever placed the block, which unknown deaths have no message for
+    if (contact.getType() != ContactInfo.Type.OTHER) attack(null, contact.getBlock());
   }
 
   void melee(MeleeInfo melee) throws NoMessage {
@@ -342,6 +376,7 @@ public class DeathMessageBuilder {
     }
 
     attack(projectile.getShooter(), info);
+    if (info != null && projectile.hasCustomName()) weapon = projectile.getName();
     ranged(projectile, distanceReference);
   }
 
@@ -352,11 +387,6 @@ public class DeathMessageBuilder {
 
   void suffocate(PhysicalInfo fallenBlock) throws NoMessage {
     require("suffocate");
-    attack(null, fallenBlock);
-  }
-
-  void cactus(PhysicalInfo fallenBlock) throws NoMessage {
-    require("cactus");
     attack(null, fallenBlock);
   }
 
@@ -419,12 +449,12 @@ public class DeathMessageBuilder {
       case ProjectileInfo projectileInfo -> projectile(projectileInfo, location);
       case ExplosionInfo explosionInfo -> explosion(explosionInfo, location);
       case FireInfo fireInfo -> fire(fireInfo);
+      case ContactInfo contactInfo -> contact(contactInfo);
       case PotionInfo potionInfo -> magic(potionInfo, null);
       case FallingBlockInfo fallingBlockInfo -> squash(fallingBlockInfo);
       case BlockInfo blockInfo -> {
         switch (blockInfo.getMaterial().getItemType()) {
           case ANVIL -> squash(blockInfo);
-          case CACTUS -> cactus(blockInfo);
           default -> suffocate(blockInfo);
         }
       }
@@ -439,6 +469,7 @@ public class DeathMessageBuilder {
     var entityType = entityInfo.getEntityType();
     if (entityType == EntityType.CREEPER) return "Creeper";
     else if (entityType == EntityTypes.PRIMED_TNT) return "PrimedTnt";
+    else if (entityType == EntityType.ARROW) return "Arrow";
     return entityInfo.getIdentifier();
   }
 

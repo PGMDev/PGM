@@ -43,7 +43,7 @@ public class ItemInfo extends OwnerInfoBase implements PhysicalInfo {
       }
     }
 
-    return MinecraftComponent.material(getItem().getType());
+    return MinecraftComponent.item(getItem());
   }
 
   @Override

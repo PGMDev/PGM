@@ -41,19 +41,6 @@ public interface Materials {
   Material MOVING_PISTON = parse("PISTON_MOVING_PIECE", "MOVING_PISTON");
   Material PISTON_HEAD = parse("PISTON_EXTENSION", "PISTON_HEAD");
 
-  MaterialMatcher WEAPONS = MaterialMatcher.builder()
-      .addAll(m -> m.name().endsWith("_SWORD")
-          || m.name().endsWith("_AXE")
-          || m.name().endsWith("_PICKAXE")
-          || m.name().endsWith("_SHOVEL")
-          || m.name().endsWith("_SPADE") // 1.8 shovels
-          || m.name().endsWith("_HOE")
-          || m.name().endsWith("_SPEAR"))
-      .addAll(Material.BOW, Material.FLINT_AND_STEEL, Material.SHEARS, Material.STICK)
-      .addNullable(Material.getMaterial("TRIDENT"))
-      .addNullable(Material.getMaterial("MACE"))
-      .build();
-
   MaterialMatcher DOOR_ITEMS = MaterialMatcher.builder()
       .addAll(m -> m.name().contains("_DOOR") && !m.isBlock())
       .build();
@@ -105,10 +92,6 @@ public interface Materials {
       }
       default -> -1;
     };
-  }
-
-  static boolean isWeapon(Material material) {
-    return material != null && WEAPONS.matches(material);
   }
 
   static boolean isSolid(Material material) {
