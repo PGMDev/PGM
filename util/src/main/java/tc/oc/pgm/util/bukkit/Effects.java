@@ -1,9 +1,11 @@
 package tc.oc.pgm.util.bukkit;
 
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Platform;
@@ -28,4 +30,22 @@ public interface Effects {
   void blockBreak(Location location, BlockMaterialData material);
 
   void spawnFlame(Player player, Location loc, float x, float y, float z, int amt);
+
+  void pickupEffect(Entity entity, PickupEffect effect);
+
+  enum PickupEffect {
+    SPAWN(Sounds.PICKUP_APPEAR),
+    DESPAWN(Sounds.PICKUP_DISAPPEAR),
+    PICKUP(Sounds.PICKUP_DISAPPEAR);
+
+    private final Sound sound;
+
+    PickupEffect(Sound sound) {
+      this.sound = sound;
+    }
+
+    public Sound sound() {
+      return sound;
+    }
+  }
 }
