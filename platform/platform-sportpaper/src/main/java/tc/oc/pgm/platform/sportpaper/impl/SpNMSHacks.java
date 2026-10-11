@@ -229,4 +229,9 @@ public class SpNMSHacks implements NMSHacks {
   public int allocateEntityId() {
     return Bukkit.allocateEntityId();
   }
+
+  @Override
+  public int getMinHeight(World world) {
+    return 0;
+  }
 }
