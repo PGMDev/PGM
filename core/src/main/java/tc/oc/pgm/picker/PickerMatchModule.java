@@ -420,7 +420,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     scheduleRefresh(event.getVictim());
   }
 
-  @EventHandler
+  @EventHandler(priority = EventPriority.MONITOR)
   public void playerVanishRefresh(final PlayerVanishEvent event) {
     refreshKit(event.getPlayer());
   }
