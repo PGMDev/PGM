@@ -1,7 +1,9 @@
 package tc.oc.pgm.entity;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -17,29 +19,43 @@ import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 
 public record SpawnableEntity(
-    Class<? extends LivingEntity> entityType, List<Consumer<Entity>> properties, Kit kit) {
+    Class<? extends Entity> entityType, List<Consumer<Entity>> properties, Kit kit) {
 
   public Entity spawn(Location location) {
-    LivingEntity entity = location.getWorld().spawn(location, entityType);
+    Entity entity = location.getWorld().spawn(location, entityType);
     for (var property : properties) {
       property.accept(entity);
     }
-    kit.apply(entity);
+    if (entity instanceof LivingEntity living) kit.apply(living);
     return entity;
   }
 
   public static SpawnableEntity parse(Element el, MapFactory factory) throws InvalidXMLException {
-    var type = parseType(Node.fromRequiredAttr(el, "type"));
+    return parse(el, parseType(Node.fromRequiredAttr(el, "type")), factory, Set.of());
+  }
 
+  public static SpawnableEntity parse(
+      Element el, Class<? extends Entity> type, MapFactory factory, Set<String> excluded)
+      throws InvalidXMLException {
+    String[] ignored = Stream.concat(excluded.stream(), Stream.of("kit")).toArray(String[]::new);
     List<Consumer<Entity>> properties =
-        MobProperties.MOB_PROPERTIES.parseAttributes(type, el, "kit");
+        MobProperties.MOB_PROPERTIES.parseAttributes(type, el, ignored);
 
-    Kit kit = factory.getParser().kit(el, "kit").optional(KitNode.EMPTY);
+    Kit kit = KitNode.EMPTY;
+    if (LivingEntity.class.isAssignableFrom(type)) {
+      var livingType = type.asSubclass(LivingEntity.class);
+      kit = factory.getParser().kit(el, "kit").optional(KitNode.EMPTY);
 
-    // Kit contents can't be inspected until references resolve, so mob compatibility
-    // is validated through the feature context, which defers until after resolution
-    FeatureValidation<KitDefinition> validation = (def, node) -> def.validateMob(type, node);
-    factory.getFeatures().validate(kit, validation, new Node(el));
+      // Kit contents can't be inspected until references resolve, so mob compatibility
+      // is validated through the feature context, which defers until after resolution
+      FeatureValidation<KitDefinition> validation =
+          (def, node) -> def.validateMob(livingType, node);
+      factory.getFeatures().validate(kit, validation, new Node(el));
+    } else if (el.getAttribute("kit") != null) {
+      throw new InvalidXMLException(
+          "Kits can only be applied to living entities, not " + type.getSimpleName(),
+          el.getAttribute("kit"));
+    }
 
     return new SpawnableEntity(type, properties, kit);
   }
