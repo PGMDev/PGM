@@ -1,5 +1,7 @@
 package tc.oc.pgm.platform.sportpaper.inventory;
 
+import com.google.common.collect.Lists;
+import java.util.List;
 import java.util.function.Function;
 import net.minecraft.server.v1_8_R3.NBTBase;
 import net.minecraft.server.v1_8_R3.NBTTagByte;
@@ -8,6 +10,7 @@ import net.minecraft.server.v1_8_R3.NBTTagDouble;
 import net.minecraft.server.v1_8_R3.NBTTagFloat;
 import net.minecraft.server.v1_8_R3.NBTTagInt;
 import net.minecraft.server.v1_8_R3.NBTTagIntArray;
+import net.minecraft.server.v1_8_R3.NBTTagList;
 import net.minecraft.server.v1_8_R3.NBTTagLong;
 import net.minecraft.server.v1_8_R3.NBTTagShort;
 import net.minecraft.server.v1_8_R3.NBTTagString;
@@ -82,5 +85,13 @@ public class SpItemTag<T, N extends NBTBase> implements ItemTag<T> {
         new Codec<>(b -> new NBTTagByte((byte) (b ? 1 : 0)), byteTag -> byteTag.f() != 0);
     public static Codec<int[], NBTTagIntArray> INT_ARRAY =
         new Codec<>(NBTTagIntArray::new, NBTTagIntArray::c);
+    public static Codec<List<String>, NBTTagList> STRING_LIST = new Codec<>(
+        (List<String> strings) -> {
+          var nbt = new NBTTagList();
+          nbt.list = Lists.transform(strings, NBTTagString::new);
+          return nbt;
+        },
+        nbt -> Lists.transform(
+            nbt.list, b -> b instanceof NBTTagString str ? str.a_() : b.toString()));
   }
 }
