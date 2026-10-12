@@ -278,16 +278,19 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
   @Override
   public void onDisable() {
-    if (tablistResizerEnabled) {
-      TablistResizer.unregisterListener();
-      tablistResizerEnabled = false;
+    try {
+      if (matchTabManager != null) matchTabManager.disable();
+      if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
+    } finally {
+      if (tablistResizerEnabled) {
+        TablistResizer.unregisterListener();
+        tablistResizerEnabled = false;
+      }
+      Platform.MANIFEST.onDisable();
+      if (executorService != null) executorService.shutdown();
+      if (asyncExecutorService != null) asyncExecutorService.shutdown();
+      if (datastore != null) datastore.close();
     }
-    Platform.MANIFEST.onDisable();
-    if (matchTabManager != null) matchTabManager.disable();
-    if (matchManager != null) matchManager.getMatches().forEachRemaining(Match::unload);
-    if (executorService != null) executorService.shutdown();
-    if (asyncExecutorService != null) asyncExecutorService.shutdown();
-    if (datastore != null) datastore.close();
   }
 
   @Override

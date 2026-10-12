@@ -7,9 +7,11 @@ import com.github.retrooper.packetevents.event.PacketListenerCommon;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.event.ProtocolPacketEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
@@ -40,6 +42,13 @@ public class PacketEventsUtil {
 
   public static void unregister(PacketListenerCommon listener) {
     eventManager().unregisterListener(listener);
+  }
+
+  public static <E extends ProtocolPacketEvent> void reEncodeIfModified(
+      E event, Predicate<? super E> rewrite) {
+    var previousWrapper = event.getLastUsedWrapper();
+    if (rewrite.test(event)) event.markForReEncode(true);
+    else event.setLastUsedWrapper(previousWrapper);
   }
 
   private static EventManager eventManager() {
