@@ -18,7 +18,7 @@ import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -34,7 +34,7 @@ import tc.oc.pgm.util.nms.packets.EntityPackets;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.5")
+@Supports(value = PAPER, minVersion = "26.2")
 public class ModernEntityPackets implements EntityPackets {
 
   private static final EntityDataAccessor<Byte> ENTITY_FLAGS =
@@ -53,7 +53,7 @@ public class ModernEntityPackets implements EntityPackets {
             loc.getZ(),
             loc.getPitch(),
             loc.getYaw(),
-            EntityType.ARMOR_STAND,
+            EntityTypes.ARMOR_STAND,
             0,
             CraftVector.toVec3(velocity),
             0),
@@ -75,7 +75,7 @@ public class ModernEntityPackets implements EntityPackets {
         loc.getZ(),
         loc.getPitch(),
         loc.getYaw(),
-        EntityType.WITHER_SKULL,
+        EntityTypes.WITHER_SKULL,
         0,
         CraftVector.toVec3(velocity),
         0));

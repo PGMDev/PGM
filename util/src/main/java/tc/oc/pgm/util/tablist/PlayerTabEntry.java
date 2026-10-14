@@ -5,9 +5,11 @@ import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 
 import java.util.UUID;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.event.player.PlayerSkinPartsChangeEvent;
 import tc.oc.pgm.util.skin.Skin;
 
@@ -22,9 +24,15 @@ public class PlayerTabEntry extends DynamicTabEntry {
 
   private static boolean showPing = false;
   private static Function<Player, Component> playerComponent = p -> text(p.getName());
+  private static BiFunction<Player, Player, @Nullable Skin> playerSkin = (player, viewer) -> null;
 
   public static void setPlayerComponent(Function<Player, Component> playerComponent) {
     PlayerTabEntry.playerComponent = playerComponent;
+  }
+
+  /** Set which skin each viewer is shown, returning null for the player's own */
+  public static void setPlayerSkin(BiFunction<Player, Player, @Nullable Skin> playerSkin) {
+    PlayerTabEntry.playerSkin = playerSkin;
   }
 
   public static void setShowRealPing(boolean showPing) {
@@ -51,7 +59,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   public PlayerTabEntry(Player player) {
     super(randomUUIDVersion2SameDefaultSkin(player.getUniqueId()));
     this.player = player;
-    this.spareEntityId = NMS_HACKS.allocateEntityId();
+    this.spareEntityId = NMS_HACKS.allocateEntityId(player.getWorld());
   }
 
   @Override
@@ -75,7 +83,8 @@ public class PlayerTabEntry extends DynamicTabEntry {
     if (viewer == null) {
       return null;
     }
-    return PLAYER_UTILS.getPlayerSkinForViewer(player, viewer);
+    Skin skin = playerSkin.apply(player, viewer);
+    return skin != null && !skin.isEmpty() ? skin : PLAYER_UTILS.getPlayerSkin(player);
   }
 
   @Override

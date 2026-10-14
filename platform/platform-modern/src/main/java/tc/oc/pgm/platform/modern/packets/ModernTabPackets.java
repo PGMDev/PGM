@@ -23,7 +23,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Act
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket.Entry;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.PlayerTeam;
@@ -41,7 +41,7 @@ import tc.oc.pgm.util.nms.packets.TabPackets;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "1.21.4")
+@Supports(value = PAPER, minVersion = "26.2")
 public class ModernTabPackets implements TabPackets {
 
   @Override
@@ -65,7 +65,7 @@ public class ModernTabPackets implements TabPackets {
             loc.getZ(),
             loc.getPitch(),
             loc.getYaw(),
-            EntityType.PLAYER,
+            EntityTypes.PLAYER,
             0,
             new Vec3(0, 0, 0),
             0),
