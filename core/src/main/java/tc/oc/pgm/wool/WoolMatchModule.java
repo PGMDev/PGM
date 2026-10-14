@@ -239,6 +239,10 @@ public class WoolMatchModule implements MatchModule, Listener {
     }
   }
 
+  public boolean isMonumentBlock(Block block) {
+    return findMonumentWool(block) != null;
+  }
+
   private Entry<Team, MonumentWool> findMonumentWool(Block block) {
     for (Entry<Team, MonumentWool> woolEntry : this.wools.entries()) {
       if (woolEntry.getValue().getDefinition().getPlacementRegion().contains(block)) {

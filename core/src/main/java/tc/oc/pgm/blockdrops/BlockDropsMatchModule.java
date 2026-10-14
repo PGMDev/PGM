@@ -2,6 +2,7 @@ package tc.oc.pgm.blockdrops;
 
 import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.material.Materials.DOORS;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -22,11 +23,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -34,7 +36,10 @@ import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
+import tc.oc.pgm.tracker.Trackers;
+import tc.oc.pgm.tracker.info.BlockInfo;
 import tc.oc.pgm.util.block.RayBlockIntersection;
+import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.event.PlayerPunchBlockEvent;
 import tc.oc.pgm.util.event.PlayerTrampleBlockEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
@@ -67,15 +72,23 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
     return ruleSet;
   }
 
-  public static boolean causesDrops(final Event event) {
-    return event instanceof BlockBreakEvent
-        || (event instanceof EntityExplodeEvent explodeEvent
-            && MISC_UTILS.isDestructiveExplosion(explodeEvent));
+  private static boolean causesDrops(final BlockTransformEvent event) {
+    if (event.getOldState().getType() == Material.AIR) return false;
+    final Event cause = event.getCause();
+    if (cause instanceof BlockBreakEvent breakEvent)
+      return event.getBlock().equals(breakEvent.getBlock());
+
+    // Explosion-hit TNT is primed, not dropped, on both modern and legacy
+    if (!MISC_UTILS.isDestructiveExplosion(cause) || event.changedFrom(Material.TNT)) return false;
+
+    // As with breaking, doors drop from the half that the explosion hit
+    return !DOORS.matches(event.getOldState().getType())
+        || Events.explodedBlocks(cause).contains(event.getBlock());
   }
 
   @EventHandler(priority = EventPriority.LOW)
   public void initializeDrops(BlockTransformEvent event) {
-    if (!causesDrops(event.getCause())) {
+    if (!causesDrops(event)) {
       return;
     }
 
@@ -154,7 +167,7 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
    */
   @SuppressWarnings("deprecation")
   public void doBlockDrops(final BlockTransformEvent event) {
-    if (!causesDrops(event.getCause())) {
+    if (!causesDrops(event)) {
       return;
     }
 
@@ -168,71 +181,78 @@ public class BlockDropsMatchModule implements MatchModule, Listener {
       MaterialData.block(newState).applyTo(block, true);
 
       float yield = 1f;
-      boolean explosion = false;
+      Location center = null;
       MatchPlayer player = ParticipantBlockTransformEvent.getParticipant(event);
 
-      if (event.getCause() instanceof EntityExplodeEvent explodeEvent) {
-        explosion = true;
-        yield = explodeEvent.getYield();
-
-        if (drops.fallChance != null
-            && oldState.getType().isBlock()
-            && oldState.getType() != Material.AIR
-            && match.getRandom().nextFloat() < drops.fallChance) {
-
-          FallingBlock fallingBlock = match
-              .getWorld()
-              .spawnFallingBlock(
-                  block.getLocation(),
-                  event.getOldState().getType(),
-                  event.getOldState().getRawData());
-          fallingBlock.setDropItem(false);
-
-          if (drops.landChance != null && match.getRandom().nextFloat() >= drops.landChance) {
-            this.fallingBlocksThatWillNotLand.add(fallingBlock);
-          }
-
-          Vector v =
-              fallingBlock.getLocation().subtract(explodeEvent.getLocation()).toVector();
-          double distance = v.length();
-          v.normalize().multiply(BASE_FALL_SPEED * drops.fallSpeed / Math.max(1d, distance));
-
-          // A very simple deflection model. Check for a solid
-          // neighbor block and "bounce" the velocity off of it.
-          Block west = block.getRelative(BlockFace.WEST);
-          Block east = block.getRelative(BlockFace.EAST);
-          Block down = block.getRelative(BlockFace.DOWN);
-          Block up = block.getRelative(BlockFace.UP);
-          Block north = block.getRelative(BlockFace.NORTH);
-          Block south = block.getRelative(BlockFace.SOUTH);
-
-          if ((v.getX() < 0 && west != null && west.getType().isSolid())
-              || v.getX() > 0 && east != null && east.getType().isSolid()) {
-            v.setX(-v.getX());
-          }
-
-          if ((v.getY() < 0 && down != null && down.getType().isSolid())
-              || v.getY() > 0 && up != null && up.getType().isSolid()) {
-            v.setY(-v.getY());
-          }
-
-          if ((v.getZ() < 0 && north != null && north.getType().isSolid())
-              || v.getZ() > 0 && south != null && south.getType().isSolid()) {
-            v.setZ(-v.getZ());
-          }
-
-          fallingBlock.setVelocity(v);
-        }
+      final Event cause = event.getCause();
+      if (cause instanceof EntityExplodeEvent explosion) {
+        center = explosion.getLocation();
+        yield = explosion.getYield();
+      } else if (cause instanceof BlockExplodeEvent explosion) {
+        // getBlock is the explosion center rounded down on both platforms, and getLocation is that
+        // block's corner, so re-centering it is as close as we can get to the centre itself.
+        center = explosion.getBlock().getLocation().add(0.5, 0.5, 0.5);
+        yield = explosion.getYield();
       }
 
-      dropObjects(drops, player, newState.getLocation(), yield, explosion);
+      if (center != null
+          && drops.fallChance != null
+          && match.getRandom().nextFloat() < drops.fallChance) {
+
+        FallingBlock fallingBlock =
+            MaterialData.block(oldState).spawnFallingBlock(block.getLocation());
+        fallingBlock.setDropItem(false);
+
+        // Nothing else will attribute this one: the spawn fires no event the trackers can see, and
+        // BlockTracker has already cleared the source block by the time drops run, so the breaker
+        // this event carries is the only owner still available.
+        if (player != null) {
+          Trackers.trackEntity(fallingBlock, new BlockInfo(oldState, player.getParticipantState()));
+        }
+
+        if (drops.landChance != null && match.getRandom().nextFloat() >= drops.landChance) {
+          this.fallingBlocksThatWillNotLand.add(fallingBlock);
+        }
+
+        Vector v = fallingBlock.getLocation().subtract(center).toVector();
+        double distance = v.length();
+        v.normalize().multiply(BASE_FALL_SPEED * drops.fallSpeed / Math.max(1d, distance));
+
+        // A very simple deflection model. Check for a solid
+        // neighbor block and "bounce" the velocity off of it.
+        Block west = block.getRelative(BlockFace.WEST);
+        Block east = block.getRelative(BlockFace.EAST);
+        Block down = block.getRelative(BlockFace.DOWN);
+        Block up = block.getRelative(BlockFace.UP);
+        Block north = block.getRelative(BlockFace.NORTH);
+        Block south = block.getRelative(BlockFace.SOUTH);
+
+        if ((v.getX() < 0 && west != null && west.getType().isSolid())
+            || v.getX() > 0 && east != null && east.getType().isSolid()) {
+          v.setX(-v.getX());
+        }
+
+        if ((v.getY() < 0 && down != null && down.getType().isSolid())
+            || v.getY() > 0 && up != null && up.getType().isSolid()) {
+          v.setY(-v.getY());
+        }
+
+        if ((v.getZ() < 0 && north != null && north.getType().isSolid())
+            || v.getZ() > 0 && south != null && south.getType().isSolid()) {
+          v.setZ(-v.getZ());
+        }
+
+        fallingBlock.setVelocity(v);
+      }
+
+      dropObjects(drops, player, newState.getLocation(), yield, center != null);
     }
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onFallingBlockLand(BlockTransformEvent event) {
-    if (event.getCause() instanceof EntityChangeBlockEvent) {
-      Entity entity = ((EntityChangeBlockEvent) event.getCause()).getEntity();
+    if (event.getCause() instanceof EntityChangeBlockEvent entityChangeBlockEvent) {
+      Entity entity = entityChangeBlockEvent.getEntity();
       if (entity instanceof FallingBlock && this.fallingBlocksThatWillNotLand.remove(entity)) {
         event.setCancelled(true);
       }

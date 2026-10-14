@@ -5,13 +5,11 @@ import static tc.oc.pgm.util.platform.Supports.Priority.HIGH;
 import static tc.oc.pgm.util.platform.Supports.Variant.SPORTPAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.minecraft.server.v1_8_R3.EntityPotion;
-import net.minecraft.server.v1_8_R3.NBTCompressedStreamTools;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.CraftSound;
@@ -19,11 +17,14 @@ import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -31,15 +32,15 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.platform.sportpaper.material.LegacyMaterialData;
-import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
+import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.platform.Supports;
 
 @Supports(value = SPORTPAPER, priority = HIGH)
 public class SpMiscUtil implements MiscUtils {
-  private static final byte NBT_TAG_ANY_NUMERIC = 99;
 
   @Override
   public boolean yield(Event event) {
@@ -90,19 +91,6 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
-  public int getWorldDataVersion(Path levelDat) {
-    try {
-      var dataTag = NBTCompressedStreamTools.a(Files.newInputStream(levelDat)).getCompound("Data");
-      return dataTag.hasKeyOfType("DataVersion", NBT_TAG_ANY_NUMERIC)
-          ? dataTag.getInt("DataVersion")
-          : DataVersions.LEGACY;
-    } catch (Throwable ignored) {
-      // In case we cannot read the level.dat file, return a constant
-      return DataVersions.LEGACY;
-    }
-  }
-
-  @Override
   @SuppressWarnings("PatternValidation")
   public Key getSoundKey(String name) {
     return key(CraftSound.getSound(Sound.valueOf(name)));
@@ -115,9 +103,9 @@ public class SpMiscUtil implements MiscUtils {
   }
 
   @Override
-  public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
-    // All explosions in 1.8 are destructive
-    return true;
+  public boolean isDestructiveExplosion(Event ev) {
+    // 1.8 has no non-destructive explosions, so any explosion event is destructive
+    return ev instanceof BlockExplodeEvent || ev instanceof EntityExplodeEvent;
   }
 
   @Override
@@ -129,5 +117,30 @@ public class SpMiscUtil implements MiscUtils {
   @Override
   public Entity getFakePickupEntity(PlayerPickupItemEvent ev) {
     return ev.getItem();
+  }
+
+  @Override
+  public boolean isDuplicateRetract(BlockPistonRetractEvent event) {
+    // Pistons on legacy fire retract events twice, unless they are sticky pistons, and
+    // BlockPistonEvent's isSticky check reports all moving pistons as sticky, so we check the block
+    // data here
+    Block piston = event.getBlock();
+    return piston.getType() == Materials.MOVING_PISTON && (piston.getData() & 0x8) == 0;
+  }
+
+  @Override
+  public boolean doesWaterEvaporate(Block block) {
+    // The flag ItemBucket reads before placing water, set by the nether's world provider
+    return ((CraftWorld) block.getWorld()).getHandle().worldProvider.n();
+  }
+
+  @Override
+  public @Nullable FallingBlock getFallingBlock(EntityChangeBlockEvent event) {
+    if (!(event.getEntity() instanceof FallingBlock fallingBlock)) return null;
+
+    Material material = fallingBlock.getMaterial();
+    return material == event.getBlock().getType() && material != event.getTo()
+        ? fallingBlock
+        : null;
   }
 }

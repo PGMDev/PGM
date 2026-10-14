@@ -2,6 +2,7 @@ package tc.oc.pgm.listeners;
 
 import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
 import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+import static tc.oc.pgm.util.material.Materials.ANY_FIRE;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
@@ -10,9 +11,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import org.bukkit.Material;
@@ -22,10 +26,8 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
@@ -46,12 +48,11 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
-import org.bukkit.material.Door;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.util.Vector;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
@@ -63,9 +64,10 @@ import tc.oc.pgm.api.player.ParticipantState;
 import tc.oc.pgm.blockdrops.BlockDropsMatchModule;
 import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.events.PlayerBlockTransformEvent;
-import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.Trackers;
+import tc.oc.pgm.tracker.trackers.BlockTracker;
 import tc.oc.pgm.util.ClassLogger;
+import tc.oc.pgm.util.block.BlockFaces;
 import tc.oc.pgm.util.block.BlockStates;
 import tc.oc.pgm.util.bukkit.Events;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
@@ -75,10 +77,6 @@ import tc.oc.pgm.util.material.Materials;
 
 @NullMarked
 public class BlockTransformListener implements Listener {
-  private static final BlockFace[] NEIGHBORS = {
-    BlockFace.WEST, BlockFace.EAST, BlockFace.DOWN, BlockFace.UP, BlockFace.NORTH, BlockFace.SOUTH
-  };
-
   @Retention(RetentionPolicy.RUNTIME)
   public @interface EventWrapper {}
 
@@ -104,20 +102,17 @@ public class BlockTransformListener implements Listener {
 
           for (final EventPriority priority : EventPriority.values()) {
             EventExecutor executor = (listener, event) -> {
-              if (!Events.isCancelled(event)) {
-                // At the first priority level, call the event handler method.
-                // If it decides to generate a BlockTransformEvent, it will be stored in
-                // currentEvents.
-                if (priority == EventPriority.LOWEST) {
-                  if (eventClass.isInstance(event)) {
-                    try {
-                      method.invoke(listener, event);
-                    } catch (InvocationTargetException ex) {
-                      throw MISC_UTILS.createEventException(ex.getCause(), event);
-                    } catch (Throwable t) {
-                      throw MISC_UTILS.createEventException(t, event);
-                    }
-                  }
+              // At the first priority level, call the event handler method. If it decides to
+              // generate a BlockTransformEvent, it will be stored in currentEvents.
+              if (!Events.isCancelled(event)
+                  && priority == EventPriority.LOWEST
+                  && eventClass.isInstance(event)) {
+                try {
+                  method.invoke(listener, event);
+                } catch (InvocationTargetException ex) {
+                  throw MISC_UTILS.createEventException(ex.getCause(), event);
+                } catch (Throwable t) {
+                  throw MISC_UTILS.createEventException(t, event);
                 }
               }
 
@@ -148,18 +143,13 @@ public class BlockTransformListener implements Listener {
     List<BlockTransformEvent> wrapperEvents = currentEvents.removeAll(causeEvent);
 
     finishCauseEvent(causeEvent, wrapperEvents);
-
-    for (BlockTransformEvent bte : wrapperEvents) {
-      processCancelMessage(bte);
-    }
-
-    for (BlockTransformEvent bte : wrapperEvents) {
-      processBlockDrops(bte);
-    }
+    for (BlockTransformEvent bte : wrapperEvents) processCancelMessage(bte);
   }
 
   // A few of the event handlers need to do some post-processing after the wrapper events return.
   protected void finishCauseEvent(Event causeEvent, List<BlockTransformEvent> wrapperEvents) {
+    for (BlockTransformEvent bte : wrapperEvents) processBlockDrops(bte);
+
     if (causeEvent instanceof EntityExplodeEvent entityExplodeEvent)
       removeCancelled(entityExplodeEvent.blockList(), wrapperEvents, Function.identity());
 
@@ -173,32 +163,30 @@ public class BlockTransformListener implements Listener {
       finishPistonMove(blockPistonEvent, wrapperEvents);
   }
 
-  private void handleDoor(BlockTransformEvent event, Door door) {
-    BlockFace relative = door.isTopHalf() ? BlockFace.DOWN : BlockFace.UP;
-    BlockState oldState = event.getOldState().getBlock().getRelative(relative).getState();
-    BlockState newState = event.getBlock().getRelative(relative).getState();
-    BlockTransformEvent toCall;
-    if (event instanceof ParticipantBlockTransformEvent bte) {
-      toCall = new ParticipantBlockTransformEvent(
-          event.getCause(), oldState, newState, bte.getPlayerState());
-    } else if (event instanceof PlayerBlockTransformEvent bte) {
-      toCall =
-          new PlayerBlockTransformEvent(event.getCause(), oldState, newState, bte.getPlayerState());
-    } else {
-      toCall = new BlockTransformEvent(event, oldState, newState);
-    }
+  private void handleDoor(BlockTransformEvent event, BlockFace relative) {
+    BlockState other = event.getBlock().getRelative(relative).getState();
+    if (other.getType() != event.getOldState().getType()
+        || MATERIAL_UTILS.getDoorOtherHalf(other) != relative.getOppositeFace()
+        // Blocks an explosion reports itself, so a door half caught in it is not reported twice
+        || Events.explodedBlocks(event.getCause()).contains(other.getBlock())) return;
+
+    BlockTransformEvent toCall = createEvent(
+        event.getCause(),
+        other,
+        BlockStates.toAir(other),
+        PlayerBlockTransformEvent.getPlayerState(event));
+    toCall.setPropagate(event.isPropagate());
+    if (event.isManual()) toCall.markManual();
     callEvent(toCall, true);
   }
 
   protected void callEvent(final BlockTransformEvent event, boolean checked) {
     if (!checked) {
-      org.bukkit.material.MaterialData oldData = event.getOldState().getData();
-      org.bukkit.material.MaterialData newData = event.getNewState().getData();
-      if (oldData instanceof Door) {
-        handleDoor(event, (Door) oldData);
-      }
-      if (newData instanceof Door) {
-        handleDoor(event, (Door) newData);
+      BlockState old = event.getOldState();
+      if (Materials.DOORS.matches(old.getType())
+          && !Materials.DOORS.matches(event.getNewState().getType())) {
+        BlockFace relative = MATERIAL_UTILS.getDoorOtherHalf(old);
+        if (relative != null) handleDoor(event, relative);
       }
     }
     logger.finest(() -> "Generated event " + event);
@@ -209,26 +197,49 @@ public class BlockTransformListener implements Listener {
     callEvent(event, false);
   }
 
-  protected BlockTransformEvent callEvent(
+  protected void callEvent(
       Event cause, BlockState oldState, BlockState newState, @Nullable Player player) {
-    MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
-    return callEvent(
-        cause, oldState, newState, matchPlayer == null ? null : matchPlayer.getState());
+    callEvent(cause, oldState, newState, stateOf(player));
   }
 
-  protected BlockTransformEvent callEvent(
+  protected void callEvent(
       Event cause, BlockState oldState, BlockState newState, @Nullable MatchPlayerState player) {
-    BlockTransformEvent event;
-    if (player == null) {
-      event = new BlockTransformEvent(cause, oldState, newState);
-    } else if (player instanceof ParticipantState) {
-      event =
-          new ParticipantBlockTransformEvent(cause, oldState, newState, (ParticipantState) player);
-    } else {
-      event = new PlayerBlockTransformEvent(cause, oldState, newState, player);
-    }
+    callEvent(cause, oldState, newState, player, true);
+  }
+
+  protected void callEvent(
+      Event cause,
+      BlockState oldState,
+      BlockState newState,
+      @Nullable MatchPlayerState player,
+      boolean propagate) {
+    callEvent(cause, oldState, newState, player, propagate, false);
+  }
+
+  protected void callEvent(
+      Event cause,
+      BlockState oldState,
+      BlockState newState,
+      @Nullable MatchPlayerState player,
+      boolean propagate,
+      boolean manual) {
+    BlockTransformEvent event = createEvent(cause, oldState, newState, player);
+    event.setPropagate(propagate);
+    if (manual) event.markManual();
     callEvent(event);
-    return event;
+  }
+
+  protected @Nullable MatchPlayerState stateOf(@Nullable Player player) {
+    MatchPlayer matchPlayer = PGM.get().getMatchManager().getPlayer(player);
+    return matchPlayer == null ? null : matchPlayer.getState();
+  }
+
+  protected static BlockTransformEvent createEvent(
+      Event cause, BlockState oldState, BlockState newState, @Nullable MatchPlayerState player) {
+    if (player == null) return new BlockTransformEvent(cause, oldState, newState);
+    if (player instanceof ParticipantState participant)
+      return new ParticipantBlockTransformEvent(cause, oldState, newState, participant);
+    return new PlayerBlockTransformEvent(cause, oldState, newState, player);
   }
 
   // ------------------------
@@ -237,8 +248,8 @@ public class BlockTransformListener implements Listener {
 
   @EventWrapper
   public void onBlockPlace(final BlockPlaceEvent event) {
-    if (event instanceof BlockMultiPlaceEvent) {
-      for (BlockState oldState : ((BlockMultiPlaceEvent) event).getReplacedBlockStates()) {
+    if (event instanceof BlockMultiPlaceEvent blockMultiPlaceEvent) {
+      for (BlockState oldState : blockMultiPlaceEvent.getReplacedBlockStates()) {
         callEvent(event, oldState, oldState.getBlock().getState(), event.getPlayer());
       }
     } else {
@@ -250,11 +261,11 @@ public class BlockTransformListener implements Listener {
   @EventWrapper
   public void onPlayerBucketEmpty(final PlayerBucketEmptyEvent event) {
     Block block = event.getBlockClicked().getRelative(event.getBlockFace());
-    Material contents = Materials.materialInBucket(event.getBucket());
-    if (contents == null) {
-      return;
-    }
-    BlockState newBlock = BlockStates.cloneWithMaterial(block, contents);
+    Material contents = MATERIAL_UTILS.getBucketContents(event.getBucket());
+    if (contents == null) return;
+
+    BlockState newBlock = bucketResult(block, contents);
+    if (newBlock == null) return;
 
     this.callEvent(event, block.getState(), newBlock, event.getPlayer());
   }
@@ -270,7 +281,7 @@ public class BlockTransformListener implements Listener {
   }
 
   @EventWrapper
-  public void onBlockForm(final BlockGrowEvent event) {
+  public void onBlockGrow(final BlockGrowEvent event) {
     this.callEvent(
         new BlockTransformEvent(event, event.getBlock().getState(), event.getNewState()));
   }
@@ -285,69 +296,92 @@ public class BlockTransformListener implements Listener {
   public void onBlockSpread(final BlockSpreadEvent event) {
     // This fires for: fire, grass, mycelium, mushrooms, and vines
     // Fire is already handled by BlockIgniteEvent
-    if (event.getNewState().getType() != Material.FIRE) {
+    if (!ANY_FIRE.matches(event.getNewState().getType())) {
       this.callEvent(
           new BlockTransformEvent(event, event.getBlock().getState(), event.getNewState()));
     }
   }
 
-  @SuppressWarnings("deprecation")
   @EventWrapper
-  public void onBlockFromTo(BlockFromToEvent event) {
-    if (event.getToBlock().getType() != event.getBlock().getType()) {
+  public void onBlockFromTo(final BlockFromToEvent event) {
+    BlockState source = getFlowSourceState(event.getBlock());
+    if (event.getToBlock().getType() != source.getType()) {
       BlockState oldState = event.getToBlock().getState();
-      BlockState newState = event.getToBlock().getState();
-      newState.setType(event.getBlock().getType());
-      newState.setRawData(event.getBlock().getData());
-
-      // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
-      // When lava flows into water, it creates stone or cobblestone
-      if (Materials.isWater(oldState.getType()) && Materials.isLava(newState.getType())) {
-        newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
-        newState.setRawData((byte) 0);
-      }
-
-      // For some reason, the newState has the data value of the old source.
-      // This corrects for that manually.
-      if (Materials.isWater(newState.getType()) || Materials.isLava(newState.getType())) {
-        byte oldData = newState.getRawData();
-        if (event.getFace() == BlockFace.DOWN) {
-          // A data value of 8 (or higher) represents water flowing down
-          newState.setRawData((byte) (8));
-        } else if (oldData < 7) {
-          // Data values 0-7 represent water on the ground, and increase by 1 as they spread
-          newState.setRawData((byte) (oldData + 1));
-        } else {
-          // Otherwise, the previous block must have been flowing down, so it spreads to a data
-          // value of 1
-          newState.setRawData((byte) (1));
-        }
-      }
+      BlockState newState = getFlowResult(event, source);
 
       // Check for lava ownership
       this.callEvent(event, oldState, newState, Trackers.getOwner(event.getBlock()));
     }
   }
 
+  protected BlockState getFlowSourceState(Block block) {
+    return block.getState();
+  }
+
+  /** The state the destination block of a flow will be in, using legacy data values. */
+  @SuppressWarnings("deprecation")
+  protected BlockState getFlowResult(BlockFromToEvent event, BlockState source) {
+    BlockState newState = event.getToBlock().getState();
+    newState.setType(source.getType());
+    newState.setRawData(source.getRawData());
+
+    // TODO: getType is deprecated getMaterial and setMaterial are SportPaper only
+    // When lava flows into water, it creates stone or cobblestone
+    if (Materials.isWater(event.getToBlock().getType()) && Materials.isLava(newState.getType())) {
+      newState.setType(event.getFace() == BlockFace.DOWN ? Material.STONE : Material.COBBLESTONE);
+      newState.setRawData((byte) 0);
+    }
+
+    // For some reason, the newState has the data value of the old source.
+    // This corrects for that manually.
+    if (Materials.isWater(newState.getType()) || Materials.isLava(newState.getType())) {
+      newState.setRawData((byte) getFlowLevel(event, newState.getRawData()));
+    }
+
+    return newState;
+  }
+
+  protected static int getFlowLevel(BlockFromToEvent event, int sourceLevel) {
+    // A level of 8 (or higher) represents liquid flowing down
+    if (event.getFace() == BlockFace.DOWN) return 8;
+    // Levels 0-7 represent liquid on the ground, and increase by 1 as they spread
+    if (sourceLevel < 7) return sourceLevel + 1;
+    // Otherwise, the previous block must have been flowing down, so it spreads to a level of 1
+    return 1;
+  }
+
   @EventWrapper
   public void onBlockIgnite(final BlockIgniteEvent event) {
-    // Flint & steel generates a BlockPlaceEvent
-    if (event.getCause() == BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL) return;
+    // Handled by onBlockPlace
+    if (isIgnitePlacement(event)) return;
 
     BlockState oldState = event.getBlock().getState();
-    BlockState newState = BlockStates.cloneWithMaterial(event.getBlock(), Material.FIRE);
+    BlockState newState = getIgniteResult(event);
     ParticipantState igniter = null;
 
     if (event.getIgnitingEntity() != null) {
-      // The player themselves using flint & steel, or any of
-      // several types of owned entity starting or spreading a fire.
+      // The player themselves, or any of several types of owned entity starting or spreading a
+      // fire.
       igniter = Trackers.getOwner(event.getIgnitingEntity());
     } else if (event.getIgnitingBlock() != null) {
       // Fire, lava, or flint & steel in a dispenser
       igniter = Trackers.getOwner(event.getIgnitingBlock());
     }
 
-    callEvent(event, oldState, newState, igniter);
+    callEvent(
+        event, oldState, newState, igniter, true, event.getIgnitingEntity() instanceof Player);
+  }
+
+  /** Whether the platform also generates a {@link BlockPlaceEvent} for this ignition */
+  protected boolean isIgnitePlacement(final BlockIgniteEvent event) {
+    return (event.getCause() == BlockIgniteEvent.IgniteCause.FLINT_AND_STEEL
+            && event.getIgnitingEntity() != null)
+        || (event.getCause() == BlockIgniteEvent.IgniteCause.FIREBALL
+            && event.getIgnitingEntity() instanceof Player);
+  }
+
+  protected BlockState getIgniteResult(final BlockIgniteEvent event) {
+    return BlockStates.cloneWithMaterial(event.getBlock(), Material.FIRE);
   }
 
   // -------------------------
@@ -366,87 +400,103 @@ public class BlockTransformListener implements Listener {
     this.callEvent(event, state, BlockStates.toAir(state), event.getPlayer());
   }
 
-  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-  public void onPrimeTNT(ExplosionPrimeEvent event) {
+  @EventWrapper
+  public void onPrimeTNT(final ExplosionPrimeEvent event) {
     if (event.getEntity() instanceof TNTPrimed) {
       Block block = event.getEntity().getLocation().getBlock();
+      if (isBeingPlaced(block)) return;
       if (block.getType() == Material.TNT) {
-        ParticipantState player;
-        if (event instanceof ExplosionPrimeByEntityEvent) {
-          player = Trackers.getOwner(((ExplosionPrimeByEntityEvent) event).getPrimer());
+        if (event instanceof ExplosionPrimeByEntityEvent explosionPrimeByEntityEvent) {
+          ParticipantState player = Trackers.getOwner(explosionPrimeByEntityEvent.getPrimer());
+          callEvent(event, block.getState(), BlockStates.toAir(block), player);
         } else {
-          player = null;
+          // Nothing responsible to deny, and the platform primes regardless
+          // TODO: with the next map proto bump, let filters deny these primes (propagating), as
+          // maps before it rely on redstone igniting TNT under a global block-break filter
+          BlockTransformEvent transform =
+              createEvent(event, block.getState(), BlockStates.toAir(block), null);
+          transform.markForced();
+          callEvent(transform);
         }
-        callEvent(event, block.getState(), BlockStates.toAir(block), player);
       }
     }
+  }
+
+  private boolean isBeingPlaced(Block block) {
+    for (Event cause : currentEvents.keySet()) {
+      if (cause instanceof BlockPlaceEvent place && place.getBlock().equals(block)) return true;
+    }
+    return false;
   }
 
   @EventWrapper
   public void onEntityExplode(final EntityExplodeEvent event) {
-    ParticipantState playerState = Trackers.getOwner(event.getEntity());
-
-    for (Block block : event.blockList()) {
-      if (block.getType() != Material.TNT) {
-        // Don't cancel the explosion when individual blocks are cancelled
-        callEvent(
-                event,
-                block.getState(),
-                MISC_UTILS.isDestructiveExplosion(event)
-                    ? BlockStates.toAir(block)
-                    : block.getState(),
-                playerState)
-            .setPropagate(false);
-      }
-    }
+    handleExplosion(event, event.blockList(), Trackers.getOwner(event.getEntity()));
   }
 
   @EventWrapper
   public void onBlockExplode(final BlockExplodeEvent event) {
-    for (Block block : event.blockList()) {
+    handleExplosion(event, event.blockList(), getExplosionOwner(event));
+  }
+
+  protected void handleExplosion(
+      Event event, List<Block> blockList, @Nullable ParticipantState owner) {
+    boolean destructive = MISC_UTILS.isDestructiveExplosion(event);
+    for (Block block : blockList) {
       // Don't cancel the explosion when individual blocks are cancelled
-      BlockTransformEvent transform =
-          new BlockTransformEvent(event, block.getState(), BlockStates.toAir(block));
-      transform.setPropagate(false);
-      callEvent(transform);
+      callEvent(
+          event,
+          block.getState(),
+          destructive ? BlockStates.toAir(block) : block.getState(),
+          owner,
+          false);
     }
+  }
+
+  protected @Nullable ParticipantState getExplosionOwner(final BlockExplodeEvent event) {
+    return Trackers.getOwner(event.getBlock());
   }
 
   protected <T> void removeCancelled(
       List<T> elements, Collection<BlockTransformEvent> wrapperEvents, Function<T, Block> toBlock) {
+    Set<Block> cancelled = null;
     for (BlockTransformEvent wrapper : wrapperEvents) {
       if (wrapper.isCancelled()) {
-        Block block = wrapper.getOldState().getBlock();
-        elements.removeIf(element -> toBlock.apply(element).equals(block));
+        if (cancelled == null) cancelled = new HashSet<>();
+        cancelled.add(wrapper.getOldState().getBlock());
       }
     }
+    if (cancelled == null) return;
+
+    Set<Block> blocks = cancelled;
+    elements.removeIf(element -> blocks.contains(toBlock.apply(element)));
   }
 
   @EventWrapper
   public void onBlockBurn(final BlockBurnEvent event) {
-    Match match = PGM.get().getMatchManager().getMatch(event.getBlock().getWorld());
-    if (match == null) return;
-
     BlockState oldState = event.getBlock().getState();
-    BlockState newState = BlockStates.toAir(oldState);
-    MatchPlayerState igniterState = null;
-    TrackerMatchModule tmm = match.needModule(TrackerMatchModule.class);
+    this.callEvent(event, oldState, BlockStates.toAir(oldState), getIgniter(event));
+  }
 
-    for (BlockFace face : NEIGHBORS) {
-      Block neighbor = oldState.getBlock().getRelative(face);
-      if (neighbor.getType() == Material.FIRE) {
-        igniterState = tmm.getOwner(neighbor);
-        if (igniterState != null) break;
+  protected @Nullable ParticipantState getIgniter(final BlockBurnEvent event) {
+    BlockTracker tracker = Trackers.getBlockTracker(event.getBlock().getWorld());
+    if (tracker == null) return null;
+
+    for (BlockFace face : BlockFaces.NEIGHBORS) {
+      Block neighbor = event.getBlock().getRelative(face);
+      if (ANY_FIRE.matches(neighbor.getType())) {
+        ParticipantState igniter = tracker.getOwner(neighbor);
+        if (igniter != null) return igniter;
       }
     }
 
-    this.callEvent(event, oldState, newState, igniterState);
+    return null;
   }
 
   @EventWrapper
   public void onBlockFade(final BlockFadeEvent event) {
-    BlockState state = event.getBlock().getState();
-    this.callEvent(new BlockTransformEvent(event, state, BlockStates.toAir(state)));
+    this.callEvent(
+        new BlockTransformEvent(event, event.getBlock().getState(), event.getNewState()));
   }
 
   @EventWrapper
@@ -460,13 +510,18 @@ public class BlockTransformListener implements Listener {
   // -----------------------
 
   private void onPistonMove(
-      BlockPistonEvent event, List<Block> blocks, Map<Block, BlockState> newStates) {
+      BlockPistonEvent event,
+      List<Block> blocks,
+      Map<Block, BlockState> newStates,
+      Map<Block, BlockState> oldStates,
+      Predicate<BlockState> nonPropagating) {
     // The block list in a piston event includes only the pushed blocks, not the empty spaces they
     // are
     // pushed into. We need to build our own map of the post-event block states.
 
     // Add the pushed blocks at their destination
     for (Block block : blocks) {
+      if (MATERIAL_UTILS.isBrokenByPiston(block)) continue;
       Block dest = block.getRelative(event.getDirection());
       newStates.put(dest, BlockStates.cloneWithMaterial(dest, block.getState()));
     }
@@ -479,17 +534,21 @@ public class BlockTransformListener implements Listener {
     }
 
     // Fire events for all changing blocks.
-    for (BlockState newState : newStates.values()) {
-      this.callEvent(new BlockTransformEvent(event, newState.getBlock().getState(), newState));
+    for (Map.Entry<Block, BlockState> entry : newStates.entrySet()) {
+      Block block = entry.getKey();
+      BlockState oldState = oldStates.getOrDefault(block, block.getState());
+      BlockTransformEvent bte = new BlockTransformEvent(event, oldState, entry.getValue());
+      bte.setPropagate(!nonPropagating.test(entry.getValue()));
+      this.callEvent(bte);
     }
   }
 
   private void finishPistonMove(
       BlockPistonEvent causeEvent, Collection<BlockTransformEvent> wrapperEvents) {
     // If ANY of the pushed block events are cancelled, the piston jams and the entire causing event
-    // is cancelled.
+    // is cancelled. Non-propagating transforms are reported but cannot jam the piston.
     for (BlockTransformEvent bte : wrapperEvents) {
-      if (bte.isCancelled()) {
+      if (bte.isCancelled() && bte.isPropagate()) {
         causeEvent.setCancelled(true);
         break;
       }
@@ -500,31 +559,56 @@ public class BlockTransformListener implements Listener {
   public void onBlockPistonExtend(final BlockPistonExtendEvent event) {
     Map<Block, BlockState> newStates = new HashMap<>();
 
-    // Add the arm of the piston, which will extend into the adjacent block.
     Block head = event.getBlock().getRelative(event.getDirection());
-    BlockState state = head.getState();
-    MATERIAL_UTILS
-        .fromLegacyBlock(Materials.PISTON_HEAD, getPistonDirectionByte(event.getDirection()))
-        .applyTo(state);
-    newStates.put(head, state);
+    newStates.put(head, pistonHeadState(head, event.getDirection(), event.isSticky()));
 
-    this.onPistonMove(event, event.getBlocks(), newStates);
+    this.onPistonMove(event, event.getBlocks(), newStates, Map.of(), _ -> false);
   }
 
-  private byte getPistonDirectionByte(BlockFace face) {
-    return switch (face) {
-      case UP -> 1;
-      case NORTH -> 2;
-      case SOUTH -> 3;
-      case WEST -> 4;
-      case EAST -> 5;
-      default -> 0; // down included
-    };
+  /** The state of an extended piston arm at {@code head}, facing {@code facing}. */
+  private BlockState pistonHeadState(Block head, BlockFace facing, boolean sticky) {
+    BlockState state = head.getState();
+    MATERIAL_UTILS.pistonHead(facing, sticky).applyTo(state);
+    return state;
   }
 
   @EventWrapper
   public void onBlockPistonRetract(final BlockPistonRetractEvent event) {
-    this.onPistonMove(event, event.getBlocks(), new HashMap<>());
+    if (MISC_UTILS.isDuplicateRetract(event)) return;
+
+    BlockFace facing = getPistonFacing(event);
+    Block head = event.getBlock().getRelative(facing);
+
+    BlockState armLeaving = BlockStates.toAir(head);
+    Map<Block, BlockState> newStates = new HashMap<>();
+    newStates.put(head, armLeaving);
+
+    // Modern clears the arm before firing this event, while SportPaper restores it first.
+    // Air here therefore means the arm was just removed, so its old state is synthesised rather
+    // than read; otherwise a sticky pull would report air as the old state on modern only.
+    Map<Block, BlockState> oldStates = head.getType() == Material.AIR
+        ? Map.of(head, pistonHeadState(head, facing, event.isSticky()))
+        : Map.of();
+
+    // A retracting arm is reported, but cannot jam the piston by being cancelled. If a pulled
+    // block took the arm's place, onPistonMove overwrites armLeaving in newStates before firing
+    // anything, so the transform is a real block move that may be cancelled as usual.
+    this.onPistonMove(event, event.getBlocks(), newStates, oldStates, state -> state == armLeaving);
+  }
+
+  /**
+   * getDirection is not consistent across the code paths that fire a piston event: the ones that
+   * move blocks report the direction those blocks travel, while the ones with an empty block list
+   * report the piston's facing. Read the facing off the piston itself where possible, since by this
+   * point it may have already been replaced with a moving piston, which carries no facing on the
+   * legacy platform.
+   *
+   * <p>The two inconsistencies cancel out: the only retract event that loses the facing is the one
+   * that reports a travel direction, so inverting getDirection is correct wherever it is reached.
+   */
+  private BlockFace getPistonFacing(final BlockPistonRetractEvent event) {
+    BlockFace facing = MATERIAL_UTILS.getFacingOrNull(event.getBlock());
+    return facing != null ? facing : event.getDirection().getOppositeFace();
   }
 
   // -----------------------------
@@ -532,6 +616,9 @@ public class BlockTransformListener implements Listener {
   // -----------------------------
   @EventWrapper
   public void onEntityChangeBlock(final EntityChangeBlockEvent event) {
+    // Handled by onBlockFall
+    if (MISC_UTILS.getFallingBlock(event) != null) return;
+
     callEvent(
         event,
         event.getBlock().getState(),
@@ -540,49 +627,58 @@ public class BlockTransformListener implements Listener {
   }
 
   @EventWrapper
-  public void onBlockTrample(final PlayerInteractEvent event) {
-    if (event.getAction() == Action.PHYSICAL) {
-      Block block = event.getClickedBlock();
-      if (block != null) {
-        Material oldType = getTrampledType(block.getType());
-        if (oldType != null) {
-          callEvent(
-              event,
-              BlockStates.cloneWithMaterial(block, oldType),
-              block.getState(),
-              event.getPlayer());
-        }
-      }
-    }
-  }
-
-  @EventWrapper
   public void onDispenserDispense(final BlockDispenseEvent event) {
-    if (Materials.isBucket(event.getItem())) {
-      // Yes, the location the dispenser is facing is stored in "velocity" for some ungodly reason
-      Block targetBlock =
-          event.getVelocity().toLocation(event.getBlock().getWorld()).getBlock();
-      Material contents = Materials.materialInBucket(event.getItem());
+    Material contents = MATERIAL_UTILS.getBucketContents(event.getItem().getType());
+    if (contents == null) return;
 
-      if (Materials.isLiquid(contents) || (contents == Material.AIR && targetBlock.isLiquid())) {
-        callEvent(
-            event,
-            targetBlock.getState(),
-            BlockStates.cloneWithMaterial(targetBlock, contents),
-            Trackers.getOwner(event.getBlock()));
-      }
-    }
+    Block target = dispenseTarget(event);
+    if (target == null) return;
+
+    BlockState newState = bucketResult(target, contents);
+    if (newState == null) return;
+
+    callEvent(event, target.getState(), newState, Trackers.getOwner(event.getBlock()));
+  }
+
+  // Yes, the location the dispenser is facing is stored in "velocity" for some ungodly reason
+  private @Nullable Block dispenseTarget(final BlockDispenseEvent event) {
+    BlockFace facing = MATERIAL_UTILS.getFacingOrNull(event.getBlock());
+    if (facing == null) return null;
+
+    Block target = event.getBlock().getRelative(facing);
+    Vector position = event.getVelocity();
+    return position.getX() == target.getX()
+            && position.getY() == target.getY()
+            && position.getZ() == target.getZ()
+        ? target
+        : null;
+  }
+
+  /** The state {@code target} takes on when a bucket's {@code contents} are poured onto it. */
+  protected @Nullable BlockState bucketResult(final Block target, Material contents) {
+    if (evaporates(target, contents)) return null;
+    if (contents == Material.AIR && !isBucketPickupSource(target)) return null;
+    return BlockStates.cloneWithMaterial(target, contents);
+  }
+
+  /** Whether pouring {@code contents} onto {@code target} places nothing. */
+  protected boolean evaporates(final Block target, Material contents) {
+    return Materials.isWater(contents) && MISC_UTILS.doesWaterEvaporate(target);
+  }
+
+  /** Whether an empty bucket can pick this block up, and so leave air behind. */
+  protected boolean isBucketPickupSource(final Block block) {
+    return block.isLiquid();
   }
 
   @EventWrapper
-  public void onBlockFall(BlockFallEvent event) {
-    this.callEvent(new BlockTransformEvent(
-        event, event.getBlock().getState(), BlockStates.toAir(event.getBlock().getState())));
+  public void onBlockFall(final BlockFallEvent event) {
+    Block block = event.getBlock();
+    this.callEvent(new BlockTransformEvent(event, block.getState(), getFallResult(block)));
   }
 
-  private static @Nullable Material getTrampledType(Material newType) {
-    if (newType == Materials.SOIL) return Material.DIRT;
-    return null;
+  protected BlockState getFallResult(final Block block) {
+    return BlockStates.toAir(block);
   }
 
   // --------------------------
@@ -590,14 +686,12 @@ public class BlockTransformListener implements Listener {
   // --------------------------
 
   public void processCancelMessage(final BlockTransformEvent event) {
-    if (event instanceof PlayerBlockTransformEvent
+    if (event instanceof PlayerBlockTransformEvent bte
         && event.isCancelled()
         && event.getCancellationReason() != null
         && event.isManual()) {
 
-      ((PlayerBlockTransformEvent) event)
-          .getPlayerState()
-          .sendWarning(event.getCancellationReason());
+      bte.getPlayerState().sendWarning(event.getCancellationReason());
     }
   }
 

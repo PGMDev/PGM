@@ -7,13 +7,22 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.MobBucketItem;
+import net.minecraft.world.item.SolidBucketItem;
+import net.minecraft.world.level.material.Fluids;
 import org.bukkit.Bukkit;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.block.data.type.PistonHead;
+import org.bukkit.block.data.type.TechnicalPiston;
 import org.bukkit.craftbukkit.legacy.CraftLegacy;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.GlowItemFrame;
@@ -35,7 +44,7 @@ import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "26.2")
 @SuppressWarnings("deprecation")
 public class ModernMaterialUtils implements MaterialUtils {
 
@@ -136,20 +145,63 @@ public class ModernMaterialUtils implements MaterialUtils {
     var states = block.getStateDefinition().getPossibleStates();
     Set<BlockMaterialData> materials = new HashSet<>(states.size());
     for (var state : states) {
-      materials.add(new ModernBlockData(state.createCraftBlockData()));
+      materials.add(new ModernBlockData(state.asBlockData()));
     }
     return materials;
   }
 
   @Override
-  public MaterialMatcher.Builder matcherBuilder() {
-    return new MaterialMatcherBuilderImpl();
+  public BlockMaterialData pistonHead(BlockFace facing, boolean sticky) {
+    PistonHead head = (PistonHead) Material.PISTON_HEAD.createBlockData();
+    head.setFacing(facing);
+    head.setType(sticky ? TechnicalPiston.Type.STICKY : TechnicalPiston.Type.NORMAL);
+
+    return new ModernBlockData(head);
   }
 
   @Override
-  public boolean isUpperHalfOfDoor(Block block) {
-    return block.getState().getBlockData() instanceof Door door
-        && door.getHalf() == Bisected.Half.TOP;
+  public boolean isBrokenByPiston(Block block) {
+    // The same value PistonStructureResolver reads to decide what it destroys.
+    return block.getPistonMoveReaction() == PistonMoveReaction.BREAK;
+  }
+
+  @Override
+  public @Nullable BlockFace getFacingOrNull(Block block) {
+    return block.getBlockData() instanceof Directional directional ? directional.getFacing() : null;
+  }
+
+  @Override
+  public @Nullable BlockFace getDoorOtherHalf(BlockState state) {
+    if (!(state.getBlockData() instanceof Door door)) return null;
+    return door.getHalf() == Bisected.Half.TOP ? BlockFace.DOWN : BlockFace.UP;
+  }
+
+  @Override
+  public @Nullable Material getBucketContents(Material bucket) {
+    var item = CraftMagicNumbers.getItem(bucket);
+
+    // Powder snow
+    if (item instanceof SolidBucketItem solid) {
+      return CraftMagicNumbers.getMaterial(solid.getBlock());
+    }
+
+    // Milk, or not a bucket at all
+    if (!(item instanceof BucketItem b)) return null;
+
+    var content = b.getContent();
+    if (content == Fluids.EMPTY) {
+      // Mob buckets which carry fluid place that fluid when they're used. The sulfur cube bucket
+      // does not carry any fluid: nothing is placed when it is used, so return null.
+      return item instanceof MobBucketItem ? null : Material.AIR;
+    }
+
+    return CraftMagicNumbers.getMaterial(
+        content.defaultFluidState().createLegacyBlock().getBlock());
+  }
+
+  @Override
+  public MaterialMatcher.Builder matcherBuilder() {
+    return new MaterialMatcherBuilderImpl();
   }
 
   private static class MaterialMatcherBuilderImpl extends MaterialMatcher.BuilderImpl
@@ -192,7 +244,7 @@ public class ModernMaterialUtils implements MaterialUtils {
         // log:0 -> oak_log[axis=y],
         // log:4 -> oak_log[axis=x],
         // log:8 -> oak_log[axis=z]
-        case BLOCK_STATE -> add(new BlockStateMaterialMatcher(block.createCraftBlockData()));
+        case BLOCK_STATE -> add(new BlockStateMaterialMatcher(block.asBlockData()));
         // Legacy translates into LESS states than are available in modern, eg:
         // step:0 -> smooth_stone_slab[type=bottom,waterlogged=false],
         // step:8 -> smooth_stone_slab[type=top,waterlogged=false]

@@ -3,12 +3,16 @@ package tc.oc.pgm.util.bukkit;
 import static tc.oc.pgm.util.Assert.assertNotNull;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.AuthorNagException;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.Plugin;
@@ -94,5 +98,13 @@ public interface Events {
 
   static boolean isCancelled(Event event) {
     return event instanceof Cancellable && ((Cancellable) event).isCancelled();
+  }
+
+  /** The blocks an explosion event destroys itself, or an empty list if it is not an explosion. */
+  static List<Block> explodedBlocks(Event event) {
+    if (event instanceof EntityExplodeEvent entityExplodeEvent)
+      return entityExplodeEvent.blockList();
+    if (event instanceof BlockExplodeEvent blockExplodeEvent) return blockExplodeEvent.blockList();
+    return List.of();
   }
 }
