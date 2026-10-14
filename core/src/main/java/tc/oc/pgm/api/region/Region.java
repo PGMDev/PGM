@@ -1,5 +1,7 @@
 package tc.oc.pgm.api.region;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import com.google.common.collect.Iterators;
 import java.util.Collection;
 import java.util.Collections;
@@ -178,9 +180,16 @@ public interface Region extends TypedFilter<LocationQuery> {
     return contains(query);
   }
 
+  default Iterator<BlockVector> getBlockVectorIterator(World world) {
+    int minY = NMS_HACKS.getMinWorldHeight(world), maxY = NMS_HACKS.getMaxWorldHeight(world);
+    return Iterators.filter(
+        getStatic(world).getBlockVectorIterator(),
+        pos -> pos.getBlockY() >= minY && pos.getBlockY() < maxY);
+  }
+
   default Iterable<Block> getBlocks(World world) {
-    return () -> Iterators.transform(
-        getStatic(world).getBlockVectorIterator(), pos -> BlockVectors.blockAt(world, pos));
+    return () ->
+        Iterators.transform(getBlockVectorIterator(world), pos -> BlockVectors.blockAt(world, pos));
   }
 
   default Stream<ChunkVector> getChunkPositions() {
