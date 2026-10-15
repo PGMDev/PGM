@@ -13,7 +13,7 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundTakeItemEntityPacket;
-import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,12 +30,18 @@ import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.nms.packets.PlayerPackets;
 import tc.oc.pgm.util.platform.Supports;
+import tc.oc.pgm.util.reflect.ReflectionUtils;
 
-@Supports(value = PAPER, minVersion = "1.21.7")
+@SuppressWarnings("unchecked")
+@Supports(value = PAPER, minVersion = "26.3")
 public class ModernPlayerPackets implements PlayerPackets, PacketSender {
 
-  private static final int POSE_FIELD = 6;
-  private static final int BED_LOCATION = 14;
+  private static final EntityDataAccessor<Pose> DATA_POSE = ReflectionUtils.readStaticField(
+      net.minecraft.world.entity.Entity.class, EntityDataAccessor.class, "DATA_POSE");
+
+  private static final EntityDataAccessor<Optional<BlockPos>> SLEEPING_POS_ID =
+      ReflectionUtils.readStaticField(
+          LivingEntity.class, EntityDataAccessor.class, "SLEEPING_POS_ID");
 
   @Override
   public void playDeathAnimation(Player player) {
@@ -46,10 +52,8 @@ public class ModernPlayerPackets implements PlayerPackets, PacketSender {
         player.getEntityId(),
         List.of(
             SynchedEntityData.DataValue.create(LivingEntity.DATA_HEALTH_ID, 0f),
-            new SynchedEntityData.DataValue<>(
-                POSE_FIELD, EntityDataSerializers.POSE, Pose.SLEEPING),
-            new SynchedEntityData.DataValue<>(
-                BED_LOCATION, EntityDataSerializers.OPTIONAL_BLOCK_POS, Optional.of(pos))));
+            SynchedEntityData.DataValue.create(DATA_POSE, Pose.SLEEPING),
+            SynchedEntityData.DataValue.create(SLEEPING_POS_ID, Optional.of(pos))));
 
     sendToViewers(metadata, player, true);
     ENTITIES.teleportEntityPacket(player.getEntityId(), location).sendToViewers(player, false);
@@ -89,7 +93,7 @@ public class ModernPlayerPackets implements PlayerPackets, PacketSender {
   @Override
   public void updateVelocity(Player player) {
     var handle = ((CraftPlayer) player).getHandle();
-    handle.hurtMarked = false;
+    handle.syncVelocity = false;
     handle.connection.send(new ClientboundSetEntityMotionPacket(handle));
   }
 }

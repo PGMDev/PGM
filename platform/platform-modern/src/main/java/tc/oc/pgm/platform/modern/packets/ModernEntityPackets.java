@@ -16,11 +16,10 @@ import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.PositionPath;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
@@ -33,14 +32,17 @@ import org.bukkit.util.Vector;
 import tc.oc.pgm.util.nms.packets.EntityPackets;
 import tc.oc.pgm.util.nms.packets.Packet;
 import tc.oc.pgm.util.platform.Supports;
+import tc.oc.pgm.util.reflect.ReflectionUtils;
 
-@Supports(value = PAPER, minVersion = "26.2")
+@SuppressWarnings("unchecked")
+@Supports(value = PAPER, minVersion = "26.3")
 public class ModernEntityPackets implements EntityPackets {
 
-  private static final EntityDataAccessor<Byte> ENTITY_FLAGS =
-      new EntityDataAccessor<>(0, EntityDataSerializers.BYTE);
-  private static final EntityDataAccessor<Integer> ENTITY_AIR =
-      new EntityDataAccessor<>(1, EntityDataSerializers.INT);
+  private static final EntityDataAccessor<Byte> ENTITY_FLAGS = ReflectionUtils.readStaticField(
+      net.minecraft.world.entity.Entity.class, EntityDataAccessor.class, "DATA_SHARED_FLAGS_ID");
+
+  private static final EntityDataAccessor<Integer> ENTITY_AIR = ReflectionUtils.readStaticField(
+      net.minecraft.world.entity.Entity.class, EntityDataAccessor.class, "DATA_AIR_SUPPLY_ID");
 
   @Override
   public Packet spawnArmorStand(Location loc, int entityId, Vector velocity) {
@@ -89,11 +91,9 @@ public class ModernEntityPackets implements EntityPackets {
   @Override
   public Packet teleportEntityPacket(int entityId, Location location) {
     Vec3 position = new Vec3(location.getX(), location.getY(), location.getZ());
-    PositionMoveRotation positionMoveRotation =
-        new PositionMoveRotation(position, Vec3.ZERO, location.getYaw(), location.getPitch());
 
-    return new ModernPacket<>(
-        new ClientboundEntityPositionSyncPacket(entityId, positionMoveRotation, false));
+    return new ModernPacket<>(new ClientboundEntityPositionSyncPacket(
+        entityId, PositionPath.of(position), location.getYaw(), location.getPitch(), false));
   }
 
   @Override
