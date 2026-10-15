@@ -1,10 +1,12 @@
 package tc.oc.pgm.platform.modern.impl;
 
+import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import java.util.List;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
@@ -50,11 +52,16 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
-  @SuppressWarnings({"removal", "UnstableApiUsage"})
+  @SuppressWarnings("UnstableApiUsage")
   public PlayerDeathEvent createDeathEvent(
-      Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg) {
+      Player player,
+      EntityDamageEvent.DamageCause dmg,
+      List<ItemStack> drops,
+      String messageFormat) {
+    Component message = text(messageFormat)
+        .replaceText(b -> b.matchLiteral("{0}").replacement(player.displayName()));
     return new PlayerDeathEvent(
-        player, DamageSource.builder(DamageType.GENERIC_KILL).build(), drops, 0, msg);
+        player, DamageSource.builder(DamageType.GENERIC_KILL).build(), drops, 0, message, true);
   }
 
   @Override

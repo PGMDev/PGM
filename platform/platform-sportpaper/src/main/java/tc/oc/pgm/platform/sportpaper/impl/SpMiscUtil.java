@@ -54,8 +54,12 @@ public class SpMiscUtil implements MiscUtils {
 
   @Override
   public PlayerDeathEvent createDeathEvent(
-      Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg) {
-    return new PlayerDeathEvent(player, drops, 0, msg);
+      Player player,
+      EntityDamageEvent.DamageCause dmg,
+      List<ItemStack> drops,
+      String messageFormat) {
+    return new PlayerDeathEvent(
+        player, drops, 0, messageFormat.replace("{0}", player.getDisplayName()));
   }
 
   @Override
