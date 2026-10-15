@@ -172,10 +172,7 @@ public class CombatLogTracker implements Listener {
 
     try {
       currentDeathEvent = MISC_UTILS.createDeathEvent(
-          player.getBukkit(),
-          imminentDeath.cause,
-          drops,
-          player.getBukkit().getDisplayName() + " logged out to avoid death");
+          player.getBukkit(), imminentDeath.cause, drops, "{0} logged out to avoid death");
       if (currentDeathEvent != null) match.callEvent(currentDeathEvent);
     } finally {
       currentDeathEvent = null;
