@@ -19,7 +19,7 @@ import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.11", priority = HIGHEST)
+@Supports(value = PAPER, minVersion = "26.2", priority = HIGHEST)
 public class ModernPlatform implements Platform.Manifest {
   private PacketManipulations packetManipulations;
 
