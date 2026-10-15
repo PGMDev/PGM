@@ -38,7 +38,10 @@ public interface MiscUtils {
   void createExplosion(Entity source, float power, boolean fire, boolean destroy);
 
   PlayerDeathEvent createDeathEvent(
-      Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg);
+      Player player,
+      EntityDamageEvent.DamageCause dmg,
+      List<ItemStack> drops,
+      String messageFormat);
 
   EntityChangeBlockEvent createEntityChangeBlockEvent(
       Player player, Block block, BlockMaterialData md);
