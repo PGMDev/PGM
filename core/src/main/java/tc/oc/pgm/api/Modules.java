@@ -138,6 +138,7 @@ import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.variables.VariablesMatchModule;
 import tc.oc.pgm.variables.VariablesModule;
+import tc.oc.pgm.vehicle.VehicleMatchModule;
 import tc.oc.pgm.wool.WoolMatchModule;
 import tc.oc.pgm.wool.WoolModule;
 import tc.oc.pgm.worldborder.WorldBorderMatchModule;
@@ -235,6 +236,7 @@ public final class Modules {
     register(SpectateMatchModule.class, SpectateMatchModule::new);
     register(DamageHistoryMatchModule.class, DamageHistoryMatchModule::new);
     register(WeatherMatchModule.class, WeatherMatchModule::new);
+    register(VehicleMatchModule.class, VehicleMatchModule::new);
 
     register(ProjectileTrailMatchModule.class, ProjectileTrailMatchModule::new);
 

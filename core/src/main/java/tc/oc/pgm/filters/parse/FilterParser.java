@@ -53,6 +53,7 @@ import tc.oc.pgm.filters.matcher.player.CarryingFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.EffectFilter;
 import tc.oc.pgm.filters.matcher.player.FlyingFilter;
+import tc.oc.pgm.filters.matcher.player.RidingFilter;
 import tc.oc.pgm.filters.matcher.player.GroundedFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
 import tc.oc.pgm.filters.matcher.player.LivesFilter;
@@ -399,6 +400,13 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("flying")
   public FlyingFilter parseFlying(Element el) throws InvalidXMLException {
     return FlyingFilter.INSTANCE;
+  }
+
+  @MethodParser("riding")
+  public RidingFilter parseRiding(Element el) throws InvalidXMLException {
+    Node typeNode = Node.fromAttr(el, "type");
+    if (typeNode == null) return RidingFilter.ANY;
+    return new RidingFilter(XMLUtils.parseEnum(typeNode, org.bukkit.entity.EntityType.class));
   }
 
   @MethodParser("can-fly")
