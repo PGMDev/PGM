@@ -25,12 +25,14 @@ import tc.oc.pgm.action.actions.ActionNode;
 import tc.oc.pgm.action.actions.CallAction;
 import tc.oc.pgm.action.actions.ControlAction;
 import tc.oc.pgm.action.actions.ControlWrapperAction;
+import tc.oc.pgm.action.actions.DismountAction;
 import tc.oc.pgm.action.actions.DropFlagAction;
 import tc.oc.pgm.action.actions.EnchantItemAction;
 import tc.oc.pgm.action.actions.ExposedAction;
 import tc.oc.pgm.action.actions.FillAction;
 import tc.oc.pgm.action.actions.KillEntitiesAction;
 import tc.oc.pgm.action.actions.MessageAction;
+import tc.oc.pgm.action.actions.MountAction;
 import tc.oc.pgm.action.actions.OpenShop;
 import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
@@ -730,6 +732,27 @@ public class ActionParser {
       throw new InvalidXMLException("Either 'region' or 'x','y' and 'z' are required", el);
 
     return new TeleportAction(region, xFormula, yFormula, zFormula, pitchFormula, yawFormula);
+  }
+
+  @MethodParser("mount")
+  public MountAction parseMount(Element el, Class<?> scope, ActionParseContext context)
+      throws InvalidXMLException {
+    Node typeNode = Node.fromRequiredAttr(el, "type");
+    var type = XMLUtils.parseEnum(typeNode, org.bukkit.entity.EntityType.class);
+    if (!type.isSpawnable()
+        || type.getEntityClass() == null
+        || !(org.bukkit.entity.Vehicle.class.isAssignableFrom(type.getEntityClass())
+            || org.bukkit.entity.LivingEntity.class.isAssignableFrom(type.getEntityClass())))
+      throw new InvalidXMLException("'" + type + "' can't be ridden", typeNode);
+    var dismountFilter = parser.filter(el, "dismount-filter").orAllow();
+    boolean removeOnExit = parser.parseBool(el, "remove-on-exit").attr().optional(true);
+    return new MountAction(type, dismountFilter, removeOnExit);
+  }
+
+  @MethodParser("dismount")
+  public DismountAction parseDismount(Element el, Class<?> scope, ActionParseContext context)
+      throws InvalidXMLException {
+    return new DismountAction(parser.parseBool(el, "remove").attr().orNull());
   }
 
   @MethodParser("paste-structure")
