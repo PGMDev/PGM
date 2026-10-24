@@ -53,7 +53,6 @@ import tc.oc.pgm.filters.matcher.player.CarryingFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
 import tc.oc.pgm.filters.matcher.player.EffectFilter;
 import tc.oc.pgm.filters.matcher.player.FlyingFilter;
-import tc.oc.pgm.filters.matcher.player.RidingFilter;
 import tc.oc.pgm.filters.matcher.player.GroundedFilter;
 import tc.oc.pgm.filters.matcher.player.KillStreakFilter;
 import tc.oc.pgm.filters.matcher.player.LivesFilter;
@@ -63,6 +62,7 @@ import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerStateFilter;
 import tc.oc.pgm.filters.modifier.LocationQueryModifier;
 import tc.oc.pgm.filters.modifier.PlayerQueryModifier;
+import tc.oc.pgm.filters.modifier.RidingQueryModifier;
 import tc.oc.pgm.filters.modifier.SameTeamQueryModifier;
 import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
@@ -403,10 +403,9 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   }
 
   @MethodParser("riding")
-  public RidingFilter parseRiding(Element el) throws InvalidXMLException {
-    Node typeNode = Node.fromAttr(el, "type");
-    if (typeNode == null) return RidingFilter.ANY;
-    return new RidingFilter(XMLUtils.parseEnum(typeNode, org.bukkit.entity.EntityType.class));
+  public RidingQueryModifier parseRiding(Element el) throws InvalidXMLException {
+    return new RidingQueryModifier(
+        el.getChildren().isEmpty() ? StaticFilter.ALLOW : parseChild(el));
   }
 
   @MethodParser("can-fly")

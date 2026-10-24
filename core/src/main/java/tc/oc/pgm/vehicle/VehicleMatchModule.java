@@ -15,6 +15,7 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.action.actions.MountAction;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
@@ -41,10 +42,11 @@ public class VehicleMatchModule implements MatchModule, Listener {
   /**
    * Take the player out of whatever they are riding, bypassing any dismount filter.
    *
-   * @param remove whether to remove the vehicle too; null follows the mount's {@code
-   *     remove-on-exit}, and leaves vehicles that weren't spawned by a mount alone
+   * @param removeFilter queried against the player once they are out, to decide whether the
+   *     vehicle is removed too. Null uses the mount's {@code remove-filter}, and leaves vehicles
+   *     that weren't spawned by a mount alone.
    */
-  public void dismount(MatchPlayer player, @Nullable Boolean remove) {
+  public void dismount(MatchPlayer player, @Nullable Filter removeFilter) {
     Player bukkit = player.getBukkit();
     Entity vehicle = bukkit.getVehicle();
     if (vehicle == null) return;
@@ -53,8 +55,10 @@ public class VehicleMatchModule implements MatchModule, Listener {
     allowExit(bukkit);
     bukkit.leaveVehicle();
 
-    boolean doRemove = remove != null ? remove : mount != null && mount.isRemovedOnExit();
-    if (doRemove && !(vehicle instanceof Player)) {
+    Filter filter = removeFilter != null
+        ? removeFilter
+        : mount != null ? mount.getRemoveFilter() : null;
+    if (filter != null && !(vehicle instanceof Player) && filter.query(player).isAllowed()) {
       MountAction.release(vehicle);
       vehicle.remove();
     }
@@ -93,8 +97,8 @@ public class VehicleMatchModule implements MatchModule, Listener {
       return;
     }
 
-    // Remove the abandoned vehicle once the player is out of it
-    if (!mount.isRemovedOnExit()) return;
+    // Remove the abandoned vehicle once the player is out of it, if the mount says so
+    if (matchPlayer != null && !mount.getRemoveFilter().query(matchPlayer).isAllowed()) return;
     PGM.get().getServer().getScheduler().runTask(PGM.get(), () -> {
       if (vehicle.isValid() && vehicle.getPassenger() == null) {
         MountAction.release(vehicle);

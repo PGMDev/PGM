@@ -58,6 +58,7 @@ import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.entity.SpawnableEntity;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -737,22 +738,17 @@ public class ActionParser {
   @MethodParser("mount")
   public MountAction parseMount(Element el, Class<?> scope, ActionParseContext context)
       throws InvalidXMLException {
-    Node typeNode = Node.fromRequiredAttr(el, "type");
-    var type = XMLUtils.parseEnum(typeNode, org.bukkit.entity.EntityType.class);
-    if (!type.isSpawnable()
-        || type.getEntityClass() == null
-        || !(org.bukkit.entity.Vehicle.class.isAssignableFrom(type.getEntityClass())
-            || org.bukkit.entity.LivingEntity.class.isAssignableFrom(type.getEntityClass())))
-      throw new InvalidXMLException("'" + type + "' can't be ridden", typeNode);
+    Element entityEl = XMLUtils.getRequiredUniqueChild(el, "entity");
+    var entity = SpawnableEntity.parse(entityEl, factory, false);
     var dismountFilter = parser.filter(el, "dismount-filter").orAllow();
-    boolean removeOnExit = parser.parseBool(el, "remove-on-exit").attr().optional(true);
-    return new MountAction(type, dismountFilter, removeOnExit);
+    var removeFilter = parser.filter(el, "remove-filter").orAllow();
+    return new MountAction(entity, dismountFilter, removeFilter);
   }
 
   @MethodParser("dismount")
   public DismountAction parseDismount(Element el, Class<?> scope, ActionParseContext context)
       throws InvalidXMLException {
-    return new DismountAction(parser.parseBool(el, "remove").attr().orNull());
+    return new DismountAction(parser.filter(el, "remove-filter").orNull());
   }
 
   @MethodParser("paste-structure")
