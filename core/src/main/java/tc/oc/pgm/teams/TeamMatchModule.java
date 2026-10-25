@@ -573,8 +573,11 @@ public class TeamMatchModule implements MatchModule, Listener, JoinHandler {
 
     if (kickTo instanceof Team) {
       return forceJoin(kickMe, (Team) kickTo);
+    } else if (match.setParty(kickMe, kickTo)) {
+      jmm.getWaitlist().addKicked(kickMe);
+      return true;
     } else {
-      return match.setParty(kickMe, kickTo);
+      return false;
     }
   }
 

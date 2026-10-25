@@ -24,6 +24,7 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchLoadEvent;
+import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
@@ -129,9 +130,15 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
   }
 
   public void setMaxPlayers(@Nullable Integer maxPlayers, @Nullable Integer maxOverfill) {
+    int previousOverfill = getMaxOverfill();
     this.maxPlayers = maxPlayers == null ? options.maxPlayers : maxPlayers;
     this.maxOverfill = maxOverfill == null ? options.maxOverfill : maxOverfill;
-    match.setMaxPlayers(getMaxPlayers());
+    if (match.getMaxPlayers() != getMaxPlayers()) {
+      match.setMaxPlayers(getMaxPlayers());
+    } else if (previousOverfill != getMaxOverfill()) {
+      // Overfill alone doesn't change the match size
+      match.callEvent(new MatchResizeEvent(match));
+    }
   }
 
   public void setNameTagVisibility(@Nullable NameTagVisibility nameTagVisibility) {
@@ -218,7 +225,7 @@ public class FreeForAllMatchModule implements MatchModule, Listener, JoinHandler
     kickMe.sendWarning(translatable("leave.ok.priorityKick"));
     kickMe.playSound(Sounds.MATCH_KICK);
 
-    match.setParty(kickMe, match.getDefaultParty());
+    if (match.setParty(kickMe, match.getDefaultParty())) join().getWaitlist().addKicked(kickMe);
 
     return true;
   }

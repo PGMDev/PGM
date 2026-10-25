@@ -96,6 +96,8 @@ public final class PGMConfig implements Config {
   private final boolean priorityKick;
   private final boolean balanceJoin;
   private final boolean queueJoin;
+  private final boolean waitlistJoin;
+  private final Duration waitlistAfkTime;
   private final boolean anytimeJoin;
   private final boolean flagBeams;
 
@@ -208,6 +210,8 @@ public final class PGMConfig implements Config {
     this.priorityKick = parseBoolean(config.getString("join.priority-kick", "true"));
     this.balanceJoin = parseBoolean(config.getString("join.balance", "true"));
     this.queueJoin = parseBoolean(config.getString("join.queue", "false"));
+    this.waitlistJoin = parseBoolean(config.getString("join.waitlist", "true"));
+    this.waitlistAfkTime = parseDuration(config.getString("join.waitlist-afk", "2m"));
     this.anytimeJoin = parseBoolean(config.getString("join.anytime", "true"));
 
     var proximityStr = config.getString("ui.proximity", "false");
@@ -595,6 +599,16 @@ public final class PGMConfig implements Config {
   @Override
   public boolean shouldQueueJoin() {
     return queueJoin;
+  }
+
+  @Override
+  public boolean shouldWaitlistJoin() {
+    return waitlistJoin;
+  }
+
+  @Override
+  public Duration getWaitlistAfkTime() {
+    return waitlistAfkTime;
   }
 
   @Override
