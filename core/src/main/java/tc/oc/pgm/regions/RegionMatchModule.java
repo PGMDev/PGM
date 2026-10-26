@@ -15,6 +15,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDamageEvent;
@@ -121,6 +122,47 @@ public class RegionMatchModule implements MatchModule, Listener {
   public void checkEnterLeave(final PlayerCoarseMoveEvent event) {
     this.checkEnterLeave(
         event, this.match.getPlayer(event.getPlayer()), event.getBlockFrom(), event.getBlockTo());
+  }
+
+  /**
+   * Evaluate the enter/leave region filters for a rider carried across a block boundary by a
+   * vehicle. A living mount (horse, pig, ...) fires neither {@link
+   * org.bukkit.event.player.PlayerMoveEvent} nor {@link org.bukkit.event.vehicle.VehicleMoveEvent}
+   * for its rider, so such movement bypasses {@link #checkEnterLeave(PlayerCoarseMoveEvent)}. The
+   * vehicle module polls this instead. Any deny message is sent to the player.
+   *
+   * @return true if the movement is denied and the rider should be put back
+   */
+  public boolean denyVehicleMovement(MatchPlayer player, Location from, Location to) {
+    VehicleMovement carrier = new VehicleMovement();
+    this.checkEnterLeave(carrier, player, BlockVectors.center(from), BlockVectors.center(to));
+    if (!carrier.isCancelled()) return false;
+    if (carrier.getCancellationReason() != null) {
+      player.sendWarning(carrier.getCancellationReason());
+    }
+    return true;
+  }
+
+  /**
+   * A cancellable carrier event, never fired through the plugin manager, so {@link
+   * #checkEnterLeave(Event, MatchPlayer, Location, Location)} can report a deny for movement that
+   * has no Bukkit event of its own.
+   */
+  private static final class VehicleMovement extends GeneralizedEvent {
+    private static final HandlerList handlers = new HandlerList();
+
+    private VehicleMovement() {
+      super(null);
+    }
+
+    @Override
+    public HandlerList getHandlers() {
+      return handlers;
+    }
+
+    public static HandlerList getHandlerList() {
+      return handlers;
+    }
   }
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)

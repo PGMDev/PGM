@@ -15,15 +15,6 @@ import tc.oc.pgm.api.player.MatchPlayer;
 /**
  * Re-scopes a player query to whatever the player is riding (boat, minecart, horse...), so any
  * entity filter can be applied to it. Denies when the player isn't riding anything.
- *
- * <pre>{@code
- * <riding id="riding-horse-or-fast">
- *   <any>
- *     <entity>horse</entity>
- *     <effect>speed</effect>
- *   </any>
- * </riding>
- * }</pre>
  */
 public class RidingQueryModifier extends QueryModifier<PlayerQuery, EntityQuery> {
 

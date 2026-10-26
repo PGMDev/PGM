@@ -3,13 +3,9 @@ package tc.oc.pgm.action.actions;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
-import org.bukkit.inventory.HorseInventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.Nullable;
@@ -21,28 +17,15 @@ import tc.oc.pgm.entity.SpawnableEntity;
 import tc.oc.pgm.vehicle.VehicleMatchModule;
 
 /**
- * Spawns an entity at the player and seats them on it. The entity is a spawnable entity, the same
- * definition spawners use, so any of its properties (and a kit, for mobs) can be set. Non-living
- * vehicles like boats and minecarts are allowed too.
+ * Spawns an entity at the player and seats them on it, using the same entity definition spawners
+ * use, so any of its properties (and a kit, for mobs) can be set. Non-living vehicles like boats and
+ * minecarts are allowed too.
  *
- * <pre>{@code
- * <mount dismount-filter="never" remove-filter="always">
- *   <entity type="horse" tamed="true" jump-strength="1" kit="horse-armor"/>
- * </mount>
- * }</pre>
- *
- * <ul>
- *   <li>{@code dismount-filter}: queried against the player whenever they try to get out by
- *       themselves (default: always). Death, teleports, despawning, quitting and {@code
- *       <dismount>} always get them out.
- *   <li>{@code remove-filter}: queried against the player once they are out, to decide whether
- *       the entity is removed (default: always).
- * </ul>
- *
- * <p>Being an action it works anywhere actions do, and untriggering it (e.g. a lent kit being
- * removed) takes the player out. Tamed mobs are owned by the rider and horses are saddled, so
- * they can be steered. Players already riding an entity from this action are left alone; anything
- * else they're riding is swapped out.
+ * <p>{@code dismount-filter} is queried whenever the player tries to get out by themselves (default:
+ * always); death, teleports, despawning, quitting and {@code <dismount>} always get them out. {@code
+ * remove-filter} is queried once they are out, to decide whether the entity is removed (default:
+ * always). Tamed mobs are owned by the rider. Players already riding an entity from this action are
+ * left alone; anything else they're riding is swapped out.
  */
 public class MountAction extends AbstractAction<MatchPlayer> {
 
@@ -75,11 +58,8 @@ public class MountAction extends AbstractAction<MatchPlayer> {
     Player bukkit = player.getBukkit();
     if (getMount(bukkit.getVehicle()) == this) return;
 
-    VehicleMatchModule vehicles = player.getMatch().getModule(VehicleMatchModule.class);
-    if (bukkit.isInsideVehicle()) {
-      if (vehicles != null) vehicles.dismount(player, null);
-      else bukkit.leaveVehicle();
-    }
+    VehicleMatchModule vehicles = player.getMatch().needModule(VehicleMatchModule.class);
+    if (bukkit.isInsideVehicle()) vehicles.dismount(player, null);
 
     Location location = bukkit.getLocation();
     Entity vehicle = entity.spawn(location);
@@ -100,22 +80,10 @@ public class MountAction extends AbstractAction<MatchPlayer> {
     });
   }
 
-  @Override
-  public void untrigger(MatchPlayer player, ActionContext context) {
-    if (getMount(player.getBukkit().getVehicle()) != this) return;
-    VehicleMatchModule vehicles = player.getMatch().getModule(VehicleMatchModule.class);
-    if (vehicles != null) vehicles.dismount(player, null);
-  }
-
-  /** Make a rideable mob controllable by its rider. */
+  /** Make a tamed mob owned by its rider, so it can be controlled. */
   private static void prepare(Entity vehicle, Player rider) {
     if (vehicle instanceof Tameable tameable && tameable.isTamed()) {
       tameable.setOwner(rider);
-    }
-    if (vehicle instanceof InventoryHolder holder
-        && holder.getInventory() instanceof HorseInventory inventory
-        && inventory.getSaddle() == null) {
-      inventory.setSaddle(new ItemStack(Material.SADDLE));
     }
   }
 

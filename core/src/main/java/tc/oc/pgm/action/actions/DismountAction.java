@@ -27,8 +27,6 @@ public class DismountAction extends AbstractAction<MatchPlayer> {
 
   @Override
   public void trigger(MatchPlayer player, ActionContext context) {
-    VehicleMatchModule vehicles = player.getMatch().getModule(VehicleMatchModule.class);
-    if (vehicles != null) vehicles.dismount(player, removeFilter);
-    else player.getBukkit().leaveVehicle();
+    player.getMatch().needModule(VehicleMatchModule.class).dismount(player, removeFilter);
   }
 }
