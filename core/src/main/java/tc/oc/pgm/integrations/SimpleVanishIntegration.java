@@ -143,6 +143,10 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
 
   @EventHandler(priority = EventPriority.HIGH)
   public void onJoin(PlayerJoinEvent event) {
+    if (isVanished(event.getPlayer().getUniqueId())) {
+      event.getPlayer().setMetadata(VANISH_KEY, VANISH_VALUE);
+    }
+
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
     if (player == null) return;
     if (player.getParty() instanceof Competitor) return; // Do not vanish players on a team
@@ -161,11 +165,11 @@ public class SimpleVanishIntegration implements VanishIntegration, Listener {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onQuit(PlayerQuitEvent event) {
     MatchPlayer player = matchManager.getPlayer(event.getPlayer());
-    if (player == null) return;
     // If player is vanished & joined via "vanish" subdomain. Remove vanish status on quit
-    if (isVanished(player.getId()) && tempVanish.contains(player.getId())) {
+    if (player != null && isVanished(player.getId()) && tempVanish.contains(player.getId())) {
       setVanished(player, false, true);
     }
+    event.getPlayer().removeMetadata(VANISH_KEY, VANISH_VALUE.getOwningPlugin());
   }
 
   @EventHandler
