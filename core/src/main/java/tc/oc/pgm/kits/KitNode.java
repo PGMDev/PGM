@@ -5,6 +5,7 @@ import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -88,7 +89,7 @@ public class KitNode extends AbstractKit {
   }
 
   @Override
-  public void validateMob(Class<? extends LivingEntity> mobType, Node node)
+  public void validateMob(Class<? extends Entity> mobType, Node node)
       throws InvalidXMLException {
     for (Kit kit : kits) kit.validateMob(mobType, node);
   }

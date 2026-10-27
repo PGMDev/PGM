@@ -3,6 +3,7 @@ package tc.oc.pgm.kits;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -56,14 +57,18 @@ public class EquipmentKit extends AbstractKit {
   }
 
   @Override
-  public void validateMob(Class<? extends LivingEntity> mobType, Node node)
-      throws InvalidXMLException {
-    var equipment = EntityEquipmentUtil.EQUIPMENT;
-    if (slots.containsKey(Slot.Saddle.saddle()) && !equipment.canEquipSaddle(mobType)) {
-      throw new InvalidXMLException("saddle is not supported for " + mobType.getSimpleName(), node);
+  public void validateMob(Class<? extends Entity> mobType, Node node) throws InvalidXMLException {
+    if (!LivingEntity.class.isAssignableFrom(mobType)) {
+      throw new InvalidXMLException(
+          "equipment is not supported for " + mobType.getSimpleName(), node);
     }
-    if (slots.containsKey(Slot.Body.body()) && !equipment.canEquipBody(mobType)) {
-      throw new InvalidXMLException("body is not supported for " + mobType.getSimpleName(), node);
+    var living = mobType.asSubclass(LivingEntity.class);
+    var equipment = EntityEquipmentUtil.EQUIPMENT;
+    if (slots.containsKey(Slot.Saddle.saddle()) && !equipment.canEquipSaddle(living)) {
+      throw new InvalidXMLException("saddle is not supported for " + living.getSimpleName(), node);
+    }
+    if (slots.containsKey(Slot.Body.body()) && !equipment.canEquipBody(living)) {
+      throw new InvalidXMLException("body is not supported for " + living.getSimpleName(), node);
     }
   }
 }
