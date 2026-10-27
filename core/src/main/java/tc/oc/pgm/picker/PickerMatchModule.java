@@ -6,12 +6,15 @@ import static tc.oc.pgm.util.Assert.assertTrue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -36,9 +39,12 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.api.match.event.MatchFinishEvent;
+import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
+import tc.oc.pgm.api.party.Competitor;
+import tc.oc.pgm.api.party.event.PartyRenameEvent;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.player.event.MatchPlayerDeathEvent;
 import tc.oc.pgm.api.player.event.ObserverInteractEvent;
@@ -47,9 +53,11 @@ import tc.oc.pgm.api.setting.SettingKey;
 import tc.oc.pgm.blitz.BlitzMatchModule;
 import tc.oc.pgm.classes.ClassMatchModule;
 import tc.oc.pgm.classes.PlayerClass;
+import tc.oc.pgm.classes.PlayerClassChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerPartyChangeEvent;
+import tc.oc.pgm.events.PlayerWaitlistEvent;
 import tc.oc.pgm.join.JoinMatchModule;
 import tc.oc.pgm.join.JoinRequest;
 import tc.oc.pgm.join.JoinResult;
@@ -61,10 +69,12 @@ import tc.oc.pgm.spawns.events.ObserverKitApplyEvent;
 import tc.oc.pgm.spawns.events.ParticipantKitApplyEvent;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.teams.TeamMatchModule;
+import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.StringUtils;
 import tc.oc.pgm.util.bukkit.Enchantments;
 import tc.oc.pgm.util.bukkit.Sounds;
+import tc.oc.pgm.util.concurrent.RateLimiter;
 import tc.oc.pgm.util.event.player.PlayerLocaleChangeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.MaterialData;
@@ -97,6 +107,13 @@ public class PickerMatchModule implements MatchModule, Listener {
   private static final int LORE_WIDTH_PIXELS = 120;
   private static final int WIDTH = 9; // Inventory width in slots (for readability)
 
+  // Same limits as the tab list, see MatchTabManager
+  private static final int MIN_DELAY = 100, MAX_DELAY = 5_000;
+  private static final int TIME_RATIO = 40;
+  private static final int TPS_RATIO = 1000;
+  private static final int AFK_DELAY = 5_000;
+  private static final Duration AFK_TIME = Duration.ofSeconds(30);
+
   enum Button {
     AUTO_JOIN(Material.CHAINMAIL_HELMET),
     TEAM_JOIN(Material.LEATHER_HELMET),
@@ -120,6 +137,13 @@ public class PickerMatchModule implements MatchModule, Listener {
   private final boolean hasTeams;
   private final boolean hasClasses;
   private final boolean isBlitz;
+  private final RateLimiter rateLimit =
+      new RateLimiter(MIN_DELAY, MAX_DELAY, TIME_RATIO, TPS_RATIO);
+  private final Set<MatchPlayer> afkWindows = new HashSet<>();
+  private final Set<MatchPlayer> afkKits = new HashSet<>();
+  private @Nullable Future<?> refreshTask;
+  private @Nullable Future<?> afkRefreshTask;
+  private boolean refreshKits;
 
   private PickerMatchModule(Match match) {
     this.match = match;
@@ -251,8 +275,15 @@ public class PickerMatchModule implements MatchModule, Listener {
     }
 
     meta.setDisplayName(OPEN_BUTTON_PREFIX + TextTranslations.translate(key, player.getBukkit()));
-    meta.setLore(Lists.newArrayList(
-        ChatColor.DARK_PURPLE + TextTranslations.translate("picker.tooltip", player.getBukkit())));
+    String tooltip =
+        ChatColor.DARK_PURPLE + TextTranslations.translate("picker.tooltip", player.getBukkit());
+    if (match.needModule(JoinMatchModule.class).getWaitlist().wouldWaitlist(player)) {
+      String hint =
+          ChatColor.GOLD + TextTranslations.translate("picker.waitlist.join", player.getBukkit());
+      meta.setLore(List.of(tooltip, hint));
+    } else {
+      meta.setLore(List.of(tooltip));
+    }
 
     // Color the leather helmet to match player team
     if (player.getParty() != null && !(player.getParty() instanceof ObserverParty)) {
@@ -432,12 +463,42 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   @EventHandler
   public void teamSwitch(final PlayerPartyChangeEvent event) {
-    refreshCountsAll();
     refreshKit(event.getPlayer());
+
+    // May fill or free the match, changing the waitlist hint
+    boolean fillChanged = PGM.get().getConfiguration().shouldWaitlistJoin()
+        && !match.isFinished()
+        && (event.getOldParty() instanceof Competitor || event.getNewParty() instanceof Competitor);
+    scheduleRefreshAll(fillChanged);
 
     if (event.getNewParty() == null) {
       picking.remove(event.getPlayer());
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void teamResize(final TeamResizeEvent event) {
+    scheduleRefreshAll(true);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void matchResize(final MatchResizeEvent event) {
+    scheduleRefreshAll(true);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void partyRename(final PartyRenameEvent event) {
+    scheduleRefreshAll(false);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void classChange(final PlayerClassChangeEvent event) {
+    scheduleRefresh(event.getPlayer());
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void waitlist(final PlayerWaitlistEvent event) {
+    scheduleRefreshAll(false);
   }
 
   @EventHandler
@@ -645,6 +706,20 @@ public class PickerMatchModule implements MatchModule, Listener {
   private ItemStack createAutoJoinButton(MatchPlayer viewer) {
     ItemStack autojoin = new ItemStack(Button.AUTO_JOIN.material);
 
+    JoinMatchModule jmm = match.needModule(JoinMatchModule.class);
+    int position = jmm.getWaitlist().getPosition(viewer);
+    String tooltip;
+    if (position > 0) {
+      tooltip = ChatColor.GOLD
+          + TextTranslations.translate("picker.waitlist.position", viewer.getBukkit(), position);
+    } else if (jmm.getWaitlist().wouldWaitlist(viewer)) {
+      tooltip =
+          ChatColor.GOLD + TextTranslations.translate("picker.waitlist.join", viewer.getBukkit());
+    } else {
+      tooltip = ChatColor.AQUA
+          + TextTranslations.translate("picker.autoJoin.tooltip", viewer.getBukkit());
+    }
+
     ItemMeta autojoinMeta = autojoin.getItemMeta();
     autojoinMeta.setDisplayName(ChatColor.GRAY.toString()
         + ChatColor.BOLD
@@ -652,8 +727,7 @@ public class PickerMatchModule implements MatchModule, Listener {
     autojoinMeta.setLore(Lists.newArrayList(
         this.getTeamSizeDescription(
             viewer.getMatch().getParticipants().size(), viewer.getMatch().getMaxPlayers()),
-        ChatColor.AQUA
-            + TextTranslations.translate("picker.autoJoin.tooltip", viewer.getBukkit())));
+        tooltip));
     autojoin.setItemMeta(autojoinMeta);
 
     return autojoin;
@@ -798,5 +872,48 @@ public class PickerMatchModule implements MatchModule, Listener {
 
   private void scheduleRefresh(final MatchPlayer viewer) {
     match.getExecutor(MatchScope.LOADED).execute(() -> refreshWindow(viewer));
+  }
+
+  private void scheduleRefreshAll(boolean kits) {
+    refreshKits |= kits;
+    if (refreshTask != null) return;
+    refreshTask = match
+        .getExecutor(MatchScope.LOADED)
+        .schedule(this::refreshActive, rateLimit.getDelay(), TimeUnit.MILLISECONDS);
+  }
+
+  private void refreshActive() {
+    refreshTask = null;
+    rateLimit.beforeTask();
+    for (MatchPlayer player : List.copyOf(picking)) {
+      if (player.isActive(AFK_TIME)) refreshWindow(player);
+      else afkWindows.add(player);
+    }
+    if (refreshKits) {
+      for (MatchPlayer player : match.getObservers()) {
+        if (player.isActive(AFK_TIME)) refreshKit(player);
+        else afkKits.add(player);
+      }
+      refreshKits = false;
+    }
+    rateLimit.afterTask();
+
+    if (afkRefreshTask == null && (!afkWindows.isEmpty() || !afkKits.isEmpty())) {
+      afkRefreshTask = match
+          .getExecutor(MatchScope.LOADED)
+          .schedule(this::refreshAfk, AFK_DELAY, TimeUnit.MILLISECONDS);
+    }
+  }
+
+  private void refreshAfk() {
+    afkRefreshTask = null;
+    for (MatchPlayer player : afkWindows) {
+      if (picking.contains(player)) refreshWindow(player);
+    }
+    for (MatchPlayer player : afkKits) {
+      if (player.isObserving()) refreshKit(player);
+    }
+    afkWindows.clear();
+    afkKits.clear();
   }
 }

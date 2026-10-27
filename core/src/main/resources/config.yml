@@ -80,6 +80,8 @@ join:
   anytime: true       # Can players join after a match has started?
   balance: true       # Can players be moved to make teams more balanced?
   queue: false        # Should players be put in a queue before joining the match?
+  waitlist: true      # Should players wait for a free slot when joining a full match?
+  waitlist-afk: "2m"  # How long a waitlisted player can be inactive before losing their place
   limit: true         # Should there be a limit on the number of players on each team?
   priority-kick: true # Can free players be kicked to observers to make room for a premium player?
 
