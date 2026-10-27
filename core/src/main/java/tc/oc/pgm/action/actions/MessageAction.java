@@ -71,7 +71,6 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
     return component;
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   private static @NonNull Component replaceClickEvents(
       @NonNull Component component, Function<MatchResult, String> replacer) {
     var click = component.clickEvent();
@@ -81,8 +80,7 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
       while (matcher.find()) matcher.appendReplacement(result, replacer.apply(matcher));
       matcher.appendTail(result);
       var resultPayload = ClickEvent.Payload.string(result.toString());
-      component = component.clickEvent(
-          ClickEvent.clickEvent((ClickEvent.Action) click.action(), resultPayload));
+      component = component.clickEvent(ClickEvent.clickEvent(click.action(), resultPayload));
     }
     var children = new ArrayList<>(component.children());
     children.replaceAll(child -> replaceClickEvents(child, replacer));
