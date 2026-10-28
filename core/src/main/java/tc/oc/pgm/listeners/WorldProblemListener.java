@@ -78,9 +78,10 @@ public class WorldProblemListener implements Listener {
         }
       }
 
-      // Remove all block 36 and remember the ones at y=0 so VoidFilter can check them
+      // Remove all block 36 and remember the ones at the bottom so VoidFilter can check them
+      int minY = NMS_HACKS.getMinWorldHeight(event.getWorld());
       for (Block block36 : NMS_HACKS.getBlocks(event.getChunk(), Materials.MOVING_PISTON)) {
-        if (block36.getY() == 0) {
+        if (block36.getY() == minY) {
           block36Locations
               .get(event.getWorld())
               .add(block36.getX(), block36.getY(), block36.getZ());

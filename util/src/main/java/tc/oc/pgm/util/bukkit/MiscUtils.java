@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.bukkit;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -50,9 +49,13 @@ public interface MiscUtils {
 
   double getArrowDamage(Arrow arrow);
 
-  int getWorldDataVersion(Path levelDat);
+  int getArrowKnockback(Arrow arrow);
+
+  boolean isArrow(Class<? extends Entity> entityClass);
 
   Key getSoundKey(String name);
+
+  boolean isKnownSound(Key key);
 
   default void initScoreboardTeam(Team team, NamedTextColor color) {}
 

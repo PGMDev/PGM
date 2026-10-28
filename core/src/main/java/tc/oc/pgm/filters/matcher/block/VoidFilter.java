@@ -1,5 +1,7 @@
 package tc.oc.pgm.filters.matcher.block;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import tc.oc.pgm.api.filter.query.BlockQuery;
@@ -19,9 +21,10 @@ public class VoidFilter extends TypedFilter.Impl<BlockQuery> {
   @Override
   public boolean matches(BlockQuery query) {
     BlockState block = query.getBlock();
-    return block.getY() == 0
-        || (!WorldProblemListener.wasBlock36(block.getWorld(), block.getX(), 0, block.getZ())
-            && block.getWorld().getBlockAt(block.getX(), 0, block.getZ()).getType()
+    int minY = NMS_HACKS.getMinWorldHeight(block.getWorld());
+    return block.getY() == minY
+        || (!WorldProblemListener.wasBlock36(block.getWorld(), block.getX(), minY, block.getZ())
+            && block.getWorld().getBlockAt(block.getX(), minY, block.getZ()).getType()
                 == Material.AIR);
   }
 

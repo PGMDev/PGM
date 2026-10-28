@@ -1,5 +1,7 @@
 package tc.oc.pgm.snapshot;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.ChunkSnapshot;
@@ -19,9 +21,12 @@ public class WorldSnapshot {
   private final World world;
   private final Map<ChunkVector, ChunkSnapshot> chunkSnapshots = new HashMap<>();
   private final BudgetWorldEdit worldEdit;
+  private final int minY, maxY;
 
   public WorldSnapshot(World world) {
     this.world = world;
+    this.minY = NMS_HACKS.getMinWorldHeight(world);
+    this.maxY = NMS_HACKS.getMaxWorldHeight(world);
     this.worldEdit = new BudgetWorldEdit(world, this);
   }
 
@@ -30,7 +35,7 @@ public class WorldSnapshot {
   }
 
   public BlockMaterialData getOriginalMaterial(int x, int y, int z) {
-    if (y < 0 || y >= 256) return MaterialData.AIR;
+    if (y < minY || y >= maxY) return MaterialData.AIR;
 
     ChunkVector chunkVector = ChunkVector.ofBlock(x, y, z);
     ChunkSnapshot chunkSnapshot = chunkSnapshots.get(chunkVector);
@@ -43,7 +48,7 @@ public class WorldSnapshot {
 
   public BlockState getOriginalBlock(int x, int y, int z) {
     BlockState state = world.getBlockAt(x, y, z).getState();
-    if (y < 0 || y >= 256) return state;
+    if (y < minY || y >= maxY) return state;
 
     ChunkVector chunkVector = ChunkVector.ofBlock(x, y, z);
     ChunkSnapshot chunkSnapshot = chunkSnapshots.get(chunkVector);
@@ -97,7 +102,6 @@ public class WorldSnapshot {
    * @param region the region to get block states from
    */
   public Iterable<BlockData> getMaterials(Region region) {
-    return () ->
-        MaterialData.iterator(chunkSnapshots, region.getStatic(world).getBlockVectorIterator());
+    return () -> MaterialData.iterator(chunkSnapshots, region.getBlockVectorIterator(world));
   }
 }

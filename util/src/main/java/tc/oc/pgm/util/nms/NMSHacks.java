@@ -40,8 +40,6 @@ public interface NMSHacks {
 
   void setSkullMetaOwner(SkullMeta meta, String name, UUID uuid, Skin skin);
 
-  World createWorld(String worldName, World.Environment env, boolean terrain, long seed);
-
   boolean canMineBlock(BlockMaterialData blockMaterial, Player player);
 
   void resetDimension(World world);
@@ -56,5 +54,9 @@ public interface NMSHacks {
 
   int getMaxWorldSize(World world);
 
-  int allocateEntityId();
+  int getMinWorldHeight(World world);
+
+  int getMaxWorldHeight(World world);
+
+  int allocateEntityId(World world);
 }

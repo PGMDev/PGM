@@ -57,6 +57,7 @@ import tc.oc.pgm.util.attribute.Attributes;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextTranslations;
 
@@ -310,20 +311,27 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
 
     MatchPlayer matchHolder = this.match.getPlayer(holder);
     if (matchHolder != null && matchHolder.isParticipating()) {
+      List<String> specialLore = new ArrayList<>();
+
       BlitzMatchModule module = matchHolder.getMatch().getModule(BlitzMatchModule.class);
       if (module != null) {
         int livesLeft = module.getNumOfLives(holder.getUniqueId());
-        ItemStack lives = new ItemStack(Material.EGG, livesLeft);
-        ItemMeta lifeMeta = lives.getItemMeta();
         String key = livesLeft == 1 ? "misc.life" : "misc.lives";
-        lifeMeta.setDisplayName(ChatColor.GREEN
+        String livesText = ChatColor.GREEN
             + TextTranslations.translate(
-                key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN));
-        lives.setItemMeta(lifeMeta);
-        preview.setItem(4, lives);
-      }
+                key, viewer, ChatColor.AQUA + String.valueOf(livesLeft) + ChatColor.GREEN);
 
-      List<String> specialLore = new ArrayList<>();
+        if (Slot.OffHand.offHand().isPresent()) {
+          // The off-hand takes this slot, so show lives with the special abilities
+          specialLore.add(livesText);
+        } else {
+          ItemStack lives = new ItemStack(Material.EGG, Math.max(1, livesLeft));
+          ItemMeta lifeMeta = lives.getItemMeta();
+          lifeMeta.setDisplayName(livesText);
+          lives.setItemMeta(lifeMeta);
+          preview.setItem(4, lives);
+        }
+      }
 
       if (holder.getAllowFlight()) {
         specialLore.add(
@@ -398,7 +406,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     preview.setItem(6, potions);
 
     // hunger and health
-    ItemStack hunger = new ItemStack(Material.COOKED_BEEF, holder.getFoodLevel());
+    ItemStack hunger = new ItemStack(Material.COOKED_BEEF, Math.max(1, holder.getFoodLevel()));
     ItemMeta hungerMeta = hunger.getItemMeta();
     hungerMeta.setDisplayName(ChatColor.AQUA.toString()
         + ChatColor.ITALIC
@@ -407,7 +415,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     hunger.setItemMeta(hungerMeta);
     preview.setItem(7, hunger);
 
-    ItemStack health = new ItemStack(Material.REDSTONE, (int) holder.getHealth());
+    ItemStack health = new ItemStack(Material.REDSTONE, Math.max(1, (int) holder.getHealth()));
     ItemMeta healthMeta = health.getItemMeta();
     healthMeta.setDisplayName(ChatColor.AQUA.toString()
         + ChatColor.ITALIC
@@ -421,6 +429,7 @@ public class ViewInventoryMatchModule implements MatchModule, Listener {
     preview.setItem(1, inventory.getChestplate());
     preview.setItem(2, inventory.getLeggings());
     preview.setItem(3, inventory.getBoots());
+    Slot.OffHand.offHand().ifPresent(offHand -> preview.setItem(4, offHand.getItem(inventory)));
 
     this.showInventoryPreview(viewer, inventory, preview);
   }

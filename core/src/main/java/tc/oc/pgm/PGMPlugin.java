@@ -1,5 +1,7 @@
 package tc.oc.pgm;
 
+import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
+
 import com.google.common.collect.Lists;
 import fr.minuskube.inv.InventoryManager;
 import java.io.File;
@@ -208,12 +210,11 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
         config.getGroups().isEmpty() ? null : new ConfigDecorationProvider());
 
     // Sometimes match folders need to be cleaned up if the server previously crashed
-    final File[] worldDirs = getServer().getWorldContainer().listFiles();
-    if (worldDirs != null) {
+    for (File root : WORLD_STORAGE.getWorldDirectories()) {
+      final File[] worldDirs = root.listFiles();
+      if (worldDirs == null) continue;
       for (File dir : worldDirs) {
-        if (dir.isDirectory() && Match.isMatchWorld(dir.getName())) {
-          FileUtils.delete(dir);
-        }
+        if (dir.isDirectory() && Match.isMatchWorld(dir.getName())) FileUtils.delete(dir);
       }
     }
 
