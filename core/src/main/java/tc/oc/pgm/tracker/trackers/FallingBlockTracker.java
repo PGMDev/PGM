@@ -8,6 +8,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.EntityBlockFormEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.event.BlockTransformEvent;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.tracker.DamageResolver;
 import tc.oc.pgm.api.tracker.info.DamageInfo;
@@ -55,9 +56,11 @@ public class FallingBlockTracker extends AbstractTracker<BlockInfo> implements D
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
-  public void onFall(BlockFallEvent event) {
+  public void onBlockTransform(BlockTransformEvent event) {
+    if (!(event.getCause() instanceof BlockFallEvent fall)) return;
+
     BlockInfo info = resolveBlock(event.getBlock());
-    if (info != null) entities().trackEntity(event.getEntity(), info);
+    if (info != null) entities().trackEntity(fall.getEntity(), info);
   }
 
   private Location getEyeLocation(Entity entity) {

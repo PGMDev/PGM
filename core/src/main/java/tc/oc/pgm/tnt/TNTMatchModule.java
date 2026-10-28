@@ -24,11 +24,13 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.ParticipantBlockTransformEvent;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeByEntityEvent;
 import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.wool.WoolMatchModule;
 
 @NullMarked
 @ListenerScope(MatchScope.RUNNING)
@@ -74,10 +76,15 @@ public class TNTMatchModule implements MatchModule, Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void handleInstantActivation(BlockPlaceEvent event) {
-    if (this.properties.instantIgnite() && event.getBlock().getType() == Material.TNT) {
-      World world = event.getBlock().getWorld();
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+  public void handleInstantActivation(ParticipantBlockTransformEvent event) {
+    if (this.properties.instantIgnite()
+        && event.getCause() instanceof BlockPlaceEvent place
+        && event.getNewState().getType() == Material.TNT) {
+      WoolMatchModule wools = match.getModule(WoolMatchModule.class);
+      if (wools != null && wools.isMonumentBlock(event.getBlock())) return;
+
+      World world = event.getWorld();
       TNTPrimed tnt = world.spawn(
           event.getBlock().getLocation().clone().add(new Location(world, 0.5, 0.5, 0.5)),
           TNTPrimed.class);
@@ -90,10 +97,10 @@ public class TNTMatchModule implements MatchModule, Listener {
         tnt.setYield(this.properties.power()); // Note: not related to EntityExplodeEvent.yield
       }
 
-      if (callPrimeEvent(tnt, event.getPlayer())) {
+      if (callPrimeEvent(tnt, place.getPlayer())) {
         event.setCancelled(true); // Allow the block to be placed if priming is cancelled
         match.playSound(Sounds.TNT_FUSE, tnt.getLocation());
-        InventoryUtils.consumeItem(event, event.getPlayer());
+        InventoryUtils.consumeItem(place, place.getPlayer());
       }
     }
   }

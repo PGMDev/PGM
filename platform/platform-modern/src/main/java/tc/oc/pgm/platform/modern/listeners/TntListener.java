@@ -1,6 +1,7 @@
 package tc.oc.pgm.platform.modern.listeners;
 
 import org.bukkit.craftbukkit.entity.CraftTNTPrimed;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -13,7 +14,29 @@ import tc.oc.pgm.util.event.entity.ExplosionPrimeEvent;
 
 public class TntListener implements Listener {
 
+  private interface BridgedPrimeEvent {}
+
+  private static final class BridgedExplosionPrimeEvent extends ExplosionPrimeEvent
+      implements BridgedPrimeEvent {
+
+    private BridgedExplosionPrimeEvent(TNTPrimed tnt) {
+      super(tnt);
+    }
+  }
+
+  private static final class BridgedExplosionPrimeByEntityEvent extends ExplosionPrimeByEntityEvent
+      implements BridgedPrimeEvent {
+
+    private BridgedExplosionPrimeByEntityEvent(TNTPrimed tnt, Entity primer) {
+      super(tnt, primer);
+    }
+  }
+
   private TNTPrimeEvent lastEvent;
+
+  static boolean isBridgedPrimeEvent(ExplosionPrimeEvent event) {
+    return event instanceof BridgedPrimeEvent;
+  }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
   public void onTntPrime(TNTPrimeEvent event) {
@@ -31,9 +54,9 @@ public class TntListener implements Listener {
 
     ExplosionPrimeEvent pgmEvent;
     if (primeEvent.getPrimingEntity() != null) {
-      pgmEvent = new ExplosionPrimeByEntityEvent(tnt, primeEvent.getPrimingEntity());
+      pgmEvent = new BridgedExplosionPrimeByEntityEvent(tnt, primeEvent.getPrimingEntity());
     } else {
-      pgmEvent = new ExplosionPrimeEvent(tnt);
+      pgmEvent = new BridgedExplosionPrimeEvent(tnt);
     }
     EventUtil.handleCall(pgmEvent, event);
     tnt.setYield(pgmEvent.getRadius());
