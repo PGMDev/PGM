@@ -17,6 +17,7 @@ import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.world.WorldCreationInfo;
+import tc.oc.pgm.util.world.WorldFormat;
 import tc.oc.pgm.util.world.WorldStorage;
 
 @Supports(SPORTPAPER)
@@ -48,13 +49,18 @@ public class SpWorldStorage implements WorldStorage {
   }
 
   @Override
+  public File getWorldDirectory(String worldName, WorldFormat format) {
+    return new File(Bukkit.getServer().getWorldContainer(), worldName);
+  }
+
+  @Override
   public List<File> getWorldDirectories() {
     return List.of(Bukkit.getServer().getWorldContainer());
   }
 
   @Override
-  public int getWorldDataVersion(Path worldDir) {
-    var levelDat = worldDir.resolve("level.dat");
+  public int getWorldDataVersion(Path worldDir, WorldFormat format) {
+    var levelDat = worldDir.resolve(WorldFormat.LEVEL_DAT);
     try (var in = Files.newInputStream(levelDat)) {
       var dataTag = NBTCompressedStreamTools.a(in).getCompound("Data");
       return dataTag.hasKeyOfType("DataVersion", NBT_TAG_ANY_NUMERIC)
@@ -64,5 +70,11 @@ public class SpWorldStorage implements WorldStorage {
       // In case we cannot read the level.dat file, return a constant
       return DataVersions.LEGACY;
     }
+  }
+
+  @Override
+  public List<String> getDiscardedFiles(WorldFormat format) {
+    // Legacy maps do not often have more than the minimum necessary files
+    return List.of();
   }
 }

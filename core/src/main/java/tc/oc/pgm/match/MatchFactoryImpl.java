@@ -220,7 +220,7 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     private DownloadMapStage(MapContext map) {
       this.map = assertNotNull(map);
       this.worldName = Match.WORLD_PREFIX + counter.getAndIncrement();
-      this.dir = new File(PGM.get().getServer().getWorldContainer().getAbsoluteFile(), worldName);
+      this.dir = WORLD_STORAGE.getWorldDirectory(worldName, map.getInfo().getWorldFormat());
     }
 
     private InitWorldStage advanceSync() throws MapMissingException {
@@ -233,6 +233,10 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
         map.getInfo().getSource().downloadTo(map.getInfo().getWorldFolder(), dir);
       } else {
         throw new MapMissingException(dir.getPath(), "Unable to mkdirs world directory");
+      }
+
+      for (String discarded : WORLD_STORAGE.getDiscardedFiles(map.getInfo().getWorldFormat())) {
+        FileUtils.delete(new File(dir, discarded));
       }
 
       return new InitWorldStage(map, worldName);
@@ -262,7 +266,12 @@ public class MatchFactoryImpl implements MatchFactory, Callable<Match> {
     private Stage advanceSync() throws IllegalStateException {
       final WorldInfo info = map.getInfo().getWorld();
       final World world = WORLD_STORAGE.createWorld(new WorldCreationInfo(
-          worldName, info.getEnvironment(), info.hasTerrain(), info.getSeed()));
+          worldName,
+          info.getEnvironment(),
+          info.hasTerrain(),
+          info.getSeed(),
+          map.getInfo().getWorldFormat(),
+          map.getInfo().getWorldDataVersion()));
 
       if (world == null) throw new IllegalStateException("Unable to load a null world");
 

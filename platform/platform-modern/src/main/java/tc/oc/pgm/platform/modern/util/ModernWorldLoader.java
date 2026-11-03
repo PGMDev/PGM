@@ -1,7 +1,5 @@
 package tc.oc.pgm.platform.modern.util;
 
-import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
-
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import io.papermc.paper.world.PaperWorldLoader;
@@ -42,6 +40,7 @@ import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.world.WorldCreationInfo;
+import tc.oc.pgm.util.world.WorldFormat;
 
 public abstract class ModernWorldLoader {
 
@@ -49,10 +48,13 @@ public abstract class ModernWorldLoader {
   public static @Nullable World createWorld(WorldCreationInfo info) {
     boolean terrain = info.terrain();
     try {
-      return createWorld(new WorldCreator(info.name())
-          .environment(info.environment())
-          .generator(terrain ? null : NullChunkGenerator.INSTANCE)
-          .seed(terrain ? info.seed() : 0));
+      return createWorld(
+          new WorldCreator(info.name())
+              .environment(info.environment())
+              .generator(terrain ? null : NullChunkGenerator.INSTANCE)
+              .seed(terrain ? info.seed() : 0),
+          info.format(),
+          info.dataVersion());
     } catch (Throwable t) {
       PGM.get().getLogger().log(Level.SEVERE, "Failed to create world " + info.name(), t);
       return null;
@@ -60,12 +62,13 @@ public abstract class ModernWorldLoader {
   }
 
   /**
-   * Loads match worlds into their own PGM-namespaced dimension.
+   * Loads match worlds, in either {@link WorldFormat}, into their own PGM-namespaced dimension.
    *
    * <p>Bukkit's own world creation assumes a CraftBukkit world folder in the world container, so
    * this is {@link org.bukkit.craftbukkit.CraftServer#createWorld} adapted for PGM's needs.
    */
-  private static @Nullable World createWorld(@NonNull WorldCreator creator) {
+  private static @Nullable World createWorld(
+      @NonNull WorldCreator creator, WorldFormat format, int dataVersion) {
     var server = (CraftServer) Bukkit.getServer();
     var console = server.getServer(); // NMS server
 
@@ -113,13 +116,9 @@ public abstract class ModernWorldLoader {
       throw new IllegalStateException("Missing configured level stem " + actualDimension);
     }
 
-    // PGM: We need to read data version from level.dat pre-migration
-    int dataVersion =
-        WORLD_STORAGE.getWorldDataVersion(server.getWorldContainer().toPath().resolve(name));
-
     // PGM: bring the world folder into a loadable state before reading anything back out of it
     WorldGenSettings legacyWorldGenSettings =
-        prepareWorld(server, name, actualDimension, dimensionKey);
+        prepareWorld(server, name, format, actualDimension, dimensionKey);
 
     PaperWorldLoader.LoadedWorldData loadedWorldData =
         PaperWorldLoader.loadWorldData(console, dimensionKey, name);
@@ -153,7 +152,7 @@ public abstract class ModernWorldLoader {
     }
 
     // PGM: replace dimension type for legacy worlds
-    if (dataVersion < DataVersions.V1_18_EXP_1 && actualDimension == LevelStem.OVERWORLD) {
+    if (needsLegacyOverworld(format, dataVersion) && actualDimension == LevelStem.OVERWORLD) {
       var dimHolder = console
           .registryAccess()
           .lookupOrThrow(Registries.DIMENSION_TYPE)
@@ -208,7 +207,7 @@ public abstract class ModernWorldLoader {
     }
 
     // PGM: add metadata if map is post-flattening for WorldProblemListener
-    if (dataVersion >= DataVersions.V1_13)
+    if (isPostFlattening(format, dataVersion))
       serverLevel
           .getWorld()
           .setMetadata("is-post-flattening", new FixedMetadataValue(PGM.get(), true));
@@ -223,6 +222,14 @@ public abstract class ModernWorldLoader {
     return serverLevel.getWorld();
   }
 
+  private static boolean isPostFlattening(WorldFormat format, int dataVersion) {
+    return format == WorldFormat.DIMENSION || dataVersion >= DataVersions.V1_13;
+  }
+
+  private static boolean needsLegacyOverworld(WorldFormat format, int dataVersion) {
+    return format == WorldFormat.LEGACY && dataVersion < DataVersions.V1_18_EXP_1;
+  }
+
   /**
    * Migrate a legacy world folder into the per-dimension layout, so it can be read back out.
    *
@@ -231,8 +238,12 @@ public abstract class ModernWorldLoader {
   private static @Nullable WorldGenSettings prepareWorld(
       CraftServer server,
       String name,
+      WorldFormat format,
       ResourceKey<LevelStem> stem,
       ResourceKey<net.minecraft.world.level.Level> dimensionKey) {
+    // We don't need to prepare worlds that are in the dimension format already
+    if (format == WorldFormat.DIMENSION) return null;
+
     var console = server.getServer();
     var legacyWorldGenSettings = readLegacyWorldGenSettings(console, name);
 

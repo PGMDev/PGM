@@ -1,9 +1,11 @@
 package tc.oc.pgm.api.map;
 
 import com.google.common.collect.Range;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.platform.Platform;
+import tc.oc.pgm.util.world.WorldFormat;
 
 /**
  * Most bare-bones part of a map definition, which is defined as part of its variant. All other data
@@ -42,6 +44,12 @@ public interface VariantInfo {
   @Nullable
   String getWorldFolder();
 
+  /** @return the on-disk layout of this variant's world folder */
+  WorldFormat getWorldFormat();
+
+  /** @return the data version of this variant's world, or {@link DataVersions#LEGACY} */
+  int getWorldDataVersion();
+
   Range<Version> getServerVersions();
 
   default boolean isServerSupported() {
@@ -75,6 +83,16 @@ public interface VariantInfo {
     @Nullable
     default String getWorldFolder() {
       return getVariant().getWorldFolder();
+    }
+
+    @Override
+    default WorldFormat getWorldFormat() {
+      return getVariant().getWorldFormat();
+    }
+
+    @Override
+    default int getWorldDataVersion() {
+      return getVariant().getWorldDataVersion();
     }
 
     @Override
