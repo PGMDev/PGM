@@ -3,8 +3,10 @@ package tc.oc.pgm.platform.modern.impl;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtUtils;
@@ -17,12 +19,25 @@ import tc.oc.pgm.platform.modern.util.PgmKeys;
 import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.world.WorldCreationInfo;
+import tc.oc.pgm.util.world.WorldFormat;
 import tc.oc.pgm.util.world.WorldStorage;
 
 @Supports(value = PAPER, minVersion = "26.1.2")
 public class ModernWorldStorage implements WorldStorage {
   /** Constant from LevelStorageSource, sounds way too high (104mb) but better than unbounded */
   public static final long MAX_HEAP = 104857600L;
+
+  /** Unneeded or unwanted per-dimension files, which we never want to inherit from a map */
+  private static final List<String> DISCARDED = List.of(
+      "paper-world.yml",
+      "data/minecraft/chunk_tickets.dat",
+      "data/minecraft/ender_dragon_fight.dat",
+      "data/minecraft/raids.dat",
+      "data/minecraft/scheduled_events.dat",
+      "data/minecraft/wandering_trader.dat",
+      "data/minecraft/world_border.dat",
+      "data/paper/metadata.dat",
+      "data/paper/persistent_data_container.dat");
 
   /** Only ever used to resolve the dimension root */
   private static final String DUMMY_WORLD = "dummy";
@@ -38,6 +53,14 @@ public class ModernWorldStorage implements WorldStorage {
   }
 
   @Override
+  public File getWorldDirectory(String worldName, WorldFormat format) {
+    return switch (format) {
+      case DIMENSION -> getDimensionPath(worldName).toFile();
+      case LEGACY -> new File(Bukkit.getServer().getWorldContainer(), worldName);
+    };
+  }
+
+  @Override
   public List<File> getWorldDirectories() {
     // Probe a non-existent dimension to get the dimension root folder
     var dimensionRoot = getDimensionPath(DUMMY_WORLD).getParent().toFile();
@@ -45,13 +68,30 @@ public class ModernWorldStorage implements WorldStorage {
   }
 
   @Override
-  public int getWorldDataVersion(Path worldDir) {
+  public int getWorldDataVersion(Path worldDir, WorldFormat format) {
     try {
-      var root = NbtIo.readCompressed(worldDir.resolve("level.dat"), NbtAccounter.create(MAX_HEAP));
-      return NbtUtils.getDataVersion(root.getCompoundOrEmpty("Data"), DataVersions.LEGACY);
+      return switch (format) {
+        case DIMENSION ->
+          NbtUtils.getDataVersion(
+              readCompressed(worldDir.resolve(WorldFormat.WORLD_GEN_SETTINGS)),
+              DataVersions.LEGACY);
+        case LEGACY ->
+          NbtUtils.getDataVersion(
+              readCompressed(worldDir.resolve(WorldFormat.LEVEL_DAT)).getCompoundOrEmpty("Data"),
+              DataVersions.LEGACY);
+      };
     } catch (Throwable ignored) {
-      // In case we cannot read the level.dat file, return a constant
+      // If we cannot read the world's data, assume the oldest version we support
       return DataVersions.LEGACY;
     }
+  }
+
+  private static CompoundTag readCompressed(Path file) throws IOException {
+    return NbtIo.readCompressed(file, NbtAccounter.create(MAX_HEAP));
+  }
+
+  @Override
+  public List<String> getDiscardedFiles(WorldFormat format) {
+    return format == WorldFormat.DIMENSION ? DISCARDED : List.of();
   }
 }

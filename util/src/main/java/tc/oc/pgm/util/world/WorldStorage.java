@@ -13,7 +13,11 @@ public interface WorldStorage {
   @Nullable
   World createWorld(WorldCreationInfo info);
 
+  File getWorldDirectory(String worldName, WorldFormat format);
+
   List<File> getWorldDirectories();
 
-  int getWorldDataVersion(Path worldDir);
+  int getWorldDataVersion(Path worldDir, WorldFormat format);
+
+  List<String> getDiscardedFiles(WorldFormat format);
 }
