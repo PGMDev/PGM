@@ -6,7 +6,7 @@ import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static tc.oc.pgm.api.map.MapSource.DEFAULT_VARIANT;
 import static tc.oc.pgm.util.Assert.assertNotNull;
-import static tc.oc.pgm.util.bukkit.MiscUtils.MISC_UTILS;
+import static tc.oc.pgm.util.world.WorldStorage.WORLD_STORAGE;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -469,9 +469,9 @@ public class MapInfoImpl implements MapInfo {
       /* Infer the map version from the DataVersion field in level.dat. If 1.13+, set that as
       the min version to avoid legacy servers crashing when loading the chunks. */
       var sourceDir = source.getAbsoluteDir();
-      var levelDat = (world != null ? sourceDir.resolve(world) : sourceDir).resolve("level.dat");
+      var worldDir = world != null ? sourceDir.resolve(world) : sourceDir;
 
-      var mapDataVersion = MISC_UTILS.getWorldDataVersion(levelDat);
+      var mapDataVersion = WORLD_STORAGE.getWorldDataVersion(worldDir);
       if (mapDataVersion >= DataVersions.V1_13) return VERSION_1_13;
       return null;
     }
