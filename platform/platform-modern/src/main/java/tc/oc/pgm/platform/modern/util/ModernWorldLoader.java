@@ -15,9 +15,9 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.WorldLoader;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Util;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.worldupdate.UpgradeProgress;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -120,14 +120,12 @@ public abstract class ModernWorldLoader {
         throw new IllegalArgumentException("Illegal dimension (" + creator.environment() + ")");
     };
 
+    RegistryAccess registryAccess = console.registryAccess();
     // PGM: set our own dimension key with our own namespace, matching ModernWorldStorage's paths
     final ResourceKey<net.minecraft.world.level.Level> dimensionKey = PgmKeys.dimensionKey(name);
-    WorldLoader.DataLoadContext context = console.worldLoaderContext;
-    RegistryAccess.Frozen registryAccess = context.datapackDimensions();
-    net.minecraft.core.Registry<LevelStem> contextLevelStemRegistry =
+    net.minecraft.core.Registry<LevelStem> levelStemRegistry =
         registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
-    final LevelStem configuredStem =
-        console.registryAccess().lookupOrThrow(Registries.LEVEL_STEM).getValue(actualDimension);
+    final LevelStem configuredStem = levelStemRegistry.getValue(actualDimension);
     if (configuredStem == null) {
       throw new IllegalStateException("Missing configured level stem " + actualDimension);
     }
@@ -142,7 +140,7 @@ public abstract class ModernWorldLoader {
 
     // PGM: only load pre-existing worlds; return null if no WorldGenSettings found
     WorldGenSettings worldGenSettings = LevelStorageSource.readExistingSavedData(
-            console.storageSource, dimensionKey, console.registryAccess(), WorldGenSettings.TYPE)
+            console.storageSource, dimensionKey, registryAccess, WorldGenSettings.TYPE)
         .result()
         .orElse(legacyWorldGenSettings);
     if (worldGenSettings == null) {
@@ -160,7 +158,7 @@ public abstract class ModernWorldLoader {
     long biomeZoomSeed = BiomeManager.obfuscateSeed(genSettingsFinal.options().seed());
     LevelStem customStem = genSettingsFinal.dimensions().get(actualDimension).orElse(null);
     if (customStem == null) {
-      customStem = contextLevelStemRegistry.getValue(actualDimension);
+      customStem = levelStemRegistry.getValue(actualDimension);
     }
     if (customStem == null) {
       throw new IllegalStateException(
@@ -169,8 +167,7 @@ public abstract class ModernWorldLoader {
 
     // PGM: replace dimension type for legacy worlds
     if (needsLegacyOverworld(format, dataVersion) && actualDimension == LevelStem.OVERWORLD) {
-      var dimHolder = console
-          .registryAccess()
+      var dimHolder = registryAccess
           .lookupOrThrow(Registries.DIMENSION_TYPE)
           .getOrThrow(PgmKeys.LEGACY_OVERWORLD);
       customStem = new LevelStem(dimHolder, customStem.generator());
@@ -184,7 +181,7 @@ public abstract class ModernWorldLoader {
         creator.environment(),
         customStem.type().value(),
         customStem.generator(),
-        console.registryAccess(),
+        registryAccess,
         loadedWorldData.uuid());
     if (biomeProvider == null && chunkGenerator != null) {
       biomeProvider = chunkGenerator.getDefaultBiomeProvider(worldInfo);
@@ -193,7 +190,7 @@ public abstract class ModernWorldLoader {
     final SavedDataStorage savedDataStorage = new SavedDataStorage(
         console.storageSource.getDimensionPath(dimensionKey).resolve(LevelResource.DATA.id()),
         console.getFixerUpper(),
-        console.registryAccess());
+        registryAccess);
     savedDataStorage.set(
         WorldGenSettings.TYPE,
         new WorldGenSettings(genSettingsFinal.options(), genSettingsFinal.dimensions()));
@@ -201,7 +198,7 @@ public abstract class ModernWorldLoader {
     // PGM: pass PGMServerLevel so we can fix displayed maps and disable command blocks
     ServerLevel serverLevel = new PGMServerLevel(
         console,
-        console.executor,
+        Util.backgroundExecutor(),
         console.storageSource,
         genSettingsFinal,
         dimensionKey,

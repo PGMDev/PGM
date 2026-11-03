@@ -12,7 +12,6 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.status.ChunkStatus;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -42,7 +41,7 @@ import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.skin.Skin;
 
-@Supports(value = PAPER, minVersion = "26.1.2")
+@Supports(value = PAPER, minVersion = "26.2")
 public class ModernNMSHacks implements NMSHacks {
   @Override
   public void skipFireworksLaunch(Firework firework) {
@@ -103,7 +102,6 @@ public class ModernNMSHacks implements NMSHacks {
     var nmsBlock = CraftMagicNumbers.getBlock(material);
     var chunk = craftChunk.getHandle(ChunkStatus.FULL);
 
-    int baseY = chunk.getMinY();
     for (int i = 0; i < chunk.getSections().length; i++) {
       var section = chunk.getSections()[i];
       if (section == null || section.hasOnlyAir()) continue;
@@ -111,7 +109,7 @@ public class ModernNMSHacks implements NMSHacks {
       var states = section.getStates();
       if (!states.maybeHas(bs -> bs.getBukkitMaterial() == material)) continue;
 
-      final int chunkY = baseY + (i * LevelChunkSection.SECTION_HEIGHT);
+      final int chunkY = chunk.getSectionYFromSectionIndex(i) << 4;
 
       // Iteration order is relevant, as indexes are packed as x | z << 4 | y << 8
       for (int y = 0; y < 16; y++) {
@@ -181,7 +179,7 @@ public class ModernNMSHacks implements NMSHacks {
   }
 
   @Override
-  public int allocateEntityId() {
-    return Bukkit.getUnsafe().nextEntityId();
+  public int allocateEntityId(World world) {
+    return Bukkit.getUnsafe().nextEntityId(world);
   }
 }
