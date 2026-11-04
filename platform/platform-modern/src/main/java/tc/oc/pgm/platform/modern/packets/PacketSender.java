@@ -1,5 +1,6 @@
 package tc.oc.pgm.platform.modern.packets;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerLevel;
@@ -18,12 +19,7 @@ public interface PacketSender {
   }
 
   default void sendToViewers(Packet<?> packet, Entity entity, boolean excludeSpectators) {
-    for (var conn : getViewers(entity)) {
-      if (excludeSpectators) {
-        Entity spectatorTarget = conn.getPlayer().getBukkitEntity().getSpectatorTarget();
-        if (spectatorTarget != null && spectatorTarget.getUniqueId().equals(entity.getUniqueId()))
-          continue;
-      }
+    for (var conn : getViewers(entity, excludeSpectators)) {
       conn.send(packet);
     }
   }
@@ -32,5 +28,18 @@ public interface PacketSender {
     ServerLevel world = (ServerLevel) ((CraftEntity) entity).getHandle().level();
     var entityTracker = world.getChunkSource().chunkMap.entityMap.get(entity.getEntityId());
     return entityTracker == null ? List.of() : entityTracker.seenBy;
+  }
+
+  default Iterable<ServerPlayerConnection> getViewers(Entity entity, boolean excludeSpectators) {
+    var viewers = getViewers(entity);
+    if (!excludeSpectators) return viewers;
+
+    var filtered = new ArrayList<ServerPlayerConnection>();
+    for (var conn : viewers) {
+      Entity spectatorTarget = conn.getPlayer().getBukkitEntity().getSpectatorTarget();
+      if (spectatorTarget == null || !spectatorTarget.getUniqueId().equals(entity.getUniqueId()))
+        filtered.add(conn);
+    }
+    return filtered;
   }
 }

@@ -3,6 +3,7 @@ package tc.oc.pgm.platform.modern.packets;
 import com.github.retrooper.packetevents.event.PacketListenerCommon;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.netty.buffer.ByteBufHelper;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
@@ -64,11 +65,22 @@ public class PacketManipulations {
   }
 
   private void handleEntityStatus(PacketSendEvent event) {
-    var wrapper = new WrapperPlayServerEntityStatus(event);
+    int entityId, status;
+    if (event.getLastUsedWrapper() instanceof WrapperPlayServerEntityStatus wrapper) {
+      entityId = wrapper.getEntityId();
+      status = wrapper.getStatus();
+    } else {
+      Object buf = event.getByteBuf();
+      int index = ByteBufHelper.readerIndex(buf);
+      entityId = ByteBufHelper.readInt(buf);
+      status = ByteBufHelper.readByte(buf);
+      ByteBufHelper.readerIndex(buf, index);
+    }
+
     Player player = event.getPlayer();
     // Strip "Living entity dead" status=3 packets if they're for yourself.
     // This glitches hitboxes
-    if (player.getEntityId() == wrapper.getEntityId() && wrapper.getStatus() == 3) {
+    if (player.getEntityId() == entityId && status == 3) {
       event.setCancelled(true);
     }
   }
@@ -79,13 +91,26 @@ public class PacketManipulations {
   }
 
   private void handleEntityMetadata(PacketSendEvent event) {
-    var wrapper = new WrapperPlayServerEntityMetadata(event);
-    int entityId = wrapper.getEntityId();
-    var items = wrapper.getEntityMetadata();
+    PacketEventsUtil.reEncodeIfModified(event, this::rewriteEntityMetadata);
+  }
+
+  private boolean rewriteEntityMetadata(PacketSendEvent event) {
+    int entityId;
+    if (event.getLastUsedWrapper() instanceof WrapperPlayServerEntityMetadata previous) {
+      entityId = previous.getEntityId();
+    } else {
+      Object buf = event.getByteBuf();
+      int index = ByteBufHelper.readerIndex(buf);
+      entityId = ByteBufHelper.readVarInt(buf);
+      ByteBufHelper.readerIndex(buf, index);
+    }
 
     Player pl = tracker.get(entityId);
     // We're only interested in modifying players
-    if (pl == null) return;
+    if (pl == null) return false;
+
+    var wrapper = new WrapperPlayServerEntityMetadata(event);
+    var items = wrapper.getEntityMetadata();
 
     Player receiver = event.getPlayer();
     boolean modified = false;
@@ -111,10 +136,7 @@ public class PacketManipulations {
     boolean checkHealth = isSelf || isDead;
     boolean hideParticles = pl.hasMetadata(HIDE_PARTICLES_KEY);
 
-    if (!checkHealth && !hideParticles) {
-      if (modified) event.markForReEncode(true);
-      return;
-    }
+    if (!checkHealth && !hideParticles) return modified;
 
     for (EntityData<?> item : items) {
       if (checkHealth && item.getIndex() == DATA_HEALTH_ID.id()) {
@@ -138,7 +160,7 @@ public class PacketManipulations {
       if (!checkHealth && !hideParticles) break;
     }
 
-    if (modified) event.markForReEncode(true);
+    return modified;
   }
 
   private void handleServerPing(PacketSendEvent event) {
@@ -148,7 +170,7 @@ public class PacketManipulations {
       @Override
       public JsonObject getServerListExtra(Plugin plugin) {
         return (JsonObject)
-            pingExtra.asMap().computeIfAbsent(plugin.namespace(), k -> new JsonObject());
+            pingExtra.asMap().computeIfAbsent(plugin.namespace(), _ -> new JsonObject());
       }
     }.callEvent();
 
