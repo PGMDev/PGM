@@ -1,7 +1,7 @@
 {
     "pack": {
         "description": "PGM legacy world compatibility datapack",
-        "min_format": 101.1,
-        "max_format": 101.1
+        "min_format": 107.1,
+        "max_format": 107.1
     }
 }
