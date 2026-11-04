@@ -24,7 +24,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
@@ -67,7 +67,6 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
-import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.AfkTracker;
@@ -132,8 +131,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       getLogger().log(Level.SEVERE, "Failed to initialize PGM platform", t);
       getServer().getPluginManager().disablePlugin(this);
     }
-    // Fix before any audiences have the chance of creating
-    if (Platform.isLegacy()) ViaUtils.removeViaChatFacet();
 
     Permissions.registerAll();
 

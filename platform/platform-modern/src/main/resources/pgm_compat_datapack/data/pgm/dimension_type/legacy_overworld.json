@@ -33,6 +33,7 @@
     },
     "minecraft:gameplay/nether_portal_spawns_piglin": true,
     "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:visual/ambient_light_color": "#0a0a0a",
     "minecraft:visual/cloud_color": "#ccffffff",
     "minecraft:visual/cloud_height": 128.33,
     "minecraft:visual/fog_color": "#c0d8ff",
@@ -48,5 +49,7 @@
     "max_inclusive": 7
   },
   "monster_spawn_block_light_limit": 0,
-  "timelines": "#minecraft:in_overworld"
+  "timelines": "#minecraft:in_overworld",
+  "default_clock": "minecraft:overworld",
+  "has_ender_dragon_fight": false
 }
