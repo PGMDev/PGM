@@ -1,12 +1,10 @@
 package tc.oc.pgm.shops;
 
 import static tc.oc.pgm.util.bukkit.BukkitUtils.colorize;
-import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.PGM;
@@ -43,20 +41,21 @@ public class ShopKeeper {
     return name == null || name.isEmpty() ? ChatColor.GRAY + getShop().getId() : colorize(name);
   }
 
-  public void spawn(Match match) {
+  public Location getLocation(Match match) {
     if (match == null) throw new IllegalArgumentException("Match can not be null!");
+    return location.getPoint(match, null);
+  }
 
-    Location loc = location.getPoint(match, null);
-    loc.getWorld().getChunkAt(loc); // Load chunk
-
+  public Entity spawn(Location loc) {
     Entity keeper = loc.getWorld().spawn(loc, type);
     keeper.setCustomName(getName());
     keeper.setCustomNameVisible(true);
     keeper.setMetadata(METADATA_KEY, new FixedMetadataValue(PGM.get(), shop.getId()));
-    if (keeper instanceof LivingEntity livingEntity) {
-      livingEntity.setRemoveWhenFarAway(false);
-    }
-    NMS_HACKS.freezeEntity(keeper);
+    return keeper;
+  }
+
+  public static void clearKeeper(Entity entity) {
+    entity.removeMetadata(METADATA_KEY, PGM.get());
   }
 
   public static boolean isKeeper(Entity entity) {
