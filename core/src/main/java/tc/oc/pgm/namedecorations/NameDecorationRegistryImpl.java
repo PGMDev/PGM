@@ -68,6 +68,7 @@ public class NameDecorationRegistryImpl implements NameDecorationRegistry, Liste
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onPlayerQuit(PlayerQuitEvent event) {
+    event.getPlayer().removeMetadata(METADATA_KEY, METADATA_VALUE.getOwningPlugin());
     decorationCache.invalidate(event.getPlayer().getUniqueId());
     PlayerComponent.RENDERER.decorationChanged(event.getPlayer().getUniqueId());
   }

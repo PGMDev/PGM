@@ -27,10 +27,12 @@ import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.jspecify.annotations.NullMarked;
 import tc.oc.pgm.api.PGM;
+import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.util.event.block.BlockFallEvent;
 import tc.oc.pgm.util.event.entity.EntityDespawnInVoidEvent;
 import tc.oc.pgm.util.event.entity.PotionEffectAddEvent;
@@ -103,6 +105,12 @@ public class ModernListener implements Listener {
       EntityDespawnInVoidEvent pgmEvent = new EntityDespawnInVoidEvent(modernEvent.getEntity());
       handleCall(pgmEvent, modernEvent);
     }
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPlayerQuit(PlayerQuitEvent event) {
+    event.getPlayer().removeMetadata(PacketManipulations.SHOW_INVISIBLE_KEY, PGM.get());
+    event.getPlayer().removeMetadata(PacketManipulations.HIDE_PARTICLES_KEY, PGM.get());
   }
 
   @EventHandler
