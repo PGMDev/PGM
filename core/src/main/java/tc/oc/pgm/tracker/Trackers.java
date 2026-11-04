@@ -1,5 +1,7 @@
 package tc.oc.pgm.tracker;
 
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
+
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -31,10 +33,11 @@ public final class Trackers {
   public static double distanceFromRanged(RangedInfo rangedInfo, @Nullable Location deathLocation) {
     if (rangedInfo.getOrigin() == null || deathLocation == null) return Double.NaN;
 
-    // When players fall in the void, use y=0 as their death location
-    if (deathLocation.getY() < 0) {
+    // When players fall in the void, use the bottom of the world as their death location
+    int minY = NMS_HACKS.getMinWorldHeight(deathLocation.getWorld());
+    if (deathLocation.getY() < minY) {
       deathLocation = deathLocation.clone();
-      deathLocation.setY(0);
+      deathLocation.setY(minY);
     }
     return deathLocation.distance(rangedInfo.getOrigin());
   }

@@ -33,6 +33,7 @@ import tc.oc.pgm.tnt.TNTMatchModule;
 import tc.oc.pgm.tracker.Trackers;
 import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.player.PlayerAttackEntityEvent;
+import tc.oc.pgm.util.inventory.InventoryUtils;
 import tc.oc.pgm.util.material.Materials;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.MinecraftComponent;
@@ -124,7 +125,7 @@ public class AntiGriefListener implements Listener {
 
   @EventHandler(priority = EventPriority.HIGHEST)
   public void checkDefuse(final PlayerInteractEvent event) {
-    ItemStack hand = event.getPlayer().getItemInHand();
+    ItemStack hand = event.getItem();
     if (hand == null || hand.getType() != DEFUSE_ITEM) return;
 
     MatchPlayer clicker = this.mm.getPlayer(event.getPlayer());
@@ -201,6 +202,7 @@ public class AntiGriefListener implements Listener {
   @EventHandler(priority = EventPriority.MONITOR)
   public void cloneCraftingWindow(final PlayerInteractEvent event) {
     if (!event.isCancelled()
+        && !InventoryUtils.isOffHand(event)
         && event.getAction() == Action.RIGHT_CLICK_BLOCK
         && event.getPlayer().getOpenInventory().getType() == InventoryType.CRAFTING) {
       Block block = event.getClickedBlock();

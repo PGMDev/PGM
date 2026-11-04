@@ -1,6 +1,8 @@
 package tc.oc.pgm.util.listener;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
@@ -20,9 +22,11 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.PlayerInventory;
 import tc.oc.pgm.util.bukkit.Sounds;
 import tc.oc.pgm.util.event.ItemTransferEvent;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
+import tc.oc.pgm.util.inventory.Slot;
 
 /** A listener that calls {@link ItemTransferEvent} and {@link PlayerItemTransferEvent}. */
 public class ItemTransferListener implements Listener {
@@ -632,8 +636,13 @@ public class ItemTransferListener implements Listener {
   }
 
   private static int getQuantityPlaceable(final ItemStack stack, final Inventory inventory) {
+    // Transfers into a player's inventory only fill its storage, never the armor or off-hand
+    Stream<ItemStack> contents = inventory instanceof PlayerInventory
+        ? Slot.Storage.storage().map(s -> s.getItem(inventory))
+        : Arrays.stream(inventory.getContents());
+
     int transferrable = 0;
-    for (ItemStack slotStack : inventory.getContents()) {
+    for (ItemStack slotStack : (Iterable<ItemStack>) contents::iterator) {
       if (slotStack == null) {
         return stack.getAmount();
       } else if (slotStack.isSimilar(stack)) {

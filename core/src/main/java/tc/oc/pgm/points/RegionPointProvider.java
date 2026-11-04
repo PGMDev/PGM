@@ -1,6 +1,7 @@
 package tc.oc.pgm.points;
 
 import static tc.oc.pgm.util.Assert.assertNotNull;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -76,9 +77,11 @@ public class RegionPointProvider implements PointProvider {
 
     // Scan downward, then upward, for a safe point in the region. If spawn is outdoors, just scan
     // upward.
+    int minY = NMS_HACKS.getMinWorldHeight(location.getWorld());
+    int maxY = NMS_HACKS.getMaxWorldHeight(location.getWorld());
     for (; scanDirection <= 1; scanDirection += 2) {
       for (PointProviderLocation safe = location.clone();
-          safe.getBlockY() >= 0 && safe.getBlockY() < 256 && region.contains(safe);
+          safe.getBlockY() >= minY && safe.getBlockY() < maxY && region.contains(safe);
           safe.setY(safe.getBlockY() + scanDirection)) {
 
         if (isSpawnable(safe)) return safe;

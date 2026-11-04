@@ -6,5 +6,5 @@ plugins {
 dependencies {
     implementation(project(":core"))
     implementation(project(":util"))
-    paperweight.paperDevBundle("26.1.2.build.+")
+    paperweight.paperDevBundle("26.2.build.+")
 }

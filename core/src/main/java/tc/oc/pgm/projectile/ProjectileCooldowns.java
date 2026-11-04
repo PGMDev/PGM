@@ -17,6 +17,7 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.TimeUtils;
 import tc.oc.pgm.util.inventory.InventoryUtils;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.text.TextTranslations;
 
 public class ProjectileCooldowns {
@@ -59,11 +60,10 @@ public class ProjectileCooldowns {
 
     if (runnableTask != null && !this.runnableTask.isDone()) return;
 
-    this.runnableTask =
-        player
-            .getMatch()
-            .getExecutor(MatchScope.RUNNING)
-            .scheduleAtFixedRate(this.runnable, 0, TimeUtils.TICK, TimeUnit.MILLISECONDS);
+    this.runnableTask = player
+        .getMatch()
+        .getExecutor(MatchScope.RUNNING)
+        .scheduleAtFixedRate(this.runnable, 0, TimeUtils.TICK, TimeUnit.MILLISECONDS);
   }
 
   private void end() {
@@ -102,7 +102,7 @@ public class ProjectileCooldowns {
 
       if (initialSize == cooldowns.size()) {
         // Tick the held item if cooldowns active
-        setItemCooldown(inventory.getItemInHand(), now);
+        Slot.Equipment.hands().forEach(hand -> setItemCooldown(hand.getItem(inventory), now));
       } else {
         inventory.forEach(this::resetItemCooldownName);
       }

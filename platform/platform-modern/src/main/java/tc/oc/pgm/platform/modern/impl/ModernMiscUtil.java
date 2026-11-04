@@ -3,13 +3,9 @@ package tc.oc.pgm.platform.modern.impl;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtUtils;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
 import org.bukkit.Registry;
@@ -25,6 +21,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.ThrownPotion;
+import org.bukkit.entity.Trident;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
@@ -37,7 +34,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
-import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
@@ -85,16 +81,17 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
-  public int getWorldDataVersion(Path levelDat) {
-    // Constant from LevelStorageSource, sounds way too high (104mb) but better than unbounded
-    long MAX_HEAP = 104857600L;
-    try {
-      var root = NbtIo.readCompressed(levelDat, NbtAccounter.create(MAX_HEAP));
-      return NbtUtils.getDataVersion(root.getCompoundOrEmpty("Data"), DataVersions.LEGACY);
-    } catch (Throwable ignored) {
-      // In case we cannot read the level.dat file, return a constant
-      return DataVersions.LEGACY;
-    }
+  public int getArrowKnockback(Arrow arrow) {
+    // Knockback is a function of the firing weapon, the arrow itself always reports 0
+    ItemStack weapon = arrow.getWeapon();
+    return weapon == null ? 0 : weapon.getEnchantmentLevel(Enchantment.PUNCH);
+  }
+
+  @Override
+  public boolean isArrow(Class<? extends Entity> entityClass) {
+    // Spectral arrows aren't Arrows on modern, while tridents are thrown rather than fired
+    return AbstractArrow.class.isAssignableFrom(entityClass)
+        && !Trident.class.isAssignableFrom(entityClass);
   }
 
   @Override
@@ -106,6 +103,11 @@ public class ModernMiscUtil implements MiscUtils {
     } catch (IllegalAccessException | NoSuchFieldException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public boolean isKnownSound(Key key) {
+    return Registry.SOUND_EVENT.get(key) != null;
   }
 
   @Override

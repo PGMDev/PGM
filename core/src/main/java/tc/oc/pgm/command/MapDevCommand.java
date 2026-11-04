@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.join;
 import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.command.util.ParserConstants.CURRENT;
 import static tc.oc.pgm.util.bukkit.Effects.EFFECTS;
+import static tc.oc.pgm.util.nms.NMSHacks.NMS_HACKS;
 import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.text.TextException.exception;
 
@@ -145,7 +146,12 @@ public class MapDevCommand {
     }
 
     var maxBuild = viewer.getMatch().moduleRequire(RegionMatchModule.class).getMaxBuildHeight();
-    new DisplayRunner(pl, reg, maxBuild == null ? 255 : maxBuild);
+    new DisplayRunner(
+        pl,
+        reg,
+        maxBuild == null
+            ? NMS_HACKS.getMaxWorldHeight(viewer.getMatch().getWorld()) - 1
+            : maxBuild);
   }
 
   private static class DisplayRunner implements Runnable {
