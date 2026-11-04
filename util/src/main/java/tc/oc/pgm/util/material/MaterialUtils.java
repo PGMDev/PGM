@@ -6,12 +6,13 @@ import java.util.Set;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Hanging;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockVector;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.util.block.BlockData;
 import tc.oc.pgm.util.chunk.ChunkVector;
 import tc.oc.pgm.util.platform.Platform;
@@ -55,7 +56,18 @@ public interface MaterialUtils {
 
   Set<BlockMaterialData> getPossibleBlocks(Material material);
 
-  MaterialMatcher.Builder matcherBuilder();
+  BlockMaterialData pistonHead(BlockFace facing, boolean sticky);
 
-  boolean isUpperHalfOfDoor(Block block);
+  boolean isBrokenByPiston(Block block);
+
+  @Nullable
+  BlockFace getFacingOrNull(Block block);
+
+  @Nullable
+  BlockFace getDoorOtherHalf(BlockState state);
+
+  @Nullable
+  Material getBucketContents(Material bucket);
+
+  MaterialMatcher.Builder matcherBuilder();
 }

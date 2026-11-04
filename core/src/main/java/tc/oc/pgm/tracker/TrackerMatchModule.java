@@ -97,6 +97,7 @@ public class TrackerMatchModule implements MatchModule {
   @Override
   public void unload() {
     combatLogTracker.unload();
+    blockTracker.unload();
   }
 
   public EntityTracker getEntityTracker() {
