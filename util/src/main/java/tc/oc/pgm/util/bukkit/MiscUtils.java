@@ -1,7 +1,6 @@
 package tc.oc.pgm.util.bukkit;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -39,7 +38,10 @@ public interface MiscUtils {
   void createExplosion(Entity source, float power, boolean fire, boolean destroy);
 
   PlayerDeathEvent createDeathEvent(
-      Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg);
+      Player player,
+      EntityDamageEvent.DamageCause dmg,
+      List<ItemStack> drops,
+      String messageFormat);
 
   EntityChangeBlockEvent createEntityChangeBlockEvent(
       Player player, Block block, BlockMaterialData md);
@@ -49,8 +51,6 @@ public interface MiscUtils {
   ThrownPotion spawnPotion(Location loc, ItemStack item);
 
   double getArrowDamage(Arrow arrow);
-
-  int getWorldDataVersion(Path levelDat);
 
   Key getSoundKey(String name);
 

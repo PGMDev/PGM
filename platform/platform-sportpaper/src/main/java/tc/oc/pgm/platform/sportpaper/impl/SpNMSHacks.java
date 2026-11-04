@@ -13,16 +13,12 @@ import net.minecraft.server.v1_8_R3.EntityArrow;
 import net.minecraft.server.v1_8_R3.EntityFireball;
 import net.minecraft.server.v1_8_R3.EntityFireworks;
 import net.minecraft.server.v1_8_R3.IBlockData;
-import net.minecraft.server.v1_8_R3.IDataManager;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
-import net.minecraft.server.v1_8_R3.ServerNBTManager;
-import net.minecraft.server.v1_8_R3.WorldData;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.CraftChunk;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
@@ -43,7 +39,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
-import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.nms.NMSHacks;
 import tc.oc.pgm.util.platform.Supports;
@@ -141,28 +136,6 @@ public class SpNMSHacks implements NMSHacks {
   }
 
   @Override
-  public World createWorld(String worldName, World.Environment env, boolean terrain, long seed) {
-    WorldCreator creator = new WorldCreator(worldName);
-
-    IDataManager sdm =
-        new ServerNBTManager(Bukkit.getServer().getWorldContainer(), worldName, true);
-    WorldData worldData = sdm.getWorldData();
-    if (worldData != null) {
-      creator
-          .generateStructures(worldData.shouldGenerateMapFeatures())
-          .generatorSettings(worldData.getGeneratorOptions())
-          .seed(worldData.getSeed())
-          .type(org.bukkit.WorldType.getByName(worldData.getType().name()));
-    }
-
-    return Bukkit.getServer()
-        .createWorld(creator
-            .environment(env)
-            .generator(terrain ? null : NullChunkGenerator.INSTANCE)
-            .seed(terrain ? seed : creator.seed()));
-  }
-
-  @Override
   public boolean canMineBlock(BlockMaterialData blockMaterial, Player player) {
     ItemStack tool = player.getItemInHand();
 
@@ -226,7 +199,7 @@ public class SpNMSHacks implements NMSHacks {
   }
 
   @Override
-  public int allocateEntityId() {
+  public int allocateEntityId(World world) {
     return Bukkit.allocateEntityId();
   }
 }

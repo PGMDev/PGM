@@ -1,15 +1,13 @@
 package tc.oc.pgm.platform.modern.impl;
 
+import static net.kyori.adventure.text.Component.text;
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
-import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.nbt.NbtAccounter;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtUtils;
 import org.bukkit.ExplosionResult;
 import org.bukkit.Location;
 import org.bukkit.Registry;
@@ -37,7 +35,6 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scoreboard.Team;
 import tc.oc.pgm.platform.modern.material.ModernBlockMaterialData;
-import tc.oc.pgm.util.DataVersions;
 import tc.oc.pgm.util.bukkit.MiscUtils;
 import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.platform.Supports;
@@ -55,11 +52,16 @@ public class ModernMiscUtil implements MiscUtils {
   }
 
   @Override
-  @SuppressWarnings({"removal", "UnstableApiUsage"})
+  @SuppressWarnings("UnstableApiUsage")
   public PlayerDeathEvent createDeathEvent(
-      Player player, EntityDamageEvent.DamageCause dmg, List<ItemStack> drops, String msg) {
+      Player player,
+      EntityDamageEvent.DamageCause dmg,
+      List<ItemStack> drops,
+      String messageFormat) {
+    Component message = text(messageFormat)
+        .replaceText(b -> b.matchLiteral("{0}").replacement(player.displayName()));
     return new PlayerDeathEvent(
-        player, DamageSource.builder(DamageType.GENERIC_KILL).build(), drops, 0, msg);
+        player, DamageSource.builder(DamageType.GENERIC_KILL).build(), drops, 0, message, true);
   }
 
   @Override
@@ -82,19 +84,6 @@ public class ModernMiscUtil implements MiscUtils {
   @Override
   public double getArrowDamage(Arrow arrow) {
     return arrow.getDamage();
-  }
-
-  @Override
-  public int getWorldDataVersion(Path levelDat) {
-    // Constant from LevelStorageSource, sounds way too high (104mb) but better than unbounded
-    long MAX_HEAP = 104857600L;
-    try {
-      var root = NbtIo.readCompressed(levelDat, NbtAccounter.create(MAX_HEAP));
-      return NbtUtils.getDataVersion(root.getCompoundOrEmpty("Data"), DataVersions.LEGACY);
-    } catch (Throwable ignored) {
-      // In case we cannot read the level.dat file, return a constant
-      return DataVersions.LEGACY;
-    }
   }
 
   @Override

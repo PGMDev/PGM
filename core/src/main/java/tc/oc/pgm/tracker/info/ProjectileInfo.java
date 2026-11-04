@@ -37,6 +37,10 @@ public class ProjectileInfo implements PhysicalInfo, DamageInfo, RangedInfo {
     return projectile;
   }
 
+  public boolean hasCustomName() {
+    return customName != null;
+  }
+
   public PhysicalInfo getProjectile() {
     return projectile;
   }
