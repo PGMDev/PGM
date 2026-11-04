@@ -15,12 +15,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 import org.jspecify.annotations.Nullable;
-import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
@@ -29,7 +26,8 @@ import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
 import tc.oc.pgm.filters.query.PlayerQuery;
 import tc.oc.pgm.projectile.EntityLaunchEvent;
-import tc.oc.pgm.util.bukkit.MetadataUtils;
+import tc.oc.pgm.util.EntityMap;
+import tc.oc.pgm.util.EntitySet;
 import tc.oc.pgm.util.bukkit.Sounds;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -40,6 +38,8 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
   private final float velocityMod;
   private final Set<PotionEffect> potionEffects;
   private final Filter pickupFilter;
+  private final EntitySet customProjectiles;
+  private final EntityMap<ArrowProperties> replacedArrows;
 
   public ModifyBowProjectileMatchModule(
       Match match,
@@ -52,11 +52,12 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
     this.velocityMod = velocityMod;
     this.potionEffects = effects;
     this.pickupFilter = pickupFilter;
+    this.customProjectiles = new EntitySet(match);
+    this.replacedArrows = new EntityMap<>(match);
   }
 
   @EventHandler(ignoreCancelled = true)
   public void changeBowProjectile(EntityShootBowEvent event) {
-    Plugin plugin = PGM.get();
     Entity newProjectile;
 
     if (this.cls == null) {
@@ -85,16 +86,16 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
 
       // Save some special properties of Arrows
       if (oldEntity instanceof Arrow arrow) {
-        newProjectile.setMetadata("critical", new FixedMetadataValue(plugin, arrow.isCritical()));
-        newProjectile.setMetadata(
-            "knockback", new FixedMetadataValue(plugin, arrow.getKnockbackStrength()));
-        newProjectile.setMetadata(
-            "damage", new FixedMetadataValue(plugin, MISC_UTILS.getArrowDamage(arrow)));
+        replacedArrows.put(
+            newProjectile,
+            new ArrowProperties(
+                arrow.isCritical(),
+                arrow.getKnockbackStrength(),
+                MISC_UTILS.getArrowDamage(arrow)));
       }
     }
 
-    // Tag the projectile as custom
-    newProjectile.setMetadata("customProjectile", new FixedMetadataValue(plugin, true));
+    customProjectiles.add(newProjectile);
 
     match.callEvent(new EntityLaunchEvent(newProjectile, event.getEntity()));
   }
@@ -102,13 +103,14 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
   @EventHandler(ignoreCancelled = true)
   public void fixEntityDamage(EntityDamageByEntityEvent event) {
     Entity projectile = event.getDamager();
-    if (projectile.hasMetadata("customProjectile")) {
+    if (customProjectiles.contains(projectile)) {
 
       // If the custom projectile replaced an arrow, recreate some effects specific to arrows
-      if (projectile.hasMetadata("damage")) {
-        boolean critical = MetadataUtils.getMetadataValue(projectile, "critical", PGM.get());
-        int knockback = MetadataUtils.getMetadataValue(projectile, "knockback", PGM.get());
-        double damage = MetadataUtils.getMetadataValue(projectile, "damage", PGM.get());
+      ArrowProperties arrow = replacedArrows.get(projectile);
+      if (arrow != null) {
+        boolean critical = arrow.critical();
+        int knockback = arrow.knockback();
+        double damage = arrow.damage();
         double speed = projectile.getVelocity().length();
 
         // Reproduce the damage calculation from nms.EntityArrow with the addition of our modifier
@@ -171,4 +173,6 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
       event.setCancelled(true);
     }
   }
+
+  private record ArrowProperties(boolean critical, int knockback, double damage) {}
 }
