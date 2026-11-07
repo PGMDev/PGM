@@ -184,6 +184,20 @@ public interface Config {
   boolean shouldQueueJoin();
 
   /**
+   * Gets whether players joining a full match wait for a free slot.
+   *
+   * @return If the join waitlist is enabled.
+   */
+  boolean shouldWaitlistJoin();
+
+  /**
+   * Gets how long a waitlisted player can be inactive before losing their place.
+   *
+   * @return A duration of inactivity.
+   */
+  Duration getWaitlistAfkTime();
+
+  /**
    * Gets whether non-premium players can be kicked to make room for a premium player.
    *
    * @return If priority kick is enabled.

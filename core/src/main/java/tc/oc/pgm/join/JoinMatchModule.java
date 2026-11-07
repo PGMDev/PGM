@@ -16,13 +16,16 @@ import tc.oc.pgm.api.integration.Integration;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.match.MatchModule;
 import tc.oc.pgm.api.match.MatchScope;
+import tc.oc.pgm.api.match.event.MatchResizeEvent;
 import tc.oc.pgm.api.match.event.MatchStartEvent;
 import tc.oc.pgm.api.match.factory.MatchModuleFactory;
 import tc.oc.pgm.api.module.exception.ModuleLoadException;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerPartyChangeEvent;
 import tc.oc.pgm.match.ObserverParty;
 import tc.oc.pgm.match.QueuedParty;
+import tc.oc.pgm.teams.events.TeamResizeEvent;
 import tc.oc.pgm.timelimit.TimeLimitMatchModule;
 import tc.oc.pgm.util.bukkit.OnlinePlayerMapAdapter;
 
@@ -46,12 +49,15 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
   private final Match match;
   private final OnlinePlayerMapAdapter<JoinRequest> requests;
 
+  private final WaitlistManager waitlist;
+
   private JoinHandler handler;
 
   private JoinMatchModule(Match match) {
     this.match = match;
     this.queuedParticipants = new QueuedParty(match);
     this.requests = new OnlinePlayerMapAdapter<>(PGM.get());
+    this.waitlist = new WaitlistManager(match, this);
   }
 
   @Override
@@ -135,6 +141,11 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
       requests.put(joining.getBukkit(), request);
     }
 
+    if (result.getOption() == JoinResultOption.FULL && waitlist.canAdd(joining, request)) {
+      waitlist.add(joining, request, false);
+      return true;
+    }
+
     return switch (result.getOption()) {
       case QUEUED -> {
         queueToJoin(joining);
@@ -162,6 +173,11 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
 
   public boolean leave(MatchPlayer leaving, JoinRequest request) {
     if (cancelQueuedJoin(leaving)) return true;
+
+    if (waitlist.remove(leaving)) {
+      leaving.sendMessage(translatable("join.ok.unwaitlist", NamedTextColor.YELLOW));
+      return true;
+    }
 
     // Can't leave if the match is over
     if (match.isFinished()) {
@@ -217,14 +233,41 @@ public class JoinMatchModule implements MatchModule, Listener, JoinHandler {
     // Give handler a chance to bulk join
     handler.queuedJoin(queue);
 
-    // Send any leftover players to obs
+    // Send any leftover players to obs, waitlisting them if the match is full
     for (MatchPlayer joining : queue.getOrderedPlayers()) {
       match.setParty(joining, match.getDefaultParty());
+
+      JoinRequest request = requests.get(joining.getBukkit());
+      if (request == null) request = JoinRequest.fromPlayer(joining, null);
+      if (waitlist.canAdd(joining, request)
+          && queryJoin(joining, request).getOption() == JoinResultOption.FULL) {
+        waitlist.add(joining, request, false);
+      }
     }
+  }
+
+  public WaitlistManager getWaitlist() {
+    return waitlist;
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onPartyChange(PlayerPartyChangeEvent event) {
+    waitlist.onPartyChange(event);
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onTeamResize(TeamResizeEvent event) {
+    waitlist.scheduleDrain();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR)
+  public void onMatchResize(MatchResizeEvent event) {
+    waitlist.scheduleDrain();
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
   public void onMatchCommit(MatchStartEvent event) {
     queuedJoin(queuedParticipants);
+    waitlist.onMatchStart();
   }
 }
