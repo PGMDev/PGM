@@ -1,6 +1,7 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.action.Action;
@@ -33,10 +34,10 @@ public interface Kit extends Action<MatchPlayer> {
   }
 
   /**
-   * Throw if this kit cannot be applied to the given mob type. Called after feature references are
-   * resolved, so implementations may safely inspect their content.
+   * Throw if this kit cannot be applied to the given entity type. Called after feature references
+   * are resolved, so implementations may safely inspect their content.
    */
-  default void validateMob(Class<? extends LivingEntity> mobType, Node node)
+  default void validateMob(Class<? extends Entity> mobType, Node node)
       throws InvalidXMLException {
     if (!mobCompatible()) {
       throw new InvalidXMLException(

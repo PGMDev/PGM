@@ -1,6 +1,7 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +53,7 @@ public class XMLKitReference extends XMLFeatureReference<KitDefinition> implemen
   }
 
   @Override
-  public void validateMob(Class<? extends LivingEntity> mobType, Node node)
+  public void validateMob(Class<? extends Entity> mobType, Node node)
       throws InvalidXMLException {
     get().validateMob(mobType, node);
   }

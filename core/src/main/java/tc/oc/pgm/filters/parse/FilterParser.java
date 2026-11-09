@@ -62,6 +62,7 @@ import tc.oc.pgm.filters.matcher.player.PlayerMovementFilter;
 import tc.oc.pgm.filters.matcher.player.PlayerStateFilter;
 import tc.oc.pgm.filters.modifier.LocationQueryModifier;
 import tc.oc.pgm.filters.modifier.PlayerQueryModifier;
+import tc.oc.pgm.filters.modifier.RidingQueryModifier;
 import tc.oc.pgm.filters.modifier.SameTeamQueryModifier;
 import tc.oc.pgm.filters.operator.AllFilter;
 import tc.oc.pgm.filters.operator.AnyFilter;
@@ -399,6 +400,12 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("flying")
   public FlyingFilter parseFlying(Element el) throws InvalidXMLException {
     return FlyingFilter.INSTANCE;
+  }
+
+  @MethodParser("riding")
+  public RidingQueryModifier parseRiding(Element el) throws InvalidXMLException {
+    return new RidingQueryModifier(
+        el.getChildren().isEmpty() ? StaticFilter.ALLOW : parseChild(el));
   }
 
   @MethodParser("can-fly")

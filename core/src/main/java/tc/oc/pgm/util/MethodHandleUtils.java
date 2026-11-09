@@ -29,7 +29,9 @@ public final class MethodHandleUtils {
       new HandleFinder(Player.class, "getPlayer", "getActor"),
       new HandleFinder(LivingEntity.class, "getEntity", "getActor"),
       new HandleFinder(Entity.class, "getEntity", "getActor"),
-      new HandleFinder(HumanEntity.class, "getWhoClicked"));
+      new HandleFinder(HumanEntity.class, "getWhoClicked"),
+      new HandleFinder(Entity.class, "getEntered"),
+      new HandleFinder(LivingEntity.class, "getExited"));
 
   public static MethodHandle getHandle(Class<? extends Event> event) throws NoSuchMethodException {
     MethodHandle handle = CACHED_HANDLES.computeIfAbsent(event, MethodHandleUtils::findHandle);
