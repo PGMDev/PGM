@@ -22,9 +22,12 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.map.factory.MapModuleFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.FilterModule;
+import tc.oc.pgm.projectile.projectiles.BridgeEggProjectile;
 import tc.oc.pgm.projectile.projectiles.EntityProjectile;
 import tc.oc.pgm.projectile.projectiles.PgmProjectile;
+import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
@@ -88,7 +91,7 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
     }
   }
 
-  private static class ProjectileParser {
+  public static class ProjectileParser {
     private final XMLFluentParser parser;
     private final MethodParsers<PgmProjectile> methodParsers;
 
@@ -102,12 +105,16 @@ public class ProjectileModule implements MapModule<ProjectileMatchModule> {
       return methodParsers.parse(el);
     }
 
-    /*@MethodParser("bridge-egg")
+    @MethodParser("bridge-egg")
     public PgmProjectile parseBridgeEgg(Element el) throws InvalidXMLException {
-      // TODO: implement actual parsing and the feature, this is just an example.
-      //  Should return a new PgmProjectile type.
-      return new EntityProjectile(Egg.class, null, null, false);
-    }*/
+      int bridgeRange = parser.parseInt(el, "bridge-range").required();
+      BlockMaterialData bridgeMaterial =
+          parser.blockMaterialData(el, "bridge-material").required();
+      boolean teamColor = parser.parseBool(el, "team-color").attr().orFalse();
+      boolean silent = parser.parseBool(el, "silent").attr().orFalse();
+
+      return new BridgeEggProjectile(bridgeRange, bridgeMaterial, teamColor, silent);
+    }
 
     public PgmProjectile parsePlainEntity(Element el) throws InvalidXMLException {
       var entity = parser
