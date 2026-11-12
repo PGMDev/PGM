@@ -52,6 +52,9 @@ pools:
       # After the map plays, reset the score to:
       # Supports a formula with play_minutes
       after-playing: 0
+      # If the map that just played should count towards the vote's weighting, making
+      # it (or its gamemode, depending on the formula used) less likely to be picked again.
+      use-current-map: true
 
     # Voted pool only: make maps be excluded from votes if they recently played for long
     cooldown:
