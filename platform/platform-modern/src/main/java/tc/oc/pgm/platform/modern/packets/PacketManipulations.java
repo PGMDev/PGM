@@ -15,6 +15,7 @@ import java.util.Map;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityEvent;
 import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -37,7 +38,7 @@ public class PacketManipulations {
       ReflectionUtils.readStaticField(
           LivingEntity.class, EntityDataAccessor.class, "DATA_EFFECT_PARTICLES");
 
-  private static final int INVISIBILITY = 0x20;
+  private static final int INVISIBILITY = 1 << Entity.FLAG_INVISIBLE;
 
   private final PlayerTracker tracker;
   private final List<PacketListenerCommon> listeners;
@@ -66,9 +67,9 @@ public class PacketManipulations {
   private void handleEntityStatus(PacketSendEvent event) {
     var wrapper = new WrapperPlayServerEntityStatus(event);
     Player player = event.getPlayer();
-    // Strip "Living entity dead" status=3 packets if they're for yourself.
+    // Strip "living entity dead" status packets if they're for yourself.
     // This glitches hitboxes
-    if (player.getEntityId() == wrapper.getEntityId() && wrapper.getStatus() == 3) {
+    if (player.getEntityId() == wrapper.getEntityId() && wrapper.getStatus() == EntityEvent.DEATH) {
       event.setCancelled(true);
     }
   }

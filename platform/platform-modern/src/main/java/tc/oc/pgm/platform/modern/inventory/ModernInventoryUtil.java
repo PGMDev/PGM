@@ -27,6 +27,7 @@ import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MenuType;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
@@ -37,7 +38,7 @@ import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
-@Supports(value = PAPER, minVersion = "1.21.11")
+@Supports(value = PAPER, minVersion = "26.3")
 public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatform {
 
   @Override
@@ -61,13 +62,17 @@ public class ModernInventoryUtil implements InventoryUtils.InventoryUtilsPlatfor
 
   @Override
   public boolean openVillager(Villager villager, Player viewer) {
-    viewer.openMerchant((Villager) villager.copy(), true);
+    viewer.openInventory(MenuType.MERCHANT
+        .builder()
+        .merchant((Villager) villager.copy())
+        .title(villager.teamDisplayName())
+        .build(viewer));
     return true;
   }
 
   @Override
   public ItemStack craftItemCopy(ItemStack item) {
-    return CraftItemStack.asCraftCopy(item);
+    return item.clone();
   }
 
   @Override

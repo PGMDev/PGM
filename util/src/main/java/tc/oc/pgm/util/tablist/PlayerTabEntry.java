@@ -51,7 +51,7 @@ public class PlayerTabEntry extends DynamicTabEntry {
   public PlayerTabEntry(Player player) {
     super(randomUUIDVersion2SameDefaultSkin(player.getUniqueId()));
     this.player = player;
-    this.spareEntityId = NMS_HACKS.allocateEntityId();
+    this.spareEntityId = NMS_HACKS.allocateEntityId(player.getWorld());
   }
 
   @Override
