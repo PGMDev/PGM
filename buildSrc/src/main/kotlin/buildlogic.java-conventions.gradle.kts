@@ -46,7 +46,7 @@ dependencies {
     api("fr.mrmicky:fastboard:2.2.2")
     // Latest SmartInvs commit
     api("com.github.MinusKube:SmartInvs:9c9dbbe") { isTransitive = false }
-    api("org.eclipse.jgit:org.eclipse.jgit:7.8.0.202609011348-r") { isTransitive = false }
+    api("org.eclipse.jgit:org.eclipse.jgit:7.8.1.202611041320-r") { isTransitive = false }
     api("net.objecthunter:exp4j:0.4.9-pgm")
     api("org.reflections:reflections:0.10.2")
 
