@@ -35,6 +35,11 @@ public interface ModernBlockMaterialData extends BlockMaterialData {
   }
 
   @Override
+  default boolean sameMaterialAs(Block block) {
+    return getBlock().equals(block.getBlockData());
+  }
+
+  @Override
   default Material getItemType() {
     return getBlock().getMaterial();
   }

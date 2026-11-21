@@ -35,4 +35,16 @@ public interface BlockData extends BlockMaterialData {
           getBlockVector().getBlockZ() + offset.getBlockZ());
     }
   }
+
+  /**
+   * Check if this block data has the same material as the block at this position with the given
+   * offset in the world.
+   *
+   * @param world the world to check the block in
+   * @param offset the offset from the original position
+   * @return true if the materials match
+   */
+  default boolean sameMaterialAs(World world, BlockVector offset) {
+    return sameMaterialAs(getBlock(world, offset));
+  }
 }

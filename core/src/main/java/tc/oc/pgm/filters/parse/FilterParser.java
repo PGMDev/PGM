@@ -14,6 +14,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.api.feature.FeatureValidation;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.Filterables;
@@ -27,6 +28,7 @@ import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.matcher.CauseFilter;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.block.BlocksFilter;
+import tc.oc.pgm.filters.matcher.block.BuiltFilter;
 import tc.oc.pgm.filters.matcher.block.MaterialFilter;
 import tc.oc.pgm.filters.matcher.block.StructuralLoadFilter;
 import tc.oc.pgm.filters.matcher.block.VoidFilter;
@@ -79,6 +81,7 @@ import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
 import tc.oc.pgm.goals.ProximityGoalDefinition;
 import tc.oc.pgm.regions.RegionValidation;
+import tc.oc.pgm.structure.StructureDefinition;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -645,6 +648,25 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"));
 
     return LocationQueryModifier.of(child, vector);
+  }
+
+  @MethodParser("built")
+  public Filter parseBuiltFilter(Element el) throws InvalidXMLException {
+    var structure = parser
+        .reference(StructureDefinition.class, el, "structure")
+        .validate((FeatureValidation<StructureDefinition>) (def, node) -> {
+          int volume = def.getBounds().getBlockVolume();
+          if (volume > BuiltFilter.MAX_VOLUME)
+            throw new InvalidXMLException(
+                String.format(
+                    "Structure '%s' exceeds limit of %d blocks (bounds volume is %d)",
+                    def.getId(), BuiltFilter.MAX_VOLUME, volume),
+                node);
+        })
+        .required();
+
+    var origin = parser.vector(el, "origin").required().toBlockVector();
+    return new BuiltFilter(structure, origin);
   }
 
   @MethodParser("player")
