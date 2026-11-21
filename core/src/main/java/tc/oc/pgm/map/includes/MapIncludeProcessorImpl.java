@@ -27,13 +27,11 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
   private final Logger logger;
   private final Map<String, MapInclude> includes;
 
-  protected static final ThreadLocal<SAXBuilder> DOCUMENT_FACTORY =
-      ThreadLocal.withInitial(
-          () -> {
-            final SAXBuilder builder = new SAXBuilder();
-            builder.setSAXHandlerFactory(SAXHandler.FACTORY);
-            return builder;
-          });
+  protected static final ThreadLocal<SAXBuilder> DOCUMENT_FACTORY = ThreadLocal.withInitial(() -> {
+    final SAXBuilder builder = new SAXBuilder();
+    builder.setSAXHandlerFactory(SAXHandler.FACTORY);
+    return builder;
+  });
 
   public MapIncludeProcessorImpl(Logger logger) {
     this.logger = logger;
@@ -83,6 +81,7 @@ public class MapIncludeProcessorImpl implements MapIncludeProcessor {
     Set<String> deletedIncludes = new HashSet<>(includes.keySet());
 
     File[] files = includeFiles.listFiles();
+    if (files == null) return;
     for (File file : files) {
       String filename = file.getName();
       if (!filename.endsWith(".xml")) continue;

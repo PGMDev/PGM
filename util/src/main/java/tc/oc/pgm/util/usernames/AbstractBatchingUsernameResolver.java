@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import org.bukkit.Bukkit;
 
 public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameResolver
     implements UsernameResolver {
@@ -13,16 +12,13 @@ public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameR
 
   @Override
   public synchronized CompletableFuture<UsernameResponse> resolve(UUID uuid) {
-    CompletableFuture<UsernameResponse> response =
-        futures.computeIfAbsent(
-            uuid,
-            key -> {
-              if (currentBatch != null) currentBatch.add(uuid);
-              return createFuture(uuid);
-            });
-
-    if (currentBatch == null) getExecutor().execute(() -> process(uuid, response));
-
+    var response = futures.get(uuid);
+    if (response == null) {
+      var newFuture = response = createFuture(uuid);
+      futures.put(uuid, newFuture);
+      if (currentBatch != null) currentBatch.add(uuid);
+      else getExecutor().execute(() -> process(uuid, newFuture));
+    }
     return response;
   }
 
@@ -36,12 +32,12 @@ public abstract class AbstractBatchingUsernameResolver extends AbstractUsernameR
     List<UUID> batch = currentBatch;
     currentBatch = null;
     if (batch != null && !batch.isEmpty()) {
-      Bukkit.getLogger().info(LOG_PREFIX + "Batch resolving " + batch.size() + " uuids");
+      info("Batch resolving " + batch.size() + " uuids");
 
       return CompletableFuture.runAsync(
           () -> {
             process(batch);
-            Bukkit.getLogger().info(LOG_PREFIX + "Done resolving " + batch.size() + " uuids");
+            info("Done resolving " + batch.size() + " uuids");
           },
           getExecutor());
     } else {

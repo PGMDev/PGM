@@ -14,9 +14,12 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.title.Title;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.action.replacements.Replacement;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.util.math.LocalFrame;
 
 public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
   private static final Pattern PATTERN = Pattern.compile("\\{(.+?)}");
@@ -42,20 +45,21 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
   }
 
   @Override
-  public void trigger(T scope) {
-    if (text != null) scope.sendMessage(replace(text, scope));
-    if (title != null) scope.showTitle(replace(title, scope));
-    if (actionbar != null) scope.sendActionBar(replace(actionbar, scope));
+  public void trigger(T scope, ActionContext context) {
+    var frame = context.frame();
+    if (text != null) scope.sendMessage(replace(text, scope, frame));
+    if (title != null) scope.showTitle(replace(title, scope, frame));
+    if (actionbar != null) scope.sendActionBar(replace(actionbar, scope, frame));
   }
 
-  private Component replace(Component component, T scope) {
+  private Component replace(Component component, T scope, @Nullable LocalFrame frame) {
     if (component == null || replacements == null) {
       return component;
     }
 
     BiFunction<MatchResult, TextComponent.Builder, ComponentLike> replacer = (match, original) -> {
       Replacement r = replacements.get(match.group(1));
-      return r != null ? r.get(scope) : original;
+      return r != null ? r.get(scope, frame) : original;
     };
 
     component = component.replaceText(b -> b.match(PATTERN).replacement(replacer));
@@ -67,8 +71,8 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
     return component;
   }
 
-  private Component replaceClickEvents(
-      Component component, Function<MatchResult, String> replacer) {
+  private static @NonNull Component replaceClickEvents(
+      @NonNull Component component, Function<MatchResult, String> replacer) {
     var click = component.clickEvent();
     if (click != null && click.payload() instanceof ClickEvent.Payload.Text payload) {
       var matcher = PATTERN.matcher(payload.value());
@@ -83,9 +87,11 @@ public class MessageAction<T extends Filterable<?>> extends AbstractAction<T> {
     return component.children(children);
   }
 
-  private Title replace(Title title, T scope) {
+  private Title replace(Title title, T scope, @Nullable LocalFrame frame) {
     if (replacements == null) return title;
     return Title.title(
-        replace(title.title(), scope), replace(title.subtitle(), scope), title.times());
+        replace(title.title(), scope, frame),
+        replace(title.subtitle(), scope, frame),
+        title.times());
   }
 }

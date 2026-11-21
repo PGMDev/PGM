@@ -1,6 +1,6 @@
 package tc.oc.pgm.events;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.party.Competitor;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;

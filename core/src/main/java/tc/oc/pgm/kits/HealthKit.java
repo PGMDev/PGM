@@ -3,6 +3,7 @@ package tc.oc.pgm.kits;
 import static tc.oc.pgm.util.Assert.assertTrue;
 
 import java.util.List;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 
@@ -28,5 +29,15 @@ public class HealthKit extends AbstractKit {
     if (force || player.getBukkit().getHealth() < newHealth) {
       player.getBukkit().setHealth(newHealth);
     }
+  }
+
+  @Override
+  public void apply(LivingEntity entity) {
+    entity.setHealth(Math.min(halfHearts, entity.getMaxHealth()));
+  }
+
+  @Override
+  public boolean mobCompatible() {
+    return true;
   }
 }

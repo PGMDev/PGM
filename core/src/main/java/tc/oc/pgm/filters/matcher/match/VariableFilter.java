@@ -1,6 +1,7 @@
 package tc.oc.pgm.filters.matcher.match;
 
 import com.google.common.collect.Range;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.FilterDefinition;
 import tc.oc.pgm.api.filter.Filterables;
@@ -13,6 +14,8 @@ import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.WeakTypedFilter;
 import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.util.math.Formula;
+import tc.oc.pgm.util.math.LocalFrame;
+import tc.oc.pgm.util.math.LocalRef;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.variables.Variable;
@@ -152,10 +155,15 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
 
     @Override
     public QueryResponse query(Query q) {
+      return query(q, null);
+    }
+
+    @Override
+    public QueryResponse query(Query q, @Nullable LocalFrame frame) {
       T target;
       if (!(q instanceof MatchQuery mq) || (target = mq.filterable(scope)) == null)
         return QueryResponse.ABSTAIN;
-      return QueryResponse.fromBoolean(values.contains(formula.apply(target)));
+      return QueryResponse.fromBoolean(values.contains(formula.apply(target, frame)));
     }
 
     @Override
@@ -163,6 +171,32 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
       //noinspection unchecked
       return Filterable.class.isAssignableFrom(queryType)
           && Filterables.isAssignable((Class<Filterable<?>>) queryType, scope);
+    }
+  }
+
+  public static class Local implements FilterDefinition {
+    private final LocalRef local;
+    private final Range<Double> values;
+
+    public Local(LocalRef local, Range<Double> values) {
+      this.local = local;
+      this.values = values;
+    }
+
+    @Override
+    public QueryResponse query(Query query) {
+      throw new IllegalStateException("Local variable filter queried outside of an action");
+    }
+
+    @Override
+    public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+      if (frame == null) return query(query);
+      return QueryResponse.fromBoolean(values.contains(frame.get(local)));
+    }
+
+    @Override
+    public boolean respondsTo(Class<? extends Query> queryType) {
+      return true;
     }
   }
 
@@ -182,6 +216,17 @@ public abstract class VariableFilter<Q extends MatchQuery> implements WeakTypedF
     @Override
     public boolean matches(PartyQuery query) {
       return values.contains(formula.apply(query.getParty()));
+    }
+
+    @Override
+    public QueryResponse query(Query query) {
+      return query(query, null);
+    }
+
+    @Override
+    public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+      if (!(query instanceof PartyQuery pq)) return QueryResponse.ABSTAIN;
+      return QueryResponse.fromBoolean(values.contains(formula.apply(pq.getParty(), frame)));
     }
 
     @Override

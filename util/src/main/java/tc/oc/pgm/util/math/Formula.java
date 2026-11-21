@@ -10,9 +10,11 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ExpressionContext;
 import net.objecthunter.exp4j.function.Function;
+import net.objecthunter.exp4j.function.Functions;
 import net.objecthunter.exp4j.shuntingyard.ShuntingYard;
 import net.objecthunter.exp4j.tokenizer.FunctionToken;
 import net.objecthunter.exp4j.tokenizer.VariableToken;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public interface Formula<T> extends ToDoubleFunction<T> {
@@ -51,6 +53,10 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     return new ExpFormula<>(exp, context);
   }
 
+  static boolean isReservedName(String name) {
+    return AddedFunctions.BY_NAME.containsKey(name) || Functions.getBuiltinFunction(name) != null;
+  }
+
   static Set<String> getUsedVariables(String expr, ContextFactory<?> context)
       throws IllegalArgumentException {
     var fn = new HashMap<>(AddedFunctions.BY_NAME);
@@ -75,10 +81,19 @@ public interface Formula<T> extends ToDoubleFunction<T> {
     return applyAsDouble(value);
   }
 
+  default double apply(T value, @Nullable LocalFrame frame) {
+    return applyAsDouble(value);
+  }
+
   record ExpFormula<T>(Expression expression, ContextFactory<T> context) implements Formula<T> {
     @Override
     public double applyAsDouble(T value) {
-      return expression.setExpressionContext(context.withContext(value)).evaluate();
+      return apply(value, null);
+    }
+
+    @Override
+    public double apply(T value, @Nullable LocalFrame frame) {
+      return expression.setExpressionContext(context.withContext(value, frame)).evaluate();
     }
   }
 
@@ -99,12 +114,12 @@ public interface Formula<T> extends ToDoubleFunction<T> {
 
     Set<String> getArrays();
 
-    ExpressionContext withContext(T t);
+    ExpressionContext withContext(T t, @Nullable LocalFrame frame);
 
     static <T extends ExpressionContext> ContextFactory<T> ofStatic(Set<String> variables) {
       return new ContextFactory<>() {
         @Override
-        public ExpressionContext withContext(T t) {
+        public ExpressionContext withContext(T t, @Nullable LocalFrame frame) {
           return t;
         }
 

@@ -8,6 +8,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.spigotmc.SpigotConfig;
 import tc.oc.pgm.platform.modern.listeners.DispenserListener;
+import tc.oc.pgm.platform.modern.listeners.ModernBlockPhysicsListener;
+import tc.oc.pgm.platform.modern.listeners.ModernBlockTransformListener;
 import tc.oc.pgm.platform.modern.listeners.ModernListener;
 import tc.oc.pgm.platform.modern.listeners.PlayerTracker;
 import tc.oc.pgm.platform.modern.listeners.RecipeUnlocker;
@@ -17,7 +19,7 @@ import tc.oc.pgm.platform.modern.packets.PacketManipulations;
 import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.platform.Supports;
 
-@Supports(value = PAPER, minVersion = "1.21.11", priority = HIGHEST)
+@Supports(value = PAPER, minVersion = "26.1.2", priority = HIGHEST)
 public class ModernPlatform implements Platform.Manifest {
   private PacketManipulations packetManipulations;
 
@@ -36,8 +38,11 @@ public class ModernPlatform implements Platform.Manifest {
             tracker = new PlayerTracker(),
             new RecipeUnlocker(),
             new SpawnEggUseListener(),
-            new TntListener())
+            new TntListener(),
+            new ModernBlockPhysicsListener())
         .forEach(l -> Bukkit.getServer().getPluginManager().registerEvents(l, plugin));
+
+    new ModernBlockTransformListener(plugin).registerEvents();
 
     packetManipulations = new PacketManipulations(tracker);
 

@@ -3,9 +3,11 @@ package tc.oc.pgm.util.inventory;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Table;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import org.bukkit.Material;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -48,6 +51,29 @@ public abstract class Slot {
   private static final Map<String, Slot> byKey;
   private static final Table<Class<? extends Slot>, Integer, Slot> byIndex;
   private static final Map<Class<? extends Inventory>, Class<? extends Slot>> byInventoryType;
+
+  /**
+   * Equipment slots by the element name used in kits, e.g. {@code <helmet>}. A null value means the
+   * slot is not supported on this server version.
+   */
+  public static Map<String, Slot> byEquipmentTag() {
+    return EquipmentTags.BY_TAG;
+  }
+
+  /** Lazy holder, so the {@link Slot} class initializer never references its subclasses */
+  private static final class EquipmentTags {
+    static final Map<String, Slot> BY_TAG = build();
+
+    private static Map<String, Slot> build() {
+      var tags = new LinkedHashMap<String, Slot>();
+      Armor.armor().forEach(armor -> tags.put(armor.armorTypeName(), armor));
+      tags.put("mainhand", MainHand.mainHand());
+      tags.put("offhand", OffHand.offHand().orElse(null));
+      tags.put("body", Body.body());
+      tags.put("saddle", Saddle.saddle());
+      return Collections.unmodifiableMap(tags);
+    }
+  }
 
   /**
    * Convert a Mojang slot name (used by /replaceitem) to a {@link Slot} object. The "slot." at the
@@ -211,6 +237,21 @@ public abstract class Slot {
   /** Put the given stack in this slot of the given holder's inventory. */
   public void setItem(Inventory inv, ItemStack stack) {
     inv.setItem(getIndex(), airToNull(stack));
+  }
+
+  /** Set this equipment slot on a non-player {@link LivingEntity}. */
+  public void setEquipment(LivingEntity entity, ItemStack stack) {
+    throw new UnsupportedOperationException("Slot " + this + " is not a mob equipment slot");
+  }
+
+  /** Set the drop chance for this equipment slot on a non-player {@link LivingEntity}. */
+  public void setDropChance(LivingEntity entity, float chance) {
+    throw new UnsupportedOperationException("Slot " + this + " is not a mob equipment slot");
+  }
+
+  /** Whether {@link #setDropChance} is supported for this slot on this server version. */
+  public boolean supportsDropChance() {
+    return isEquipment();
   }
 
   protected PlayerInventory asPlayerInventory(Inventory inv) {
@@ -407,6 +448,16 @@ public abstract class Slot {
     public EquipmentSlot toEquipmentSlot() {
       return EquipmentSlot.HAND;
     }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      entity.getEquipment().setItemInHand(stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      entity.getEquipment().setItemInHandDropChance(chance);
+    }
   }
 
   public static class OffHand extends Equipment {
@@ -422,6 +473,16 @@ public abstract class Slot {
 
     protected OffHand() {
       super("weapon.offhand", 40, EquipmentSlot.valueOf("OFF_HAND"));
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      EntityEquipmentUtil.EQUIPMENT.setOffHand(entity, stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      EntityEquipmentUtil.EQUIPMENT.setOffHandDropChance(entity, chance);
     }
   }
 
@@ -458,6 +519,97 @@ public abstract class Slot {
 
     public static Armor forType(ArmorType armorType) {
       return byArmorType.get(armorType);
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      var eq = entity.getEquipment();
+      switch (armorType) {
+        case HELMET -> eq.setHelmet(stack);
+        case CHESTPLATE -> eq.setChestplate(stack);
+        case LEGGINGS -> eq.setLeggings(stack);
+        case BOOTS -> eq.setBoots(stack);
+      }
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      var eq = entity.getEquipment();
+      switch (armorType) {
+        case HELMET -> eq.setHelmetDropChance(chance);
+        case CHESTPLATE -> eq.setChestplateDropChance(chance);
+        case LEGGINGS -> eq.setLeggingsDropChance(chance);
+        case BOOTS -> eq.setBootsDropChance(chance);
+      }
+    }
+  }
+
+  /** Mob-only equipment slots, not part of any player inventory */
+  public abstract static class MobEquipment extends Slot {
+    private final String name;
+
+    MobEquipment(String name) {
+      super(MobEquipment.class, null, -1);
+      this.name = name;
+    }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+
+    @Override
+    public boolean isEquipment() {
+      return true;
+    }
+
+    @Override
+    public boolean supportsDropChance() {
+      return EntityEquipmentUtil.EQUIPMENT.supportsMobDropChance();
+    }
+  }
+
+  public static class Body extends MobEquipment {
+    private static final Body body = new Body();
+
+    public static Body body() {
+      return body;
+    }
+
+    Body() {
+      super("body");
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      EntityEquipmentUtil.EQUIPMENT.setBody(entity, stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      EntityEquipmentUtil.EQUIPMENT.setBodyDropChance(entity, chance);
+    }
+  }
+
+  public static class Saddle extends MobEquipment {
+    private static final Saddle saddle = new Saddle();
+
+    public static Saddle saddle() {
+      return saddle;
+    }
+
+    Saddle() {
+      super("saddle");
+    }
+
+    @Override
+    public void setEquipment(LivingEntity entity, ItemStack stack) {
+      EntityEquipmentUtil.EQUIPMENT.setSaddle(entity, stack);
+    }
+
+    @Override
+    public void setDropChance(LivingEntity entity, float chance) {
+      EntityEquipmentUtil.EQUIPMENT.setSaddleDropChance(entity, chance);
     }
   }
 

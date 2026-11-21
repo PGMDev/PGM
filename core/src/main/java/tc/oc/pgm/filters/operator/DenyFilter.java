@@ -1,7 +1,9 @@
 package tc.oc.pgm.filters.operator;
 
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.Query;
+import tc.oc.pgm.util.math.LocalFrame;
 
 /** Deny if the child filter allows, otherwise abstain. */
 public class DenyFilter extends SingleFilterFunction {
@@ -18,7 +20,12 @@ public class DenyFilter extends SingleFilterFunction {
 
   @Override
   public QueryResponse query(Query query) {
-    return switch (filter.query(query)) {
+    return query(query, null);
+  }
+
+  @Override
+  public QueryResponse query(Query query, @Nullable LocalFrame frame) {
+    return switch (filter.query(query, frame)) {
       case ALLOW -> QueryResponse.DENY;
       default -> QueryResponse.ABSTAIN;
     };

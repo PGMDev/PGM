@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.util.inventory.Slot;
 import tc.oc.pgm.util.material.Materials;
 
 public class Payment {
@@ -39,19 +40,33 @@ public class Payment {
   }
 
   public boolean hasPayment(PlayerInventory inventory) {
-    if (price <= 0) return true;
-
-    int remaining = price;
-    for (ItemStack item : inventory.getContents()) {
-      if (item == null || !matches(item)) continue;
-      if ((remaining -= item.getAmount()) <= 0) return true;
-    }
-    return false;
+    return getAffordableAmount(inventory, 1) > 0;
   }
 
   public boolean matches(ItemStack item) {
     return this.item != null
         ? Materials.itemsSimilar(item, this.item, true)
         : item.getType() == currency;
+  }
+
+  public int getAffordableAmount(PlayerInventory inventory, int max) {
+    if (price <= 0) return max;
+
+    int totalCurrency = 0;
+    int targetCurrency = max * price; // total desired
+
+    for (var slot : Slot.Storage.storage().toList()) {
+      ItemStack item = slot.getItem(inventory);
+
+      if (item != null && matches(item)) {
+        totalCurrency += item.getAmount();
+
+        if (totalCurrency >= targetCurrency) {
+          return max;
+        }
+      }
+    }
+
+    return totalCurrency / price;
   }
 }

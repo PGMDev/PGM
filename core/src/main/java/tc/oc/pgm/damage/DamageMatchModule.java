@@ -25,6 +25,7 @@ import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.filter.query.DamageQuery;
 import tc.oc.pgm.api.filter.query.Query;
@@ -45,7 +46,7 @@ import tc.oc.pgm.tracker.info.ExplosionInfo;
 import tc.oc.pgm.tracker.info.FireInfo;
 import tc.oc.pgm.tracker.info.GenericDamageInfo;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
-import tc.oc.pgm.util.inventory.PotionClassifier;
+import tc.oc.pgm.util.bukkit.PotionClassification;
 
 @ListenerScope(MatchScope.RUNNING)
 public class DamageMatchModule implements MatchModule, Listener {
@@ -67,7 +68,7 @@ public class DamageMatchModule implements MatchModule, Listener {
     this.victimAction = victimAction;
   }
 
-  TrackerMatchModule tracker() {
+  public TrackerMatchModule tracker() {
     return match.needModule(TrackerMatchModule.class);
   }
 
@@ -176,19 +177,21 @@ public class DamageMatchModule implements MatchModule, Listener {
       if (attackerAction != null && (attacker = damageInfo.getAttacker()) != null) {
         attacker
             .getPlayer()
-            .ifPresent(p -> attackerAction.trigger(p, getAttackerQuery(event, victim, damageInfo)));
+            .ifPresent(p -> attackerAction.trigger(
+                p, ActionContext.query(getAttackerQuery(event, victim, damageInfo))));
       }
       if (victimAction != null) {
         victim
             .getPlayer()
-            .ifPresent(p -> victimAction.trigger(p, getQuery(event, victim, damageInfo)));
+            .ifPresent(p ->
+                victimAction.trigger(p, ActionContext.query(getQuery(event, victim, damageInfo))));
       }
     }
   }
 
   /** Search the rider stack for a participant */
   @Nullable
-  MatchPlayer getVictim(Entity entity) {
+  public MatchPlayer getVictim(Entity entity) {
     if (entity == null) return null;
 
     MatchPlayer victim = match.getParticipant(entity);
@@ -249,7 +252,7 @@ public class DamageMatchModule implements MatchModule, Listener {
   @EventHandler(ignoreCancelled = true)
   public void onPotionSplash(final PotionSplashEvent event) {
     ThrownPotion potion = event.getPotion();
-    if (!PotionClassifier.isHarmful(potion)) return;
+    if (!PotionClassification.isHarmful(potion)) return;
 
     for (LivingEntity entity : event.getAffectedEntities()) {
       ParticipantState victim = match.getParticipantState(entity);

@@ -13,13 +13,19 @@ public class Icon implements Payable {
   private final ItemStack item;
   private final Filter filter;
   private final Action<? super MatchPlayer> action;
+  private final boolean stackable;
 
   public Icon(
-      List<Payment> payments, ItemStack item, Filter filter, Action<? super MatchPlayer> action) {
+      List<Payment> payments,
+      ItemStack item,
+      Filter filter,
+      Action<? super MatchPlayer> action,
+      boolean stackable) {
     this.payments = ImmutableList.copyOf(payments);
     this.item = item;
     this.filter = filter;
     this.action = action;
+    this.stackable = stackable;
   }
 
   public List<Payment> getPayments() {
@@ -36,5 +42,9 @@ public class Icon implements Payable {
 
   public Action<? super MatchPlayer> getAction() {
     return action;
+  }
+
+  public boolean isStackable() {
+    return stackable;
   }
 }

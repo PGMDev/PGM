@@ -143,6 +143,10 @@ public interface Region extends TypedFilter<LocationQuery> {
     return getStatic(match).getRandom(match.getRandom());
   }
 
+  default Location getRandomLoc(Match match) {
+    return getStatic(match).getRandom(match.getRandom()).toLocation(match.getWorld());
+  }
+
   /** Does this region contain a finite number of blocks? */
   default boolean isBlockBounded() {
     return false;
@@ -181,6 +185,7 @@ public interface Region extends TypedFilter<LocationQuery> {
 
   default Stream<ChunkVector> getChunkPositions() {
     final Bounds bounds = getBounds();
+    if (bounds.isEmpty()) return Stream.empty();
     if (!bounds.isBlockFinite()) {
       throw new UnsupportedOperationException(
           "Cannot enumerate chunks in unbounded region type " + getClass().getSimpleName());

@@ -14,6 +14,7 @@ public class SpMobProperties extends MobProperties {
   public SpMobProperties() {
     register(ArmorStand.class, "gravity", BOOL, ArmorStand::setGravity);
     register(Horse.class, "variant", enumOf(Horse.Variant.class), Horse::setVariant);
+    register(Horse.class, "carrying-chest", BOOL, Horse::setCarryingChest);
     register(
         Skeleton.class,
         "skeleton-type",

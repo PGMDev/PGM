@@ -47,6 +47,7 @@ import tc.oc.pgm.map.source.GitMapSourceFactory;
 import tc.oc.pgm.map.source.PathMapSourceFactory;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.text.TextException;
+import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 
 public final class PGMConfig implements Config {
 
@@ -125,6 +126,10 @@ public final class PGMConfig implements Config {
 
   // groups.*
   private final List<Group> groups;
+
+  // username-resolvers.*
+  private final List<UsernameResolverType> usernameResolvers;
+  private final List<ApiUsernameResolver> customUsernameResolvers;
 
   // experiments.*
   private final Map<String, Object> experiments;
@@ -234,6 +239,22 @@ public final class PGMConfig implements Config {
 
     this.vanish = parseBoolean(config.getString("vanish", "true"));
 
+    this.usernameResolvers = new ArrayList<>();
+    this.customUsernameResolvers = new ArrayList<>();
+    for (var resolver : config.getMapList("username-resolvers")) {
+      var type = parseEnum(String.valueOf(resolver.get("type")), UsernameResolverType.class);
+      if (type == UsernameResolverType.CUSTOM) {
+        customUsernameResolvers.add(new ApiUsernameResolver(
+            getOrDefault(resolver, "name", "custom"),
+            getOrDefault(resolver, "uri", ""),
+            parseBoolean(getOrDefault(resolver, "single-threaded", "true")),
+            getOrDefault(resolver, "json-path", "username")));
+      } else if (usernameResolvers.contains(type)) {
+        throw new IllegalArgumentException("Username resolver already exists for type " + type);
+      }
+      usernameResolvers.add(type);
+    }
+
     final ConfigurationSection section = config.getConfigurationSection("groups");
     this.groups = new ArrayList<>();
     if (section != null) {
@@ -258,15 +279,11 @@ public final class PGMConfig implements Config {
       ImmutableMap.of("uri", "https://github.com/PGMDev/Maps", "path", "default-maps");
 
   public static GitMapSourceFactory parseGit(Map<?, ?> repository) {
-    final URI uri = parseUri(String.valueOf(repository.get("uri")));
+    final URI uri = parseUri(getOrDefault(repository, "uri", null));
 
-    String branch = String.valueOf(repository.get("branch"));
-    if (branch.isEmpty() || branch.equals("null")) {
-      branch = null;
-    }
-
-    String path = String.valueOf(repository.get("path"));
-    if (path.isEmpty() || path.equals("null")) {
+    String branch = getOrDefault(repository, "branch", null);
+    String path = getOrDefault(repository, "path", null);
+    if (path == null) {
       String normalizedPath = Normalizer.normalize(
               uri.getHost() + uri.getPath(), Normalizer.Form.NFD)
           .replaceAll("[^A-Za-z0-9_]", "-")
@@ -285,6 +302,12 @@ public final class PGMConfig implements Config {
     }
 
     return new GitMapSourceFactory(base, children, uri, branch);
+  }
+
+  private static String getOrDefault(Map<?, ?> map, String key, String defaultValue) {
+    var value = map.get(key);
+    if (value == null) return defaultValue;
+    return value.toString();
   }
 
   // TODO: Can be removed after 1.0 release
@@ -716,6 +739,16 @@ public final class PGMConfig implements Config {
   @Override
   public boolean isVanishEnabled() {
     return vanish;
+  }
+
+  @Override
+  public List<UsernameResolverType> getUsernameResolvers() {
+    return usernameResolvers;
+  }
+
+  @Override
+  public List<ApiUsernameResolver> getCustomUsernameResolvers() {
+    return customUsernameResolvers;
   }
 
   @Override

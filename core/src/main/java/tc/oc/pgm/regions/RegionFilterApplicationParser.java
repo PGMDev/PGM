@@ -24,6 +24,7 @@ import tc.oc.pgm.filters.operator.FilterNode;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.teams.Teams;
+import tc.oc.pgm.util.VectorUtils;
 import tc.oc.pgm.util.Version;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
@@ -143,6 +144,14 @@ public class RegionFilterApplicationParser {
       String velocityText = attrVelocity.getValue();
       if (velocityText.startsWith("@")) velocityText = velocityText.substring(1);
       Vector velocity = XMLUtils.parseVector(attrVelocity, velocityText);
+      Vector clampedVelocity = VectorUtils.clampVelocityVector(velocity);
+      if (!clampedVelocity.equals(velocity)) {
+        factory.warn(
+            "Excessive velocity setting detected: (" + velocity + "). Clamping to ("
+                + clampedVelocity + ") to ensure compatibility.",
+            attrVelocity);
+        velocity = clampedVelocity;
+      }
       add(el, new RegionFilterApplication(RFAScope.EFFECT, region, effectFilter, velocity));
     }
 

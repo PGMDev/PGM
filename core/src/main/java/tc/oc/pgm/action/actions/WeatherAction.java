@@ -3,6 +3,7 @@ package tc.oc.pgm.action.actions;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.modules.WeatherMatchModule;
 import tc.oc.pgm.modules.WeatherMatchModule.WeatherType;
@@ -29,7 +30,7 @@ public class WeatherAction extends AbstractAction<Match> {
     return INSTANCES.get(state);
   }
 
-  public void trigger(Match match) {
+  public void trigger(Match match, ActionContext context) {
     match.moduleRequire(WeatherMatchModule.class).setWeather(state);
   }
 }

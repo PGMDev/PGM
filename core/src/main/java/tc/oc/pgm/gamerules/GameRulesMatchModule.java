@@ -11,6 +11,10 @@ import tc.oc.pgm.util.bukkit.GameRules;
 
 @NullMarked
 public class GameRulesMatchModule implements MatchModule {
+  // Gamerules forced to a safe value whenever the match is not running
+  private static final Map<GameRule<?>, Object> IDLE_GAME_RULES =
+      Map.of(GameRules.ADVANCE_TIME, false, GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0);
+
   private final Match match;
   private final Map<GameRule<?>, @Nullable Object> gameRules;
 
@@ -34,6 +38,18 @@ public class GameRulesMatchModule implements MatchModule {
     for (GameRule<?> rule : GameRules.getKnownGameRules()) {
       gameRules.put(rule, rule.get(this.match.getWorld()));
     }
+
+    IDLE_GAME_RULES.forEach(this::setGameRule);
+  }
+
+  @Override
+  public void enable() {
+    IDLE_GAME_RULES.keySet().forEach(rule -> setGameRule(rule, this.gameRules.get(rule)));
+  }
+
+  @Override
+  public void disable() {
+    IDLE_GAME_RULES.forEach(this::setGameRule);
   }
 
   private <T> void setGameRule(GameRule<T> rule, @Nullable Object value) {

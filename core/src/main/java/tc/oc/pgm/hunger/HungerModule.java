@@ -10,32 +10,37 @@ import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
 public class HungerModule implements MapModule<HungerMatchModule> {
+  private final boolean depletion;
+  private final boolean replenishment;
+
+  public HungerModule(boolean depletion, boolean replenishment) {
+    this.depletion = depletion;
+    this.replenishment = replenishment;
+  }
 
   @Override
   public HungerMatchModule createMatchModule(Match match) {
-    return new HungerMatchModule(match);
+    return new HungerMatchModule(match, depletion, replenishment);
   }
 
   public static class Factory implements MapModuleFactory<HungerModule> {
     @Override
     public HungerModule parse(MapFactory factory, Logger logger, Document doc)
         throws InvalidXMLException {
-      boolean on = true;
+      var parser = factory.getParser();
 
-      for (Element hungerRootElement : doc.getRootElement().getChildren("hunger")) {
-        Element hungerDepletionElement = hungerRootElement.getChild("depletion");
-        if (hungerDepletionElement != null) {
-          if (hungerDepletionElement.getValue().equalsIgnoreCase("off")) {
-            on = false;
-          }
-        }
+      boolean depletion = true;
+      Boolean replenishment = null; // Optional, will default to depletion
+
+      for (Element hungerEl : doc.getRootElement().getChildren("hunger")) {
+        depletion = parser.parseBool(hungerEl, "depletion").optional(depletion);
+        replenishment = parser.parseBool(hungerEl, "replenishment").optional(replenishment);
       }
 
-      if (!on) {
-        return new HungerModule();
-      } else {
-        return null;
-      }
+      // Legacy behavior, replenishment defaults to depletion
+      if (replenishment == null) replenishment = depletion;
+
+      return depletion && replenishment ? null : new HungerModule(depletion, replenishment);
     }
   }
 }

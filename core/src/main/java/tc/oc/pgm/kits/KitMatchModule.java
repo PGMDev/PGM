@@ -30,6 +30,7 @@ import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.kits.tag.Grenade;
 import tc.oc.pgm.kits.tag.ItemTags;
 import tc.oc.pgm.util.event.ItemTransferEvent;
+import tc.oc.pgm.util.event.PlayerItemTransferEvent;
 import tc.oc.pgm.util.inventory.Slot;
 
 @ListenerScope(MatchScope.RUNNING)
@@ -173,6 +174,15 @@ public class KitMatchModule implements MatchModule, Listener {
 
   @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
   public void checkItemTransfer(ItemTransferEvent event) {
+    checkTransfer(event);
+  }
+
+  @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+  public void checkPlayerItemTransfer(PlayerItemTransferEvent event) {
+    checkTransfer(event);
+  }
+
+  private void checkTransfer(ItemTransferEvent event) {
     if (event.getReason() == ItemTransferEvent.Reason.PLACE && isUnshareable(event.getItem())) {
       event.setCancelled(true);
     }

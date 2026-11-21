@@ -1,11 +1,13 @@
 package tc.oc.pgm.kits;
 
 import java.util.List;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.features.XMLFeatureReference;
+import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
 public class XMLKitReference extends XMLFeatureReference<KitDefinition> implements Kit {
@@ -37,5 +39,21 @@ public class XMLKitReference extends XMLFeatureReference<KitDefinition> implemen
   @Override
   public void remove(MatchPlayer player) {
     get().remove(player);
+  }
+
+  @Override
+  public void apply(LivingEntity entity) {
+    get().apply(entity);
+  }
+
+  @Override
+  public boolean mobCompatible() {
+    return get().mobCompatible();
+  }
+
+  @Override
+  public void validateMob(Class<? extends LivingEntity> mobType, Node node)
+      throws InvalidXMLException {
+    get().validateMob(mobType, node);
   }
 }

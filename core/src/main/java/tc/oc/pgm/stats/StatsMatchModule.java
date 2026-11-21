@@ -4,6 +4,7 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.Component.virtual;
+import static tc.oc.pgm.util.nms.PlayerUtils.PLAYER_UTILS;
 import static tc.oc.pgm.util.player.PlayerComponent.player;
 import static tc.oc.pgm.util.text.NumberComponent.number;
 import static tc.oc.pgm.util.text.TextFormatter.list;
@@ -59,6 +60,7 @@ import tc.oc.pgm.destroyable.DestroyableDestroyedEvent;
 import tc.oc.pgm.destroyable.DestroyableHealthChange;
 import tc.oc.pgm.destroyable.DestroyableHealthChangeEvent;
 import tc.oc.pgm.events.ListenerScope;
+import tc.oc.pgm.events.PlayerJoinMatchEvent;
 import tc.oc.pgm.events.PlayerJoinPartyEvent;
 import tc.oc.pgm.events.PlayerLeavePartyEvent;
 import tc.oc.pgm.events.PlayerParticipationStopEvent;
@@ -77,6 +79,7 @@ import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.tracker.TrackerMatchModule;
 import tc.oc.pgm.tracker.info.ProjectileInfo;
 import tc.oc.pgm.util.named.NameStyle;
+import tc.oc.pgm.util.skin.Skin;
 import tc.oc.pgm.util.text.TextFormatter;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.wool.MonumentWool;
@@ -123,6 +126,15 @@ public class StatsMatchModule implements MatchModule, Listener {
   @EventHandler(priority = EventPriority.LOWEST)
   public void onMatchFinish(final MatchFinishEvent event) {
     event.getMatch().getParticipants().forEach(player -> getPlayerStat(player).endParticipation());
+  }
+
+  @EventHandler
+  public void storeSkinOnMatchJoin(final PlayerJoinMatchEvent event) {
+    final MatchPlayer player = event.getPlayer();
+    Skin playerSkin = PLAYER_UTILS.getPlayerSkin(player.getBukkit());
+    if (playerSkin != null) {
+      PGM.get().getDatastore().setSkin(player.getId(), playerSkin);
+    }
   }
 
   @EventHandler

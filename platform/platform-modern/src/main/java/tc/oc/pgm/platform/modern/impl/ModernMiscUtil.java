@@ -2,6 +2,7 @@ package tc.oc.pgm.platform.modern.impl;
 
 import static tc.oc.pgm.util.platform.Supports.Variant.PAPER;
 
+import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import java.nio.file.Path;
 import java.util.List;
 import net.kyori.adventure.key.Key;
@@ -14,6 +15,7 @@ import org.bukkit.Location;
 import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -126,6 +128,14 @@ public class ModernMiscUtil implements MiscUtils {
   public boolean isDestructiveExplosion(EntityExplodeEvent ev) {
     return ev.getExplosionResult() == ExplosionResult.DESTROY
         || ev.getExplosionResult() == ExplosionResult.DESTROY_WITH_DECAY;
+  }
+
+  @Override
+  public boolean isEntityDestroyed(EntityRemoveFromWorldEvent ev) {
+    // When an entity is removed by chunk unloading, dimension change,
+    // or with its player, it is not actually destroyed.
+    var reason = ((CraftEntity) ev.getEntity()).getHandle().getRemovalReason();
+    return reason != null && reason.shouldDestroy();
   }
 
   @Override

@@ -7,10 +7,9 @@ import static net.kyori.adventure.text.Component.empty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,9 +18,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.actions.ActionNode;
+import tc.oc.pgm.action.actions.CallAction;
+import tc.oc.pgm.action.actions.ControlAction;
+import tc.oc.pgm.action.actions.ControlWrapperAction;
 import tc.oc.pgm.action.actions.DropFlagAction;
 import tc.oc.pgm.action.actions.EnchantItemAction;
 import tc.oc.pgm.action.actions.ExposedAction;
@@ -33,6 +36,7 @@ import tc.oc.pgm.action.actions.PasteStructureAction;
 import tc.oc.pgm.action.actions.PickupFlagAction;
 import tc.oc.pgm.action.actions.RepeatAction;
 import tc.oc.pgm.action.actions.ReplaceItemAction;
+import tc.oc.pgm.action.actions.ReturnAction;
 import tc.oc.pgm.action.actions.ScheduleAction;
 import tc.oc.pgm.action.actions.ScopeSwitchAction;
 import tc.oc.pgm.action.actions.SetVariableAction;
@@ -53,7 +57,6 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.FeatureDefinitionContext;
-import tc.oc.pgm.features.XMLFeatureReference;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
 import tc.oc.pgm.filters.matcher.player.ParticipatingFilter;
@@ -76,8 +79,11 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.util.xml.parsers.Builder;
+import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.Variable;
 import tc.oc.pgm.variables.VariableParser;
+import tc.oc.pgm.variables.VariableTarget;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class ActionParser {
@@ -86,7 +92,7 @@ public class ActionParser {
   private final boolean legacy;
   private final FeatureDefinitionContext features;
   private final XMLFluentParser parser;
-  private final Map<String, Method> methodParsers;
+  private final MethodParsers<Action<?>> methodParsers;
   private final ReplacementParser replacementParser;
 
   public ActionParser(MapFactory factory) {
@@ -94,31 +100,38 @@ public class ActionParser {
     this.legacy = !factory.getProto().isNoOlderThan(MapProtos.ACTION_REVAMP);
     this.features = factory.getFeatures();
     this.parser = factory.getParser();
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
-    replacementParser = new ReplacementParser(factory);
+    this.methodParsers = MethodParsers.byNameParser(this, "action");
+    this.replacementParser = new ReplacementParser(factory, false);
   }
 
   public <B extends Filterable<?>> Action<? super B> parseProperty(
-      Element el, @Nullable Class<B> bound) throws InvalidXMLException {
-    return parse(el, bound, true);
+      Element el, @Nullable Class<B> bound, @Nullable ActionParseContext context)
+      throws InvalidXMLException {
+    return parse(el, bound, true, context);
   }
 
-  public <B extends Filterable<?>> Action<? super B> parse(Element el, @Nullable Class<B> bound)
+  public <B extends Filterable<?>> Action<? super B> parse(
+      Element el, @Nullable Class<B> bound, @Nullable ActionParseContext context)
       throws InvalidXMLException {
-    return parse(el, bound, false);
+    return parse(el, bound, false, context);
   }
 
   @SuppressWarnings("unchecked")
   private <B extends Filterable<?>> Action<? super B> parse(
-      Element el, @Nullable Class<B> bound, boolean property) throws InvalidXMLException {
+      Element el, @Nullable Class<B> bound, boolean property, @Nullable ActionParseContext context)
+      throws InvalidXMLException {
     String id = FeatureDefinitionContext.parseId(el);
 
     Node node = new Node(el);
     if (id != null && maybeReference(el, property)) {
-      return parseReference(node, id, bound);
+      return parseReference(node, id, bound, null);
     }
 
-    Action<? super B> result = property ? parseAction(el, bound) : parseDynamic(el, bound);
+    var inner = context == null || id != null ? ActionParseContext.root() : context;
+    Action<? super B> result =
+        property ? parseAction(el, bound, inner) : parseDynamic(el, bound, inner);
+    if (inner != context && inner.control().isUsed()) result = ControlWrapperAction.of(result);
+
     if (bound != null) validate(result, ActionScopeValidation.of(bound), node);
     if (result instanceof ActionDefinition) {
       if (XMLUtils.parseBoolean(Node.fromAttr(el, "expose"), false)) {
@@ -134,23 +147,24 @@ public class ActionParser {
   }
 
   public Set<String> actionTypes() {
-    return methodParsers.keySet();
+    return methodParsers.methods().keySet();
   }
 
   private boolean maybeReference(Element el, boolean property) {
     return (property || "action".equals(el.getName())) && el.getChildren().isEmpty();
   }
 
-  public <B extends Filterable<?>> Action<? super B> parseReference(Node node, Class<B> bound)
-      throws InvalidXMLException {
-    return parseReference(node, node.getValue(), bound);
+  public <B extends Filterable<?>> Action<? super B> parseReference(
+      Node node, Class<B> bound, @Nullable LocalScope locals) throws InvalidXMLException {
+    return parseReference(node, node.getValue(), bound, locals);
   }
 
   private <B extends Filterable<?>> Action<? super B> parseReference(
-      Node node, String id, Class<B> bound) throws InvalidXMLException {
+      Node node, String id, Class<B> bound, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     @SuppressWarnings("unchecked")
     var action = (Action<? super B>) features.get(id, ActionDefinition.class);
-    if (action == null) action = parseInlineAction(node, id, bound);
+    if (action == null) action = parseInlineAction(node, id, bound, locals);
     if (action == null)
       action = features.addReference(new XMLActionReference<>(features, node, id));
 
@@ -166,63 +180,49 @@ public class ActionParser {
           .replace("%EXP%", EXPRESSION));
 
   private <B extends Filterable<?>> Action<? super B> parseInlineAction(
-      Node node, String id, Class<B> scope) throws InvalidXMLException {
+      Node node, String id, Class<B> scope, @Nullable LocalScope locals)
+      throws InvalidXMLException {
     Matcher match = INLINE_SET.matcher(id);
     if (!match.matches()) return null;
 
     if (scope == null)
       throw new InvalidXMLException("Inline action requires an implicit scope", node);
 
-    var context = factory.needModule(VariablesModule.class).getContext(scope);
+    var variables = factory.needModule(VariablesModule.class);
+    Formula<B> formula = variables.parseFormula(scope, match.group(3), locals);
+
+    var local = locals != null ? locals.lookup(match.group(1)) : null;
+    if (local != null) {
+      if (match.group(2) != null) throw new InvalidXMLException(LocalScope.INDEX_ERROR, node);
+      return new SetVariableAction<>(scope, VariableTarget.local(local), formula);
+    }
 
     Variable<?> var = features.resolve(node, match.group(1), Variable.class);
-    Formula<B> formula = Formula.of(match.group(3), context);
 
     if (var.isReadonly())
       throw new InvalidXMLException("Variable was readonly when write access is required", node);
 
-    if (var.isIndexed() && var instanceof Variable.Indexed<?> varIdx) {
+    Formula<B> idx = null;
+    if (var.isIndexed()) {
       var idxText = match.group(2);
       if (idxText == null)
         throw new InvalidXMLException(
             "Inline action doesn't define the index to insert into", node);
-
-      return new SetVariableAction.Indexed<>(scope, varIdx, Formula.of(idxText, context), formula);
+      idx = variables.parseFormula(scope, idxText, locals);
     }
-    return new SetVariableAction<>(scope, var, formula);
+    return new SetVariableAction<>(scope, VariableTarget.variable(var, idx), formula);
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   private void validate(
       Action<?> action, FeatureValidation<ActionDefinition<?>> validation, Node node)
       throws InvalidXMLException {
-    if (action instanceof XMLFeatureReference ref) {
-      features.validate(ref, validation);
-    } else if (action instanceof ActionDefinition ad) {
-      features.validate(ad, validation, node);
-    } else {
-      throw new IllegalStateException(
-          "Attempted validation on an action which is neither definition nor reference.");
-    }
-  }
-
-  protected Method getParserFor(Element el) {
-    return methodParsers.get(el.getName().toLowerCase());
+    features.validate(action, validation, node);
   }
 
   @SuppressWarnings("unchecked")
-  private <T, B extends Filterable<?>> Action<T> parseDynamic(Element el, Class<B> scope)
-      throws InvalidXMLException {
-    Method parser = getParserFor(el);
-    if (parser != null) {
-      try {
-        return (Action<T>) parser.invoke(this, el, scope);
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else {
-      throw new InvalidXMLException("Unknown action type: " + el.getName(), el);
-    }
+  private <T, B extends Filterable<?>> Action<T> parseDynamic(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
+    return (Action<T>) methodParsers.parse(el, scope, context);
   }
 
   private <B extends Filterable<?>> Class<B> parseScope(Element el, Class<B> scope)
@@ -262,52 +262,156 @@ public class ActionParser {
         parser.action(cls, el, "action", "trigger").required());
   }
 
-  // Generic action with N children parser
-  private <B extends Filterable<?>> ActionNode<? super B> parseAction(
-      Element el, Class<B> scope, boolean obs) throws InvalidXMLException {
-    scope = parseScope(el, scope);
+  private static final Set<String> CALL_ATTRIBUTES =
+      Set.of("id", "scope", "function", "result", "index", "filter", "expose");
 
+  // Parser for <function> elements
+  public <B extends Filterable<?>> void parseFunction(Element el) throws InvalidXMLException {
+    String id = XMLUtils.parseRequiredId(el);
+    Class<B> scope = parseScope(el, null);
+
+    Node paramsNode = Node.fromAttr(el, "params");
+    var params = parseLocalNames(List.of(), paramsNode);
+    for (String name : params) {
+      if (CALL_ATTRIBUTES.contains(name))
+        throw new InvalidXMLException(
+            "'" + name + "' is reserved and cannot be a function parameter", paramsNode);
+    }
+
+    var locals = new LocalScope(null, parseLocalNames(params, Node.fromAttr(el, "locals")));
+    var context = ActionParseContext.function(locals);
+    var body = new ActionNode<>(
+        parseChildren(el, scope, context),
+        parser.filter(locals, el, "filter").orAllow(),
+        StaticFilter.ALLOW,
+        scope,
+        null);
+
+    boolean returnsValue = context.control().returnsValue();
+    double defaultValue = parser
+        .parseDouble(el, "default")
+        .validate((v, n) -> {
+          if (!returnsValue)
+            throw new InvalidXMLException(
+                "'default' is only allowed on functions that return a value", n);
+        })
+        .optional(0d);
+
+    features.addFeature(
+        el,
+        new FunctionDefinition<>(
+            id,
+            scope,
+            ImmutableList.copyOf(params),
+            locals,
+            body,
+            context.control().isUsed(),
+            returnsValue,
+            defaultValue));
+  }
+
+  // Generic action with N children parser
+  private <B extends Filterable<?>> Action<? super B> parseAction(
+      Element el, Class<B> scope, boolean obs, ActionParseContext context)
+      throws InvalidXMLException {
+    scope = parseScope(el, scope);
+    var declared = parseLocals(el, context.locals(), null);
+    return parseNode(el, scope, obs, context.withLocals(declared), declared != null);
+  }
+
+  private <B extends Filterable<?>> ActionNode<B> parseNode(
+      Element el, Class<B> scope, boolean obs, ActionParseContext context, boolean newFrame)
+      throws InvalidXMLException {
+    var children = parseChildren(el, scope, context);
+
+    var locals = context.locals();
+    Filter filter = parser.filter(locals, el, "filter").orAllow();
+    Filter untriggerFilter = parser
+        .filter(locals, el, "untrigger-filter")
+        .result(!legacy && filter == StaticFilter.ALLOW);
+
+    return new ActionNode<>(
+        children,
+        wrapFilter(filter, obs),
+        wrapFilter(untriggerFilter, obs),
+        scope,
+        newFrame ? locals : null);
+  }
+
+  private <B extends Filterable<?>> ImmutableList<Action<? super B>> parseChildren(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
     if (el.getChildren().isEmpty())
       throw new InvalidXMLException("No action children were defined", el);
 
     ImmutableList.Builder<Action<? super B>> children = ImmutableList.builder();
     for (Element child : el.getChildren()) {
-      children.add(parse(child, scope));
+      children.add(parse(child, scope, context));
     }
+    return children.build();
+  }
 
-    Filter filter = parser.filter(el, "filter").orAllow();
-    Filter untriggerFilter =
-        parser.filter(el, "untrigger-filter").result(!legacy && filter == StaticFilter.ALLOW);
+  private @Nullable LocalScope parseLocals(
+      Element el, @Nullable LocalScope parent, @Nullable Node index) throws InvalidXMLException {
+    Node node = Node.fromAttr(el, "locals");
+    if (node == null && index == null) return null;
 
-    return new ActionNode<>(
-        children.build(), wrapFilter(filter, obs), wrapFilter(untriggerFilter, obs), scope);
+    List<String> names = new ArrayList<>();
+    if (index != null) names.add(validateLocal(index.getValue(), index, names));
+    return new LocalScope(parent, parseLocalNames(names, node));
+  }
+
+  private List<String> parseLocalNames(List<String> names, @Nullable Node node)
+      throws InvalidXMLException {
+    if (node == null) return names;
+    List<String> result = new ArrayList<>(names);
+    for (String name : node.getValue().split(",")) {
+      result.add(validateLocal(name, node, result));
+    }
+    return result;
+  }
+
+  private String validateLocal(String name, Node node, List<String> names)
+      throws InvalidXMLException {
+    name = name.trim();
+    VariableParser.validateName(name, "Local variable names", node);
+    if (names.contains(name))
+      throw new InvalidXMLException("Local variable '" + name + "' is already defined", node);
+    return name;
   }
 
   // Parsers
   @MethodParser("action")
-  public <B extends Filterable<?>> ActionNode<? super B> parseAction(Element el, Class<B> scope)
-      throws InvalidXMLException {
-    return parseAction(el, scope, true);
+  public <B extends Filterable<?>> Action<? super B> parseAction(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
+    return parseAction(el, scope, true, context);
   }
 
   @MethodParser("repeat")
-  public <B extends Filterable<?>> Action<? super B> parseRepeat(Element el, Class<B> scope)
-      throws InvalidXMLException {
+  public <B extends Filterable<?>> Action<? super B> parseRepeat(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
     scope = parseScope(el, scope);
 
-    Action<? super B> child = parseAction(el, scope, true);
-    Formula<B> formula = parser.formula(scope, el, "times").required();
+    Node index = Node.fromAttr(el, "index");
+    var declared = parseLocals(el, context.locals(), index);
+    var child = parseNode(el, scope, true, context.withLocals(declared).loop(), false);
+    Formula<B> formula = parser.formula(scope, context.locals(), el, "times").required();
 
-    return new RepeatAction<>(scope, child, formula);
+    return new RepeatAction<>(
+        scope,
+        child,
+        formula,
+        declared,
+        index == null ? null : declared.lookup(index.getValue().trim()));
   }
 
   @MethodParser("switch-scope")
   public <O extends Filterable<?>, I extends Filterable<?>> Action<? super O> parseSwitchScope(
-      Element el, Class<O> outer) throws InvalidXMLException {
+      Element el, Class<O> outer, ActionParseContext context) throws InvalidXMLException {
     outer = parseScope(el, outer, "outer");
     Class<I> inner = parseScope(el, null, "inner");
 
-    Action<? super I> child = parseAction(el, inner, includeObs(el, inner));
+    var childContext = ScopeSwitchAction.isMulti(outer, inner) ? context.loop() : context;
+    Action<? super I> child = parseAction(el, inner, includeObs(el, inner), childContext);
 
     Action<? super O> result = ScopeSwitchAction.of(child, outer, inner);
     if (result == null) {
@@ -317,14 +421,122 @@ public class ActionParser {
     return result;
   }
 
+  @MethodParser("break")
+  public ControlAction parseBreak(Element el, Class<?> scope, ActionParseContext context)
+      throws InvalidXMLException {
+    return parseControl(el, context, ControlFlow.Signal.BREAK);
+  }
+
+  @MethodParser("continue")
+  public ControlAction parseContinue(Element el, Class<?> scope, ActionParseContext context)
+      throws InvalidXMLException {
+    return parseControl(el, context, ControlFlow.Signal.CONTINUE);
+  }
+
+  @MethodParser("return")
+  public <B extends Filterable<?>> ReturnAction<B> parseReturn(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
+    var control = context.control();
+    control.markUsed();
+
+    scope = parseScope(el, scope);
+    var locals = context.locals();
+    Formula<B> value = parser
+        .formula(scope, locals, el, "value")
+        .validate((v, n) -> {
+          if (!control.inFunction())
+            throw new InvalidXMLException(
+                "Returns can only have a value inside a function, outside of any schedule", n);
+          control.markReturnsValue();
+        })
+        .orNull();
+    return new ReturnAction<>(scope, parser.filter(locals, el, "filter").orAllow(), value);
+  }
+
+  private ControlAction parseControl(
+      Element el, ActionParseContext context, ControlFlow.Signal signal)
+      throws InvalidXMLException {
+    var control = context.control();
+    if (!control.inLoop())
+      throw new InvalidXMLException(
+          "'" + el.getName()
+              + "' must be inside a repeat or a switch-scope to a lower scope within the same action",
+          el);
+    control.markUsed();
+    return new ControlAction(
+        signal, parser.filter(context.locals(), el, "filter").orAllow());
+  }
+
+  @MethodParser("call")
+  public <T extends Filterable<?>> CallAction<T> parseCall(
+      Element el, Class<T> scope, ActionParseContext context) throws InvalidXMLException {
+    var locals = context.locals();
+    scope = parseScope(el, scope);
+    ImmutableMap.Builder<String, Formula<T>> argsBuilder = ImmutableMap.builder();
+    for (Attribute attr : el.getAttributes()) {
+      if (CALL_ATTRIBUTES.contains(attr.getName())) continue;
+      argsBuilder.put(
+          attr.getName(), parser.formula(scope, locals, el, attr.getName()).required());
+    }
+    var args = argsBuilder.build();
+
+    var result = parseTarget(el, "result", scope, locals).orNull();
+
+    var function = parser
+        .function(el, scope, "function")
+        .validate((FunctionDefinition<T> fn, Node node) ->
+            validateCall(fn, node, args.keySet(), result != null))
+        .required();
+
+    return new CallAction<>(
+        scope, function, args, result, parser.filter(locals, el, "filter").orAllow());
+  }
+
+  private <T extends Filterable<?>> Builder.Generic<VariableTarget<T>> parseTarget(
+      Element el, String attr, Class<T> scope, @Nullable LocalScope locals) {
+    return parser.node(
+        node -> {
+          var local = locals != null ? locals.lookup(node.getValue()) : null;
+          if (local != null) {
+            if (el.getAttribute("index") != null)
+              throw new InvalidXMLException(LocalScope.INDEX_ERROR, el);
+            return VariableTarget.local(local);
+          }
+
+          Variable<?> var = parser.variable(el, attr).bound(scope).writtable().required();
+          Formula<T> idx =
+              var.isIndexed() ? parser.formula(scope, locals, el, "index").required() : null;
+          return VariableTarget.variable(var, idx);
+        },
+        el,
+        attr);
+  }
+
+  private void validateCall(
+      FunctionDefinition<?> fn, Node node, Set<String> args, boolean hasResult)
+      throws InvalidXMLException {
+    for (String param : fn.getParams()) {
+      if (!args.contains(param))
+        throw new InvalidXMLException(
+            "Missing argument '" + param + "' for function '" + fn.getId() + "'", node);
+    }
+    for (String arg : args) {
+      if (!fn.getParams().contains(arg))
+        throw new InvalidXMLException(
+            "Unknown argument '" + arg + "' for function '" + fn.getId() + "'", node);
+    }
+    if (hasResult && !fn.returnsValue())
+      throw new InvalidXMLException("Function '" + fn.getId() + "' does not return a value", node);
+  }
+
   @MethodParser("kit")
   public Kit parseKitTrigger(Element el, Class<?> scope) throws InvalidXMLException {
     return parser.kit(el).required();
   }
 
   @MethodParser("message")
-  public <T extends Filterable<?>> MessageAction<?> parseChatMessage(Element el, Class<T> scope)
-      throws InvalidXMLException {
+  public <T extends Filterable<?>> MessageAction<?> parseChatMessage(
+      Element el, Class<T> scope, ActionParseContext context) throws InvalidXMLException {
     Component text = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "text"));
     Component actionbar = XMLUtils.parseFormattedText(Node.fromChildOrAttr(el, "actionbar"));
 
@@ -351,7 +563,8 @@ public class ActionParser {
     ImmutableMap.Builder<String, Replacement> replacementMap = ImmutableMap.builder();
     for (Element replacement : XMLUtils.flattenElements(el, "replacements")) {
       replacementMap.put(
-          XMLUtils.parseRequiredId(replacement), replacementParser.parse(replacement, scope));
+          XMLUtils.parseRequiredId(replacement),
+          replacementParser.parse(replacement, scope, context.locals()));
     }
     return new MessageAction<>(scope, text, actionbar, title, replacementMap.build());
   }
@@ -374,24 +587,19 @@ public class ActionParser {
   }
 
   @MethodParser("set")
-  public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(Element el, Class<T> scope)
-      throws InvalidXMLException {
+  public <T extends Filterable<?>> SetVariableAction<T> parseSetVariable(
+      Element el, Class<T> scope, ActionParseContext context) throws InvalidXMLException {
+    var locals = context.locals();
     scope = parseScope(el, scope);
-    Variable<?> var = parser.variable(el, "var").bound(scope).writtable().required();
-    Formula<T> formula = parser.formula(scope, el, "value").required();
-
-    if (var.isIndexed() && var instanceof Variable.Indexed<?> indexedVar) {
-      Formula<T> idx = parser.formula(scope, el, "index").required();
-      return new SetVariableAction.Indexed<>(scope, indexedVar, idx, formula);
-    }
-
-    return new SetVariableAction<>(scope, var, formula);
+    var target = parseTarget(el, "var", scope, locals).required();
+    return new SetVariableAction<>(
+        scope, target, parser.formula(scope, locals, el, "value").required());
   }
 
   @MethodParser("kill-entities")
-  public KillEntitiesAction parseKillEntities(Element el, Class<?> scope)
-      throws InvalidXMLException {
-    return new KillEntitiesAction(parser.filter(el, "filter").required());
+  public KillEntitiesAction parseKillEntities(
+      Element el, Class<?> scope, ActionParseContext context) throws InvalidXMLException {
+    return new KillEntitiesAction(parser.filter(context.locals(), el, "filter").required());
   }
 
   @MethodParser("open-shop")
@@ -414,22 +622,25 @@ public class ActionParser {
   }
 
   @MethodParser("enchant-item")
-  public EnchantItemAction parseEnchantItem(Element el, Class<?> scope) throws InvalidXMLException {
+  public EnchantItemAction parseEnchantItem(Element el, Class<?> scope, ActionParseContext context)
+      throws InvalidXMLException {
     var kits = factory.getKits();
     ItemMatcher matcher = kits.parseItemMatcher(el, "find");
     SlotGroup slots = parser.node(kits::parseSlotGroup, el, "slots").optional(SlotGroup.ALL);
     Enchantment enchant = XMLUtils.parseEnchantment(Node.fromRequiredAttr(el, "enchantment"));
-    Formula<MatchPlayer> level = parser.formula(MatchPlayer.class, el, "level").required();
+    Formula<MatchPlayer> level =
+        parser.formula(MatchPlayer.class, context.locals(), el, "level").required();
 
     return new EnchantItemAction(matcher, slots, enchant, level);
   }
 
   @MethodParser("fill")
-  public FillAction parseFill(Element el, Class<?> scope) throws InvalidXMLException {
+  public FillAction parseFill(Element el, Class<?> scope, ActionParseContext context)
+      throws InvalidXMLException {
     return new FillAction(
         parser.region(el, "region").blockBounded().orSelf(),
         XMLUtils.parseBlockMaterialData(Node.fromRequiredAttr(el, "material")),
-        parser.filter(el, "filter").orNull(),
+        parser.filter(context.locals(), el, "filter").orNull(),
         parser.parseBool(el, "update").orTrue(),
         parser.parseBool(el, "events").orFalse());
   }
@@ -454,37 +665,66 @@ public class ActionParser {
   }
 
   @MethodParser("take-payment")
-  public Action<? super MatchPlayer> parseTakePayment(Element el, Class<?> scope)
-      throws InvalidXMLException {
+  public Action<? super MatchPlayer> parseTakePayment(
+      Element el, Class<?> scope, ActionParseContext context) throws InvalidXMLException {
     Payable payable = Payable.of(ShopModule.parsePayments(el, factory.getParser()));
     if (payable.isFree()) throw new InvalidXMLException("Payment has not been defined", el);
     return new TakePaymentAction(
         payable,
-        parser.action(MatchPlayer.class, el, "success-action").orNull(),
-        parser.action(MatchPlayer.class, el, "fail-action").orNull());
+        parser.action(MatchPlayer.class, context, el, "success-action").orNull(),
+        parser.action(MatchPlayer.class, context, el, "fail-action").orNull());
   }
 
   @MethodParser("velocity")
-  public Action<? super MatchPlayer> parseVelocity(Element el, Class<?> scope)
-      throws InvalidXMLException {
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").required();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").required();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").required();
+  public Action<? super MatchPlayer> parseVelocity(
+      Element el, Class<?> scope, ActionParseContext context) throws InvalidXMLException {
+    var locals = context.locals();
+    var xFormula = parser
+        .formula(MatchPlayer.class, locals, el, "x")
+        .validate(this::validateVelocityActionFormula)
+        .required();
+    var yFormula = parser
+        .formula(MatchPlayer.class, locals, el, "y")
+        .validate(this::validateVelocityActionFormula)
+        .required();
+    var zFormula = parser
+        .formula(MatchPlayer.class, locals, el, "z")
+        .validate(this::validateVelocityActionFormula)
+        .required();
 
     return new VelocityAction(xFormula, yFormula, zFormula);
   }
 
+  private void validateVelocityActionFormula(Formula<MatchPlayer> formula, Node node) {
+    double velocity;
+    try {
+      velocity = formula.applyAsDouble(null);
+    } catch (Throwable e) {
+      // If trying to evaluate a formula results in an exception, it likely depends on player/match
+      // data, and thus we can't determine if it is excessive or not at parse time
+      velocity = 0;
+    }
+
+    if (Math.abs(velocity) > 3.9) {
+      factory.warn(
+          "Excessive velocity component detected: " + velocity + "; will be clamped to "
+              + (velocity < 0 ? "-" : "") + "3.9 at runtime.",
+          node);
+    }
+  }
+
   @MethodParser("teleport")
-  public Action<? super MatchPlayer> parseTeleport(Element el, Class<?> scope)
-      throws InvalidXMLException {
+  public Action<? super MatchPlayer> parseTeleport(
+      Element el, Class<?> scope, ActionParseContext context) throws InvalidXMLException {
+    var locals = context.locals();
     var region = parser.region(el, "region").randomPoints().optional();
 
-    var xFormula = parser.formula(MatchPlayer.class, el, "x").optional();
-    var yFormula = parser.formula(MatchPlayer.class, el, "y").optional();
-    var zFormula = parser.formula(MatchPlayer.class, el, "z").optional();
+    var xFormula = parser.formula(MatchPlayer.class, locals, el, "x").optional();
+    var yFormula = parser.formula(MatchPlayer.class, locals, el, "y").optional();
+    var zFormula = parser.formula(MatchPlayer.class, locals, el, "z").optional();
 
-    var pitchFormula = parser.formula(MatchPlayer.class, el, "pitch").optional();
-    var yawFormula = parser.formula(MatchPlayer.class, el, "yaw").optional();
+    var pitchFormula = parser.formula(MatchPlayer.class, locals, el, "pitch").optional();
+    var yawFormula = parser.formula(MatchPlayer.class, locals, el, "yaw").optional();
 
     if (region.isEmpty() && (xFormula.isEmpty() || yFormula.isEmpty() || zFormula.isEmpty()))
       throw new InvalidXMLException("Either 'region' or 'x','y' and 'z' are required", el);
@@ -494,11 +734,12 @@ public class ActionParser {
 
   @MethodParser("paste-structure")
   public <T extends Filterable<?>> PasteStructureAction<T> parseStructure(
-      Element el, Class<T> scope) throws InvalidXMLException {
+      Element el, Class<T> scope, ActionParseContext context) throws InvalidXMLException {
+    var locals = context.locals();
     scope = parseScope(el, scope);
-    var xFormula = parser.formula(scope, el, "x").required();
-    var yFormula = parser.formula(scope, el, "y").required();
-    var zFormula = parser.formula(scope, el, "z").required();
+    var xFormula = parser.formula(scope, locals, el, "x").required();
+    var yFormula = parser.formula(scope, locals, el, "y").required();
+    var zFormula = parser.formula(scope, locals, el, "z").required();
 
     var structure = parser.reference(StructureDefinition.class, el, "structure").required();
     var update = parser.parseBool(el, "update").orTrue();
@@ -528,10 +769,11 @@ public class ActionParser {
 
   @MethodParser("schedule")
   @SuppressWarnings("unchecked")
-  public <B extends Filterable<?>> Action<?> parseSchedule(Element el, Class<B> scope)
-      throws InvalidXMLException {
+  public <B extends Filterable<?>> Action<?> parseSchedule(
+      Element el, Class<B> scope, ActionParseContext context) throws InvalidXMLException {
     scope = parseScope(el, scope);
-    var action = parseAction(el, scope);
+    Action<? super B> action =
+        ControlWrapperAction.of(parseAction(el, scope, context.withRootControl()));
     var after = parser.duration(el, "after").between(WAIT_RANGE).required();
 
     return MatchPlayer.class.isAssignableFrom(scope)

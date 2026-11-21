@@ -33,7 +33,9 @@ class ParticipationData {
     TimePenalty penalty = getPenalty(newTeam);
     Duration timeOff = getDuration(penalty);
     if (penalty == TimePenalty.REJOIN_MULTIPLIER) {
-      timeOff = TimeUtils.min(timeOff.multipliedBy(rejoins), getDuration(TimePenalty.REJOIN_MAX));
+      timeOff = TimeUtils.max(
+          TimeUtils.min(timeOff.multipliedBy(rejoins), getDuration(TimePenalty.REJOIN_MAX)),
+          getDuration(TimePenalty.REJOIN_MIN));
     }
     return lastLeaveTick + TimeUtils.toTicks(timeOff);
   }

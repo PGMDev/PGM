@@ -1,6 +1,7 @@
 package tc.oc.pgm.action.actions;
 
 import java.util.logging.Level;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.teams.Team;
@@ -15,7 +16,7 @@ public class TeamAliasAction extends AbstractAction<Party> {
   }
 
   @Override
-  public void trigger(Party party) {
+  public void trigger(Party party, ActionContext context) {
     // No-op for non-team parties, we don't want people renaming obs
     if (!(party instanceof Team)) return;
     var existingTeam = party.getMatch().needModule(TeamMatchModule.class).getTeam(alias);

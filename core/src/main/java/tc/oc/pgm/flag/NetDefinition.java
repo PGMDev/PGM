@@ -4,9 +4,11 @@ import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.Component;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.Action;
 import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.filter.Filter;
+import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.flag.post.PostDefinition;
@@ -36,6 +38,7 @@ public class NetDefinition extends SelfIdentifyingFeatureDefinition {
   // captured
   private final boolean respawnTogether; // Delay respawn until all capturableFlags are captured
   private @Nullable Vector proximityLocation;
+  private final @Nullable Action<? super MatchPlayer> captureAction;
 
   public NetDefinition(
       @Nullable String id,
@@ -51,7 +54,8 @@ public class NetDefinition extends SelfIdentifyingFeatureDefinition {
       ImmutableSet<FlagDefinition> capturableFlags,
       ImmutableSet<FlagDefinition> recoverableFlags,
       boolean respawnTogether,
-      @Nullable Vector proximityLocation) {
+      @Nullable Vector proximityLocation,
+      @Nullable Action<? super MatchPlayer> captureAction) {
 
     super(id);
     this.region = region;
@@ -67,6 +71,7 @@ public class NetDefinition extends SelfIdentifyingFeatureDefinition {
     this.recoverableFlags = recoverableFlags;
     this.respawnTogether = respawnTogether;
     this.proximityLocation = proximityLocation;
+    this.captureAction = captureAction;
   }
 
   public Region getRegion() {
@@ -111,6 +116,10 @@ public class NetDefinition extends SelfIdentifyingFeatureDefinition {
 
   public ImmutableSet<FlagDefinition> getRecoverableFlags() {
     return recoverableFlags;
+  }
+
+  public @Nullable Action<? super MatchPlayer> getCaptureAction() {
+    return captureAction;
   }
 
   public boolean isRespawnTogether() {

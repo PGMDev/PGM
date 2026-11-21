@@ -129,7 +129,9 @@ public abstract class ListeningMapAdapter<K, V> extends ForwardingMap<K, V> impl
    * called.
    */
   public void disable() {
+    this.lazyEnable = false;
     if (this.enabled) {
+      this.enabled = false;
       this.clear();
       HandlerList.unregisterAll(this);
     }

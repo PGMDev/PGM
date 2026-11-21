@@ -1,5 +1,11 @@
 package tc.oc.pgm.rotation;
 
+import static net.kyori.adventure.text.Component.space;
+import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
+import static tc.oc.pgm.util.player.PlayerComponent.player;
+import static tc.oc.pgm.util.text.TemporalComponent.duration;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.File;
@@ -15,6 +21,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -29,6 +37,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.blitz.BlitzMatchModule;
+import tc.oc.pgm.channels.ChatManager;
 import tc.oc.pgm.events.MapPoolAdjustEvent;
 import tc.oc.pgm.rotation.pools.MapPool;
 import tc.oc.pgm.rotation.pools.MapPoolType;
@@ -201,8 +210,63 @@ public class MapPoolManager implements MapOrder {
     }
 
     // Call a MapPoolAdjustEvent so plugins can listen when map pool has changed
-    match.callEvent(new MapPoolAdjustEvent(
-        activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit));
+    MapPoolAdjustEvent event = new MapPoolAdjustEvent(
+        activeMapPool, mapPool, match, force, sender, poolTimeLimit, matchCountLimit);
+    match.callEvent(event);
+
+    announcePoolChange(event);
+  }
+
+  private void announcePoolChange(MapPoolAdjustEvent event) {
+    MapPool newPool = event.getNewPool();
+    Duration timeLimit = event.getTimeLimit();
+    int matchLimit = event.getMatchLimit();
+
+    // Send feedback to staff, alerting them that the map pool has changed by force
+    if (event.isForced()) {
+      Component poolName = text(newPool.getName(), NamedTextColor.LIGHT_PURPLE);
+      Component staffName = player(event.getSender());
+      Component matchLimitText = text()
+          .append(text(matchLimit, NamedTextColor.GREEN))
+          .append(space())
+          .append(
+              translatable("match.name" + (matchLimit != 1 ? ".plural" : ""), NamedTextColor.GRAY))
+          .build();
+
+      // No limit
+      Component forced = translatable("pool.change.force", poolName, staffName);
+      if (timeLimit != null) {
+        Component time = duration(timeLimit).color(NamedTextColor.GREEN);
+
+        // If time & match limit are present, display both
+        if (matchLimit != 0) {
+          Component timeAndLimit =
+              translatable("misc.or", NamedTextColor.GRAY, time, matchLimitText);
+          forced = translatable("pool.change.forceTimed", poolName, timeAndLimit, staffName);
+        } else {
+          // Just time limit
+          forced = translatable("pool.change.forceTimed", poolName, time, staffName);
+        }
+      } else if (matchLimit != 0) {
+        // Just match limit
+        forced = translatable("pool.change.forceTimed", poolName, matchLimitText, staffName);
+      }
+
+      ChatManager.broadcastAdminMessage(forced.color(NamedTextColor.GRAY));
+    }
+
+    // Broadcast map pool changes due to size
+    if (newPool.isDynamic()) {
+      Component broadcast = text()
+          .append(text("[", NamedTextColor.WHITE))
+          .append(translatable("pool.name", NamedTextColor.GOLD))
+          .append(text("] ", NamedTextColor.WHITE))
+          .append(translatable(
+              "pool.change", NamedTextColor.GREEN, text(newPool.getName(), NamedTextColor.AQUA)))
+          .build();
+
+      event.getMatch().sendMessage(broadcast);
+    }
   }
 
   /**

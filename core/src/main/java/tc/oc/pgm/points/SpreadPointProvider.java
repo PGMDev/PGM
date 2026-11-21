@@ -55,6 +55,7 @@ public class SpreadPointProvider extends AggregatePointProvider {
       }
     }
 
+    if (bestPoints.isEmpty()) return null;
     int index = match.getRandom().nextInt(bestPoints.size());
     return bestPoints.get(index);
   }

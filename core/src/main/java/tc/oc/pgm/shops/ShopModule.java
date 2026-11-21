@@ -151,19 +151,24 @@ public class ShopModule implements MapModule<ShopMatchModule> {
   }
 
   private static Icon parseIcon(Element icon, XMLFluentParser parser) throws InvalidXMLException {
+    boolean stackable = false;
 
     List<Payment> payments = parsePayments(icon, parser);
 
     ItemStack item = parser.item(icon).required();
     Filter filter = parser.filter(icon, "filter").orAllow();
 
-    Action<? super MatchPlayer> action = parser
-        .action(MatchPlayer.class, icon, "action", "kit")
-        .optional(() -> KitNode.of(
-            new ItemKit(null, Collections.singletonList(item), false, false, false, true),
-            new OverflowWarningKit(translatable("shop.purchase.overflow"))));
+    Action<? super MatchPlayer> action =
+        parser.action(MatchPlayer.class, icon, "action", "kit").orNull();
 
-    return new Icon(payments, item, filter, action);
+    if (action == null) {
+      stackable = true; // simple item, safe to buy in bulk
+      action = KitNode.of(
+          new ItemKit(null, Collections.singletonList(item), false, false, false, true),
+          new OverflowWarningKit(translatable("shop.purchase.overflow")));
+    }
+
+    return new Icon(payments, item, filter, action, stackable);
   }
 
   public static List<Payment> parsePayments(Element parent, XMLFluentParser parser)

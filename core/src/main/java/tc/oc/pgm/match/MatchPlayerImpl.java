@@ -81,6 +81,7 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
   private final AtomicBoolean protocolReady;
   private final AtomicInteger protocolVersion;
   private final AfkTracker.Activity activity;
+  private long lastKitTick = 0;
 
   public MatchPlayerImpl(Match match, Player player) {
     this.logger = ClassLogger.get(
@@ -372,17 +373,21 @@ public class MatchPlayerImpl implements MatchPlayer, Comparable<MatchPlayer> {
       }
     }
 
-    match
-        .getExecutor(MatchScope.LOADED)
-        .schedule(
-            () -> {
-              final Player bukkit = getBukkit();
-              if (bukkit.isOnline() && !isDead() && bukkit.getMaxHealth() < 20) {
-                bukkit.setHealth(Math.min(bukkit.getHealth(), bukkit.getMaxHealth()));
-              }
-            },
-            TimeUtils.TICK,
-            TimeUnit.MILLISECONDS);
+    var currTick = match.getTick().tick;
+    if (currTick > lastKitTick) {
+      lastKitTick = currTick;
+      match
+          .getExecutor(MatchScope.LOADED)
+          .schedule(
+              () -> {
+                final Player bukkit = getBukkit();
+                if (bukkit.isOnline() && !isDead() && bukkit.getMaxHealth() < 20) {
+                  bukkit.setHealth(Math.min(bukkit.getHealth(), bukkit.getMaxHealth()));
+                }
+              },
+              TimeUtils.TICK,
+              TimeUnit.MILLISECONDS);
+    }
   }
 
   @Override

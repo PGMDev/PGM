@@ -3,9 +3,14 @@ package tc.oc.pgm.shops;
 import static net.kyori.adventure.text.Component.translatable;
 
 import com.google.common.collect.ImmutableList;
+import java.util.Collections;
 import java.util.List;
+import org.bukkit.inventory.ItemStack;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.kits.ItemKit;
+import tc.oc.pgm.kits.KitNode;
+import tc.oc.pgm.kits.OverflowWarningKit;
 import tc.oc.pgm.shops.menu.Category;
 import tc.oc.pgm.shops.menu.Icon;
 import tc.oc.pgm.util.bukkit.Sounds;
@@ -36,14 +41,42 @@ public class Shop extends SelfIdentifyingFeatureDefinition {
   }
 
   public void purchase(Icon icon, MatchPlayer buyer) {
-    if (icon.takePayment(buyer)) {
-      icon.getAction().trigger(buyer);
-      buyer.getBukkit().updateInventory();
-      buyer.playSound(Sounds.SHOP_PURCHASE);
-    } else if (!buyer.getMatch().isRunning()) {
+    purchase(icon, buyer, false);
+  }
+
+  public void purchase(Icon icon, MatchPlayer buyer, boolean stack) {
+    if (!buyer.getMatch().isRunning()) {
       buyer.sendWarning(translatable("match.error.noMatch"));
-    } else {
-      buyer.sendWarning(translatable("shop.currency.insufficient"));
+      return;
     }
+
+    int desiredPurchases = 1;
+    if (stack && icon.isStackable()) {
+      int amountPerPurchase = Math.max(1, icon.getItem().getAmount());
+      int maxStackSize = icon.getItem().getMaxStackSize();
+      desiredPurchases = maxStackSize / amountPerPurchase;
+    }
+
+    int purchases = icon.takePayment(buyer, desiredPurchases);
+    if (purchases <= 0) {
+      buyer.sendWarning(translatable("shop.currency.insufficient"));
+      return;
+    }
+
+    if (purchases > 1) { // already checked if isStackable, else purchases <= 1
+      ItemStack stackItem = icon.getItem().clone();
+      stackItem.setAmount(stackItem.getAmount() * purchases);
+
+      // clone itemkit action with correct qty
+      KitNode.of(
+              new ItemKit(null, Collections.singletonList(stackItem), false, false, false, true),
+              new OverflowWarningKit(translatable("shop.purchase.overflow")))
+          .trigger(buyer);
+    } else {
+      icon.getAction().trigger(buyer);
+    }
+
+    buyer.getBukkit().updateInventory();
+    buyer.playSound(Sounds.SHOP_PURCHASE);
   }
 }

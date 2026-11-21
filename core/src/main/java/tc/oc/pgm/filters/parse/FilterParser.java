@@ -4,11 +4,9 @@ import static tc.oc.pgm.filters.PlatformFilters.PLATFORM_FILTERS;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.LivingEntity;
@@ -51,6 +49,7 @@ import tc.oc.pgm.filters.matcher.party.CompetitorFilter;
 import tc.oc.pgm.filters.matcher.party.GoalFilter;
 import tc.oc.pgm.filters.matcher.party.RankFilter;
 import tc.oc.pgm.filters.matcher.party.ScoreFilter;
+import tc.oc.pgm.filters.matcher.party.TouchedFilter;
 import tc.oc.pgm.filters.matcher.player.CanFlyFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFilter;
 import tc.oc.pgm.filters.matcher.player.CarryingFlagFilter;
@@ -80,8 +79,9 @@ import tc.oc.pgm.flag.state.Dropped;
 import tc.oc.pgm.flag.state.Returned;
 import tc.oc.pgm.flag.state.State;
 import tc.oc.pgm.goals.GoalDefinition;
-import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.structure.StructureDefinition;
+import tc.oc.pgm.goals.ProximityGoalDefinition;
+import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
@@ -98,11 +98,12 @@ import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLFluentParser;
 import tc.oc.pgm.util.xml.XMLUtils;
+import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.Variable;
 
 public abstract class FilterParser implements XMLParser<Filter, FilterDefinition> {
 
-  protected final Map<String, Method> methodParsers;
+  protected final MethodParsers<Filter> methodParsers;
   protected final MapFactory factory;
   protected final XMLFluentParser parser;
   protected final FeatureDefinitionContext features;
@@ -112,7 +113,10 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     this.parser = factory.getParser();
     this.features = factory.getFeatures();
 
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+    this.methodParsers = MethodParsers.<Filter>byNameParser(this, "filter").withFallback(el -> {
+      if (factory.getRegions().isRegion(el)) return factory.getRegions().parse(el);
+      throw new InvalidXMLException("Unknown filter type: " + el.getName(), el);
+    });
   }
 
   @Override
@@ -145,8 +149,20 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
    */
   public abstract Filter parseReference(Node node, String id) throws InvalidXMLException;
 
+  public Filter parseReference(Node node, String id, @Nullable LocalScope locals)
+      throws InvalidXMLException {
+    return parseReference(node, id);
+  }
+
+  public Filter parseProperty(Node node, @Nullable LocalScope locals) throws InvalidXMLException {
+    return node.isAttribute()
+        ? parseReference(node, node.getValue(), locals)
+        : parseChild(node.getElement());
+  }
+
   public boolean isFilter(Element el) {
-    return methodParsers.containsKey(el.getName()) || factory.getRegions().isRegion(el);
+    return methodParsers.methods().containsKey(el.getName())
+        || factory.getRegions().isRegion(el);
   }
 
   public void parseFilterChildren(Element parent) throws InvalidXMLException {
@@ -155,23 +171,8 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     }
   }
 
-  protected Method getParserFor(Element el) {
-    return methodParsers.get(el.getName().toLowerCase());
-  }
-
   protected Filter parseDynamic(Element el) throws InvalidXMLException {
-    Method parser = getParserFor(el);
-    if (parser != null) {
-      try {
-        return (Filter) parser.invoke(this, el);
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else if (factory.getRegions().isRegion(el)) {
-      return factory.getRegions().parse(el);
-    } else {
-      throw new InvalidXMLException("Unknown filter type: " + el.getName(), el);
-    }
+    return methodParsers.parse(el);
   }
 
   protected List<Filter> parseChildren(Element parent) throws InvalidXMLException {
@@ -449,6 +450,13 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     return new TeamFilterAdapter(Optional.empty(), goalFilter(el));
   }
 
+  @MethodParser("touched")
+  public Filter parseTouched(Element el) throws InvalidXMLException {
+    return parseExplicitTeam(
+        el,
+        new TouchedFilter(features.createReference(new Node(el), ProximityGoalDefinition.class)));
+  }
+
   @MethodParser("captured")
   public Filter parseCaptured(Element el) throws InvalidXMLException {
     return parseExplicitTeam(el, goalFilter(el));
@@ -705,7 +713,7 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
   @MethodParser("blocks")
   public Filter parseBlocksFilter(Element el) throws InvalidXMLException {
     Region region =
-        factory.getRegions().parseRequiredProperty(el, "region", BlockBoundedValidation.INSTANCE);
+        factory.getRegions().parseRequiredProperty(el, "region", RegionValidation.BLOCK_BOUNDED);
     Filter child = parseProperty(Node.fromAttrOrSelf(el, "filter"), MaterialFilter.NOT_AIR);
 
     return new BlocksFilter(region, child);

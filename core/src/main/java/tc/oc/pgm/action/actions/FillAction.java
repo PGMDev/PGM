@@ -4,6 +4,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.event.block.BlockFormEvent;
 import org.jetbrains.annotations.Nullable;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
@@ -33,9 +34,10 @@ public class FillAction extends AbstractAction<Match> {
   }
 
   @Override
-  public void trigger(Match match) {
+  public void trigger(Match match, ActionContext context) {
     for (Block block : region.getBlocks(match.getWorld())) {
-      if (filter != null && filter.query(new BlockQuery(block)).isDenied()) continue;
+      if (filter != null && filter.query(new BlockQuery(block), context.frame()).isDenied())
+        continue;
 
       if (!events) {
         materialData.applyTo(block, update);

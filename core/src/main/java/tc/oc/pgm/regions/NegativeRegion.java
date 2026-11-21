@@ -35,7 +35,7 @@ public class NegativeRegion implements RegionDefinition.Static {
 
   @Override
   public Bounds getBounds() {
-    throw new UnsupportedOperationException("NegativeRegion is unbounded");
+    return Bounds.unbounded();
   }
 
   @Override

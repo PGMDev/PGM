@@ -1,5 +1,6 @@
 package tc.oc.pgm.action.actions;
 
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.feature.FeatureReference;
 import tc.oc.pgm.api.player.MatchPlayer;
 import tc.oc.pgm.flag.Flag;
@@ -14,7 +15,7 @@ public class PickupFlagAction extends AbstractAction<MatchPlayer> {
   }
 
   @Override
-  public void trigger(MatchPlayer matchPlayer) {
+  public void trigger(MatchPlayer matchPlayer, ActionContext context) {
     final Flag flag = this.flag.get().getGoal(matchPlayer.getMatch());
     if (flag == null) return;
     flag.pickupFlag(matchPlayer, matchPlayer.getLocation());

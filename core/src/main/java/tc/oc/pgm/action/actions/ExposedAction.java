@@ -1,8 +1,8 @@
 package tc.oc.pgm.action.actions;
 
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.action.ActionDefinition;
 import tc.oc.pgm.api.feature.Feature;
-import tc.oc.pgm.api.filter.query.Query;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
 import tc.oc.pgm.filters.Filterable;
 
@@ -31,18 +31,13 @@ public class ExposedAction extends SelfIdentifyingFeatureDefinition
   }
 
   @Override
-  public void trigger(Filterable<?> scope) {
-    delegate.trigger(getAncestor(scope));
+  public void trigger(Filterable<?> scope, ActionContext context) {
+    delegate.trigger(getAncestor(scope), context);
   }
 
   @Override
-  public void trigger(Filterable<?> filterable, Query event) {
-    delegate.trigger(filterable, event);
-  }
-
-  @Override
-  public void untrigger(Filterable<?> scope) {
-    delegate.untrigger(getAncestor(scope));
+  public void untrigger(Filterable<?> scope, ActionContext context) {
+    delegate.untrigger(getAncestor(scope), context);
   }
 
   protected Filterable<?> getAncestor(Filterable<?> context) {

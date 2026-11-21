@@ -57,6 +57,6 @@ public class Complement implements RegionDefinition.Static {
         + this.original.toString()
         + ",subtracted="
         + this.subtracted.toString()
-        + "]}";
+        + "}";
   }
 }

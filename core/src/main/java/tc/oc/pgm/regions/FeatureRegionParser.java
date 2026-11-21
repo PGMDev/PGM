@@ -40,13 +40,6 @@ public class FeatureRegionParser extends RegionParser {
   @Override
   public void validate(Region region, FeatureValidation<RegionDefinition> validation, Node node)
       throws InvalidXMLException {
-    if (region instanceof XMLRegionReference) {
-      factory.getFeatures().validate((XMLRegionReference) region, validation);
-    } else if (region instanceof RegionDefinition) {
-      factory.getFeatures().validate((RegionDefinition) region, validation, node);
-    } else {
-      throw new IllegalStateException(
-          "Attempted validation on a region which is neither definition nor reference.");
-    }
+    factory.getFeatures().validate(region, validation, node);
   }
 }

@@ -5,6 +5,7 @@ import fr.minuskube.inv.InventoryManager;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -23,7 +24,7 @@ import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.java.JavaPluginLoader;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.Config;
 import tc.oc.pgm.api.Datastore;
 import tc.oc.pgm.api.PGM;
@@ -47,8 +48,6 @@ import tc.oc.pgm.db.SQLDatastore;
 import tc.oc.pgm.db.SqlUsernameResolver;
 import tc.oc.pgm.integrations.SimpleVanishIntegration;
 import tc.oc.pgm.listeners.AntiGriefListener;
-import tc.oc.pgm.listeners.BlockTransformListener;
-import tc.oc.pgm.listeners.FormattingListener;
 import tc.oc.pgm.listeners.InitialMatchLoader;
 import tc.oc.pgm.listeners.JoinLeaveAnnouncer;
 import tc.oc.pgm.listeners.MatchAnnouncer;
@@ -68,7 +67,6 @@ import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.RandomMapOrder;
 import tc.oc.pgm.tablist.MatchTabManager;
 import tc.oc.pgm.util.FileUtils;
-import tc.oc.pgm.util.bukkit.ViaUtils;
 import tc.oc.pgm.util.chunk.NullChunkGenerator;
 import tc.oc.pgm.util.concurrent.BukkitExecutorService;
 import tc.oc.pgm.util.listener.AfkTracker;
@@ -81,8 +79,11 @@ import tc.oc.pgm.util.platform.Platform;
 import tc.oc.pgm.util.tablist.TablistResizer;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextTranslations;
-import tc.oc.pgm.util.usernames.ApiUsernameResolver;
 import tc.oc.pgm.util.usernames.BukkitUsernameResolver;
+import tc.oc.pgm.util.usernames.ElectroidApiUsernameResolver;
+import tc.oc.pgm.util.usernames.MojangApiUsernameResolver;
+import tc.oc.pgm.util.usernames.PlayerDbApiUsernameResolver;
+import tc.oc.pgm.util.usernames.UsernameResolver;
 import tc.oc.pgm.util.usernames.UsernameResolvers;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 
@@ -130,8 +131,6 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       getLogger().log(Level.SEVERE, "Failed to initialize PGM platform", t);
       getServer().getPluginManager().disablePlugin(this);
     }
-    // Fix before any audiences have the chance of creating
-    if (Platform.isLegacy()) ViaUtils.removeViaChatFacet();
 
     Permissions.registerAll();
 
@@ -169,10 +168,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
       return;
     }
 
-    UsernameResolvers.setResolvers(
-        new BukkitUsernameResolver(),
-        new SqlUsernameResolver((SQLDatastore) datastore),
-        new ApiUsernameResolver());
+    setupUsernameResolvers();
 
     datastore = new CacheDatastore(datastore);
 
@@ -215,7 +211,7 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     final File[] worldDirs = getServer().getWorldContainer().listFiles();
     if (worldDirs != null) {
       for (File dir : worldDirs) {
-        if (dir.isDirectory() && dir.getName().startsWith("match")) {
+        if (dir.isDirectory() && Match.isMatchWorld(dir.getName())) {
           FileUtils.delete(dir);
         }
       }
@@ -250,6 +246,33 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
 
     registerListeners();
     registerCommands();
+  }
+
+  private void setupUsernameResolvers() {
+    var custom = config.getCustomUsernameResolvers().iterator();
+    var types = config.getUsernameResolvers();
+    if (types.isEmpty()) {
+      PGM.get()
+          .getLogger()
+          .warning("No username resolvers were configured, falling back to defaults.");
+      var nonCustom = EnumSet.allOf(Config.UsernameResolverType.class);
+      nonCustom.remove(Config.UsernameResolverType.CUSTOM);
+      types = List.copyOf(nonCustom);
+    }
+
+    List<UsernameResolver> resolvers = new ArrayList<>();
+    for (var type : types) {
+      resolvers.add(
+          switch (type) {
+            case BUKKIT -> new BukkitUsernameResolver();
+            case SQL -> new SqlUsernameResolver((SQLDatastore) datastore);
+            case PLAYER_DB -> new PlayerDbApiUsernameResolver();
+            case MOJANG -> new MojangApiUsernameResolver();
+            case ELECTROID -> new ElectroidApiUsernameResolver();
+            case CUSTOM -> custom.next();
+          });
+    }
+    UsernameResolvers.setResolvers(resolvers.toArray(UsernameResolver[]::new));
   }
 
   @Override
@@ -385,14 +408,12 @@ public class PGMPlugin extends JavaPlugin implements PGM, Listener {
     registerEvents(new PlayerMoveListener());
     registerEvents(new ItemTransferListener());
     registerEvents(new TNTMinecartPlacementListener());
-    new BlockTransformListener(this).registerEvents();
     registerEvents(matchManager);
     inventoryManager.init();
     registerEvents(afkTracker);
     if (matchTabManager != null) registerEvents(matchTabManager);
     registerEvents(nameDecorationRegistry);
     registerEvents(new PGMListener(this, matchManager));
-    registerEvents(new FormattingListener());
     registerEvents(new AntiGriefListener(matchManager));
     registerEvents(new RestartListener(this, matchManager));
     registerEvents(new WorldProblemListener(this));

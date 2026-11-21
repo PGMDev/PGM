@@ -5,14 +5,15 @@ import org.jetbrains.annotations.NotNull;
 import tc.oc.pgm.api.map.MapProtos;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
-import tc.oc.pgm.regions.BlockBoundedValidation;
-import tc.oc.pgm.regions.RandomPointsValidation;
+import tc.oc.pgm.regions.EmptyRegion;
+import tc.oc.pgm.regions.EverywhereRegion;
 import tc.oc.pgm.regions.RegionParser;
-import tc.oc.pgm.regions.StaticValidation;
+import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
-public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionBuilder<T>> {
+public abstract sealed class RegionBuilder<T extends Region> extends Builder<T, RegionBuilder<T>>
+    permits RegionBuilder.OfRegion, RegionBuilder.OfStatic {
   protected final RegionParser regions;
   private boolean children = false;
 
@@ -33,13 +34,23 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
   }
 
   public RegionBuilder<T> blockBounded() {
-    validate((r, n) -> regions.validate(r, BlockBoundedValidation.INSTANCE, n));
+    validate((r, n) -> regions.validate(r, RegionValidation.BLOCK_BOUNDED, n));
     return this;
   }
 
   public RegionBuilder<T> randomPoints() {
-    validate((r, n) -> regions.validate(r, RandomPointsValidation.INSTANCE, n));
+    validate((r, n) -> regions.validate(r, RegionValidation.RANDOM_POINTS, n));
     return this;
+  }
+
+  @SuppressWarnings("unchecked")
+  public T orEverywhere() throws InvalidXMLException {
+    return optional((T) EverywhereRegion.INSTANCE);
+  }
+
+  @SuppressWarnings("unchecked")
+  public T orNowhere() throws InvalidXMLException {
+    return optional((T) EmptyRegion.INSTANCE);
   }
 
   protected Region parseRegion(Node node) throws InvalidXMLException {
@@ -55,7 +66,7 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
     return this;
   }
 
-  public static class OfRegion extends RegionBuilder<Region> {
+  public static final class OfRegion extends RegionBuilder<Region> {
     public OfRegion(RegionParser regions, Element el, String... prop) {
       super(regions, el, prop);
     }
@@ -66,17 +77,17 @@ public abstract class RegionBuilder<T extends Region> extends Builder<T, RegionB
     }
   }
 
-  public static class OfStatic extends RegionBuilder<Region.Static> {
+  public static final class OfStatic extends RegionBuilder<Region.Static> {
 
     public OfStatic(RegionParser regions, Element el, String... prop) {
       super(regions, el, prop);
-      validate((r, n) -> regions.validate(r, StaticValidation.INSTANCE, n));
+      validate((r, n) -> regions.validate(r, RegionValidation.STATIC, n));
     }
 
     @Override
     protected Region.Static parse(Node node) throws InvalidXMLException {
       Region region = parseRegion(node);
-      if (!(region instanceof Region.Static s)) throw StaticValidation.makeException(node);
+      if (!(region instanceof Region.Static s)) throw RegionValidation.notStatic(node);
       return s;
     }
   }

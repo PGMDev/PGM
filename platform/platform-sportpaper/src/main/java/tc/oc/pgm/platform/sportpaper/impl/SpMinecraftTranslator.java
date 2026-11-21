@@ -29,6 +29,7 @@ public class SpMinecraftTranslator implements MinecraftComponent.MinecraftTransl
     return switch (entityType) {
       case MINECART_TNT -> getTranslationKey(Material.EXPLOSIVE_MINECART);
       case EGG -> getTranslationKey(Material.EGG);
+      case ENDER_PEARL -> getTranslationKey(Material.ENDER_PEARL);
       // Not fully correct, but whatever
       case FISHING_HOOK -> getTranslationKey(Material.FISHING_ROD);
       default -> ENTITY_TYPE_FORMAT.formatted(entityType.getName());

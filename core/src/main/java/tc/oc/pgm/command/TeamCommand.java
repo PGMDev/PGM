@@ -66,8 +66,8 @@ public final class TeamCommand {
       Match match,
       CommandSender sender,
       TeamMatchModule teams,
-      @Flag("a") boolean all,
-      @Flag("f") boolean force) {
+      @Flag(value = "all", aliases = "a") boolean all,
+      @Flag(value = "force", aliases = "f") boolean force) {
     if (match.isRunning() && !force) {
       throw exception("match.shuffle.err");
     }

@@ -164,8 +164,9 @@ public class ModifyBowProjectileMatchModule implements MatchModule, Listener {
     if (!NMS_HACKS.isCraftItemArrowEntity(event)) {
       return;
     }
-    Filter.QueryResponse response =
-        pickupFilter.query(new PlayerQuery(event, match.getPlayer(event.getPlayer())));
+    MatchPlayer player = match.getPlayer(event.getPlayer());
+    if (player == null) return;
+    Filter.QueryResponse response = pickupFilter.query(new PlayerQuery(event, player));
     if (response.isDenied()) {
       event.setCancelled(true);
     }

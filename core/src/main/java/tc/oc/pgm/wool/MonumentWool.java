@@ -24,7 +24,7 @@ import tc.oc.pgm.goals.Goal;
 import tc.oc.pgm.goals.TouchableGoal;
 import tc.oc.pgm.kits.ApplyItemKitEvent;
 import tc.oc.pgm.kits.ApplyKitEvent;
-import tc.oc.pgm.kits.ArmorKit;
+import tc.oc.pgm.kits.EquipmentKit;
 import tc.oc.pgm.teams.Team;
 import tc.oc.pgm.util.bukkit.BukkitUtils;
 import tc.oc.pgm.util.event.PlayerItemTransferEvent;
@@ -124,10 +124,10 @@ public class MonumentWool extends TouchableGoal<MonumentWoolFactory>
   }
 
   @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-  public void onArmorKitApplication(ApplyKitEvent event) {
-    if (event.getKit() instanceof ArmorKit ak) {
-      for (ArmorKit.ArmorItem armorPiece : ak.getArmorItems()) {
-        handleWoolAcquisition(event.getPlayer().getBukkit(), armorPiece.stack());
+  public void onEquipmentKitApplication(ApplyKitEvent event) {
+    if (event.getKit() instanceof EquipmentKit ek) {
+      for (EquipmentKit.EquipmentItem piece : ek.getEquipment()) {
+        handleWoolAcquisition(event.getPlayer().getBukkit(), piece.stack());
       }
     }
   }

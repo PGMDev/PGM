@@ -11,7 +11,7 @@ import tc.oc.pgm.util.inventory.Slot;
 
 /**
  * Fired when an {@link ItemKit} is applied to a player. The kit can be modified through the
- * containers returned by the various getter methods. Note that {@link ArmorKit}s fire a generic
+ * containers returned by the various getter methods. Note that {@link EquipmentKit}s fire a generic
  * {@link ApplyKitEvent}, not this one.
  */
 public class ApplyItemKitEvent extends ApplyKitEvent {

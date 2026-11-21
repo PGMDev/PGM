@@ -25,9 +25,9 @@ import tc.oc.pgm.goals.ProximityMetric;
 import tc.oc.pgm.goals.ShowOptions;
 import tc.oc.pgm.modes.Mode;
 import tc.oc.pgm.modes.ObjectiveModesModule;
-import tc.oc.pgm.regions.BlockBoundedValidation;
 import tc.oc.pgm.regions.RegionModule;
 import tc.oc.pgm.regions.RegionParser;
+import tc.oc.pgm.regions.RegionValidation;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.teams.TeamModule;
 import tc.oc.pgm.teams.Teams;
@@ -104,9 +104,9 @@ public class CoreModule implements MapModule<CoreMatchModule> {
         RegionParser parser = context.getRegions();
         if (context.getProto().isOlderThan(MapProtos.MODULE_SUBELEMENT_VERSION)) {
           region = parser.parseChildren(coreEl);
-          parser.validate(region, BlockBoundedValidation.INSTANCE, new Node(coreEl));
+          parser.validate(region, RegionValidation.BLOCK_BOUNDED, new Node(coreEl));
         } else {
-          region = parser.parseRequiredProperty(coreEl, "region", BlockBoundedValidation.INSTANCE);
+          region = parser.parseRequiredProperty(coreEl, "region", RegionValidation.BLOCK_BOUNDED);
         }
 
         String id = coreEl.getAttributeValue("id");

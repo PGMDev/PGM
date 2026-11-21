@@ -8,23 +8,23 @@ import tc.oc.pgm.api.feature.FeatureInfo;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.features.SelfIdentifyingFeatureDefinition;
+import tc.oc.pgm.util.TimeUtils;
 
 @FeatureInfo(name = "spawner")
 public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
   public final Region spawnRegion;
   public final Region playerRegion;
   public final int maxEntities;
-  public final Duration minDelay, maxDelay, delay;
+  public final long minDelay, maxDelay;
   public final List<Spawnable> objects;
-  public final Filter playerFilter;
+  public final Filter filter;
 
   public SpawnerDefinition(
       String id,
       List<Spawnable> objects,
       Region spawnRegion,
       Region playerRegion,
-      Filter playerFilter,
-      Duration delay,
+      Filter filter,
       Duration minDelay,
       Duration maxDelay,
       int maxEntities) {
@@ -32,11 +32,10 @@ public class SpawnerDefinition extends SelfIdentifyingFeatureDefinition {
     this.spawnRegion = spawnRegion;
     this.playerRegion = playerRegion;
     this.maxEntities = maxEntities;
-    this.minDelay = minDelay;
-    this.maxDelay = maxDelay;
-    this.delay = delay;
+    this.minDelay = TimeUtils.toTicks(minDelay);
+    this.maxDelay = TimeUtils.toTicks(maxDelay);
     this.objects = objects;
-    this.playerFilter = playerFilter;
+    this.filter = filter;
   }
 
   @Override

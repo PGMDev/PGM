@@ -1,9 +1,7 @@
 package tc.oc.pgm.variables;
 
 import com.google.common.collect.Range;
-import java.lang.reflect.Method;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 import org.jdom2.Element;
 import tc.oc.pgm.api.filter.Filterables;
@@ -11,21 +9,29 @@ import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.party.Party;
 import tc.oc.pgm.api.player.MatchPlayer;
+import tc.oc.pgm.api.region.RegionDefinition;
 import tc.oc.pgm.features.FeatureDefinitionContext;
 import tc.oc.pgm.filters.Filterable;
+import tc.oc.pgm.regions.Component;
 import tc.oc.pgm.teams.TeamFactory;
 import tc.oc.pgm.util.MethodParser;
 import tc.oc.pgm.util.MethodParsers;
+import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 import tc.oc.pgm.util.xml.XMLUtils;
 import tc.oc.pgm.variables.types.ArrayVariable;
+import tc.oc.pgm.variables.types.BlockVariable;
 import tc.oc.pgm.variables.types.CuboidVariable;
+import tc.oc.pgm.variables.types.CylindricalVariable;
 import tc.oc.pgm.variables.types.DummyVariable;
 import tc.oc.pgm.variables.types.LivesVariable;
 import tc.oc.pgm.variables.types.MaxBuildVariable;
 import tc.oc.pgm.variables.types.PlayerVariable;
+import tc.oc.pgm.variables.types.PointVariable;
+import tc.oc.pgm.variables.types.RegionVariable;
 import tc.oc.pgm.variables.types.ScoreVariable;
+import tc.oc.pgm.variables.types.SphereVariable;
 import tc.oc.pgm.variables.types.TeamVariableAdapter;
 import tc.oc.pgm.variables.types.TimeLimitVariable;
 import tc.oc.pgm.variables.types.WorldTimeVariable;
@@ -35,30 +41,26 @@ public class VariableParser {
   public static final Pattern VARIABLE_ID = Pattern.compile("[A-Za-z_][\\w.]*");
 
   private final MapFactory factory;
-  private final Map<String, Method> methodParsers;
+  private final MethodParsers<Variable<?>> methodParsers;
 
   public VariableParser(MapFactory factory) {
     this.factory = factory;
-    this.methodParsers = MethodParsers.getMethodParsersForClass(getClass());
+    this.methodParsers = MethodParsers.byNameParser(this, "variable");
   }
 
   public Variable<?> parse(Element el) throws InvalidXMLException {
-    String id = Node.fromRequiredAttr(el, "id").getValue();
-    if (!VARIABLE_ID.matcher(id).matches() || id.contains("."))
-      throw new InvalidXMLException(
-          "Variable IDs must start with a letter or underscore and can only include letters, digits or underscores.",
-          el);
+    validateName(Node.fromRequiredAttr(el, "id").getValue(), "Variable IDs", new Node(el));
+    return methodParsers.parse(el);
+  }
 
-    Method parser = methodParsers.get(el.getName().toLowerCase());
-    if (parser != null) {
-      try {
-        return (Variable<?>) parser.invoke(this, el);
-      } catch (Exception e) {
-        throw InvalidXMLException.coerce(e, new Node(el));
-      }
-    } else {
-      throw new InvalidXMLException("Unknown variable type: " + el.getName(), el);
-    }
+  public static void validateName(String name, String kind, Node node) throws InvalidXMLException {
+    if (!VARIABLE_ID.matcher(name).matches() || name.contains("."))
+      throw new InvalidXMLException(
+          kind
+              + " must start with a letter or underscore and can only include letters, digits or underscores.",
+          node);
+    if (Formula.isReservedName(name))
+      throw new InvalidXMLException("'" + name + "' conflicts with a built-in function", node);
   }
 
   @MethodParser("variable")
@@ -122,15 +124,39 @@ public class VariableParser {
     return PlayerVariable.of(component);
   }
 
+  @MethodParser("point")
+  public Variable<Match> parsePoint(Element el) throws InvalidXMLException {
+    return registerComponents(el, new PointVariable(factory.getRegions().parsePoint(el)));
+  }
+
+  @MethodParser("block")
+  public Variable<Match> parseBlock(Element el) throws InvalidXMLException {
+    return registerComponents(el, new BlockVariable(factory.getRegions().parseBlock(el)));
+  }
+
   @MethodParser("cuboid")
   public Variable<Match> parseCuboid(Element el) throws InvalidXMLException {
+    return registerComponents(el, new CuboidVariable(factory.getRegions().parseCuboid(el)));
+  }
+
+  @MethodParser("cylinder")
+  public Variable<Match> parseCylinder(Element el) throws InvalidXMLException {
+    return registerComponents(el, new CylindricalVariable(factory.getRegions().parseCylinder(el)));
+  }
+
+  @MethodParser("sphere")
+  public Variable<Match> parseSphere(Element el) throws InvalidXMLException {
+    return registerComponents(el, new SphereVariable(factory.getRegions().parseSphere(el)));
+  }
+
+  private <R extends RegionDefinition.Mutable, T extends RegionVariable<R, ?>> T registerComponents(
+      Element el, T reg) throws InvalidXMLException {
     String baseId = FeatureDefinitionContext.parseId(el);
-    var variable = new CuboidVariable(factory.getRegions().parseCuboid(el));
-    for (CuboidVariable.Component component : CuboidVariable.Component.values()) {
+    for (Component<R> component : reg.getComponents()) {
       var subId = baseId + "." + component.name().toLowerCase(Locale.ROOT);
-      factory.getFeatures().addFeature(el, subId, variable.getComponent(component));
+      factory.getFeatures().addFeature(el, subId, reg.getComponent(component));
     }
-    return variable;
+    return reg;
   }
 
   @MethodParser("worldtime")

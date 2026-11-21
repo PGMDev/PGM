@@ -35,7 +35,7 @@ import tc.oc.pgm.util.platform.Supports;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
 
-@Supports(value = PAPER, minVersion = "1.20.6")
+@Supports(value = PAPER, minVersion = "26.1.2")
 @SuppressWarnings("deprecation")
 public class ModernMaterialUtils implements MaterialUtils {
 
@@ -136,7 +136,7 @@ public class ModernMaterialUtils implements MaterialUtils {
     var states = block.getStateDefinition().getPossibleStates();
     Set<BlockMaterialData> materials = new HashSet<>(states.size());
     for (var state : states) {
-      materials.add(new ModernBlockData(state.createCraftBlockData()));
+      materials.add(new ModernBlockData(state.asBlockData()));
     }
     return materials;
   }
@@ -158,7 +158,7 @@ public class ModernMaterialUtils implements MaterialUtils {
 
     @Override
     public MaterialMatcher.Builder visit(Material material) {
-      return add(material, true);
+      return add(material, material.isLegacy());
     }
 
     @Override
@@ -177,7 +177,7 @@ public class ModernMaterialUtils implements MaterialUtils {
 
       if (itemMaterial.isAir() && blockMaterial.isAir()) {
         var ex = new InvalidXMLException(
-            "Material doesn't exist (did it ever?)'" + material + ":" + data + "'", currentNode);
+            "Material doesn't exist (did it ever?) '" + material + ":" + data + "'", currentNode);
         PGM.get().getGameLogger().log(Level.WARNING, null, ex);
         return this;
       }
@@ -192,7 +192,7 @@ public class ModernMaterialUtils implements MaterialUtils {
         // log:0 -> oak_log[axis=y],
         // log:4 -> oak_log[axis=x],
         // log:8 -> oak_log[axis=z]
-        case BLOCK_STATE -> add(new BlockStateMaterialMatcher(block.createCraftBlockData()));
+        case BLOCK_STATE -> add(new BlockStateMaterialMatcher(block.asBlockData()));
         // Legacy translates into LESS states than are available in modern, eg:
         // step:0 -> smooth_stone_slab[type=bottom,waterlogged=false],
         // step:8 -> smooth_stone_slab[type=top,waterlogged=false]

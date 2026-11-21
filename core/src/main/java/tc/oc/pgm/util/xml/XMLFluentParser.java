@@ -1,5 +1,7 @@
 package tc.oc.pgm.util.xml;
 
+import static tc.oc.pgm.util.material.MaterialUtils.MATERIAL_UTILS;
+
 import com.google.common.collect.Range;
 import java.time.Duration;
 import java.util.function.Function;
@@ -9,8 +11,11 @@ import org.bukkit.Material;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.jdom2.Element;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.action.Action;
+import tc.oc.pgm.action.ActionParseContext;
 import tc.oc.pgm.action.ActionParser;
+import tc.oc.pgm.action.FunctionDefinition;
 import tc.oc.pgm.api.feature.FeatureDefinition;
 import tc.oc.pgm.api.map.factory.MapFactory;
 import tc.oc.pgm.api.region.Region;
@@ -21,6 +26,7 @@ import tc.oc.pgm.kits.Kit;
 import tc.oc.pgm.kits.KitParser;
 import tc.oc.pgm.regions.RegionParser;
 import tc.oc.pgm.util.function.ThrowingFunction;
+import tc.oc.pgm.util.material.BlockMaterialData;
 import tc.oc.pgm.util.math.Formula;
 import tc.oc.pgm.util.text.TextException;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -35,6 +41,7 @@ import tc.oc.pgm.util.xml.parsers.ReferenceBuilder;
 import tc.oc.pgm.util.xml.parsers.RegionBuilder;
 import tc.oc.pgm.util.xml.parsers.StringBuilder;
 import tc.oc.pgm.util.xml.parsers.VariableBuilder;
+import tc.oc.pgm.variables.LocalScope;
 import tc.oc.pgm.variables.VariablesModule;
 
 public class XMLFluentParser {
@@ -122,6 +129,10 @@ public class XMLFluentParser {
     return number(Float.class, el, prop);
   }
 
+  public NumberBuilder<Short> parseShort(Element el, String... prop) {
+    return number(Short.class, el, prop);
+  }
+
   public <T extends Number & Comparable<T>> NumberBuilder<T> number(
       Class<T> cls, Element el, String... prop) {
     return new NumberBuilder<>(cls, el, prop);
@@ -154,6 +165,15 @@ public class XMLFluentParser {
     };
   }
 
+  public Builder.Generic<BlockMaterialData> blockMaterialData(Element el, String... prop) {
+    return new Builder.Generic<>(el, prop) {
+      @Override
+      protected BlockMaterialData parse(Node node) throws InvalidXMLException {
+        return MATERIAL_UTILS.parseBlockMaterialData(node.getValueNormalize(), node);
+      }
+    };
+  }
+
   public Builder.Generic<Vector> vector(Element el, String... prop) {
     return new Builder.Generic<>(el, prop) {
       @Override
@@ -173,7 +193,11 @@ public class XMLFluentParser {
   }
 
   public FilterBuilder filter(Element el, String... prop) {
-    return new FilterBuilder(filters, el, prop);
+    return filter(null, el, prop);
+  }
+
+  public FilterBuilder filter(@Nullable LocalScope locals, Element el, String... prop) {
+    return new FilterBuilder(filters, locals, el, prop);
   }
 
   public RegionBuilder<Region> region(Element el, String... prop) {
@@ -222,18 +246,37 @@ public class XMLFluentParser {
     return new ReferenceBuilder<>(features, clazz, el, prop);
   }
 
+  @SuppressWarnings("unchecked")
+  public <S extends Filterable<?>> ReferenceBuilder<FunctionDefinition<S>> function(
+      Element el, Class<S> scope, String... prop) {
+    var builder = (ReferenceBuilder<FunctionDefinition<S>>)
+        (ReferenceBuilder<?>) reference(FunctionDefinition.class, el, prop);
+    return builder.validate((FunctionDefinition<S> fn, Node node) -> {
+      if (fn.getScope() != scope)
+        throw new InvalidXMLException(
+            "Function '" + fn.getId() + "' has scope " + fn.getScope().getSimpleName()
+                + " but is called from scope " + scope.getSimpleName(),
+            node);
+    });
+  }
+
   public VariableBuilder<?> variable(Element el, String... prop) {
     return new VariableBuilder<>(features, el, prop);
   }
 
   public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(
       Class<T> clazz, Element el, String... prop) {
+    return action(clazz, null, el, prop);
+  }
+
+  public <T extends Filterable<?>> Builder.Generic<Action<? super T>> action(
+      Class<T> clazz, @Nullable ActionParseContext context, Element el, String... prop) {
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Action<? super T> parse(Node node) throws InvalidXMLException {
         return node.isAttribute()
-            ? actions.parseReference(node, clazz)
-            : actions.parseProperty(node.getElement(), clazz);
+            ? actions.parseReference(node, clazz, context == null ? null : context.locals())
+            : actions.parseProperty(node.getElement(), clazz, context);
       }
     };
   }
@@ -244,11 +287,16 @@ public class XMLFluentParser {
 
   public <T extends Filterable<?>> Builder<Formula<T>, ?> formula(
       Class<T> clazz, Element el, String... prop) {
+    return formula(clazz, null, el, prop);
+  }
+
+  public <T extends Filterable<?>> Builder<Formula<T>, ?> formula(
+      Class<T> clazz, @Nullable LocalScope locals, Element el, String... prop) {
     if (variables == null) this.variables = factory.needModule(VariablesModule.class);
     return new Builder.Generic<>(el, prop) {
       @Override
       protected Formula<T> parse(Node node) {
-        return Formula.of(node.getValue(), variables.getContext(clazz));
+        return variables.parseFormula(clazz, node.getValue(), locals);
       }
     };
   }

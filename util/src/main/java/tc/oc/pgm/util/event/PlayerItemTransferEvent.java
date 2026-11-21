@@ -3,6 +3,7 @@ package tc.oc.pgm.util.event;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -79,5 +80,16 @@ public class PlayerItemTransferEvent extends ItemTransferEvent {
     return reason == Reason.PLACE
         || reason == Reason.DROP
         || (reason == Reason.TRANSFER && getTo() != null && getTo().getHolder() != this.player);
+  }
+
+  private static final HandlerList handlers = new HandlerList();
+
+  @Override
+  public HandlerList getHandlers() {
+    return handlers;
+  }
+
+  public static HandlerList getHandlerList() {
+    return handlers;
   }
 }

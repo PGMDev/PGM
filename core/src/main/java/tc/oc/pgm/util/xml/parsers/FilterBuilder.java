@@ -1,6 +1,7 @@
 package tc.oc.pgm.util.xml.parsers;
 
 import org.jdom2.Element;
+import org.jspecify.annotations.Nullable;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.filters.Filterable;
 import tc.oc.pgm.filters.matcher.StaticFilter;
@@ -8,13 +9,17 @@ import tc.oc.pgm.filters.parse.DynamicFilterValidation;
 import tc.oc.pgm.filters.parse.FilterParser;
 import tc.oc.pgm.util.xml.InvalidXMLException;
 import tc.oc.pgm.util.xml.Node;
+import tc.oc.pgm.variables.LocalScope;
 
 public class FilterBuilder extends Builder<Filter, FilterBuilder> {
   private final FilterParser filters;
+  private final @Nullable LocalScope locals;
 
-  public FilterBuilder(FilterParser filters, Element el, String... prop) {
+  public FilterBuilder(
+      FilterParser filters, @Nullable LocalScope locals, Element el, String... prop) {
     super(el, prop);
     this.filters = filters;
+    this.locals = locals;
   }
 
   public FilterBuilder dynamic() {
@@ -42,7 +47,7 @@ public class FilterBuilder extends Builder<Filter, FilterBuilder> {
   @Override
   protected Filter parse(Node node) throws InvalidXMLException {
     if (prop.length == 0) return filters.parse(el);
-    return filters.parseProperty(node);
+    return filters.parseProperty(node, locals);
   }
 
   @Override

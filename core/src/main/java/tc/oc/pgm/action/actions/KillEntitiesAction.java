@@ -4,6 +4,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.ItemDespawnEvent;
+import tc.oc.pgm.action.ActionContext;
 import tc.oc.pgm.api.filter.Filter;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.filters.query.EntityQuery;
@@ -18,19 +19,15 @@ public class KillEntitiesAction extends AbstractAction<Match> {
   }
 
   @Override
-  public void trigger(Match match) {
-    match
-        .getWorld()
-        .getEntities()
-        .forEach(
-            (Entity entity) -> {
-              if (!(entity instanceof Player)
-                  && filter.query(new EntityQuery(null, entity)).isAllowed()) {
-                if (entity instanceof Item) {
-                  match.callEvent(new ItemDespawnEvent((Item) entity, entity.getLocation()));
-                }
-                entity.remove();
-              }
-            });
+  public void trigger(Match match, ActionContext context) {
+    match.getWorld().getEntities().forEach((Entity entity) -> {
+      if (!(entity instanceof Player)
+          && filter.query(new EntityQuery(null, entity), context.frame()).isAllowed()) {
+        if (entity instanceof Item) {
+          match.callEvent(new ItemDespawnEvent((Item) entity, entity.getLocation()));
+        }
+        entity.remove();
+      }
+    });
   }
 }
