@@ -647,16 +647,12 @@ public abstract class FilterParser implements XMLParser<Filter, FilterDefinition
     var structure = parser
         .reference(StructureDefinition.class, el, "structure")
         .validate((FeatureValidation<StructureDefinition>) (def, node) -> {
-          int count = 0;
-          var it = def.getRegion().getStatic().getBlockVectorIterator();
-          while (it.hasNext()) {
-            it.next();
-            count++;
-          }
-          if (count > 1024)
+          int volume = def.getBounds().getBlockVolume();
+          if (volume > BuiltFilter.MAX_VOLUME)
             throw new InvalidXMLException(
                 String.format(
-                    "Structure '%s' exceeds limit of 1024 blocks (has %d)", def.getId(), count),
+                    "Structure '%s' exceeds limit of %d blocks (bounds volume is %d)",
+                    def.getId(), BuiltFilter.MAX_VOLUME, volume),
                 node);
         })
         .required();

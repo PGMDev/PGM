@@ -15,9 +15,12 @@ import tc.oc.pgm.filters.FilterMatchModule;
 import tc.oc.pgm.filters.matcher.TypedFilter;
 import tc.oc.pgm.structure.Structure;
 import tc.oc.pgm.structure.StructureDefinition;
+import tc.oc.pgm.util.block.BlockVectors;
 
 public class BuiltFilter extends TypedFilter.Impl<MatchQuery>
     implements ReactorFactory<BuiltFilter.Reactor> {
+
+  public static final int MAX_VOLUME = 1024;
 
   private final FeatureReference<StructureDefinition> structure;
   private final BlockVector origin;
@@ -34,7 +37,7 @@ public class BuiltFilter extends TypedFilter.Impl<MatchQuery>
 
   @Override
   public boolean matches(MatchQuery query) {
-    return ((Reactor) query.state(this)).matches(query);
+    return query.state(this).matches(query);
   }
 
   @Override
@@ -55,54 +58,46 @@ public class BuiltFilter extends TypedFilter.Impl<MatchQuery>
   public class Reactor extends ReactorFactory.Reactor implements Listener {
     private Boolean lastResult = null;
     private final BlockVector lastMismatch = origin.clone();
-    private final BlockVector scratch = new BlockVector();
-    private final Structure struct;
+    private Structure struct;
     private Region.Static region;
     private BlockVector offset;
 
     public Reactor(Match match, FilterMatchModule fmm) {
       super(match, fmm);
       match.addListener(this, MatchScope.LOADED);
+      ensureInit();
+    }
 
+    private boolean ensureInit() {
+      if (struct != null) return true;
       struct = structure.get().getStructure(match);
-      if (struct != null) {
-        region = struct.getRegion().getStatic();
-        offset = origin.clone().subtract(struct.getDefinition().getOrigin()).toBlockVector();
-      }
+      if (struct == null) return false;
+      region = struct.getRegion().getStatic();
+      offset = origin.clone().subtract(struct.getDefinition().getOrigin()).toBlockVector();
+      return true;
     }
 
     public boolean matches(MatchQuery query) {
-      if (struct == null) return false;
+      if (!ensureInit()) return false;
       if (lastResult != null) return lastResult;
 
-      boolean hasMismatch = struct.findMismatch(match.getWorld(), offset, lastMismatch);
-      return lastResult = !hasMismatch;
+      var mismatch = struct.findMismatch(match.getWorld(), offset, lastMismatch);
+      if (mismatch != null) lastMismatch.copy(mismatch);
+      return lastResult = mismatch == null;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockTransform(BlockTransformEvent e) {
-      if (lastResult == null || struct == null) return;
+      if (!ensureInit()) return;
+      var position = BlockVectors.position(e.getBlock());
 
-      var block = e.getBlock();
-      int x = block.getX(), y = block.getY(), z = block.getZ();
+      // Wasn't matching, and last mismatch position isn't here
+      if (Boolean.FALSE.equals(lastResult) && !lastMismatch.equals(position)) return;
+      if (!region.contains(position.clone().subtract(offset).toBlockVector())) return;
 
-      boolean isMismatch = lastMismatch.getBlockX() == x
-          && lastMismatch.getBlockY() == y
-          && lastMismatch.getBlockZ() == z;
-
-      scratch.setX(x - offset.getBlockX());
-      scratch.setY(y - offset.getBlockY());
-      scratch.setZ(z - offset.getBlockZ());
-
-      boolean inRegion = lastResult && region.contains(scratch);
-
-      if (isMismatch || inRegion) {
-        lastResult = null;
-        lastMismatch.setX(x);
-        lastMismatch.setY(y);
-        lastMismatch.setZ(z);
-        invalidate(BuiltFilter.this, match);
-      }
+      lastResult = null;
+      lastMismatch.copy(position);
+      invalidate(BuiltFilter.this, match);
     }
   }
 }

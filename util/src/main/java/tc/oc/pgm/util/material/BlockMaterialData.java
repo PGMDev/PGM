@@ -16,5 +16,13 @@ public interface BlockMaterialData extends MaterialData {
 
   int encoded();
 
+  /**
+   * Check if this material data is the same as the material of the given block.
+   *
+   * @param block the block to compare against
+   * @return true if the materials match
+   */
+  boolean sameMaterialAs(Block block);
+
   FallingBlock spawnFallingBlock(Location location);
 }

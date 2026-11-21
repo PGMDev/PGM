@@ -104,6 +104,11 @@ class BlockDataIterator implements Iterator<BlockData>, BlockData, LegacyMateria
   }
 
   @Override
+  public boolean sameMaterialAs(Block block) {
+    return block.getTypeId() == materialId && block.getData() == data;
+  }
+
+  @Override
   public FallingBlock spawnFallingBlock(Location location) {
     return location.getWorld().spawnFallingBlock(location, materialId, data);
   }

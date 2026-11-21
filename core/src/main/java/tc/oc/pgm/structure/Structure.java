@@ -3,14 +3,13 @@ package tc.oc.pgm.structure;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.util.BlockVector;
+import org.jetbrains.annotations.Nullable;
 import tc.oc.pgm.api.feature.Feature;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.region.Region;
 import tc.oc.pgm.regions.FiniteBlockRegion;
 import tc.oc.pgm.snapshot.WorldSnapshot;
 import tc.oc.pgm.util.block.BlockData;
-import tc.oc.pgm.util.material.BlockMaterialData;
-import tc.oc.pgm.util.material.MaterialData;
 
 public class Structure implements Feature<StructureDefinition> {
 
@@ -57,26 +56,34 @@ public class Structure implements Feature<StructureDefinition> {
     place(vector, update);
   }
 
-  public boolean findMismatch(World world, BlockVector offset, BlockVector out) {
-    BlockMaterialData snapshotMaterial = snapshot.getOriginalMaterial(
-        out.getBlockX() - offset.getBlockX(),
-        out.getBlockY() - offset.getBlockY(),
-        out.getBlockZ() - offset.getBlockZ());
-    if (snapshotMaterial.encoded()
-        != MaterialData.block(world.getBlockAt(out.getBlockX(), out.getBlockY(), out.getBlockZ()))
-            .encoded()) {
-      return true;
+  /**
+   * Find the first block of this structure that doesn't match the world, when placed with the given
+   * offset.
+   *
+   * @param world the world to compare against
+   * @param offset the offset the structure is placed at
+   * @param firstCheck world position to check before the rest, usually the last known mismatch
+   * @return the world position of the first mismatch, or null if the whole structure matches
+   */
+  public @Nullable BlockVector findMismatch(
+      World world, BlockVector offset, BlockVector firstCheck) {
+    int fx = firstCheck.getBlockX(), fy = firstCheck.getBlockY(), fz = firstCheck.getBlockZ();
+    int sx = fx - offset.getBlockX(), sy = fy - offset.getBlockY(), sz = fz - offset.getBlockZ();
+
+    if (region.getStatic().contains(new BlockVector(sx, sy, sz))
+        && !snapshot.getOriginalMaterial(sx, sy, sz).sameMaterialAs(world.getBlockAt(fx, fy, fz))) {
+      return firstCheck.clone();
     }
 
     for (BlockData blockData : snapshot.getMaterials(region)) {
       if (!blockData.sameMaterialAs(world, offset)) {
-        BlockVector sv = blockData.getBlockVector();
-        out.setX(sv.getBlockX() + offset.getBlockX());
-        out.setY(sv.getBlockY() + offset.getBlockY());
-        out.setZ(sv.getBlockZ() + offset.getBlockZ());
-        return true;
+        BlockVector pos = blockData.getBlockVector();
+        return new BlockVector(
+            pos.getBlockX() + offset.getBlockX(),
+            pos.getBlockY() + offset.getBlockY(),
+            pos.getBlockZ() + offset.getBlockZ());
       }
     }
-    return false;
+    return null;
   }
 }

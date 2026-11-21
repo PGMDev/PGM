@@ -72,6 +72,11 @@ class SpMaterialData implements LegacyMaterialData, ItemMaterialData, BlockMater
   }
 
   @Override
+  public boolean sameMaterialAs(Block block) {
+    return block.getType() == material && block.getData() == (byte) damage;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof LegacyMaterialData that)) return false;

@@ -4,7 +4,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.util.BlockVector;
 import tc.oc.pgm.util.material.BlockMaterialData;
-import tc.oc.pgm.util.material.MaterialData;
 
 /** Util class to reference a {@link BlockMaterialData} and location of a block. */
 public interface BlockData extends BlockMaterialData {
@@ -46,6 +45,6 @@ public interface BlockData extends BlockMaterialData {
    * @return true if the materials match
    */
   default boolean sameMaterialAs(World world, BlockVector offset) {
-    return encoded() == MaterialData.block(getBlock(world, offset)).encoded();
+    return sameMaterialAs(getBlock(world, offset));
   }
 }
