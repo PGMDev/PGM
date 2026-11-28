@@ -52,11 +52,12 @@ public class VotingCommand {
 
     VotePoolOptions vote = getVoteOptions(mapOrder);
 
-    Component addMessage = translatable(
-        "vote.add", NamedTextColor.GRAY, player(sender), map.getStyledName(MapNameStyle.COLOR));
+    Component mapNameComponent = map.getStyledName(MapNameStyle.COLOR);
+    Component addMessage =
+        translatable("vote.add", NamedTextColor.GRAY, player(sender), mapNameComponent);
 
     if (vote.isMapAdded(map)) {
-      viewer.sendWarning(addMessage);
+      viewer.sendWarning(translatable("vote.duplicate", mapNameComponent));
       return;
     }
 
