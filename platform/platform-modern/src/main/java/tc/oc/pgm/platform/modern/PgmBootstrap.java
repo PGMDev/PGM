@@ -20,10 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarFile;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,12 +29,6 @@ import tc.oc.pgm.util.DataVersions;
 
 @SuppressWarnings("UnstableApiUsage")
 public class PgmBootstrap implements PluginBootstrap {
-
-  private static final String NAMESPACE = "pgm";
-  private static final String PATH = "legacy_overworld";
-
-  public static final ResourceKey<DimensionType> LEGACY_OVERWORLD = ResourceKey.create(
-      Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(NAMESPACE, PATH));
 
   @Override
   public void bootstrap(@NonNull BootstrapContext context) {
